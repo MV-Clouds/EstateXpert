@@ -1,0 +1,761 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.wrap-mobile {
+    background-color: aliceblue;
+    display: flex;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-position: bottom;
+    padding: 0.3rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0px 4px 10px 0px #28282840;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wrap-mobile .svg-cover {
+    margin: 0.2rem;
+    border-radius: 0.3rem;
+    background-color: #0176D3;
+    padding: 0.3rem;
+}
+
+.pagination-container {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.pagination-button {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    color: #333;
+    padding: 6px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 0.3rem;
+    font-size: 12px;
+}
+
+.pagination-button svg {
+    fill: black;
+    width: 0.7rem;
+    height: 0.7rem;
+}
+
+.pagination-button:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-button.active {
+    background-color: #0070d2;
+    color: white;
+    border-color: #0070d2;
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.results-info {
+    margin-left: 15px;
+    color: #666;
+}
+
+.results-per-page {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.results-per-page label {
+    margin-right: 8px;
+    color: #666;
+}
+
+.results-per-page select {
+    padding: 4px 8px;
+    border: 1px solid #d8d8d8;
+    border-radius: 3px;
+}
+
+span {
+    margin: 0 5px;
+}
+
+.pagination-button:first-child,
+.pagination-button:last-child {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.full-page-container {
+    padding: 1rem;
+    background-color: #ffffff;
+    height: calc(100% + 1.5rem);
+    margin-top: -0.8rem;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.8rem;
+}
+
+.main {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.main .custom-header {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    border: 1px solid #afd3e5c2;
+}
+
+.main .custom-header .header-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    line-height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+}
+
+.tab-section {
+    display: flex;
+    gap: 1rem;
+}
+
+.center-trancate-text {
+    text-align: center;
+    color: #585858;
+}
+
+.center-trancate-head {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-weight: 500;
+}
+
+.tab-btns ul {
+    display: flex;
+    gap: 0.7rem;
+    padding: 0.2rem;
+    border: 0.1rem solid #808080ba;
+    border-radius: 0.3rem;
+}
+
+.tab-btns ul .tab-div {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.3rem;
+    transition: background-color 1s ease;
+    cursor: pointer;
+}
+
+.active-tab-div {
+    background-color: #0376D3;
+}
+
+.tab-btns ul .tab-div svg {
+    width: 1rem;
+    fill: black;
+}
+
+.tab-btns ul .tab-div .activeSvg {
+    fill: white;
+}
+
+.tab-btns ul .tab-div svg path {
+    fill: black;
+}
+
+.tab-btns ul .tab-div .activeSvg path {
+    fill: white;
+}
+
+.tab-section .sort-desc {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    border: 0.1rem solid #808080ba;
+    border-radius: 0.3rem;
+    padding-inline: 0.3rem;
+}
+
+.tab-section .sort-icon {
+    width: 1rem;
+}
+
+.tab-section .sort-icon svg {
+    width: 1rem;
+}
+
+.icon-button:disabled {
+    background: #DBDBDB;
+}
+
+.icon-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.main .slds-icon_small,
+.slds-icon--small {
+    height: 1rem;
+}
+
+.main .second-row {
+    margin-top: 0.5rem;
+}
+
+.main .sort-cover {
+    height: 75%;
+    border-radius: 0.5rem;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.main .sort-cover:hover {
+    background-color: #2c89d6;
+    transition: 0.5s;
+}
+
+.main .body {
+    width: 100%;
+    height: 76%;
+    display: flex;
+    margin-top: 1rem;
+    flex-grow: 1;
+}
+
+.main .body .innerDiv1 {
+    background-color: transparent;
+    display: flex;
+    width: 22%;
+    flex: 1 1 auto;
+    border-radius: 0.5rem;
+}
+
+.expanded1 {
+    width: fit-content;
+}
+
+.main .body .innerDiv1 .removeInnerDiv1 {
+    display: none;
+}
+
+.main .body .innerDiv1 .filterDiv {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 1px solid #afd3e5c2;
+}
+
+.main .body .innerDiv1 .filterWrap {
+    width: 1rem;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main .body .innerDiv1 .filterWrap svg {
+    height: 1rem;
+    width: 0.5rem;
+    cursor: pointer;
+    transition: 0.6s;
+}
+
+.main .body .innerDiv1 .filterWrap .imgRotate {
+    transform: rotate(180deg);
+    transition: 0.6s;
+}
+
+.main .body .innerDiv2 {
+    background-color: white;
+    width: 78%;
+    flex: 1 1 auto;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 1px solid #afd3e5c2;
+}
+
+.expanded2 {
+    width: 100%;
+}
+
+.main .slds-table td {
+    height: 3rem;
+}
+
+.tableDiv {
+    overflow: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    height: 90%;
+    border-radius: 0.5rem;
+    box-shadow: 0px 4px 10px 0px #28282840;
+}
+
+.tableDiv .fields-names {
+    position: sticky;
+    top: 0;
+    z-index: 97;
+}
+
+.tableDiv .header-checkbox-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tableDiv .list-view-checkbox {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.tableDiv .slds-table_resizable-cols thead th,
+.slds-table--resizable-cols thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+}
+
+.tableDiv .colume2 {
+    width: 9rem;
+}
+
+.tableDiv .offer-col {
+    width: 5rem;
+}
+
+.noresult {
+    overflow: auto;
+    scroll-behavior: scroll;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.noresult .tag1 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 25px;
+    text-align: center;
+}
+
+.noresult .tag2 {
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 25px;
+    text-align: center;
+}
+
+.main .body .innerDiv2 .slds-cell_action-mode .slds-icon_container {
+    display: none
+}
+
+.main .body .innerDiv2 .colume1 {
+    width: 3.25rem
+}
+
+.main .body .innerDiv2 .imageColume {
+    width: 5.25rem
+}
+
+.main .body .innerDiv2 .property-image {
+    width: 4rem;
+    height: 3rem;
+}
+
+.main .body .innerDiv2 .colume1:hover .slds-icon_container {
+    display: block;
+}
+
+.main .body .innerDiv2 .colume2:hover .slds-icon_container {
+    display: block;
+}
+
+.main .body .innerDiv2 .slds-icon-utility-arrowdown svg {
+    height: 0.8rem;
+    fill: white;
+}
+
+.rotate-asc {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+}
+
+.rotate-desc {
+    transform: rotate(180deg);
+    transition: transform 0.3s;
+}
+
+.paginationDiv {
+    height: 10%;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.paginationDiv .btnCover {
+    display: flex;
+    justify-content: center;
+}
+
+.paginationDiv .pageNumberDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.listing-manager-icon {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+.slds-table:not(.slds-no-row-hover) tbody tr:hover>td {
+    background-color: #e1f4ff;
+}
+
+.slds-table:not(.slds-no-row-hover) tbody tr:hover>th {
+    background-color: #e1f4ff;
+    transition: 0.5s;
+}
+
+.conat_cls {
+    transition: unset !important;
+}
+
+.conat_cls svg {
+    cursor: pointer;
+}
+
+.custom-checkbox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.custom-checkbox .checkmark {
+    width: 1.1rem;
+    height: 1.1rem;
+    background-color: transparent;
+    border: 2px solid white;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: 0.3s;
+}
+
+.custom-checkbox-body .checkmark {
+    border: 2px solid #0376D3;
+    transition: 0.3s;
+}
+
+.custom-checkbox input[type="checkbox"]:checked+.checkmark {
+    background-color: #0376D3;
+    border-color: white;
+    transition: 0.3s;
+}
+
+.custom-checkbox-body input[type="checkbox"]:checked+.checkmark {
+    border-color: #0376D3;
+    transition: 0.3s;
+}
+
+.custom-checkbox .checkmark::before {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 50%;
+    top: 50%;
+    width: 40%;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-42%, -61%) rotate(45deg);
+}
+
+.custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
+    display: block;
+}
+
+.header-text {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+    flex-direction: row;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 40.16px;
+    text-align: left;
+}
+
+.svg_back_icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.tableDiv tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+@media only screen and (max-width: 900px) {
+    * {
+        font-size: 0.8rem;
+    }
+
+    .header-text {
+        font-size: 14px;
+    }
+
+    .full-page-container {
+        padding: 0.5rem;
+        background-color: white;
+        height: 100%;
+        width: 100%;
+        margin-top: unset;
+        margin-left: unset;
+    }
+
+    .main .body {
+        flex-direction: column;
+        background: white;
+        padding-bottom: 0rem;
+        margin-top: 0rem;
+    }
+
+    .main .body .innerDiv1 {
+        position: relative;
+        width: 100%;
+        flex-direction: column-reverse;
+    }
+
+    .main .body .innerDiv1 .filterDiv {
+        padding-bottom: 0rem;
+        border-radius: 0.5rem;
+        box-shadow: 0px 4px 10px 0px #28282840;
+    }
+
+    .main .body .innerDiv1 .filterWrap {
+        background-color: rgb(243, 243, 243);
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-right: 1px solid #c9c9c9;
+        border-left: 1px solid #c9c9c9;
+        position: relative;
+        display: none;
+    }
+
+    .main .body .innerDiv2 {
+        overflow: visible;
+        width: 100%;
+        height: 30rem;
+        border-radius: 0.5rem;
+        padding: 1rem 0rem 1rem 0rem;
+    }
+
+    .noresult {
+        height: 24rem;
+    }
+
+    .paginationDiv {
+        height: fit-content;
+        margin-top: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0px 4px 10px 0px #28282840;
+    }
+
+    .main .body .innerDiv1 .wrap-icon {
+        rotate: 90deg;
+    }
+
+    .tableDiv {
+        height: 90%;
+        border-radius: 0.5rem;
+        box-shadow: 0px 4px 10px 0px #28282840;
+    }
+
+    .tableDiv .header-checkbox-div {
+        padding: 0rem 0rem 0rem 0.5rem;
+    }
+
+    .custom-header {
+        margin: 1rem 0rem 1rem 0rem;
+        box-shadow: 0px 4px 10px 0px #28282840;
+    }
+
+    .custom-header .first-row {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .custom-header .first-row .header-button {
+        width: 100%;
+    }
+
+    .custom-header .first-row .header-buttons-div {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .custom-header .first-row .header-buttons {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .custom-header .first-row .header-buttons button {
+        align-items: center;
+        justify-content: center;
+    }
+
+    .custom-header .second-row {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 1rem;
+    }
+
+    .custom-header .second-row .tab-section {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+    }
+
+    .tableDiv .header-checkbox-div {
+        padding: 0rem 0.5rem;
+    }
+
+    .pagination-button {
+        padding: 3px 5px;
+    }
+
+    .pagination-button:first-child,
+    .pagination-button:last-child {
+        gap: 0rem;
+        padding: 3px 3px;
+    }
+}
+
+.visit-booking {
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+}
+
+.badge-css {
+    font-weight: 500;
+}
+
+.restricted-access {
+    padding: 48px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 450px;
+    width: 100%;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    border: 1px solid #bfdbfe;
+    background-color: linear-gradient(160deg, #ffffff, #dbeafe);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+}
+
+.restricted-access svg {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 28px;
+    fill: #1e40af;
+    animation: pulse 1.8s ease-in-out infinite;
+}
+
+.restricted-access h1 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: #1e3a8a;
+    margin-bottom: 20px;
+}
+
+.restricted-access p {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 1.25rem;
+    color: #374151;
+    line-height: 1.6;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}

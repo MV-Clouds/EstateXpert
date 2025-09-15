@@ -1,0 +1,488 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.filter-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px;
+    background-color:#0376D3 ;
+}
+
+.filter-header .filter-text{
+    margin-left: 1rem;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+} 
+
+.filter-header .reset-text{
+    margin-right: 0.3rem;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    padding: 0.4rem;
+    background: #0376D3;
+    transition: 0.5s;
+    font-weight: 500;
+}
+
+.filter-outer{
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 3rem;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    border: 1px solid #afd3e5c2;
+}
+
+.combobox{
+    margin: 8px;
+    position: relative;
+}
+
+.combobox .custom-field-lable{
+    font-size: 12px;
+    margin-right: 0.6rem;
+    font-weight: 500;
+}
+
+.combobox .combox-div{
+    display: flex;
+}
+
+.combobox .combox-div .min-max-label{
+    width: 3rem;
+    margin-top: 0.3rem;
+}
+
+.combobox .combobox-cover .chev-down{
+    fill: rgb(12 111 190);
+    width: 1rem;
+    height: 1rem;
+}
+
+.combobox .operator-div{
+    color: rgb(116, 116, 116);
+}
+
+.combobox .pill-section .pill-body svg{
+    fill: rgb(116, 116, 116);
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+.combobox .pill-section {
+    position: relative;
+    padding: 0;
+    padding-right: 3.75rem;
+    height: fit-content;
+    overflow: hidden;
+}
+
+.combobox .pill-section ul{
+    height: fit-content;
+}
+
+.combobox .pill-section .pill-body svg{
+    cursor: pointer;
+}
+
+.combobox .options-box {
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);
+    border: 1px solid var(--slds-g-color-border-base-4, rgb(229, 229, 229));
+    border-radius: 0.2rem;
+    background-color: white;
+    width: 100%;
+    max-height: 200px !important;
+    overflow: auto;
+}
+
+.picklist-search .slds-input-has-icon .slds-input__icon{
+    top:0.9rem !important;
+}
+
+.combobox .options-box ul li {
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 1rem;
+    cursor: pointer;
+}
+
+.combobox .options-box .picklist-option {
+    width:100%;
+    padding-right:0.7rem;
+}
+
+.combobox .options-box ul li svg{
+    fill: black;
+    width: 1rem;
+    height: 1rem;
+}
+
+.combobox .input-delete-cover{
+    display: flex;
+}
+
+.combobox .input-delete-cover .delete-icon-cover{
+    margin-left: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.combobox .input-delete-cover .delete-icon-cover svg path{
+    height: 1rem;
+    width: 1rem;
+    /* fill: rgb(134,134,134); */
+    cursor: pointer;
+}
+
+.combobox .input-delete-cover .delete-icon-cover svg path:hover{
+    fill: rgb(12 111 190);
+}
+
+.combobox .input-delete-cover .plus{
+    width: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.3rem;
+    border: 0.2px solid rgb(136 129 129);
+    border-radius: 0.2rem;
+    cursor: pointer;
+    background-color: white;
+}
+
+.combobox .input-delete-cover .plus svg{
+  width: 1rem;
+  height: 1rem;
+  fill: rgb(12 111 190);
+}
+
+.combobox .input-delete-cover .min-max-input-cover{
+    width: 100%;
+    position: relative;
+}
+
+.combobox .min-max-input-div{
+    margin-bottom:0.5rem ;
+}
+
+.min-max-input-div:hover .up-btn-max-min{
+    display: block;
+}
+
+.min-max-input-div:hover .down-btn-max-min{
+    display: block;
+}
+
+.up-btn-max-min{
+    /* fill: rgb(134,134,134); */
+    fill: rgb(12 111 190);
+    width: 0.8rem;
+    position: absolute;
+    right: 0.5rem;
+    top: 0.1rem;
+    /* display: none; */
+    cursor: pointer;
+    height: 0.8rem;
+    user-select: none;
+}
+
+.up-btn-max-min:hover{
+    fill:  rgb(134,134,134);
+   
+}
+
+.down-btn-max-min{
+    fill: rgb(12 111 190);
+    width: 0.8rem;
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.6rem;
+    /* display: none; */
+    cursor: pointer;
+    height: 0.8rem;
+    user-select: none;
+}
+
+.down-btn-max-min:hover{
+    fill: rgb(134,134,134);
+}
+
+.field-add-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.advanced-checkbox{
+    display: flex;
+}
+
+.radio-div{
+    margin-top: 1rem;
+}
+
+.slds-modal__header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-body{
+    height: 17rem;
+}
+
+.slds-m-around_medium {
+    margin: 1rem;
+}
+
+.slds-m-top_medium {
+    margin-top: 1rem;
+}
+
+.slds-text-color_error {
+    color: red;
+}
+
+
+/* date-time-field */
+
+.date-time-div-cover{
+    position: relative;
+    margin: 1rem;
+}
+
+.date-time-div{
+    padding: 0rem 1rem 0rem 0rem;
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.date-time-div .input-wrapper{
+    width: 100%;
+}
+
+.date-time-div .date-input-cover{
+    margin-bottom: 0.7rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+.date-time-div .date-input-cover .date-input-flex{
+    flex-grow: 1;
+}
+
+.date-time-div .delete-icon-cover{
+    margin-left: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.date-time-div .delete-icon-cover svg{
+    height: 1rem;
+    width: 1rem;
+    fill: rgb(134,134,134);
+    cursor: pointer;
+    position: absolute;
+    top: 3.5rem;
+    left: 0.2rem;
+}
+
+.date-time-div .single svg{
+    top: 2rem;
+}
+
+.date-time-div .delete-icon-cover svg:hover{
+    fill: rgb(1,118,211);
+}
+
+/* booelan fields css */
+
+.boolen-field{
+    display: flex;
+}
+
+.boolen-field .boolean-wrapper{
+    width: 100%;
+}
+
+.boolen-field .delete-icon-cover{
+    width: fit-content;
+    display: flex;
+    align-items: flex-end;
+}
+
+.boolen-field .delete-icon-cover svg{
+    height: 1rem;
+    width: 1rem;
+    fill:rgb(134, 134, 134) ;
+    cursor: pointer;
+}
+
+.boolen-field .delete-icon-cover svg:hover{
+    fill: rgb(1,118,211);
+}
+
+
+/* footer css */
+
+
+.filter-footer{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.field-add-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.field-add-btn .add-btn-cover{
+    border: 1px solid #747474;
+    border-radius: 0.3rem;
+    margin: 1rem;
+    cursor: pointer;
+    height: 2rem;
+    padding: 0rem 0.3rem 0rem 0.3rem;
+    display: flex;
+    align-items: center;
+    color: #0176D3;
+}
+
+.field-add-btn .add-btn-cover svg{
+    width: 0.7rem;
+    height: 0.7rem;
+    margin: 0.4rem;
+}
+
+.field-add-btn .add-btn-cover svg path{
+    fill: #0176D3;
+}
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* 
+.no-spinner {
+    -moz-appearance: textfield;
+} */
+
+.outer-cover{
+    display: relative;
+}
+
+.error-message{
+    font-size: 0.7rem;
+    color: red;
+    position: absolute;
+    bottom: -1rem;
+}   
+
+.combobox .input-delete-cover .min-max-input-cover .error-message{
+    bottom: -0.5rem;
+}
+
+.custom-modal-header {
+    background-color: #0376D3;
+    color: white;
+    border: none;
+}
+
+.modal-header-button{
+    background: transparent;
+    position: absolute;
+    top: -1.8rem;
+    right: -1.8rem;
+    border: none;
+}
+
+.custom-modal-header svg{
+    width: 1.5rem;
+}
+
+.add-modal .custom-modal-body{
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    position: relative;
+
+}
+
+.add-modal .custom-modal-body .custom-modal{
+    position: absolute;
+    bottom: 1rem;
+    width: 96%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    justify-content: end;
+    gap: 1rem;
+}
+
+    
+@media only screen and (max-width: 900px) { 
+    .filter-outer{
+        padding-bottom: 1rem;
+    }
+    .custom-modal-header{
+        padding: 0.8rem;
+    }
+    .custom-modal-header h2{
+        font-size: 1rem;
+    }
+    .custom-modal-button{
+        padding: 0.4rem 0.7rem;
+        font-size: 0.8rem;
+        margin-right: 1rem; 
+        line-height:normal;
+    }
+}
+
+.custom-logic-section {
+    /* padding: 0.5rem; */
+    margin: -0.3rem 0.5rem 0.5rem 0.5rem;
+}
+
+.custom-logic-section .input-section{
+    display: flex;
+    gap: 8px;
+}
+
+.custom-logic-section .slds-form-element {
+    margin-top: 0.5rem;
+}
+
+.custom-logic-section .error-message {
+    color: #d4504c;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    position: static;
+}
+
+.filter-index-label {
+    display: flex;
+    align-items: center;
+}
+
+.filter-index {
+    color: #333;
+}

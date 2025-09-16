@@ -1,0 +1,24 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.mapCmp {
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    height: calc(100% + 3.2rem);
+    width: 100%;
+    margin-top: -1.4rem;
+}
+
+.mapCmp .map-class {
+    height: 93%;
+}
+
+.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom .gm-svpc {
+    display: none;
+}
+
+.slds-coordinates {
+    display: none;
+}

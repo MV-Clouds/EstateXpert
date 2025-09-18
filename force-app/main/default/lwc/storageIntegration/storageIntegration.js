@@ -15,6 +15,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track integrationName;
     @track integrationLabel;
     @track awsData;
+    @track isWaterMarkUploader = false;
 
     /**
     * Method Name: isAWS

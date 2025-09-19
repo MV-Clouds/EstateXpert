@@ -1,0 +1,214 @@
+* {
+  font-family: 'Mulish';
+  user-select: none;
+}
+
+.custom-modal__container {
+  width: 55%;
+  max-width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  padding-inline: 2rem;
+}
+
+.custom-modal__header {
+  background: #0070d2;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  border: none;
+}
+
+.custom-modal__header h2 {
+  margin: 0;
+}
+
+.custom-modal__content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: aliceblue;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('/resource/MVEX__newImageandMediaBg');
+}
+
+.close-btn{
+  width: 2rem;
+  height: 2rem;
+  position: absolute;
+  top: -2.5rem;
+  right: -1.8rem;
+  margin-left: 0;
+  bottom: 0;
+}
+
+.body-cover{
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.image-container {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content-section{
+  width: 50%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.input-cover{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.integration-image {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.custom-input {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.custom-modal__footer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  border-radius: 0rem 0rem 0.25rem 0.25rem;
+  align-items: center;
+  padding: 1rem;
+  width: 100%;
+  padding-bottom: 0;
+}
+
+.cancel-btn{
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 34px;
+  text-align: center;
+  padding: 0px 20px;
+  background: #FFFFFF;
+  border: 1px solid #0176D3;
+  color: #0176D3;
+  border-radius: 5px;
+}
+
+.save-btn{
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 34px;
+  text-align: center;
+  border: 1px solid #0176D3;
+  padding: 0px 20px;
+  background: #0176D3;
+  color: white;
+  border-radius: 5px;
+}
+
+.custom-backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+@media only screen and (max-width: 768px) {
+  .custom-modal__container {
+      width: 80%;
+  }
+
+  .body-cover {
+      flex-direction: column;
+  }
+
+  .image-container {
+      display: none;
+  }
+
+  .content-section {
+      width: 100%;
+  }
+}
+
+.copyclass button {
+  background-color: #0070d2;
+  border: none;
+  padding: 8px;
+  margin-top: 7px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.copyclass {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+}
+
+.custom-input:invalid + .copy-button {
+  margin-top: 18px; /* Move the button down when there's an error */
+}
+
+.closs_icon_css {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  right: -2rem;
+  bottom: 0rem;
+  background: transparent;
+}
+
+.forBGSetup {
+  background-color: aliceblue;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: unset;
+  background-image: url('/resource/MVEX__newImageandMediaBg');
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
+
+.blue-header {
+  background-color: #0176D3;
+  color: white;
+  border-bottom-style: unset;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+}
+
+.textAreaBody {
+  --sds-c-textarea-sizing-min-height: 120px;
+}
+
+.save-btn:disabled {
+  background: #c9c9c9;
+  border: 1px solid #c9c9c9;
+}
+
+.copy-button1 {
+  margin-top: 0px !important;
+}
+
+.copy_input {
+  margin-bottom: 6px;
+  margin-top: 6px;
+  pointer-events: none;
+}

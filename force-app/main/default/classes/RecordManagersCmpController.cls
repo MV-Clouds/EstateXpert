@@ -60,23 +60,23 @@ public with sharing class RecordManagersCmpController {
 
             List<String> metadataValues = new List<String>();
             String metadataType;
-            if (featureName == 'Listing_Configuration' && objectApiName == 'Listing__c') {
-                metadataType = 'listingData__mdt';
+            if (featureName == 'Listing_Configuration' && objectApiName == 'MVEX__Listing__c') {
+                metadataType = 'MVEX__listingData__mdt';
             }
-            else if(objectApiName == 'Listing__c'){
-                metadataType = 'recordManagerConfig__mdt';
-            } else if(objectApiName == 'Inquiry__c'){  // Add Inquiry support
-                metadataType = 'recordManagerInquiryConfig__mdt';
+            else if(objectApiName == 'MVEX__Listing__c'){
+                metadataType = 'MVEX__recordManagerConfig__mdt';
+            } else if(objectApiName == 'MVEX__Inquiry__c'){  // Add Inquiry support
+                metadataType = 'MVEX__recordManagerInquiryConfig__mdt';
             } else {
-                metadataType = 'recordManagerMarketingConfig__mdt';
+                metadataType = 'MVEX__recordManagerMarketingConfig__mdt';
             }
-            String query = 'SELECT FieldsData__c, PageSize__c FROM ' + String.escapeSingleQuotes(metadataType) + ' LIMIT 1';
+            String query = 'SELECT MVEX__FieldsData__c, MVEX__PageSize__c FROM ' + String.escapeSingleQuotes(metadataType) + ' LIMIT 1';
             List<SObject> metadataRecords = Database.query(query, AccessLevel.USER_MODE);
 
             if (!metadataRecords.isEmpty()) {
                 SObject metadataRecord = metadataRecords[0];
-                metadataValues.add((String)metadataRecord.get('FieldsData__c'));
-                metadataValues.add(String.valueOf(metadataRecord.get('PageSize__c')));
+                metadataValues.add((String)metadataRecord.get('MVEX__FieldsData__c'));
+                metadataValues.add(String.valueOf(metadataRecord.get('MVEX__PageSize__c')));
             }
 
             recordData.metadataRecords = metadataValues;
@@ -175,15 +175,15 @@ public with sharing class RecordManagersCmpController {
             String metadataType;
 
             System.debug('Feature Name: ' + featureName);
-            if (featureName == 'Listing_Configuration' && objectApiName == 'Listing__c') {
+            if (featureName == 'Listing_Configuration' && objectApiName == 'MVEX__Listing__c') {
                 metadataType = 'listingData__mdt';
             }
-            else if (objectApiName == 'Listing__c') {
-                metadataType = 'recordManagerConfig__mdt';
-            } else if (objectApiName == 'Inquiry__c') {  // Add Inquiry support
-                metadataType = 'recordManagerInquiryConfig__mdt';
+            else if (objectApiName == 'MVEX__Listing__c') {
+                metadataType = 'MVEX__recordManagerConfig__mdt';
+            } else if (objectApiName == 'MVEX__Inquiry__c') {  // Add Inquiry support
+                metadataType = 'MVEX__recordManagerInquiryConfig__mdt';
             } else {
-                metadataType = 'recordManagerMarketingConfig__mdt';
+                metadataType = 'MVEX__recordManagerMarketingConfig__mdt';
             }
 
             String developerName = 'RecordConfig';
@@ -191,7 +191,7 @@ public with sharing class RecordManagersCmpController {
             String query = 'SELECT MasterLabel, DeveloperName FROM ' + String.escapeSingleQuotes(metadataType) + ' LIMIT 1';
             List<SObject> metaList = Database.query(query, AccessLevel.USER_MODE);
 
-            if (featureName == 'Listing_Configuration' && objectApiName == 'Listing__c') {
+            if (featureName == 'Listing_Configuration' && objectApiName == 'MVEX__Listing__c') {
                 listingData__mdt config;
                 if (!metaList.isEmpty()) {
                     config = (listingData__mdt) metaList[0];
@@ -199,14 +199,14 @@ public with sharing class RecordManagersCmpController {
                     masterLabel = config.MasterLabel;
                 }
             }
-            else if (objectApiName == 'Listing__c') {
+            else if (objectApiName == 'MVEX__Listing__c') {
                 recordManagerConfig__mdt config;
                 if (!metaList.isEmpty()) {
                     config = (recordManagerConfig__mdt) metaList[0];
                     developerName = config.DeveloperName;
                     masterLabel = config.MasterLabel;
                 }
-            } else if (objectApiName == 'Inquiry__c') {  // Add Inquiry support
+            } else if (objectApiName == 'MVEX__Inquiry__c') {  // Add Inquiry support
                 recordManagerInquiryConfig__mdt config;
                 if (!metaList.isEmpty()) {
                     config = (recordManagerInquiryConfig__mdt) metaList[0];
@@ -227,12 +227,12 @@ public with sharing class RecordManagersCmpController {
             mdata.label = masterLabel;
 
             Metadata.CustomMetadataValue fieldsDataValue = new Metadata.CustomMetadataValue();
-            fieldsDataValue.field = 'FieldsData__c';
+            fieldsDataValue.field = 'MVEX__FieldsData__c';
             fieldsDataValue.value = checklistData;
             mdata.values.add(fieldsDataValue);
 
             Metadata.CustomMetadataValue pageSizeValue = new Metadata.CustomMetadataValue();
-            pageSizeValue.field = 'PageSize__c';
+            pageSizeValue.field = 'MVEX__PageSize__c';
             pageSizeValue.value = totalPages;
             mdata.values.add(pageSizeValue);
 
@@ -269,16 +269,16 @@ public with sharing class RecordManagersCmpController {
             }
 
             Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = 'New_Record_Fields__mdt.' + devName;
+            mdata.fullName = 'MVEX__New_Record_Fields__mdt.' + devName;
             mdata.label = masterLabel;
             
             Metadata.CustomMetadataValue instance = new Metadata.CustomMetadataValue();
-            instance.field = 'Field_Data__c';
+            instance.field = 'MVEX__Field_Data__c';
             instance.value = selectFieldsData;
             mdata.values.add(instance);
 
             Metadata.CustomMetadataValue instance1 = new Metadata.CustomMetadataValue();
-            instance1.field = 'Object_API_Name__c';
+            instance1.field = 'MVEX__Object_API_Name__c';
             instance1.value = objectApiName;
             mdata.values.add(instance1);
 

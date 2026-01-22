@@ -20,20 +20,20 @@ export default class RecordPageMapView extends LightningElement {
                     this.mapMarkers = [
                         {
                             location: {
-                                Street: data.MVEX__Address__Street__s,
-                                City: data.MVEX__Address__City__s,
-                                State: data.MVEX__Address__StateCode__s,
-                                PostalCode: data.MVEX__Address__PostalCode__s,
-                                Country: data.MVEX__Address__CountryCode__s
+                                Street: data.MVEX__Listing_Address__Street__s,
+                                City: data.MVEX__Listing_Address__City__s,
+                                State: data.MVEX__Listing_Address__StateCode__s,
+                                PostalCode: data.MVEX__Listing_Address__PostalCode__s,
+                                Country: data.MVEX__Listing_Address__CountryCode__s
                             },
                             title: data.Name,
                             description: `
                                 <b>Address:</b> 
-                                ${data.MVEX__Address__Street__s || ''}, 
-                                ${data.MVEX__Address__City__s || ''}, 
-                                ${data.MVEX__Address__StateCode__s || ''}, 
-                                ${data.MVEX__Address__CountryCode__s || ''}
-                                <br><b>Sq Ft:</b> ${data.Sq_Ft__c || 'N/A'}
+                                ${data.MVEX__Listing_Address__Street__s || ''}, 
+                                ${data.MVEX__Listing_Address__City__s || ''}, 
+                                ${data.MVEX__Listing_Address__StateCode__s || ''}, 
+                                ${data.MVEX__Listing_Address__CountryCode__s || ''}
+                                <br><b>Sq Ft:</b> ${data.MVEX__Sq_Ft__c || 'N/A'}
                             `
                         }
                     ];

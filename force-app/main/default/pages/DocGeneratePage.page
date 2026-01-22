@@ -1,0 +1,1149 @@
+<apex:page controller="DocGenerateController" applyHtmlTag="false" showHeader="false" cache="false">
+
+    <html>
+
+    <!-- <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+        <style>
+            body {
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .page-break {
+                display: block;
+                page-break-after: always;
+                visibility: hidden !important;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            ol,
+            ul,
+            dl,
+            fieldset {
+                margin: 0;
+                padding: 0;
+            }
+
+            .pdf_toolbar {
+                width: 100%;
+                height: 3.5rem;
+                background: #0176D3;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                user-select: none;
+            }
+
+            .configContainet {
+                width: 100%;
+                height: fit-content;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .configContainet button {
+                border: none;
+                outline: none;
+                background: inherit;
+            }
+
+            .configContainet button:active {
+                background: initial;
+            }
+
+            .config_cc {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+            .config_cc:not(:last-child) {
+                padding-right: 1rem;
+                border-right: 1.5px solid white;
+            }
+
+            .pageConfig {
+                gap: 0.5rem;
+            }
+
+            .pageChangeConfig {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 1px;
+            }
+
+            .pageChangeBtn {
+                background: #ffffff !important;
+                min-width: 1.5rem;
+                min-height: 1.5rem;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding-inline: 0.75rem;
+                padding-block: 5px;
+                cursor: pointer;
+            }
+
+            .pageMinus {
+                border-radius: 4px 0px 0px 4px;
+            }
+
+            .pagePlus {
+                border-radius: 0px 4px 4px 0px;
+            }
+
+            .pageChangeBtn svg {
+                width: 16px;
+                height: 16px;
+                fill: currentColor;
+            }
+
+            .pageChangeBtn:disabled {
+                cursor: no-drop;
+            }
+
+            input[type=number]::-webkit-inner-spin-button,
+            input[type=number]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                margin: 0;
+            }
+
+            .pageToSetInut {
+                width: 2.5rem;
+                height: 1.5rem;
+                border: none;
+                outline: none;
+                text-align: center;
+                padding-block: 1px;
+                background: #ffffff !important;
+            }
+
+            .pageToSetInut[data-name="totalPages"] {
+                border-radius: 2px;
+            }
+
+            .pageToSetInut:focus-visible,
+            .zoomInpput:focus-visible {
+                border: none;
+                outline: none !important;
+            }
+
+            .toolbarText {
+                font-size: 14px;
+                font-family: Bahnschrift, 'Segoe UI', 'Segoe UI Web (West European)', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+                letter-spacing: 1px;
+                color: #ffffff;
+            }
+
+            .zoomConfig {
+                gap: 0px;
+            }
+
+            .zoomBtn {
+                width: 16px;
+                height: 16px;
+                fill: #ffffff;
+                padding: 0.25rem;
+                cursor: pointer;
+                transition: all linear 0.1s;
+                outline: 1px solid #ffffff;
+            }
+
+            .zI {
+                border-radius: 4px 0px 0px 4px;
+            }
+
+            .zO {
+                border-radius: 0px 4px 4px 0px;
+            }
+
+            .zoomBtn:hover {
+                background: #ffffff !important;
+                fill: #01aeff;
+            }
+
+            .zoomInfo {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding-bottom: 1px;
+                border-radius: 2px;
+            }
+
+            .content {
+                --zoomLevel: 100%;
+                min-width: 100%;
+                width: 100%;
+                max-width: max-content;
+                height: calc(100% - 3.5rem - 2rem) !important;
+                overflow: auto;
+                background: #4d525d;
+                padding-block: 1rem;
+                position: relative;
+                scroll-behavior: smooth;
+                scrollbar-width: thin;
+                scrollbar-color: #01aeff transparent;
+            }
+
+            .intialLoading {
+                width: calc(100% - 4rem);
+                border-radius: 4px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background: white;
+                margin-inline: 2rem;
+            }
+
+            .intialLoading_container {
+                width: 72px;
+                height: 72px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .intialLoading_container svg {
+                width: 64px;
+                height: 64px;
+                fill: #01aeff;
+                position: absolute;
+                top: 0%;
+                transform: translateY(0%);
+                animation: moveUp 1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s infinite alternate;
+            }
+
+            .intialLoading_container svg.error {
+                fill: #fc4949;
+                ;
+                animation: none;
+            }
+
+            @keyframes moveUp {
+                0% {
+                    transform: translateY(120%);
+                }
+
+                100% {
+                    transform: translateY(0%);
+                }
+            }
+
+            .loadingInfo {
+                width: 100%;
+                text-align: center;
+                font-size: 14px;
+                color: #131313;
+                margin-top: 1rem;
+                font-weight: 700;
+            }
+
+            .scrollTopBtn {
+                position: sticky;
+                bottom: 0rem;
+                left: calc(100% - 4.5rem);
+                border-radius: 50%;
+                padding: 0.25rem;
+                background: white;
+                box-shadow: rgb(0 0 0 / 32%) 0px 0px 10px;
+                outline: none;
+                border: none;
+                cursor: pointer;
+                display: none;
+            }
+
+            .scrollTopBtn svg {
+                width: 2.5rem;
+                height: 2.5rem;
+                fill: #0098de;
+                transform: rotate(180deg);
+            }
+
+            .content_sub {
+                min-width: calc(var(--zoomLevel) - 4rem);
+                width: calc(var(--zoomLevel) - 4rem);
+                height: max-content;
+                padding-inline: 2rem;
+                margin-inline: auto;
+                margin-bottom: -3rem;
+            }
+
+            .pdf_content {
+                width: 100%;
+                height: max-content;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                justify-content: flex-start;
+                align-items: center;
+            }
+
+            .canvasClass {
+                width: 100%;
+                border-radius: 4px;
+                box-shadow: rgb(0 0 0 / 35%) 0px 3px 6px, rgb(0 0 0 / 37%) 0px 3px 6px;
+            }
+        </style>
+        <apex:styleSheet value="{!URLFOR($Resource.summerNoteEditor, '/summernote-lite-pdf.css')}" />
+        <apex:includeScript value="{!URLFOR($Resource.pdfLibs, '/html2pdf.bundle-0.9.3.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.pdfLibs, '/pdfJS/web/pdf.js')}" />
+    </head>
+
+    <body>
+        <apex:outputpanel rendered="{!useMode == 'preview'}">
+            <div class="pdf_toolbar">
+                <div class="configContainet">
+                    <div class="pageConfig config_cc">
+                        <span class="toolbarText">Page : </span>
+                        <div class="pageChangeConfig">
+                            <button class="pageChangeBtn pageMinus" data-name="pageMinus" onclick="onPageChange(event)"
+                                disabled="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z">
+                                    </path>
+                                </svg>
+                            </button>
+                            <input class="pageToSetInut" type="number" data-name="pageToSet"
+                                onkeyup="onPageChange(event)" />
+                            <button class="pageChangeBtn pagePlus" data-name="pagePlus" onclick="onPageChange(event)">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="toolbarText"> of </div>
+                        <input class="pageToSetInut" type="number" data-name="totalPages" disabled="true" />
+                    </div>
+                    <div class="zoomConfig config_cc">
+                        <button data-name="zoomIn" title="Zoom In" onclick="setZoomLevel(event)">
+                            <svg class="zoomBtn zI" viewBox="0 0 24 24">
+                                <path d="M5 11V13H19V11H5Z"></path>
+                            </svg>
+                        </button>
+                        <div class="zoomInfo pageToSetInut">100%</div>
+                        <button data-name="zoomOut" title="Zoom Out" onclick="setZoomLevel(event)">
+                            <svg class="zoomBtn zO" viewBox="0 0 24 24">
+                                <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="content" id="content">
+                <div class="intialLoading">
+                    <div class="intialLoading_container">
+                        <svg viewBox="0 0 1920 1920">
+                            <g stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path
+                                    d="M1706.235 1807.059H350.941V112.94h903.53v451.765h451.764v1242.353Zm-338.823-1670.74 315.443 315.447h-315.443V136.32Zm402.182 242.487L1440.372 49.58C1408.296 17.62 1365.717 0 1320.542 0H238v1920h1581.175V498.635c0-45.176-17.618-87.755-49.58-119.83ZM576.823 1242.353h790.589v-112.94H576.823v112.94Zm0-451.765h903.53V677.647h-903.53v112.941Zm0 677.647h451.765v-112.941H576.823v112.941Zm0-451.764h677.648V903.53H576.823v112.941Zm0-451.765h451.765V451.765H576.823v112.941Z"
+                                    fill-rule="evenodd"></path>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="loadingInfo"> Initializing... </div>
+                </div>
+                <div class="content_sub">
+                    <div class="pdf_content" id="pdf_content"></div>
+                </div>
+                <button class="scrollTopBtn" title="Scroll To Top" onclick="scrollToTop()">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M8.01266 4.56502C8.75361 4.16876 9.5587 4 11.1411 4H12.8589C14.4413 4 15.2464 4.16876 15.9873 4.56502C16.6166 4.90155 17.0985 5.38342 17.435 6.01266C17.8312 6.75361 18 7.5587 18 9.14111V14.8589C18 16.4413 17.8312 17.2464 17.435 17.9873C17.0985 18.6166 16.6166 19.0985 15.9873 19.435C15.2464 19.8312 14.4413 20 12.8589 20H11.1411C9.5587 20 8.75361 19.8312 8.01266 19.435C7.38342 19.0985 6.90155 18.6166 6.56502 17.9873C6.16876 17.2464 6 16.4413 6 14.8589V9.14111C6 7.5587 6.16876 6.75361 6.56502 6.01266C6.90155 5.38342 7.38342 4.90155 8.01266 4.56502ZM12.8589 2H11.1411C9.12721 2 8.04724 2.27848 7.06946 2.8014C6.09168 3.32432 5.32432 4.09168 4.8014 5.06946C4.27848 6.04724 4 7.12721 4 9.14111V14.8589C4 16.8728 4.27848 17.9528 4.8014 18.9305C5.32432 19.9083 6.09168 20.6757 7.06946 21.1986C8.04724 21.7215 9.12721 22 11.1411 22H12.8589C14.8728 22 15.9528 21.7215 16.9305 21.1986C17.9083 20.6757 18.6757 19.9083 19.1986 18.9305C19.7215 17.9528 20 16.8728 20 14.8589V9.14111C20 7.12721 19.7215 6.04724 19.1986 5.06946C18.6757 4.09168 17.9083 3.32432 16.9305 2.8014C15.9528 2.27848 14.8728 2 12.8589 2ZM13 6H11V11H13V6ZM7.75781 13.758L12.0005 18.0006L16.2431 13.758L14.8289 12.3438L12.0005 15.1722L9.17203 12.3438L7.75781 13.758Z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </apex:outputpanel>
+    </body>
+
+    <script type="text/javascript">
+        const parentURL = (window.location != window.parent.location) ? document.referrer : document.location.href;
+        const intialLoading = document.querySelector('.intialLoading');
+        const loadingInfo = document.querySelector('.loadingInfo');
+        const docIcon = intialLoading?.querySelector('svg');
+        const useMode = '{!JSENCODE(useMode)}';
+
+        function sendInfoToLWC(completedChannel, status, error, cvId) {
+            if (useMode === 'preview') {
+                loadingInfo && (loadingInfo.innerText = 'Facing Issue While Generating Preview, Please Try Agian...');
+                docIcon?.classList.add('error');
+            }
+            else {
+                const message = {
+                    messageFrom: 'docGenerate',
+                    completedChannel: completedChannel,
+                    status: status,
+                    error: error,
+                    cvId: cvId,
+                };
+                parent.postMessage(message, parentURL);
+            }
+        }
+
+        try {
+
+            const apexError = '{!JSENCODE(apexError)}';
+            apexError && console.log('apexError : ', apexError);
+
+            if (apexError && apexError !== null && apexError !== '') {
+                loadingInfo && (loadingInfo.innerText = 'Facing Issue While Generating Preview, Please Try Again...');
+                docIcon?.classList.add('error');
+                sendInfoToLWC('unknown', false, { message: apexError });
+            }
+            else {
+
+                const sessionId = '{!JSENCODE(sessionId)}';
+                const fileName = '{!JSENCODE(fileName)}';
+                const recordId = '{!JSENCODE(recordId)}';
+
+                let selectedExtension = '{!JSENCODE(selectedExtension)}';
+                const selectedChannels = '{!JSENCODE(selectedChannels)}';
+                const domainURL = parentURL.replace('lightning.force.com/', 'my.salesforce.com');
+
+                let pdfPages = 1;
+                let currentPage = 1;
+                let zoomLevel = 100;
+
+                const content = document.querySelector('.content');
+                const content_sub = document.querySelector('.content_sub');
+                const pdf_content = document.getElementById('pdf_content');
+
+                const pageToSet = document.querySelector('[data-name="pageToSet"]');
+                const pagePlus = document.querySelector('[data-name="pagePlus"]');
+                const pageMinus = document.querySelector('[data-name="pageMinus"]');
+
+                const dummyImgSrc = 'data:image/png;base64,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'
+                const editorNode = `<div class="@typeClass note-editor note-frame">
+                                            <div class="note-editing-area">
+                                                <div aria-multiline="true" role="textbox" class="note-editable">
+                                                    <HTMLContent>
+                                                </div>
+                                            </div> 
+                                        </div>
+                                        `
+
+
+                const pageMargins = '{!JSENCODE(pageMargins)}';
+                const pageSize = '{!JSENCODE(pageSize)}';
+                const pageUnit = '{!JSENCODE(pageConfigUnit)}';
+                const pageOriantation = '{!JSENCODE(pageOrientation)}';
+
+                const mArray = pageMargins.split(';');
+                const pageWidth = pageFormats()[pageSize][0];
+                const pageHeight = pageFormats()[pageSize][1];
+
+                const marginTop = toPx(parseInt(mArray[0]));
+                const marginBottom = toPx(parseInt(mArray[1]));
+                const marginLeft = toPx(parseInt(mArray[2]));
+                const marginRight = toPx(parseInt(mArray[3]));
+
+                let bodyHtml = '{!JSENCODE(bodyHtml)}';
+                let headerHtml = '{!JSENCODE(headerHtml)}';
+                let footerHtml = '{!JSENCODE(footerHtml)}';
+
+                const showHeader = JSON.parse('{!showHeader}');
+                const showFooter = JSON.parse('{!showFooter}');
+
+                const headerMarginTop = showHeader ? toPx('{!headerMarginTop}') : 0;
+
+                const footerMarginBottom = showFooter ? toPx('{!footerMarginBottom}') : 0;
+                const headerFooterMaxHeight = (pageFormats()[pageSize][1] * 1.3334) * 0.4;
+
+                const currentTempId = '{!JSENCODE(templateId)}';
+
+                const mappingValueString = '{!JSENCODE(mappingKeyVsMappingValues)}'
+                const mappingKeyVsMappingValues = mappingValueString ? JSON.parse(mappingValueString) : {};
+
+                const salesforceImageSRCsString = '{!JSENCODE(salesforceImages)}';
+                const salesforceImages = salesforceImageSRCsString ? JSON.parse(salesforceImageSRCsString) : {};
+
+                const listingMediaKeyString = '{!JSENCODE(listingImageMedia)}';
+                const listingImageMedia = listingMediaKeyString ? JSON.parse(listingMediaKeyString) : {};
+
+                const mergeTemplateKeysString = '{!JSENCODE(mergeTemplateKeys)}';
+                const mergeTemplateKeys = mergeTemplateKeysString ? JSON.parse(mergeTemplateKeysString) : {};
+
+                // ###
+                const signatureImageCvIdString =  '{!JSENCODE(signatureImageCvId)}';
+                const signatureImageCvId = signatureImageCvIdString ? JSON.parse(signatureImageCvIdString) : null;
+                const signatureKey = '{!JSENCODE(signatureKey)}';
+                const signatureSize = '{!signatureSize}';
+
+                if(signatureImageCvId && signatureImageCvId[signatureKey]){
+                    salesforceImages[signatureKey] = signatureImageCvId[signatureKey];
+                }
+
+                const imageMaxSize = '{!imageMaxSize}';
+
+                const selfMergeTempKey = Object.keys(mergeTemplateKeys)?.find(key => mergeTemplateKeys[key] === currentTempId);
+                delete mergeTemplateKeys[selfMergeTempKey];
+
+                let isBatchRequired = '{!isBatchRequired}';
+                if (isBatchRequired == true || isBatchRequired == 'true') {
+                    mergeTemplateKeys[currentTempId] = currentTempId;
+                }
+
+                if (Object.keys(mergeTemplateKeys)?.length || Object.keys(salesforceImages)?.length) {
+                    loadingInfo && (loadingInfo.innerText = 'Fetching Template Data...');
+                    fetchData();
+                }
+                else {
+                    replaceKeysWithValue();
+                }
+
+                function fetchData() {
+                    let completedProcess = 0;
+                    let totalProcess = Object.keys(mergeTemplateKeys).length;
+                    totalProcess = totalProcess + Object.keys(salesforceImages).length;
+
+                    let templatesData = {};
+                    for (let key in mergeTemplateKeys) {
+                        templatesData[key] = '';
+                        fetchAllTemplateData(1, mergeTemplateKeys[key], key);
+                    }
+
+                    function fetchAllTemplateData(offset, templateId, mergeKey) {
+                        Visualforce.remoting.Manager.invokeAction(
+                            '{!$RemoteAction.DocGenerateController.fetchTemplateData}',
+                            offset, templateId, mergeKey,
+                            function (result, event) {
+                                if (event.status) {
+                                    let isLastBatch = result[0];
+                                    templatesData[mergeKey] += result[1];
+                                    if (isLastBatch == 'false') {
+                                        fetchAllTemplateData(offset + 25, templateId, mergeKey);
+                                    } else {
+
+                                        templatesData[mergeKey] = unescapeHtml(templatesData[mergeKey]);
+
+                                        if (templateId == currentTempId) {
+                                            bodyHtml = templatesData[mergeKey];
+                                            delete mergeTemplateKeys[mergeKey];
+                                        }
+                                        else {
+                                            mergeTemplateKeys[mergeKey] = templatesData[mergeKey];
+                                        }
+
+                                        proccesFurther();
+                                    }
+                                }
+                                else if (event.statusCode == 414 && event.message == "Remoting response size exceeded maximum of 15 MB.") {
+                                    loadingInfo && l(oadingInfo.innerText = 'Your Data is to Large to generate file');
+                                    docIcon?.classList.add('error');
+                                }
+                                else {
+                                    mergeTemplateKeys[mergeKey] = mergeKey;
+                                    proccesFurther();
+                                }
+                            }
+                        );
+                    }
+
+                    for (let src in salesforceImages) {
+                        fetchContentVersionsData(salesforceImages[src], src)
+                    }
+
+                    function fetchContentVersionsData(cvId, imageSRC) {
+                        const queryURL = `/services/data/v56.0/sobjects/ContentVersion/${cvId}/VersionData`;
+
+                        const myHeaders = new Headers();
+                        myHeaders.append("Authorization", "Bearer " + sessionId);
+
+                        const requestOptions = {
+                            method: "GET",
+                            headers: myHeaders,
+                            redirect: "follow"
+                        };
+
+                        fetch(encodeURI(domainURL + queryURL), requestOptions)
+                            .then(response => {
+                                response.blob()
+                                    .then(blob => {
+                                        if (blob.size < imageMaxSize) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                salesforceImages[imageSRC] = 'data:image/png;base64,' + reader.result.split(',')[1];
+                                                proccesFurther();
+                                            }
+                                            reader.onerror = () => {
+                                                salesforceImages[imageSRC] = dummyImgSrc;
+                                                proccesFurther();
+                                            }
+                                            reader.readAsDataURL(blob);
+                                        }
+                                        else {
+                                            salesforceImages[imageSRC] = dummyImgSrc;
+                                            proccesFurther();
+                                        }
+                                    })
+                            })
+                            .catch(error => {
+                                salesforceImages[imageSRC] = dummyImgSrc;
+                                proccesFurther();
+                            })
+                    }
+
+                    function proccesFurther() {
+                        completedProcess++;
+                        if (completedProcess === totalProcess) {
+                            replaceKeysWithValue();
+                        }
+                    }
+                }
+
+                function replaceKeysWithValue() {
+
+                    let bodyElement = document.createElement('div');
+                    bodyElement.innerHTML = editorNode.replace('<HTMLContent>', bodyHtml);
+                    bodyElement.innerHTML = bodyElement.innerHTML.replace('@typeClass', '');
+
+                    let headerElement = document.createElement('div');
+                    if (showHeader === true && headerHtml) {
+                        headerElement.innerHTML = editorNode.replace('<HTMLContent>', headerHtml)
+                            .replace('@typeClass', 'headerEditor');
+                        headerElement.style = ` max-height : headerFooterMaxHeight;
+                                                overflow: hidden;`
+                    }
+
+                    let footerElement = document.createElement('div');
+                    if (showFooter === true && footerHtml) {
+                        footerElement.innerHTML = editorNode.replace('<HTMLContent>', footerHtml)
+                            .replace('@typeClass', 'footerEditor');
+                    }
+
+                    for (let key in mergeTemplateKeys) {
+                        const tempData = mergeTemplateKeys[key];
+                        const pattern = /{{Temp.(.*?)}}/g;
+                        let matcher;
+                        while (((matcher = pattern.exec(tempData)) !== null)) {
+                            mergeTemplateKeys[key] = mergeTemplateKeys[key].replaceAll(matcher[0], '')
+                        }
+                    }
+
+                    for (let key in mergeTemplateKeys) {
+                        bodyElement.innerHTML = bodyElement.innerHTML.replaceAll(key, mergeTemplateKeys[key]);
+                    }
+
+                    if (selfMergeTempKey) {
+                        bodyElement.innerHTML = bodyElement.innerHTML.replaceAll(selfMergeTempKey, selfMergeTempKey + '<span style="color:red"> --- Self Merge Not Allow. --- </span>');
+                    }
+
+                    for (let key in mappingKeyVsMappingValues) {
+                        bodyElement.innerHTML = bodyElement.innerHTML.replaceAll(key, mappingKeyVsMappingValues[key]);
+                        headerElement.innerHTML = headerElement.innerHTML.replaceAll(key, mappingKeyVsMappingValues[key]);
+                        footerElement.innerHTML = footerElement.innerHTML.replaceAll(key, mappingKeyVsMappingValues[key])
+                    }
+
+                    let bodyImages = bodyElement.querySelectorAll('img');
+                    let headerImages = headerElement.querySelectorAll('img');
+                    let footerImages = footerElement.querySelectorAll('img');
+                    let images = [...bodyImages, ...headerImages, ...footerImages]
+
+                    images?.forEach(ele => {
+                        if (salesforceImages[ele.src]) {
+                            ele.src = salesforceImages[ele.src];
+                        }
+                    })
+
+                    let signatureValue = '';
+                    if(salesforceImages[signatureKey]){
+                        const signatureImageInPt = (signatureSize * pageFormats()[pageSize][0]) / 100;
+                        signatureValue = `<p><img style="width : ${signatureImageInPt}pt; max-width:100%;" src="${salesforceImages[signatureKey]}" ></p>`
+                    }
+                    
+                    bodyElement.innerHTML = bodyElement.innerHTML.replaceAll(signatureKey, signatureValue);
+                    headerElement.innerHTML = headerElement.innerHTML.replaceAll(signatureKey, signatureValue);
+                    footerElement.innerHTML = footerElement.innerHTML.replaceAll(signatureKey, signatureValue);
+
+                    bodyElement.innerHTML = processIfElseExpressions(bodyElement.innerHTML);
+                    headerElement.innerHTML = processIfElseExpressions(headerElement.innerHTML);
+                    footerElement.innerHTML = processIfElseExpressions(footerElement.innerHTML);
+
+                    const promises = [];
+
+                    if (Object.keys(listingImageMedia).length > 0) {
+                        for (let key in listingImageMedia) {
+                            const imgTags = bodyElement.querySelectorAll(`img[data-name="${key}"]`);
+                            imgTags.forEach(img => {
+                                img.src = listingImageMedia[key] + '?withheaders=yes' || dummyImgSrc;
+                            });
+                        }
+                    } else {
+                        const imgTags = bodyElement.querySelectorAll('img[data-name^="listingMedia["]');
+                        imgTags.forEach(img => {
+                            img.src = dummyImgSrc;
+                        });
+                    }
+
+                    Promise.all(promises).then(() => {
+                        generateFile(bodyElement, headerElement, footerElement);
+                    });
+
+                }
+                function processIfElseExpressions(html) {
+                    const IF_ELSE_REGEX = /\{\{@IF:([^{}|]+)\|#\|([^{}|]*)\|#\|([^{}]*)\}\}/g;
+                    return html.replace(IF_ELSE_REGEX, (_, condition, thenText, elseText) => {
+                        const result = evaluateIfExpression(condition);
+                        return result ? thenText : (elseText ?? '');
+                    });
+                }
+                
+
+                function generateFile(bodyElement, headerElement, footerElement) {
+                    if (selectedExtension === '.pdf' || useMode === 'preview') {
+                        generatePDF(bodyElement, headerElement, footerElement);
+                    }
+                }
+
+                function generatePDF(bodyElement, headerElement, footerElement){
+                            
+                    const opt = {
+                        margin: [   marginTop, 
+                                    marginLeft, 
+                                    marginBottom, 
+                                    marginRight],
+                        filename: fileName + '.pdf',
+                        image: { type: 'jpeg', quality: 1 },
+                        html2canvas: { scale: 3 , useCORS: true , letterRendering: true},
+                        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+                        jsPDF: { unit: 'px', format: pageSize, orientation: pageOriantation, hotfixes: ["px_scaling"] },
+                    };
+
+                    const isHeaderContent = !(!headerElement?.querySelector('.note-editable')?.innerHTML?.trim());
+                    const isFooterContent = !(!footerElement?.querySelector('.note-editable')?.innerHTML?.trim());
+
+                    if(showHeader === true && isHeaderContent){
+
+                        const headerImgs =  headerElement.querySelectorAll('img');
+                        headerImgs.forEach(ele => {
+                            if(ele.src.startsWith('http')){
+                                ele.src = dummyImgSrc;
+                            }
+                        });
+                
+                        opt.header = {  element : headerElement, 
+                                        margins : [headerMarginTop, marginLeft, 0, marginRight], 
+                                        maxHeight : headerFooterMaxHeight,
+                                        };             
+                    }
+
+                    if(showFooter === true && isFooterContent){
+
+                        const footerImgs =  footerElement.querySelectorAll('img');
+                        footerImgs.forEach(ele => {
+                            if(ele.src.startsWith('http')){
+                                ele.src = dummyImgSrc;
+                            }
+                        });
+
+                        opt.footer = { element : footerElement, 
+                                        margins : [0, marginLeft, footerMarginBottom, marginRight], 
+                                        maxHeight : headerFooterMaxHeight,
+                                        };            
+                    }
+
+                    docIcon && (docIcon.style = 'animation : none');
+                    loadingInfo && (loadingInfo.innerText = 'Rendering Preview...');
+
+
+                    html2pdf().set(opt).from(bodyElement).outputPdf()
+                    .then(function (rawPDF){
+                        if(useMode === 'preview'){
+                            intialLoading.style.display = 'none';
+                            displayPDF(rawPDF);
+                        }
+                        else{
+                            const pdfBlob = new Blob([getArrayBuffer(rawPDF)], { type: 'application/pdf' }) 
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                const fileData = reader.result.split(',')[1];
+                                let downlaodUrl =  reader.result;
+
+                                handleGeneratedFiles(fileData, pdfBlob, downlaodUrl);
+                            }
+                            reader.readAsDataURL(pdfBlob);
+                        }
+                    })
+                    .catch(function (error){
+                        console.log('error to store pdf file : ', error.stack)
+                        sendInfoToLWC('unknown', false, error);
+                    })
+                }
+
+
+                function handleGeneratedFiles(fileData, blob, downalodURL) {
+                    try {
+                        const fileSizeInByte = (fileData.length / 4) * 3;
+
+                        if (selectedChannels.includes('Download')) {
+                            let downloadLink = document.createElement("a");
+                            document.body.appendChild(downloadLink);
+
+                            if (navigator.msSaveOrOpenBlob) {
+                                navigator.msSaveOrOpenBlob(blob, filename + selectedExtension);
+                            } else {
+                                downloadLink.href = downalodURL;
+                                downloadLink.download = fileName + selectedExtension;
+                                downloadLink.click();
+                            }
+                            document.body.removeChild(downloadLink);
+
+                            sendInfoToLWC('Download', true, null);
+                        }
+
+                        if (fileSizeInByte < 37.5 * 1020 * 1020 && selectedChannels.includes('Files')) {
+                            createContentVersion(fileData);
+                        } else if (selectedChannels.includes('Files')) {
+                            sendInfoToLWC('External Storage', false, { message: 'File Size Limit Exceeded!' });
+                        }
+                    } catch (error) {
+                        console.log('error in handleGeneratedFiles : ', error.stack);
+                        sendInfoToLWC('unknown', false, error);
+                    }
+                }
+
+                function createContentVersion(fileData) {
+                    try {
+
+                        if (!sessionId || sessionId == '') {
+                            console.error('Error fetching session ID fro create conetentVersion');
+                            sendInfoToLWC('Files', false, { message: 'Error fetching session ID fro create conetentVersion' });
+                        }
+
+                        const myHeaders = new Headers();
+                        myHeaders.append("Authorization", "Bearer " + sessionId);
+                        myHeaders.append("Content-Type", "application/json");
+
+                        const raw = JSON.stringify({
+                            "title": fileName,
+                            "PathOnClient": fileName + selectedExtension,
+                            "versionData": fileData,
+                            "FirstPublishLocationId": recordId
+                        });
+
+                        const requestOptions = {
+                            method: "POST",
+                            headers: myHeaders,
+                            body: raw,
+                            redirect: "follow"
+                        };
+
+                        const queryURL = "/services/data/v61.0/sobjects/ContentVersion";
+
+                        fetch(encodeURI(domainURL + queryURL), requestOptions)
+                            .then(response => {
+                                response.json()
+                                    .then(result => {
+                                        if (!result.success || !result.id) {
+                                            console.log('Couldn\'t create the content version');
+                                            sendInfoToLWC('External Storage', false, result.error);
+                                        }
+                                        else {
+                                            sendInfoToLWC('External Storage', true, null, result.id);
+                                        }
+                                    })
+                            })
+                            .catch(error => {
+                                console.log('error in External Storage : ', error.json());
+                                sendInfoToLWC('External Storage', true, null, result.id);
+                            })
+
+                    } catch (error) {
+                        console.log('Error in createContentVersion ::', error.message);
+                        sendInfoToLWC('Files', false, error);
+                    }
+                }
+
+                function getArrayBuffer(data){
+                    let len = data.length,
+                    ab = new ArrayBuffer(len),
+                    u8 = new Uint8Array(ab);
+
+                    while (len--) u8[len] = data.charCodeAt(len);
+                    return ab;
+                };
+
+
+                function unescapeHtml(html){
+                    let doc = new DOMParser().parseFromString(html, "text/html");
+                    return doc.documentElement.innerText
+                }
+
+                function pageFormats(){
+                    return {
+                        'a0': [2383.94, 3370.39],
+                        'a1': [1683.78, 2383.94],
+                        'a2': [1190.55, 1683.78],
+                        'a3': [841.89, 1190.55],
+                        'a4': [595.28, 841.89],
+                        'a5': [419.53, 595.28],
+                        'a6': [297.64, 419.53],
+                        'a7': [209.76, 297.64],
+                        'a8': [147.40, 209.76],
+                        'a9': [104.88, 147.40],
+                        'a10': [73.70, 104.88],
+                        'b0': [2834.65, 4008.19],
+                        'b1': [2004.09, 2834.65],
+                        'b2': [1417.32, 2004.09],
+                        'b3': [1000.63, 1417.32],
+                        'b4': [708.66, 1000.63],
+                        'b5': [498.90, 708.66],
+                        'b6': [354.33, 498.90],
+                        'b7': [249.45, 354.33],
+                        'b8': [175.75, 249.45],
+                        'b9': [124.72, 175.75],
+                        'b10': [87.87, 124.72],
+                        'c0': [2599.37, 3676.54],
+                        'c1': [1836.85, 2599.37],
+                        'c2': [1298.27, 1836.85],
+                        'c3': [918.43, 1298.27],
+                        'c4': [649.13, 918.43],
+                        'c5': [459.21, 649.13],
+                        'c6': [323.15, 459.21],
+                        'c7': [229.61, 323.15],
+                        'c8': [161.57, 229.61],
+                        'c9': [113.39, 161.57],
+                        'c10': [79.37, 113.39],
+                        'dl': [311.81, 623.62],
+                        'letter': [612, 792],
+                        'government-letter': [576, 756],
+                        'legal': [612, 1008],
+                        'junior-legal': [576, 360],
+                        'ledger': [1224, 792],
+                        'tabloid': [792, 1224],
+                        'credit-card': [153, 243],
+                        'executive' : [522, 756],
+                        'statement' : [396, 594],
+                    }
+                };
+
+
+                function unitMultiplier(unit){
+                    switch (unit) {
+                        case 'pt':
+                        return 1;
+                    
+                        case 'mm':
+                        return 72 / 25.4;
+                    
+                        case 'cm':
+                        return 72 / 2.54;
+                    
+                        case 'in':
+                        return 72;
+                    
+                        case 'px':
+                        return 72 / 96;
+                    
+                        case 'pc':
+                        return 12;
+                    
+                        case 'em':
+                        return 12;
+                    
+                        case 'ex':
+                        return 6;
+                    
+                        default:
+                        return null;
+                    }
+                };
+
+                function toPx(value){
+                    let toPt = unitMultiplier(pageUnit) * value;
+                    return (toPt * 1.3334);
+                }
+
+                function ptToCm(value){
+                    return (value / 28.3465);
+                }
+
+                function ptToPx(value){
+                    return (value * 1.3334);
+                }
+
+                function displayPDF(pdfBlob) {
+                    let loadingTask = pdfjsDistBuildPdf?.getDocument({ data: pdfBlob });
+                    loadingTask.promise.then(function (pdf) {
+
+                        const totalPagesInput = document.querySelector('[data-name="totalPages"]');
+                        totalPagesInput && (totalPagesInput.value = pdf.pdfInfo.numPages);
+
+                        const pageToSetInut = document.querySelector('[data-name="pageToSet"]');
+                        pageToSetInut && (pageToSetInut.value = currentPage);
+
+                        pdfPages = pdf.pdfInfo.numPages;
+
+                        for (let i = 1; i <= pdf.pdfInfo.numPages; i++) {
+                            let pageNum = i;
+                            pdf.getPage(i).then(function (page) {
+
+                                let scale = 1.5;
+                                let outputScale = window.devicePixelRatio || 1.1;
+                                outputScale = outputScale != 1 ? outputScale : 1.1;
+
+                                let viewport = page.getViewport(scale);
+
+                                let canvas = document.createElement('canvas');
+                                pdf_content.appendChild(canvas);
+                                let context = canvas.getContext('2d');
+
+                                let Print_unit = 4.19;
+
+                                canvas.width = Math.floor(viewport.width * Print_unit);
+                                canvas.height = Math.floor(viewport.height * Print_unit);
+                                canvas.classList.add('canvasClass');
+                                canvas.style = `aspect-ratio : ${viewport.width / viewport.height}`;
+
+                                let transform = outputScale !== 1
+                                    ? [Print_unit, 0, 0, Print_unit, 0, 0]
+                                    : null;
+
+                                let renderContext = {
+                                    canvasContext: context,
+                                    transform: transform,
+                                    viewport: viewport,
+                                    intent: 'print'
+                                };
+
+                                let renderTask = page.render(renderContext);
+
+                            }, function (reason) {
+                                console.error(reason);
+                            });
+                        }
+                    });
+                }
+
+                function setZoomLevel(event){
+                    const clickedButton = event.currentTarget.dataset.name
+                    let zoomOffset = 10;
+
+                    if(zoomLevel <= 25){
+                        zoomOffset = clickedButton == 'zoomIn' ? 0 : zoomOffset;
+                    }
+                    else if(zoomLevel >= 500){ 
+                        zoomOffset = clickedButton == 'zoomOut' ? 0 : zoomOffset;
+                    }
+
+                    if( clickedButton == "zoomIn"){
+                        zoomLevel = zoomLevel - zoomOffset;
+                    }
+                    else if(clickedButton == "zoomOut"){
+                        zoomLevel = zoomLevel + zoomOffset;
+                    }
+
+                    content_sub.style = `--zoomLevel : ${zoomLevel}% !important;`;
+
+                    const zoomInfo = document.querySelector('.zoomInfo');
+                    zoomInfo.innerText = zoomLevel + '%';
+                }
+
+                content?.addEventListener("scroll", (event) => {
+                    onscroll();
+                });
+
+                function onscroll(){
+                    let scrollHeight = content.scrollHeight;
+                    const addon = currentPage === 1 ? 16 : 4;
+                    const singlePageHeight = (content.scrollHeight / pdfPages) - addon;
+
+                    currentPage =  Math.floor((content.scrollTop / (singlePageHeight)) + 1);
+
+                    const pageToSetInut = document.querySelector('[data-name="pageToSet"]');
+                    pageToSetInut.value = currentPage;
+
+                    const scrollToTopBtn = document.querySelector('.scrollTopBtn');
+                    if(content.scrollTop > 0){
+                        scrollToTopBtn.style = 'display : block !important';
+                    }
+                    else{
+                        scrollToTopBtn.style = '';
+                    }
+
+                    setPageBtnStatus();
+                }
+
+                function onPageChange(event){
+                    const dataName = event.currentTarget.dataset.name;
+
+                    let pageNoToSet = currentPage;
+                    if(dataName == "pageToSet"){
+                        pageNoToSet = event.target.value;
+                    }
+                    else if(dataName == "pagePlus"){
+                        pageNoToSet = currentPage + 1;
+                    }
+                    else if(dataName == "pageMinus"){
+                        pageNoToSet = currentPage - 1;
+                    }
+
+                    if((pageNoToSet > pdfPages || pageNoToSet <= 0) && pageNoToSet != ''){
+                        pageToSet.value = currentPage;
+                    }
+                    else{
+                        if(pageNoToSet != currentPage && pageNoToSet != ''){
+                            const singlePageHeight = content.scrollHeight / pdfPages;
+                            content.scrollTop = (singlePageHeight) * (pageNoToSet - 1);
+                            currentPage = pageNoToSet;
+                        }
+                        pageToSet.value = currentPage;
+                    }
+
+                    setPageBtnStatus();
+
+                }
+
+                function setPageBtnStatus(){
+                    if(currentPage <= 1){
+                        pageMinus.setAttribute('disabled', 'true');
+                    }
+                    else{
+                        pageMinus.removeAttribute('disabled');
+                    }
+
+                    if(currentPage >= pdfPages){
+                        pagePlus.setAttribute('disabled', 'true');
+                    }
+                    else{
+                        pagePlus.removeAttribute('disabled');
+                    }
+                }
+
+                function scrollToTop(){
+                    content.scrollTop = 0;
+                    onscroll();
+                }
+            }
+        }
+        catch (error) {
+            console.error('error in docGenerate JS : ', error.stack);
+            sendInfoToLWC('unknown', false, error);
+        }
+
+    </script> -->
+
+
+    </html>
+</apex:page>

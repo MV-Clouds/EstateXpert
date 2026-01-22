@@ -1,0 +1,62 @@
+<template>
+    <template if:false={showSection}>
+        <div class="mainDiv">
+            <div class="tile-items">
+                <template for:each={shownProcessedListingData} for:item="listing" for:index="index">
+                    <div class="tile-item" key={listing.Id}>
+                        <div class="img-sec">
+                            <img src={listing.media_url} alt="Image 1" draggable="false">
+                        </div>
+                        <div class="content-section">
+                            <div class="data-div">
+                                <div class="name-div"><a data-id={listing.Id}
+                                        onclick={redirectToRecord}>{listing.Name}</a></div>
+                                <template for:each={listing.cardViewFields} for:item="item" for:index="index1">
+                                    <div key={item.fieldName} class="data-item">{item.value}</div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+    <template if:true={showSection}>
+        <div class="noresult">
+            <div class="noresult-class">
+                <p class="tag1">No Result found yet...</p>
+                <p class="tag2">We did not find any result for your search</p>
+            </div>
+        </div>
+    </template>
+    <div class="paginationDiv slds-p-around_medium">
+        <div class="btnCover">
+            <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
+                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                    <path
+                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                </svg>
+                Previous
+            </button>
+
+            <template for:each={pageNumbers} for:item="page">
+                <template if:false={page.isEllipsis}>
+                    <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
+                        {page.number}
+                    </button>
+                </template>
+                <template if:true={page.isEllipsis}>
+                    <span key={page.number} class="pagination-ellipsis">...</span>
+                </template>
+            </template>
+
+            <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                Next
+                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                    <path
+                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</template>

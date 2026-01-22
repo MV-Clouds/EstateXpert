@@ -1,0 +1,76 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+        class="slds-modal slds-fade-in-open slds-modal_small section_css">
+        <div class="slds-modal__container">
+            <div class="slds-modal__close closs_icon_css" onclick={handleDialogueClose}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                    fill="white" />
+                </svg>
+            </div>
+
+            <div class="slds-modal__header blue-header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">New Portal</h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small modalbody" id="modal-content-id-1">
+                <div class="content_body">
+                    <template for:each={fields} for:item="field" for:index="index">
+                        <template if:true={field.isFirst}>
+                            <div class="input-container" key={field.Id}>
+                                <div class="slds-form-element flex_css">
+                                    <label class="label_css">{field.fieldName}</label>
+                                    <div class="slds-form-element__control width_css">
+                                        {field.value}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template if:false={field.isFirst}>
+                            <template if:false={field.isPicklist}>
+                                <div class="input-container" key={field.Id}>
+                                    <div class="slds-form-element flex_css">
+                                        <label class="label_css">
+                                            <abbr if:true={field.isRequired} class="slds-required" title="required">*</abbr>{field.fieldName}
+                                            <lightning-helptext content={field.helpText}></lightning-helptext>
+                                        </label>
+                                        <div class="slds-form-element__control width_css">
+                                            <input type={field.datatype} class="slds-input" placeholder={field.placeHolder} data-field={field.fieldName}
+                                                onkeyup={getTheFieldValue} value={field.value}>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:true={field.isPicklist}>
+                                <div class="input-container" key={field.Id}>
+                                    <div class="slds-form-element flex_css">
+                                        <label class="label_css">
+                                            <abbr if:true={field.isRequired} class="slds-required" title="required">*</abbr>{field.fieldName}
+                                            <lightning-helptext content={field.helpText}></lightning-helptext>
+                                        </label>
+                                        <div class="slds-form-element__control width_css">
+                                            <lightning-combobox
+                                                data-index={index}
+                                                value={field.value}
+                                                placeholder={field.placeHolder}
+                                                options={field.picklistOptions} variant="label-hidden"
+                                                onchange={handleChange} ></lightning-combobox>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </template>
+                </div>
+                <div class="edit_modal_footerbtns">
+                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={handleDialogueClose}>Cancel</button>
+                    <button class="save_btn_css" onclick={savePortalRecord}>Create Portal</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    <template if:true={isSpinner}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+</template>

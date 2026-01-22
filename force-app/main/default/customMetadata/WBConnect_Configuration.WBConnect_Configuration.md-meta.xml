@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>WBConnect_Configuration</label>
+    <protected>true</protected>
+    <values>
+        <field>API_Endpoint__c</field>
+        <value xsi:type="xsd:string">https://graph.facebook.com</value>
+    </values>
+    <values>
+        <field>API_Version__c</field>
+        <value xsi:type="xsd:string">v22.0</value>
+    </values>
+    <values>
+        <field>Access_Token__c</field>
+        <value xsi:type="xsd:string">EAAHUUEnZB9J0BO3zZAfT6cwL7y615j2y6pD5A9Jo8RaPXa4m4WfFZCKs53GmwWze3mX4htkSdv5rroCzN7YlJagpHPGPn223CjA15Rl9UJBCfJ5TQx3HaoQ9MPpPiTvUEZAMFGdDpotrsVYZAYBwmgQbJhSfAfNkCIo4QonIZCCwsBiFxPeESnLiZBlxuaIaaSjfgZDZD</value>
+    </values>
+    <values>
+        <field>Application_Id__c</field>
+        <value xsi:type="xsd:string">514916280628381</value>
+    </values>
+    <values>
+        <field>Business_Account_Id__c</field>
+        <value xsi:type="xsd:string">319254377948692</value>
+    </values>
+    <values>
+        <field>Phone_Number_Id__c</field>
+        <value xsi:type="xsd:string">647008055159531</value>
+    </values>
+</CustomMetadata>

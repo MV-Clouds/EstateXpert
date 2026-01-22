@@ -1,0 +1,436 @@
+:host {
+  --designCurveColor: ;
+  --statusIconColor: ;
+  --duration: 1s;
+}
+
+* {
+  font-family: 'Mulish';
+  user-select: none;
+}
+
+.mainOuterDiv {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  /* background-color: rgba(0, 0, 0, 0.232); */
+  z-index: 9999;
+}
+
+.popupOuterContainer {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #00000033;
+}
+
+.popupContainer {
+  width: 24rem;
+  height: fit-content;
+}
+
+.closeBtnSection {
+  background: transparent;
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px;
+}
+
+.closeBtn {
+  cursor: pointer;
+  transition: all 0.2s linear;
+
+  &:hover {
+    scale: 1.2;
+  }
+}
+
+.popupBody {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0px 0px 35px 0px #00000042;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-color: aliceblue;
+  background-image: url('/resource/newImageandMediaBg');
+}
+
+.topDesingSection {
+  width: 100%;
+  min-height: max-content;
+  height: 9rem;
+  position: relative;
+  overflow: hidden;
+
+}
+
+.curveDesign {
+  position: absolute;
+  top: -100%;
+  left: 0%;
+  transform: translate(-5%, 0%);
+  width: 110%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--designCurveColor);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 2.75rem;
+}
+
+.contentSection {
+  width: 100%;
+  height: fit-content;
+  padding: 2rem 1rem 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start
+}
+
+.ballDesignIcon {
+  width: 4rem;
+  height: 4rem;
+  stroke: var(--statusIconColor);
+  /* margin-bottom: 1.5rem; */
+}
+
+.toastIcon .ballDesignIcon {
+  width: 24px;
+  height: 24px;
+  stroke: var(--statusIconColor);
+}
+
+.titleDiv {
+  font-size: 21px;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  color: #0176d9;
+  /* filter: brightness(0.9); */
+}
+
+.titleDiv h2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.messageDiv,
+.messageDiv1 {
+  font-size: 16px;
+  line-height: 16px;
+  text-align: center;
+  color: #0176d9;
+  opacity: 85%;
+  flex-grow: 1;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.messageDiv p {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  margin: 2rem 0rem;
+}
+
+.messageDiv1 p {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  /* margin: 2rem 0rem; */
+}
+
+/* --- ----- ----- ------ Toast Message CSS ------- ---- ----- ----- */
+
+.toastOuterContainer {
+  position: fixed;
+  z-index: 1000;
+  top: 6rem;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  min-width: fit-content;
+  max-width: 70%;
+  width: fit-content;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toastContainer[data-status=success] {
+  --designCurveColor: #3dd06c33;
+  --statusIconColor: #2E844A;
+}
+
+.toastContainer[data-status=error] {
+  --designCurveColor: #FF000033;
+  --statusIconColor: #FF0000;
+}
+
+.toastContainer[data-status=warning] {
+  --designCurveColor: #FEF7D1;
+  --statusIconColor: #d8a835;
+}
+
+.toastContainer[data-status=info] {
+  --designCurveColor: #68CEFE;
+  --statusIconColor: #03a5f1;
+}
+
+.toastContainer {
+  position: relative;
+  width: fit-content;
+  height: 4.5rem;
+  background-color: white;
+  box-shadow: 0px 0px 35px 0px #00000042;
+  border-radius: 4px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.padStartSection {
+  min-width: 3.75rem;
+  width: 3.75rem;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.curveDesign_Toast {
+  width: 100%;
+  height: 110%;
+  border-radius: 0%;
+  background-color: var(--designCurveColor);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 1rem;
+  flex-direction: row;
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
+
+.contentSection_Toast {
+  flex-grow: 1;
+  min-width: 20rem;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding-inline: 1rem;
+}
+
+.closeBtn_Toast {
+  cursor: pointer;
+  transition: all 0.2s linear;
+
+  &:hover {
+    scale: 1.2;
+  }
+}
+
+.contentSection_Toast .titleDiv {
+  text-align: left;
+  margin-bottom: 0rem;
+}
+
+.contentSection_Toast .messageDiv,
+.contentSection_Toast .messageDiv1 {
+  text-align: left;
+  flex-grow: 0;
+}
+
+.contentSection_Toast h2 {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  word-break: break-word;
+  text-overflow: ellipsis;
+}
+
+.contentSection_Toast p {
+  overflow: hidden;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.confirmButtonOption {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.confirmBtn {
+  width: 9rem;
+  border-radius: 8px;
+  background: #0176d9;
+  cursor: pointer;
+  transition: all linear 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* &:hover{
+      scale: 1.2;
+    } */
+}
+
+.confirmBtn svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.confirmBtn path {
+  /* fill: #F7C752; */
+  fill: white;
+}
+
+.doneBtn {
+  width: 9rem;
+  height: 2.5rem;
+  border-radius: 8px;
+  background: var(--statusIconColor);
+  cursor: pointer;
+  transition: all linear 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+  font-family: 'DM Sans';
+}
+
+.closeBtnSection_Toast {
+  width: 3rem;
+  height: 100%;
+  padding-right: 1rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.durationSlider {
+  position: absolute;
+  bottom: 0%;
+  left: 0%;
+  width: 0%;
+  height: 4px;
+  background-color: var(--designCurveColor);
+}
+
+.sliderStart {
+  animation: slideIn var(--duration) linear 0s 1 forwards;
+}
+
+@keyframes slideIn {
+  0% {
+    width: 0%;
+  }
+
+  100% {
+    width: 100%;
+  }
+}
+
+
+/* Modal CSS */
+
+.closs_icon_css {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  right: -2rem;
+  bottom: 0rem;
+  background: transparent;
+}
+
+.blue-header {
+  background-color: #0176D3;
+  color: white;
+  border-bottom-style: unset;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.modalbody {
+  background-color: aliceblue;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-image: url('/resource/newImageandMediaBg/');
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.delete_modal_font_css {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 26px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 3rem;
+  margin-bottom: 1rem;
+}
+
+.edit_modal_footerbtns {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.delete_btn_css {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 34px;
+  text-align: center;
+  border: 1px solid #bf0a00;
+  padding: 0px 20px;
+  background: #B3261E;
+  color: white;
+  border-radius: 5px;
+}
+
+.cancel_btn_css {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 34px;
+  text-align: center;
+  padding: 0px 20px;
+  background: #FFFFFF;
+  border: 1px solid #0176D3;
+  color: #0176D3;
+  border-radius: 5px;
+}

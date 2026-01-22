@@ -1,0 +1,96 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.modal-wrapper .slds-modal__header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0176D3;
+    color: white;
+    --slds-c-icon-color-foreground-default: white;
+}
+
+.custom-header {
+    border: none;
+    border-radius: 8px 8px 0px 0px;
+}
+
+.custom-content{
+    background-color: aliceblue;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    background-position: bottom;
+    border-radius: 0px 0px 8px 8px;
+}
+
+.slds-modal {
+    --slds-c-input-color-border: #0176D3;
+    --slds-c-modal-radius-border: 8px;
+}
+
+.slds-input {
+    border: 2px solid #0176D3;
+    --slds-c-input-spacing-horizontal-end: 1rem;
+    --slds-c-input-spacing-horizontal-start: 1rem;
+}
+
+.modal-wrapper .slds-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    border-top-style: none !important;
+    background-color: white;
+}
+
+.detail-container {
+    display: flex;
+    width: 100%;
+    gap: 2rem;
+}
+
+.detail {
+    width: 50%;
+}
+
+.input-field {
+    margin-bottom: 1rem;
+}
+
+.pill-content {
+    margin-top: 8px;
+}
+
+.footer-btns {
+    display: flex;
+    justify-content: center;
+}
+
+.footer-btns button {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 34px;
+    text-align: center;
+    border: 1px solid #0176D3;
+    padding: 0px 20px;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+}
+
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    right: -2rem;
+    bottom: 0rem;
+    background: transparent;
+}
+
+.blue-header {
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
+}

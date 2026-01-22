@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Flow Default JSON</label>
+    <protected>true</protected>
+    <values>
+        <field>Collect_purchase_interest_JSON__c</field>
+        <value xsi:type="xsd:string">{
+  &quot;version&quot;: &quot;7.0&quot;,
+    &quot;screens&quot;: [
+        {
+            &quot;id&quot;: &quot;JOIN_NOW&quot;,
+            &quot;title&quot;: &quot;Join Now&quot;,
+            &quot;data&quot;: {},
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextSubheading&quot;,
+                                &quot;text&quot;: &quot;Get early access to our Mega Sales Day deals. Register now!&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;TextInput&quot;,
+                                &quot;name&quot;: &quot;name&quot;,
+                                &quot;label&quot;: &quot;Name&quot;,
+                                &quot;input-type&quot;: &quot;text&quot;,
+                                &quot;required&quot;: true
+                            },
+                            {
+                                &quot;type&quot;: &quot;TextInput&quot;,
+                                &quot;label&quot;: &quot;Email&quot;,
+                                &quot;name&quot;: &quot;email&quot;,
+                                &quot;input-type&quot;: &quot;email&quot;,
+                                &quot;required&quot;: true
+                            },
+                            {
+                                &quot;type&quot;: &quot;OptIn&quot;,
+                                &quot;label&quot;: &quot;I agree to the terms.&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;tos_optin&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;navigate&quot;,
+                                    &quot;payload&quot;: {},
+                                    &quot;next&quot;: {
+                                        &quot;name&quot;: &quot;TERMS_AND_CONDITIONS&quot;,
+                                        &quot;type&quot;: &quot;screen&quot;
+                                    }
+                                }
+                            },
+                            {
+                                &quot;type&quot;: &quot;OptIn&quot;,
+                                &quot;label&quot;: &quot;Keep me up to date about offers and promotions&quot;,
+                                &quot;name&quot;: &quot;marketing_optin&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Continue&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;navigate&quot;,
+                                    &quot;next&quot;: {
+                                        &quot;type&quot;: &quot;screen&quot;,
+                                        &quot;name&quot;: &quot;CATEGORIES&quot;
+                                    },
+                                    &quot;payload&quot;: {
+                                        &quot;name&quot;: &quot;${form.name}&quot;,
+                                        &quot;email&quot;: &quot;${form.email}&quot;,
+                                        &quot;tos_optin&quot;: &quot;${form.tos_optin}&quot;,
+                                        &quot;marketing_optin&quot;: &quot;${form.marketing_optin}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            &quot;id&quot;: &quot;CATEGORIES&quot;,
+            &quot;title&quot;: &quot;Join now&quot;,
+            &quot;data&quot;: {
+                &quot;name&quot;: {
+                    &quot;type&quot;: &quot;string&quot;,
+                    &quot;__example__&quot;: &quot;Example&quot;
+                },
+                &quot;email&quot;: {
+                    &quot;type&quot;: &quot;string&quot;,
+                    &quot;__example__&quot;: &quot;Example&quot;
+                },
+                &quot;tos_optin&quot;: {
+                    &quot;type&quot;: &quot;boolean&quot;,
+                    &quot;__example__&quot;: false
+                },
+                &quot;marketing_optin&quot;: {
+                    &quot;type&quot;: &quot;boolean&quot;,
+                    &quot;__example__&quot;: false
+                }
+            },
+            &quot;terminal&quot;: true,
+            &quot;success&quot;: true,
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextSubheading&quot;,
+                                &quot;text&quot;: &quot;Let us know which category you are interested in?&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;CheckboxGroup&quot;,
+                                &quot;label&quot;: &quot;Select categories&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;categories&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;mobile_phones&quot;,
+                                        &quot;title&quot;: &quot;Mobile phones&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;televisions&quot;,
+                                        &quot;title&quot;: &quot;Televisions&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;home_audio&quot;,
+                                        &quot;title&quot;: &quot;Home audio&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;headphones&quot;,
+                                        &quot;title&quot;: &quot;Headphones &amp; earphones&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;ebook_readers&quot;,
+                                        &quot;title&quot;: &quot;eBook readers&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;cameras&quot;,
+                                        &quot;title&quot;: &quot;Cameras&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;accessories&quot;,
+                                        &quot;title&quot;: &quot;Accessories&quot;
+                                    }
+                                ]
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Confirm&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;complete&quot;,
+                                    &quot;payload&quot;: {
+                                        &quot;name&quot;: &quot;${data.name}&quot;,
+                                        &quot;email&quot;: &quot;${data.email}&quot;,
+                                        &quot;tos_optin&quot;: &quot;${data.tos_optin}&quot;,
+                                        &quot;marketing_optin&quot;: &quot;${data.marketing_optin}&quot;,
+                                        &quot;categories&quot;: &quot;${form.categories}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            &quot;id&quot;: &quot;TERMS_AND_CONDITIONS&quot;,
+            &quot;title&quot;: &quot;Terms and conditions&quot;,
+            &quot;data&quot;: {},
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;TextHeading&quot;,
+                        &quot;text&quot;: &quot;Our Terms&quot;
+                    },
+                    {
+                        &quot;type&quot;: &quot;TextSubheading&quot;,
+                        &quot;text&quot;: &quot;Data usage&quot;
+                    },
+                    {
+                        &quot;type&quot;: &quot;TextBody&quot;,
+                        &quot;text&quot;: &quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus.&quot;
+                    },
+                    {
+                        &quot;type&quot;: &quot;TextSubheading&quot;,
+                        &quot;text&quot;: &quot;Privacy policy&quot;
+                    },
+                    {
+                        &quot;type&quot;: &quot;TextBody&quot;,
+                        &quot;text&quot;: &quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus.&quot;
+                    }
+                ]
+            }
+        }
+    ]
+}</value>
+    </values>
+    <values>
+        <field>Customer_support_JSON__c</field>
+        <value xsi:type="xsd:string">{
+    &quot;version&quot;: &quot;7.0&quot;,
+    &quot;screens&quot;: [
+        {
+            &quot;id&quot;: &quot;DETAILS&quot;,
+            &quot;title&quot;: &quot;Get help&quot;,
+            &quot;data&quot;: {},
+            &quot;terminal&quot;: true,
+            &quot;success&quot;: true,
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextInput&quot;,
+                                &quot;name&quot;: &quot;Name&quot;,
+                                &quot;label&quot;: &quot;Name&quot;,
+                                &quot;input-type&quot;: &quot;text&quot;,
+                                &quot;required&quot;: true
+                            },
+                            {
+                                &quot;type&quot;: &quot;TextInput&quot;,
+                                &quot;label&quot;: &quot;Order number&quot;,
+                                &quot;name&quot;: &quot;Order_number&quot;,
+                                &quot;input-type&quot;: &quot;number&quot;,
+                                &quot;required&quot;: true
+                            },
+                            {
+                                &quot;type&quot;: &quot;RadioButtonsGroup&quot;,
+                                &quot;label&quot;: &quot;Choose a topic&quot;,
+                                &quot;name&quot;: &quot;Choose_a_topic&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_Orders_and_payments&quot;,
+                                        &quot;title&quot;: &quot;Orders and payments&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_Maintenance&quot;,
+                                        &quot;title&quot;: &quot;Maintenance&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;2_Delivery&quot;,
+                                        &quot;title&quot;: &quot;Delivery&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;3_Returns&quot;,
+                                        &quot;title&quot;: &quot;Returns&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;4_Other&quot;,
+                                        &quot;title&quot;: &quot;Other&quot;
+                                    }
+                                ],
+                                &quot;required&quot;: true
+                            },
+                            {
+                                &quot;type&quot;: &quot;TextArea&quot;,
+                                &quot;label&quot;: &quot;Description of issue&quot;,
+                                &quot;required&quot;: false,
+                                &quot;name&quot;: &quot;Description_of_issue&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Done&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;complete&quot;,
+                                    &quot;payload&quot;: {
+                                        &quot;screen_0_Name_0&quot;: &quot;${form.Name}&quot;,
+                                        &quot;screen_0_Order_number_1&quot;: &quot;${form.Order_number}&quot;,
+                                        &quot;screen_0_Choose_a_topic_2&quot;: &quot;${form.Choose_a_topic}&quot;,
+                                        &quot;screen_0_Description_of_issue_3&quot;: &quot;${form.Description_of_issue}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}</value>
+    </values>
+    <values>
+        <field>Default_JSON__c</field>
+        <value xsi:type="xsd:string">{
+    &quot;version&quot;: &quot;7.0&quot;,
+    &quot;screens&quot;: [
+        {
+            &quot;id&quot;: &quot;WELCOME_SCREEN&quot;,
+            &quot;title&quot;: &quot;Welcome&quot;,
+            &quot;terminal&quot;: true,
+            &quot;success&quot;: true,
+            &quot;data&quot;: {},
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;TextHeading&quot;,
+                        &quot;text&quot;: &quot;Hello World&quot;
+                    },
+                    {
+                        &quot;type&quot;: &quot;TextBody&quot;,
+                        &quot;text&quot;: &quot;Let&apos;s start building things!&quot;
+                    },
+                    {
+                        &quot;type&quot;: &quot;Footer&quot;,
+                        &quot;label&quot;: &quot;Complete&quot;,
+                        &quot;on-click-action&quot;: {
+                            &quot;name&quot;: &quot;complete&quot;,
+                            &quot;payload&quot;: {}
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}</value>
+    </values>
+    <values>
+        <field>Get_feedback_JSON__c</field>
+        <value xsi:type="xsd:string">{
+    &quot;version&quot;: &quot;7.0&quot;,
+    &quot;screens&quot;: [
+        {
+            &quot;id&quot;: &quot;RECOMMEND&quot;,
+            &quot;title&quot;: &quot;Feedback 1 of 2&quot;,
+            &quot;data&quot;: {},
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextSubheading&quot;,
+                                &quot;text&quot;: &quot;Would you recommend us to a friend?&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;RadioButtonsGroup&quot;,
+                                &quot;label&quot;: &quot;Choose one&quot;,
+                                &quot;name&quot;: &quot;Choose_one&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_Yes&quot;,
+                                        &quot;title&quot;: &quot;Yes&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_No&quot;,
+                                        &quot;title&quot;: &quot;No&quot;
+                                    }
+                                ],
+                                &quot;required&quot;: true
+                            },
+                            {
+                                &quot;type&quot;: &quot;TextSubheading&quot;,
+                                &quot;text&quot;: &quot;How could we do better?&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;TextArea&quot;,
+                                &quot;label&quot;: &quot;Leave a comment&quot;,
+                                &quot;required&quot;: false,
+                                &quot;name&quot;: &quot;Leave_a_comment&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Continue&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;navigate&quot;,
+                                    &quot;next&quot;: {
+                                        &quot;type&quot;: &quot;screen&quot;,
+                                        &quot;name&quot;: &quot;RATE&quot;
+                                    },
+                                    &quot;payload&quot;: {
+                                        &quot;screen_0_Choose_one_0&quot;: &quot;${form.Choose_one}&quot;,
+                                        &quot;screen_0_Leave_a_comment_1&quot;: &quot;${form.Leave_a_comment}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            &quot;id&quot;: &quot;RATE&quot;,
+            &quot;title&quot;: &quot;Feedback 2 of 2&quot;,
+            &quot;data&quot;: {
+                &quot;screen_0_Choose_one_0&quot;: {
+                    &quot;type&quot;: &quot;string&quot;,
+                    &quot;__example__&quot;: &quot;Example&quot;
+                },
+                &quot;screen_0_Leave_a_comment_1&quot;: {
+                    &quot;type&quot;: &quot;string&quot;,
+                    &quot;__example__&quot;: &quot;Example&quot;
+                }
+            },
+            &quot;terminal&quot;: true,
+            &quot;success&quot;: true,
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextSubheading&quot;,
+                                &quot;text&quot;: &quot;Rate the following: &quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;Dropdown&quot;,
+                                &quot;label&quot;: &quot;Purchase experience&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;Purchase_experience&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_Excellent&quot;,
+                                        &quot;title&quot;: &quot;★★★★★ • Excellent (5/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_Good&quot;,
+                                        &quot;title&quot;: &quot;★★★★☆ • Good (4/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;2_Average&quot;,
+                                        &quot;title&quot;: &quot;★★★☆☆ • Average (3/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;3_Poor&quot;,
+                                        &quot;title&quot;: &quot;★★☆☆☆ • Poor (2/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;4_Very_Poor&quot;,
+                                        &quot;title&quot;: &quot;★☆☆☆☆ • Very Poor (1/5)&quot;
+                                    }
+                                ]
+                            },
+                            {
+                                &quot;type&quot;: &quot;Dropdown&quot;,
+                                &quot;label&quot;: &quot;Delivery and setup&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;Delivery_and_setup&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_Excellent&quot;,
+                                        &quot;title&quot;: &quot;★★★★★ • Excellent (5/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_Good&quot;,
+                                        &quot;title&quot;: &quot;★★★★☆ • Good (4/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;2_Average&quot;,
+                                        &quot;title&quot;: &quot;★★★☆☆ • Average (3/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;3_Poor&quot;,
+                                        &quot;title&quot;: &quot;★★☆☆☆ • Poor (2/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;4_Very_Poor&quot;,
+                                        &quot;title&quot;: &quot;★☆☆☆☆ • Very Poor (1/5)&quot;
+                                    }
+                                ]
+                            },
+                            {
+                                &quot;type&quot;: &quot;Dropdown&quot;,
+                                &quot;label&quot;: &quot;Customer service&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;Customer_service&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_Excellent&quot;,
+                                        &quot;title&quot;: &quot;★★★★★ • Excellent (5/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_Good&quot;,
+                                        &quot;title&quot;: &quot;★★★★☆ • Good (4/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;2_Average&quot;,
+                                        &quot;title&quot;: &quot;★★★☆☆ • Average (3/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;3_Poor&quot;,
+                                        &quot;title&quot;: &quot;★★☆☆☆ • Poor (2/5)&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;4_Very_Poor&quot;,
+                                        &quot;title&quot;: &quot;★☆☆☆☆ • Very Poor (1/5)&quot;
+                                    }
+                                ]
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Done&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;complete&quot;,
+                                    &quot;payload&quot;: {
+                                        &quot;screen_1_Purchase_experience_0&quot;: &quot;${form.Purchase_experience}&quot;,
+                                        &quot;screen_1_Delivery_and_setup_1&quot;: &quot;${form.Delivery_and_setup}&quot;,
+                                        &quot;screen_1_Customer_service_2&quot;: &quot;${form.Customer_service}&quot;,
+                                        &quot;screen_0_Choose_one_0&quot;: &quot;${data.screen_0_Choose_one_0}&quot;,
+                                        &quot;screen_0_Leave_a_comment_1&quot;: &quot;${data.screen_0_Leave_a_comment_1}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}</value>
+    </values>
+    <values>
+        <field>Send_a_survey_JSON__c</field>
+        <value xsi:type="xsd:string">{
+    &quot;version&quot;: &quot;7.0&quot;,
+    &quot;screens&quot;: [
+        {
+            &quot;id&quot;: &quot;QUESTION_ONE&quot;,
+            &quot;title&quot;: &quot;Question 1 of 3&quot;,
+            &quot;data&quot;: {},
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextHeading&quot;,
+                                &quot;text&quot;: &quot;You&apos;ve found the perfect deal, what do you do next?&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;CheckboxGroup&quot;,
+                                &quot;label&quot;: &quot;Choose all that apply:&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;Choose_all_that_apply_0&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_Buy_it_right_away&quot;,
+                                        &quot;title&quot;: &quot;Buy it right away&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_Check_reviews_before_buying&quot;,
+                                        &quot;title&quot;: &quot;Check reviews before buying&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;2_Share_it_with_friends_family&quot;,
+                                        &quot;title&quot;: &quot;Share it with friends + family&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;3_Buy_multiple_while_its_cheap&quot;,
+                                        &quot;title&quot;: &quot;Buy multiple, while its cheap&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;4_None_of_the_above&quot;,
+                                        &quot;title&quot;: &quot;None of the above&quot;
+                                    }
+                                ]
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Continue&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;navigate&quot;,
+                                    &quot;next&quot;: {
+                                        &quot;type&quot;: &quot;screen&quot;,
+                                        &quot;name&quot;: &quot;QUESTION_TWO&quot;
+                                    },
+                                    &quot;payload&quot;: {
+                                        &quot;screen_0_Choose_all_that_apply_0&quot;: &quot;${form.Choose_all_that_apply_0}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            &quot;id&quot;: &quot;QUESTION_TWO&quot;,
+            &quot;title&quot;: &quot;Question 2 of 3&quot;,
+            &quot;data&quot;: {
+                &quot;screen_0_Choose_all_that_apply_0&quot;: {
+                    &quot;type&quot;: &quot;array&quot;,
+                    &quot;items&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;__example__&quot;: []
+                }
+            },
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextHeading&quot;,
+                                &quot;text&quot;: &quot;Its your birthday in two weeks, how might you prepare?&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;RadioButtonsGroup&quot;,
+                                &quot;label&quot;: &quot;Choose one:&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;Choose_one_0&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_Buy_something_new&quot;,
+                                        &quot;title&quot;: &quot;Buy something new&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_Wear_the_same_as_usual&quot;,
+                                        &quot;title&quot;: &quot;Wear the same, as usual&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;2_Look_for_a_deal_online&quot;,
+                                        &quot;title&quot;: &quot;Look for a deal online&quot;
+                                    }
+                                ]
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Continue&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;navigate&quot;,
+                                    &quot;next&quot;: {
+                                        &quot;type&quot;: &quot;screen&quot;,
+                                        &quot;name&quot;: &quot;QUESTION_THREE&quot;
+                                    },
+                                    &quot;payload&quot;: {
+                                        &quot;screen_1_Choose_one_0&quot;: &quot;${form.Choose_one_0}&quot;,
+                                        &quot;screen_0_Choose_all_that_apply_0&quot;: &quot;${data.screen_0_Choose_all_that_apply_0}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            &quot;id&quot;: &quot;QUESTION_THREE&quot;,
+            &quot;title&quot;: &quot;Question 3 of 3&quot;,
+            &quot;data&quot;: {
+                &quot;screen_1_Choose_one_0&quot;: {
+                    &quot;type&quot;: &quot;string&quot;,
+                    &quot;__example__&quot;: &quot;Example&quot;
+                },
+                &quot;screen_0_Choose_all_that_apply_0&quot;: {
+                    &quot;type&quot;: &quot;array&quot;,
+                    &quot;items&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;__example__&quot;: []
+                }
+            },
+            &quot;terminal&quot;: true,
+            &quot;success&quot;: true,
+            &quot;layout&quot;: {
+                &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+                &quot;children&quot;: [
+                    {
+                        &quot;type&quot;: &quot;Form&quot;,
+                        &quot;name&quot;: &quot;form&quot;,
+                        &quot;children&quot;: [
+                            {
+                                &quot;type&quot;: &quot;TextHeading&quot;,
+                                &quot;text&quot;: &quot;What&apos;s the best gift for a friend?&quot;
+                            },
+                            {
+                                &quot;type&quot;: &quot;CheckboxGroup&quot;,
+                                &quot;label&quot;: &quot;Choose all that apply:&quot;,
+                                &quot;required&quot;: true,
+                                &quot;name&quot;: &quot;Choose_all_that_apply_0&quot;,
+                                &quot;data-source&quot;: [
+                                    {
+                                        &quot;id&quot;: &quot;0_A_gift_voucher&quot;,
+                                        &quot;title&quot;: &quot;A gift voucher&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;1_A_new_outfit&quot;,
+                                        &quot;title&quot;: &quot;A new outfit &quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;2_A_boquet_of_flowers&quot;,
+                                        &quot;title&quot;: &quot;A bouquet of flowers&quot;
+                                    },
+                                    {
+                                        &quot;id&quot;: &quot;3_A_meal_out_together&quot;,
+                                        &quot;title&quot;: &quot;A meal out together&quot;
+                                    }
+                                ]
+                            },
+                            {
+                                &quot;type&quot;: &quot;Footer&quot;,
+                                &quot;label&quot;: &quot;Done&quot;,
+                                &quot;on-click-action&quot;: {
+                                    &quot;name&quot;: &quot;complete&quot;,
+                                    &quot;payload&quot;: {
+                                        &quot;screen_0_Choose_all_that_apply_0&quot;: &quot;${data.screen_0_Choose_all_that_apply_0}&quot;,
+                                        &quot;screen_1_Choose_one_0&quot;: &quot;${data.screen_1_Choose_one_0}&quot;,
+                                        &quot;screen_2_Choose_all_that_apply_0&quot;: &quot;${form.Choose_all_that_apply_0}&quot;
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}</value>
+    </values>
+</CustomMetadata>

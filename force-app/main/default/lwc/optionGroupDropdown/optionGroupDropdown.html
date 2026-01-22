@@ -1,0 +1,60 @@
+<template>
+    <div class="slds-form-element" onclick={outsideClick}>
+        <label class="slds-form-element__label" if:true={headerLabel}>{headerLabel}</label>
+        <div class="slds-combobox_container">
+            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" aria-expanded={isOpen}
+                aria-haspopup="listbox" role="combobox" style="position: relative;">
+                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none"
+                    onclick={toggleDropdown}>
+                    <input type="text" class="slds-input" readonly value={selectedLabel} placeholder="Select a value" />
+                    <lightning-icon icon-name="utility:down" alternative-text="Show More" size="xx-small"
+                        class="slds-input__icon slds-input__icon_right"></lightning-icon>
+                </div>
+
+                <div if:true={isOpen} class="dropdown-option">
+                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+
+                        <!-- Ungrouped Options -->
+                        <template for:each={ungroupedOptions} for:item="opt">
+                            <li key={opt.id} class="slds-listbox__item" role="presentation" onclick={handleSelect}
+                                data-value={opt.value}>
+                                <div class="slds-listbox__option slds-listbox__option_plain" role="option">
+                                    <template if:true={opt.selected}>
+                                        <lightning-icon icon-name="utility:check" alternative-text="Selected"
+                                            size="xx-small" class="slds-m-right_x-small check-icon"></lightning-icon>
+                                    </template>
+                                    {opt.label}
+                                </div>
+                            </li>
+                        </template>
+
+
+                        <!-- Grouped Titles and Items -->
+                        <template for:each={groupedOptions} for:item="group">
+                            <!-- Group Label -->
+                            <li key={group.id} class="slds-listbox__item">
+                                <div class="slds-has-divider_top-space slds-p-around_x-small slds-text-title_caps">
+                                    {group.groupName}
+                                </div>
+                            </li>
+                            <!-- Group Children -->
+                            <template for:each={group.childs} for:item="child">
+                                <li key={child.id} class="slds-listbox__item" role="presentation" onclick={handleSelect}
+                                    data-value={child.value}>
+                                    <div class="slds-listbox__option slds-listbox__option_plain" role="option">
+                                        <template if:true={child.selected}>
+                                            <lightning-icon icon-name="utility:check" size="xx-small"
+                                                class="slds-m-right_x-small check-icon"></lightning-icon>
+                                        </template>
+                                        {child.label}
+                                    </div>
+                                </li>
+                            </template>
+                        </template>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

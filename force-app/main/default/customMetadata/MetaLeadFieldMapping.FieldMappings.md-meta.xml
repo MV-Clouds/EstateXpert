@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>FieldMappings</label>
+    <protected>false</protected>
+    <values>
+        <field>FieldMappingJson__c</field>
+        <value xsi:type="xsd:string">[{&quot;metaField&quot;:&quot;full_name&quot;,&quot;salesforceField&quot;:&quot;LastName&quot;},{&quot;metaField&quot;:&quot;email&quot;,&quot;salesforceField&quot;:&quot;Email&quot;},{&quot;metaField&quot;:&quot;phone_number&quot;,&quot;salesforceField&quot;:&quot;Phone&quot;},{&quot;metaField&quot;:&quot;city&quot;,&quot;salesforceField&quot;:&quot;City&quot;},{&quot;metaField&quot;:&quot;company_name&quot;,&quot;salesforceField&quot;:&quot;Company&quot;},{&quot;metaField&quot;:&quot;country&quot;,&quot;salesforceField&quot;:&quot;Country&quot;},{&quot;metaField&quot;:&quot;state&quot;,&quot;salesforceField&quot;:&quot;State&quot;}]</value>
+    </values>
+</CustomMetadata>

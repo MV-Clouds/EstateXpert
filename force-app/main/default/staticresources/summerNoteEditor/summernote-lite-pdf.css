@@ -1,0 +1,383 @@
+/*!
+ * 
+ * Super simple wysiwyg editor v0.8.18
+ * https://summernote.org
+ * 
+ * 
+ * Copyright 2013- Alan Hong. and other contributors
+ * summernote may be freely distributed under the MIT license.
+ * 
+ * Date: 2020-05-20T18:09Z
+ * 
+ */
+ @font-face {
+    font-family: "summernote";
+    font-style: normal;
+    font-weight: 400;
+    font-display: auto;
+    src: url(font/summernote.eot);
+    src: url(font/summernote.eot?#iefix) format("embedded-opentype"), url(font/summernote.woff2) format("woff2"), url(font/summernote.woff) format("woff"), url(font/summernote.ttf) format("truetype")
+}
+
+body{
+    font-size : 0.8125rem
+}
+
+[class^=note-icon]:before,
+[class*=" note-icon"]:before {
+    display: inline-block;
+    font-family: summernote;
+    font-style: normal;
+    font-size: inherit;
+    text-decoration: inherit;
+    text-rendering: auto;
+    text-transform: none;
+    vertical-align: middle;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    speak: none
+}
+
+.note-frame {
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    color: #000;
+    font-family: sans-serif;
+    border-radius: 0px
+}
+
+
+.note-editor {
+    position: relative
+}
+
+.note-editor .note-editing-area {
+    position: relative;
+}
+
+.note-editor .note-editing-area .note-editable {
+    outline: none;
+}
+
+.note-editor .note-editing-area .note-editable sup {
+    vertical-align: super
+}
+
+.note-editor .note-editing-area .note-editable sub {
+    vertical-align: sub
+}
+
+.note-editor .note-editing-area .note-editable img.note-float-left {
+    margin-right: 10px
+}
+
+.note-editor .note-editing-area .note-editable img.note-float-right {
+    margin-left: 10px
+}
+
+.note-editor.note-frame,
+.note-editor.note-airframe {
+    border: 1px solid #00000032
+}
+
+.note-editor.note-frame.codeview .note-editing-area .note-editable,
+.note-editor.note-airframe.codeview .note-editing-area .note-editable {
+    display: none
+}
+
+.note-editor.note-frame .note-editing-area,
+.note-editor.note-airframe .note-editing-area {
+    overflow: hidden
+}
+
+.note-editor.note-frame .note-editing-area .note-editable,
+.note-editor.note-airframe .note-editing-area .note-editable {
+    padding: 10px;
+    overflow: auto;
+    word-wrap: break-word
+}
+
+.note-editor.note-frame .note-editing-area .note-editable[contenteditable=false],
+.note-editor.note-airframe .note-editing-area .note-editable[contenteditable=false] {
+    background-color: #8080801d
+}
+
+.note-editor.note-airframe .note-editing-area .note-editable {
+    padding: 0
+}
+
+.note-editor .note-editing-area .note-editable table {
+    width: 99% !important;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.note-editor .note-editing-area .note-editable table td,
+.note-editor .note-editing-area .note-editable table th {
+    border: 1px solid #ececec;
+    padding: 5px 3px
+}
+
+.note-editor .note-editing-area .note-editable a {
+    background-color: inherit;
+    text-decoration: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    color: #337ab7
+}
+
+.note-editor .note-editing-area .note-editable a:hover,
+.note-editor .note-editing-area .note-editable a:focus {
+    color: #23527c;
+    text-decoration: underline;
+    outline: 0
+}
+
+.note-editor .note-editing-area .note-editable figure {
+    margin: 0
+}
+
+/* ============ ==============  DocGenius - Custom CSS ============ ============= ========= ============ */
+            h1, h2, h3, h4, h5, h6, p, ol, ul, dl, fieldset{
+                margin: 0;
+                padding: 0;
+            }
+            .note-editor.note-frame h1{
+                font-size: 34px;
+                font-weight: 600;
+                line-height: 34px;
+                display: block;
+            }
+            .note-editor.note-frame h2{
+                font-size: 30px;
+                font-weight: 600;
+                line-height: 32px;
+                display: block;
+            }
+            .note-editor.note-frame h3{
+                font-size: 24px;
+                font-weight: 600;
+                line-height: 26px;
+                display: block;
+            }
+            .note-editor.note-frame h4{
+                font-size: 20px;
+                font-weight: 600;
+                line-height: 22px;
+                display: block;
+            }
+            .note-editor.note-frame h5{
+                font-size: 18px;
+                font-weight: 600;
+                line-height: 20px;
+                display: block;
+            }
+            .note-editor.note-frame h6{
+                font-size: 16px;
+                font-weight: 600;
+                line-height: 18px;
+                display: block;
+            }
+            .note-editor.note-frame ul{
+                list-style-type: disc !important;
+            }
+            .note-editor.note-frame ul ul{
+                list-style-type: circle !important;
+            }
+            .note-editor.note-frame ul ul ul{
+                list-style-type: square !important;
+            }
+            .note-editor.note-frame ul ul ul ul{
+                list-style-type: disc !important;
+            }
+            .note-editor.note-frame ul ul ul ul ul{
+                list-style-type: circle !important;
+            }
+            .note-editor.note-frame ul ul ul ul ul ul{
+                list-style-type: square !important;
+            }
+            .note-editor.note-frame ul,
+            .note-editor.note-frame ol{
+                display: block !important;
+                margin-block-start: unset !important;
+                margin-block-end: unset !important;
+                margin-inline-start: 0px !important;
+                margin-inline-end: 0px !important;
+                padding-inline-start: 52px !important;
+                unicode-bidi: isolate !important;
+                list-style: inside;
+                overflow: hidden;
+                max-height: 100%;
+            }
+            .note-editor.note-frame ol{
+                list-style-type: decimal !important;
+            }
+            .note-editor.note-frame ol ol{
+                list-style-type: upper-roman !important;
+            }
+            .note-editor.note-frame ol ol ol{
+                list-style-type: upper-alpha !important;
+            }
+            .note-editor.note-frame ol ol ol ol{
+                list-style-type: lower-roman !important;
+            }
+            .note-editor.note-frame ol ol ol ol ol{
+                list-style-type: lower-alpha !important;
+            }
+            .note-editor.note-frame li{
+                display: list-item !important;
+                text-align: -webkit-match-parent;
+                unicode-bidi: isolate !important;
+            }
+            .note-editor.note-frame ::marker{
+                unicode-bidi: isolate;
+                font-variant-numeric: tabular-nums;
+                text-transform: none;
+                text-indent: 0px !important;
+                text-align: start !important;
+                text-align-last: start !important;
+            }
+            .note-popover .popover-content .note-style .dropdown-style blockquote,
+            .note-editor .note-toolbar .note-style .dropdown-style blockquote,
+            .note-editor.note-frame blockquote{
+                border-left: 5px solid #f86466;
+                background: white;
+                padding: 10px 20px;
+                margin: 0 0 20px;
+                font-size: 17.5px;
+                display: block;
+                margin-block-start: 1em;
+                margin-block-end: 1em;
+                margin-inline-start: 40px;
+                margin-inline-end: 40px;
+                unicode-bidi: isolate;
+            }
+            .note-popover .popover-content .note-style .dropdown-style pre,
+            .note-editor .note-toolbar .note-style .dropdown-style pre,
+            .note-editor.note-frame pre {
+                display: block;
+                padding: 9.5px;
+                margin: 0 0 10px;
+                font-size: 13px;
+                line-height: 1.42857143;
+                color: #333;
+                word-break: break-all;
+                word-wrap: break-word;
+                background-color: #f5f5f5;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+            }
+                /* full editor container css */
+            .note-editor.note-frame,
+            .note-editor.note-airframe {
+                padding-top: 0px !important;
+                border: none !important;
+                width: 100%;
+                max-width: 100% !important;
+                /* height: 100%; */
+                height: max-content !important;
+                overflow: hidden;
+                /* display: flex; */
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                position: static !important;
+            }
+            .headerFooterSection .note-editor.note-frame,
+            .headerFooterSection .note-editor.note-airframe{
+                height: fit-content !important;
+                padding-bottom: 0rem;
+            }
+
+                    /* editing area outer div  */
+            .note-editor .note-editing-area {
+                /* max-width: calc(100% - 35rem - 1.25rem); */
+                max-width: 100% !important;
+                width: 100% !important;
+                /* margin-right: calc(30% + 1.5rem); */
+                /* height: calc(100% - 0.5rem ); */
+                height: 100% !important;
+                /* flex-grow: 1; */
+                /* max-height: max-content; */
+                /* min-height: 80%; */
+                max-height: max-content!important;
+                overflow: auto !important;
+                overflow-y: scroll !important;
+                /* scrollbar-width: thin; */
+                scrollbar-width: none !important;
+                scrollbar-color: #00a4f1 #ff000000;
+                padding: 0 !important;
+                /* padding-bottom: 200px !important; */
+            }
+            /* Main Editable area */
+            .note-editor.note-frame .note-editing-area .note-editable,
+            .note-editor.note-airframe .note-editing-area .note-editable {
+                /* height: max-content; */
+                height: 100% !important;
+                min-height: max-content !important;
+                /* min-height: 100%; */
+                background-color: white;
+                /* padding: 70px 67px 48px;
+                width: 792px; */
+                padding: 0px !important;
+                width: 100% !important;
+                max-width : 100% !important;
+                margin-inline: auto;
+                margin-bottom: 0px !important;
+                /* box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; */
+                /* border: 1px solid #D1D1D1; */
+                border-radius: 0px;
+                background: transparent;
+            }
+            .headerEditor.note-editor.note-frame .note-editing-area .note-editable,
+            .footerEditor.note-editor.note-frame .note-editing-area .note-editable{
+                height:  max-content !important;
+                min-height: max-content !important;
+                background-color: white;
+                padding: 0px !important;
+                width: 100% !important;
+                max-width : 100% !important;
+                box-shadow: none;
+                border-radius: 0px !important;
+                margin-bottom: 0px !important;
+                line-height: auto !important;
+                word-break: break-all;
+                overflow: hidden !important;
+            }
+            .note-editor .note-editing-area .note-editable table td,
+            .note-editor .note-editing-area .note-editable table th {
+                border-width: 0.5px;
+                border-style: solid;
+                border-color: #808080;
+            }
+            /* table Header  */
+            .note-editor .note-editing-area .note-editable table thead tr{
+                background-color: #dcdcdc;
+            }
+            .note-editor.note-frame hr{
+                page-break-after: always;
+                margin: 0px !important;
+                border-top: none !important;
+                border-bottom: none !important;
+                background: transparent;
+                height: 0px !important;
+                visibility: hidden !important;
+            }
+
+/* ========= =======  ========= ============ Media Query ======= ======== ========= ========= ============ */
+@media only screen and (max-width: 1440px){
+    .note-editor .note-editing-area {
+        max-width: calc(100% - 30rem - 1.25rem);
+    }
+}
+@media only screen and (max-width: 1350px){
+    .note-editor .note-editing-area {
+        margin-right: 0%;
+        margin-inline: auto;
+        max-width: calc(100% - 2rem);
+    }
+    .note-custom_title{
+        display: none !important;
+    }
+}

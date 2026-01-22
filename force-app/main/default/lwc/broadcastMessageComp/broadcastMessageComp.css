@@ -1,0 +1,380 @@
+* {
+    font-family: "Mulish";
+    user-select: none;
+}
+
+.wrapper {
+    background-color: #ffffff;
+    padding: 1rem;
+    padding-bottom: 1rem;
+    height: calc(100% + 1.5rem);
+    margin-top: -0.8rem;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+}
+
+
+.back-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    overflow: auto;
+    flex-grow: 1;
+    scrollbar-width: none;
+    padding: 1rem;
+}
+
+.comboboxdiv {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    margin: 1rem;
+}
+
+.internal-comboboxdiv {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.comboboxdiv lightning-combobox,
+.comboboxdiv div {
+    width: 100%;
+}
+
+.pagination-container {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    justify-content: center;
+    padding-bottom: 1rem;
+}
+
+.pagination-button {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    color: #333;
+    padding: 6px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 0.3rem;
+    font-size: 12px;
+}
+
+.pagination-button svg {
+    fill: black;
+    width: 0.7rem;
+    height: 0.7rem;
+}
+
+.pagination-button:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-button.active {
+    background-color: #0070d2;
+    color: white;
+    border-color: #0070d2;
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+span {
+    margin: 0 5px;
+}
+
+.pagination-button:first-child,
+.pagination-button:last-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-column {
+    width: 40px;
+}
+
+/* Modal CSS */
+
+
+.modal-content {
+    padding: 0;
+    border-radius: 5px;
+    overflow: hidden;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+}
+
+
+.modal-heading {
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
+}
+
+.modal-heading h1 {
+    font-size: 20px;
+
+}
+
+.modal-body {
+    padding: 1rem 1rem 0 1rem;
+}
+
+.modal-body-content {
+    width: 100%;
+    display: grid;
+    height: -webkit-fill-available;
+}
+
+.save-btn {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 34px;
+    text-align: center;
+    border: 1px solid #0176D3;
+    padding: 0px 20px;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+}
+
+.close-btn {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 34px;
+    text-align: center;
+    padding: 0px 20px;
+    background: #FFFFFF;
+    border: 1px solid #0176D3;
+    color: #0176D3;
+    border-radius: 5px;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    border-radius: 0rem 0rem 0.25rem 0.25rem;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 1rem;
+}
+
+.empty-state {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-records-message {
+    height: 80%;
+}
+
+.empty-state__content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.empty-state__content .empty-state__icon {
+    width: 25%;
+    height: 100%;
+}
+
+.empty-state__content .empty-state__message {
+    color: #3a9bea;
+    font-size: 25px;
+    font-weight: 500;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.main_content_cls {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    line-height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+    min-width: max-content;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #acacac;
+    ;
+}
+
+.btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.main_header_cls {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.details_cls {
+    padding: 0 42px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #636363;
+}
+
+.sub_main_header_css {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header_block_css {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 40.16px;
+    text-align: left;
+    gap: 15px;
+    color: #131314;
+}
+
+.svg_back_icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.table-content {
+    overflow: auto;
+    border-radius: 8px;
+    height: 80%;
+    background-color: white;
+    margin: 0 16px 16px 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+.table-content .checkbox,
+.table-content .sno {
+    width: 10%;
+}
+
+.table-content .name,
+.table-content .phone,
+.table-content .email {
+    width: 30%;
+}
+
+.table-content .slds-table th,
+.table-content .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 45px;
+}
+
+.table-content .slds-table th {
+    background-color: #0176D3;
+    color: white;
+}
+
+.table-content tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.table-content table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 98;
+}
+
+.table-content table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+.table-content .slds-table_resizable-cols thead th,
+.table-content .slds-table--resizable-cols thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+}
+
+.truncate_css {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 1px;
+}
+
+.truncate_css div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

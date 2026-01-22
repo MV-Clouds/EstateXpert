@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Property Finder</label>
+    <protected>false</protected>
+    <values>
+        <field>Portal_Record__c</field>
+        <value xsi:type="xsd:string">[
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;age&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Items Enum: \&quot;central-ac\&quot; \&quot;built-in-wardrobes\&quot; \&quot;kitchen-appliances\&quot; \&quot;security\&quot; \&quot;concierge\&quot; \&quot;private-gym\&quot; \&quot;shared-gym\&quot; \&quot;private-jacuzzi\&quot; \&quot;shared-spa\&quot; \&quot;covered-parking\&quot; \&quot;maids-room\&quot; \&quot;barbecue-area\&quot; \&quot;shared-pool\&quot; \&quot;childrens-pool\&quot; \&quot;private-garden\&quot; \&quot;private-pool\&quot; \&quot;view-of-water\&quot; \&quot;walk-in-closet\&quot; \&quot;lobby-in-building\&quot; \&quot;electricity\&quot; \&quot;waters\&quot; \&quot;sanitation\&quot; \&quot;no-services\&quot; \&quot;fixed-phone\&quot; \&quot;fibre-optics\&quot; \&quot;flood-drainage\&quot; \&quot;balcony\&quot; \&quot;networked\&quot; \&quot;view-of-landmark\&quot; \&quot;dining-in-building\&quot; \&quot;conference-room\&quot; \&quot;study\&quot; \&quot;maid-service\&quot; \&quot;childrens-play-area\&quot; \&quot;pets-allowed\&quot; \&quot;vastu-compliant\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;central-ac&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;amenities&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;This is the public profile id of the user.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;assignedTo.id&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Date&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;2019-08-24&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;availableFrom&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: &quot;String&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;none\&quot; \&quot;1\&quot; \&quot;2\&quot; \&quot;3\&quot; \&quot;4\&quot; \&quot;5\&quot; \&quot;6\&quot; \&quot;7\&quot; \&quot;8\&quot; \&quot;9\&quot; \&quot;10\&quot; \&quot;11\&quot; \&quot;12\&quot; \&quot;13\&quot; \&quot;14\&quot; \&quot;15\&quot; \&quot;16\&quot; \&quot;17\&quot; \&quot;18\&quot; \&quot;19\&quot; \&quot;20\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;none&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;bathrooms&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: &quot;String&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;studio\&quot; \&quot;1\&quot; \&quot;2\&quot; \&quot;3\&quot; \&quot;4\&quot; \&quot;5\&quot; \&quot;6\&quot; \&quot;7\&quot; \&quot;8\&quot; \&quot;9\&quot; \&quot;10\&quot; \&quot;11\&quot; \&quot;12\&quot; \&quot;13\&quot; \&quot;14\&quot; \&quot;15\&quot; \&quot;16\&quot; \&quot;17\&quot; \&quot;18\&quot; \&quot;19\&quot; \&quot;20\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;studio&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;bedrooms&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;residential\&quot; \&quot;commercial\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;residential&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;category&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Date&quot;,
+    &quot;Data_Type__c&quot;: &quot;Datetime&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;2019-08-24T14:15:22Z&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;compliance.advertisementLicenseIssuanceDate&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Required when uaeEmirate = Dubai&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;compliance.listingAdvertisementNumber&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;rera\&quot; \&quot;dtcm\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;rera&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;compliance.type&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Description__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Additional details aboutthe property, areaand other information in English.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;compliance.userConfirmedDataIsCorrect&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;This is the public profile id of the user&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;createdBy.id&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;description.ar&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;description.en&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;developer&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;fully-finished\&quot; \&quot;semi-finished\&quot; \&quot;unfinished\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;fully-finished&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;finishingType&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: &quot;String&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;floorNumber&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;unfurnished\&quot; \&quot;semi-furnished\&quot; \&quot;furnished\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;unfurnished&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;furnishingType&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;hasGarden&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;hasKitchen&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;hasParkingOnSite&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;location.id&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;mojDeedLocationDescription&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;numberOfFloors&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;ownerName&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;parkingSlots&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: &quot;String&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;plotNumber&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;plotSize&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.amounts.daily&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.amounts.monthly&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.amounts.sale&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.amounts.weekly&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.amounts.yearly&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Required when price.type = sale&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.downpayment&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.minimalRentalPeriod&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.mortgage.comment&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.mortgage.enabled&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.numberOfCheques&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.numberOfMortgageYears&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.obligation.comment&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.obligation.enabled&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.onRequest&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Items Enum: \&quot;installments\&quot; \&quot;cash\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;installments&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.paymentMethods&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;yearly\&quot; \&quot;sale\&quot; \&quot;monthly\&quot; \&quot;daily\&quot; \&quot;weekly\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;yearly&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.type&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.utilitiesInclusive&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.valueAffected.comment&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price.valueAffected.enabled&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;completed\&quot; \&quot;off_plan\&quot; \&quot;completed_primary\&quot; \&quot;off_plan_primary\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;completed&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;projectStatus&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;reference&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;size&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;North\&quot; \&quot;South\&quot; \&quot;West\&quot; \&quot;East\&quot; \&quot;Northeast\&quot; \&quot;Northwest\&quot; \&quot;Southeast\&quot; \&quot;Southwest\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;North&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;street.direction&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;street.width&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;title.ar&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;title.en&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;compound\&quot; \&quot;whole-building\&quot; \&quot;factory\&quot; \&quot;land\&quot; \&quot;rest-house\&quot; \&quot;apartment\&quot; \&quot;shop\&quot; \&quot;warehouse\&quot; \&quot;chalet\&quot; \&quot;office-space\&quot; \&quot;full-floor\&quot; \&quot;villa\&quot; \&quot;farm\&quot; \&quot;show-room\&quot; \&quot;bulk-sale-unit\&quot; \&quot;restaurant\&quot; \&quot;roof\&quot; \&quot;half-floor\&quot; \&quot;twin-house\&quot; \&quot;cabin\&quot; \&quot;bulk-rent-unit\&quot; \&quot;ivilla\&quot; \&quot;co-working-space\&quot; \&quot;hotel-apartment\&quot; \&quot;retail\&quot; \&quot;duplex\&quot; \&quot;townhouse\&quot; \&quot;staff-accommodation\&quot; \&quot;medical-facility\&quot; \&quot;palace\&quot; \&quot;penthouse\&quot; \&quot;clinic\&quot; \&quot;cafeteria\&quot; \&quot;bungalow\&quot; \&quot;labor-camp\&quot; \&quot;business-center\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;compound&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;type&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;dubai\&quot; \&quot;abu_dhabi\&quot; \&quot;northern_emirates\&quot;&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;dubai&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;uaeEmirate&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: null,
+    &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;unitNumber&quot;
+  }
+]</value>
+    </values>
+    <values>
+        <field>Portal_Value__c</field>
+        <value xsi:type="xsd:string">Propertyfinder</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,24 @@
+<template>
+    <!-- Category LWC -->
+    <template if:true={showTemplateCategory}>
+        <c-wb-template-category 
+            tab-name={selectedTabName}
+            selected-option={selectedOption}
+            selected-tab={selectedTab}
+            active-tab={activeTab}
+            onnext={handleNext}>
+        </c-wb-template-category>
+    </template>
+
+    <!-- Create or Edit Template Page -->
+    <template if:true={showCreateTemplateTest}>
+        <c-wb-create-template-page 
+            tab-name={selectedTabName}
+            selected-option={selectedOption}
+            selected-tab={selectedTab}
+            active-tab={activeTab}
+            onprevious={handlePrevious}
+            edittemplateid={edittemplateid}>
+        </c-wb-create-template-page>
+    </template>
+</template>

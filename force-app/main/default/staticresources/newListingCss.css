@@ -1,0 +1,13 @@
+.fields-cover .form-fields .fix-slds-input_faux {
+    line-height: max(2.2rem, calc(1.2em - 2px));
+}
+
+.fields-cover .form-fields .slds-input{
+    height: 2.2rem;
+}
+
+.fields-cover .record-type-div .slds-combobox__input{
+    height: 2.4rem;
+    display: flex;
+    align-items: center;
+}

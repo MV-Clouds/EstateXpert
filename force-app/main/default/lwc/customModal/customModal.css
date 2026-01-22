@@ -1,0 +1,125 @@
+*{
+    font-family: 'Mulish';
+    user-select: none;
+    --slds-c-icon-color-foreground-default : white !important;
+    --slds-c-modal-footer-color-background : white !important
+}
+
+.custom-modal-header {
+    background-color: #0070d2 !important;
+    color: white;
+    border: none;
+}
+
+.custom-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 25px;
+}
+
+.custom-input-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    line-height: 1;
+}
+
+.label-container {
+    flex: 0 0 35%;
+    margin-right: 15px;
+    /* margin-top: 2%; */
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.10000000149011612px;
+}
+
+.input-container {
+    flex: 1;
+}
+
+.red{
+    color: red;
+}
+
+.cancel-btn{
+    border: none;
+    background: #FFFFFF;
+    border: 1px solid #0176D3;
+    color: #0176D3;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.10000000149011612px;
+    text-align: center;
+    padding: 7px 20px;
+}
+
+
+.save-btn{
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.10000000149011612px;
+    text-align: center;
+    padding: 7px 20px;
+}
+
+.main_content_cls {
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+}
+
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    right: -2rem;
+    bottom: 0rem;
+    background: transparent;
+}
+
+.blue-header {
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+}
+
+.cancel_btn_css {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 34px;
+    text-align: center;
+    padding: 0px 20px;
+    background: #FFFFFF;
+    border: 1px solid #0176D3;
+    color: #0176D3;
+    border-radius: 5px;
+}
+
+.save_btn_css {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 34px;
+    text-align: center;
+    border: 1px solid #0176D3;
+    padding: 0px 20px;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+}

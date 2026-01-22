@@ -1,0 +1,167 @@
+<template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+    <div class="real-estate-wrapper">
+        <div class="sub-container">
+            <!-- Error Handling -->
+            <template if:true={error}>
+                <div class="error-message">
+                    <lightning-icon icon-name="utility:error" size="small"
+                        class="slds-m-right_x-small"></lightning-icon>
+                    Error loading data. Please try again later.
+                </div>
+            </template>
+
+            <!-- Header -->
+            <header class="real-estate-header">
+                <div class="offer-header">
+                    <h1>Offer Management</h1>
+                </div>
+            </header>
+
+            <!-- Offer Container -->
+            <div class="offers-container">
+                <template if:true={isOfferDataAvailable}>
+                    <div class="offers-header">
+                        <h2>Related Offers</h2>
+                    </div>
+                    <div class="custom-datatable">
+                        <table class="offers-table">
+                            <thead>
+                                <tr>
+                                    <th class="center-text">Offer Number</th>
+                                    <th class="center-text">Offer Amount</th>
+                                    <th class="center-text">Offer Date</th>
+                                    <th class="center-text">Offer Expiration Date</th>
+                                    <th class="center-text">Status</th>
+                                    <th class="center-text">Contact</th>
+                                    <th class="center-text">Offer History</th>
+                                    <!-- <th class="center-text">Offer Inbox</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={offers} for:item="offer">
+                                    <tr key={offer.Id}>
+                                        <td class="center-text">{offer.Name}</td>
+                                        <td class="center-text">{offer.MVEX__Offer_Amount__c}</td>
+                                        <td class="center-text">{offer.FormattedOfferDate}</td>
+                                        <td class="center-text">{offer.FormattedExpirationDate}</td>
+                                        <td class="center-text">{offer.MVEX__Status__c}</td>
+                                        <td class="center-text">
+                                            <a data-id={offer.MVEX__Buyer_Contact__c} onclick={redirectToRecord}
+                                                tabindex="0">{offer.contactName}</a>
+                                        </td>
+                                        <td class="center-text">
+                                            <div data-id={offer.Id} data-name={offer.Name} onclick={handleOfferHistory}
+                                                class="offer-inbox-icon">
+                                                <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <g stroke-width="0"></g>
+                                                    <g stroke-linecap="round" stroke-linejoin="round"></g>
+                                                    <g>
+                                                        <path
+                                                            d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 10.5778 21.7031 9.22492 21.1679 8"
+                                                            stroke="#003366" stroke-width="1.5" stroke-linecap="round"
+                                                            stroke-dasharray="0.5 3.5"></path>
+                                                        <path
+                                                            d="M22 12C22 10.1786 21.513 8.47087 20.6622 7M12 2C13.8214 2 15.5291 2.48697 17 3.33782"
+                                                            stroke="#003366" stroke-width="1.5" stroke-linecap="round">
+                                                        </path>
+                                                        <path d="M12 9V13H16" stroke="#003366" stroke-width="1.5"
+                                                            stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </g>
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="center-text">
+                                            <div data-id={offer.Buyer_Contact__c} onclick={redirectToOfferInbox}
+                                                data-offer={offer.Id} class="offer-inbox-icon">
+                                                <svg width="30px" height="30px" viewBox="0 0 16.00 16.00"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none">
+                                                    <g stroke-width="0"></g>
+                                                    <g stroke-linecap="round" stroke-linejoin="round"></g>
+                                                    <g>
+                                                        <path fill="#013366" fill-rule="evenodd"
+                                                            d="M8 3.517a1 1 0 011.62-.784l5.348 4.233a1 1 0 010 1.568l-5.347 4.233A1 1 0 018 11.983v-1.545c-.76-.043-1.484.003-2.254.218-.994.279-2.118.857-3.506 1.99a.993.993 0 01-1.129.096.962.962 0 01-.445-1.099c.415-1.5 1.425-3.141 2.808-4.412C4.69 6.114 6.244 5.241 8 5.042V3.517zm1.5 1.034v1.2a.75.75 0 01-.75.75c-1.586 0-3.066.738-4.261 1.835a8.996 8.996 0 00-1.635 2.014c.878-.552 1.695-.916 2.488-1.138 1.247-.35 2.377-.33 3.49-.207a.75.75 0 01.668.745v1.2l4.042-3.2L9.5 4.55z"
+                                                            clip-rule="evenodd"></path>
+                                                    </g>
+                                                </svg>
+                                            </div>
+                                        </td> -->
+
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={isOfferDataAvailable}>
+                    <div class="no-records">
+                        <lightning-icon icon-name="utility:info" size="small" class="icon"></lightning-icon>
+                        <div class="message">
+                            <div class="title">No Related Offers Found</div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <template if:true={showModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+                <div class="modal-heading slds-modal__header">
+                    <h1> History for {offerName}</h1>
+                </div>
+
+                <div class="custom-datatable-modal">
+                    <template if:true={hasRecords}>
+                        <div class="custom-datatable">
+                            <table class="offers-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Field</th>
+                                        <th scope="col">Data Type</th>
+                                        <th scope="col">Old Value</th>
+                                        <th scope="col">New Value</th>
+                                        <th scope="col">Changed Date</th>
+                                        <th scope="col">Changed By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={processedHistory} for:item="record">
+                                        <tr key={record.key}>
+                                            <td>{record.label}</td>
+                                            <td>{record.dataType}</td>
+                                            <td>{record.oldValue}</td>
+                                            <td>{record.newValue}</td>
+                                            <td>{record.changeDate}</td>
+                                            <td>{record.changedBy}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasRecords}>
+                        <p>No history records found</p>
+                    </template>
+
+                    <div class="footer">
+                        <button class="close-btn" onclick={closeModal}>Close</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

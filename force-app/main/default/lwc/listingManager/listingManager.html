@@ -1,0 +1,370 @@
+<template>
+    <template if:true={spinnerShow}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+    <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
+        <template if:true={isAccessible}>
+            <div class="main">
+                <div hide-header="true" variant="narrow" class="slds-size_full full-page-card">
+                    <div class="custom-header">
+                        <div class="slds-page-header__row first-row">
+                            <div class="slds-page-header__col-title">
+                                <div class="slds-media header-text">
+                                    <div class="portal_mapping">
+                                        Listing Manager
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-page-header__col-actions header-button">
+                                <div class="slds-page-header__controls header-buttons-div">
+                                    <div class="header-buttons">
+                                        <c-record-config-body-cmp feature-name="Listing Manager"></c-record-config-body-cmp>
+                                        <button onclick={goTONewListing} class="icon-button">
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
+                                                    fill="white" />
+                                            </svg>
+                                            New Listing
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-page-header__row second-row">
+                            <div class="slds-page-header__col-meta">
+                                <template if:false={isSelected}>
+                                    <p class="slds-page-header__meta-text">{totalListings} {lisitngItems}</p>
+                                </template>
+                                <template if:true={isSelected}>
+                                    <p class="slds-page-header__meta-text">{totalSelected} {items} Selected</p>
+                                </template>
+                            </div>
+                            <div class="tab-section">
+                                <div class="sort-desc">
+                                    <div class="sort-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M10 14H2M8 10H2M6 6H2M12 18H2M19 20V4M19 20L22 17M19 20L16 17M19 4L22 7M19 4L16 7"
+                                                stroke="#131314" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                    <div class="sort-text">{sortDescription}</div>
+                                </div>
+                                <div class="tab-btns">
+                                    <ul>
+                                        <li class="tab-div active-tab-div" onclick={handleMenuTabClick} data-tab-id="1">
+                                            <svg class="activeSvg menusvg" width="24" height="14" viewBox="0 0 24 14"
+                                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path data-tab-index="1"
+                                                    d="M0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333ZM0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333Z"
+                                                    fill="#131314" />
+                                            </svg>
+                                        </li>
+                                        <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="2">
+                                            <svg class="menusvg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path data-tab-index="2" fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M8 13.3333C8.70724 13.3333 9.38552 13.6143 9.88562 14.1144C10.3857 14.6145 10.6667 15.2928 10.6667 16V21.3333C10.6667 22.0406 10.3857 22.7189 9.88562 23.219C9.38552 23.719 8.70724 24 8 24H2.66667C1.95942 24 1.28115 23.719 0.781048 23.219C0.280951 22.7189 0 22.0406 0 21.3333V16C0 15.2928 0.280951 14.6145 0.781048 14.1144C1.28115 13.6143 1.95942 13.3333 2.66667 13.3333H8ZM21.3333 13.3333C22.0406 13.3333 22.7189 13.6143 23.219 14.1144C23.719 14.6145 24 15.2928 24 16V21.3333C24 22.0406 23.719 22.7189 23.219 23.219C22.7189 23.719 22.0406 24 21.3333 24H16C15.2928 24 14.6145 23.719 14.1144 23.219C13.6143 22.7189 13.3333 22.0406 13.3333 21.3333V16C13.3333 15.2928 13.6143 14.6145 14.1144 14.1144C14.6145 13.6143 15.2928 13.3333 16 13.3333H21.3333ZM8 0C8.70724 0 9.38552 0.280951 9.88562 0.781048C10.3857 1.28115 10.6667 1.95942 10.6667 2.66667V8C10.6667 8.70724 10.3857 9.38552 9.88562 9.88562C9.38552 10.3857 8.70724 10.6667 8 10.6667H2.66667C1.95942 10.6667 1.28115 10.3857 0.781048 9.88562C0.280951 9.38552 0 8.70724 0 8V2.66667C0 1.95942 0.280951 1.28115 0.781048 0.781048C1.28115 0.280951 1.95942 0 2.66667 0H8ZM21.3333 0C22.0406 0 22.7189 0.280951 23.219 0.781048C23.719 1.28115 24 1.95942 24 2.66667V8C24 8.70724 23.719 9.38552 23.219 9.88562C22.7189 10.3857 22.0406 10.6667 21.3333 10.6667H16C15.2928 10.6667 14.6145 10.3857 14.1144 9.88562C13.6143 9.38552 13.3333 8.70724 13.3333 8V2.66667C13.3333 1.95942 13.6143 1.28115 14.1144 0.781048C14.6145 0.280951 15.2928 0 16 0H21.3333Z"
+                                                    fill="white" />
+                                            </svg>
+                                        </li>
+                                        <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="3">
+                                            <svg class="menusvg" width="24" height="25" viewBox="0 0 24 25" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path data-tab-index="3"
+                                                    d="M18 0C14.7 0 12 2.7 12 6C12 6.992 12.383 8.004 12.875 9.125C13.396 10.2913 13.9802 11.4283 14.625 12.531C15.4274 13.907 16.2823 15.2517 17.188 16.562L18 17.75L18.813 16.562C18.813 16.562 20.102 14.727 21.375 12.532C22.0199 11.429 22.6041 10.2917 23.125 9.125C23.617 8.004 24 6.992 24 6C24 2.7 21.3 0 18 0ZM7.969 1.938L0 5.344V24.53L8.031 21.062L16.031 24.062L24 20.655V11.937C23.38 13.1092 22.7128 14.2558 22 15.374V19.343L17 21.468V19.843L15.531 17.718C15.3523 17.4585 15.1753 17.1978 15 16.936V21.561L9 19.311V4.438L10.094 4.845C10.1873 4.17893 10.3657 3.5276 10.625 2.907L7.969 1.938ZM18 2C20.219 2 22 3.781 22 6C22 6.387 21.758 7.3 21.312 8.313C20.867 9.324 20.238 10.473 19.625 11.531C18.809 12.937 18.457 13.437 18 14.125C17.543 13.437 17.191 12.937 16.375 11.531C15.762 10.473 15.133 9.324 14.687 8.312C14.242 7.302 14 6.387 14 6C14 3.781 15.781 2 18 2ZM7 4.5V19.344L2 21.469V6.656L7 4.5ZM18 4.5C17.6022 4.5 17.2206 4.65804 16.9393 4.93934C16.658 5.22064 16.5 5.60218 16.5 6C16.5 6.39782 16.658 6.77936 16.9393 7.06066C17.2206 7.34196 17.6022 7.5 18 7.5C18.3978 7.5 18.7794 7.34196 19.0607 7.06066C19.342 6.77936 19.5 6.39782 19.5 6C19.5 5.60218 19.342 5.22064 19.0607 4.93934C18.7794 4.65804 18.3978 4.5 18 4.5Z"
+                                                    fill="#131314" />
+                                            </svg>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <template if:true={mobileView}>
+                    <div class="wrap-mobile">
+                        <div>Filter</div>
+                        <div class="svg-cover" onclick={wrapFilter}>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M7.9996 0.999999L7.9996 10.3497M7.9996 13.6499L7.9996 15M7.9996 13.6499C7.53904 13.6499 7.09734 13.4761 6.77167 13.1668C6.446 12.8574 6.26304 12.4378 6.26304 12.0002C6.26304 11.5627 6.446 11.1431 6.77167 10.8337C7.09734 10.5243 7.53904 10.3505 7.9996 10.3505C8.46016 10.3505 8.90186 10.5243 9.22753 10.8337C9.5532 11.1431 9.73616 11.5627 9.73616 12.0002C9.73616 12.4378 9.5532 12.8574 9.22753 13.1668C8.90186 13.4761 8.46016 13.6499 7.9996 13.6499ZM13.2626 0.999999L13.2626 5.34984M13.2626 5.34984C13.7233 5.34984 14.1655 5.52407 14.4913 5.83352C14.817 6.14298 15 6.56269 15 7.00032C15 7.43786 14.8162 7.85747 14.4906 8.16686C14.1649 8.47624 13.7232 8.65005 13.2626 8.65005M13.2626 5.34984C12.802 5.34984 12.3606 5.52407 12.0348 5.83352C11.7091 6.14298 11.5261 6.56269 11.5261 7.00032C11.5261 7.43786 11.709 7.85747 12.0347 8.16686C12.3604 8.47624 12.8021 8.65005 13.2626 8.65005M13.2626 8.65005L13.2626 15M2.73656 0.999999L2.73656 3.34973M2.73656 6.64995L2.73656 15M2.73656 6.64995C2.27599 6.64995 1.83429 6.47614 1.50863 6.16675C1.18296 5.85737 1 5.43775 1 5.00022C1 4.78357 1.04492 4.56905 1.13219 4.36889C1.21946 4.16874 1.34737 3.98687 1.50863 3.83368C1.66988 3.68049 1.86132 3.55897 2.07201 3.47606C2.28269 3.39316 2.50851 3.35049 2.73656 3.35049C2.96461 3.35049 3.19042 3.39316 3.40111 3.47606C3.6118 3.55897 3.80323 3.68049 3.96449 3.83368C4.12574 3.98687 4.25366 4.16874 4.34093 4.36889C4.4282 4.56905 4.47311 4.78357 4.47311 5.00022C4.47311 5.43775 4.29016 5.85737 3.96449 6.16675C3.63882 6.47614 3.19712 6.64995 2.73656 6.64995Z"
+                                    stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                    </div>
+                </template>
+                <div class="body">
+                    <div class="innerDiv1">
+                        <div class="filterDiv">
+                            <c-listing-manager-filter-cmp onvalueselected={handleFilteredListings}
+                                onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}>
+                            </c-listing-manager-filter-cmp>
+                        </div>
+                        <div class="filterWrap" onclick={wrapFilter}>
+                            <svg width="9" height="12" viewBox="0 0 9 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.00001 11.192L0.846008 5.99998L9.00001 0.807983V11.192Z" fill="#454545" />
+                            </svg>
+
+                        </div>
+                    </div>
+                    <template if:false={fieldsModal}>
+                        <div class="innerDiv2">
+                            <template if:true={showList}>
+                                <template if:false={showSection}>
+                                    <div class="tableDiv" id="tableDiv">
+                                        <table aria-multiselectable="true"
+                                            class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
+                                            aria-label="Example advanced table of Opportunities in actionable mode">
+                                            <thead>
+                                                <tr class="slds-line-height_reset fields-names">
+                                                    <!-- <th class="slds-text-align_right slds-cell_action-mode colume1" scope="col">
+                                        <span id="column-group-header" class="slds-assistive-text">Choose a row</span>
+                                        <div class="header-checkbox-div">
+                                            <label class="custom-checkbox">
+                                                <input type="checkbox" onchange={selectAllCheckbox} checked={checkAll}>
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </div>
+                                        </th> -->
+                                                    <th class="slds-cell_action-mode imageColume" scope="col">
+                                                        <div class="slds-truncate slds-assistive-text" title="Actions">
+                                                            Actions</div>
+                                                    </th>
+                                                    <!-- <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode offer-col"
+                                                        scope="col">
+                                                        <div class="slds-truncate visit-booking">Site Visit</div>
+                                                    </th>
+
+                                                    <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode offer-col"
+                                                        scope="col">
+                                                        <div class="slds-truncate visit-booking">Offers</div>
+                                                    </th> -->
+
+                                                    <th key={listing.fieldName} aria-sort="none" data-id="Name"
+                                                        onclick={sortClick}
+                                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                        scope="col">
+                                                        <div class="slds-text-link_reset sort-cover" role="button"
+                                                            tabindex="0">
+                                                            <span class="slds-assistive-text">Sort by: </span>
+                                                            <div class="slds-has-flexi-truncate center-trancate-head">
+                                                                <span class="slds-truncate" title="Title">Listing
+                                                                    Name</span>
+                                                                <span
+                                                                    class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                    <svg data-index="Name" class="listing-manager-icon"
+                                                                        viewBox="0 0 384 512"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path
+                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                    </svg>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </th>
+                                                    <template for:each={fields} for:item="listing" for:index="index">
+                                                        <th key={listing.fieldName} data-id={listing.fieldName}
+                                                            onclick={sortClick} aria-sort="none"
+                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                            scope="col">
+                                                            <div class="sort-cover" role="button" tabindex="0">
+                                                                <span class="slds-assistive-text">Sort by: </span>
+                                                                <div class="slds-has-flexi-truncate center-trancate-head">
+                                                                    <span class="slds-truncate"
+                                                                        title="Title">{listing.fieldLabel}</span>
+                                                                    <span
+                                                                        class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                        <svg data-index={listing.fieldName}
+                                                                            class="listing-manager-icon"
+                                                                            viewBox="0 0 384 512"
+                                                                            xmlns="http://www.w3.org/2000/svg">
+                                                                            <path
+                                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                        </svg>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </th>
+                                                    </template>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={shownProcessedListingData} for:item="listing"
+                                                    for:index="index">
+                                                    <tr key={listing.Id} aria-selected="false" class="table-tr">
+                                                        <!-- <td class="slds-text-align_right slds-cell_action-mode list-view-checkbox"
+                                                            role="gridcell">
+                                                            <label class="custom-checkbox custom-checkbox-body">
+                                                                <input data-id={index} type="checkbox"
+                                                                    checked={listing.isChecked} value={listing.isChecked}
+                                                                    onchange={checkBoxValueChange}>
+                                                                <span class="checkmark"></span>
+                                                            </label>
+                                                        </td> -->
+                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                            <div class="slds-truncate center-trancate-text">
+                                                                <img class="property-image" src={listing.media_url}
+                                                                    alt="Listing Image" draggable="false" />
+                                                            </div>
+                                                        </td>
+                                                        <!-- <th class="slds-cell_action-mode conat_cls" scope="row">
+                                                            <template if:true={listing.isActive}>
+                                                                <div class="slds-truncate center-trancate-text"
+                                                                    data-id={listing.Id} onclick={redirectToVisitBooking}>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                        height="24" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round">
+                                                                        <rect x="3" y="4" width="18" height="18" rx="2"
+                                                                            ry="2" />
+                                                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                                                        <path d="M9 16l2 2 4-4" />
+                                                                    </svg>
+                                                                </div>
+                                                            </template>
+                                                            <template if:false={listing.isActive}>
+                                                                <div class="slds-truncate center-trancate-text">
+                                                                    <lightning-badge label="N/A" class="slds-badge_lightest slds-text-body_regular badge-css"></lightning-badge>
+                                                                </div>
+                                                            </template>
+                                                        </th>
+
+                                                        <th class="slds-cell_action-mode conat_cls" scope="row">
+                                                            <template if:true={listing.isActive}>
+                                                                <div class="slds-truncate center-trancate-text"
+                                                                    data-id={listing.Id} onclick={redirectToOffers}>
+                                                                    <svg viewBox="0 -0.5 25 25" fill="none"
+                                                                        xmlns="http://www.w3.org/2000/svg" width="40">
+                                                                        <g stroke-width="0"></g>
+                                                                        <g stroke-linecap="round" stroke-linejoin="round"></g>
+                                                                        <g>
+                                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                                d="M17.817 16.063V14.721C17.817 14.3887 17.949 14.07 18.184 13.835L19.133 12.886C19.6223 12.3967 19.6223 11.6033 19.133 11.114L18.184 10.165C17.949 9.93001 17.817 9.61131 17.817 9.27899V7.93599C17.817 7.24398 17.256 6.68299 16.564 6.68299H15.221C14.8887 6.68299 14.57 6.55097 14.335 6.31599L13.386 5.36699C12.8967 4.87767 12.1033 4.87767 11.614 5.36699L10.665 6.31599C10.43 6.55097 10.1113 6.68299 9.77899 6.68299H8.43599C8.1035 6.68299 7.78464 6.81514 7.54963 7.05034C7.31462 7.28554 7.18273 7.6045 7.18299 7.93699V9.27899C7.18299 9.61131 7.05097 9.93001 6.81599 10.165L5.86699 11.114C5.37767 11.6033 5.37767 12.3967 5.86699 12.886L6.81599 13.835C7.05097 14.07 7.18299 14.3887 7.18299 14.721V16.063C7.18299 16.755 7.74398 17.316 8.43599 17.316H9.77899C10.1113 17.316 10.43 17.448 10.665 17.683L11.614 18.632C12.1033 19.1213 12.8967 19.1213 13.386 18.632L14.335 17.683C14.57 17.448 14.8887 17.316 15.221 17.316H16.563C16.8955 17.3163 17.2144 17.1844 17.4496 16.9493C17.6848 16.7143 17.817 16.3955 17.817 16.063Z"
+                                                                                stroke="#0076D2" stroke-width="1.5"
+                                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                            </path>
+                                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                                d="M9.78202 10.641C9.50715 10.3662 9.42492 9.95286 9.57366 9.59375C9.7224 9.23464 10.0728 9.00049 10.4615 9.00049C10.8502 9.00049 11.2006 9.23464 11.3494 9.59375C11.4981 9.95286 11.4159 10.3662 11.141 10.641C10.7657 11.0163 10.1573 11.0163 9.78202 10.641Z"
+                                                                                stroke="#0076D2" stroke-width="1.5"
+                                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                            </path>
+                                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                                d="M13.859 14.718C13.5841 14.4431 13.5019 14.0298 13.6506 13.6707C13.7994 13.3115 14.1498 13.0774 14.5385 13.0774C14.9272 13.0774 15.2776 13.3115 15.4263 13.6707C15.5751 14.0298 15.4928 14.4431 15.218 14.718C14.8427 15.0932 14.2343 15.0932 13.859 14.718Z"
+                                                                                stroke="#0076D2" stroke-width="1.5"
+                                                                                stroke-linecap="round"></path>
+                                                                            <path d="M15.218 9.28101L9.78101 14.719"
+                                                                                stroke="#0076D2" stroke-width="1.5"
+                                                                                stroke-linecap="round"></path>
+                                                                        </g>
+                                                                    </svg>
+                                                                </div>
+                                                            </template>
+                                                            <template if:false={listing.isActive}>
+                                                                <div class="slds-truncate center-trancate-text">
+                                                                    <lightning-badge label="N/A" class="slds-badge_lightest slds-text-body_regular badge-css"></lightning-badge>
+                                                                </div>
+                                                            </template>
+                                                        </th> -->
+
+                                                        <th class="slds-cell_action-mode conat_cls" scope="row">
+                                                            <div class="slds-truncate center-trancate-text">
+                                                                <a data-id={listing.Id} onclick={redirectToRecord}
+                                                                    tabindex="0">{listing.Name}</a>
+                                                            </div>
+                                                        </th>
+                                                        <template for:each={listing.orderedFields} for:item="field"
+                                                            for:index="index2">
+                                                            <td key={field.fieldName} class="slds-cell_action-mode"
+                                                                role="gridcell">
+                                                                <div class="slds-truncate center-trancate-text">
+                                                                    {field.value}
+                                                                </div>
+                                                            </td>
+                                                        </template>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
+                                <template if:true={showSection}>
+                                    <div class="noresult">
+                                        <div class="noresult-class">
+                                            <p class="tag1">No Result found yet...</p>
+                                            <p class="tag2">We did not find any result for your search</p>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div class="paginationDiv slds-var-p-around_medium">
+                                    <div class="btnCover">
+                                        <div class="pagination-container">
+                                            <button class="pagination-button" disabled={isFirstPage}
+                                                onclick={handlePrevious}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                                </svg>
+                                                Previous
+                                            </button>
+
+                                            <template for:each={pageNumbers} for:item="page">
+                                                <template if:false={page.isEllipsis}>
+                                                    <button key={page.number} data-id={page.number} class={page.className}
+                                                        onclick={handlePageChange}>
+                                                        {page.number}
+                                                    </button>
+                                                </template>
+                                                <template if:true={page.isEllipsis}>
+                                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                                </template>
+                                            </template>
+
+                                            <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                                                Next
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <templete if:true={showTile}>
+                                <c-listing-manager-tile-view-cmp onvalueselected={handleListingSelect}
+                                    listingsdata={processedListingData}
+                                    pagesize={pageSize}></c-listing-manager-tile-view-cmp>
+                            </templete>
+                            <templete if:true={showMap}>
+                                <c-listing-manager-mapview-cmp class="slds-p-around_medium"
+                                    listingsdata={listingData}></c-listing-manager-mapview-cmp>
+                            </templete>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+        <template if:false={isAccessible}>
+            <div class="restricted-access">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        fill="currentColor" />
+                </svg>
+                <h1>Access Restricted</h1>
+                <p>You don't have permission to access this page. Please contact your administrator for further
+                    assistance.</p>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,80 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+        <div class="slds-modal__container">
+            <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                    fill="white" />
+                </svg>
+            </div>
+            
+            <div class="slds-modal__header blue-header">
+                <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">New Template</h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium main_content_cls">
+                <div class="custom-input-container">
+                    <div class="label-container">
+                        <label><span class="red">*</span>Name</label>
+                    </div>
+                    <div class="input-container">
+                        <lightning-input placeholder="Template Name" name="templateName" value={templateNameValue} variant="label-hidden"
+                            onchange={handleInputChange} maxlength="255">
+                        </lightning-input>
+                    </div>
+                </div>
+                <div class="custom-input-container">
+                    <div class="label-container">
+                        <label>Description</label>
+                    </div>
+                    <div class="input-container">
+                        <lightning-textarea name="description" value={descriptionValue} onchange={handleInputChange} variant="label-hidden"
+                            aria-rowspan="5" maxlength="255">
+                        </lightning-textarea>
+                    </div>
+                </div>
+
+                <div class="custom-input-container">
+                    <div class="label-container">
+                        <label><span class="red">*</span>Template Type</label>
+                    </div>
+                    <div class="input-container">
+                        <lightning-combobox placeholder="Please select the Template Type" name="templateType" options={templateTypeOptions} variant="label-hidden"
+                            value={templateTypeSelectValue} onchange={handleInputChange}>
+                        </lightning-combobox>
+                    </div>
+                </div>
+
+                <div class="custom-input-container">
+                    <div class="label-container">
+                        <label><span class="red">*</span>Object Select</label>
+                    </div>
+                    <div class="input-container">
+                        <lightning-combobox placeholder="Please select the Object" name="objectSelect" variant="label-hidden"
+                            options={objectOptions} value={selectedObjectAPIName} onchange={handleInputChange} disabled={isPicklistDisabled}>
+                        </lightning-combobox>
+                    </div>
+                </div>
+                
+                <template if:true={isEmailTemplate}>
+                    <div class="custom-input-container">
+                        <div class="label-container">
+                            <label><span class="red">*</span>Subject</label>
+                        </div>
+                        <div class="input-container">
+                            <lightning-input placeholder="Email Subject" name="subject" value={subjectValue}
+                                onchange={handleInputChange} maxlength="255">
+                            </lightning-input>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="custom-footer">
+                    <button onclick={closeModal} class="cancel_btn_css">Cancel</button>
+                    <button onclick={handleSave} class="save_btn_css">Save</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

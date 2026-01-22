@@ -1,0 +1,3 @@
+<apex:page controller="XMLFeedGeneratorForPF" contentType="text/xml;charset=UTF-8" standardStylesheets="false" showHeader="false">
+    <apex:outputText value="{!xmlstring}" escape="true"/>
+</apex:page>

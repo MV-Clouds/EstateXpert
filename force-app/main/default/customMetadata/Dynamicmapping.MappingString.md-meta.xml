@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>MappingString</label>
+    <protected>false</protected>
+    <values>
+        <field>Autometic_Sync__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>BlockedFields__c</field>
+        <value xsi:type="xsd:string">isdeleted;recordtypeid</value>
+    </values>
+    <values>
+        <field>Condition_Type__c</field>
+        <value xsi:type="xsd:string">any</value>
+    </values>
+    <values>
+        <field>Inquiry_Condition__c</field>
+        <value xsi:type="xsd:string">custom</value>
+    </values>
+    <values>
+        <field>Inquiry_Logic__c</field>
+        <value xsi:type="xsd:string">1 OR 2</value>
+    </values>
+    <values>
+        <field>Listing_Condition__c</field>
+        <value xsi:type="xsd:string">custom</value>
+    </values>
+    <values>
+        <field>Listing_Logic__c</field>
+        <value xsi:type="xsd:string">1 OR 2 OR 3 OR 4</value>
+    </values>
+    <values>
+        <field>Logical_Condition__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Mapping_String__c</field>
+        <value xsi:type="xsd:string">MVEX__Listing__c:Name:equalTo:MVEX__Name__c;MVEX__Listing__c:MVEX__Status__c:equalTo:MVEX__Zip_Postal_Code__c;MVEX__Listing__c:Name:notEqualTo:MVEX__Area__c;MVEX__Listing__c:MVEX__Listing_Price__c:equalTo:MVEX__Price_max__c;MVEX__Inquiry__c:MVEX__City__c:equalTo:MVEX__City__c;MVEX__Inquiry__c:MVEX__Zip_Postal_Code__c:equalTo:MVEX__Zip_Postal_Code__c</value>
+    </values>
+    <values>
+        <field>Primary_Object__c</field>
+        <value xsi:nil="true"/>
+    </values>
+</CustomMetadata>

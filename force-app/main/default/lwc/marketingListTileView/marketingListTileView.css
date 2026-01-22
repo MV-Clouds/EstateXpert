@@ -1,0 +1,334 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.cover-div{
+    height: 100%;
+}
+
+.inner-div{
+    border-radius: 8px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.mainDiv {
+    overflow: auto;
+    height: 90%;
+    padding: 1rem 0.6rem 1rem 1rem;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+.mainDiv .tile-items {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
+}
+
+.mainDiv .tile-items .tile-item {
+    display: flex;
+    border: 1px solid #B2b1b1;
+    border-radius: 0.5rem;
+    /* box-shadow: 2px 1px 8px 0px #0376D3; */
+    padding: 0.7rem;
+    min-height: 8rem;
+}
+
+/* .outerCover{
+    border: 1px solid #c9c9c9;
+    border-radius: 0.25rem;
+    height: fit-content;
+    display: flex;
+    padding: 1rem;
+    box-shadow: 1px 3px 5px 0px;
+    overflow: hidden;
+} */
+
+.content-div {
+    width: 92%;
+    height: 100%;
+    /* justify-content: space-between; */
+    display: flex;
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.content-div .content {
+    display: flex;
+    width: 97%;
+    margin: 0.2rem;
+}
+
+.lable {
+    width: 50%;
+    color: #0176D3;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.value {
+    width: 50%;
+    text-align: left;
+    color: black;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.input-div {
+    width: 8%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: self-end;
+}
+
+.share-div {
+    height: 1.2rem;
+    width: 1.2rem;
+}
+
+.input-div .share-div svg {
+    fill: black;
+    height: 1rem;
+    width: 1rem;
+    cursor: pointer;
+}
+
+.input-div .share-div svg:hover {
+    fill: #0176D3;
+    height: 1rem;
+    width: 1rem;
+    cursor: pointer;
+}
+
+/* pagination css */
+
+.pagination-container {
+    display: flex;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.pagination-button {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    color: #333;
+    padding: 6px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 0.3rem;
+    font-size: 12px;
+}
+
+.pagination-button svg {
+    fill: black;
+    width: 0.7rem;
+    height: 0.7rem;
+}
+
+.pagination-button:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-button.active {
+    background-color: #0070d2;
+    color: white;
+    border-color: #0070d2;
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.results-info {
+    margin-left: 15px;
+    color: #666;
+}
+
+.results-per-page {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.results-per-page label {
+    margin-right: 8px;
+    color: #666;
+}
+
+.results-per-page select {
+    padding: 4px 8px;
+    border: 1px solid #d8d8d8;
+    border-radius: 3px;
+}
+
+/* Style for the ellipsis */
+span {
+    margin: 0 5px;
+}
+
+/* Specific styles for Back and Next buttons */
+.pagination-button:first-child,
+.pagination-button:last-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+
+.paginationDiv {
+    background-color: aliceblue;
+    height:10%;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.paginationDiv .btnCover {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.paginationDiv .pageNumberDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.noresult {
+    overflow: auto;
+    scroll-behavior: scroll;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.noresult .tag1 {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 25px;
+    text-align: center;
+
+}
+
+.noresult .tag2 {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 25px;
+    text-align: center;
+
+}
+
+input[type=checkbox] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #0376D3;
+    ;
+}
+
+
+@media only screen and (max-width: 900px) {
+    .mainDiv {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0px 4px 10px 0px #28282840;
+    }
+
+    .mainDiv .tile-items {
+        grid-template-columns: calc(100%);
+        width: 100%;
+    }
+
+    .paginationDiv {
+        height: fit-content;
+        margin-top: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0px 4px 10px 0px #28282840;
+    }
+
+    .pagination-button {
+        padding: 3px 5px;
+    }
+
+    .pagination-button:first-child,
+    .pagination-button:last-child {
+        gap: 0rem;
+        padding: 3px 3px;
+    }
+}
+
+
+/* Hide the default checkbox */
+.custom-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+/* Create a custom checkbox */
+.custom-checkbox .checkmark {
+    width: 1.1rem;
+    height: 1.1rem;
+    background-color: transparent;
+    border: 2px solid white;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: 0.3s;
+}
+
+.custom-checkbox-body .checkmark {
+    border: 2px solid #0376D3;
+    transition: 0.3s;
+}
+
+/* When the checkbox is checked, apply styles */
+.custom-checkbox input[type="checkbox"]:checked+.checkmark {
+    background-color: #0376D3;
+    /* Blue background when checked */
+    border-color: white;
+    /* Ensure border stays white */
+    transition: 0.3s;
+}
+
+.custom-checkbox-body input[type="checkbox"]:checked+.checkmark {
+    border-color: #0376D3;
+    /* Ensure border stays white */
+    transition: 0.3s;
+}
+
+/* Add a white checkmark (before pseudo-element) */
+.custom-checkbox .checkmark::before {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 50%;
+    top: 50%;
+    width: 40%;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-42%, -61%) rotate(45deg);
+}
+
+/* Show the checkmark when the checkbox is checked */
+.custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
+    display: block;
+}

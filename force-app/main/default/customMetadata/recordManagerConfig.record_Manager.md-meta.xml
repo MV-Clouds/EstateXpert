@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>record Manager</label>
+    <protected>false</protected>
+    <values>
+        <field>FieldsData__c</field>
+        <value xsi:type="xsd:string">[{&quot;fieldName&quot;:&quot;Listing_Price__c&quot;,&quot;fieldApiname&quot;:&quot;Listing_Price__c&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;Listing_Price__c&quot;,&quot;label&quot;:&quot;Listing Price&quot;},{&quot;fieldName&quot;:&quot;Description__c&quot;,&quot;fieldApiname&quot;:&quot;Description__c&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;Description__c&quot;,&quot;label&quot;:&quot;Description&quot;,&quot;fieldType&quot;:&quot;TEXTAREA&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;Address__c&quot;,&quot;fieldApiname&quot;:&quot;Address__c&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;Address__c&quot;,&quot;label&quot;:&quot;Address&quot;},{&quot;fieldName&quot;:&quot;Application_Fee__c&quot;,&quot;fieldApiname&quot;:&quot;Application_Fee__c&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;Application_Fee__c&quot;,&quot;label&quot;:&quot;Application Fee&quot;,&quot;fieldType&quot;:&quot;CURRENCY&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;Country__c&quot;,&quot;fieldApiname&quot;:&quot;Country__c&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;Country__c&quot;,&quot;label&quot;:&quot;Country&quot;,&quot;fieldType&quot;:&quot;PICKLIST&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;CreatedDate&quot;,&quot;fieldApiname&quot;:&quot;CreatedDate&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;CreatedDate&quot;,&quot;label&quot;:&quot;Created Date&quot;,&quot;fieldType&quot;:&quot;DATETIME&quot;,&quot;format&quot;:&quot;ddmmyyy24&quot;},{&quot;fieldName&quot;:&quot;LastViewedDate&quot;,&quot;fieldApiname&quot;:&quot;LastViewedDate&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;LastViewedDate&quot;,&quot;label&quot;:&quot;Last Viewed Date&quot;,&quot;fieldType&quot;:&quot;DATETIME&quot;,&quot;format&quot;:&quot;ddmmyyy24&quot;},{&quot;fieldName&quot;:&quot;CreatedBy.Username&quot;,&quot;fieldApiname&quot;:&quot;CreatedBy.Username&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;CreatedBy.Username&quot;,&quot;label&quot;:&quot;Username&quot;,&quot;fieldType&quot;:&quot;STRING&quot;,&quot;format&quot;:null}]</value>
+    </values>
+    <values>
+        <field>PageSize__c</field>
+        <value xsi:type="xsd:double">42.0</value>
+    </values>
+</CustomMetadata>

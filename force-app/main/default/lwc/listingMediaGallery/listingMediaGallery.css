@@ -1,0 +1,242 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-top: 70%;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.cmp-name {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    text-align: left;
+    padding-top: 5px;
+}
+
+.noimage {
+    padding-block: 30%;
+    font-weight: 600;
+    font-size: larger;
+    background-color: rgb(216, 215, 215);
+}
+
+.button-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    flex-direction: row;
+}
+
+.cmp-name p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.left-container {
+    width: 60%;
+    font-size: 18px;
+    font-weight: 400;
+    text-align: left;
+}
+
+.right-container {
+    display: flex;
+    justify-content: end;
+    width: 40%;
+    gap: 1rem;
+}
+
+.reload-button {
+    display: flex;
+    width: fit-content;
+    padding: 10px;
+    border-radius: 10%;
+    border: none;
+    background: #0176D3;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.preview-button {
+    display: flex;
+    width: fit-content;
+    padding: 10px;
+    border-radius: 10%;
+    border: none;
+    background: #0176D3;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-wrapper img {
+    display: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+}
+
+.arrow-container {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+}
+
+.image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.arrow {
+    color: white;
+    background-color: rgb(255, 255, 255);
+    border-radius: 8%;
+    padding: 0.4rem;
+    margin: 0.1rem;
+    cursor: pointer;
+}
+
+.left-arrow {
+    margin-right: 1rem;
+}
+
+.right-arrow {
+    margin-left: 1rem;
+}
+
+.badge_css {
+    margin-bottom: 2px;
+}
+
+.image_details {
+    min-height: 30px;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    flex-wrap: wrap;
+    padding-top: 5px;
+}
+
+.main_div_css {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: right;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.image_details .tags_label {
+    font-size: 14px;
+    padding: 4px 10px;
+    border: none;
+    background: #007BFF1F;
+    border-radius: 14px;
+    text-align: center;
+    border: none;
+    color: #007BFF;
+    margin-top: 5px;
+    width: max-content;
+}
+
+.empty-state {
+    width: -webkit-fill-available;
+    height: -webkit-fill-available;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.empty-state__content {
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    /* position: fixed; */
+}
+
+.empty-state__content .empty-state__icon {
+    width: 30%;
+    height: -webkit-fill-available;
+}
+
+.empty-state__content .empty-state__message {
+    color: #3a9bea;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-top: 0.85rem;
+}
+
+.image-container_for_image {
+    height: 20rem !important;
+    padding-top: unset !important;
+}
+
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    right: -2rem;
+    bottom: 0rem;
+    background: transparent;
+}
+
+.blue-header {
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+}
+
+.cancel_btn_css {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 34px;
+    text-align: center;
+    padding: 0px 20px;
+    background: #FFFFFF;
+    border: 1px solid #0176D3;
+    color: #0176D3;
+    border-radius: 5px;
+}
+
+.footerbtns {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.main_body {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+.main_body .slds-modal__content {
+    background: transparent;
+    max-height: calc(100vh - 15rem);
+    padding-bottom: 0;
+}

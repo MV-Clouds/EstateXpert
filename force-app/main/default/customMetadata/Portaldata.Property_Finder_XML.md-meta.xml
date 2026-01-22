@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Property Finder XML</label>
+    <protected>false</protected>
+    <values>
+        <field>Portal_Record__c</field>
+        <value xsi:type="xsd:string">[
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Date&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Availability_Date__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;For rentals only, this field represents when the property is ready for a property seeker to move into. Allowed values are YYYY-MM-DDTHH:MM:SSZ ( ISO format ).&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;availability_date&gt;2022-04-13T00:00:00Z&lt;/availability_date&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;availability_date&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Bathrooms__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Total number of bathrooms in a property. Numbers only. No commas nor any separators are allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are 0, 1,2, 3, 4, 5, 6, 7, 7+. &lt;bathroom&gt;3&lt;/bathroom&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;bathroom&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Bedrooms__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Mandatory for RR (Residential Rent) and RS (ResidentialSale) listings for properties applicable. With or without value,this field will beskipped if a listing is CR (Commercial Rent) or CS (Commercial Sale).&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are 0, 1,2, 3, 4, 5, 6, 7, 7+. &lt;bedroom&gt;3&lt;/bedroom&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;bedroom&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Year the building was completed. Numbers only. No commas nor any kind of separators allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;build_year&gt;2022&lt;/build_year&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;build_year&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;For UAE rentals only, this field represents the maximum number of cheques a property owner is willingto offer their property for rent&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are 1,2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12. &lt;cheques&gt;12&lt;/cheques&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;cheques&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;City__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Emirate (i.e. Dubai,Abu Dhabi)&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;city&gt;Dubai&lt;/city&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;city&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Commercial_Amenities__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Amenities available in the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Can be separated by commas if the property has more than one and allowed values are CR- Conference Room, AN- Available Networked, DN- Dining in building, LB- Lobby in Building, SP- Shared Pool, SY- Shared Gym, CP- Covered Parking, VC- Vastu-compliant, PN - Pantry, MZ- Mezzanine. &lt;commercial_amenities&gt;CR,AN,DN,LB,SP,SY,CP,VC,PN,MZ&lt;/commercial_amenities&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;commercial_amenities&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Community__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;District, mother project or area(i. e. Arabian Ranches,Business Bay)&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;community&gt;City Walk&lt;/community&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;community&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Completion_Status__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Refers to two things: 1.Ownership (primary/secondary) 2.Whether completed or under construction&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are completed : represents completed construction and is secondary ,off_plan : represents under construction and is secondary ,completed_primary : (NEW) represents completed construction and is primary ,off_plan_primary : (NEW) represents under construction and is primary. &lt;completion_status&gt;completed&lt;/completion_status&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: &quot;Finished =&gt; completed,In Development =&gt; off_plan,To Be Announced =&gt; off_plan_primary,Completed =&gt; completed_primary&quot;,
+    &quot;Name&quot;: &quot;completion_status&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Additional details aboutthe property, areaand other information in Arabic.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;description_ar&gt;عرض عن عقارة بالعرض العالي في الشارع الشريف&lt;/description_ar&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;description_ar&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Description__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Additional details aboutthe property, areaand other information in English.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;description_en&gt;2000 sq.ft. 4BR Duplex | Burj Khalifa View&lt;/description_en&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;description_en&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Name of the company that developed the property&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Developer&gt;Karan R&lt;/Developer&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Developer&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Listing permit number from DTCM. The string can be alphanumeric, no whitespace is allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;dtcm_permit&gt;8888999909&lt;/dtcm_permit&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;dtcm_permit&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Email&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Agent_Email__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Email address of the agent&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;email&gt;karanr@propertyfinder.ae&lt;/email&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;email&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Floor__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Floor where the property is located. Numbers only. No commas nor any kind of separators allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;floor&gt;2&lt;/floor&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;floor&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Furnished__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Furnished status of the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are Yes- if the property is being offered as fully-furnished, No- if the property is being offered as unfurnished, Partly- if the property is being offered as semi-furnished.&lt;furnished&gt;Yes&lt;/furnished&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;furnished&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Geographic coordinates of where the property is.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;geopoints&gt;55.274110,25.197477&lt;/geopoints&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;geopoints&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Agents_Unique_Id__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The unique identifier of the agent’s user account in your CRM or listing system. Can be alphanumeric&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;id&gt;karanr+97&lt;/id&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;id&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Could have a value such as designation&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;info&gt;Broker&lt;/info&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;info&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Optional but if applicable, this should havethe RERA-issued Broker Registration Number of the agent.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;license_no&gt;1234567890&lt;/license_no&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;license_no&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Agent_Full_Name__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Full name of the agent&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;name&gt;Karan R&lt;/name&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;name&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Offer_Type__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The type of property for sale or rent and is commercial or residential.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are (Short-codes):RR- Residential Rent, RS-Residential Sale, CR- Commercial Rent, CS- Commercial Sale. &lt;offering_type&gt;RR&lt;/offering_type&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;offering_type&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Parking_Spaces__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Parking slots available.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are 0, 1, 2,3… 999. &lt;parking&gt;2&lt;/parking&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;parking&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;RERA_Permit_Number__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Listing permit number from Trakheesi. The string can be alphanumeric, no whitespace is allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;permit_number&gt;7131134888&lt;/permit_number&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;permit_number&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Phone&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Agent_Mobile_Phone__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Phone number of the agent(Digits ONLY,no plussigns)&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;phone&gt;05512345678&lt;/phone&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;phone&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Photo of the agent(Valid URLto jpeg or gif image)&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;photo&gt;https://www.propertyfinder.ae/images/agent/1234567890.jpg&lt;/photo&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;photo&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Total area size of a property; mostly for a land or a villa. Numbers only. No commas nor separators are allowed. Mandatory for Property Type: Villa+Land&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;plot_size&gt;12000&lt;/plot_size&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;plot_size&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Price__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Numbersonly. No commas nor any kind of separators allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;i.e.for Sales &lt;price&gt;2500000&lt;/price&gt; and for Rentals(Leavetag as closed if not applicable) &lt;price&gt;&lt;yearly&gt;100000&lt;/yearly&gt;&lt;monthly&gt;12000&lt;/monthly&gt;&lt;weekly&gt;3000&lt;/weekly&gt;&lt;daily&gt;500&lt;/daily&gt;&lt;/price&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;To show or hide the price.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are Yes(Hides the price) or No(Shows the price). &lt;price_on_application&gt;No&lt;/price_on_application&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;price_on_application&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Private_Amenities__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Amenities available in the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Can be separated by commas if the property has more than one and allowed values are AC- CentralA/C &amp; Heating, BA- Balcony, BK - Built-in Kitchen Appliances, BL - View of Landmark, BW- Built-in Wardrobes, CP- Covered Parking, CS- Concierge Service, LB - Lobby in Building, MR - Maid&apos;s Room, MS- Maid Service, PA- Pets Allowed, PG- Private Garden, PJ- Private Jacuzzi, PP- Private Pool, PY- Private Gym, VC- Vastu-compliant, SE- Security, SP- Shared Pool, SS- Shared Spa, ST- Study, SY- Shared Gym, VW- View of Water, WC- Walk-in Closet, CO- Children&apos;s Pool, PR- Children&apos;s PlayA. &lt;private_amenities&gt;MR,ST,BA,SP,SY,SE,CS,MS,CP,BW,WC,PA&lt;/private_amenities&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;private_amenities&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Name of the real-estate project that the advertised property belongs to. Allowed values are String name of the project.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;project_name&gt;Karan R&lt;/project_name&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;project_name&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;House_Office_No__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Building Name or smaller grouping (i.e. BlakelyTower,Al Ghozlan2)&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;property_name&gt;BlakelyTower&lt;/property_name&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;property_name&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Property_Type__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The type of the property being advertised.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are (Short-codes):AP - Apartment/Flat, BU- Bulk Units, BW- Bungalow, CD- Compound, DX- Duplex, FA- Factory, FM - Farm, FF- Full Floor, HA- HotelApartment, HF - Half Floor, LC- Labor Camp, LP - Land/Plot, OF- OfficeSpace, BC- Business Centre, PH - Penthouse, RE- Retail, RT- Restaurant, ST- Storage, TH - Townhouse, VH - Villa/House, SA- StaffAccommodation WB - Whole Building, SH- Shop, SR- Showroom, CW- Co-working Space. &lt;property_type&gt;DX&lt;/property_type&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: &quot;Apartment =&gt; AP,Penthouse =&gt; PH,Villa =&gt; VH,Townhouse =&gt; TH&quot;,
+    &quot;Name&quot;: &quot;property_type&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Broker_s_Listing_ID__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Unique identifier of listings. The string can be alphanumeric, no whitespace is allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;reference_number&gt;VM-RK-D4BR-12819&lt;/reference_number&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;reference_number&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Yearly service charge. Numbers only. No commas nor separators are allowed&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;service_charge&gt;10000&lt;/service_charge&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;service_charge&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Size__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Floor areasize of a property. Numbers only. No commas nor any separators are allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;size&gt;1200&lt;/size&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;size&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Total number of stories in a villa, townhouse,penthouseor multi-level properties. Numbers only. No commas nor any separator allowed.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;stories&gt;2&lt;/stories&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;stories&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Subcommunity__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Projector sub-area (i.e. Al Barsha 3, South Ridge)&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;sub_community&gt;Building 4B&lt;/sub_community&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;sub_community&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Marketing heading of a listing in Arabic.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;title_ar&gt;عرض عن عقارة بالعرض العالي في الشارع الشريف&lt;/title_ar&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;title_ar&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;Represents the number that uniquely identifies the title deed. Allowed values are n-digit-number/year.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;title_deed&gt;123456/2022&lt;/title_deed&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;title_deed&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Name&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Marketing heading of a listing in English. Do not use unconventional special characters.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;title_en&gt;Huge + Luxurious 4BR Duplex | Burj Khalifa View&lt;/title_en&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;title_en&quot;
+  }
+]</value>
+    </values>
+    <values>
+        <field>Portal_Value__c</field>
+        <value xsi:type="xsd:string">Propertyfinder XML</value>
+    </values>
+</CustomMetadata>

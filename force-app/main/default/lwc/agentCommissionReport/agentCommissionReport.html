@@ -1,0 +1,341 @@
+<template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+    <div class="main_container_cls">
+        <template if:true={isAccessible}>
+            <div class="main_header_cls">
+                <div class="portal_mapping">
+                    Agents Commission Report
+                </div>
+            </div>
+
+            <div class="main_content_cls">
+                <div class="filterdiv">
+                    <div class="slds-col">
+                        <lightning-input type="search" name="agentNameFilter" placeholder="Search Agent Name" value={agentNameSearch}
+                            onchange={handleAgentNameSearch} variant="label-hidden"></lightning-input>
+                    </div>
+                    <div class="slds-col">
+                        <c-option-group-dropdown selected-value={dateRange} options={dateRangeOptions}
+                            onoptionselection={handleDateRangeChange}></c-option-group-dropdown>
+                    </div>
+                    <template if:true={showCustomDate}>
+                        <div class="slds-col">
+                            <lightning-input type="date" value={startDate} onchange={handleStartDateChange}
+                                placeholder="Start Date" variant="label-hidden"></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-input type="date" value={endDate} onchange={handleEndDateChange} placeholder="End Date"
+                                variant="label-hidden"></lightning-input>
+                        </div>
+                    </template>
+                    <div class="slds-col">
+                        <lightning-combobox name="closingType" placeholder="Closing Type" value={closingType}
+                            options={closingTypeOptions} onchange={handleClosingTypeChange}
+                            variant="label-hidden"></lightning-combobox>
+                    </div>
+                    <div class="slds-col">
+                        <lightning-combobox name="displayType" placeholder="Display Type" value={displayType}
+                            options={displayTypeOptions} onchange={handleDisplayTypeChange}
+                            variant="label-hidden"></lightning-combobox>
+                    </div>
+                    <div class="filter-icon-container" onclick={toggleMoreFilters}>
+                        <lightning-icon icon-name={filterIconName} alternative-text="Filter" size="x-small"></lightning-icon>
+                    </div>
+                    <div if:true={showMoreFilters} class="filter-dropdown-box">
+                        <div class="slds-col">
+                            <lightning-combobox name="roleFilter" label="Role" value={selectedRole} options={roleOptions}
+                                onchange={handleRoleChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-combobox name="userFilter" label="User" value={selectedUser} options={userOptions}
+                                onchange={handleUserChange}></lightning-combobox>
+                        </div>
+                    </div>
+                </div>
+
+                <template if:true={filteredCommissionData.length}>
+                    <div class="table-content">
+                        <template if:false={isChart}>
+                            <table class="slds-table">
+                                <thead>
+                                    <tr class="table_tr_cls">
+                                        <th scope="col" class="sno">
+                                            <div>No.</div>
+                                        </th>
+                                        <th data-id="agentName" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header agentname"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Agent Name">Agent Name</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="agentName" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="rentCount" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header rentcount"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Rent Count">Rent Count</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="rentCount" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="saleCount" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header salecount"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Sale Count">Sale Count</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="saleCount" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="closingCount" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header totalclosing"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Total Closing Count">Total Closing Count</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="closingCount" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="rentPrice" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header rentprice"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Rent Price">Rent Price</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="rentPrice" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="salePrice" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header saleprice"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Sale Price">Sale Price</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="salePrice" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="totalPrice" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header totalprice"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Total Price">Total Price</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="totalPrice" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="rentCommission" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header rentcommission"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Rent Commission">Rent Commission</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="rentCommission" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="saleCommission" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header salecommission"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Sale Commission">Sale Commission</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="saleCommission" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="finalCommission" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header totalcommission"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Total Commission">Total Commission</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="finalCommission" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th data-id="totalCommission" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header agentcommission"
+                                            scope="col">
+                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Agent Commission">Agent Commission</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="totalCommission" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={sortedCommissionData} for:item="row" for:index="index">
+                                        <tr key={row.id}>
+                                            <td data-label="S.No.">
+                                                <div>{row.index}</div>
+                                            </td>
+                                            <td data-label="Agent Name" class="truncate_css">
+                                                <div>{row.agentName}</div>
+                                            </td>
+                                            <td data-label="Rent Count">
+                                                <div>{row.rentCount}</div>
+                                            </td>
+                                            <td data-label="Sale Count">
+                                                <div>{row.saleCount}</div>
+                                            </td>
+                                            <td data-label="Total Closing Count">
+                                                <div>{row.closingCount}</div>
+                                            </td>
+                                            <td data-label="Rent Price">
+                                                <div>{row.rentPrice}</div>
+                                            </td>
+                                            <td data-label="Sale Price">
+                                                <div>{row.salePrice}</div>
+                                            </td>
+                                            <td data-label="Total Price">
+                                                <div>{row.totalPrice}</div>
+                                            </td>
+                                            <td data-label="Rent Commission">
+                                                <div>{row.rentCommission}</div>
+                                            </td>
+                                            <td data-label="Sale Commission">
+                                                <div>{row.saleCommission}</div>
+                                            </td>
+                                            <td data-label="Total Commission">
+                                                <div>{row.finalCommission}</div>
+                                            </td>
+                                            <td data-label="Agent Commission">
+                                                <div>{row.totalCommission}</div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td data-label="S.No.">
+                                            <div>Total</div>
+                                        </td>
+                                        <td data-label="Agent Name" class="truncate_css">
+                                            <div>-</div>
+                                        </td>
+                                        <td data-label="Rent Count">
+                                            <div>{totalRentCountSum}</div>
+                                        </td>
+                                        <td data-label="Sale Count">
+                                            <div>{totalSaleCountSum}</div>
+                                        </td>
+                                        <td data-label="Total Closing Count">
+                                            <div>{totalClosingSum}</div>
+                                        </td>
+                                        <td data-label="Rent Price">
+                                            <div>{totalRentPriceSum}</div>
+                                        </td>
+                                        <td data-label="Sale Price">
+                                            <div>{totalSalePriceSum}</div>
+                                        </td>
+                                        <td data-label="Total Price">
+                                            <div>{totalPriceSum}</div>
+                                        </td>
+                                        <td data-label="Rent Commission">
+                                            <div>{totalRentCommissionSum}</div>
+                                        </td>
+                                        <td data-label="Sale Commission">
+                                            <div>{totalSaleCommissionSum}</div>
+                                        </td>
+                                        <td data-label="Total Commission">
+                                            <div>{finalCommissionSum}</div>
+                                        </td>
+                                        <td data-label="Agent Commission">
+                                            <div>{totalCommissionSum}</div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </template>
+                        <template if:true={isChart}>
+                            <div class="chart-container" lwc:dom="manual"></div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={filteredCommissionData.length}>
+                    <div class="no-records-message">
+                        <div class="empty-state">
+                            <div class="empty-state__content">
+                                <div class="empty-state__icon">
+                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                </div>
+                                <div class="empty-state__message">No data available to show</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:false={isAccessible}>
+            <div class="access-ui">
+                <div class="restricted-access">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                            fill="currentColor" />
+                    </svg>
+                    <h1>Access Restricted</h1>
+                    <p>You don't have permission to access this page. Please contact your administrator for further
+                        assistance.</p>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,69 @@
+.popup {
+    background-image: url("/resource/ErrorIcons/ErrorIcons/ErrorPopUpBg.png");
+    background-size: cover;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 400px;
+    height: 60%;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    position: relative;
+}
+.Container{
+    background: grey;
+    opacity: 0.3;
+    height: 100%;
+    display: flex;
+}
+.popup img {
+    width: 16%;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    height: auto;
+
+}
+.popup h1 {
+    margin: 20px 0 10px;
+    color: #333;
+    font-size: 24px;
+    font-weight: 700;
+}
+.popup p {
+    color: #666;
+    margin-bottom: 20px;
+}
+.popup .code-section {
+    display: flex;
+    justify-content: space-between;
+    width: 70%;
+    border: 1px solid #ddd;
+    background-color: white;
+    align-items: center;
+    margin: auto;
+    padding: 6px 6px;
+    border-radius: 40px;
+}
+.popup .btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+.popup .btn:hover {
+    background-color: #0056b3;
+}
+.popup .footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+.popup .footer .btn {
+    background-color: #0056b3;
+}

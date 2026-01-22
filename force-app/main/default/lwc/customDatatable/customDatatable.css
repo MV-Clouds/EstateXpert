@@ -1,0 +1,1185 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+/* Custom Table Container - Wrapper around SLDS */
+.custom-table-wrapper {
+    border: 1px solid #afd3e5c2;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px 0px #28282840;
+    background-color: white;
+}
+
+/* Keep original .table-container for backward compatibility */
+.table-container {
+    border: 1px solid #afd3e5c2;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px 0px #28282840;
+    background-color: white;
+}
+
+/* Custom SLDS Table Styling - Don't remove SLDS classes */
+.custom-table-wrapper .slds-table thead th,
+.table-container .slds-table thead th {
+    background-color: #0176D3;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+    height: 45px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 8px;
+}
+
+.custom-table-wrapper .slds-table tbody tr,
+.table-container .slds-table tbody tr {
+    height: 45px;
+}
+
+.custom-table-wrapper .slds-table tbody tr:nth-child(odd),
+.table-container .slds-table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa;
+}
+
+.custom-table-wrapper .slds-table tbody tr:hover,
+.table-container .slds-table tbody tr:hover {
+    background-color: #e1f4ff;
+    transition: background-color 0.3s ease;
+}
+
+.custom-table-wrapper .slds-table tbody tr:hover td,
+.custom-table-wrapper .slds-table tbody tr:hover th,
+.table-container .slds-table tbody tr:hover td,
+.table-container .slds-table tbody tr:hover th {
+    background-color: #e1f4ff;
+}
+
+.custom-table-wrapper .slds-table td,
+.custom-table-wrapper .slds-table th,
+.table-container .slds-table td,
+.table-container .slds-table th {
+    padding: 8px;
+    vertical-align: middle;
+}
+
+/* Custom Checkbox Styles */
+.custom-checkbox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #0176D3;
+    cursor: pointer;
+}
+
+/* Checkbox Container Styles */
+.checkbox-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.25rem;
+    height: 45px;
+    width: 100%;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #0376D3;
+    cursor: pointer;
+}
+
+.checkbox-header {
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
+    text-align: center;
+}
+
+.checkbox-cell {
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
+}
+
+/* Sort Header Styles */
+.sortable-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+    background: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.sortable-header:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    outline: none;
+}
+
+.sortable-header:focus,
+.sortable-header:active {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Sort icon container - Fixed to always reserve space */
+.sort-icon-container {
+    margin-left: 6px;
+    transition: transform 0.3s ease;
+    display: flex; /* Changed from 'none' to 'flex' */
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; /* Use opacity instead of display */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sortable-header:hover .sort-icon-container,
+.sortable-header.currently-sorted .sort-icon-container {
+    opacity: 1; /* Show icon with opacity */
+}
+
+/* Header content */
+.header-text-with-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+}
+
+.column-label {
+    text-align: center;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.custom-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+/* Keep SLDS truncate functionality */
+.custom-table-wrapper .slds-truncate,
+.table-container .slds-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+/* Sort icon container */
+.sort-icon-container {
+    margin-left: 6px;
+    transition: transform 0.3s ease;
+    display: none;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+}
+
+.sortable-header:hover .sort-icon-container,
+.sortable-header.currently-sorted .sort-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sort-icon-container.rotate-asc {
+    transform: rotate(0deg);
+    transition: transform 0.3s ease;
+}
+
+.sort-icon-container.rotate-desc {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.sort-icon {
+    width: 14px;
+    height: 14px;
+    fill: white;
+}
+
+/* Non-sortable header content */
+.header-text-only {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+/* Data cell content */
+.cell-content {
+    width: 100%;
+    display: block;
+    text-align: left;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+/* Center text utility */
+.center-text {
+    display: block;
+    width: 100%;
+    text-align: center;
+    max-width: 100%;
+}
+
+/* Record Link Styles */
+.record-link {
+    color: #0176D3;
+    text-decoration: none;
+    text-align: center;
+}
+
+.record-link:hover {
+    text-decoration: underline;
+    color: #014486;
+}
+
+.record-link-anchor {
+    color: #0176D3;
+    text-decoration: none;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+/* Custom Pagination Container */
+.custom-pagination-wrapper {
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    padding: 16px;
+    border-top: 1px solid #e5e5e5;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Keep original pagination-container for backward compatibility */
+.pagination-container {
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    padding: 16px;
+    border-top: 1px solid #e5e5e5;
+    border-radius: 0 0 8px 8px;
+}
+
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pagination-button {
+    min-width: 40px;
+}
+
+.pagination-number {
+    min-width: 40px;
+}
+
+/* SLDS Pagination Number Variant Support */
+.pagination-number[variant="brand"] {
+    background-color: #0176D3;
+    color: white;
+}
+
+.pagination-ellipsis {
+    padding: 8px 12px;
+    color: #666;
+    font-weight: bold;
+}
+
+.record-info {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Custom Scrollable Container - Wrapper around SLDS */
+.custom-scrollable-wrapper {
+    overflow-x: auto;
+}
+
+/* Keep SLDS scrollable functionality */
+.custom-scrollable-wrapper .slds-scrollable_x,
+.custom-datatable .slds-scrollable_x {
+    overflow-x: auto;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: relative;
+}
+
+.loading-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 10;
+}
+
+/* Custom Scrollbar for SLDS and Custom Classes */
+.custom-scrollable-wrapper::-webkit-scrollbar,
+.slds-scrollable_x::-webkit-scrollbar {
+    height: 6px;
+}
+
+.custom-scrollable-wrapper::-webkit-scrollbar-track,
+.slds-scrollable_x::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.custom-scrollable-wrapper::-webkit-scrollbar-thumb,
+.slds-scrollable_x::-webkit-scrollbar-thumb {
+    background: #0176D3;
+    border-radius: 3px;
+}
+
+.custom-scrollable-wrapper::-webkit-scrollbar-thumb:hover,
+.slds-scrollable_x::-webkit-scrollbar-thumb:hover {
+    background: #014486;
+}
+
+/* Animation for row selection - Support both SLDS and custom */
+.custom-table-wrapper .slds-table tbody tr,
+.table-container .slds-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+/* Action button hover effects - Support both SLDS and custom */
+.custom-button-menu:hover,
+.slds-button-menu:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Custom Utility Classes */
+.custom-text-wrap {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.custom-no-wrap {
+    white-space: nowrap;
+}
+
+.custom-center-align {
+    text-align: center;
+}
+
+.custom-left-align {
+    text-align: left;
+}
+
+.custom-right-align {
+    text-align: right;
+}
+
+/* Keep original utility classes for backward compatibility */
+.text-wrap {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+.center-align {
+    text-align: center;
+}
+
+.left-align {
+    text-align: left;
+}
+
+.right-align {
+    text-align: right;
+}
+
+/* Header Actions */
+.header-actions-container {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.header-action-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 15px;
+    line-height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+}
+
+.header-action-btn:hover {
+    background-color: #014486;
+}
+
+.header-action-btn .action-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-action-btn .action-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: white;
+}
+
+/* Table Container */
+.datatable-container {
+    border: 1px solid #afd3e5c2;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0px 4px 10px 0px #28282840;
+}
+
+.table-scrollable {
+    overflow: auto;
+    border-radius: 8px 8px 0px 0px;
+    height: 100%;
+    background-color: white;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+/* Table Styles */
+.datatable-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto !important; /* Force auto layout for content-based sizing */
+}
+
+/* Header cell styles */
+.datatable-table .header-cell {
+    background-color: #0376D3;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+    height: 45px;
+    position: sticky;
+    z-index: 97;
+    text-align: center;
+    border: none;
+    outline: none;
+    width: auto;
+    min-width: 120px !important;
+    vertical-align: middle;
+    box-sizing: border-box;
+    /* Ensure no truncation */
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+.datatable-table .table-data-row {
+    height: 45px;
+}
+
+.datatable-table .table-data-row:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.datatable-table .table-data-row:hover {
+    background-color: #e1f4ff;
+    transition: background-color 0.3s ease;
+}
+
+.datatable-table .table-data-row:hover .data-cell {
+    background-color: #e1f4ff;
+}
+
+/* Data cell styles */
+.datatable-table .data-cell {
+    padding: 8px 12px;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    border: none;
+    width: auto;
+    min-width: 120px !important; /* Increased minimum width */
+    height: 45px;
+    line-height: 1.4;
+    /* Ensure no truncation */
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+/* Action Buttons */
+.actions-header {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    text-align: center;
+}
+
+.actions-cell {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    text-align: center;
+}
+
+.row-actions-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+    height: 100%;
+}
+
+.row-action-btn {
+    padding: 4px;
+    border: 1px solid #d8d8d8;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: white;
+    width: 22px;
+    height: 22px;
+    transition: all 0.2s ease;
+}
+
+.row-action-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #0176d3;
+}
+
+.row-action-btn .action-icon {
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-action-btn .action-icon svg {
+    width: 12px;
+    height: 12px;
+    fill: #666;
+    transition: fill 0.3s ease;
+}
+
+.row-action-btn:hover .action-icon svg {
+    fill: #0176d3;
+}
+
+/* Pagination Styles */
+.pagination-main-container {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    justify-content: center;
+    padding: 1rem;
+    gap: 2px;
+    flex-wrap: wrap;
+    border-radius: 0 0 8px 8px;
+}
+
+.pagination-nav-button {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    color: #333;
+    padding: 6px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 0.3rem;
+    font-size: 12px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-nav-button svg {
+    fill: black;
+    width: 0.7rem;
+    height: 0.7rem;
+}
+
+.pagination-nav-button:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-button {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    color: #333;
+    padding: 6px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 0.3rem;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.pagination-button:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-button.active {
+    background-color: #0070d2;
+    color: white;
+    border-color: #0070d2;
+}
+
+.pagination-ellipsis-span {
+    margin: 0 5px;
+    padding: 6px;
+    color: #666;
+    font-weight: bold;
+}
+
+.record-info-container {
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+}
+
+/* No Data Styles */
+.no-data-main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 200px;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #afd3e5c2;
+}
+
+.no-data-icon {
+    margin-bottom: 1rem;
+}
+
+.no-data-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.no-data-description {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Container Styles */
+.custom-datatable-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* Truncate text utilities */
+.truncate-text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Support both custom and SLDS has-flexi-truncate */
+.custom-has-flexi-truncate,
+.slds-has-flexi-truncate {
+    min-width: 0;
+}
+
+/* Center alignment utility classes */
+.center-trancate-text {
+    display: block;
+    width: 100%;
+    text-align: center;
+    max-width: 100%;
+}
+
+/* Remove any unwanted borders and outlines */
+.datatable-table th,
+.datatable-table td {
+    border: none;
+    outline: none;
+}
+
+.datatable-table th:focus,
+.datatable-table td:focus {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Ensure consistent column widths */
+.datatable-table .header-cell,
+.datatable-table .data-cell {
+    width: auto;
+    min-width: 80px;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+/* Header Main Container */
+.header-main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+    padding: 0 0.5rem;
+}
+
+/* Search Container */
+.search-container {
+    flex: 1;
+    max-width: 400px;
+    min-width: 250px;
+}
+
+.search-input-wrapper {
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+}
+
+.search-input input {
+    border-radius: 6px;
+    border: 1px solid #d8d8d8;
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+}
+
+.search-input input:focus {
+    border-color: #0176D3;
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1);
+}
+
+/* Toggle and Progress Styles */
+.toggle-column {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+}
+
+.toggle-cell {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+}
+
+.progress-column {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+}
+
+.progress-cell {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+    padding: 8px 4px;
+}
+
+.progress-cell lightning-progress-bar {
+    width: 100%;
+}
+
+.data-cell lightning-input[type="toggle"] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Image column styles */
+.image-column {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+}
+
+.image-cell {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+    padding: 4px;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+    overflow: hidden;
+}
+
+.cell-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid #e5e5e5;
+}
+
+.cell-image.error {
+    background-color: #f3f3f3;
+    border-color: #c23934;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 10px;
+    text-align: center;
+}
+
+/* Custom Scrollbar for table */
+.table-scrollable::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.table-scrollable::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.table-scrollable::-webkit-scrollbar-thumb {
+    background: #0176D3;
+    border-radius: 3px;
+}
+
+.table-scrollable::-webkit-scrollbar-thumb:hover {
+    background: #014486;
+}
+
+/* Animation for row selection */
+.datatable-table .table-data-row {
+    transition: all 0.2s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    /* Enable horizontal scrolling for the table container */
+    .table-scrollable {
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+    
+    /* Set minimum width for table to trigger horizontal scroll */
+    .datatable-table {
+        min-width: 1200px !important; /* Increased to ensure scrolling */
+        width: max-content !important;
+        table-layout: auto !important;
+        font-size: 12px;
+    }
+    
+    /* Container adjustments */
+    .datatable-container {
+        width: 100%;
+        overflow: visible !important; /* Changed from hidden */
+    }
+    
+    /* Remove ALL text truncation for mobile */
+    .datatable-table .data-cell,
+    .datatable-table .header-cell,
+    .center-text,
+    .cell-content,
+    .column-label,
+    .header-text-with-icon,
+    .header-text-only,
+    .center-trancate-text,
+    .record-link-anchor {
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        text-overflow: unset !important; /* Completely remove ellipsis */
+        min-width: fit-content !important;
+        padding: 4px 8px;
+        font-size: 12px;
+        max-width: none !important;
+    }
+    
+    /* Ensure all columns have adequate width for mobile */
+    .datatable-table .data-cell {
+        min-width: 120px !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+    
+    .datatable-table .header-cell {
+        min-width: 120px !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+    
+    /* Specific column widths for mobile */
+    .checkbox-header,
+    .checkbox-cell {
+        width: 60px !important;
+        min-width: 60px !important;
+        max-width: 60px !important;
+    }
+
+    .actions-header,
+    .actions-cell {
+        width: 140px !important;
+        min-width: 140px !important;
+        max-width: 140px !important;
+    }
+
+    .toggle-column,
+    .toggle-cell {
+        width: 100px !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+    }
+
+    .progress-column,
+    .progress-cell {
+        width: 140px !important;
+        min-width: 140px !important;
+        max-width: 140px !important;
+        padding: 4px 8px;
+    }
+
+    .image-column,
+    .image-cell {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+        padding: 4px;
+    }
+    
+    /* Header and content adjustments */
+    .header-main-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .search-container {
+        max-width: none;
+        min-width: auto;
+    }
+    
+    .header-actions-container {
+        justify-content: center;
+        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-action-btn {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+    
+    /* Pagination adjustments */
+    .pagination-main-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .pagination-nav-button {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    .pagination-nav-button:first-child,
+    .pagination-nav-button:last-child {
+        gap: 0.25rem;
+        padding: 6px 8px;
+    }
+    
+    /* Action button adjustments */
+    .row-actions-container {
+        gap: 4px;
+    }
+
+    .row-action-btn {
+        width: 24px;
+        height: 24px;
+        padding: 2px;
+    }
+    
+    /* Image adjustments */
+    .cell-image {
+        width: 35px;
+        height: 35px;
+        border-radius: 4px;
+    }
+
+    .image-container {
+        height: 40px;
+    }
+}
+
+/* Prevent column width changes */
+.datatable-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Changed from 'auto' to 'fixed' for consistent widths */
+}
+
+/* Set specific widths for different column types */
+.checkbox-header,
+.checkbox-cell {
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+}
+
+.actions-header,
+.actions-cell {
+    width: 140px !important; /* Increased width */
+    min-width: 140px !important;
+    max-width: 140px !important;
+}
+
+.image-column,
+.image-cell {
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+}
+
+/* Data columns should have more space */
+.data-column-header {
+    width: auto;
+    min-width: 150px !important; /* Increased minimum width */
+}
+
+.toggle-input > lightning-primitive-input-toggle > .slds-form-element__control > label {
+    display: flex;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.toggle-input lightning-input {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.toggle-input lightning-input .slds-form-element {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.toggle-input lightning-input .slds-form-element__control {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Additional toggle centering styles */
+.data-cell .toggle-input {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100%;
+    height: 100%;
+}
+
+.toggle-input {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100%;
+}
+
+.toggle-input lightning-input[type="toggle"] {
+    --slds-c-toggle-color-background: transparent;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.toggle-input lightning-input .slds-form-element__control .slds-checkbox_toggle {
+    margin: 0 auto !important;
+}

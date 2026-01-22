@@ -1,0 +1,35 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 07-30-2024
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="instagram-post-container">
+        <div class="image-upload">
+            <label for="image-input">Upload Images:</label>
+            <input type="file" id="image-input" multiple onchange={handleImageUpload} />
+            <div class="image-preview">
+                <template for:each={images} for:item="image" for:index="index">
+                    <img src={image.data} alt={image.name} key={image.name} />
+                    <button key={image.name} onclick={handleImageRemove}>Remove</button>
+                </template>
+            </div>
+        </div>
+        <!-- <div class="video-upload">
+            <label for="video-input">Upload Videos:</label>
+            <input type="file" id="video-input" multiple onchange={handleVideoUpload} />
+            <div class="video-preview">
+                <template for:each={videos} for:item="video">
+                    <video src={video.data} controls></video>
+                </template>
+            </div>
+        </div> -->
+        <div class="caption">
+            <label for="caption-input">Caption:</label>
+            <textarea id="caption-input" onchange={handleCaptionChange}></textarea>
+        </div>
+        <button onclick={handleSubmit}>Post</button>
+    </div>
+</template>

@@ -1,0 +1,97 @@
+<template>
+    <div class="main-div">
+        <div class="Outer-div">
+            <template if:true={isLoading}>
+                <!-- <div class="slds-m-around_large"> -->
+                    <c-spinner-component alternative-text="Loading" size="medium"></c-spinner-component>
+                <!-- </div> -->
+            </template>
+            <template if:false={isLoading}>
+                <div class="heading-div">
+                    <div class="header-text">
+                        <img src={headerImage} draggable="false" />
+                        <h1 class="heading-tag">
+                            Create New Contact
+                        </h1>
+                    </div>
+                    <div class="btn-div">
+                            <button class="btn clear-button" onclick={clearForm} >Cancel</button>
+                            <button class="btn save-button" type="button" onclick={handleButtonClick}>Save</button>
+                    </div>
+                </div>
+                <div class="record-div">
+                    <lightning-record-edit-form record-id={recordId} object-api-name={objectName} 
+                    onsuccess={handleSuccess} onsubmit={validateFields} onerror={handleError} >
+                    <!-- <div class="message-div">
+                        <lightning-messages data-id="message">
+                        </lightning-messages>
+                    </div> -->
+                            <div class="slds-grid slds-gutters div-cover">
+                                <div class="custom-grid1" >
+                                        <div class="fields-cover">
+                                            <template if:true={fields}>
+                                                <template for:each={fields} for:item="f">
+                                                   <div key={f.Id} class="form-fields">
+                                                    <lightning-input-field field-name={f.APIName} required={f.Required} onchange={handleFieldChange}>
+                                                    </lightning-input-field>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                </div>
+                                <div class="custom-grid2">
+                                    <div class="dupli">
+                                        <h1 class="title_cls">Contact Details</h1>
+                                        <div if:true={isLoading2} class="spinner">
+                                            <c-spinner-component></c-spinner-component>
+                                        </div>
+                                        <template if:true={foundDupli}>   
+                                          <div class="tableDiv" id="tableDiv">
+                                              <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid" aria-label="Example advanced table of Opportunities in actionable mode">
+                                                  <thead>
+                                                    <tr class="slds-line-height_reset fields-names">
+                                                      <template for:each={tableFields} for:item="field" for:index="index">
+                                                        <th aria-sort="none" key={field.fieldName} data-id={field.fieldName} onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2 action-mode" scope="col">
+                                                          <div class="slds-text-link_reset sort-cover" role="button" tabindex="0">
+                                                            <span class="slds-assistive-text">Sort by: </span>
+                                                            <div class="slds-has-flexi-truncate center-trancate-head">
+                                                              <span class="slds-truncate" title="Title">{field.label}</span>
+                                                              <span class="slds-icon_container slds-icon-utility-arrowdown arrow-down-css">
+                                                                <svg data-index={field.fieldName} class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/></svg>
+                                                              </span>
+                                                            </div>
+                                                          </div>
+                                                        </th>
+                                                      </template>
+                                                    </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                    <template for:each={processedMyList} for:item="listing" for:index="index">
+                                                      <tr class="table-tr" key={listing.key}>
+                                                        <template for:each={listing.orderedFields} for:item="item" for:index="index1">
+                                                          <td key={item.fieldName} class="slds-cell_action-mode action-mode" role="gridcell"><div class="slds-truncate center-trancate-text">{item.value}</div></td>
+                                                        </template>
+                                                      </tr>
+                                                    </template>
+                                                  </tbody>
+                                                </table>
+                                          </div>
+                                        </template>
+
+                                        <template if:false={foundDupli}>
+                                            <div class="empty-state">
+                                                <div class="empty-state__content">
+                                                    No Duplicate Contacts
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </lightning-record-edit-form>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,337 @@
+.wrapper {
+    background-color: #ffffff;
+    padding: 1rem;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% + 1.5rem);
+    margin-top: -0.8rem;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.8rem;
+}
+
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+}
+
+.sr-no {
+    width: 10%;
+}
+
+.left-align {
+    text-align: left !important;
+}
+
+.pagination-container {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.pagination-button {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    color: #333;
+    padding: 6px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 0.3rem;
+    font-size: 12px;
+}
+
+.pagination-button svg {
+    fill: black;
+    width: 0.7rem;
+    height: 0.7rem;
+}
+
+.pagination-button:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-button.active {
+    background-color: #0070d2;
+    color: white;
+    border-color: #0070d2;
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+span {
+    margin: 0 5px;
+}
+
+.pagination-button:first-child,
+.pagination-button:last-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-container {
+    /* border-radius: 0.4rem;  */
+    
+    margin-top: 1.5%;
+    border-radius: 0.4rem; 
+    /* border-top-right-radius: 0.4rem;  */
+    overflow-y:auto; 
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    border: 1px solid #dcdcdc; 
+    /* height : ; */
+    flex-grow: 1;
+    background-color: transparent;
+    
+}
+
+.table-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+}
+
+.empty-state {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-records-message {
+    height: 100%;
+}
+
+.empty-state__content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.empty-state__content .empty-state__icon {
+    width: 25%;
+    height: 100%;
+}
+
+.empty-state__content .empty-state__message {
+    color: #3a9bea;
+    font-size: 25px;
+    font-weight: 500;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.clickable-name {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.message-status{
+    background-color: #2d5f84;
+    color: #ffffff;
+    width: 51px;
+    border-radius: 7px;
+}
+
+.Sent {
+    background-color: #FCEFCB;
+    color: #E9A319;
+    width: fit-content;
+    border-radius: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.Delivered {
+    background-color: #ECF7FF;
+    color: #3C96DE;
+    width: fit-content;
+    border-radius: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+.Seen {
+    background-color: #d3fab7;
+    color: rgb(0, 128, 0);
+    width: fit-content;
+    border-radius: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+.Failed {
+    background-color: #f5c9c9;
+    color: #e43333;
+    width: fit-content;
+    border-radius: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.tableData {
+    height: 10%;
+    padding: 10px;
+    font-size: 15px;
+    text-align: center;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status{
+    display: flex;
+    justify-content: center;
+    align-items: center;;
+}
+
+.main_header_cls {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.details_cls {
+    padding: 0 42px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #636363;
+}
+
+.sub_main_header_css {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header_block_css {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 40.16px;
+    text-align: left;
+    gap: 15px;
+    color: #131314;
+}
+
+.svg_back_icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.table-content {
+    overflow: auto;
+    border-radius: 8px;
+    height: 100%;
+    background-color: white;
+    margin: 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+.table-content .slds-table th,
+.table-content .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 45px;
+}
+
+.table-content .slds-table th {
+    background-color: #0176D3;
+    color: white;
+}
+
+.table-content tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.table-content table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 98;
+}
+
+.table-content table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+.table-content .slds-table_resizable-cols thead th,
+.table-content .slds-table--resizable-cols thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+}
+
+.main_content_cls {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    margin: 1rem 0rem 0rem 0rem;
+}

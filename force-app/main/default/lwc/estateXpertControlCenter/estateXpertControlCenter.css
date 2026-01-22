@@ -1,0 +1,297 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.mainContainer {
+    width: calc(100% + 1.5rem);
+    height: calc(100% + 1.5rem);
+    margin-left: -0.75rem;
+    margin-top: -0.75rem;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.subContainer {
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+.main_header {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.main_header h1 {
+    font-size: 24px;
+    font-weight: 400;
+    /* line-height: 40px; */
+    text-align: left;
+}
+
+.main_header p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: left;
+}
+
+.tiles {
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-flow: column;
+}
+
+.tile {
+    padding: 20px;
+    -webkit-box-flex: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #fff;
+    border: 1px solid #9B9A9C;
+    border-radius: 8px;
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.16);
+    text-decoration: none;
+    cursor: pointer;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+}
+
+.tile-icon img {
+    width: 50px;
+    height: 50px;
+}
+
+.tile-title {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: left;
+    color: #131314;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tile-description {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: left;
+    color: #636363;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+}
+
+.tiles-section-header {
+    width: 100%;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #0176D3;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: left;
+    border-radius: 8px;
+    border: none;
+}
+
+.tile-flex {
+    display: grid !important;
+    grid-template-columns: calc(25% - 20px) calc(25% - 20px) calc(25% - 20px) calc(25% - 20px);
+    transition: all linear 0.325s;
+    justify-content: center;
+    gap: 20px;
+}
+
+@media only screen and (max-width: 1500px) {
+    .tile {
+        gap: 10px !important;
+    }
+
+    .tile-description {
+        font-size: 14px !important;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .tile {
+        gap: 20px !important;
+    }
+
+    .tile-flex {
+        display: grid !important;
+        grid-template-columns: calc(50% - 20px) calc(50% - 20px) !important;
+    }
+
+    .mainContainer {
+        width: 100% !important;
+        height: 100% !important;
+        margin-left: unset !important;
+        margin-top: unset !important;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .tile {
+        gap: 20px !important;
+    }
+
+    .tile-flex {
+        display: grid !important;
+        grid-template-columns: unset !important;
+    }
+
+    .mainContainer {
+        width: 100% !important;
+        height: 100% !important;
+        margin-left: unset !important;
+        margin-top: unset !important;
+    }
+}
+
+.tile-description-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tile-description-wrapper .helptext {
+    visibility: hidden;
+    background-color: #003157d4;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 115%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    width: 14rem;
+    line-height: 20px;
+    text-align: left;
+    font-size: 14px;
+    backdrop-filter: blur(4px);
+}
+
+.tile-description-wrapper .helptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #305474 transparent transparent transparent;
+}
+
+.tile-description-wrapper:hover .helptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* error pop css ----------------------- */
+
+.popup-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.popup-box {
+    background-color: #e4eff5;
+    padding: 20px;
+    border-radius: 8px;
+    width: 24rem;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    position: relative;
+    padding-top: 4rem;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+}
+
+.close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    font-size: 24px;
+    color: #ffffff;
+    background: #0176d3;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem;
+}
+
+.content h2 {
+    margin: 20px 0 10px;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.content p {
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.call-button {
+    background-color: #0176D3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.call-button:hover {
+    background-color: #005ca6;
+}
+
+.icon img {
+    width: 50px;
+    height: 50px;
+}

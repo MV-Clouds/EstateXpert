@@ -1,0 +1,111 @@
+<template>
+  <template lwc:if={showPopup}>
+    <template lwc:if={isPopupType}>
+      <!-- ==== ====== ====== POPUP Type ================ -->
+      <template lwc:if={showDoneBtn}>
+        <div class="popupOuterContainer" style={loadStyle}>
+          <div class="popupContainer">
+            <div class="popupBody">
+              <div class="contentSection">
+                <div class="titleDiv">
+                  <h2>{title}</h2>
+                </div>
+                <div class="messageDiv">
+                  <p>{message}</p>
+                </div>
+                <div class="doneBtn" onclick={closeModal} data-type="popup">
+                  <div>Okay</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <template lwc:if={isWarning}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+        class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__close closs_icon_css" data-name="not-conform" onclick={handleConfirmation}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" data-name="not-conform">
+                    <path data-name="not-conform"
+                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                        fill="white" />
+                </svg>
+            </div>
+
+            <div class="slds-modal__header blue-header">
+                <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{title}</h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small modalbody">
+                <div class="delete_modal_font_css">
+                    <p>{message}</p>
+                </div>
+                <div class="edit_modal_footerbtns">
+                    <button class="cancel_btn_css" data-name="not-conform" onclick={handleConfirmation}>No</button>
+                    <button class="delete_btn_css" data-name="conform" onclick={handleConfirmation}>Yes</button>
+                </div>
+            </div>
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+      </template>
+
+    </template>
+    <template lwc:else>
+      <!-- ==== ====== ====== TOAST Type ================ -->
+      <div class="toastOuterContainer toastIcon">
+        <div class="toastContainer" data-status={status}>
+          <div class="padStartSection">
+            <div class="curveDesign_Toast">
+              <template lwc:if={isSuccess}>
+                <svg class="ballDesignIcon" viewBox="0 0 100 100" fill="none">
+                  <path
+                    d="M50 0C40.111 0 30.444 2.93245 22.2215 8.42652C13.999 13.9206 7.59043 21.7295 3.80604 30.8658C0.021664 40.0021 -0.968502 50.0555 0.960758 59.7545C2.89002 69.4536 7.65206 78.3627 14.6447 85.3553C21.6373 92.3479 30.5465 97.11 40.2455 99.0392C49.9445 100.969 59.9979 99.9783 69.1342 96.194C78.2705 92.4096 86.0794 86.001 91.5735 77.7785C97.0676 69.556 100 59.8891 100 50C100 36.7392 94.7322 24.0215 85.3553 14.6447C75.9785 5.26784 63.2608 0 50 0ZM50 93.75C41.3471 93.75 32.8885 91.1841 25.6938 86.3768C18.4992 81.5695 12.8916 74.7367 9.58029 66.7424C6.26896 58.7481 5.40256 49.9515 7.09067 41.4648C8.77877 32.9781 12.9455 25.1826 19.0641 19.0641C25.1826 12.9455 32.9781 8.77875 41.4648 7.09064C49.9515 5.40254 58.7481 6.26894 66.7424 9.58027C74.7367 12.8916 81.5695 18.4991 86.3768 25.6938C91.1841 32.8884 93.75 41.3471 93.75 50C93.75 61.6032 89.1406 72.7312 80.9359 80.9359C72.7312 89.1406 61.6032 93.75 50 93.75Z"
+                    fill="#2E844A" />
+                  <path
+                    d="M81.0795 28.9016C80.4965 28.3241 79.7077 28 78.8856 28C78.0635 28 77.2748 28.3241 76.6917 28.9016L42.1497 63.1633L23.4783 44.5597C22.9088 43.947 22.1184 43.5849 21.281 43.5529C20.4435 43.5209 19.6276 43.8217 19.0127 44.3891C18.3979 44.9565 18.0344 45.7441 18.0023 46.5785C17.9702 47.4129 18.2721 48.2259 18.8416 48.8385L42.1497 72L81.0795 33.3045C81.3712 33.0162 81.6027 32.6733 81.7607 32.2955C81.9187 31.9176 82 31.5124 82 31.1031C82 30.6937 81.9187 30.2885 81.7607 29.9106C81.6027 29.5328 81.3712 29.1899 81.0795 28.9016Z"
+                    fill="#2E844A" />
+                </svg>
+              </template>
+              <template lwc:elseif={isError}>
+                <svg class="ballDesignIcon" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+                </svg>
+              </template>
+              <template lwc:elseif={isWarning}>
+                <svg class="ballDesignIcon" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z">
+                  </path>
+                </svg>
+              </template>
+            </div>
+          </div>
+          <div class="contentSection_Toast">
+            <div class="titleDiv">
+              <h2>{title}</h2>
+            </div>
+            <div class="messageDiv1">
+              <p>{message}</p>
+            </div>
+          </div>
+          <div class="closeBtnSection_Toast">
+            <div class="closeBtn_Toast" onclick={closeModal} data-type="toast">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.25 17.25 6.75 6.75"></path>
+                <path d="m17.25 6.75-10.5 10.5"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </template>
+
+  <c-custom-timeout ontimeoutmethod={handleTimeout}></c-custom-timeout>
+
+</template>

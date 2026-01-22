@@ -1,0 +1,97 @@
+<template>
+    <div class="chat-container">
+        <!-- Toggle Switch -->
+        <div class="toggle-container">
+            <button class="reset-btn" onclick={resetAll}>
+                <svg fill="#747474" height="20" width="20" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#747474">
+                    <path d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
+                        fill-rule="evenodd"></path>
+                </svg>
+            </button>
+            <label class="switch">
+                <input type="checkbox" onchange={toggleForm} checked={showChat} />
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <!-- Chat Body -->
+        <div class="chat-body" if:true={showChat}>
+            <template for:each={formattedMessages} for:item="message">
+                <div key={message.id} class={message.className}>
+                    <div class="message-content">
+                        <span class="message-icon" if:true={message.isBot}>
+                            <img src="/resource/MVEX__boticons/bot.png" alt="Bot Icon" class="tile-icon-img"
+                                draggable="false" />
+                        </span>
+                        <span class="message-text">{message.text}</span>
+                        <span class="message-icon" if:false={message.isBot}>
+                            <img src="/resource/MVEX__boticons/profile.png" alt="User Icon" class="tile-icon-img"
+                                draggable="false" />
+                        </span>
+                    </div>
+                </div>
+            </template>
+            <template if:true={isLoading}>
+                <div class="message bot loading-message">
+                    <div class="message-content">
+                        <span class="message-icon">
+                            <img src="/resource/MVEX__boticons/bot.png" alt="Bot Icon" class="tile-icon-img"
+                                draggable="false" />
+                        </span>
+                        <span class="spinner"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input" if:true={showChat}>
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" placeholder="Type a message..." value={userInput} oninput={handleInputChange}
+                        onkeypress={handleKeyPress} class="chat-input-field" disabled={isLoading} />
+                </div>
+                <button onclick={handleSendMessage} class="send-button" disabled={isLoading}>
+                    <svg class="send-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M10.3009 13.6949L20.102 3.89742M10.5795 14.1355L12.8019 18.5804C13.339 19.6545 13.6075 20.1916 13.9458 20.3356C14.2394 20.4606 14.575 20.4379 14.8492 20.2747C15.1651 20.0866 15.3591 19.5183 15.7472 18.3818L19.9463 6.08434C20.2845 5.09409 20.4535 4.59896 20.3378 4.27142C20.2371 3.98648 20.013 3.76234 19.7281 3.66167C19.4005 3.54595 18.9054 3.71502 17.9151 4.05315L5.61763 8.2523C4.48114 8.64037 3.91289 8.83441 3.72478 9.15032C3.56153 9.42447 3.53891 9.76007 3.66389 10.0536C3.80791 10.3919 4.34498 10.6605 5.41912 11.1975L9.86397 13.42C10.041 13.5085 10.1295 13.5527 10.2061 13.6118C10.2742 13.6643 10.3352 13.7253 10.3876 13.7933C10.4468 13.87 10.491 13.9585 10.5795 14.1355Z"
+                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="feedback-form" if:false={showChat}>
+            <h2>Support Form</h2>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="subject"><abbr title="required" class="slds-required asterisk">*</abbr>Subject:</label>
+                    <input type="text" id="subject" placeholder="Enter subject" value={formSubject}
+                        oninput={handleFormInputChange} data-field="formSubject" />
+                </div>
+                <div class="form-group">
+                    <label for="description"><abbr title="required" class="slds-required asterisk">*</abbr>Description:</label>
+                    <textarea id="description" placeholder="Enter description" value={formDescription}
+                        oninput={handleFormInputChange} data-field="formDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="image">Images (jpg, jpeg, png, max 4MB total):</label>
+                    <lightning-input type="file" variant="label-hidden" accept="image/jpeg,image/jpg,image/png" multiple
+                        onchange={handleImageChange}></lightning-input>
+                </div>
+                <div class="image-preview" if:true={uploadedImages.length}>
+                    <template for:each={uploadedImages} for:item="image" for:index="index">
+                        <div key={image.id} class="image-container">
+                            <img src={image.url} alt="Uploaded Image" class="preview-image" />
+                            <button class="remove-image" onclick={removeImage} data-index={index}>×</button>
+                        </div>
+                    </template>
+                </div>
+                <div class="form-buttons">
+                    <button onclick={handleFormSubmit} class="mail-button">Send</button>
+                    <button onclick={resetForm} class="cancel-button">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

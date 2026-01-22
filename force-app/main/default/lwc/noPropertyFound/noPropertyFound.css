@@ -1,0 +1,102 @@
+.no-property-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.content-wrapper {
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.header-section {
+    padding: 2rem;
+}
+
+.house-icon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.main-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #6b6b6b;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.illustration-section {
+    margin: 2rem 0;
+}
+
+.real-estate-scene {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cta-section {
+    margin: 2rem 0;
+}
+
+.cta-button {
+    padding: 1rem 2.5rem;
+    background: #0176D3;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+    background: #015ba3;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .main-title {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .real-estate-scene {
+        max-width: 300px;
+    }
+
+    .house-icon {
+        width: 80px;
+        height: 80px;
+    }
+}

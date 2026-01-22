@@ -1,0 +1,519 @@
+<template>
+  <div class="key-container">
+    <div class="toggleFieldMapping" onclick={showHideMappingContainer}>
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M4.83578 12L11.0429 18.2071L12.4571 16.7929L7.66421 12L12.4571 7.20712L11.0429 5.79291L4.83578 12ZM10.4857 12L16.6928 18.2071L18.107 16.7929L13.3141 12L18.107 7.20712L16.6928 5.79291L10.4857 12Z">
+        </path>
+      </svg>
+      <span>Insert Fields</span>
+    </div>
+    <div class="mappingTopSection">
+      <div class="mappingTitle">
+        <template lwc:if={isMappingOpen}>
+          <div class="closeMapping" onclick={showHideMappingContainer}>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M19.1642 12L12.9571 5.79291L11.5429 7.20712L16.3358 12L11.5429 16.7929L12.9571 18.2071L19.1642 12ZM13.5143 12L7.30722 5.79291L5.89301 7.20712L10.6859 12L5.89301 16.7929L7.30722 18.2071L13.5143 12Z">
+              </path>
+            </svg>
+          </div>
+        </template>
+        <div class="mappingHeaderTitle">
+          Insert Mapping Keys
+        </div>
+        <template lwc:if={showFullHeightButton}>
+          <div class="fullHeightBtn" onclick={toggleMappingContainerHeight}>
+            <template lwc:if={isMappingContainerExpanded}>
+              <svg viewBox="0 0 512 512" transform="rotate(90)">
+                <g stroke-width="0"></g>
+                <g stroke-linecap="round" stroke-linejoin="round"></g>
+                <g>
+                  <g>
+                    <g>
+                      <g>
+                        <path
+                          d="M213.333,42.667C201.551,42.667,192,52.218,192,64v97.83L36.418,6.248c-8.331-8.331-21.839-8.331-30.17,0 c-8.331,8.331-8.331,21.839,0,30.17L161.83,192H64c-11.782,0-21.333,9.551-21.333,21.333c0,11.782,9.551,21.333,21.333,21.333 h149.333c0.007,0,0.014-0.001,0.021-0.001c0.696-0.001,1.391-0.037,2.084-0.105c0.318-0.031,0.627-0.091,0.94-0.136 c0.375-0.054,0.75-0.098,1.122-0.171c0.359-0.071,0.708-0.17,1.061-0.259c0.322-0.081,0.645-0.151,0.964-0.248 c0.346-0.105,0.68-0.234,1.018-0.356c0.318-0.114,0.639-0.219,0.953-0.349c0.316-0.131,0.618-0.284,0.926-0.43 c0.323-0.152,0.649-0.296,0.966-0.465c0.295-0.158,0.575-0.338,0.861-0.509c0.311-0.186,0.626-0.361,0.929-0.564 c0.316-0.211,0.613-0.447,0.917-0.674c0.253-0.19,0.513-0.365,0.759-0.568c1.087-0.892,2.085-1.889,2.977-2.977 c0.202-0.246,0.378-0.506,0.568-0.759c0.228-0.304,0.463-0.601,0.674-0.917c0.203-0.303,0.379-0.618,0.564-0.929 c0.171-0.286,0.351-0.566,0.509-0.861c0.169-0.317,0.313-0.643,0.465-0.966c0.145-0.308,0.299-0.611,0.43-0.926 c0.13-0.314,0.235-0.635,0.349-0.953c0.122-0.338,0.251-0.672,0.356-1.018c0.096-0.318,0.167-0.642,0.248-0.964 c0.089-0.353,0.188-0.701,0.259-1.061c0.074-0.372,0.118-0.748,0.171-1.122c0.045-0.314,0.104-0.622,0.136-0.94 c0.069-0.7,0.106-1.402,0.106-2.105V64C234.667,52.218,225.115,42.667,213.333,42.667z">
+                        </path>
+                        <path
+                          d="M505.752,475.582L350.17,320H448c11.782,0,21.333-9.551,21.333-21.333c0-11.782-9.551-21.333-21.333-21.333H298.667 c-0.703,0-1.405,0.037-2.105,0.106c-0.318,0.031-0.627,0.091-0.94,0.136c-0.375,0.054-0.75,0.098-1.122,0.171 c-0.359,0.071-0.708,0.17-1.061,0.259c-0.322,0.081-0.645,0.151-0.964,0.248c-0.346,0.105-0.68,0.234-1.018,0.356 c-0.318,0.114-0.639,0.219-0.953,0.349c-0.316,0.131-0.618,0.284-0.926,0.43c-0.323,0.152-0.649,0.296-0.966,0.465 c-0.295,0.158-0.575,0.338-0.861,0.509c-0.311,0.186-0.626,0.361-0.929,0.564c-0.316,0.211-0.613,0.447-0.917,0.674 c-0.253,0.19-0.513,0.365-0.759,0.568c-1.087,0.892-2.085,1.889-2.977,2.977c-0.202,0.246-0.378,0.506-0.568,0.759 c-0.228,0.304-0.463,0.601-0.674,0.917c-0.203,0.303-0.379,0.618-0.564,0.929c-0.171,0.286-0.351,0.566-0.509,0.861 c-0.169,0.317-0.313,0.643-0.465,0.966c-0.145,0.308-0.299,0.611-0.43,0.926c-0.13,0.314-0.235,0.635-0.349,0.953 c-0.122,0.338-0.251,0.672-0.356,1.018c-0.096,0.318-0.167,0.642-0.248,0.964c-0.089,0.353-0.188,0.701-0.259,1.061 c-0.074,0.372-0.118,0.748-0.171,1.122c-0.045,0.314-0.104,0.622-0.136,0.94c-0.068,0.693-0.105,1.388-0.105,2.084 c0,0.007-0.001,0.014-0.001,0.021V448c0,11.782,9.551,21.333,21.333,21.333c11.782,0,21.333-9.551,21.333-21.333v-97.83 l155.582,155.582c8.331,8.331,21.839,8.331,30.17,0C514.083,497.42,514.083,483.913,505.752,475.582z">
+                        </path>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            </template>
+            <template lwc:else>
+              <svg viewBox="0 0 24 24">
+                <g stroke-width="0"></g>
+                <g stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.048"></g>
+                <g>
+                  <path
+                    d="M14.293,9.707a1,1,0,0,1,0-1.414L18.586,4H16a1,1,0,0,1,0-2h5a1,1,0,0,1,1,1V8a1,1,0,0,1-2,0V5.414L15.707,9.707a1,1,0,0,1-1.414,0ZM3,22H8a1,1,0,0,0,0-2H5.414l4.293-4.293a1,1,0,0,0-1.414-1.414L4,18.586V16a1,1,0,0,0-2,0v5A1,1,0,0,0,3,22Z">
+                  </path>
+                </g>
+              </svg>
+            </template>
+          </div>
+        </template>
+      </div>
+      <div class="mergingTypeSelection">
+        <template for:each={mappingTypeTabs} for:item="mappingTab" for:index="index">
+          <div class="tabSelection" data-name={mappingTab.name} data-index={index} key={mappingTab}
+            onclick={setMappingTab}>{mappingTab.label}
+            <div class="customToolTip top left">{mappingTab.helpText}</div>
+          </div>
+        </template>
+      </div>
+      <div class="selectedTab_Outer">
+        <div class="selectedMappingTab">
+          <div class="tabSelection selected">{selectedMappingType.label}
+            <div class="customToolTip bottom right">{selectedMappingType.helpText}</div>
+          </div>
+        </div>
+        <div class="mappingTabExpandBtn" onclick={toggleMappingTableHeight}>
+          <template lwc:if={isMappingTabExpanded}>
+            <svg viewBox="0 0 512 512" transform="rotate(90)">
+              <g stroke-width="0"></g>
+              <g stroke-linecap="round" stroke-linejoin="round"></g>
+              <g>
+                <g>
+                  <g>
+                    <g>
+                      <path
+                        d="M213.333,42.667C201.551,42.667,192,52.218,192,64v97.83L36.418,6.248c-8.331-8.331-21.839-8.331-30.17,0 c-8.331,8.331-8.331,21.839,0,30.17L161.83,192H64c-11.782,0-21.333,9.551-21.333,21.333c0,11.782,9.551,21.333,21.333,21.333 h149.333c0.007,0,0.014-0.001,0.021-0.001c0.696-0.001,1.391-0.037,2.084-0.105c0.318-0.031,0.627-0.091,0.94-0.136 c0.375-0.054,0.75-0.098,1.122-0.171c0.359-0.071,0.708-0.17,1.061-0.259c0.322-0.081,0.645-0.151,0.964-0.248 c0.346-0.105,0.68-0.234,1.018-0.356c0.318-0.114,0.639-0.219,0.953-0.349c0.316-0.131,0.618-0.284,0.926-0.43 c0.323-0.152,0.649-0.296,0.966-0.465c0.295-0.158,0.575-0.338,0.861-0.509c0.311-0.186,0.626-0.361,0.929-0.564 c0.316-0.211,0.613-0.447,0.917-0.674c0.253-0.19,0.513-0.365,0.759-0.568c1.087-0.892,2.085-1.889,2.977-2.977 c0.202-0.246,0.378-0.506,0.568-0.759c0.228-0.304,0.463-0.601,0.674-0.917c0.203-0.303,0.379-0.618,0.564-0.929 c0.171-0.286,0.351-0.566,0.509-0.861c0.169-0.317,0.313-0.643,0.465-0.966c0.145-0.308,0.299-0.611,0.43-0.926 c0.13-0.314,0.235-0.635,0.349-0.953c0.122-0.338,0.251-0.672,0.356-1.018c0.096-0.318,0.167-0.642,0.248-0.964 c0.089-0.353,0.188-0.701,0.259-1.061c0.074-0.372,0.118-0.748,0.171-1.122c0.045-0.314,0.104-0.622,0.136-0.94 c0.069-0.7,0.106-1.402,0.106-2.105V64C234.667,52.218,225.115,42.667,213.333,42.667z">
+                      </path>
+                      <path
+                        d="M505.752,475.582L350.17,320H448c11.782,0,21.333-9.551,21.333-21.333c0-11.782-9.551-21.333-21.333-21.333H298.667 c-0.703,0-1.405,0.037-2.105,0.106c-0.318,0.031-0.627,0.091-0.94,0.136c-0.375,0.054-0.75,0.098-1.122,0.171 c-0.359,0.071-0.708,0.17-1.061,0.259c-0.322,0.081-0.645,0.151-0.964,0.248c-0.346,0.105-0.68,0.234-1.018,0.356 c-0.318,0.114-0.639,0.219-0.953,0.349c-0.316,0.131-0.618,0.284-0.926,0.43c-0.323,0.152-0.649,0.296-0.966,0.465 c-0.295,0.158-0.575,0.338-0.861,0.509c-0.311,0.186-0.626,0.361-0.929,0.564c-0.316,0.211-0.613,0.447-0.917,0.674 c-0.253,0.19-0.513,0.365-0.759,0.568c-1.087,0.892-2.085,1.889-2.977,2.977c-0.202,0.246-0.378,0.506-0.568,0.759 c-0.228,0.304-0.463,0.601-0.674,0.917c-0.203,0.303-0.379,0.618-0.564,0.929c-0.171,0.286-0.351,0.566-0.509,0.861 c-0.169,0.317-0.313,0.643-0.465,0.966c-0.145,0.308-0.299,0.611-0.43,0.926c-0.13,0.314-0.235,0.635-0.349,0.953 c-0.122,0.338-0.251,0.672-0.356,1.018c-0.096,0.318-0.167,0.642-0.248,0.964c-0.089,0.353-0.188,0.701-0.259,1.061 c-0.074,0.372-0.118,0.748-0.171,1.122c-0.045,0.314-0.104,0.622-0.136,0.94c-0.068,0.693-0.105,1.388-0.105,2.084 c0,0.007-0.001,0.014-0.001,0.021V448c0,11.782,9.551,21.333,21.333,21.333c11.782,0,21.333-9.551,21.333-21.333v-97.83 l155.582,155.582c8.331,8.331,21.839,8.331,30.17,0C514.083,497.42,514.083,483.913,505.752,475.582z">
+                      </path>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </template>
+          <template lwc:else>
+            <svg viewBox="0 0 24 24">
+              <g stroke-width="0"></g>
+              <g stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.048"></g>
+              <g>
+                <path
+                  d="M14.293,9.707a1,1,0,0,1,0-1.414L18.586,4H16a1,1,0,0,1,0-2h5a1,1,0,0,1,1,1V8a1,1,0,0,1-2,0V5.414L15.707,9.707a1,1,0,0,1-1.414,0ZM3,22H8a1,1,0,0,0,0-2H5.414l4.293-4.293a1,1,0,0,0-1.414-1.414L4,18.586V16a1,1,0,0,0-2,0v5A1,1,0,0,0,3,22Z">
+                </path>
+              </g>
+            </svg>
+          </template>
+        </div>
+      </div>
+    </div>
+    <div class="mappingKeySection">
+      <div class="objectSelection">
+        <template lwc:if={showCombobox}>
+          <c-custom-combobox class="relatedObjSelection" options={comboBoxOptions} value={selectedValue}
+            placeholder={objectComboPlaceHolder} onselect={handleOptionSelect} onfocus={handleComboboxFocus}
+            onblur={handleComboboxFocus} multiselect="false" searchable="true" dropdown-position="right"
+            dropdown-top="false" show-description={showComboDescription} data-combox="relatedObj"></c-custom-combobox>
+        </template>
+        <template lwc:if={showSearchBar}>
+          <div class="fieldSearchContainer">
+            <div class="fieldSearchContainer_sub">
+              <span class="fieldSearchBtn">
+                <svg class="slds-icon slds-icon-text-default slds-icon_x-small" focusable="false" data-key="search"
+                  aria-hidden="true" viewBox="0 0 520 520" part="icon">
+                  <g>
+                    <path
+                      d="M496 453L362 320a189 189 0 10-340-92 190 190 0 00298 135l133 133a14 14 0 0021 0l21-21a17 17 0 001-22zM210 338a129 129 0 11130-130 129 129 0 01-130 130z">
+                    </path>
+                  </g>
+                </svg>
+              </span>
+              <input type="text" class="fieldSearchInput" value={searchFieldValue} onkeyup={handleKeySearch}
+                placeholder={searchBarPlaceHolder} />
+            </div>
+          </div>
+        </template>
+        <template lwc:if={showRefreshButton}>
+          <div class="refreshBtn" onclick={refreshData} title="Refresh" data-name={isDataRefreshing}>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z">
+              </path>
+            </svg>
+          </div>
+        </template>
+      </div>
+      <template lwc:if={mappingTypeTabArea.objectFields}>
+        <div class="mappingHeader">
+          <div class="table_tr header_tr">
+            <div class="table_td first-td header_td">
+              <div class="textContent">Field Name</div>
+            </div>
+            <div class="table_td last-td header_td">
+              <span class="textContent fieldMappingHeader">Mapping Key</span>
+            </div>
+          </div>
+        </div>
+        <div class="mappingFields">
+          <div class="mappingFields_sub">
+            <template for:each={field_Vs_KeyList} for:item="field" for:index="index">
+              <div class="table_tr mappingTableRow" key={field} data-fieldrow={field.name}>
+                <div class="table_td first-td">
+                  <div class="fieldLabel">{field.label}</div>
+                </div>
+                <div class="table_td last-td">
+                  <div class="fieldKey" data-fieldname={field.name} data-name="fieldTD">
+                    <span class="fieldKeyText" onclick={setHighlightedSelection}>{field.key}</span>
+                    <span if:true={field.isFormatReq} class="formatCopy" data-fieldname={field.name}
+                      data-fieldkey={field.key} data-fieldtype={field.type} data-isformatreq={field.isFormatReq}
+                      onclick={setFormatKeyList}>
+                      <svg viewBox="0 0 24 24">
+                        <g stroke-width="0"></g>
+                        <g stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g>
+                          <path
+                            d="M12,10a2,2,0,1,1-2,2A2,2,0,0,1,12,10ZM4,14a2,2,0,1,0-2-2A2,2,0,0,0,4,14Zm16-4a2,2,0,1,0,2,2A2,2,0,0,0,20,10Z">
+                          </path>
+                        </g>
+                      </svg>
+                    </span>
+                    <span class="fieldKeyText_copyBTN" data-fieldname={field.name} data-fieldkey={field.key}
+                      data-fieldtype={field.type} data-isformatreq={field.isFormatReq} onclick={handleCopyFieldKey}>
+                      <svg viewBox="0 0 55.699 55.699">
+                        <g>
+                          <path
+                            d="M51.51,18.001c-0.006-0.085-0.022-0.167-0.05-0.248c-0.012-0.034-0.02-0.067-0.035-0.1   c-0.049-0.106-0.109-0.206-0.194-0.291v-0.001l0,0c0,0-0.001-0.001-0.001-0.002L34.161,0.293c-0.086-0.087-0.188-0.148-0.295-0.197   c-0.027-0.013-0.057-0.02-0.086-0.03c-0.086-0.029-0.174-0.048-0.265-0.053C33.494,0.011,33.475,0,33.453,0H22.177   c-3.678,0-6.669,2.992-6.669,6.67v1.674h-4.663c-3.678,0-6.67,2.992-6.67,6.67V49.03c0,3.678,2.992,6.669,6.67,6.669h22.677   c3.677,0,6.669-2.991,6.669-6.669v-1.675h4.664c3.678,0,6.669-2.991,6.669-6.669V18.069C51.524,18.045,51.512,18.025,51.51,18.001z    M34.454,3.414l13.655,13.655h-8.985c-2.575,0-4.67-2.095-4.67-4.67V3.414z M38.191,49.029c0,2.574-2.095,4.669-4.669,4.669H10.845   c-2.575,0-4.67-2.095-4.67-4.669V15.014c0-2.575,2.095-4.67,4.67-4.67h5.663h4.614v10.399c0,3.678,2.991,6.669,6.668,6.669h10.4   v18.942L38.191,49.029L38.191,49.029z M36.777,25.412h-8.986c-2.574,0-4.668-2.094-4.668-4.669v-8.985L36.777,25.412z    M44.855,45.355h-4.664V26.412c0-0.023-0.012-0.044-0.014-0.067c-0.006-0.085-0.021-0.167-0.049-0.249   c-0.012-0.033-0.021-0.066-0.036-0.1c-0.048-0.105-0.109-0.205-0.194-0.29l0,0l0,0c0-0.001-0.001-0.002-0.001-0.002L22.829,8.637   c-0.087-0.086-0.188-0.147-0.295-0.196c-0.029-0.013-0.058-0.021-0.088-0.031c-0.086-0.03-0.172-0.048-0.263-0.053   c-0.021-0.002-0.04-0.013-0.062-0.013h-4.614V6.67c0-2.575,2.095-4.67,4.669-4.67h10.277v10.4c0,3.678,2.992,6.67,6.67,6.67h10.399   v21.616C49.524,43.26,47.429,45.355,44.855,45.355z" />
+                        </g>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+      <template lwc:if={mappingTypeTabArea.generalFields}>
+        <div class="mappingHeader">
+          <div class="table_tr header_tr">
+            <div class="table_td first-td header_td">
+              <div class="textContent">Field Name</div>
+            </div>
+            <div class="table_td last-td header_td">
+              <span class="textContent fieldMappingHeader">Mapping Key</span>
+            </div>
+          </div>
+        </div>
+        <div class="mappingFields">
+          <div class="mappingFields_sub">
+            <template for:each={generalFieldsToDisplay} for:item="field" for:index="index">
+              <div class="table_tr mappingTableRow" key={field} data-fieldrow={field.name}>
+                <div class="table_td first-td">
+                  <div class="fieldLabel">{field.label}</div>
+                </div>
+                <div class="table_td last-td">
+                  <div class="fieldKey" data-fieldname={field.name} data-name="fieldTD">
+                    <span class="fieldKeyText" onclick={setHighlightedSelection}>{field.key}</span>
+                    <span if:true={field.isFormatReq} class="formatCopy" data-fieldname={field.name}
+                      data-fieldkey={field.key} data-fieldtype={field.type} data-isformatreq={field.isFormatReq}
+                      onclick={setFormatKeyList}>
+                      <svg viewBox="0 0 24 24">
+                        <g stroke-width="0"></g>
+                        <g stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g>
+                          <path
+                            d="M12,10a2,2,0,1,1-2,2A2,2,0,0,1,12,10ZM4,14a2,2,0,1,0-2-2A2,2,0,0,0,4,14Zm16-4a2,2,0,1,0,2,2A2,2,0,0,0,20,10Z">
+                          </path>
+                        </g>
+                      </svg>
+                    </span>
+                    <span class="fieldKeyText_copyBTN" data-fieldname={field.name} data-fieldkey={field.key}
+                      data-fieldtype={field.type} data-isformatreq={field.isFormatReq} onclick={handleCopyFieldKey}>
+                      <svg viewBox="0 0 55.699 55.699">
+                        <g>
+                          <path
+                            d="M51.51,18.001c-0.006-0.085-0.022-0.167-0.05-0.248c-0.012-0.034-0.02-0.067-0.035-0.1   c-0.049-0.106-0.109-0.206-0.194-0.291v-0.001l0,0c0,0-0.001-0.001-0.001-0.002L34.161,0.293c-0.086-0.087-0.188-0.148-0.295-0.197   c-0.027-0.013-0.057-0.02-0.086-0.03c-0.086-0.029-0.174-0.048-0.265-0.053C33.494,0.011,33.475,0,33.453,0H22.177   c-3.678,0-6.669,2.992-6.669,6.67v1.674h-4.663c-3.678,0-6.67,2.992-6.67,6.67V49.03c0,3.678,2.992,6.669,6.67,6.669h22.677   c3.677,0,6.669-2.991,6.669-6.669v-1.675h4.664c3.678,0,6.669-2.991,6.669-6.669V18.069C51.524,18.045,51.512,18.025,51.51,18.001z    M34.454,3.414l13.655,13.655h-8.985c-2.575,0-4.67-2.095-4.67-4.67V3.414z M38.191,49.029c0,2.574-2.095,4.669-4.669,4.669H10.845   c-2.575,0-4.67-2.095-4.67-4.669V15.014c0-2.575,2.095-4.67,4.67-4.67h5.663h4.614v10.399c0,3.678,2.991,6.669,6.668,6.669h10.4   v18.942L38.191,49.029L38.191,49.029z M36.777,25.412h-8.986c-2.574,0-4.668-2.094-4.668-4.669v-8.985L36.777,25.412z    M44.855,45.355h-4.664V26.412c0-0.023-0.012-0.044-0.014-0.067c-0.006-0.085-0.021-0.167-0.049-0.249   c-0.012-0.033-0.021-0.066-0.036-0.1c-0.048-0.105-0.109-0.205-0.194-0.29l0,0l0,0c0-0.001-0.001-0.002-0.001-0.002L22.829,8.637   c-0.087-0.086-0.188-0.147-0.295-0.196c-0.029-0.013-0.058-0.021-0.088-0.031c-0.086-0.03-0.172-0.048-0.263-0.053   c-0.021-0.002-0.04-0.013-0.062-0.013h-4.614V6.67c0-2.575,2.095-4.67,4.669-4.67h10.277v10.4c0,3.678,2.992,6.67,6.67,6.67h10.399   v21.616C49.524,43.26,47.429,45.355,44.855,45.355z" />
+                        </g>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+      <template lwc:if={mappingTypeTabArea.sfImages}>
+        <div class="mappingFields_sub">
+          <div lwc:if={isImgMaxSizeLimit} class="keyInfoText">
+            <ul>
+              <li>Add salesforce images upto 20MB.</li>
+            </ul>
+          </div>
+          <template for:each={contentVersionToDisplay} for:item="img" for:index="index">
+            <div class="mappingImgContainer" data-imgid={img.Id} key={img}>
+              <div class="fetchLoadingOverlay" data-overlay={img.Id}>
+                <div class="overlayIcon">
+                  <svg viewBox="0 0 24 24">
+                    <g stroke-width="0"></g>
+                    <g stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g>
+                      <g data-name="Layer 2">
+                        <g data-name="cloud-download">
+                          <rect width="24" height="24" opacity="0"></rect>
+                          <path
+                            d="M14.31 16.38L13 17.64V12a1 1 0 0 0-2 0v5.59l-1.29-1.3a1 1 0 0 0-1.42 1.42l3 3A1 1 0 0 0 12 21a1 1 0 0 0 .69-.28l3-2.9a1 1 0 1 0-1.38-1.44z">
+                          </path>
+                          <path
+                            d="M17.67 7A6 6 0 0 0 6.33 7a5 5 0 0 0-3.08 8.27A1 1 0 1 0 4.75 14 3 3 0 0 1 7 9h.1a1 1 0 0 0 1-.8 4 4 0 0 1 7.84 0 1 1 0 0 0 1 .8H17a3 3 0 0 1 2.25 5 1 1 0 0 0 .09 1.42 1 1 0 0 0 .66.25 1 1 0 0 0 .75-.34A5 5 0 0 0 17.67 7z">
+                          </path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                <div class="fetchLoadingOverlayText">
+                  Fetching Data...
+                </div>
+              </div>
+              <div class="imgThumbnail">
+                <img src={img.imageSRC}></img>
+              </div>
+              <div class="imgDetailsection">
+                <div class="imgName">{img.Title}</div>
+                <div class="imageInfo">
+                  <div class="imgFileType">{img.FileType}</div>
+                  <div class="imgSize">{img.fileSize}</div>
+                </div>
+              </div>
+              <div class="imgCopyBtn" data-id={img.Id} onclick={copySFImgAsHTMl}>
+                <svg viewBox="0 0 55.699 55.699">
+                  <g>
+                    <path
+                      d="M51.51,18.001c-0.006-0.085-0.022-0.167-0.05-0.248c-0.012-0.034-0.02-0.067-0.035-0.1   c-0.049-0.106-0.109-0.206-0.194-0.291v-0.001l0,0c0,0-0.001-0.001-0.001-0.002L34.161,0.293c-0.086-0.087-0.188-0.148-0.295-0.197   c-0.027-0.013-0.057-0.02-0.086-0.03c-0.086-0.029-0.174-0.048-0.265-0.053C33.494,0.011,33.475,0,33.453,0H22.177   c-3.678,0-6.669,2.992-6.669,6.67v1.674h-4.663c-3.678,0-6.67,2.992-6.67,6.67V49.03c0,3.678,2.992,6.669,6.67,6.669h22.677   c3.677,0,6.669-2.991,6.669-6.669v-1.675h4.664c3.678,0,6.669-2.991,6.669-6.669V18.069C51.524,18.045,51.512,18.025,51.51,18.001z    M34.454,3.414l13.655,13.655h-8.985c-2.575,0-4.67-2.095-4.67-4.67V3.414z M38.191,49.029c0,2.574-2.095,4.669-4.669,4.669H10.845   c-2.575,0-4.67-2.095-4.67-4.669V15.014c0-2.575,2.095-4.67,4.67-4.67h5.663h4.614v10.399c0,3.678,2.991,6.669,6.668,6.669h10.4   v18.942L38.191,49.029L38.191,49.029z M36.777,25.412h-8.986c-2.574,0-4.668-2.094-4.668-4.669v-8.985L36.777,25.412z    M44.855,45.355h-4.664V26.412c0-0.023-0.012-0.044-0.014-0.067c-0.006-0.085-0.021-0.167-0.049-0.249   c-0.012-0.033-0.021-0.066-0.036-0.1c-0.048-0.105-0.109-0.205-0.194-0.29l0,0l0,0c0-0.001-0.001-0.002-0.001-0.002L22.829,8.637   c-0.087-0.086-0.188-0.147-0.295-0.196c-0.029-0.013-0.058-0.021-0.088-0.031c-0.086-0.03-0.172-0.048-0.263-0.053   c-0.021-0.002-0.04-0.013-0.062-0.013h-4.614V6.67c0-2.575,2.095-4.67,4.669-4.67h10.277v10.4c0,3.678,2.992,6.67,6.67,6.67h10.399   v21.616C49.524,43.26,47.429,45.355,44.855,45.355z" />
+                  </g>
+                </svg>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+      <template lwc:if={mappingTypeTabArea.signature}>
+        <div class="mappingFields_sub">
+          <div class="keyInfoText">
+            <ul>
+              <li>Add Signature in your Document using the signature key.</li>
+              <li>To Generate Digital signature in your org, You can use </br><b><a href={signatureAnyWhereLink} target="_blank">Signature Anywhere</a></b> AppExchange app.</li>
+            </ul>
+          </div>
+          <div class="fieldKey signatureKey" data-fieldname="signature" data-name="fieldTD">
+            <span class="fieldKeyText">{signatureKey}</span>
+            <span class="fieldKeyText_copyBTN" data-fieldname="signature" data-fieldkey={signatureKey} onclick={handleCopyFieldKey}>
+              <svg viewBox="0 0 55.699 55.699" >
+              <g><path d="M51.51,18.001c-0.006-0.085-0.022-0.167-0.05-0.248c-0.012-0.034-0.02-0.067-0.035-0.1   c-0.049-0.106-0.109-0.206-0.194-0.291v-0.001l0,0c0,0-0.001-0.001-0.001-0.002L34.161,0.293c-0.086-0.087-0.188-0.148-0.295-0.197   c-0.027-0.013-0.057-0.02-0.086-0.03c-0.086-0.029-0.174-0.048-0.265-0.053C33.494,0.011,33.475,0,33.453,0H22.177   c-3.678,0-6.669,2.992-6.669,6.67v1.674h-4.663c-3.678,0-6.67,2.992-6.67,6.67V49.03c0,3.678,2.992,6.669,6.67,6.669h22.677   c3.677,0,6.669-2.991,6.669-6.669v-1.675h4.664c3.678,0,6.669-2.991,6.669-6.669V18.069C51.524,18.045,51.512,18.025,51.51,18.001z    M34.454,3.414l13.655,13.655h-8.985c-2.575,0-4.67-2.095-4.67-4.67V3.414z M38.191,49.029c0,2.574-2.095,4.669-4.669,4.669H10.845   c-2.575,0-4.67-2.095-4.67-4.669V15.014c0-2.575,2.095-4.67,4.67-4.67h5.663h4.614v10.399c0,3.678,2.991,6.669,6.668,6.669h10.4   v18.942L38.191,49.029L38.191,49.029z M36.777,25.412h-8.986c-2.574,0-4.668-2.094-4.668-4.669v-8.985L36.777,25.412z    M44.855,45.355h-4.664V26.412c0-0.023-0.012-0.044-0.014-0.067c-0.006-0.085-0.021-0.167-0.049-0.249   c-0.012-0.033-0.021-0.066-0.036-0.1c-0.048-0.105-0.109-0.205-0.194-0.29l0,0l0,0c0-0.001-0.001-0.002-0.001-0.002L22.829,8.637   c-0.087-0.086-0.188-0.147-0.295-0.196c-0.029-0.013-0.058-0.021-0.088-0.031c-0.086-0.03-0.172-0.048-0.263-0.053   c-0.021-0.002-0.04-0.013-0.062-0.013h-4.614V6.67c0-2.575,2.095-4.67,4.669-4.67h10.277v10.4c0,3.678,2.992,6.67,6.67,6.67h10.399   v21.616C49.524,43.26,47.429,45.355,44.855,45.355z"/></g>
+              </svg>
+            </span>
+          </div>
+          <div class="sizeSetOpt">
+            <lightning-helptext class="tooltip" content="Set Signature size by percentage of Page size"></lightning-helptext>
+            <div class="label">Signature Size : </div>
+            <input class=" slds-slider__range" type="range" value={signatureSize} oninput={setSignatureSize} min="1" max="100">
+            <div>{signatureSize}%</div>
+            <button class="signaturesSetBtn" onclick={updateSignatureSize}  disabled={isSignatureSetBtn}>Update</button>
+          </div>
+          <lightning-accordion class="infoAccordion" allow-multiple-sections-open active-section-name="">
+            <lightning-accordion-section name="A" label="How It Works?">
+              <div class="keyInfoUlListText signature">
+                <ul>
+                  <li>Insert the signature key into the template where you want the signature to appear.</li>
+                  <li>At the time of Document generation, it will automatically look for the most recent image from the source record.</li>
+                  <li>The image must have "Signature-" in its name to be selected.</li>
+                  <li>The most recent image with a name that includes "Signature-" will be selected and used to replace the signature key.</li>
+                  <li>You can add image upto 3MB.</li>
+                </ul>
+              </div>
+            </lightning-accordion-section>
+          </lightning-accordion>
+        </div>
+      </template>
+      <template lwc:if={mappingTypeTabArea.pmImages}>
+        <div class="mappingFields_sub">
+          <div class="display_css mappingTableRow">
+            <div class="width_main_css">
+              <div class="fiedlKey">
+                <span class="fieldKeyText">{listingMediaCount}</span>
+                <span class="icon-minus" onclick={decreaseCount}>
+                  <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="14" y="30" width="36" height="4" />
+                  </svg>
+                </span>
+                <span class="icon-plus" onclick={increaseCount}>
+                  <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M34 30V14h-4v16H14v4h16v16h4V34h16v-4z" />
+                  </svg>
+                </span>
+                <span class="fieldKeyText_copyBTN" data-name={listingMediaCount} onclick={copyPMImgAsHTML}>
+                  <svg viewBox="0 0 55.699 55.699">
+                    <g>
+                      <path
+                        d="M51.51,18.001c-0.006-0.085-0.022-0.167-0.05-0.248c-0.012-0.034-0.02-0.067-0.035-0.1   c-0.049-0.106-0.109-0.206-0.194-0.291v-0.001l0,0c0,0-0.001-0.001-0.001-0.002L34.161,0.293c-0.086-0.087-0.188-0.148-0.295-0.197   c-0.027-0.013-0.057-0.02-0.086-0.03c-0.086-0.029-0.174-0.048-0.265-0.053C33.494,0.011,33.475,0,33.453,0H22.177   c-3.678,0-6.669,2.992-6.669,6.67v1.674h-4.663c-3.678,0-6.67,2.992-6.67,6.67V49.03c0,3.678,2.992,6.669,6.67,6.669h22.677   c3.677,0,6.669-2.991,6.669-6.669v-1.675h4.664c3.678,0,6.669-2.991,6.669-6.669V18.069C51.524,18.045,51.512,18.025,51.51,18.001z    M34.454,3.414l13.655,13.655h-8.985c-2.575,0-4.67-2.095-4.67-4.67V3.414z M38.191,49.029c0,2.574-2.095,4.669-4.669,4.669H10.845   c-2.575,0-4.67-2.095-4.67-4.669V15.014c0-2.575,2.095-4.67,4.67-4.67h5.663h4.614v10.399c0,3.678,2.991,6.669,6.668,6.669h10.4   v18.942L38.191,49.029L38.191,49.029z M36.777,25.412h-8.986c-2.574,0-4.668-2.094-4.668-4.669v-8.985L36.777,25.412z    M44.855,45.355h-4.664V26.412c0-0.023-0.012-0.044-0.014-0.067c-0.006-0.085-0.021-0.167-0.049-0.249   c-0.012-0.033-0.021-0.066-0.036-0.1c-0.048-0.105-0.109-0.205-0.194-0.29l0,0l0,0c0-0.001-0.001-0.002-0.001-0.002L22.829,8.637   c-0.087-0.086-0.188-0.147-0.295-0.196c-0.029-0.013-0.058-0.021-0.088-0.031c-0.086-0.03-0.172-0.048-0.263-0.053   c-0.021-0.002-0.04-0.013-0.062-0.013h-4.614V6.67c0-2.575,2.095-4.67,4.669-4.67h10.277v10.4c0,3.678,2.992,6.67,6.67,6.67h10.399   v21.616C49.524,43.26,47.429,45.355,44.855,45.355z" />
+                    </g>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <div class="buttonSection">
+      <template lwc:if={cancelButtonLabel}>
+        <button class="footerBtn" title={cancelButtonLabel} onclick={handleClose}>
+          <svg viewBox="0 0 520 520">
+            <g>
+              <path
+                d="M310 254l130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 01-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0114 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 010-14z">
+              </path>
+            </g>
+          </svg>
+          {cancelButtonLabel}
+        </button>
+      </template>
+      <template lwc:if={previewButtonLabel}>
+        <button class="footerBtn" title={previewButtonLabel} onclick={handlePreview}>
+          <svg viewBox="0 0 520 520">
+            <g lwc-3pd22r3mk56="">
+              <path
+                d="M518 251a288 288 0 00-516 0 20 20 0 000 18 288 288 0 00516 0 20 20 0 000-18zM260 370c-61 0-110-49-110-110s49-110 110-110 110 49 110 110-49 110-110 110zm0-180c-39 0-70 31-70 70s31 70 70 70 70-31 70-70-31-70-70-70z">
+              </path>
+            </g>
+          </svg>
+          {previewButtonLabel}
+        </button>
+      </template>
+      <template lwc:if={saveButtonLabel}>
+        <button class="footerBtn" title={saveButtonLabel} onclick={handleSave}>
+          <svg viewBox="0 0 520 520">
+            <g>
+              <path
+                d="M371 40v136c0 10-8 19-19 19H139c-10 0-19-8-19-19V40H80a40 40 0 00-40 40v360a40 40 0 0040 40h360a40 40 0 0040-40V112l-72-72zm70 381c0 10-8 19-19 19H99c-10 0-19-8-19-19V254c0-10 8-19 19-19h323c10 0 19 8 19 19zM248 136c0 10 8 19 19 19h46c10 0 19-8 19-19V40h-83z">
+              </path>
+            </g>
+          </svg>
+          {saveButtonLabel}
+        </button>
+      </template>
+    </div>
+
+    <!-- Format field Popover for formatting options === START ===   -->
+    <div if:true={showFormatKeys} class="formattingKeyPopover" onclick={closeKeyPopover}>
+      <div class="keyPopover_Container" onclick={stopPropagation}>
+        <div class="keyPopover_top">
+          <div class="keyPopoverTitle">
+            Field Type : {clickedFieldType}
+          </div>
+          <div class="keyPopoverCloseBtn" onclick={closeKeyPopover}>
+            <svg viewBox="0 0 22 22">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M20.7334 2.5537C20.8179 2.46918 20.885 2.36885 20.9307 2.25843C20.9765 2.14801 21 2.02966 21 1.91013C21 1.79061 20.9765 1.67226 20.9307 1.56184C20.885 1.45142 20.8179 1.35109 20.7334 1.26657C20.6489 1.18206 20.5486 1.11502 20.4382 1.06928C20.3277 1.02354 20.2094 1 20.0899 1C19.9703 1 19.852 1.02354 19.7416 1.06928C19.6311 1.11502 19.5308 1.18206 19.4463 1.26657L11 9.71469L2.5537 1.26657C2.46918 1.18206 2.36885 1.11502 2.25843 1.06928C2.14801 1.02354 2.02966 1 1.91013 1C1.79061 1 1.67226 1.02354 1.56184 1.06928C1.45142 1.11502 1.35109 1.18206 1.26657 1.26657C1.18206 1.35109 1.11502 1.45142 1.06928 1.56184C1.02354 1.67226 1 1.79061 1 1.91013C1 2.02966 1.02354 2.14801 1.06928 2.25843C1.11502 2.36885 1.18206 2.46918 1.26657 2.5537L9.71469 11L1.26657 19.4463C1.09589 19.617 1 19.8485 1 20.0899C1 20.3312 1.09589 20.5627 1.26657 20.7334C1.43726 20.9041 1.66875 21 1.91013 21C2.15152 21 2.38301 20.9041 2.5537 20.7334L11 12.2853L19.4463 20.7334C19.617 20.9041 19.8485 21 20.0899 21C20.3312 21 20.5627 20.9041 20.7334 20.7334C20.9041 20.5627 21 20.3312 21 20.0899C21 19.8485 20.9041 19.617 20.7334 19.4463L12.2853 11L20.7334 2.5537Z">
+              </path>
+            </svg>
+          </div>
+        </div>
+        <div class="keyPopover_body">
+          <div class="helpText">{formatHelpText}</div>
+          <div class="filterKeyComboContainer">
+            <template lwc:if={formateOptions.isPrimaryFormateCombobox}>
+              <c-custom-combobox class="primeFilterKeys" options={primeFormatKeys} placeholder="Select Format"
+                onselect={handlePrimeFormat} multiselect="false" searchable="false" dropdown-position="center"
+                dropdown-top="false" data-combox="primeFilterKeys"></c-custom-combobox>
+              <template lwc:if={isSubFormat}>
+                <c-custom-combobox class="subFilterKeys" options={subFormatKeys} placeholder="Select Time Format"
+                  onselect={handleSubFormat} multiselect="false" searchable="false" dropdown-position="center"
+                  dropdown-top="false" data-combox="subFilterKeys"></c-custom-combobox>
+              </template>
+            </template>
+            <template lwc:if={formateOptions.isCheckboxFormate}>
+              <div class="formatInputSection">
+                <div class="inputContainer">
+                  <div class="inputContainerText">When Ticked</div>
+                  <input type="text" placeholder="i.e. Yes, Completed..." data-name="true"
+                    onkeyup={setCheckBoxFormat} />
+                </div>
+                <div class="inputContainer">
+                  <div class="inputContainerText">When Unticked</div>
+                  <input type="text" placeholder="i.e. No, Pending..." data-name="false" onkeyup={setCheckBoxFormat} />
+                </div>
+              </div>
+            </template>
+            <template lwc:if={formateOptions.isTextFormate}>
+              <div class="formatInputSection">
+                <div class="inputContainer">
+                  <div class="inputContainerText">Text Length</div>
+                  <input type="number" placeholder="Set text length by character..." onkeyup={setTextFormat} />
+                </div>
+              </div>
+            </template>
+            <template lwc:if={formateOptions.isNumberFormat}>
+              <div class="slds-form-element">
+                <label class="slds-checkbox_toggle slds-grid">
+                  <span class="slds-form-element__label slds-m-bottom_none toggleLabel">Format {clickedFieldType}:
+                  </span>
+                  <input type="checkbox" name="checkbox-toggle-15" value="checkbox-toggle-15" data-action="format"
+                    onchange={setNumberFormat} />
+                  <span id="checkbox-toggle-15" class="slds-checkbox_faux_container">
+                    <span class="slds-checkbox_faux"></span>
+                    <span class="slds-checkbox_on"> Yes</span>
+                    <span class="slds-checkbox_off"> No</span>
+                  </span>
+                </label>
+              </div>
+              <div class="formatInputSection decimalInput">
+                <div class="inputContainer">
+                  <div class="inputContainerText">Decimal Places</div>
+                  <input type="number" placeholder="Decimal Places" data-action="decimalPlaces"
+                    onkeyup={setNumberFormat} />
+                </div>
+              </div>
+              <div class="formatInputSection decimalInput">
+                <div class="inputContainer">
+                  <div class="inputContainerText roundMode" data-text="roundMode">Rounding Mode</div>
+                  <select data-action="roundMode" disabled onchange={setNumberFormat}>
+                    <option value="none">-- None --</option>
+                    <option value="CEILING">CEILING (towards positive infinity)</option>
+                    <option value="FLOOR">FLOOR (towards negative infinity)</option>
+                    <option value="HALF_UP">HALF UP (towards the nearest integers, but 5.5 = 6)</option>
+                    <option value="HALF_DOWN">HALF DOWN (towards the nearest integers, but 5.5 = 5)</option>
+                    <option value="UP">UP (towards zero)</option>
+                    <option value="DOWN">DOWN (away from zero)</option>
+                  </select>
+                </div>
+              </div>
+            </template>
+          </div>
+          <div class="table_tr mappingTableRow" data-fieldrow={chosenFormat.name}>
+            <div class="table_td last-td">
+              <div class="fieldKey" data-fieldname={chosenFormat.name} data-name="fieldTD">
+                <span class="fieldKeyText" onclick={setHighlightedSelection}>{chosenFormat.key}</span>
+                <span class="fieldKeyText_copyBTN" data-fieldname={chosenFormat.name} data-fieldkey={chosenFormat.key}
+                  data-fieldtype={chosenFormat.type} data-isformatreq='false' onclick={handleCopyFieldKey}>
+                  <svg viewBox="0 0 55.699 55.699">
+                    <g>
+                      <path
+                        d="M51.51,18.001c-0.006-0.085-0.022-0.167-0.05-0.248c-0.012-0.034-0.02-0.067-0.035-0.1 c-0.049-0.106-0.109-0.206-0.194-0.291v-0.001l0,0c0,0-0.001-0.001-0.001-0.002L34.161,0.293c-0.086-0.087-0.188-0.148-0.295-0.197   c-0.027-0.013-0.057-0.02-0.086-0.03c-0.086-0.029-0.174-0.048-0.265-0.053C33.494,0.011,33.475,0,33.453,0H22.177   c-3.678,0-6.669,2.992-6.669,6.67v1.674h-4.663c-3.678,0-6.67,2.992-6.67,6.67V49.03c0,3.678,2.992,6.669,6.67,6.669h22.677   c3.677,0,6.669-2.991,6.669-6.669v-1.675h4.664c3.678,0,6.669-2.991,6.669-6.669V18.069C51.524,18.045,51.512,18.025,51.51,18.001z    M34.454,3.414l13.655,13.655h-8.985c-2.575,0-4.67-2.095-4.67-4.67V3.414z M38.191,49.029c0,2.574-2.095,4.669-4.669,4.669H10.845   c-2.575,0-4.67-2.095-4.67-4.669V15.014c0-2.575,2.095-4.67,4.67-4.67h5.663h4.614v10.399c0,3.678,2.991,6.669,6.668,6.669h10.4   v18.942L38.191,49.029L38.191,49.029z M36.777,25.412h-8.986c-2.574,0-4.668-2.094-4.668-4.669v-8.985L36.777,25.412z    M44.855,45.355h-4.664V26.412c0-0.023-0.012-0.044-0.014-0.067c-0.006-0.085-0.021-0.167-0.049-0.249   c-0.012-0.033-0.021-0.066-0.036-0.1c-0.048-0.105-0.109-0.205-0.194-0.29l0,0l0,0c0-0.001-0.001-0.002-0.001-0.002L22.829,8.637   c-0.087-0.086-0.188-0.147-0.295-0.196c-0.029-0.013-0.058-0.021-0.088-0.031c-0.086-0.03-0.172-0.048-0.263-0.053   c-0.021-0.002-0.04-0.013-0.062-0.013h-4.614V6.67c0-2.575,2.095-4.67,4.669-4.67h10.277v10.4c0,3.678,2.992,6.67,6.67,6.67h10.399   v21.616C49.524,43.26,47.429,45.355,44.855,45.355z" />
+                    </g>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Format field Popover for formatting options === END ===   -->
+
+  </div>
+
+  <c-custom-timeout ontimeoutmethod={handleTimeout}></c-custom-timeout>
+</template>

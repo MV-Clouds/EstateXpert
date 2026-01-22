@@ -1,0 +1,67 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+        class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+            <div class="slds-modal__close closs_icon_css" onclick={handleCloseModal}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                    fill="white" />
+                </svg>
+            </div>    
+
+            <div class="slds-modal__header blue-header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Listings Published On {portalName} Portal</h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small border_css" id="modal-content-id-1">
+                <template if:true={isDataAvailable}>
+                    <div class="tableContainer">
+                        <div class="popup__header-row2">
+                            <div class="slds-col">
+                                <p class="header-text">Listing Name</p>
+                            </div>
+                            <div class="slds-col">
+                                <p class="header-text">Listing Reference</p>
+                            </div>
+                            <div class="slds-col">
+                                <p class="header-text">Listing Type</p>
+                            </div>
+                        </div>
+                        <div class="popup__recordValues">
+                            <template for:each={listingsDatas} for:item="listingsData">
+                                <div key={listingsData.listing_reference} class="popup__data-row2">
+                                    <div class="slds-col wrap_css">
+                                        <p class="clickable_css" onclick={redirectToListing} data-id={listingsData.id}>{listingsData.name}</p>
+                                    </div>
+                                    <div class="slds-col wrap_css">
+                                        <p>{listingsData.listing_reference}</p>
+                                    </div>
+                                    <div class="slds-col wrap_css">
+                                        <p>{listingsData.listing_type}</p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <template if:false={isDataAvailable}>
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-state__icon">
+                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                            </div>
+                            <div class="empty-state__message">No Listing has been published on {portalName} portal yet.</div>
+                        </div>
+                    </div>
+                </template>
+                <div class="footerbtns">
+                    <button class="cancel_btn_css" onclick={handleCloseModal}>Close</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+</template>

@@ -1,0 +1,40 @@
+<apex:page controller="FileDownloadController" contentType="{!fileContentType}" showHeader="false" sidebar="false" cache="false">
+    <html>
+        <body>    
+            <style>
+            
+                body{
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                }
+                body.sfdcBody{
+                    padding: unset !important;
+                }
+                .main-control-center-div {
+                    height: 100%;
+                    background-image: url('/resource/newImageandMediaBg');
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    display: flex;
+                    flex-direction: column;
+                    background-position-x: right;
+                }
+
+                .logo-div {
+                    margin-left: auto;
+                }
+
+                .logo-image{
+                    max-width: 8rem;
+                }
+            </style>
+            {!fileDownload}
+            <div class="main-control-center-div">
+                <div class="logo-div">
+                    <img class="logo-image" src="/resource/WBConnectLogo" alt="WBConnect Logo"></img>
+                </div>
+            </div>
+        </body>
+    </html>
+</apex:page>

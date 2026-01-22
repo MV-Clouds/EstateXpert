@@ -1,0 +1,342 @@
+<template>
+    <div class={containerClass}>
+        <!-- Header Section with Search and Actions -->
+        <div class="header-main-container">
+            <!-- Search Section (Left) -->
+            <template if:true={enableSearch}>
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <lightning-input
+                            type="search"
+                            placeholder={searchPlaceholder}
+                            value={searchTerm}
+                            onchange={handleSearchChange}
+                            class="search-input">
+                        </lightning-input>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Header Actions (Right) -->
+            <template if:true={headerActionButtons.length}>
+                <div class="header-actions-container">
+                    <template for:each={headerActionButtons} for:item="action">
+                        <button
+                            key={action.name}
+                            onclick={handleHeaderAction}
+                            data-actionname={action.name}
+                            class="header-action-btn">
+                            <template if:true={action.svgContent}>
+                                <span class="action-icon" lwc:dom="manual"></span>
+                            </template>
+                            {action.label}
+                        </button>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isDataLoading}>
+            <div class="loading-spinner">
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Data Table -->
+        <template if:true={hasTableData}>
+            <div class="datatable-container table-scrollable">
+                <table class={computedTableClass} role="grid">
+                    <!-- Table Header -->
+                    <thead>
+                        <tr class="table-header-row">
+                            <!-- Selection Column -->
+                            <template if:true={enableRowSelection}>
+                                <template if:false={hideSelectionColumn}>
+                                    <th class="header-cell checkbox-header" scope="col">
+                                        <div class="checkbox-container">
+                                            <input
+                                                type="checkbox"
+                                                checked={isAllRowsSelected}
+                                                onchange={handleSelectAllRows}
+                                                class="header-checkbox"
+                                            />
+                                        </div>
+                                    </th>
+                                </template>
+                            </template>
+
+                            <!-- Data Columns -->
+                            <template for:each={processedTableColumns} for:item="column">
+                                <th key={column.fieldName} 
+                                    class="header-cell data-column-header"
+                                    scope="col">
+                                    
+                                    <template if:true={column.sortable}>
+                                        <div class="sortable-header sort-cover" 
+                                             role="button" 
+                                             tabindex="0"
+                                             data-fieldname={column.fieldName}
+                                             onclick={handleColumnSort}>
+                                            <span class="header-text-with-icon" title={column.label}>
+                                                <span class="column-label slds-truncate">
+                                                    {column.label}
+                                                </span>
+                                                <span class="sort-icon-container">
+                                                    <svg class="sort-icon" data-index={column.fieldName} data-field={column.fieldName}
+                                                         xmlns="http://www.w3.org/2000/svg" height="52" width="52" 
+                                                         viewBox="0 0 520 520" fill="white">
+                                                        <path d="M414 210c8-8 8-19 0-27L264 36a20 20 0 0 0-28 0L86 183c-8 8-8 19 0 27l28 27c8 8 20 8 28 0l47-46c8-8 22-2 22 9v270c0 10 9 20 20 20h40c11 0 20-11 20-20V200c0-12 14-17 22-9l47 46c8 8 20 8 28 0z"/>
+                                                    </svg>
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </template>
+                                    
+                                    <template if:false={column.sortable}>
+                                        <span class="header-text-only" title={column.label}>
+                                            <span class="column-label slds-truncate">
+                                                {column.label}
+                                            </span>
+                                        </span>
+                                    </template>
+                                </th>
+                            </template>
+
+                            <!-- Row Actions Column -->
+                            <template if:true={hasRowActions}>
+                                <th class="header-cell actions-header" scope="col">
+                                    Actions
+                                </th>
+                            </template>
+                        </tr>
+                    </thead>
+
+                    <!-- Table Body -->
+                    <tbody>
+                        <template for:each={currentPageData} for:item="row" for:index="index">
+                            <tr key={row.recordId} class="table-data-row" data-rowindex={index}>
+                                <!-- Selection Column -->
+                                <template if:true={enableRowSelection}>
+                                    <template if:false={hideSelectionColumn}>
+                                        <td class="data-cell checkbox-cell">
+                                            <div class="checkbox-container">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={row.isRowSelected}
+                                                    onchange={handleSingleRowSelection}
+                                                    data-index={index}
+                                                    class="row-checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </template>
+                                </template>
+
+                                <!-- Data Columns -->
+                                <template for:each={row.columnData} for:item="cellData">
+                                    <td key={cellData.fieldName} class="data-cell">
+                                        <template if:true={cellData.isRecordLink}>
+                                            <a href="javascript:void(0);"
+                                               onclick={handleRecordLinkNavigation}
+                                               data-recordid={row.recordId}
+                                               class="record-link-anchor">
+                                                <lightning-formatted-text 
+                                                    value={cellData.displayValue}>
+                                                </lightning-formatted-text>
+                                            </a>
+                                        </template>
+                                        
+                                        <template if:false={cellData.isRecordLink}>
+                                            <div class="cell-content center-text" title={cellData.displayValue}>
+                                                <!-- Image Type -->
+                                                <template if:true={cellData.isImage}>
+                                                    <div class="image-container">
+                                                        <img 
+                                                            src={cellData.rawValue} 
+                                                            alt={cellData.displayValue}
+                                                            class="cell-image"
+                                                            onclick={handleImageClick}
+                                                            data-imageurl={cellData.rawValue}
+                                                            data-recordid={row.recordId}
+                                                            onerror={handleImageError}
+                                                        />
+                                                    </div>
+                                                </template>
+                                                
+                                                <!-- Currency Type -->
+                                                <template if:true={cellData.isCurrency}>
+                                                    <lightning-formatted-number 
+                                                        value={cellData.rawValue}
+                                                        format-style="currency"
+                                                        currency-code="USD">
+                                                    </lightning-formatted-number>
+                                                </template>
+                                                
+                                                <!-- Date Type (Date only) -->
+                                                <template if:true={cellData.isDate}>
+                                                    <lightning-formatted-date-time 
+                                                        value={cellData.rawValue}
+                                                        year="numeric" 
+                                                        month="short" 
+                                                        day="2-digit">
+                                                    </lightning-formatted-date-time>
+                                                </template>
+
+                                                <!-- DateTime Type (Date and Time) -->
+                                                <template if:true={cellData.isDateTime}>
+                                                    <div class="datetime-cell">
+                                                        <lightning-formatted-date-time 
+                                                            value={cellData.rawValue}
+                                                            year="numeric" 
+                                                            month="short" 
+                                                            day="2-digit"
+                                                            hour="2-digit"
+                                                            minute="2-digit"
+                                                            hour12="true"
+                                                            class="datetime-text">
+                                                        </lightning-formatted-date-time>
+                                                    </div>
+                                                </template>
+                                                
+                                                <!-- Email Type -->
+                                                <template if:true={cellData.isEmail}>
+                                                    <lightning-formatted-email 
+                                                        value={cellData.rawValue}>
+                                                    </lightning-formatted-email>
+                                                </template>
+                                                
+                                                <!-- Phone Type -->
+                                                <template if:true={cellData.isPhone}>
+                                                    <lightning-formatted-phone 
+                                                        value={cellData.rawValue}>
+                                                    </lightning-formatted-phone>
+                                                </template>
+                                                
+                                                <!-- URL Type -->
+                                                <template if:true={cellData.isUrl}>
+                                                    <lightning-formatted-url 
+                                                        value={cellData.rawValue}
+                                                        target="_blank">
+                                                    </lightning-formatted-url>
+                                                </template>
+                                                
+                                                <!-- Boolean Type -->
+                                                <template if:true={cellData.isBoolean}>
+                                                    <lightning-input 
+                                                        type="checkbox" 
+                                                        checked={cellData.rawValue}
+                                                        disabled>
+                                                    </lightning-input>
+                                                </template>
+
+                                                <!-- Toggle Type -->
+                                                <template if:true={cellData.isToggle}>
+                                                    <lightning-input 
+                                                        type="toggle"
+                                                        checked={cellData.rawValue}
+                                                        disabled={cellData.isReadOnly}
+                                                        onchange={handleToggleChange}
+                                                        data-fieldname={cellData.fieldName}
+                                                        data-recordid={row.recordId}
+                                                        class="toggle-input">
+                                                    </lightning-input>
+                                                </template>
+
+                                                <!-- Progress Type -->
+                                                <template if:true={cellData.isProgress}>
+                                                    <lightning-progress-bar 
+                                                        value={cellData.rawValue} 
+                                                        size="large" 
+                                                        variant="circular">
+                                                    </lightning-progress-bar>
+                                                </template>
+                                                
+                                                <!-- Default Text -->
+                                                <template if:false={cellData.hasSpecialType}>
+                                                    <lightning-formatted-text 
+                                                        value={cellData.displayValue}>
+                                                    </lightning-formatted-text>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </td>
+                                </template>
+
+                                <!-- Row Actions -->
+                                <template if:true={hasRowActions}>
+                                    <td class="data-cell actions-cell">
+                                        <div class="row-actions-container">
+                                            <template for:each={rowActionButtons} for:item="action">
+                                                <button 
+                                                    key={action.name}
+                                                    onclick={handleRowActionClick}
+                                                    data-actionname={action.name}
+                                                    data-rowindex={index}
+                                                    class="row-action-btn"
+                                                    title={action.label}>
+                                                    <template if:true={action.svgContent}>
+                                                        <span class="action-icon" lwc:dom="manual"></span>
+                                                    </template>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <template if:true={enableTablePagination}>
+                <template if:false={hideTableFooter}>
+                    <div class="pagination-main-container">
+                        <button class="pagination-nav-button" disabled={isCurrentPageFirst} onclick={handlePreviousPage}>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z"/>
+                            </svg> 
+                            Previous
+                        </button>
+                        
+                        <template for:each={paginationNumbers} for:item="page">
+                            <template if:false={page.isEllipsis}>
+                                <button key={page.number} data-page={page.number} class={page.buttonClass} onclick={handlePageNumberChange}>
+                                    {page.number}
+                                </button>
+                            </template>
+                            <template if:true={page.isEllipsis}>
+                                <span key={page.number} class="pagination-ellipsis-span">...</span>
+                            </template>
+                        </template>
+                        
+                        <button class="pagination-nav-button" disabled={isCurrentPageLast} onclick={handleNextPage}>
+                            Next 
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z"/>
+                            </svg>
+                        </button>
+
+                        <!-- Record Info -->
+                        <div class="record-info-container">
+                            Showing {startRecord} to {endRecord} of {totalDataItems} records&nbsp;
+                            <template if:true={totalSelectedRows}>
+                                | {totalSelectedRows} selected
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <!-- No Data Message -->
+        <template if:true={showNoDataMessage}>
+            <div class="no-data-main-container">
+                <lightning-icon icon-name={noDataIconName} size="large" class="no-data-icon"></lightning-icon>
+                <h3 class="no-data-title">{noDataTitle}</h3>
+                <p class="no-data-description">{noDataMessage}</p>
+            </div>
+        </template>
+    </div>
+</template>

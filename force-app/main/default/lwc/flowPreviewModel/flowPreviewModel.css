@@ -1,0 +1,72 @@
+.slds-modal__container {
+    max-width: 900px !important;
+}
+
+.search-box {
+    width: 100%;
+}
+
+.flow-list {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.flow-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.flow-name {
+    font-weight: 600;
+}
+
+.flow-date {
+    font-size: 12px;
+    color: gray;
+}
+
+.preview-pane {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-container {
+    width: 280px;
+    height: 500px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.slds-gutters{
+    margin-left: 0px;
+    margin-right: 0px;
+}
+.preview-container {
+    width: 280px; /* Fixed width */
+    height: 500px; /* Adjust as needed */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.iframe-preview {
+    height: 900px;
+    min-width: 450px;
+    transform: scale(0.6);
+    transform-origin: top left;
+    margin-top: 360px;
+    margin-left: 190px;
+    border: none;
+}

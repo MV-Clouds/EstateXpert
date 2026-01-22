@@ -1,0 +1,147 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.my_popup_container {
+    position: fixed;
+    height: -webkit-fill-available;
+    width: -webkit-fill-available;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+    backdrop-filter: brightness(0.7);
+    z-index: 999;
+}
+
+.portal-syndication {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: right;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    position: relative;
+    min-height: 400px;
+}
+
+.portal-syndication h2 {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 20px;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.portal_syndication_table .inactive_cls {
+    background-color: #dcdcdc;
+    color: black;
+    border-radius: 15px;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.portal_syndication_table .active_cls {
+    background-color: #2e844a;
+    color: white;
+    border-radius: 15px;
+    padding: 4px 13px;
+    font-size: 12px;
+}
+
+.portal_syndication_table .publish_css {
+    background-color: #0576d2;
+    color: white;
+    padding: 7px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.portal_syndication_table .unpublish_css {
+    background-color: #ba0517;
+    color: white;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.portal_syndication_table .slds-button:hover {
+    opacity: 0.8;
+}
+
+.portal_syndication_table {
+    overflow: auto;
+    border-radius: 8px;
+    max-height: 18rem;
+    background-color: white;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+.portal_syndication_table .slds-table th,
+.portal_syndication_table .slds-table td {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 400;
+    color: #585858;
+    height: 40px;
+}
+
+.portal_syndication_table .slds-table th {
+    background-color: #0176D3;
+    color: white;
+    padding: 0.6rem;
+}
+
+.portal_syndication_table tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.portal_syndication_table table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 97;
+}
+
+.portal_syndication_table table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+.no-data-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+}
+
+.no-data-container img {
+    width: 60%;
+}
+
+.no-data-message {
+    color: #3a9bea;
+    font-size: 25px;
+    font-weight: 500;
+    margin-top: 0.85rem;
+    text-align: center;
+}
+
+.name_truncate_css {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 10rem;
+    margin: auto;
+}

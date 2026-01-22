@@ -1,0 +1,267 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.real-estate-wrapper {
+    min-height: 100%;
+}
+
+.sub-container {
+    padding: 0;
+}
+
+/* Error Handling */
+.error-message {
+    display: flex;
+    align-items: center;
+    color: #c0392b;
+    padding: 10px;
+    background: #f9d6d5;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Header */
+.real-estate-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0176D3;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.real-estate-header h1 {
+    color: #ffffff;
+    font-size: 18px;
+    margin: 0;
+    font-weight: 500;
+}
+
+.offer-header{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Offers Container */
+.offers-container {
+    background: #fff;
+    border-radius: 8px;
+    margin-top: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.offers-header {
+    padding: 12px 16px;
+    background: #f3f3f3;
+    border-bottom: 1px solid #e5e5e5;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.offers-header h2 {
+    color: #0176D3;
+    font-size: 16px;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Data Table */
+.custom-datatable {
+    max-width: 100%;
+    overflow: auto;
+    border-radius: 0 0 8px 8px;
+}
+
+.offers-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    font-size: 14px;
+}
+
+.offers-table th {
+    padding: 12px 10px;
+    background-color: #0176D3;
+    color: white;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+    border: none;
+}
+
+.offers-table td {
+    padding: 12px 10px;
+    text-align: center;
+    font-size: 14px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.offers-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.offers-table tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.offers-table tr:last-child td {
+    border-bottom: none;
+}
+
+.center-text {
+    text-align: center;
+}
+
+/* Contact Links */
+.offers-table td a {
+    color: #0176D3;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.offers-table td a:hover {
+    text-decoration: underline;
+}
+
+/* Action Icons */
+.offer-inbox-icon {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.offer-inbox-icon:hover {
+    background-color: #f0f0f0;
+}
+
+.offer-inbox-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* No Records State */
+.no-records {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+    background: #f8f9fa;
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+}
+
+.no-records .icon {
+    margin-right: 0.5rem;
+    color: #0176d3;
+}
+
+.no-records .title {
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+}
+
+/* Modal Styles */
+.slds-modal__header {
+    background-color: #0176D3;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-heading h1 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.custom-datatable-modal {
+    padding: 1rem;
+    background-color: white;
+    border-radius: 0 0 8px 8px;
+}
+
+.custom-datatable-modal .offers-table {
+    font-size: 13px;
+}
+
+.custom-datatable-modal .offers-table th,
+.custom-datatable-modal .offers-table td {
+    padding: 8px;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e5e5;
+    margin-top: 1rem;
+}
+
+.close-btn {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 34px;
+    text-align: center;
+    padding: 0px 20px;
+    background: #FFFFFF;
+    border: 1px solid #0176D3;
+    color: #0176D3;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    right: -2rem;
+    bottom: 0rem;
+    background: transparent;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 768px) {
+    .offers-table {
+        font-size: 12px;
+    }
+    
+    .offers-table th,
+    .offers-table td {
+        padding: 8px 4px;
+    }
+    
+    .real-estate-header h1 {
+        font-size: 16px;
+    }
+    
+    .offers-header h2 {
+        font-size: 14px;
+    }
+}
+
+/* Loading Spinner Container */
+.spinner-container {
+    position: relative;
+    min-height: 200px;
+}

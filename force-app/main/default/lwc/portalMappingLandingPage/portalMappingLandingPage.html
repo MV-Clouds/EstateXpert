@@ -1,0 +1,96 @@
+<template>
+    <div class="main_div_portal_mapping_landing_container">
+        <div class="main_header">
+            <div class="main_sub_header">
+                <div class="svg_back_icon" onclick={handleBack}>
+                    <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z" fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>                             
+                </div>
+                <div class="portal_mapping">
+                    {portalNameToShow}
+                </div>
+            </div>
+            <div class="action">
+                <!-- <template if:true={isCreateable}>
+                    <button class="btn_in_blue" onclick={handleEdit}>Edit</button>
+                </template> -->
+                <button class="btn_in_blue" onclick={handleSave}>Save</button>
+                <button class="btn_in_white" onclick={revertTheChanges}>Cancel</button>
+                <!-- <button class="btn_in_white" onclick={currentPortalAction} data-name="delete">Delete</button>
+
+                <template if:true={activeInactive}>
+                    <button class="btn_in_white" onclick={currentPortalAction} data-name="deactivate">Deactivate</button>
+                </template>
+                <template if:false={activeInactive}>
+                    <button class="btn_in_white" onclick={currentPortalAction} data-name="activate">Activate</button>
+                </template> -->
+
+                <button class="btn_in_white" onclick={viewListOfPortals}>View Listings</button>
+            </div>
+        </div>
+        <div class="field-mapping-container">
+            <template if:true={isRecordAvailable}>
+                <div class="tableContainer">
+                    <div class="portalMapping_header-row">
+                        <div class="slds-col">
+                            <p class="header-text">Listing Fields</p>
+                        </div>
+                        <div class="slds-col">
+                            <p class="header-text">Portals Fields</p>
+                        </div>
+                        <div class="slds-col">
+                            <p class="header-text">Example</p>
+                        </div>
+                    </div>
+                    <div class="portalMapping_recordValues">
+                        <template for:each={finalList} for:item="val" for:index="index">
+                            <div key={val.id} class="portalMapping_data-row">
+                                <div class="slds-col position_css">
+                                    <div if:true={val.isRequired} class="red_css">*</div>
+                                    <lightning-combobox label="" options={val.listingFields} data-index={index} data-datatype={val.dataType} variant="label-hidden"
+                                        value={val.listingFieldAPIName} onchange={handleComboboxChange}>
+                                    </lightning-combobox>
+                                </div>
+                                <div class="slds-col view_input slds-input_faux font_styles1">
+                                    <div class="portal_label_truncate_css">
+                                        {val.portalLabel}
+                                    </div>
+                                    <template if:true={val.description}>
+                                        <lightning-helptext content={val.description}></lightning-helptext>
+                                    </template>
+                                </div>
+                                <div class="slds-col font_styles2">
+                                    {val.example}
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template if:false={isRecordAvailable}>
+                <div class="empty-state">
+                    <div class="empty-state__content">
+                        <div class="empty-state__icon">
+                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                        </div>
+                        <div class="empty-state__message">No records has been added yet.</div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <template if:true={showModal}>
+        <c-setting-pop-up onhidepopup={handleHidePopup} get-portal-name={portalGen}
+            get-portal-icon-url={portalIconUrl} get-portal-id={portalId} onrefreshpageonhide={handleHideAndRefreshPage}></c-setting-pop-up>
+    </template>
+
+    <template if:true={isSpinner}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+
+    <template if:true={showListingPopup}>
+        <c-list-of-published-listings portal-id={portalId} portal-name={portalName} onclosemodal={handleCloseListingViewPopup}></c-list-of-published-listings>
+    </template>
+</template>

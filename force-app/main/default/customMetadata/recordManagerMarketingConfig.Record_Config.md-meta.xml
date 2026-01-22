@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Record Config</label>
+    <protected>false</protected>
+    <values>
+        <field>FieldsData__c</field>
+        <value xsi:type="xsd:string">[{&quot;fieldName&quot;:&quot;Salutation&quot;,&quot;fieldApiname&quot;:&quot;Salutation&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;Salutation&quot;,&quot;label&quot;:&quot;Salutation&quot;,&quot;fieldType&quot;:&quot;PICKLIST&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;FirstName&quot;,&quot;fieldApiname&quot;:&quot;FirstName&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;FirstName&quot;,&quot;label&quot;:&quot;First Name&quot;,&quot;fieldType&quot;:&quot;STRING&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;LastName&quot;,&quot;fieldApiname&quot;:&quot;LastName&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;LastName&quot;,&quot;label&quot;:&quot;Last Name&quot;,&quot;fieldType&quot;:&quot;STRING&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;Title&quot;,&quot;fieldApiname&quot;:&quot;Title&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;Title&quot;,&quot;label&quot;:&quot;Title&quot;,&quot;fieldType&quot;:&quot;STRING&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;Description&quot;,&quot;fieldApiname&quot;:&quot;Description&quot;,&quot;cardView&quot;:true,&quot;value&quot;:&quot;Description&quot;,&quot;label&quot;:&quot;Contact Description&quot;,&quot;fieldType&quot;:&quot;TEXTAREA&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;CreatedDate&quot;,&quot;fieldApiname&quot;:&quot;CreatedDate&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;CreatedDate&quot;,&quot;label&quot;:&quot;Created Date&quot;,&quot;fieldType&quot;:&quot;DATETIME&quot;,&quot;format&quot;:&quot;ddmmyyy24&quot;}]</value>
+    </values>
+    <values>
+        <field>PageSize__c</field>
+        <value xsi:type="xsd:double">60.0</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,314 @@
+<template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+
+    <template if:true={error}>
+        <div class="error-message slds-m-around_medium">
+            Error loading data: {error}
+        </div>
+    </template>
+    
+    <div>
+        <div class="slds-col slds-size_1-of-1">
+            <div class="contacts-container">
+                <div class="contacts-header">
+                    <h2>Related Contacts</h2>
+                    <div class="header-actions">
+                        <lightning-button-icon 
+                            icon-name="utility:refresh" 
+                            variant="border-filled"
+                            alternative-text="Refresh Data"
+                            title="Refresh Data"
+                            onclick={handleRefreshData}
+                            class="slds-m-right_x-small">
+                        </lightning-button-icon>
+                        <lightning-button-icon 
+                            icon-name="utility:event" 
+                            variant="border-filled"
+                            alternative-text="View Schedule"
+                            title="View Full Schedule"
+                            onclick={openScheduleModal}>
+                        </lightning-button-icon>
+                    </div>
+                </div>
+                <template if:true={isContactDataAvailable}>
+                    <div class="custom-datatable">
+                        <table class="contacts-table slds-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">
+                                        <div>Name</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div>Email</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div>Phone</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div>Showing Status</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div>Schedule Date</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div>Actions</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={contacts} for:item="contact">
+                                    <tr key={contact.Id}>
+                                        <td data-label="Name">
+                                            <div><a href="javascript:void(0);" onclick={navigateToContact} data-id={contact.Id}>{contact.Name}</a></div>
+                                        </td>
+                                        <td data-label="Email">
+                                            <div>{contact.Email}</div>
+                                        </td>
+                                        <td data-label="Phone">
+                                            <div>{contact.MobilePhone}</div>
+                                        </td>
+                                        <td data-label="Showing Status">
+                                            <div>
+                                                <lightning-formatted-text value={contact.ShowingStatus}></lightning-formatted-text>
+                                            </div>
+                                        </td>
+                                        <td data-label="Schedule Date">
+                                            <div>{contact.FormattedScheduleDate}</div>
+                                        </td>
+                                        <td data-label="Actions">
+                                            <div class="action-btn">
+                                                <lightning-button-icon 
+                                                    icon-name="utility:settings"
+                                                    variant="border-filled"
+                                                    alternative-text="Manage Showing"
+                                                    title="Manage Showing"
+                                                    onclick={openManageModal} 
+                                                    data-contact={contact.Json}
+                                                    class="slds-m-left_x-small">
+                                                </lightning-button-icon>
+                                                <lightning-button-icon 
+                                                    icon-name="utility:share"
+                                                    variant="border-filled"
+                                                    alternative-text="View Showing Record"
+                                                    title="View Showing Record in New Tab"
+                                                    onclick={openShowingInNewTab}
+                                                    data-showing-id={contact.ShowingId}
+                                                    disabled={contact.isShowingDisabled}
+                                                    class="view-showing-btn slds-m-left_x-small">
+                                                </lightning-button-icon>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={isContactDataAvailable}>
+                    <div class="sldc-text-body_regular slds-text-color_error slds-p-around_medium slds-text-align_center">
+                        <lightning-icon icon-name="utility:info" alternative-text="Info" size="small"
+                            class="slds-m-right_small"></lightning-icon>No Related Contacts<br />
+                        There are currently no related contacts for this property listing.
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+
+    <template if:true={showScheduleModal}>
+        <section role="dialog" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container schedule-modal-container">
+                <div class="slds-modal__close closs_icon_css" onclick={closeScheduleModal}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title custom-modal-header">All Schedulings</h2>
+                </header>
+                <div class="calender-modal-body modal-body">
+                    <div class="calender-cover">
+                        <div class="calendar-container">
+                            <div class="evo-calendar schedule-calendar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+
+    <template if:true={showManageModal}>
+        <section role="dialog" class="slds-modal slds-fade-in-open backdrop-filter">
+            <div class="slds-modal__container manage-modal-container">
+                
+                <div class="slds-modal__close closs_icon_css" onclick={closeManageModal}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+                
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title custom-modal-header">Manage Showing</h2>
+                </header>
+                
+                <div class="modal-body slds-grid slds-grid_vertical-stretch">
+                    
+                    <div class="slds-col slds-size_2-of-8 slds-p-around_medium modal-controls">
+                        
+                        <div class="slds-text-heading_medium slds-m-bottom_medium">
+                            Contact: {currentContact.Name}
+                        </div>
+
+                        <lightning-combobox 
+                            name="action" 
+                            label="Select Action"
+                            value={selectedAction} 
+                            options={actionOptions} 
+                            onchange={handleActionChange}
+                            class="slds-m-bottom_medium"
+                            required>
+                        </lightning-combobox>
+
+                        <template if:true={showDateTimeInputs}>
+                            <label class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr> Select Date</label>
+                            <lightning-input 
+                                type="date" 
+                                name="selectedDate"
+                                label="Selected Date"
+                                variant="label-hidden"
+                                value={selectedDate}
+                                onchange={handleDateChange}
+                                class="slds-m-bottom_small"
+                                required>
+                            </lightning-input>
+
+                            <lightning-input 
+                                type="time" 
+                                name="time"
+                                label="Visit Time"
+                                value={selectedTime}
+                                onchange={handleTimeChange}
+                                class="slds-m-bottom_medium"
+                                required
+                                message-when-value-missing="Time is required">
+                            </lightning-input>
+                        </template>
+
+                        <template if:true={showCommunicationInputs}>
+                            <lightning-combobox 
+                                name="communicationMethod" 
+                                label="Communication Method"
+                                options={communicationMethodOptions} 
+                                value={selectedCommunicationMethod}
+                                onchange={handleCommunicationMethodChange} 
+                                required
+                                message-when-value-missing="Communication method is required"
+                                class="slds-m-bottom_medium">
+                            </lightning-combobox>
+
+                            <template if:true={isWhatsAppSelected}>
+                                <lightning-combobox 
+                                    name="template" 
+                                    label="Select Template" 
+                                    options={templateOptions}
+                                    onchange={handleTemplateChange} 
+                                    value={selectedTemplate} 
+                                    required
+                                    message-when-value-missing="Template is required" 
+                                    class="slds-m-bottom_medium">
+                                </lightning-combobox>
+                            </template>
+                        </template>
+
+                        <div class="slds-text-align_center slds-p-top_small modal-buttons">
+                            <lightning-button 
+                                variant="neutral" 
+                                label="Cancel" 
+                                onclick={closeManageModal}
+                                class="slds-p-right_medium">
+                            </lightning-button>
+                            <lightning-button 
+                                variant="brand" 
+                                label={saveButtonLabel}
+                                title={saveButtonLabel}
+                                onclick={handleSave}>
+                            </lightning-button>
+                        </div>
+                    </div>
+
+                    <div class="slds-col slds-size_6-of-8 slds-p-around_medium slds-border_left modal-preview-area">
+                        
+                        <!-- <template if:true={showDateTimeInputs}> -->
+                            <!-- <h3 class="slds-text-heading_medium slds-m-bottom_small">Select Date</h3> -->
+                            <!-- <div class="calendar-container-wrapper">
+                                <div class="evo-calendar manage-calendar"></div>
+                            </div> -->
+                        <!-- </template> -->
+                        
+                        <template if:true={showCommunicationInputs}>
+                            <h3 class="slds-text-heading_medium slds-m-bottom_small">Live Preview</h3>
+                            <div class="slds-box slds-theme_default preview-container">
+                                
+                                <template if:true={isWhatsAppSelected}>
+                                    <template if:true={selectedTemplate}>
+                                        <div class="whatsapp-preview">
+                                            <c-template-preview
+                                                template-id={selectedTemplate}
+                                                record-id={currentShowingId}
+                                                object-api-name="MVEX__Showing__c">
+                                            </c-template-preview>
+                                        </div>
+                                    </template>
+                                    <template if:false={selectedTemplate}>
+                                        <div class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
+                                            Select a WhatsApp template to preview
+                                        </div>
+                                    </template>
+                                </template>
+
+                                <template if:false={isWhatsAppSelected}>
+                                    <div class="email-preview-container">
+                                        <template if:true={previewEmailHtml}>
+                                            <div class="email-preview slds-p-around_medium" lwc:dom="manual">
+                                            </div>
+                                        </template>
+                                        <template if:false={previewEmailHtml}>
+                                            <div class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
+                                                Email preview loading...
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <template if:false={showCommunicationInputsAndDate}>
+                            <div class="slds-box slds-theme_default preview-container slds-text-align_center slds-p-around_large">
+                                <div class="action-message action-message-center">
+                                    <lightning-icon icon-name="utility:check" size="large" variant="success"></lightning-icon>
+                                    <h3 class="slds-text-heading_medium slds-m-top_medium">
+                                        You are about to update the status to "{selectedAction}".
+                                    </h3>
+                                    <p class="slds-m-top_small">Click "{saveButtonLabel}" to confirm.</p>
+                                </div>
+                            </div>
+                        </template>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open backdrop-filter"></div>
+    </template>
+</template>

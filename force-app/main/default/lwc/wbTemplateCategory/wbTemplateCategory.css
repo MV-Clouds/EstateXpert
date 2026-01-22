@@ -1,0 +1,317 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+.main {
+    border-radius: 5px;
+    overflow: auto;
+    background-color: #ffffff;
+    padding: 1rem;
+    padding-bottom: 1rem;
+    height: calc(100% + 1.5rem);
+    margin-top: -0.8rem;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.slds-template_default{
+    overflow-y: hidden;
+}
+
+.texttemp{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0.7rem;
+}
+.templateHeading {
+    font-weight: 500;
+    font-size: 23px;
+}
+
+.displayMainContent{
+    display: grid;
+    height: 100%;
+    grid-template-columns: auto 21rem;
+    /* background-color: black; */
+}
+
+.selectCategoryBlock{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* background-color: white; */
+}
+
+.categoryBlock{
+    /* height: 65%; */
+    min-height: 65%;
+    max-height: fit-content;
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    background-color: white;
+    border: 1px solid lightgrey;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url(/resource/MVEX__newImageandMediaBg/);
+}
+
+.categoryBlockHeader{
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+.categoryBlockDesp{
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #737171;
+}
+
+.slds-button-group{
+    display: flex;;
+}
+
+.slds-button-group > button{
+    flex-grow: 1;
+    font-weight: 500;
+    padding: 0;
+}
+
+.section-tab-li:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.radiogroup {
+    margin-top: 2%;
+}
+
+.radio1,
+.radio2,
+.radio3 {
+    margin-bottom: 1%;
+}
+.radiobtn {
+    display: flex;
+    align-items: center;
+}
+
+.txtwithlabel{
+    font-weight: 500;
+}
+
+.radiolabel {
+    margin-left: 2.5%;
+    font-size: large;
+}
+
+.radiodescription {
+    margin-left: 2.5%;
+    width: 100%;
+}
+
+/* template preview coding */
+
+.templatePreview{  
+    padding: 0;
+    padding-left: 15px;
+}
+
+.templatePreviewmain{
+    height: 100%;
+    min-height: fit-content;
+    background-color: white;
+    border: 1px solid lightgrey;
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    /* margin-bottom: 2%; */
+}
+
+.templatePreviewmain > h1{
+    font-weight: 500;
+    font-size: 1.2em;
+}
+
+.templatePreviewBlock{
+    background: url('/resource/MVEX__wbiBg');
+    background-color: antiquewhite;
+    padding: 15px;
+    height: 76%;
+    margin-top: 6px;
+}
+
+
+.chat-bubble {
+    border: 1px solid white;
+    border-radius: 5px;
+    padding-top: 6px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-bottom: 7px;
+    max-width: 300px;
+    background-color: white;
+    position: relative;
+}
+
+
+.chat-bubble::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: -13px;
+    width: 0;
+    height: 0;
+    border-top: 0px solid white;
+    border-right: 18px solid white;
+    border-bottom: 17px solid transparent;
+    transform: translateY(-50%);
+}
+
+.paratext{
+    margin-top: 10px;
+}
+
+.chatBubbleTime{
+    margin-top: 1%;
+    display: flex;
+    justify-content: end;
+    font-size: smaller;
+}
+
+
+.previewButtons {
+    color: #4194C2;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    max-width: 300px;
+    font-weight: 500;
+}
+
+.previewButton1,
+.previewButton2 {
+    border: 1px solid white;
+    border-radius: 5px;
+    padding: 2%;
+    margin-top: 6px;
+    font-size: larger;
+    background-color: white;
+}
+
+.templatefootertxt1 {
+    color: #555F64;
+    font-weight: 500;
+    margin-top: 1%;
+}
+
+.templatefootertxt2 {
+    color: #818282;
+}
+
+@media screen and (orientation: landscape) {
+    .slds-button-group > button{
+        font-size: 1.2rem;
+        padding: 6px;
+    }
+}
+
+
+@media screen and (max-width: 400px) and (orientation: portrait) {
+    .displayMainContent{
+        grid-template-columns: auto;
+    }
+    .selectCategoryBlock{
+        order: 2;
+    }
+    .templatePreview{
+        order: 1;
+    }
+    .templatePreview{
+        padding: 0;
+        padding-bottom: 15px;
+    }
+    .templateNavigationButton{
+        margin-top: 6px;
+    }
+}
+
+.main_header_cls {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.details_cls {
+    padding: 0 42px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #636363;
+}
+
+.sub_main_header_css {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header_block_css {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 40.16px;
+    text-align: left;
+    gap: 15px;
+    color: #131314;
+}
+
+.svg_back_icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    line-height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+    min-width: max-content;
+}
+
+.btn svg {
+    width: 16px;
+    height: 16px;
+}

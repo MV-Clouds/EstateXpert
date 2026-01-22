@@ -1,0 +1,18 @@
+<template>
+    <!-- Full-Page Overlay -->
+    <div class="overlay" if:true={isLoading}>
+        <div class="upload-wrapper">
+            <img src="/resource/MVEX__animated" alt="" draggable="false">
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill" style={progressStyle}></div>
+                </div>
+                <div class="progress-text saturationAnimation">{progressText}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Upload Input -->
+    <input type="file" multiple class="file-input" onchange={handleFiles} />
+</template>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Bayut Data</label>
+    <protected>false</protected>
+    <values>
+        <field>Portal_Record__c</field>
+        <value xsi:type="xsd:string">[
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Bathrooms__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The number of bathrooms in the property, where applicable.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed Values are 1, 2, 3, 4, 5, 6, 7, 8, 9, 10. &lt;Bathrooms&gt; 4 &lt;/Bathrooms&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Bathrooms&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Bedrooms__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The number of bedrooms in the property, where applicable.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed Values are -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10+. &lt;Bedrooms&gt; 4 &lt;/Bedrooms&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Bedrooms&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;City__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The City/Emirate in which the property is located.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;City&gt; Dubai &lt;/City&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;City&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;The features applicable to the property. In the case of multiple features, a child tag &lt;Feature&gt; can be used.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Features&gt;&lt;Feature&gt; Swimming Pool &lt;/Feature&gt;&lt;Feature&gt; Gym &lt;/Feature&gt;&lt;/Features&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Feature&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Furnished__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Status of furnishing in the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed Values are Yes, No, or Partly. &lt;Furnished&gt; No &lt;/Furnished&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Furnished&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Agent_Full_Name__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The name of the agent whose name will be\\r\\ndisplayed with the property on the portals.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Listing_Agent&gt; Karan R &lt;/Listing_Agent&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Listing_Agent&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Email&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Agent_Email__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The email id of the agent will be displayed with the property ad.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Listing_Agent_Email&gt; kr@mailinator.com &lt;/Listing_Agent_Email&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Listing_Agent_Email&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Phone&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Agent_Mobile_Phone__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The contact number of the agent will be displayed with the property ad.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Listing_Agent_Phone&gt; +971-4512-15421554 &lt;/Listing_Agent_Phone&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Listing_Agent_Phone&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Community__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The main locality of the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Locality&gt; Jumeirah Lakes Towers &lt;/Locality&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Locality&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Off_Plan__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The tag is used to specify if the property being advertised is ready or off-plan.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed Values are Yes or No. &lt;Off_Plan&gt; No &lt;/Off_Plan&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Off_plan&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;RERA_Permit_Number__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The Trakheesi Permit number is issued by the DLD.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Permit_Number&gt; 1572 &lt;/Permit_Number&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Permit_Number&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Price__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The price of the property for sale or the advertised rent amount.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Price&gt; 6000 &lt;/Price&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Price&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Description__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The description for the listing.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Property_Description&gt; EXCLUSIVE!! Stunning 6 Master bedroom villa in Khalifa City A. Rent per year is AED200,000. &lt;/Property_Description&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Description&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;The Arabic description for the listing.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Property_Description_AR&gt; A حصرية!!مذهلة 6 غرف نوم رئیسیة فیال في مدينة خلیفة &lt;/Property_Description_AR&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Description_AR&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Type__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The purpose - Sale or Rent - of the advertised property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed Values are Buy or Rent. &lt;Property_purpose&gt; Rent &lt;/Property_purpose&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_purpose&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Broker_s_Listing_ID__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The unique identifier for the property is used in the client’s CRM. If duplicates are encountered, only one instance will be made live. Duplicates will be marked as Inactive.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Property_Ref_No&gt; 55352-Ap-R-0099 &lt;/Property_Ref_No&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Ref_No&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Size__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Numeric value of the area of the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Property_Size&gt; 1600 &lt;/Property_Size&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Size&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;The unit used to measure the area of the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Preferred value SQFT. &lt;Property_Size_Unit&gt; SQFT &lt;/Property_Size_Unit&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Size_Unit&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Status__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The status of the property whether it is live on the portal or deleted.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Property_Status&gt; live &lt;/Property_Status&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Status&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Name&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The title will be displayed on the ad on the portal.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Property_Title&gt; exclusive 6master beds private entrance 200k &lt;/Property_Title&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Title&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Portal_Field_Description__c&quot;: &quot;The Arabic title will be displayed on the ad on the portal.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Property_Title_AR&gt; غرف 200000 درهم - 2750323 6 A فیال في مدينة خلیفة &lt;/Property_Title_AR&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: false,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Title_AR&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Property_Type__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The type of the property being advertised.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed values are Villa, Apartment, Office, Shop, Warehouse, Factory, Labour Camp, Other Commercial, Commercial Building, Residential Floor, Commercial Floor, Residential Land, Commercial Land, Townhouse, Residential Building, Hotel Apartment, Loft Apartment, Duplex or Pent House. &lt;Property_Type&gt; Apartment &lt;/Property_Type&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Property_Type&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Rent_Frequency__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Only required if the property is listed for rent.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;Allowed Values are Daily, Weekly, Monthly, and Yearly. &lt;Rent_Frequency&gt; monthly &lt;/Rent_Frequency&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Rent_Frequency&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Subcommunity__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The sub-locality of the property.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Sub_Locality&gt; Cluster C &lt;/Sub_Locality&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Sub_Locality&quot;
+  },
+  {
+    &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+    &quot;Data_Type__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;House_Office_No__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;The name of the building, if applicable, in which the property is located.&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;&lt;Tower_Name&gt; Pretoni Tower &lt;/Tower_Name&gt;&quot;,
+    &quot;Portal_Name__c&quot;: &quot;Bayut&quot;,
+    &quot;Required__c&quot;: true,
+    &quot;Value_Mapping__c&quot;: null,
+    &quot;Name&quot;: &quot;Tower_Name&quot;
+  }
+]</value>
+    </values>
+    <values>
+        <field>Portal_Value__c</field>
+        <value xsi:type="xsd:string">Bayut</value>
+    </values>
+</CustomMetadata>

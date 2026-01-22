@@ -1,0 +1,242 @@
+:host() {
+  --selectedItemBGColor: unset;
+  --selecteditemTextColor: unset;
+
+  --inputAreaHeight: unset;
+  --inputAreaWidth: 100%;
+  --inputAreaBorderWidth: unset;
+  --inputAreaBorderColor: unset;
+  --inputAreaBorderRadius: unset;
+  --inputAreaIconSize: unset;
+  --inputAreaIconColor: unset;
+  --inputAreaFontSize: none;
+  --inputAreaFontColor: unset;
+
+  --invalidInputBackground: unset;
+  --invalidInputBorderColor: unset;
+  --invalidInputShadow: unset;
+  --asteriskColor: unset;
+  --invalidLabelColor: unset;
+  --invalidAsteriskColor: unset;
+
+  --placeHolderColor: unset;
+  --placeHolderSize: unset;
+
+  --inputOnFocusShadow: 0px 0px 3px 0px #3ec2ffad;
+  --inputOnFocusBorderColor: #00aeff;
+
+  --dropDownWidth: unset;
+  --dropDownMaxHeight: unset;
+
+  --optionFontSize: unset;
+  --optionFontColor: unset;
+  --optionLineHeight: unset;
+
+  --labelBackgroundColor: unset;
+  --labelLeft: unset;
+  --labelPosition: unset;
+  --labelTop: unset;
+  --labelColor: unset;
+  --labelFontSize: unset;
+
+  --descriptionColor: #848484;
+  --descriptionFontSize: 11px;
+  --descriptionTopMargin: 0rem;
+
+  --optionIconSize: 20px;
+}
+
+.backDrop {
+  display: none;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.customeComboBox {
+  position: relative;
+}
+
+/* if combo in searchable, then dropdown button section placed above the back-shadow.... */
+.customeComboBox[data-searchable=true] {
+  z-index: 11;
+}
+
+.optionPosition {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+}
+
+.disabledItem {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background: #ffffff78;
+  backdrop-filter: grayscale(1);
+  cursor: not-allowed;
+  z-index: 999;
+}
+
+.selectedItem {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background: var(--selectedItemBGColor, rgb(0 174 255 / 25%));
+}
+
+.selctedtionColor {
+  color: var(--selecteditemTextColor, black) !important;
+}
+
+/* ========= Custom CSS Style to Override Standerd ======== */
+.mainComboDiv {
+  --slds-c-icon-color-foreground-default: var(--inputAreaIconColor);
+  --lwc-squareIconUtilitySmall: var(--inputAreaIconSize);
+  --slds-c-input-color-background: var(--inputAreaBgColor);
+  width: 100%;
+  z-index: unset !important;
+}
+
+.mainComboDiv .optionIcon {
+  --lwc-squareIconMediumBoundary: var(--optionIconSize);
+}
+
+.inputAreaCSS_1 {
+  width: var(--inputAreaWidth, 100%) !important;
+}
+
+.inputAreaCSS_2,
+.inputAreaSectiedValueCSS {
+  outline: none;
+  box-shadow: none;
+  font-size: var(--inputAreaFontSize, unset) !important;
+  min-height: var(--inputAreaHeight);
+  color: var(--inputAreaFontColor, #424242);
+  background-color: var(--inputAreaBgColor, white);
+  border-width: var(--inputAreaBorderWidth, 1px);
+  border-color: var(--inputAreaBorderColor, #8e8e8e);
+  border-radius: var(--inputAreaBorderRadius, 4px);
+  display: flex;
+  align-items: center;
+}
+
+.inputAreaCSS_2:focus,
+.inputAreaSectiedValueCSS:focus {
+  box-shadow: var(--inputOnFocusShadow);
+  border-color: var(--inputOnFocusBorderColor);
+}
+
+.inputAreaCSS_2::placeholder,
+.placeHolderCSS {
+  display: flex !important;
+  align-items: center !important;
+  color: var(--placeHolderColor) !important;
+  font-size: var(--placeHolderSize) !important;
+}
+
+.dropDownCSS {
+  max-height: var(--dropDownMaxHeight, 15rem) !important;
+  scrollbar-color: #54545429 transparent;
+  scrollbar-width: thin;
+
+  font-size: var(--optionFontSize);
+  color: var(--optionFontColor);
+  line-height: var(--optionLineHeight);
+  border-radius: var(--inputAreaBorderRadius, 4px);
+  /* dropDown Border radius same as input area border radius */
+  min-width: var(--dropDownWidth, var(--inputAreaWidth));
+  /* --lwc-sizeMedium : var(--dropDownWidth, var(--inputAreaWidth)); */
+}
+
+.dropDownCSS[data-position="left"] {
+  right: 0% !important;
+  left: auto !important;
+  transform: translateX(0px);
+}
+
+.dropDownCSS[data-position="right"] {
+  left: 0% !important;
+  transform: translateX(0px);
+}
+
+.dropDownCSS[data-ontop=true] {
+  top: auto !important;
+  bottom: 100% !important;
+}
+
+.label-div {
+  padding: 0 0.5rem;
+  z-index: 4 !important;
+  width: fit-content !important;
+  /* border-radius: 50%; */
+  position: var(--labelPosition);
+  top: var(--labelTop);
+  left: var(--labelLeft);
+  background-color: var(--labelBackgroundColor) !important;
+  color: var(--labelColor) !important;
+  font-size: var(--labelFontSize);
+}
+
+.emptyImgPadding {
+  padding-left: 1rem;
+}
+
+.option-description {
+  display: block;
+  margin-top: var(--descriptionTopMargin);
+  color: var(--descriptionColor);
+  font-size: var(--descriptionFontSize);
+}
+
+.emptyOptions {
+  width: 100%;
+  padding-block: 0.5rem;
+  text-align: center;
+  opacity: 0.75;
+
+  font-size: var(--optionFontSize);
+  color: var(--optionFontColor);
+  line-height: var(--optionLineHeight);
+}
+
+.combobox-disabled {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 100;
+  backdrop-filter: contrast(0.8) saturate(0);
+  background: rgb(236 235 234 / 30%);
+  cursor: not-allowed;
+  border-radius: var(--inputAreaBorderRadius);
+}
+
+.asterisk {
+  color: var(--asteriskColor, #ba0517);
+}
+
+.invalid-input .slds-combobox__input {
+  background-color: var(--invalidInputBackground, rgb(255, 255, 255)) !important;
+  border-color: var(--invalidInputBorderColor, rgb(238 72 65)) !important;
+  box-shadow: var(--invalidInputShadow, rgb(243 82 76) 0px 0px 1px 1px) !important;
+}
+
+.invalid-input .label-div {
+  color: var(--invalidLabelColor, var(--labelColor)) !important;
+}
+
+.invalid-input .asterisk {
+  color: var(--invalidAsteriskColor, var(--asteriskColor, #ba0517));
+}

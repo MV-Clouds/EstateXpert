@@ -1,0 +1,84 @@
+<template>
+    <div class="add-modal-cover">
+        <lightning-breadcrumbs>
+            <div class="bread-crumb-cover">
+                <label class="listing-label">Listing</label>
+                <span>
+                    <img class="listing-manager-icon" src={chevRight} draggable="false"/>
+                </span>
+            </div>
+            <template for:each={breadcrumbs} for:item="breadcrumb" for:index="index">
+                <div class="bread-crumb-cover" key={breadcrumb.apiName}>
+                    <lightning-breadcrumb label={breadcrumb.label} data-index={index} onclick={handleBreadcrumbClick}></lightning-breadcrumb>
+                    <span>
+                        <img class="listing-manager-icon" src={chevRight} draggable="false"/>
+                    </span>
+                </div>
+            </template>
+        </lightning-breadcrumbs>
+        <template if:true={showCombobox}>
+            <div class="slds-form-element__control">
+                <div class="slds-combobox_container slds-has-selection">
+                    <div class={computedDropdownClass}>
+                        <div class="input-delete-cover">
+                            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div" role="none">
+                                <input type="text" class="slds-input slds-combobox__input" placeholder="Select Field" value={searchTerm1} onkeyup={handleSearchChange1} onfocus={handleFocus1} onblur={handleBlur1}  disabled={isDisabled}/>
+                            </div>
+                        </div>
+                        <template if:true={showOptions1}>
+                            <div class="slds-dropdown slds-dropdown_length-5" onmousedown={handlePreventDefault}>
+                                <ul class="slds-listbox slds-listbox_vertical ul-div">
+                                    <template for:each={filteredOptions1} for:item="option">
+                                            <template if:false={option.showRightIcon}>
+                                                <li key={option.value} data-id={option.value} onclick={changeFields} class="slds-listbox__item">
+                                                    <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
+                                                        <span class="slds-media__body">
+                                                            <span class="slds-truncate" title={option.label}>{option.label}</span>
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                            <template if:true={option.showRightIcon}>
+                                                <li key={option.value} data-id={option.value} onclick={changeTheCheckboxValue} class="slds-listbox__item">
+                                                    <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
+                                                        <span class="slds-media__body">
+                                                            <span class="slds-truncate" title={option.label}>{option.label}</span>
+                                                        </span>
+                                                        <span class="slds-media__figure slds-media__figure_reverse">
+                                                            <lightning-icon icon-name="utility:chevronright" alternative-text="Lookup Field" size="x-small"></lightning-icon>
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                    </template>
+                                </ul>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+    <template if:true={valueIsField}>
+        <div class="selected-popup">
+            You have selected the following field:
+            <template for:each={selectedField} for:item="field" for:index="index">
+                <div key={field.apiName} class="selected-field">
+                    <div>
+                        <lightning-icon icon-name="standard:folder" alternative-text="Field Icon" size="medium"></lightning-icon>
+                        <span class="field-label">{field.label}</span>
+                        <span class="field-type">({field.type})</span>
+                    </div>
+                    <div class="not-operation-cover">
+                        <div class="not-cover">
+                            <lightning-input type="checkbox" label="Not" data-index={index} checked={notCheckboxValue} onchange={handleNotCheckboxChange}></lightning-input>
+                        </div>
+                        <div>
+                            <lightning-combobox class="operator-combobox" data-index={index} value={field.operation} options={currentFieldOptions} onchange={operationSelect}></lightning-combobox>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </template>
+</template>

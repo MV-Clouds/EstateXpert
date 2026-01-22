@@ -1,0 +1,102 @@
+<template>
+    <template if:true={isStep1}>
+        <div class="slds-modal__header blue-header">
+            <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Select Template</h1>
+        </div>
+        <div class="body_container">
+            <div class="slds-form-element__control main_body">
+                <label>Select Listing Template</label>
+                <lightning-input label="Select Listing Template" type="search" onclick={showPicklistOptions}
+                placeholder="Search Template..." onkeyup={search} variant="label-hidden"
+                value={selectedValue} onblur={hidePicklistOptions} class="input_class" oncommit={handleClear}
+                readonly={readonly}>
+                </lightning-input>
+                <div if:true={dropDown}
+                    class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid dropdown_class"
+                    role="listbox" onmousedown={preventHide}>
+                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                        <template for:each={searchResults} for:item="searchResult">
+                            <li key={searchResult.value} data-value={searchResult.value}
+                                role="presentation" onclick={selectSearchResult}
+                                class="slds-listbox__item">
+                                <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small "
+                                    role="option">
+                                    <span class="slds-media__body">
+                                        <span class="slds-truncate" title={searchResult.label}>
+                                            {searchResult.label}
+                                        </span>
+                                    </span>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+            <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC}
+                    onload={fileDownloaded} width="0%" height="0%"></iframe>
+            <div class="edit_modal_footerbtns">
+                <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>Cancel</button>
+                <button class="save_btn_css" onclick={goToStep2}>Preview</button>
+                <button class="save_btn_css" onclick={downloadFile}>Download</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Step 2: Template Preview -->
+    <template if:true={isStep2}>
+        <div class="preview_mainDiv">
+            <div class="iframe_outer">
+                <template lwc:if={showPreview}>
+                    <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC}
+                        onload={fileDownloaded} width="0%" height="0%"></iframe>
+                    <iframe lwc:if={vfPageSRC} class="preview_iframe" data-id="vfPage" src={vfPageSRC}
+                        width="100%" height="100%" onload={contentLoaded}></iframe>
+                </template>
+                <template lwc:elseif={errorOccured}>
+                    <div class="errorMessageContainer">
+                        <div class="popupContainer">
+                            <div class="popupBody">
+                                <div class="topDesingSection">
+                                    <div class="curveDesign">
+                                        <svg class="ballDesignIcon" fill="none" stroke-linecap="round"
+                                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                                            <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="contentSection">
+                                    <div class="titleDiv">
+                                        <h2>{errorDetail.title}</h2>
+                                    </div>
+                                    <div class="messageDiv">
+                                        <p>{errorDetail.message}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <div class="loadingContainer">
+                        <img class="intiImg" src="/resource/MVEX__emptyState" draggable="false"/>
+                        <div class="loadingInfo">
+                            {loadingInfo}
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="edit_modal_footerbtns">
+                <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>Cancel</button>
+                <button class="save_btn_css" onclick={goToStep1}>Back</button>
+                <button class="save_btn_css" onclick={downloadFile}>Download</button>
+            </div>
+        </div>
+    </template>
+
+    <template if:true={isSpinner}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+
+    <c-custom-timeout data-id="previewTimeout" ontimeoutmethod={runTimeoutMethod}></c-custom-timeout>
+</template>

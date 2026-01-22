@@ -1,0 +1,526 @@
+<template>
+    <template if:true={showModal}>
+        <div class="wrapper">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container modal-wrapper">
+                    <!-- modal header start -->
+                    <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
+                        </svg>
+                    </div>
+    
+                    <header class="slds-modal__header custom-header">
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+                            <template if:true={isStep1}>Select Marketing Campaign Type</template>
+                            <template if:true={isStep2}>{selectedOptionLabel} - Campaign Details</template>
+                            <template if:true={isStep3}>Select Listing (Optional)</template>
+                            <template if:true={isStep4}>{selectedOptionLabel} - Template Selection</template>
+                            <template if:true={isStep5}>Select Recipients</template>
+                        </h2>
+                        
+                    </header>
+                
+                    <!-- modal body start -->
+                    <div class="slds-modal__content slds-p-around_medium custom-content" id="modal-content-id-1">
+    
+                        <!-- Wizard Progress Bar -->
+                        <div class="wizard-progress">
+                            <lightning-progress-indicator current-step={currentStepValue} type="path" variant="base">
+                                <template for:each={steps} for:item="step">
+                                    <lightning-progress-step label={step.label} value={step.value} key={step.value}></lightning-progress-step>
+                                </template>
+                            </lightning-progress-indicator>
+                        </div>
+    
+                        <!-- Step 1: Campaign Type Selection -->
+                        <template if:true={isStep1}>
+                            <div class="option-container">
+                                <div class="option-card" onclick={handleOptionSelect} data-value="single">
+                                    <div class="option-icon">📧</div>
+                                    <h3>Single Marketing Campaign</h3>
+                                    <p>Send a one-time email campaign to your selected audience</p>
+                                </div>
+                                
+                                <div class="option-card" onclick={handleOptionSelect} data-value="drip">
+                                    <div class="option-icon">🔄</div>
+                                    <h3>Marketing Campaign Drip</h3>
+                                    <p>Set up a series of automated emails sent over time</p>
+                                </div>
+                            </div>
+                        </template>
+    
+                        <!-- Step 2: Campaign Details -->
+                        <template if:true={isStep2}>
+                            <div class="campaign-details">
+                                <div class="form-grid">
+                                    <div class="form-column">
+                                        <lightning-combobox
+                                            name="objectName"
+                                            label="Select Object"
+                                            value={campaignDetails.objectName}
+                                            placeholder="Choose an object..."
+                                            options={objectOptions}
+                                            data-id="objectName"
+                                            onchange={handleCampaignFieldChange}
+                                            required
+                                            disabled={campaignDetails.isObjectDropDownDisabled}
+                                            class="custom-combobox">
+                                        </lightning-combobox>
+                                        
+                                        <lightning-input
+                                            type="text"
+                                            name="campaignName"
+                                            label="Email Campaign Name"
+                                            value={campaignDetails.campaignName}
+                                            placeholder="Enter campaign name"
+                                            data-id="campaignName"
+                                            onchange={handleCampaignFieldChange}
+                                            required
+                                            class="custom-input">
+                                        </lightning-input>
+                                    </div>
+                                    
+                                    <div class="form-column">
+                                        <lightning-combobox
+                                            name="templateType"
+                                            label="Template Type"
+                                            value={campaignDetails.templateType}
+                                            placeholder="Choose template type..."
+                                            options={templateTypeOptions}
+                                            data-id="templateType"
+                                            onchange={handleCampaignFieldChange}
+                                            required
+                                            class="custom-combobox">
+                                        </lightning-combobox>
+                                        
+                                        <lightning-combobox
+                                            name="messagingService"
+                                            label="Select Messaging Service"
+                                            value={campaignDetails.messagingService}
+                                            placeholder="Choose messaging service..."
+                                            options={messagingServiceOptions}
+                                            data-id="messagingService"
+                                            onchange={handleCampaignFieldChange}
+                                            required
+                                            class="custom-combobox">
+                                        </lightning-combobox>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <!-- Step 3: Select Listing (Optional) -->
+                        <template if:true={isStep3}>
+                            <div class="listing-selection">
+                                <div class="skip-container">
+                                    <a class="skip-link" onclick={handleSkipListing}>Skip This Step ></a>
+                                </div>
+                                <p class="listing-instruction">If your email campaign is related to a specific property listing, select it below. This will automatically include listing details in your email.</p>
+                                <template if:true={hasNoListings}>
+                                    <div class="no-listing-message">
+                                        No listing available
+                                    </div>
+                                </template>
+                                <template if:false={hasNoListings}>
+                                    <div class="tab-buttons">
+                                        <button class={allTabClass} data-tab="All" onclick={handleTabClick}>All</button>
+                                        <button class={rentTabClass} data-tab="Rent" onclick={handleTabClick}>Rent</button>
+                                        <button class={saleTabClass} data-tab="Sale" onclick={handleTabClick}>Sale</button>
+                                    </div>
+                                    <div class="listing-list">
+                                        <template for:each={filteredListings} for:item="listing">
+                                            <div key={listing.value} 
+                                                 class={listing.listingClass} 
+                                                 data-id={listing.value} 
+                                                 onclick={handleListingClick}>
+                                                <template if:true={listing.selected}>
+                                                    <lightning-icon icon-name="utility:check" variant="inverse" size="small" class="selected-icon"></lightning-icon>
+                                                </template>
+                                                <div class="listing-name">{listing.name}</div>
+                                                <span class="listing-type">{listing.type}</span>
+                                                <div class="listing-address">{listing.address}</div>
+                                                <template if:true={listing.price}>
+                                                    <div class="listing-price-status">
+                                                        <span>{listing.price}</span>
+                                                        <template if:true={listing.status}>
+                                                            <span class="slds-badge slds-theme_success">{listing.status}</span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+    
+                        <!-- Step 4: Template Selection -->
+                        <template if:true={isStep4}>
+                            <!-- Single Campaign Template Selection -->
+                            <template if:true={isSingleCampaign}>
+                                <div class="template-selection-container">
+                                    <div class="template-selection-left">
+                                        <div class="template-selection-header">
+                                            <h3>Select Template</h3>
+                                            <p>Choose a template for your {selectedOptionLabel}</p>
+                                            <template if:true={selectedListing}>
+                                                <p class="listing-selected-info">Selected Listing: <strong>{selectedListingName}</strong></p>
+                                            </template>
+                                        </div>
+                                        
+                                        <div class="template-combobox-container">
+                                            <lightning-combobox
+                                                name="selectedTemplate"
+                                                label={templateComboboxLabel}
+                                                value={selectedTemplate}
+                                                placeholder="Choose a template..."
+                                                options={availableTemplates}
+                                                onchange={handleTemplateSelect}
+                                                required
+                                                class="custom-combobox template-combobox">
+                                            </lightning-combobox>
+                                        </div>
+    
+                                        <template if:true={selectedTemplate}>
+                                            <div class="selected-template-info">
+                                                <h4>Selected Template: {templatePreview.name}</h4>
+                                                <template if:true={templatePreview.subject}>
+                                                    <p><strong>Subject:</strong> {templatePreview.subject}</p>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    
+                                    <!-- Template Preview -->
+                                    <template if:true={showTemplatePreview}>
+                                        <div class="template-selection-right">
+                                            <div class="template-preview-header">
+                                                <h3>Template Preview</h3>
+                                            </div>
+                                            <div class="template-preview-content">
+                                                <div class="template-preview-body" lwc:dom="manual"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+    
+                            <!-- Drip Campaign Configuration -->
+                            <template if:true={isDripCampaign}>
+                                <div class="drip-campaign-wrapper">
+                                    <!-- Left Panel: Drip Sequence -->
+                                    <div class="drip-sequence-panel">
+                                        <div class="drip-sequence-header">
+                                            <h3>Drip Sequence</h3>
+                                            <template if:true={canAddDrip}>
+                                                <button class="add-email-btn" onclick={handleAddNewEmail}>
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                        <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                        </div>
+    
+                                        <!-- Start Date -->
+                                        <div class="start-date-section">
+                                            <lightning-input
+                                                type="date"
+                                                name="dripStartDate"
+                                                label="Campaign Start Date"
+                                                value={dripStartDate}
+                                                min={minDripStartDate}
+                                                onchange={handleDripStartDateChange}
+                                                required
+                                                class="start-date-input">
+                                            </lightning-input>
+                                        </div>
+    
+                                        <!-- Drip Sequence List -->
+                                        <div class="drip-sequence-list">
+                                            <template for:each={dripSequence} for:item="email" for:index="index">
+                                                <div key={email.id} 
+                                                     class={email.selectedClass} 
+                                                     data-id={email.id}
+                                                     onclick={handleSelectDrip}>
+                                                    <div class="drip-sequence-number">{email.displayIndex}</div>
+                                                    <div class="drip-sequence-content">
+                                                        <div class="drip-sequence-title">{email.name}</div>
+                                                        <div class={computeTimingClass}>
+                                                            <template if:true={email.daysAfterStartDate}>
+                                                                After {email.daysAfterStartDate} days at {email.formattedTime}
+                                                            </template>
+                                                            <template if:false={email.daysAfterStartDate}>
+                                                                Immediate at {email.formattedTime}
+                                                            </template>
+                                                            <template if:true={email.hasInvalidTime}>
+                                                                <div class="invalid-time-warning">
+                                                                    ⚠️ This time is in the past
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                        <template if:true={email.template}>
+                                                            <div class="drip-sequence-template">Template Selected</div>
+                                                        </template>
+                                                        <template if:false={email.template}>
+                                                            <div class="drip-sequence-template no-template">No Template Selected</div>
+                                                        </template>
+                                                    </div>
+                                                    <template if:true={email.canDelete}>
+                                                        <button class="delete-email-btn" 
+                                                                data-id={email.id} 
+                                                                onclick={handleDeleteEmail}>
+                                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                                <path d="M6 6L10 10M10 6L6 10M12 2L8 2H6L4 2M2 4H14M12 4V12C12 12.5523 11.5523 13 11 13H5C4.44772 13 4 12.5523 4 12V4" 
+                                                                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                            </svg>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+    
+                                    <!-- Right Panel: Configure Selected Email -->
+                                    <div class="configure-email-panel">
+                                        <template if:true={selectedDrip}>
+                                            <div class="configure-email-form">
+                                                <h3>Configure {selectedDrip.name}</h3>
+    
+                                                <!-- Subject Display -->
+                                                <div class="form-field">
+                                                    <label class="form-label">Subject</label>
+                                                    <div class={subjectDisplayClass}>
+                                                        <template if:true={selectedDrip.subject}>
+                                                            {selectedDrip.subject}
+                                                        </template>
+                                                        <template if:false={selectedDrip.subject}>
+                                                            Subject will be auto-populated from template
+                                                        </template>
+                                                    </div>
+                                                </div>
+    
+                                                <!-- Delay Section -->
+                                                <div class="delay-section">
+                                                    <div class="delay-field">
+                                                        <label class="form-label">Days After Start Date</label>
+                                                        <lightning-input
+                                                            type="number"
+                                                            value={selectedDrip.daysAfterStartDate}
+                                                            min="0"
+                                                            step="1"
+                                                            data-id={selectedDrip.id}
+                                                            onchange={handleDaysAfterStartDateChange}
+                                                            class={computeDelayInputClass}>
+                                                        </lightning-input>
+                                                    </div>
+                                                    <div class="delay-field">
+                                                        <label class="form-label">Time to Send</label>
+                                                        <lightning-input
+                                                            type="time"
+                                                            value={selectedDrip.timeToSend}
+                                                            data-id={selectedDrip.id}
+                                                            onchange={handleTimeToSendChange}
+                                                            class={computeTimeInputClass}>
+                                                        </lightning-input>
+                                                        <template if:true={selectedDrip.hasInvalidTime}>
+                                                            <div class="invalid-time-warning">
+                                                                This time is in the past. Please select a future time.
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+    
+                                                <!-- Template Selection -->
+                                                <div class="form-field template-field">
+                                                    <label class="form-label">Template</label>
+                                                    <div class="template-selector-inner">
+                                                        <div class="template-combobox">
+                                                            <lightning-combobox
+                                                                variant="label-hidden"
+                                                                value={selectedDrip.template}
+                                                                options={availableTemplates}
+                                                                data-id={selectedDrip.id}
+                                                                onchange={handleTemplateChange}
+                                                                placeholder="Choose a template..."
+                                                                class="custom-combobox">
+                                                            </lightning-combobox>
+                                                        </div>
+                                                        <button
+                                                            class="preview-template-btn"
+                                                            data-id={selectedDrip.id}
+                                                            onclick={handlePreviewTemplate}
+                                                            disabled={selectedDrip.hasNoTemplate}>
+                                                            Preview
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Show message when no drip is selected -->
+                                        <template if:false={selectedDrip}>
+                                            <div class="configure-email-form">
+                                                <div class="no-selection-message">
+                                                    <h3>Select an email from the sequence to configure</h3>
+                                                    <p>Choose an email from the left panel to edit its details.</p>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+    
+                        <!-- Step 5: Contact Selection -->
+                        <template if:true={isStep5}>
+                            <div class="contact-selection-container">
+                                <div class="contact-selection-grid">
+                                    <!-- Primary Recipients Section -->
+                                    <div class="contact-section primary-recipients">
+                                        <h3 class="section-title">Primary Recipients</h3>
+                                        <p class="section-subtitle">Select contacts to receive this email</p>
+                                        
+                                        <!-- Custom Searchable Combobox for Primary Contacts -->
+                                        <div class="combobox-container">
+                                            <c-custom-combobox
+                                                placeholder="Search contacts by name, email, or company..."
+                                                options={allContactOptions}
+                                                onselect={handlePrimaryContactSelect}
+                                                searchable="true"
+                                                multiselect="true"
+                                                value={selectedContacts}
+                                                show-clear-button="true"
+                                                class="contact-combobox">
+                                            </c-custom-combobox>
+                                        </div>
+    
+                                        <!-- Broadcast Groups Section - Show only when no contacts selected -->
+                                        <template if:true={showBroadcastGroups}>
+                                            <div class="broadcast-groups-section" data-section="broadcast-groups">
+                                                <div class="section-divider">
+                                                    <span class="divider-text">OR select from groups</span>
+                                                </div>
+                                                
+                                                <div class="broadcast-groups-container">
+                                                    <h4 class="broadcast-groups-title">Contact Groups</h4>
+                                                    <p class="broadcast-groups-subtitle">Select predefined groups for this {campaignDetails.objectName}</p>
+                                                    
+                                                    <div class="broadcast-groups-list">
+                                                        <template for:each={filteredBroadcastGroups} for:item="group">
+                                                            <div key={group.value} class="broadcast-group-item">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    id={group.value} 
+                                                                    data-value={group.value} 
+                                                                    onchange={handleBroadcastGroupChange}
+                                                                    checked={group.selected}
+                                                                    class="broadcast-group-checkbox" />
+                                                                <label for={group.value} class="broadcast-group-label">
+                                                                    <span class="group-name">{group.label}</span>
+                                                                    <span class="group-count">{group.contactCount} contacts</span>
+                                                                </label>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+    
+                                                    <!-- Show selected groups summary -->
+                                                    <template if:true={selectedBroadcastGroupsCount}>
+                                                        <div class="selected-groups-summary">
+                                                            <span class="summary-text">
+                                                                {selectedBroadcastGroupsCount} group(s) selected • 
+                                                                {estimatedContactsFromGroups} estimated contacts
+                                                            </span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+    
+                                    <!-- CC Recipients Section -->
+                                    <div class="contact-section cc-recipients">
+                                        <h3 class="section-title">CC Recipients</h3>
+                                        <p class="section-subtitle">Select contacts to receive a copy</p>
+                                        
+                                        <!-- Custom Searchable Combobox for CC Contacts -->
+                                        <div class="combobox-container">
+                                            <c-custom-combobox
+                                                placeholder="Search contacts for CC..."
+                                                options={allContactOptions}
+                                                onselect={handleCCContactSelect}
+                                                searchable="true"
+                                                multiselect="true"
+                                                value={selectedCCContacts}
+                                                show-clear-button="true"
+                                                class="contact-combobox">
+                                            </c-custom-combobox>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <!-- Summary Section -->
+                                <div class="contact-summary">
+                                    <h4>Campaign Summary</h4>
+                                    <div class="summary-grid">
+                                        <div class="summary-item">
+                                            <span class="summary-label">Individual Recipients:</span>
+                                            <span class="summary-value">{selectedContacts.length}</span>
+                                        </div>
+                                        <template if:true={selectedBroadcastGroupsCount}>
+                                            <div class="summary-item">
+                                                <span class="summary-label">Groups Selected:</span>
+                                                <span class="summary-value">{selectedBroadcastGroupsCount}</span>
+                                            </div>
+                                        </template>
+                                        <div class="summary-item">
+                                            <span class="summary-label">CC Recipients:</span>
+                                            <span class="summary-value">{selectedCCContacts.length}</span>
+                                        </div>
+                                        <template if:true={isDripCampaign}>
+                                            <div class="summary-item">
+                                                <span class="summary-label">Total Emails:</span>
+                                                <span class="summary-value">{dripSequence.length}</span>
+                                            </div>
+                                            <div class="summary-item">
+                                                <span class="summary-label">Start Date:</span>
+                                                <span class="summary-value">{dripStartDate}</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+    
+                        <!-- Generic Footer -->
+                        <footer class="custom-footer">
+                            <template for:each={footerButtons} for:item="button">
+                                <button 
+                                    key={button.label}
+                                    data-action={button.onclick}
+                                    onclick={handleButtonClick}
+                                    disabled={button.disabled}
+                                    class={button.buttonClass}>
+                                    {button.label}
+                                </button>
+                            </template>
+                        </footer>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+
+
+            <template if:true={isPreviewModal}>
+                <c-template-preview-modal templateid={selectedTemplateId} objectname={selectedobject}
+                    template-type="Marketing Template" is-active={templateStatus} onclosemodal={handleCloseModal}>
+                </c-template-preview-modal>
+            </template>
+
+        </div>
+
+    </template>
+    
+</template>

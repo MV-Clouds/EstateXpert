@@ -1,0 +1,467 @@
+<template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">{integrationname}
+                        Integration</h1>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small forBGSetup">
+                    <div class="body-cover">
+                        <div class="image-container">
+                            <img src="/resource/integrationPopupImg" alt="Integration Graphic" class="integration-image"
+                                draggable="false">
+                        </div>
+                        <div class="content-section">
+                            <div class="input-cover">
+                                <!-- AWS Fields -->
+                                <template if:true={isAWS}>
+                                    <div class="copyclass">
+                                        <lightning-input type="password" label="Secret Access Key"
+                                            value={fieldsData.MVEX__AWS_Secret_Access_Key__c}
+                                            placeholder="Enter Secret Access Key" onchange={handleInputChange}
+                                            onfocus={handleCredentialFocus}
+                                            data-id="MVEX__AWS_Secret_Access_Key__c" data-name="secret-key-input"
+                                            class="custom-input" required></lightning-input>
+                                        <template if:true={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" fill="#ffffff" version="1.1"
+                                                    viewBox="0 0 92 92" enable-background="new 0 0 92 92"
+                                                    xml:space="preserve" stroke="#ffffff">
+                                                    <path id="XMLID_1239_"
+                                                        d="M91.3,43.8C90.6,42.8,74.4,19,46,19C17.6,19,1.4,42.8,0.7,43.8c-0.9,1.3-0.9,3.1,0,4.5 C1.4,49.2,17.6,73,46,73c28.4,0,44.6-23.8,45.3-24.8C92.2,46.9,92.2,45.1,91.3,43.8z M46,65C26.7,65,13.5,51.4,9,46 c4.5-5.5,17.6-19,37-19c19.3,0,32.5,13.6,37,19C78.4,51.5,65.3,65,46,65z M48.3,29.6c-4.4-0.6-8.7,0.5-12.3,3.2c0,0,0,0,0,0 c-7.3,5.5-8.8,15.9-3.3,23.2c2.7,3.6,6.5,5.8,10.9,6.5c0.8,0.1,1.6,0.2,2.3,0.2c3.6,0,7-1.2,9.9-3.3c7.3-5.5,8.8-15.9,3.3-23.2 C56.6,32.5,52.7,30.2,48.3,29.6z M52.3,54.5c-2.2,1.7-5,2.4-7.8,2c-2.8-0.4-5.3-1.9-7-4.1C34.1,47.7,35,41,39.7,37.5 c2.2-1.7,5-2.4,7.8-2c2.8,0.4,5.3,1.9,7,4.1C57.9,44.3,57,51,52.3,54.5z M51.9,40c0.8,0.7,1.2,1.8,1.2,2.8c0,1-0.4,2.1-1.2,2.8 c-0.7,0.7-1.8,1.2-2.8,1.2c-1.1,0-2.1-0.4-2.8-1.2c-0.8-0.8-1.2-1.8-1.2-2.8c0-1.1,0.4-2.1,1.2-2.8c0.7-0.8,1.8-1.2,2.8-1.2 C50.2,38.9,51.2,39.3,51.9,40z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template if:false={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" viewBox="0 0 48 48" fill="none">
+                                                    <path
+                                                        d="M9.85786 18C6.23858 21 4 24 4 24C4 24 12.9543 36 24 36C25.3699 36 26.7076 35.8154 28 35.4921M20.0318 12.5C21.3144 12.1816 22.6414 12 24 12C35.0457 12 44 24 44 24C44 24 41.7614 27 38.1421 30"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path
+                                                        d="M20.3142 20.6213C19.4981 21.5112 19 22.6974 19 24C19 26.7614 21.2386 29 24 29C25.3627 29 26.5981 28.4548 27.5 27.5707"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path d="M42 42L6 6" stroke="#ffffff" stroke-width="4"
+                                                        stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <lightning-input label="Access Key" value={fieldsData.MVEX__AWS_Access_Key__c}
+                                        placeholder="Enter Access Key" onchange={handleInputChange}
+                                        onfocus={handleCredentialFocus}
+                                        data-id="MVEX__AWS_Access_Key__c" class="custom-input"
+                                        required></lightning-input>
+                                    <lightning-input label="S3 Bucket Name" value={fieldsData.MVEX__S3_Bucket_Name__c}
+                                        placeholder="Enter S3 Bucket Name" onchange={handleInputChange}
+                                        data-id="MVEX__S3_Bucket_Name__c" class="custom-input"
+                                        required></lightning-input>
+                                    <lightning-input label="S3 Region Name" value={fieldsData.MVEX__S3_Region_Name__c}
+                                        placeholder="Enter S3 Region Name" onchange={handleInputChange}
+                                        data-id="MVEX__S3_Region_Name__c" class="custom-input"
+                                        required></lightning-input>
+                                </template>
+
+                                <!-- Gmail Fields -->
+                                <template if:true={isGmail}>
+                                    <div class="copyclass">
+                                        <lightning-input label="Redirect URI" value={fieldsData.MVEX__Redirect_URI__c}
+                                            onchange={handleInputChange} data-id="MVEX__Redirect_URI__c"
+                                            class="custom-input urlDataCls" required
+                                            field-level-help="Please copy the URL and paste it as a Redirect URI in the Project you created within Google Cloud."></lightning-input>
+                                        <button onclick={copyTheText} class="copy-button">
+                                            <svg viewBox="0 -0.5 25 25" fill="none" height="16" width="16"
+                                                xmlns="http://www.w3.org/2000/svg" stroke="#000000">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                                <path d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <lightning-input label="Client ID" value={fieldsData.MVEX__Client_ID__c}
+                                        placeholder="Enter Client ID" onchange={handleInputChange}
+                                        onfocus={handleCredentialFocus}
+                                        data-id="MVEX__Client_ID__c" class="custom-input" required></lightning-input>
+                                    <div class="copyclass">
+                                        <lightning-input type="password" label="Client Secret"
+                                            value={fieldsData.MVEX__Client_Secret__c} placeholder="Enter Client Secret"
+                                            onchange={handleInputChange} onfocus={handleCredentialFocus}
+                                            data-id="MVEX__Client_Secret__c"
+                                            data-name="secret-key-input" class="custom-input"
+                                            required></lightning-input>
+                                        <template if:true={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" fill="#ffffff" version="1.1"
+                                                    viewBox="0 0 92 92" enable-background="new 0 0 92 92"
+                                                    xml:space="preserve" stroke="#ffffff">
+                                                    <path
+                                                        d="M91.3,43.8C90.6,42.8,74.4,19,46,19C17.6,19,1.4,42.8,0.7,43.8c-0.9,1.3-0.9,3.1,0,4.5 C1.4,49.2,17.6,73,46,73c28.4,0,44.6-23.8,45.3-24.8C92.2,46.9,92.2,45.1,91.3,43.8z M46,65C26.7,65,13.5,51.4,9,46 c4.5-5.5,17.6-19,37-19c19.3,0,32.5,13.6,37,19C78.4,51.5,65.3,65,46,65z M48.3,29.6c-4.4-0.6-8.7,0.5-12.3,3.2c0,0,0,0,0,0 c-7.3,5.5-8.8,15.9-3.3,23.2c2.7,3.6,6.5,5.8,10.9,6.5c0.8,0.1,1.6,0.2,2.3,0.2c3.6,0,7-1.2,9.9-3.3c7.3-5.5,8.8-15.9,3.3-23.2 C56.6,32.5,52.7,30.2,48.3,29.6z M52.3,54.5c-2.2,1.7-5,2.4-7.8,2c-2.8-0.4-5.3-1.9-7-4.1C34.1,47.7,35,41,39.7,37.5 c2.2-1.7,5-2.4,7.8-2c2.8,0.4,5.3,1.9,7,4.1C57.9,44.3,57,51,52.3,54.5z M51.9,40c0.8,0.7,1.2,1.8,1.2,2.8c0,1-0.4,2.1-1.2,2.8 c-0.7,0.7-1.8,1.2-2.8,1.2c-1.1,0-2.1-0.4-2.8-1.2c-0.8-0.8-1.2-1.8-1.2-2.8c0-1.1,0.4-2.1,1.2-2.8c0.7-0.8,1.8-1.2,2.8-1.2 C50.2,38.9,51.2,39.3,51.9,40z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template if:false={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" viewBox="0 0 48 48" fill="none">
+                                                    <path
+                                                        d="M9.85786 18C6.23858 21 4 24 4 24C4 24 12.9543 36 24 36C25.3699 36 26.7076 35.8154 28 35.4921M20.0318 12.5C21.3144 12.1816 22.6414 12 24 12C35.0457 12 44 24 44 24C44 24 41.7614 27 38.1421 30"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path
+                                                        d="M20.3142 20.6213C19.4981 21.5112 19 22.6974 19 24C19 26.7614 21.2386 29 24 29C25.3627 29 26.5981 28.4548 27.5 27.5707"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path d="M42 42L6 6" stroke="#ffffff" stroke-width="4"
+                                                        stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <div class="copyclass">
+                                        <lightning-input label="Refresh Token" value={fieldsData.MVEX__Refresh_Token__c}
+                                            placeholder="Enter Refresh Token" onchange={handleInputChange}
+                                            onfocus={handleCredentialFocus}
+                                            data-id="MVEX__Refresh_Token__c" class="custom-input" required
+                                            field-level-help="Click the button next to the input field to obtain the refresh token."></lightning-input>
+                                        <button onclick={redirectToLoginPage} class="link-button">
+                                            <svg fill="#ffffff" version="1.1" height="16" width="16"
+                                                viewBox="0 0 425.466 425.467" xml:space="preserve" stroke="#ffffff">
+                                                <path
+                                                    d="M318.15,230.195l77.934-77.937c31.894-31.892,31.894-83.782-0.004-115.674l-12.66-12.66 c-31.893-31.896-83.78-31.896-115.674-0.004l-77.937,77.934c-17.588,17.588-25.457,41.264-23.646,64.311 c-23.045-1.813-46.722,6.056-64.308,23.647L23.92,267.748c-31.894,31.889-31.894,83.779,0,115.674l12.664,12.662 c31.893,31.893,83.783,31.893,115.674,0l77.935-77.936c17.592-17.59,25.459-41.266,23.647-64.309 C276.884,255.654,300.56,247.783,318.15,230.195z M202.653,290.605l-77.936,77.938c-16.705,16.703-43.889,16.703-60.59,0 l-12.666-12.666c-16.705-16.701-16.703-43.885,0-60.594l77.936-77.932c14.14-14.141,35.779-16.306,52.226-6.516l-32.302,32.307 c-7.606,7.604-7.606,19.938,0,27.541c7.605,7.607,19.937,7.607,27.541,0l32.306-32.303 C218.959,254.828,216.795,276.469,202.653,290.605z M238.382,209.169l32.299-32.306c7.608-7.602,7.608-19.935,0-27.538 c-7.604-7.61-19.936-7.61-27.541-0.004l-32.303,32.303c-9.791-16.446-7.627-38.087,6.514-52.226l77.935-77.935 c16.707-16.707,43.89-16.707,60.594,0l12.664,12.664c16.705,16.705,16.705,43.886,0,60.591l-77.936,77.937 C276.468,216.797,254.828,218.959,238.382,209.169z">
+                                                </path>
+                                                <path
+                                                    d="M343.466,261.465c-45.287,0-82,36.713-82,82s36.713,82,82,82c45.286,0,82-36.713,82-82S388.753,261.465,343.466,261.465z M372.505,333.564l-56.046,56.104c-0.239,0.238-0.536,0.41-0.862,0.496l-22.315,5.85c-0.649,0.168-1.347-0.02-1.822-0.494 c-0.477-0.479-0.666-1.172-0.496-1.824l5.826-22.318c0.084-0.326,0.256-0.627,0.494-0.863l56.047-56.104 c0.742-0.742,1.945-0.744,2.688-0.002l4.548,4.541c0.739,0.74,0.741,1.943,0,2.688l-37.433,37.471l4.709,4.703l37.435-37.471 c0.739-0.742,1.94-0.742,2.682-0.002l4.55,4.541C373.25,331.617,373.25,332.822,372.505,333.564z M395.472,310.574l-17,17.018 c-0.739,0.744-1.942,0.744-2.685,0.002l-16.489-16.475c-0.744-0.74-0.744-1.943-0.002-2.688l17-17.02 c0.741-0.74,1.944-0.74,2.688-0.002l16.487,16.477C396.216,308.629,396.216,309.832,395.472,310.574z">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Outlook Fields -->
+                                <template if:true={isOutlook}>
+                                    <div class="copyclass">
+                                        <lightning-input label="Redirect URI" value={fieldsData.MVEX__Redirect_URI__c}
+                                            onchange={handleInputChange} data-id="MVEX__Redirect_URI__c"
+                                            class="custom-input" required
+                                            field-level-help="Please copy the URL and paste it as a Redirect URI in the application you created within Azure AD."></lightning-input>
+                                        <button onclick={copyTheText} class="copy-button">
+                                            <svg viewBox="0 -0.5 25 25" fill="none" height="16" width="16"
+                                                xmlns="http://www.w3.org/2000/svg" stroke="#000000">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                                <path d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <lightning-input label="Azure Client Id" value={fieldsData.MVEX__Client_ID__c}
+                                        placeholder="Enter Azure Client Id" onchange={handleInputChange}
+                                        onfocus={handleCredentialFocus}
+                                        data-id="MVEX__Client_ID__c" class="custom-input" required></lightning-input>
+                                    <div class="copyclass">
+                                        <lightning-input type="password" label="Azure Client Secret"
+                                            value={fieldsData.MVEX__Azure_Client_Secret__c}
+                                            placeholder="Enter Azure Client Secret" onchange={handleInputChange}
+                                            onfocus={handleCredentialFocus}
+                                            data-id="MVEX__Azure_Client_Secret__c" data-name="secret-key-input"
+                                            class="custom-input" required></lightning-input>
+                                        <template if:true={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" fill="#ffffff" version="1.1"
+                                                    viewBox="0 0 92 92" enable-background="new 0 0 92 92"
+                                                    xml:space="preserve" stroke="#ffffff">
+                                                    <path
+                                                        d="M91.3,43.8C90.6,42.8,74.4,19,46,19C17.6,19,1.4,42.8,0.7,43.8c-0.9,1.3-0.9,3.1,0,4.5 C1.4,49.2,17.6,73,46,73c28.4,0,44.6-23.8,45.3-24.8C92.2,46.9,92.2,45.1,91.3,43.8z M46,65C26.7,65,13.5,51.4,9,46 c4.5-5.5,17.6-19,37-19c19.3,0,32.5,13.6,37,19C78.4,51.5,65.3,65,46,65z M48.3,29.6c-4.4-0.6-8.7,0.5-12.3,3.2c0,0,0,0,0,0 c-7.3,5.5-8.8,15.9-3.3,23.2c2.7,3.6,6.5,5.8,10.9,6.5c0.8,0.1,1.6,0.2,2.3,0.2c3.6,0,7-1.2,9.9-3.3c7.3-5.5,8.8-15.9,3.3-23.2 C56.6,32.5,52.7,30.2,48.3,29.6z M52.3,54.5c-2.2,1.7-5,2.4-7.8,2c-2.8-0.4-5.3-1.9-7-4.1C34.1,47.7,35,41,39.7,37.5 c2.2-1.7,5-2.4,7.8-2c2.8,0.4,5.3,1.9,7,4.1C57.9,44.3,57,51,52.3,54.5z M51.9,40c0.8,0.7,1.2,1.8,1.2,2.8c0,1-0.4,2.1-1.2,2.8 c-0.7,0.7-1.8,1.2-2.8,1.2c-1.1,0-2.1-0.4-2.8-1.2c-0.8-0.8-1.2-1.8-1.2-2.8c0-1.1,0.4-2.1,1.2-2.8c0.7-0.8,1.8-1.2,2.8-1.2 C50.2,38.9,51.2,39.3,51.9,40z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template if:false={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" viewBox="0 0 48 48" fill="none">
+                                                    <path
+                                                        d="M9.85786 18C6.23858 21 4 24 4 24C4 24 12.9543 36 24 36C25.3699 36 26.7076 35.8154 28 35.4921M20.0318 12.5C21.3144 12.1816 22.6414 12 24 12C35.0457 12 44 24 44 24C44 24 41.7614 27 38.1421 30"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path
+                                                        d="M20.3142 20.6213C19.4981 21.5112 19 22.6974 19 24C19 26.7614 21.2386 29 24 29C25.3627 29 26.5981 28.4548 27.5 27.5707"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path d="M42 42L6 6" stroke="#ffffff" stroke-width="4"
+                                                        stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <div class="copyclass">
+                                        <lightning-input label="Refresh Token" value={fieldsData.MVEX__Refresh_Token__c}
+                                            placeholder="Enter Refresh Token" onchange={handleInputChange}
+                                            onfocus={handleCredentialFocus}
+                                            data-id="MVEX__Refresh_Token__c" class="custom-input" required
+                                            field-level-help="Click the button next to the input field to obtain the refresh token."></lightning-input>
+                                        <button onclick={redirectToLoginPageOutlook} class="link-button">
+                                            <svg fill="#ffffff" version="1.1" id="Capa_1" height="16" width="16"
+                                                viewBox="0 0 425.466 425.467" xml:space="preserve" stroke="#ffffff">
+                                                <path
+                                                    d="M318.15,230.195l77.934-77.937c31.894-31.892,31.894-83.782-0.004-115.674l-12.66-12.66 c-31.893-31.896-83.78-31.896-115.674-0.004l-77.937,77.934c-17.588,17.588-25.457,41.264-23.646,64.311 c-23.045-1.813-46.722,6.056-64.308,23.647L23.92,267.748c-31.894,31.889-31.894,83.779,0,115.674l12.664,12.662 c31.893,31.893,83.783,31.893,115.674,0l77.935-77.936c17.592-17.59,25.459-41.266,23.647-64.309 C276.884,255.654,300.56,247.783,318.15,230.195z M202.653,290.605l-77.936,77.938c-16.705,16.703-43.889,16.703-60.59,0 l-12.666-12.666c-16.705-16.701-16.703-43.885,0-60.594l77.936-77.932c14.14-14.141,35.779-16.306,52.226-6.516l-32.302,32.307 c-7.606,7.604-7.606,19.938,0,27.541c7.605,7.607,19.937,7.607,27.541,0l32.306-32.303 C218.959,254.828,216.795,276.469,202.653,290.605z M238.382,209.169l32.299-32.306c7.608-7.602,7.608-19.935,0-27.538 c-7.604-7.61-19.936-7.61-27.541-0.004l-32.303,32.303c-9.791-16.446-7.627-38.087,6.514-52.226l77.935-77.935 c16.707-16.707,43.89-16.707,60.594,0l12.664,12.664c16.705,16.705,16.705,43.886,0,60.591l-77.936,77.937 C276.468,216.797,254.828,218.959,238.382,209.169z">
+                                                </path>
+                                                <path
+                                                    d="M343.466,261.465c-45.287,0-82,36.713-82,82s36.713,82,82,82c45.286,0,82-36.713,82-82S388.753,261.465,343.466,261.465z M372.505,333.564l-56.046,56.104c-0.239,0.238-0.536,0.41-0.862,0.496l-22.315,5.85c-0.649,0.168-1.347-0.02-1.822-0.494 c-0.477-0.479-0.666-1.172-0.496-1.824l5.826-22.318c0.084-0.326,0.256-0.627,0.494-0.863l56.047-56.104 c0.742-0.742,1.945-0.744,2.688-0.002l4.548,4.541c0.739,0.74,0.741,1.943,0,2.688l-37.433,37.471l4.709,4.703l37.435-37.471 c0.739-0.742,1.94-0.742,2.682-0.002l4.55,4.541C373.25,331.617,373.25,332.822,372.505,333.564z M395.472,310.574l-17,17.018 c-0.739,0.744-1.942,0.744-2.685,0.002l-16.489-16.475c-0.744-0.74-0.744-1.943-0.002-2.688l17-17.02 c0.741-0.74,1.944-0.74,2.688-0.002l16.487,16.477C396.216,308.629,396.216,309.832,395.472,310.574z">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Instagram Fields -->
+                                <template if:true={isInstagram}>
+                                    <lightning-input label="Client Id" value={fieldsData.MVEX__ClientId__c}
+                                        placeholder="Enter Instagram API Key" onchange={handleInputChange}
+                                        onfocus={handleCredentialFocus}
+                                        data-id="MVEX__ClientId__c" class="custom-input" required></lightning-input>
+                                    <div class="copyclass">
+                                        <lightning-input type="password" label="Client Secret"
+                                            value={fieldsData.MVEX__ClientSecret__c} placeholder="Enter Client Secret"
+                                            onchange={handleInputChange} onfocus={handleCredentialFocus}
+                                            data-id="MVEX__ClientSecret__c"
+                                            data-name="secret-key-input" class="custom-input"
+                                            required></lightning-input>
+                                        <template if:true={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" fill="#ffffff" version="1.1"
+                                                    viewBox="0 0 92 92" enable-background="new 0 0 92 92"
+                                                    xml:space="preserve" stroke="#ffffff">
+                                                    <path
+                                                        d="M91.3,43.8C90.6,42.8,74.4,19,46,19C17.6,19,1.4,42.8,0.7,43.8c-0.9,1.3-0.9,3.1,0,4.5 C1.4,49.2,17.6,73,46,73c28.4,0,44.6-23.8,45.3-24.8C92.2,46.9,92.2,45.1,91.3,43.8z M46,65C26.7,65,13.5,51.4,9,46 c4.5-5.5,17.6-19,37-19c19.3,0,32.5,13.6,37,19C78.4,51.5,65.3,65,46,65z M48.3,29.6c-4.4-0.6-8.7,0.5-12.3,3.2c0,0,0,0,0,0 c-7.3,5.5-8.8,15.9-3.3,23.2c2.7,3.6,6.5,5.8,10.9,6.5c0.8,0.1,1.6,0.2,2.3,0.2c3.6,0,7-1.2,9.9-3.3c7.3-5.5,8.8-15.9,3.3-23.2 C56.6,32.5,52.7,30.2,48.3,29.6z M52.3,54.5c-2.2,1.7-5,2.4-7.8,2c-2.8-0.4-5.3-1.9-7-4.1C34.1,47.7,35,41,39.7,37.5 c2.2-1.7,5-2.4,7.8-2c2.8,0.4,5.3,1.9,7,4.1C57.9,44.3,57,51,52.3,54.5z M51.9,40c0.8,0.7,1.2,1.8,1.2,2.8c0,1-0.4,2.1-1.2,2.8 c-0.7,0.7-1.8,1.2-2.8,1.2c-1.1,0-2.1-0.4-2.8-1.2c-0.8-0.8-1.2-1.8-1.2-2.8c0-1.1,0.4-2.1,1.2-2.8c0.7-0.8,1.8-1.2,2.8-1.2 C50.2,38.9,51.2,39.3,51.9,40z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template if:false={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" viewBox="0 0 48 48" fill="none">
+                                                    <path
+                                                        d="M9.85786 18C6.23858 21 4 24 4 24C4 24 12.9543 36 24 36C25.3699 36 26.7076 35.8154 28 35.4921M20.0318 12.5C21.3144 12.1816 22.6414 12 24 12C35.0457 12 44 24 44 24C44 24 41.7614 27 38.1421 30"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path
+                                                        d="M20.3142 20.6213C19.4981 21.5112 19 22.6974 19 24C19 26.7614 21.2386 29 24 29C25.3627 29 26.5981 28.4548 27.5 27.5707"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path d="M42 42L6 6" stroke="#ffffff" stroke-width="4"
+                                                        stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <div class="copyclass">
+                                        <lightning-input label="Redirect URI" value={fieldsData.MVEX__Redirect_URI__c}
+                                            onchange={handleInputChange} data-id="MVEX__Redirect_URI__c" class="custom-input"
+                                            required
+                                            field-level-help="Please copy the URL and paste it as a Redirect URI in the application you created within Azure AD."></lightning-input>
+                                        <button onclick={copyTheText} class="copy-button">
+                                            <svg viewBox="0 -0.5 25 25" fill="none" height="16" width="16"
+                                                xmlns="http://www.w3.org/2000/svg" stroke="#000000">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                                <path d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="copyclass">
+                                        <lightning-input label="Access Token" value={fieldsData.MVEX__AccessToken__c}
+                                            placeholder="Enter Access Token" data-id="MVEX__AccessToken__c"
+                                            onchange={handleInputChange} onfocus={handleCredentialFocus}
+                                            class="custom-input" required
+                                            field-level-help="Click the button next to the input field to obtain the access token."
+                                            disabled="true"></lightning-input>
+                                        <button onclick={redirectToLoginPage} class="link-button">
+                                            <svg fill="#ffffff" version="1.1" height="16" width="16"
+                                                viewBox="0 0 425.466 425.467" xml:space="preserve" stroke="#ffffff">
+                                                <path
+                                                    d="M318.15,230.195l77.934-77.937c31.894-31.892,31.894-83.782-0.004-115.674l-12.66-12.66 c-31.893-31.896-83.78-31.896-115.674-0.004l-77.937,77.934c-17.588,17.588-25.457,41.264-23.646,64.311 c-23.045-1.813-46.722,6.056-64.308,23.647L23.92,267.748c-31.894,31.889-31.894,83.779,0,115.674l12.664,12.662 c31.893,31.893,83.783,31.893,115.674,0l77.935-77.936c17.592-17.59,25.459-41.266,23.647-64.309 C276.884,255.654,300.56,247.783,318.15,230.195z M202.653,290.605l-77.936,77.938c-16.705,16.703-43.889,16.703-60.59,0 l-12.666-12.666c-16.705-16.701-16.703-43.885,0-60.594l77.936-77.932c14.14-14.141,35.779-16.306,52.226-6.516l-32.302,32.307 c-7.606,7.604-7.606,19.938,0,27.541c7.605,7.607,19.937,7.607,27.541,0l32.306-32.303 C218.959,254.828,216.795,276.469,202.653,290.605z M238.382,209.169l32.299-32.306c7.608-7.602,7.608-19.935,0-27.538 c-7.604-7.61-19.936-7.61-27.541-0.004l-32.303,32.303c-9.791-16.446-7.627-38.087,6.514-52.226l77.935-77.935 c16.707-16.707,43.89-16.707,60.594,0l12.664,12.664c16.705,16.705,16.705,43.886,0,60.591l-77.936,77.937 C276.468,216.797,254.828,218.959,238.382,209.169z">
+                                                </path>
+                                                <path
+                                                    d="M343.466,261.465c-45.287,0-82,36.713-82,82s36.713,82,82,82c45.286,0,82-36.713,82-82S388.753,261.465,343.466,261.465z M372.505,333.564l-56.046,56.104c-0.239,0.238-0.536,0.41-0.862,0.496l-22.315,5.85c-0.649,0.168-1.347-0.02-1.822-0.494 c-0.477-0.479-0.666-1.172-0.496-1.824l5.826-22.318c0.084-0.326,0.256-0.627,0.494-0.863l56.047-56.104 c0.742-0.742,1.945-0.744,2.688-0.002l4.548,4.541c0.739,0.74,0.741,1.943,0,2.688l-37.433,37.471l4.709,4.703l37.435-37.471 c0.739-0.742,1.94-0.742,2.682-0.002l4.55,4.541C373.25,331.617,373.25,332.822,372.505,333.564z M395.472,310.574l-17,17.018 c-0.739,0.744-1.942,0.744-2.685,0.002l-16.489-16.475c-0.744-0.74-0.744-1.943-0.002-2.688l17-17.02 c0.741-0.74,1.944-0.74,2.688-0.002l16.487,16.477C396.216,308.629,396.216,309.832,395.472,310.574z">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <!-- <lightning-input label="Long Access Token" value={fieldsData.Long_Access_Token__c} placeholder="Enter Refresh Token" data-id="Long_Access_Token__c" class="custom-input" required disabled="true"></lightning-input>
+                                    <lightning-input label="User Id" value={fieldsData.User_Id__c} placeholder="Enter Refresh Token" data-id="User_Id__c" class="custom-input" required disabled="true"></lightning-input> -->
+                                </template>
+
+                                <!-- Google Fields -->
+                                <template if:true={isGoogle}>
+                                    <lightning-combobox label="Google Ads Endpoint"
+                                        value={fieldsData.MVEX__Google_Ads_Endpoint__c} data-id="MVEX__Google_Ads_Endpoint__c"
+                                        placeholder="Select Site" options={siteInfo} onchange={handleValueChange}
+                                        field-level-help="Please copy the URL from below field and paste it as a Webhook Callback URL in the Meta."></lightning-combobox>
+                                    <div class="copyclass">
+                                        <lightning-input value={fieldsData.MVEX__Google_Ads_Endpoint__c}
+                                            placeholder="Please select a site from above field"
+                                            class="custom-input copy_input" variant="label-hidden"></lightning-input>
+                                        <button onclick={copyTheText} class="copy-button1">
+                                            <svg viewBox="0 -0.5 25 25" fill="none" height="16" width="16"
+                                                xmlns="http://www.w3.org/2000/svg" stroke="#000000">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                                <path d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <lightning-input label="Google lead Form Secret"
+                                        value={fieldsData.MVEX__Google_lead_Form_Secret__c}
+                                        placeholder="Enter google lead form secret" onchange={handleInputChange}
+                                        data-id="MVEX__Google_lead_Form_Secret__c" class="custom-input"
+                                        required></lightning-input>
+                                    <!-- <div class="copyclass">
+                                    <lightning-input  type="password" label="Client Secret" value={fieldsData.WhatsApp_Client_Secret__c} placeholder="Enter WhatsApp Endpoint" onchange={handleInputChange} data-id="WhatsApp_Client_Secret__c" data-name="secret-key-input" class="custom-input" required></lightning-input>
+                                    <template if:true={isClientSecretHidden}>
+                                        <button class="toggle-btn" onclick={toggleClientSecret}>
+                                            <svg width="16" height="16" fill="#ffffff" version="1.1" viewBox="0 0 92 92" enable-background="new 0 0 92 92" xml:space="preserve" stroke="#ffffff">
+                                                <path d="M91.3,43.8C90.6,42.8,74.4,19,46,19C17.6,19,1.4,42.8,0.7,43.8c-0.9,1.3-0.9,3.1,0,4.5 C1.4,49.2,17.6,73,46,73c28.4,0,44.6-23.8,45.3-24.8C92.2,46.9,92.2,45.1,91.3,43.8z M46,65C26.7,65,13.5,51.4,9,46 c4.5-5.5,17.6-19,37-19c19.3,0,32.5,13.6,37,19C78.4,51.5,65.3,65,46,65z M48.3,29.6c-4.4-0.6-8.7,0.5-12.3,3.2c0,0,0,0,0,0 c-7.3,5.5-8.8,15.9-3.3,23.2c2.7,3.6,6.5,5.8,10.9,6.5c0.8,0.1,1.6,0.2,2.3,0.2c3.6,0,7-1.2,9.9-3.3c7.3-5.5,8.8-15.9,3.3-23.2 C56.6,32.5,52.7,30.2,48.3,29.6z M52.3,54.5c-2.2,1.7-5,2.4-7.8,2c-2.8-0.4-5.3-1.9-7-4.1C34.1,47.7,35,41,39.7,37.5 c2.2-1.7,5-2.4,7.8-2c2.8,0.4,5.3,1.9,7,4.1C57.9,44.3,57,51,52.3,54.5z M51.9,40c0.8,0.7,1.2,1.8,1.2,2.8c0,1-0.4,2.1-1.2,2.8 c-0.7,0.7-1.8,1.2-2.8,1.2c-1.1,0-2.1-0.4-2.8-1.2c-0.8-0.8-1.2-1.8-1.2-2.8c0-1.1,0.4-2.1,1.2-2.8c0.7-0.8,1.8-1.2,2.8-1.2 C50.2,38.9,51.2,39.3,51.9,40z"></path>
+                                            </svg>
+                                        </button>
+                                    </template>
+                                    <template if:false={isClientSecretHidden}>
+                                        <button class="toggle-btn" onclick={toggleClientSecret}>
+                                            <svg width="16" height="16" viewBox="0 0 48 48" fill="none">
+                                                <path d="M9.85786 18C6.23858 21 4 24 4 24C4 24 12.9543 36 24 36C25.3699 36 26.7076 35.8154 28 35.4921M20.0318 12.5C21.3144 12.1816 22.6414 12 24 12C35.0457 12 44 24 44 24C44 24 41.7614 27 38.1421 30" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> 
+                                                <path d="M20.3142 20.6213C19.4981 21.5112 19 22.6974 19 24C19 26.7614 21.2386 29 24 29C25.3627 29 26.5981 28.4548 27.5 27.5707" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> 
+                                                <path d="M42 42L6 6" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
+                                        </button>
+                                    </template>
+                                </div>
+                                    <lightning-input label="Configure Id" value={fieldsData.Whatsapp_Configure_Id__c} placeholder="Enter whatsApp configure id" onchange={handleInputChange} data-id="Whatsapp_Configure_Id__c" class="custom-input" required></lightning-input>
+                                    <lightning-input label="Whatsapp Phone Number Id" value={fieldsData.Whatsapp_Phone_Number_Id__c} placeholder="Enter whatsapp phone number id" onchange={handleInputChange} data-id="Whatsapp_Phone_Number_Id__c" class="custom-input" required></lightning-input>
+                                    <lightning-input label="Whatsapp Business Account Id" value={fieldsData.Whatsapp_Business_Account_Id__c} placeholder="Enter whatsapp business account id" onchange={handleInputChange} data-id="Whatsapp_Business_Account_Id__c" class="custom-input" required></lightning-input> -->
+                                </template>
+
+                                <!-- Meta Fields -->
+                                <template if:true={isMeta}>
+                                    <lightning-combobox label="Meta Page Webhook Endpoint"
+                                        value={fieldsData.MVEX__META_PAGE_ENDPOINT__c} data-id="MVEX__META_PAGE_ENDPOINT__c"
+                                        placeholder="Select Site" options={siteInfo} onchange={handleValueChange}
+                                        field-level-help="Please copy the URL from below field and paste it as a Webhook Callback URL in Meta."></lightning-combobox>
+                                    <div class="copyclass">
+                                        <lightning-input value={fieldsData.MVEX__META_PAGE_ENDPOINT__c}
+                                            placeholder="Please select a site from above field"
+                                            class="custom-input copy_input" variant="label-hidden"></lightning-input>
+                                        <button onclick={copyTheText} class="copy-button1">
+                                            <svg viewBox="0 -0.5 25 25" fill="none" height="16" width="16"
+                                                xmlns="http://www.w3.org/2000/svg" stroke="#000000">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                                <path d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <lightning-input label="Verify Token" value={fieldsData.MVEX__VERIFY_TOKEN__c}
+                                        placeholder="Enter Verify Token" onchange={handleInputChange}
+                                        data-id="MVEX__VERIFY_TOKEN__c" class="custom-input" required></lightning-input>
+                                    <lightning-input label="App ID" value={fieldsData.MVEX__APP_ID__c}
+                                        placeholder="Enter App ID" onchange={handleInputChange} data-id="MVEX__APP_ID__c"
+                                        class="custom-input" required></lightning-input>
+                                    <div class="copyclass">
+                                        <lightning-input type="password" label="App Secret"
+                                            value={fieldsData.MVEX__APP_SECRET__c} placeholder="Enter App Secret"
+                                            onchange={handleInputChange} onfocus={handleCredentialFocus}
+                                            data-id="MVEX__Client_Secret__c"
+                                            data-name="secret-key-input" class="custom-input"
+                                            required></lightning-input>
+                                        <template if:true={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" fill="#ffffff" version="1.1"
+                                                    viewBox="0 0 92 92" enable-background="new 0 0 92 92"
+                                                    xml:space="preserve" stroke="#ffffff">
+                                                    <path
+                                                        d="M91.3,43.8C90.6,42.8,74.4,19,46,19C17.6,19,1.4,42.8,0.7,43.8c-0.9,1.3-0.9,3.1,0,4.5 C1.4,49.2,17.6,73,46,73c28.4,0,44.6-23.8,45.3-24.8C92.2,46.9,92.2,45.1,91.3,43.8z M46,65C26.7,65,13.5,51.4,9,46 c4.5-5.5,17.6-19,37-19c19.3,0,32.5,13.6,37,19C78.4,51.5,65.3,65,46,65z M48.3,29.6c-4.4-0.6-8.7,0.5-12.3,3.2c0,0,0,0,0,0 c-7.3,5.5-8.8,15.9-3.3,23.2c2.7,3.6,6.5,5.8,10.9,6.5c0.8,0.1,1.6,0.2,2.3,0.2c3.6,0,7-1.2,9.9-3.3c7.3-5.5,8.8-15.9,3.3-23.2 C56.6,32.5,52.7,30.2,48.3,29.6z M52.3,54.5c-2.2,1.7-5,2.4-7.8,2c-2.8-0.4-5.3-1.9-7-4.1C34.1,47.7,35,41,39.7,37.5 c2.2-1.7,5-2.4,7.8-2c2.8,0.4,5.3,1.9,7,4.1C57.9,44.3,57,51,52.3,54.5z M51.9,40c0.8,0.7,1.2,1.8,1.2,2.8c0,1-0.4,2.1-1.2,2.8 c-0.7,0.7-1.8,1.2-2.8,1.2c-1.1,0-2.1-0.4-2.8-1.2c-0.8-0.8-1.2-1.8-1.2-2.8c0-1.1,0.4-2.1,1.2-2.8c0.7-0.8,1.8-1.2,2.8-1.2 C50.2,38.9,51.2,39.3,51.9,40z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template if:false={isClientSecretHidden}>
+                                            <button class="toggle-btn" onclick={toggleClientSecret}>
+                                                <svg width="16" height="16" viewBox="0 0 48 48" fill="none">
+                                                    <path
+                                                        d="M9.85786 18C6.23858 21 4 24 4 24C4 24 12.9543 36 24 36C25.3699 36 26.7076 35.8154 28 35.4921M20.0318 12.5C21.3144 12.1816 22.6414 12 24 12C35.0457 12 44 24 44 24C44 24 41.7614 27 38.1421 30"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path
+                                                        d="M20.3142 20.6213C19.4981 21.5112 19 22.6974 19 24C19 26.7614 21.2386 29 24 29C25.3627 29 26.5981 28.4548 27.5 27.5707"
+                                                        stroke="#ffffff" stroke-width="4" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                    <path d="M42 42L6 6" stroke="#ffffff" stroke-width="4"
+                                                        stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <lightning-input label="Facebook API Version" value={fieldsData.MVEX__FB_API_VERSION__c}
+                                        placeholder="Enter Facebook API Version" onchange={handleInputChange}
+                                        data-id="MVEX__FB_API_VERSION__c" class="custom-input" required></lightning-input>
+                                    <!-- <div class="copyclass"> -->
+                                    <lightning-input type="text" label="Access Token" value={fieldsData.MVEX__ACCESS_TOKEN__c}
+                                        placeholder="Enter Access Token" onchange={handleInputChange}
+                                        onfocus={handleCredentialFocus}
+                                        data-id="MVEX__ACCESS_TOKEN__c" data-name="secret-key-input" class="custom-input"
+                                        required></lightning-input>
+                                    <!-- </div> -->
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="custom-modal__footer">
+                        <template if:false={isWhatsApp}>
+                            <button class="cancel-btn" onclick={closeModal}>Cancel</button>
+                            <button class="save-btn" onclick={saveDetails} disabled={saveDisable}>Save</button>
+                        </template>
+                        <template if:true={isWhatsApp}>
+                            <button class="save-btn" onclick={generateToken} disabled={saveDisable}>Generate
+                                Token</button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+</template>

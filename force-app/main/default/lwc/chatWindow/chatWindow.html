@@ -1,0 +1,525 @@
+<template>
+    <lightning-spinner alternative-text="Loading" size="small" if:true={showSpinner}></lightning-spinner>
+
+    <div class="main-chat-window-div lightTheme">
+        <div class="backdrop-div" if:true={displayBackDrop} onclick={handleBackDropClick}></div>
+        <div class="toggle-parent-div">
+            <div class="toggle-mode-div" onclick={toggleTheme}>
+                <div class={sunClass}>
+                    <svg height="10" width="10" xmlns="http://www.w3.org/2000/svg">
+                        <circle r="5" cx="5" cy="5" fill="#ffeb3b" />
+                    </svg>
+                </div>
+                <div class={moonClass}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" height="12" width="12">
+                        <path transform="scale(-1,1) translate(-16,0)"
+                            d="M14.820849609375 9.52787109375c-0.465662109375 1.520115234375 -1.3988906250000002 2.8546347656249997 -2.666900390625 3.813662109375C7.5433593750000005 16.811625 0.9052617187499999 13.98931640625 0.205376953125 8.261384765625001c-0.036931640625 -0.30226171874999996 -0.05541796875 -0.606486328125 -0.055341796875 -0.9109980468750001 -0.005009765625000001 -1.626333984375 0.523693359375 -3.209396484375 1.5049921874999999 -4.506333984375 0.959033203125 -1.26800390625 2.2935527343750004 -2.2012382812499998 3.813662109375 -2.66689453125 0.42423046875 -0.13062890625 0.8307890625000001 0.24697265624999998 0.731794921875 0.679681640625 -0.0031640624999999998 0.013833984375 -0.0068320312499999996 0.027544921875 -0.011009765625000001 0.041103515625 -1.4142539062500001 4.678095703125 2.7660234375 9.13287890625 7.524498046875 8.01861328125 0.130974609375 -0.030673828124999997 0.260935546875 -0.06549609375 0.3896953125 -0.104419921875 0.42423046875 -0.13062890625 0.830783203125 0.24697265624999998 0.731794921875 0.679681640625 -0.0031640624999999998 0.013833984375 -0.006837890625 0.0275390625 -0.011009765625000001 0.04109765625Z"
+                            stroke-width="1" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="chat-div" onscroll={handleScroll}>
+            <div if:true={isLoading} class="loader-container">
+                <div class="custom-loader"></div>
+            </div>
+            <template for:each={groupedChats} for:item="group" if:false={noChatMessages}>
+                <div key={group.date} class="chat-messages-by-date-div">
+                    <div class="message-date-div">{group.date}</div>
+                    <template for:each={group.messages} for:item="chat">
+                        <div key={chat.Id} data-id={chat.Id} class="message-full-length-div" data-type={chat.className}
+                            onmouseleave={handleHideActions}>
+                            <div class="message">
+                                <div class="message-preview-div" data-by={chat.replyTo.messageBy}
+                                    data-reply-to={chat.replyTo.Id} onclick={handleReplyMessageClick}
+                                    if:true={chat.replyTo}>
+                                    <div class="message-by">{chat.replyTo.messageBy}</div>
+                                    <div class="text-message-div" if:true={chat.replyTo.isText}>
+                                        <div class="message-div reply-to-text-message-div">{chat.replyTo.MVEX__Message__c}
+                                        </div>
+                                    </div>
+                                    <div if:true={chat.replyTo.isImage}>
+                                        <img class="message-image" src={chat.replyTo.MVEX__Message__c} alt="Image" />
+                                    </div>
+                                    <div if:true={chat.replyTo.isVideo}>
+                                        Video
+                                    </div>
+                                    <div if:true={chat.replyTo.isAudio}>
+                                        <div class="reply-audio">
+                                            {chat.replyTo.fileName}
+                                        </div>
+                                    </div>
+                                    <div if:true={chat.replyTo.isDoc}>
+                                        <div class="reply-audio">
+                                            {chat.replyTo.fileName}
+                                        </div>
+                                    </div>
+                                    <div if:true={chat.replyTo.isOther}>
+                                        <div class="message-other">{chat.replyTo.MVEX__Message_Type__c} shared by
+                                            {chat.replyTo.messageBy}.</div>
+                                    </div>
+                                    <div if:true={chat.replyTo.isTemplate}>
+                                        <div class="reply-to-template-message-div"
+                                            if:true={chat.replyTo.MVEX__WhatsappTemplate__r}>
+                                            {chat.replyTo.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c}</div>
+                                        <div class="reply-to-template-message-div"
+                                            if:false={chat.replyTo.MVEX__WhatsappTemplate__r}> Deleted Template! </div>
+                                    </div>
+                                </div>
+                                <div class="text-message-div" if:true={chat.isText}>
+                                    <div>{chat.MVEX__Message__c}</div>
+                                </div>
+                                <div class="text-message-div" if:true={chat.isFlow}>
+                                    <div>Submitted Flow Response</div>
+                                </div>
+                                <div class="image-message-div" if:true={chat.isImage} data-action="open"
+                                    onclick={handleToggleImagePreview}>
+                                    <svg class="image-preview-close" data-action="close"
+                                        onclick={handleToggleImagePreview} xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 384 512" height="30" width="30">
+                                        <path
+                                            d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+                                    </svg>
+                                    <img class="message-image" src={chat.MVEX__Message__c} onerror={handleImageError}
+                                        alt="Photo" />
+                                </div>
+                                <div if:true={chat.isVideo}>
+                                    <video class="message-video" src={chat.MVEX__Message__c} onerror={handleImageError}
+                                        alt="Video" controls></video>
+                                </div>
+                                <div if:true={chat.isDoc}>
+                                    <template if:false={chat.isAWSFile}>
+                                        <div class="doc-preview">
+                                            <div class="slds-file slds-file_card slds-has-title">
+                                                <figure>
+                                                    <a href={chat.filePreviewUrl} class="slds-file__crop"
+                                                        onclick={handlePreview} data-id={chat.contentDocumentId}>
+                                                        <img class="thumbnail" src={chat.fileThumbnail}
+                                                            alt="No Preview Available" onerror={handleDocError} />
+                                                    </a>
+                                                    <figcaption class="slds-file__title slds-file__title_card">
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-truncate" title={chat.fileName}>
+                                                                {chat.fileName}
+                                                            </p>
+                                                        </div>
+                                                        <a href={chat.fileUrl}>
+                                                            <lightning-button-icon icon-name="utility:download"
+                                                                variant="bare"
+                                                                alternative-text="Download File"></lightning-button-icon>
+                                                        </a>
+                                                    </figcaption>
+                                                </figure>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div if:true={chat.isAWSFile}
+                                        class="slds-file slds-file_card slds-has-title preview-container">
+                                        <figure>
+                                            <!-- Iframe Preview Container -->
+                                            <div>
+                                                <div if:true={chat.isPreviewable} data-action="open"
+                                                    onclick={handleTogglePDFPreview}>
+                                                    <svg class="pdf-preview-close" data-action="close"
+                                                        onclick={handleTogglePDFPreview}
+                                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"
+                                                        height="30" width="30">
+                                                        <path
+                                                            d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+                                                    </svg>
+                                                    <iframe src={chat.MVEX__Message__c} class="doc-preview-aws"
+                                                        data-action="open" onclick={handleTogglePDFPreview}></iframe>
+                                                </div>
+                                                <div if:false={chat.isPreviewable}>
+                                                    <img class="doc-preview-aws" src={NoPreviewAvailable}
+                                                        alt="No Preview Available" />
+                                                </div>
+                                            </div>
+
+                                            <!-- File Title and Download -->
+                                            <figcaption class="slds-file__title slds-file__title_card">
+                                                <div class="slds-media__body">
+                                                    <p class="slds-truncate" title={chat.fileName}>
+                                                        {chat.fileName}
+                                                    </p>
+                                                </div>
+                                                <a href="javascript:void(0)" onclick={downloadRowImage}
+                                                    data-name={chat.fileName}>
+                                                    <lightning-button-icon icon-name="utility:download" variant="bare"
+                                                        alternative-text="Download File"></lightning-button-icon>
+                                                </a>
+                                            </figcaption>
+                                        </figure>
+                                    </div>
+                                </div>
+                                <div if:true={chat.isAudio}>
+                                    <div class="audio-div">
+                                        <div class="headphone" data-url={chat.MVEX__Message__c}
+                                            onclick={handleToggleAudioPreview}>
+                                            <img src={headphone} class="audio-icon" alt="audioIcon">
+                                        </div>
+                                        <!-- <div>
+                                            <a href={chat.fileUrl} target="_blank" style="position: absolute; bottom: 6px; right: 10px;">
+                                                <lightning-button-icon class="download-btn" icon-name="utility:download" variant="bare" alternative-text="Download File"></lightning-button-icon>
+                                            </a>
+                                        </div> -->
+                                        <div class="audio-name">
+                                            <p title={chat.fileName}>{chat.fileName}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="other-message-div" if:true={chat.isOther}>
+                                    <div class="other-message-text">Shared {chat.MVEX__Message_Type__c} With You.</div>
+                                    <div class="other-message-sub-text">You can not view this media due to limitation of
+                                        your plan.</div>
+                                </div>
+                                <div class="template-message-div" if:true={chat.isTemplate}>
+                                    <c-template-preview template-id={chat.MVEX__WhatsappTemplate__c} record-id={recordId}
+                                        object-api-name={objectApiName}></c-template-preview>
+                                </div>
+                                <div class="timestamp">
+                                    <lightning-formatted-date-time value={chat.CreatedDate} hour="2-digit"
+                                        minute="2-digit"></lightning-formatted-date-time>
+                                    <div class="status-icon" data-status={chat.MVEX__Message_Status__c} if:true={chat.isTick}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="10" width="16"
+                                            viewBox="0 3 16 10" fill="none" stroke-linecap="round"
+                                            stroke-linejoin="round" stroke-width="1.5">
+                                            <path class="first-tick" stroke="#34B7F1"
+                                                d="m4.375 7.5 3.125 3.125L13.75 4.375"></path>
+                                            <path class="second-tick" stroke="#34B7F1"
+                                                d="m1.25 7.5 3.125 3.125m3.125 -3.125 3.125 -3.125"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="status-icon" if:true={chat.isSending}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" stroke-width="2" height="10" width="16"
+                                            viewBox="-0.5 -0.5 16 16" fill="none" stroke="darkgray"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1.25 7.5a6.25 6.25 0 1 0 12.5 0 6.25 6.25 0 1 0 -12.5 0"></path>
+                                            <path d="m7.5 3.75 0 3.75 2.5 1.25"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="status-icon" if:true={chat.isFailed}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16"
+                                            height="10" fill="#ff000030" stroke="orangered" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="12" y1="6" x2="12" y2="12" stroke-width="3" />
+                                            <circle cx="12" cy="17" r="1.1" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="reaction" if:true={chat.isReaction}>
+                                    <div class="contact-reaction" if:true={chat.userReaction}>{chat.userReaction}</div>
+                                    <div class="your-reaction" data-chat={chat.Id} ondblclick={handleRemoveReaction}
+                                        if:true={chat.yourReaction}>{chat.yourReaction} You</div>
+                                </div>
+                            </div>
+                            <div class="action-options-btn" onclick={handleToggleActions}>
+                                <div class="action-options-div" if:false={chat.isFailed}>
+                                    <div class="action-option" data-action="reply" data-chat={chat.Id}
+                                        onclick={handleChatAction} if:false={sendOnlyTemplate}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16"
+                                            width="16" fill="teal">
+                                            <path
+                                                d="M205 34.8c11.5 5.1 19 16.6 19 29.2l0 64 112 0c97.2 0 176 78.8 176 176c0 113.3-81.5 163.9-100.2 174.1c-2.5 1.4-5.3 1.9-8.1 1.9c-10.9 0-19.7-8.9-19.7-19.7c0-7.5 4.3-14.4 9.8-19.5c9.4-8.8 22.2-26.4 22.2-56.7c0-53-43-96-96-96l-96 0 0 64c0 12.6-7.4 24.1-19 29.2s-25 3-34.4-5.4l-160-144C3.9 225.7 0 217.1 0 208s3.9-17.7 10.6-23.8l160-144c9.4-8.5 22.9-10.6 34.4-5.4z" />
+                                        </svg>
+                                        <div class="action-command">Reply</div>
+                                    </div>
+                                    <div class="action-option" data-action="react" data-chat={chat.Id}
+                                        onclick={handleChatAction} if:false={sendOnlyTemplate}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16"
+                                            width="16" fill="#f5c400">
+                                            <path
+                                                d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM164.1 325.5C182 346.2 212.6 368 256 368s74-21.8 91.9-42.5c5.8-6.7 15.9-7.4 22.6-1.6s7.4 15.9 1.6 22.6C349.8 372.1 311.1 400 256 400s-93.8-27.9-116.1-53.5c-5.8-6.7-5.1-16.8 1.6-22.6s16.8-5.1 22.6 1.6zM144.4 208a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm192-32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z" />
+                                        </svg>
+                                        <div class="action-command">React</div>
+                                    </div>
+                                    <div class="action-option" data-action="copy" data-message={chat.MVEX__Message__c}
+                                        onclick={handleChatAction} if:true={chat.isText}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" height="16"
+                                            width="16" fill="skyblue">
+                                            <path
+                                                d="M192 0c-41.8 0-77.4 26.7-90.5 64L64 64C28.7 64 0 92.7 0 128L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64l-37.5 0C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
+                                        </svg>
+                                        <div class="action-command">Copy</div>
+                                    </div>
+                                </div>
+                                <div class="action-options-div" if:true={chat.isFailed}>
+                                    <div class="action-option" data-action="copy" data-message={chat.MVEX__Message__c}
+                                        onclick={handleChatAction} if:true={chat.isText}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" height="16"
+                                            width="16" fill="skyblue">
+                                            <path
+                                                d="M192 0c-41.8 0-77.4 26.7-90.5 64L64 64C28.7 64 0 92.7 0 128L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64l-37.5 0C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
+                                        </svg>
+                                        <div class="action-command">Copy</div>
+                                    </div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="gray" stroke="gray"
+                                    height="16" width="16" stroke-width="1">
+                                    <circle cx="8" cy="3" r="1"></circle>
+                                    <circle cx="8" cy="8" r="1"></circle>
+                                    <circle cx="8" cy="13" r="1"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <div class="no-chat-messages-div" if:true={noChatMessages}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="#25D366" viewBox="0 0 16 16" height="80" width="80"
+                    stroke-width="1">
+                    <path
+                        d="M0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-2.5a1 1 0 0 0 -0.8 0.4l-1.9 2.533a1 1 0 0 1 -1.6 0L5.3 12.4a1 1 0 0 0 -0.8 -0.4H2a2 2 0 0 1 -2 -2zm3.5 1a0.5 0.5 0 0 0 0 1h9a0.5 0.5 0 0 0 0 -1zm0 2.5a0.5 0.5 0 0 0 0 1h9a0.5 0.5 0 0 0 0 -1zm0 2.5a0.5 0.5 0 0 0 0 1h5a0.5 0.5 0 0 0 0 -1z">
+                    </path>
+                </svg>
+                <div class="bold-text">No Conversations Yet!</div>
+                <div class="sub-text">Great conversation is just a message away!</div>
+            </div>
+        </div>
+        <div class="react-emoji-picker-div" data-action="cancel-react" onclick={handleChatAction}
+            if:true={showReactEmojiPicker}>
+            <div class="react-emoji-tray">
+                <template for:each={emojiCategories} for:item="category">
+                    <div key={category.category} class="emoji-category-div">
+                        <h3>{category.category}</h3>
+                        <div class="emoji-tray">
+                            <template for:each={category.emojis} for:item="item">
+                                <div key={item} class="emoji" title={item.description} onclick={handleReactWithEmoji}>
+                                    {item.emoji}</div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div class="popup-div" if:true={showPopup}>
+            <div class="files-uploader-div" if:true={showFileUploader}>
+                <template if:false={isAWSEnabled}>
+                    <lightning-file-upload class="file-uploader" label={uploadLabel} name="fileUploader"
+                        accept={acceptedFormats} record-id={recordId} onuploadfinished={handleUploadFinished}
+                        variant="label-hidden"></lightning-file-upload>
+                </template>
+                <template if:true={isAWSEnabled}>
+                    <div class="upload-container">
+                        <label class="custom-file-upload">
+                            <lightning-icon icon-name="utility:upload" alternative-text="Upload Icon"
+                                size="x-small"></lightning-icon>
+                            <span class="slds-p-left--medium slds-text-color_success">Choose Files</span>
+                            <input type="file" class="file-input" onchange={handleSelectedFiles}
+                                accept={acceptedFormats} disabled={selectedFileName} />
+                        </label>
+
+                        <template if:true={selectedFileName}>
+                            <div class="file-details">
+                                <span class="file-name">{selectedFileName}</span>
+                                <lightning-icon icon-name="utility:delete" alternative-text="Remove File" size="x-small"
+                                    class="remove-icon" onclick={removeFile}></lightning-icon>
+                            </div>
+                            <button class="upload-button" onclick={handleUploadClick}>Send</button>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            <template lwc:if={showTemplateSelection}>
+                <div class="template-select-div">
+                    <div class="bold-text">Select Template</div>
+                    <div class="search-template-div">
+                        <input placeholder="Search Template..." type="text" class="search-template-input"
+                            onkeyup={handleSearchTemplate} onchange={handleSearchTemplate}>
+                        <svg class="search-template-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                            fill="darkgray" viewBox="0 0 512 512">
+                            <path
+                                d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+                        </svg>
+                    </div>
+                    <div class="templates-list-div" if:true={filteredTemplate}>
+                        <template for:each={filteredTemplate} for:item="template">
+                            <div key={template.Id} class="template-div" data-id={template.Id}
+                                onclick={handleShowTemplatePreview}>
+                                <div class="template-title-div">
+                                    {template.MVEX__Template_Name__c}
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="no-templates-div" if:false={filteredTemplate}>
+                        <template lwc:if={allTemplates}>
+                            No Matching Template Found.
+                        </template>
+                        <template lwc:else>
+                            No Template Available.
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template lwc:elseif={showTemplatePreview}>
+                <div class="show-template-preview">
+                    <c-template-preview template-id={selectedTemplate} record-id={recordId}
+                        mobile-number={recordMobileNumber} object-api-name={objectApiName} show-buttons="true"
+                        onback={handleBackToList} onmessage={handleTemplateSent}></c-template-preview>
+                </div>
+            </template>
+        </div>
+        <div class="message-draft-div">
+            <div class="reply-to-message-div" if:true={replyToMessage}>
+                <div class="message-preview-div" data-reply-by={replyToMessage.messageBy}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 48 48" height="12" width="12"
+                        data-action="cancel-reply" onclick={handleChatAction}>
+                        <path fill="gray"
+                            d="M23.9999 0.48C11.0312 0.48 0.48 11.0312 0.48 23.9999 0.48 36.9688 11.0312 47.52 23.9999 47.52c12.9689 0 23.5201 -10.5512 23.5201 -23.5201C47.52 11.0312 36.9688 0.48 23.9999 0.48Zm8.516 29.4781c0.175 0.1663 0.3149 0.3659 0.4116 0.5872 0.0966 0.2214 0.1481 0.4597 0.1512 0.7012 0.0032 0.2415 -0.0421 0.4811 -0.1331 0.7049 -0.0911 0.2236 -0.2259 0.4268 -0.3967 0.5975 -0.1707 0.1708 -0.3739 0.3057 -0.5975 0.3967 -0.2238 0.091 -0.4634 0.1363 -0.7049 0.1331 -0.2415 -0.0031 -0.4798 -0.0546 -0.7012 -0.1512 -0.2213 -0.0967 -0.4209 -0.2366 -0.5873 -0.4116l-5.9581 -5.9569 -5.958 5.9569c-0.342 0.3249 -0.7975 0.5033 -1.2692 0.4974 -0.4717 -0.006 -0.9226 -0.1963 -1.2562 -0.5299 -0.3335 -0.3335 -0.5238 -0.7844 -0.5298 -1.2561 -0.006 -0.4717 0.1725 -0.9273 0.4974 -1.2692L21.441 24l-5.9569 -5.958c-0.3249 -0.3421 -0.5034 -0.7976 -0.4974 -1.2693 0.006 -0.4717 0.1963 -0.9226 0.5298 -1.2562 0.3336 -0.3335 0.7845 -0.5237 1.2562 -0.5298 0.4717 -0.006 0.9272 0.1725 1.2692 0.4975l5.958 5.9569 5.9581 -5.9569c0.342 -0.325 0.7976 -0.5035 1.2693 -0.4975 0.4717 0.0061 0.9226 0.1963 1.2561 0.5298 0.3336 0.3336 0.5238 0.7845 0.5299 1.2562 0.0059 0.4717 -0.1725 0.9272 -0.4975 1.2693L26.5589 24l5.9569 5.9581Z"
+                            stroke-width="1"></path>
+                    </svg>
+                    <div class="message-by">{replyToMessage.messageBy}</div>
+                    <div class="text-message-div" if:true={replyToMessage.isText}>
+                        <div class="reply-to-text-message-div">{replyToMessage.MVEX__Message__c}</div>
+                    </div>
+                    <div class="image-reply-to" if:true={replyToMessage.isImage}>
+                        <img class="message-image-for-reply" src={replyToMessage.MVEX__Message__c} alt="Image" />
+                    </div>
+                    <div class="image-reply-to" if:true={replyToMessage.isVideo}>
+                        Video
+                    </div>
+                    <div class="image-reply-to" if:true={replyToMessage.isDoc}>
+                        {replyToMessage.fileName}
+                    </div>
+                    <div class="image-reply-to" if:true={replyToMessage.isAudio}>
+                        {replyToMessage.fileName}
+                    </div>
+                    <div class="template-reply-to" if:true={replyToMessage.isTemplate}>
+                        <div class="reply-to-template-message-div">{replyToTemplateId}</div>
+                    </div>
+                    <div if:true={replyToMessage.isOther}>
+                        <div class="reply-to-other-message-div">{replyToMessage.MVEX__Message_Type__c} shared by
+                            {replyToMessage.messageBy}.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="message-div-container-parent" if:false={sendOnlyTemplate}>
+                <div class="message-draft-container">
+                    <div class="input-wrapper">
+                        <div class="emoji-picker-div">
+                            <template for:each={emojiCategories} for:item="category">
+                                <div key={category.category} class="emoji-category-div">
+                                    <h3>{category.category}</h3>
+                                    <div class="emoji-tray">
+                                        <template for:each={category.emojis} for:item="item">
+                                            <div key={item} class="emoji" title={item.description}
+                                                onclick={handleEmojiClick}>{item.emoji}</div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="emoji-icon">
+                            <svg onclick={handleEmojiButtonClick} xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 14 14" width="20" height="20" stroke-width="1" stroke="gray"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M7 13.5c3.5899 0 6.5 -2.9101 6.5 -6.5C13.5 3.41015 10.5899 0.5 7 0.5 3.41015 0.5 0.5 3.41015 0.5 7c0 3.5899 2.91015 6.5 6.5 6.5Z M4.75 5c-0.13807 0 -0.25 -0.11193 -0.25 -0.25s0.11193 -0.25 0.25 -0.25 M4.75 5c0.13807 0 0.25 -0.11193 0.25 -0.25s-0.11193 -0.25 -0.25 -0.25 M9.25 5C9.11193 5 9 4.88807 9 4.75s0.11193 -0.25 0.25 -0.25 M9.25 5c0.13807 0 0.25 -0.11193 0.25 -0.25s-0.11193 -0.25 -0.25 -0.25 M7 11c1.933 0 3.5 -1.567 3.5 -3.5h-7C3.5 9.433 5.067 11 7 11Z">
+                                </path>
+                            </svg>
+                        </div>
+                        <textarea class="message-input" rows="1" placeholder="Write a message..."
+                            onkeydown={handleMessageTextChange} onkeyup={handleMessageTextChange}>
+                            {messageText}
+                        </textarea>
+                        <div class="attachment-options-div">
+                            <div class="all-attachment-options">
+                                <div class="document attachment-options" data-media="Document"
+                                    onclick={handleAttachmentOptionClick}>
+                                    <svg data-media="Document" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                                        height="20" width="20" fill="#ff6347">
+                                        <path
+                                            d="M448 480L64 480c-35.3 0-64-28.7-64-64L0 192l512 0 0 224c0 35.3-28.7 64-64 64zm64-320L0 160 0 96C0 60.7 28.7 32 64 32l128 0c20.1 0 39.1 9.5 51.2 25.6l19.2 25.6c6 8.1 15.5 12.8 25.6 12.8l160 0c35.3 0 64 28.7 64 64z" />
+                                    </svg>
+                                    <div data-media="Document" class="attachment-type">Documents</div>
+                                </div>
+                                <div class="image attachment-options" data-media="Image"
+                                    onclick={handleAttachmentOptionClick}>
+                                    <svg data-media="Image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"
+                                        height="20" width="20" fill="#B758E6">
+                                        <path data-media="Image"
+                                            d="M160 32c-35.3 0-64 28.7-64 64l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32zM396 138.7l96 144c4.9 7.4 5.4 16.8 1.2 24.6S480.9 320 472 320l-144 0-48 0-80 0c-9.2 0-17.6-5.3-21.6-13.6s-2.9-18.2 2.9-25.4l64-80c4.6-5.7 11.4-9 18.7-9s14.2 3.3 18.7 9l17.3 21.6 56-84C360.5 132 368 128 376 128s15.5 4 20 10.7zM192 128a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224z" />
+                                    </svg>
+                                    <div data-media="Image" class="attachment-type">Photos</div>
+                                </div>
+                                <div class="video attachment-options" data-media="Video"
+                                    onclick={handleAttachmentOptionClick}>
+                                    <svg data-media="Video" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"
+                                        height="20" width="20" fill="#049A8E">
+                                        <path
+                                            d="M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z" />
+                                    </svg>
+                                    <div data-media="Video" class="attachment-type">Videos</div>
+                                </div>
+                                <div class="audio attachment-options" data-media="Audio"
+                                    onclick={handleAttachmentOptionClick}>
+                                    <svg data-media="Audio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                                        height="20" width="20" fill="#049A8E">
+                                        <path
+                                            d="M499.1 6.3c8.1 6 12.9 15.6 12.9 25.7l0 72 0 264c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L448 147 192 223.8 192 432c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L128 200l0-72c0-14.1 9.3-26.6 22.8-30.7l320-96c9.7-2.9 20.2-1.1 28.3 5z" />
+                                    </svg>
+                                    <div data-media="Audio" class="attachment-type">Audio</div>
+                                </div>
+                                <div class="template attachment-options" data-media="Template"
+                                    onclick={handleAttachmentOptionClick}>
+                                    <svg data-media="Template" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                                        height="20" width="20" fill="#00bfff">
+                                        <path data-media="Template"
+                                            d="M0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zm64 32l0 64c0 17.7 14.3 32 32 32l320 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32L96 128c-17.7 0-32 14.3-32 32zM80 320c-13.3 0-24 10.7-24 24s10.7 24 24 24l56 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-56 0zm136 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l48 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0z" />
+                                    </svg>
+                                    <div data-media="Template" class="attachment-type">Template</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="attach-icon">
+                            <svg onclick={handleAttachmentButtonClick} xmlns="http://www.w3.org/2000/svg" fill="none"
+                                width="20" height="20" viewBox="0 0 14 14" stroke-width="1" stroke="gray"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12.8581 6.7867 -5.87959 5.929c-0.22813 0.2324 -0.50031 0.4171 -0.80062 0.5431 -0.30031 0.1261 -0.62274 0.191 -0.94843 0.191 -0.3257 0 -0.64812 -0.0649 -0.94844 -0.191 -0.30031 -0.126 -0.57249 -0.3107 -0.80061 -0.5431l-1.75894 -1.7886c-0.46046 -0.4677 -0.71854 -1.09766 -0.71854 -1.75398 0 -0.65631 0.25808 -1.28631 0.71854 -1.75399L7.98644 1.1344c0.18372 -0.185239 0.40231 -0.332266 0.64314 -0.432602 0.24084 -0.100335 0.49915 -0.151993 0.76005 -0.151993s0.51922 0.051658 0.76007 0.151993c0.2408 0.100336 0.4594 0.247363 0.6431 0.432602l0.7016 0.7016c0.1853 0.18372 0.3323 0.40231 0.4326 0.64314 0.1004 0.24083 0.152 0.49915 0.152 0.76005s-0.0516 0.51922 -0.152 0.76005c-0.1003 0.24084 -0.2473 0.45942 -0.4326 0.64314L5.94094 10.2156c-0.09187 0.0927 -0.20116 0.1662 -0.32158 0.2163 -0.12041 0.0502 -0.24957 0.076 -0.38002 0.076 -0.13045 0 -0.25961 -0.0258 -0.38003 -0.076 -0.12041 -0.0501 -0.22971 -0.1236 -0.32157 -0.2163l-0.34586 -0.3557c-0.09262 -0.09187 -0.16613 -0.20116 -0.2163 -0.32158 -0.05016 -0.12041 -0.07599 -0.24957 -0.07599 -0.38002 0 -0.13045 0.02583 -0.25961 0.07599 -0.38003 0.05017 -0.12041 0.12368 -0.22971 0.2163 -0.32157l3.72539 -3.69574">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="send-wrapper">
+                        <button class="send-btn" onclick={handleSendMessage}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff" viewBox="0 0 14 14" height="16"
+                                width="16" stroke-width="1">
+                                <path
+                                    d="M11.8214 0.0977331c0.2883 -0.1052509 0.6005 -0.1264465 0.9005 -0.0610159 0.3029 0.0660858 0.5805 0.2177638 0.7997 0.4370018 0.2192 0.219238 0.3709 0.496818 0.437 0.799741 0.0654 0.29992 0.0442 0.6122 -0.061 0.90043l-3.574 10.71201 -0.0002 0.0007c-0.0871 0.2634 -0.2404 0.5001 -0.4453 0.6873 -0.2043 0.1867 -0.45301 0.3178 -0.72238 0.381 -0.26942 0.0657 -0.55131 0.0601 -0.81798 -0.0161 -0.26643 -0.0761 -0.50848 -0.2201 -0.70245 -0.4179l-1.91734 -1.9086 -2.01406 1.0415c-0.15705 0.0812 -0.34532 0.0734 -0.49515 -0.0205 -0.14982 -0.0938 -0.23893 -0.2599 -0.23434 -0.4366l0.08257 -3.18376 7.04493 -5.11741c0.2793 -0.20286 0.3413 -0.59371 0.1384 -0.87298 -0.2029 -0.27928 -0.59371 -0.34122 -0.87299 -0.13836L2.20283 8.0884 0.473125 6.35869l-0.000058 -0.00005 -0.000126 -0.00013c-0.187323 -0.18719 -0.325225 -0.41797 -0.4013217 -0.67163 -0.07555546 -0.25185 -0.0878308 -0.51841 -0.0357814 -0.77609 0.0521166 -0.28151 0.1779581 -0.54421 0.3647391 -0.76128 0.18806 -0.21856 0.431073 -0.38293 0.703923 -0.47612l0.00337 -0.00115 0 0.00001L11.8214 0.0977331Z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="send-only-template-div" if:true={sendOnlyTemplate}>
+                <div class="note-div">
+                    {noteText}
+                </div>
+                <div class="send-template-button" data-media="Template" onclick={handleAttachmentOptionClick}>
+                    <svg data-media="Template" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="20"
+                        width="20" fill="#00bfff">
+                        <path data-media="Template"
+                            d="M0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zm64 32l0 64c0 17.7 14.3 32 32 32l320 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32L96 128c-17.7 0-32 14.3-32 32zM80 320c-13.3 0-24 10.7-24 24s10.7 24 24 24l56 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-56 0zm136 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l48 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0z" />
+                    </svg>
+                    <div data-media="Template" class="send-template-text">Send Template</div>
+                </div>
+            </div>
+        </div>
+        <template if:true={audioPreview}>
+            <div class="audio-preview">
+                <div class="audio-player">
+                    <svg class="audio-preview-close" onclick={handleToggleAudioPreview}
+                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" height="30" width="30">
+                        <path
+                            d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+                    </svg>
+                    <audio controls src={audioURL}></audio>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

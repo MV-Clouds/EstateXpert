@@ -1,0 +1,132 @@
+<template>
+  <div class="preview_mainDiv" data-fix-position={isCalledFromGenerateDoc}>
+    <div class="preview_Contanier" data-full-width={isCalledFromGenerateDoc}>
+      <div class="preview_SubContanier" data-full-width={isCalledFromGenerateDoc}>
+        <div class="preview_leftSection" if:false={isCalledFromGenerateDoc}>
+          <div class="titleSection">
+            Preview Section
+          </div>
+          <div class="optionSection">
+            <div class="recordSelectionSection">
+              <c-custom-record-picker lwc:if={recordLabelField} label={label} placeholder={placeHolder}
+                onchange={onRecordSelect} onerror={handleRecordPickerError} multiselect="false"
+                dropdown-position="center" query-object-api={objectname} label-field-api={recordLabelField}
+                label-field-type={recordLabelFieldType} description-field-api="CreatedBy.Name"
+                search-by-fields={searchByField} show-footer-button="false" additional-fields="CreatedDate"
+                disabled={disableRecordPicker}></c-custom-record-picker>
+            </div>
+            <div class="buttonSection">
+              <button class="generatePreviewBtn" title="Generate Preview" onclick={generatePreview}
+                disabled={disablePreviewBtn}>
+                <svg viewBox="0 0 32.00 32.00" transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)">
+                  <g stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g>
+                    <circle class="eye-circle" cx="22" cy="24" r="2"></circle>
+                    <path data-name="<inner path>" class="cls-1"
+                      d="M22,28a4,4,0,1,1,4-4A4.0039,4.0039,0,0,1,22,28Zm0-6a2,2,0,1,0,2,2A2.0027,2.0027,0,0,0,22,22Z">
+                    </path>
+                    <path class="eye"
+                      d="M29.7769,23.4785A8.64,8.64,0,0,0,22,18a8.64,8.64,0,0,0-7.7769,5.4785L14,24l.2231.5215A8.64,8.64,0,0,0,22,30a8.64,8.64,0,0,0,7.7769-5.4785L30,24ZM22,28a4,4,0,1,1,4-4A4.0045,4.0045,0,0,1,22,28Z">
+                    </path>
+                    <path
+                      d="M12,28H8V4h8v6a2.0058,2.0058,0,0,0,2,2h6v4h2V10a.9092.9092,0,0,0-.3-.7l-7-7A.9087.9087,0,0,0,18,2H8A2.0058,2.0058,0,0,0,6,4V28a2.0058,2.0058,0,0,0,2,2h4ZM18,4.4,23.6,10H18Z">
+                    </path>
+                    <rect data-name="<Transparent Rectangle>" class="cls-1" width="32" height="32"></rect>
+                  </g>
+                </svg>
+                Generate Preview
+              </button>
+            </div>
+          </div>
+          <div class="buttonSection footerBtn">
+            <button class="closeBtn" title="Close" onclick={closeTemplatePreview}>
+              <svg viewBox="0 0 520 520">
+                <g>
+                  <path
+                    d="M310 254l130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 01-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0114 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 010-14z">
+                  </path>
+                </g>
+              </svg>
+              Close
+            </button>
+            <button class="exportBtn" title="Generate Document" onclick={generateDocument}
+              disabled={disableGenerateBtn}>
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M11 3.01254C10.9983 2.46026 11.4446 2.01114 11.9969 2.00941C12.5492 2.00768 12.9983 2.45399 13 3.00627L11 3.01254Z"
+                  fill="#ffffff"></path>
+                <path
+                  d="M14.3158 10.2951L13.0269 11.592L13 3.00627L11 3.01254L11.0269 11.5983L9.73003 10.3095C9.33828 9.92018 8.7051 9.92214 8.3158 10.3139C7.9265 10.7056 7.92849 11.3388 8.32024 11.7281L8.32275 11.7306L8.32374 11.7316L12.039 15.4236L15.7206 11.7187L15.7262 11.7131L15.727 11.7123L15.7278 11.7115L15.7337 11.7056L15.7344 11.7049L14.3158 10.2951Z"
+                  fill="#ffffff"></path>
+                <path
+                  d="M15.7344 11.7049C16.1237 11.3131 16.1217 10.6799 15.73 10.2906C15.3382 9.90134 14.705 9.90335 14.3158 10.2951L15.7344 11.7049Z"
+                  fill="#ffffff"></path>
+                <path
+                  d="M4 12C4 10.8954 4.89543 10 6 10C6.55228 10 7 9.55228 7 9C7 8.44771 6.55228 8 6 8C3.79086 8 2 9.79086 2 12V18C2 20.2091 3.79086 22 6 22H17C19.7614 22 22 19.7614 22 17V12C22 9.79086 20.2091 8 18 8C17.4477 8 17 8.44771 17 9C17 9.55228 17.4477 10 18 10C19.1046 10 20 10.8954 20 12V17C20 18.6569 18.6569 20 17 20H6C4.89543 20 4 19.1046 4 18V12Z"
+                  fill="#ffffff"></path>
+              </svg>
+              Download PDF
+            </button>
+          </div>
+        </div>
+        <div class="preview_rightSection" data-full-width={isCalledFromGenerateDoc}>
+          <div class="iframe_outer" data-full-width={isCalledFromGenerateDoc}>
+            <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC} onload={fileDownloaded}
+                width="0%" height="0%"></iframe>
+            <template lwc:if={showPreview}>
+              <template lwc:if={isSimpleTemplatePreview}>
+                <iframe lwc:if={vfPageSRC} class="preview_iframe" data-id="vfPage" src={vfPageSRC} width="100%"
+                  height="100%" onload={contentLoaded}></iframe>
+              </template>
+            </template>
+            <template lwc:elseif={showQuickPreview}>
+              <div class="quick_preview_css">
+                <div class="scrollable-content">
+                  <div class="richText"></div>
+                </div>
+              </div>
+            </template>
+            <template lwc:elseif={errorOccured}>
+              <div class="errorMessageContainer">
+                <div class="popupContainer">
+                  <div class="popupBody">
+                    <div class="topDesingSection">
+                      <div class="curveDesign">
+                        <svg class="ballDesignIcon" fill="none" stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="2" viewBox="0 0 24 24">
+                          <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="contentSection">
+                      <div class="titleDiv">
+                        <h2>{errorDetail.title}</h2>
+                      </div>
+                      <div class="messageDiv">
+                        <p>{errorDetail.message}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template lwc:else>
+              <div class="loadingContainer">
+                <img class="intiImg" src={previewModalImg} draggable="false"/>
+                <div class="loadingInfo">
+                  {loadingInfo}
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <template if:true={isSpinner}>
+    <c-spinner-component></c-spinner-component>
+  </template>
+
+  <c-custom-timeout data-id="previewTimeout" ontimeoutmethod={runTimeoutMethod}></c-custom-timeout>
+</template>

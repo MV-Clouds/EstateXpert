@@ -1,0 +1,11 @@
+:host {
+    --svgWidth: unset;
+    --svgHeight: unset;
+    --svgFill: unset;
+    --svgStroke: unset;
+    --svgStrokeWidth: unset;
+
+    --pathFill: unset;
+    --pathStroke: unset;
+    --pathStrokeWidth: unset;
+}

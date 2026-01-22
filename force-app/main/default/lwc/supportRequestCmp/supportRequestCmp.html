@@ -1,0 +1,139 @@
+<template>
+    <div class="main-cover">
+        <div class="outer-cover">
+            <!-- <div class="main_header_cls">
+                <div slot="title" class="header_block_css">
+                    <div class="svg_back_icon" onclick={onClose}>
+                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z" fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>                                                      
+                    </div>
+                    <div class="portal_mapping">
+                        Support
+                    </div>
+                </div>
+                <div class="details_cls">
+                    <p>
+                        The "Support" modal provides a direct and efficient channel for users to seek assistance and report issues, ensuring prompt support and problem resolution.
+                    </p>
+                </div>
+            </div> -->
+            <div class="maindiv">
+                <div class="supportcls">
+                    <div class="content-div">
+                        <div class="modal-header-main">
+                            <div class="mh-inner">
+                                <div slot="title" class="header_block_css">
+                                    <div class="svg_back_icon" onclick={onClose}>
+                                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z" fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round"/>
+                                        </svg>                                                      
+                                    </div>
+                                    <div class="portal_mapping">
+                                        <p class="getintouchtxt">Get In Touch</p>
+                                        <p class="helptxt">We are here for you! How can we help?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="imgcontainerdivmob">          
+                                <div class="contact-imagemob">
+                                    <img src={ContactusImage} alt="Contactus Image" draggable="false"></img>
+                                </div>
+                            </div>
+                        </div>  
+                        <div class="name-field">
+                            <div class="combobox-cover" onclick={handleFocus1}>
+                                <div class="combobox-input" data-id={selectedPriority}>
+                                    <div class="input-show">
+                                        {selectedPriority}
+                                    </div>
+                                    <div class="add-btn-class">
+                                        <svg width="20" height="14" viewBox="0 0 16 10" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" >
+                                            <path d="M2 1.75L8 7.75L14 1.75" stroke="#9f9f9f"
+                                                stroke-width="2" stroke-linecap="square" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <template if:true={isFocused}>
+                                    <div class="options-box">
+                                        <div class="options-cover" onmousedown={handlePreventDefault}>
+                                            <template for:each={priorityOptions} for:item="option1"
+                                                for:index="index1">
+                                                <div key={option1.value} data-index={index}
+                                                    data-id={option1.label}
+                                                    onclick={handleSelectPriority}
+                                                    class="options-value">
+                                                    <div class="option-body">
+                                                        <p
+                                                            class="_entity">{option1.label}</p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                            </div>
+                            <div class="error-message" if:false={priority_msg}>Please Enter Valid Priority Details..!</div>
+                        </div>
+                        <div class="name-field">
+                            <input type="text" placeholder="Enter Your Name" 
+                                value={supportname} onchange={Support_name} maxlength="50" minlength="0"/>
+                            <div class="error-message" if:false={name_msg}>Please Enter Valid Name Details..!</div>
+                        </div>
+                        <div class="name-field">
+                            <input type="text" placeholder="Enter Your Email"
+                                value={email} onchange={Support_email} maxlength="255" minlength="0"/>
+                            <div class="error-message" if:false={email_msg}>Please Enter Valid Email Details..!</div>
+                        </div>
+                        <div class="name-field">
+                            <input type="text" placeholder="Enter Your Subject"
+                                value={subject} onchange={Support_subject} maxlength="100" minlength="0"/>
+                            <div class="error-message" if:false={subject_msg}>Please Enter Valid Subject Details..!</div>
+                        </div>
+                        <div class="name-field">
+                            <textarea rows="7" placeholder="Go ahead, We are listening..."
+                                onchange={Support_message} value={message}></textarea>
+                            <div class="error-message" if:false={message_msg}>Please Enter a Message Details..!</div>
+                        </div>
+                        <div class="attachment-div">
+                            <!-- <lightning-input label="Add Attachment" onchange={handleUploadFinished} type="file"
+                                name="file" accept=".png , .jpeg , .jpg" class="quick_message" multiple></lightning-input> -->
+                                <lightning-file-upload
+                                    label="Upload File"
+                                    class="fileUpload"
+                                    name="fileUploader"
+                                    accept=".png , .jpeg , .jpg"
+                                    onuploadfinished={handleUploadFinished}
+                                    multiple>
+                                </lightning-file-upload>
+                            <template if:true={filesData}>
+                                <template for:each={filesData} for:item="imgName" for:index="index">
+                                        <div class="container" key={imgName.id}>
+                                            <div class="box box1">
+                                                <p>{imgName.name}</p>
+                                            </div>
+                                            <div class="box removeImage" key={imgName.fileName} data-id={index} onclick={removeReceiptImage}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="15" width="15" viewBox="0 0 520 520" fill="#fff"><path d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z"/></svg>
+                                            </div>
+                                        </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="button">
+                        <div class="close-btn" onclick={onClear}>Clear</div>
+                        <div class="btn-div" onclick={onSubmit}>Send Message</div>
+                    </div>
+                </div>
+                <div class="contact-imagedesktop">
+                    <img src={ContactusImage} alt="Contactus Image" draggable="false"></img>
+                </div>
+            </div>
+        </div>
+    </div>   
+    <template if:true={showSpinner}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+</template>

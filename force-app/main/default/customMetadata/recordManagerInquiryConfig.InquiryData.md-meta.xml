@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>InquiryData</label>
+    <protected>false</protected>
+    <values>
+        <field>FieldsData__c</field>
+        <value xsi:type="xsd:string">[{&quot;fieldName&quot;:&quot;Name&quot;,&quot;fieldApiname&quot;:&quot;Name&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;Name&quot;,&quot;label&quot;:&quot;Inquiry Id&quot;,&quot;fieldType&quot;:&quot;STRING&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;MVEX__Inquiry_Type__c&quot;,&quot;fieldApiname&quot;:&quot;MVEX__Inquiry_Type__c&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;MVEX__Inquiry_Type__c&quot;,&quot;label&quot;:&quot;Inquiry Type&quot;,&quot;fieldType&quot;:&quot;PICKLIST&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;MVEX__Status__c&quot;,&quot;fieldApiname&quot;:&quot;MVEX__Status__c&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;MVEX__Status__c&quot;,&quot;label&quot;:&quot;Status&quot;,&quot;fieldType&quot;:&quot;PICKLIST&quot;,&quot;format&quot;:null},{&quot;fieldName&quot;:&quot;MVEX__City__c&quot;,&quot;fieldApiname&quot;:&quot;MVEX__City__c&quot;,&quot;cardView&quot;:false,&quot;value&quot;:&quot;MVEX__City__c&quot;,&quot;label&quot;:&quot;City&quot;,&quot;fieldType&quot;:&quot;STRING&quot;,&quot;format&quot;:null}]</value>
+    </values>
+    <values>
+        <field>PageSize__c</field>
+        <value xsi:type="xsd:double">5.0</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,236 @@
+<template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+    <div class="wrapper">
+        <div class="main-header">
+            <div slot="title" class="header-block">
+                <div class="svg-back-icon" onclick={backToControlCenter}>
+                    <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                            fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="lead-header">
+                    Lead Assignment Rule
+                </div>
+            </div>
+            <div class="header-new-btn">
+                <template if:true={hasUnsavedChanges}>
+                    <button class="save-rule-cls" onclick={saveOrderChanges}>Save Order</button>
+                </template>
+                <button class="save-rule-cls" onclick={openNewRulePopup}>New Rule</button>
+            </div>
+        </div>
+
+        <div class="rules-container">
+            <template if:true={isRulesAvailable}>
+                <div class="rules-list" ondragover={handleDragOver} ondrop={handleDrop}>
+                    <template for:each={userGroups} for:item="group" for:index="index">
+                        <div key={group.Id} class="rule-item" draggable="true" data-index={index}
+                            ondragstart={handleDragStart}>
+                            <div class="rule-header">
+                                <span class="rule-drag-icon">
+                                    <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="4" cy="4" r="1.5" />
+                                        <circle cx="4" cy="10" r="1.5" />
+                                        <circle cx="4" cy="16" r="1.5" />
+                                        <circle cx="10" cy="4" r="1.5" />
+                                        <circle cx="10" cy="10" r="1.5" />
+                                        <circle cx="10" cy="16" r="1.5" />
+                                    </svg>
+                                </span>
+                                <button class="action-div" onclick={toggleConditions} data-index={index}>
+                                    <lightning-icon icon-name={group.visibleIconName} alternative-text="Filter"
+                                        size="x-small"></lightning-icon>
+                                </button>
+                                <span class="rule-serial">{group.serialNumber}</span>
+                                <span class="rule-user">Assigned User: {group.displayUserName} | Do Not Reassign:
+                                    {group.doNotReassignOwner}</span>
+                                <div class="rule-actions">
+                                    <button class="action-div" onclick={openEditRulePopup} data-index={index}>
+                                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
+                                    <button class="delete-div" onclick={openDeleteConfirmation} data-index={index}>
+                                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="delete-svg">
+                                            <path
+                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="conditions-block" if:true={group.showConditions}>
+                                <div class="conditions-list">
+                                    <p>Logic: {group.displayLogicalExpression}</p>
+                                    <template for:each={group.conditions} for:item="condition">
+                                        <div key={condition.Id} class="condition-item slds-p-around_small">
+                                            <span class="slds-text-body_regular">{condition.order}.
+                                                {condition.displayCondition}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={isRulesAvailable}>
+                <div class="no-rules slds-text-align_center slds-p-around_medium">
+                    No Rules Found
+                </div>
+            </template>
+        </div>
+
+        <!-- Rule Popup (Add/Edit) -->
+        <template if:true={showRulePopup}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+                class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close closs_icon_css" onclick={closeRulePopup}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
+                        </svg>
+                    </div>
+                    <div class="slds-modal__header blue-header">
+                        <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{rulePopupTitle}</h1>
+                    </div>
+                    <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small background_css">
+                        <div class="form-group">
+                            <div class="condition-row">
+                                <div class="input-div-css">
+                                    <label class="slds-form-element__label">Assigned User</label>
+                                    <lightning-combobox options={userOptions} value={currentRule.selectedUser}
+                                        onchange={handleUserChange} placeholder="Select User"
+                                        variant="label-hidden"></lightning-combobox>
+                                </div>
+                                <div class="check-box-css">
+                                    <label>Do Not Reassign Owner</label>
+                                    <lightning-input type="checkbox" checked={currentRule.doNotReassignOwner}
+                                        onchange={handleDoNotReassignChange} variant="label-hidden"></lightning-input>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="slds-form-element__label">Conditions</label>
+                            <div class="conditions-list">
+                                <template for:each={currentRule.conditions} for:item="condition"
+                                    for:index="conditionIndex">
+                                    <div key={condition.Id} class="condition-row">
+                                        <div class="count-label-css">
+                                            <label>{condition.order}</label>
+                                        </div>
+                                        <div class="input-div-css">
+                                            <lightning-combobox options={sortedFieldOptions}
+                                                value={condition.selectedField} data-condition-index={conditionIndex}
+                                                onchange={handleFieldChange} placeholder="Select Field"
+                                                variant="label-hidden"></lightning-combobox>
+                                        </div>
+                                        <div class="input-div-css">
+                                            <lightning-combobox options={condition.conditionOptions}
+                                                value={condition.selectedCondition}
+                                                data-condition-index={conditionIndex} onchange={handleConditionChange}
+                                                placeholder="Select Condition"
+                                                variant="label-hidden"></lightning-combobox>
+                                        </div>
+                                        <div class="input-div-css">
+                                            <template if:true={condition.isCombobox}>
+                                                <lightning-combobox options={condition.valueOptions}
+                                                    value={condition.selectedValue}
+                                                    data-condition-index={conditionIndex} onchange={handleValueChange}
+                                                    placeholder="Select Value"
+                                                    variant="label-hidden"></lightning-combobox>
+                                            </template>
+                                            <template if:true={condition.isReference}>
+                                                <lightning-record-picker object-api-name={condition.referenceObject}
+                                                    value={condition.selectedValue}
+                                                    data-condition-index={conditionIndex} onchange={handleValueChange}
+                                                    placeholder="Select Record" label="Reference"
+                                                    variant="label-hidden"></lightning-record-picker>
+                                            </template>
+                                            <template if:false={condition.isCombobox}>
+                                                <template if:false={condition.isReference}>
+                                                    <lightning-input type={condition.inputType}
+                                                        value={condition.selectedValue}
+                                                        data-condition-index={conditionIndex}
+                                                        onchange={handleValueChange} placeholder={condition.placeholder}
+                                                        variant="label-hidden"></lightning-input>
+                                                </template>
+                                            </template>
+                                        </div>
+                                        <button class="delete-div" data-condition-index={conditionIndex}
+                                            onclick={deleteCondition}>
+                                            <svg width="16" height="16" viewBox="0 0 14 14" fill="none"
+                                                class="delete-svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <button class="btn-secondary" onclick={addNewCondition}>Add Condition</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="slds-form-element__label">Custom Logic</label>
+                            <lightning-input type="text" value={currentRule.logicalExpression}
+                                onchange={handleLogicChange} placeholder="e.g., (1 AND 2) OR 3"
+                                variant="label-hidden"></lightning-input>
+                            <template if:true={logicError}>
+                                <p class="logic-error-css">{logicError}</p>
+                            </template>
+                            <p class="logic-hint">Use condition numbers with AND/OR operators (e.g., (1 AND 2) OR 3).
+                                Leave blank for all AND.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="cancel_btn_css" onclick={closeRulePopup}>Cancel</button>
+                            <button class="save_btn_css" onclick={saveRule}>Save</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+
+        <!-- Delete Confirmation Popup -->
+        <template if:true={showDeleteConfirmation}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+                class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close closs_icon_css" onclick={closeDeleteConfirmation}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
+                        </svg>
+                    </div>
+                    <div class="slds-modal__header blue-header">
+                        <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Confirm Deletion</h1>
+                    </div>
+                    <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small background_css delete_modal_font_css"
+                        id="modal-content-id-1">
+                        <p>Are you sure you want to delete this rule?</p>
+                        <div class="footerbtns">
+                            <button class="cancel_btn_css" onclick={closeDeleteConfirmation}>Cancel</button>
+                            <button class="delete_btn_css" onclick={confirmDelete}>Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,119 @@
+<template>
+    <div class="main-div">
+        <div class="Outer-div">
+            <template if:true={isLoading}>
+                    <c-spinner-component></c-spinner-component>
+            </template>
+            <template if:false={isLoading}>
+                <div class="heading-div">
+                    <div class="header-text">
+                        <img src={headerImage} draggable="false"/>
+                        <h1 class="heading-tag">
+                            Create New Listing
+                        </h1>
+                    </div>
+                    <div class="btn-div">
+                            <button class="btn clear-button" onclick={clearForm} >Cancel</button>
+                            <button class="btn save-button" type="button" onclick={handleButtonClick}>Save</button>
+                    </div>
+                </div>
+                <div class="record-div">
+                    <lightning-record-edit-form record-id={recordId} object-api-name={objectName} 
+                    onsuccess={handleSuccess} onsubmit={validateFields} onerror={handleError} >
+                            <div class="slds-grid slds-gutters div-cover">
+                                <div class="custom-grid1">
+                                        <div class="fields-cover">
+                                            <template if:true={fields}>
+                                                <div class="record-type-div">
+                                                    <lightning-combobox label="Record Type" options={recordTypes} onchange={handleRecordTypeChange} required></lightning-combobox>
+                                                </div>
+                                                <template for:each={fields} for:item="f">
+                                                   <div key={f.Id} class="form-fields">
+                                                    <lightning-input-field field-name={f.APIName} required={f.Required} onfocusout={handleFieldChange} value={f.value}>
+                                                    </lightning-input-field>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                </div>
+                                <div class="custom-grid2">
+                                    <div class="dupli">
+                                        <div class="">
+                                            <h1 class="title_cls">I want to...</h1>
+                                        </div>
+                                        <div if:true={isLoading2} class="spinner">
+                                            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                                        </div>
+                                                <div>
+                                                    <div class="property-div">
+                                                        <div class="accordion" >
+                                                            <div class="listing-div">
+                                                                <div class="radio-div"><input type="radio" onclick={firstRadio}
+                                                                        name="wrapping-text" autocomplete="Off" checked={firstCheck}
+                                                                        class="radio-input" /></div>
+                                                                <div class="title-anchor-div"><p class="title-anchor">Create the new listing</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        <template if:true={foundDupli}>
+                                            <div class="copy-text">
+                                                <h1 class="copy-title_cls">..copy data for a one of following properties:</h1>
+                                            </div>
+                                        </template>
+                                        <template if:false={isLoading2}>
+                                            <template for:each={mylist} for:item="keyValue" for:index="index">
+                                                <div key={keyValue.key}>
+                                                    <div class="property-div">
+                                                        <div class="accordion" data-record={keyValue.key} id={keyValue.key}>
+                                                            <div class="listing-div">
+                                                                <div class="radio-div"><input data-index={index} type="radio" value={keyValue.key} id={keyValue.key} onclick={getRadio}
+                                                                        name="wrapping-text" autocomplete="Off" checked={keyValue.ischecked}
+                                                                        class="radio-input" /></div>
+                                                                <div class="anchor-div"><p class="anchor"
+                                                                        data-record={keyValue.key} onclick={linkOpener}>{keyValue.name}</p>
+                                                                </div>
+                                                            </div>
+                                                            <template if:false={keyValue.show}>
+                                                                <div class="add_cls">
+                                                                    <div class="image-div">
+                                                                        <img src={keyValue.media_url} draggable="false" />
+                                                                    </div>
+                                                                    <p class="addresh">{keyValue.address}</p>
+                                                                </div>
+                                                                <div class="active-listing">
+                                                                    <p class="text"> Active Listing:</p>
+                                                                    <template for:each={keyValue.value} for:item="key1">
+                                                                            <p key={key1.Id} data-record={key1.Id} onclick={linkOpenerListing}
+                                                                                class="listing-opener">{key1.Name}<span>,</span></p>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </template>
+                                        <template if:false={foundDupli}>
+                                            <div class="empty-state">
+                                                <div class="empty-state__content">
+                                                    <div class="propertyNotAvl" aria-hidden="true">
+                                                        <img src="/img/chatter/Desert.svg" class="slds-illustration__svg" alt="" draggable="false"/>
+                                                        <div class="slds-text-color_weak">
+                                                            <h4 class="slds-text-heading_medium property-heading">
+                                                                Properties Not Available</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </lightning-record-edit-form>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

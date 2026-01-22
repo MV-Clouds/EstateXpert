@@ -1,0 +1,220 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false"
+    controller="GmailIntegrationControllerV1">
+    <apex:pageMessages />
+    <html>
+
+    <head>
+        <style>
+            * {
+                font-family: 'Mulish';
+            }
+
+            .blinking {
+                animation: blink-animation 0.5s linear;
+            }
+
+            @keyframes blink-animation {
+                0% {
+                    background: #E9EFFA;
+                }
+
+                50% {
+                    background: #c2d9ff;
+                }
+
+                100% {
+                    background: #E9EFFA;
+                }
+            }
+
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: calc(100vh - 40px);
+                background: #f0f4f9;
+                width: 100%;
+            }
+
+            .container {
+                width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid white;
+                border-radius: 10px;
+                background-color: white;
+            }
+
+            .title {
+                position: absolute;
+                left: 42%;
+                font-weight: 500;
+            }
+
+            .code {
+                background-color: #E9EFFA;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+
+            .instructions {
+                margin-bottom: 0;
+                margin-top: 4rem;
+                padding-left: 2px;
+            }
+
+            .codeblock {
+                display: flex;
+                width: 100%;
+                margin-bottom: 20px;
+                transition: all linear 0.19s;
+                justify-content: flex-start;
+                align-items: center;
+            }
+
+            .codeblock .code {
+                box-sizing: border-box;
+                width: 85%;
+                font-size: 14px;
+                padding-right: 10px;
+                margin-right: 20px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .codeblock button {
+                height: 40px;
+                border: 0;
+                border-radius: 30px;
+                color: white;
+                background: #0176D3;
+                padding-inline: 15px;
+                width: 15%;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background-color: 0px 0px 8px 0px #878787;
+            }
+
+            button {
+                cursor: pointer;
+                height: 40px;
+                border-radius: 30px;
+                padding-inline: 15px;
+                font-size: 14px;
+                background: #FFFFFF;
+                border: 1px solid #0176D3;
+                color: #0176D3;
+            }
+
+            .btn_cls {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .header_cls {
+                display: flex;
+                align-items: center;
+            }
+
+            .error-popup {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 1000;
+            }
+
+            .error-popup-content {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                width: 25rem;
+                text-align: center;
+            }
+
+            .error-popup-content h3 {
+                color: #D9534F;
+                font-size: 24px;
+                margin-top: 0;
+                font-weight: 500;
+            }
+
+            .error-popup-content p {
+                max-height: calc(100vh - 40rem);
+                overflow: auto;
+            }
+
+            .close-btn {
+                margin-top: 15px;
+                cursor: pointer;
+                padding: 10px 20px;
+                background-color: #D9534F;
+                color: white;
+                border: none;
+                border-radius: 30px;
+                font-size: 16px;
+            }
+        </style>
+        <script type="text/javascript">
+            function copyCode() {
+                var code = document.getElementById('authorizationCode');
+                var btn = document.getElementById('copybtn');
+                navigator.clipboard.writeText(code.textContent).then(function () {
+                    code.classList.add('blinking');
+                    btn.innerText = 'Copied !';
+                }, function (err) {
+                    alert('Failed to copy code: ' + err);
+                });
+            }
+            document.addEventListener('animationend', function (event) {
+                if (event.target.classList.contains('blinking')) {
+                    event.target.classList.remove('blinking');
+                    document.getElementById('copybtn').innerText = 'Copy Code';
+                }
+            });
+            function closeWindow() {
+                window.close();
+            }
+        </script>
+        <apex:styleSheet value="{!URLFOR($Resource.MulishFontCss)}" />
+    </head>
+
+    <body>
+        <apex:outputPanel id="errorPopup" layout="block" rendered="{!isFailed}">
+            <div class="error-popup">
+                <div class="error-popup-content">
+                    <h3>Error</h3>
+                    <p>{!errorMessage}</p>
+                    <button class="close-btn" onclick="closeWindow()">Close</button>
+                </div>
+            </div>
+        </apex:outputPanel>
+
+        <div class="container">
+            <div class="header_cls">
+                <apex:image url="{!URLFOR($Resource.templateBuilderLogo)}" width="auto" height="auto" />
+                <h2 class="title">Integrate with EstateXpert</h2>
+            </div>
+            <p class="instructions">Paste this refresh token to the Gmail Integration page.</p>
+            <div class="codeblock">
+                <p class="code" id="authorizationCode">{!refreshToken}</p>
+                <button id="copybtn" onclick="copyCode()">Copy Code</button>
+            </div>
+            <div class="btn_cls">
+                <button onclick="closeWindow()">Close this window</button>
+            </div>
+        </div>
+    </body>
+
+    </html>
+</apex:page>

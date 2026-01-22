@@ -1,0 +1,48 @@
+<template>
+    <div class="modal-content">
+        <template if:true={spinner}>
+            <lightning-spinner alternative-text="Loading" size="large" class="slds-m-around_medium"></lightning-spinner>
+        </template>
+        <header class="modal-header">
+            <div class="headercls">Preview Statement</div>
+        </header>
+        <div class="modal-body slds-scrollable--y">
+            <div class="modal-content-inner slds-scrollable_y">
+                <div class="scrollable-y">
+                    <!-- Payer Information -->
+                    <div class="form-element recipient-field slds-form-element slds-m-bottom_medium">
+                        <legend class="slds-form-element__legend slds-form-element__label">
+                            <abbr class="slds-required" title="required">*</abbr>
+                            To
+                        </legend>
+                        <div class="slds-form-element__control">
+                            <template if:true={selectedPayer}>
+                                <span class="recipient-pill slds-pill slds-m-bottom_small" title={selectedPayer.label}>
+                                    <lightning-icon icon-name="standard:user" alternative-text="Payer" size="x-small" class="slds-pill__icon"></lightning-icon>
+                                    <span class="slds-pill__label slds-p-right_xx-small">
+                                        {selectedPayer.label} (<template if:true={selectedPayer.email}>{selectedPayer.email}</template><template if:false={selectedPayer.email}>No Email</template>)
+                                    </span>
+                                </span>
+                            </template>
+                            <template if:false={selectedPayer}>
+                                <span class="no-contact-text">
+                                    No payer associated with this payment
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Content Preview -->
+                    <div class="contract-preview slds-box slds-theme_default" lwc:dom="manual"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with Action Buttons -->
+        <div class="docked-form-footer">
+            <lightning-button variant="brand" label="Download PDF" onclick={handleDownload} class="slds-m-right_small" disabled={isButtonDisabled}></lightning-button>
+            <lightning-button variant="brand" label="Send Email" onclick={handleSendEmail} class="slds-m-right_small" disabled={isButtonDisabled}></lightning-button>
+            <lightning-button variant="neutral" label="Cancel" onclick={handleClose}></lightning-button>
+        </div>
+    </div>
+</template>

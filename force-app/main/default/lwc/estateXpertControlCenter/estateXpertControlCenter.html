@@ -1,0 +1,354 @@
+<template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+    <div class="mainContainer">
+        <div class="subContainer">
+            <div class="main_header">
+                <h1>Control Center</h1>
+            </div>
+            <div class="tiles">
+                <div class="tiles-section" if:true={isGeneralSectionAvailable}>
+                    <div class="tiles-section-header">General</div>
+                    <div class="tile-flex">
+                        <div class="tile" onclick={mapListingAndPropertyMethod}
+                            if:true={featureAvailability.Map_Listing_And_Property}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/portalfieldmapping.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Map Listing and Property</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Map Listing and Property" modal allows user to map fields
+                                    between Listing and Property objects to automatically create
+                                    Property records with corresponding valuThe "Map Listing and
+                                    Property" modal streamlines data synchronization between
+                                    Listing and Property records by allowing users to define field
+                                    correspondences. This automation ensures that relevant
+                                    information is consistently transferred between the two object
+                                    types, eliminating manual data entry and reducing errors.
+                                </p>
+                                <span class="helptext">The "Map Listing and Property" modal streamlines data
+                                    synchronization between Listing and Property records by
+                                    allowing users to define field correspondences. This
+                                    automation ensures that relevant information is consistently
+                                    transferred between the two object types, eliminating manual
+                                    data entry and reducing errors.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={mapListingAndInquiryMethod}
+                            if:true={featureAvailability.Map_Listing_And_Inquiry}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/mappingIn.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Map Listing and Inquiry</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Map Listing and Inquiry" modal simplifies inquiry
+                                    management by automatically linking inquiries to their
+                                    corresponding listings, improving communication and customer
+                                    service.
+                                </p>
+                                <span class="helptext">The "Map Listing and Inquiry" modal simplifies inquiry
+                                    management by automatically linking inquiries to their
+                                    corresponding listings, improving communication and customer
+                                    service.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={recordManagerMethod}
+                            if:true={featureAvailability.Configure_Settings}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/recordmanager.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Configure Settings</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Configure Settings" modal enables users to customize the
+                                    filtering experience in Marketing Lists and the Listing
+                                    Manager, enhancing efficiency and productivity through
+                                    personalized preferences for default filters, fields, values,
+                                    help text, and column visibility.
+                                </p>
+                                <span class="helptext">The "Configure Settings" modal enables users to customize the
+                                    filtering experience in Marketing Lists and the Listing
+                                    Manager, enhancing efficiency and productivity through
+                                    personalized preferences for default filters, fields, values,
+                                    help text, and column visibility.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={instagramFileUploaderMethod}
+                            if:true={featureAvailability.Instagram_Post_Uploader}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/post.png" alt="field mapping" class="tile-icon-img"
+                                    draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Instagram Post Uploader</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The Instagram Post Uploader Component allows users to upload
+                                    multiple images and videos simultaneously. It provides an
+                                    intuitive interface for selecting media, adding captions, and
+                                    sharing content seamlessly on their Instagram accounts.
+                                </p>
+                                <span class="helptext">The Instagram Post Uploader Component allows users to upload
+                                    multiple images and videos simultaneously. It provides an
+                                    intuitive interface for selecting media, adding captions, and
+                                    sharing content seamlessly on their Instagram accounts.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={leadAssignmentRule}
+                            if:true={featureAvailability.Lead_Assignment_Rule}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/leadAssignment.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Lead Assignment Rule</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Lead Assignment Rule" modal allows users to configure
+                                    lead assignment rules, enabling automatic distribution of
+                                    leads based on custom criteria.
+                                </p>
+                                <span class="helptext">Use this section to set up and manage how incoming leads are
+                                    assigned to users or teams according to your business
+                                    rules.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={objectConfigurationMethod}
+                            if:true={featureAvailability.Object_Config}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/settings.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Object Config</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Object Config" allows users to manage objects and their fields for Marekting Features.
+                                </p>
+                                <span class="helptext">The "Object Config" allows users to manage objects and their fields for Marekting Features.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={wbAllBroadcastGroupPageMethod}
+                            if:true={featureAvailability.Whatsapp_Broadcast_Group}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/community.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Multi-Channel Group</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Multi-Channel Group" will be used to create groupings of records such as Contacts
+                                    or Leads, allowing you to send mail or WhatsApp messages to a group that contains
+                                    selected specific Contacts and Leads.
+                                </p>
+                                <span class="helptext">The "Multi-Channel Group" will be used to create groupings of records
+                                    such as Contacts or Leads, allowing you to send mail or WhatsApp messages to a group
+                                    that contains selected specific Contacts and Leads.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tiles-section" if:true={isIntegrationSectionAvailable}>
+                    <div class="tiles-section-header">Integration</div>
+                    <div class="tile-flex">
+                        <div class="tile" onclick={cloudStorageIntegrationMethod}
+                            if:true={featureAvailability.Cloud_Storage_Integration}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/storage.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Cloud Storage Integration</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Cloud Storage Integration" modal simplifies file
+                                    management and storage by providing seamless integration with
+                                    cloud storage services like AWS, offering enhanced
+                                    accessibility and scalability.
+                                </p>
+                                <span class="helptext">The "Cloud Storage Integration" modal simplifies file
+                                    management and storage by providing seamless integration with
+                                    cloud storage services like AWS, offering enhanced
+                                    accessibility and scalability.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={emailIntegrationMethod}
+                            if:true={featureAvailability.Email_Integration}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/email.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Email Integration</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Email Integration" modal streamlines email marketing
+                                    workflows by allowing users to seamlessly send campaigns
+                                    directly from their Gmail or Outlook accounts, improving
+                                    efficiency and productivity.
+                                </p>
+                                <span class="helptext">The "Email Integration" modal streamlines email marketing
+                                    workflows by allowing users to seamlessly send campaigns
+                                    directly from their Gmail or Outlook accounts, improving
+                                    efficiency and productivity.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={portalIntegrationMethod}
+                            if:true={featureAvailability.Portal_Integration}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/onboarding.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Portal Integration</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Portal Integration" modal streamlines the process of
+                                    distributing listings to multiple real estate portals
+                                    worldwide, expanding visibility and reaching a broader
+                                    audience.
+                                </p>
+                                <span class="helptext">The "Portal Integration" modal streamlines the process of
+                                    distributing listings to multiple real estate portals
+                                    worldwide, expanding visibility and reaching a broader
+                                    audience.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={socialMediaIntegrationMethod}
+                            if:true={featureAvailability.Social_Media_Integration}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/socialmedia.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Social Media Integration</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Social Media Integration" modal simplifies social media
+                                    management by providing a centralized platform for connecting
+                                    and managing accounts on platforms like WhatsApp, enhancing
+                                    efficiency and reach.
+                                </p>
+                                <span class="helptext">The "Social Media Integration" modal simplifies social media
+                                    management by providing a centralized platform for connecting
+                                    and managing accounts on platforms like WhatsApp, enhancing
+                                    efficiency and reach.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={leadCaptureMethod} if:true={featureAvailability.Lead_Capture}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/leadcapture.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Lead Capture</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Lead Capture" simplifies the intergaration of leads from
+                                    social media platforms.
+                                </p>
+                                <span class="helptext">The "Lead Capture" simplifies the intergaration of leads from
+                                    social media platforms.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tiles-section" if:true={isMarketingSectionAvailable}>
+                    <div class="tiles-section-header">Marketing</div>
+                    <div class="tile-flex">
+                        <div class="tile" onclick={marketingCampaignMethod}
+                            if:true={featureAvailability.Marketing_Campaign}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/marketing.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Marketing Campaign</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Marketing Campaign" modal empowers businesses to
+                                    effectively engage with their target audience by allowing them
+                                    to create, personalize, and schedule targeted email campaigns.
+                                </p>
+                                <span class="helptext">The "Marketing Campaign" modal empowers businesses to
+                                    effectively engage with their target audience by allowing them
+                                    to create, personalize, and schedule targeted email
+                                    campaigns.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={templateBuilderMethod}
+                            if:true={featureAvailability.Template_Builder}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/templatebuilder.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">Template Builder</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "Template Builder" modal empowers businesses to create
+                                    personalized templates for marketing campaigns and listings,
+                                    enhancing brand consistency and optimizing engagement.
+                                </p>
+                                <span class="helptext">The "Template Builder" modal empowers businesses to create
+                                    personalized templates for marketing campaigns and listings,
+                                    enhancing brand consistency and optimizing engagement.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tiles-section" if:true={isWhatsappSectionAvailable}>
+                    <div class="tiles-section-header">WhatsApp</div>
+                    <div class="tile-flex">
+                        <div class="tile" onclick={whatsappFlowBuilderMethod}
+                            if:true={featureAvailability.Whatsapp_Flow_Builder}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/planning.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">WhatsApp Flow Builder</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "WhatsApp Flow Builder" allows users to create flows for
+                                    use in WhatsApp chat.
+                                </p>
+                                <span class="helptext">The "WhatsApp Flow Builder" allows users to create flows for
+                                    use in WhatsApp chat.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={whatsappTemplateBuilderMethod}
+                            if:true={featureAvailability.Whatsapp_Template_Builder}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/whatsappTemplate.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">WhatsApp Template Builder</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "WhatsApp Template Builder" allows users to create
+                                    templates for use in WhatsApp chat.
+                                </p>
+                                <span class="helptext">The "WhatsApp Template Builder" allows users to create
+                                    templates for use in WhatsApp chat.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={wbAllBroadcastPageMethod}
+                            if:true={featureAvailability.Whatsapp_Broadcast}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/megaphone.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">WhatsApp Broadcast</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "WhatsApp Broadcast" modal allows users to send listings
+                                    and updates directly to clients via WhatsApp, improving
+                                    communication and engagement.
+                                </p>
+                                <span class="helptext">The "WhatsApp Broadcast" modal allows users to send listings
+                                    and updates directly to clients via WhatsApp, improving
+                                    communication and engagement.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

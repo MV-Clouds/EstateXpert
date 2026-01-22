@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>objectConfigInfo</label>
+    <protected>false</protected>
+    <values>
+        <field>ChatWindowConfigInfo__c</field>
+        <value xsi:type="xsd:string">{&quot;Contact&quot;:{&quot;nameField&quot;:&quot;Name&quot;,&quot;phoneField&quot;:&quot;Phone&quot;,&quot;emailField&quot;:&quot;Email&quot;},&quot;Lead&quot;:{&quot;nameField&quot;:&quot;Name&quot;,&quot;phoneField&quot;:&quot;MobilePhone&quot;,&quot;emailField&quot;:&quot;Email&quot;},&quot;Account&quot;:{&quot;nameField&quot;:&quot;Name&quot;,&quot;phoneField&quot;:&quot;Phone&quot;,&quot;emailField&quot;:&quot;&quot;}}</value>
+    </values>
+    <values>
+        <field>ObjectConfigInfo__c</field>
+        <value xsi:type="xsd:string">{&quot;objectApiName&quot;:&quot;Contact&quot;,&quot;phoneField&quot;:&quot;Phone&quot;,&quot;requiredFields&quot;:[{&quot;name&quot;:&quot;LastName&quot;,&quot;value&quot;:&quot;Patel&quot;,&quot;type&quot;:&quot;String&quot;},{&quot;name&quot;:&quot;OwnerId&quot;,&quot;value&quot;:&quot;005F9000009q4K5IAI&quot;,&quot;type&quot;:&quot;Reference&quot;}]}</value>
+    </values>
+</CustomMetadata>

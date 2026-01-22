@@ -1,0 +1,117 @@
+<template>
+    <div class="main">
+        <div class="main_header_cls">
+            <div class="sub_main_header_css">
+                <div slot="title" class="header_block_css">
+                    <div class="svg_back_icon" onclick={navigateToAllTemplatePage}>
+                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div class="portal_mapping">
+                        Select template category
+                    </div>
+                </div>
+                <div class="header">
+                    <button class="btn" onclick={handleNextclick}>
+                        <svg fill="#ffffff" height="14" width="14" version="1.1" id="Layer_1"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 512.01 512.01" xml:space="preserve" stroke="#ffffff">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <g>
+                                    <g>
+                                        <path
+                                            d="M505.754,240.923L271.088,6.256c-3.989-4.011-9.408-6.251-15.083-6.251H21.338c-8.619,0-16.427,5.184-19.712,13.163 c-3.307,7.979-1.472,17.152,4.629,23.253l219.584,219.584L6.256,475.59c-6.101,6.101-7.936,15.275-4.629,23.253 c3.285,7.979,11.093,13.163,19.712,13.163h234.667c5.675,0,11.093-2.24,15.083-6.251l234.667-234.667 C514.096,262.747,514.096,249.264,505.754,240.923z">
+                                        </path>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="displayMainContent">
+            <div class="selectCategoryBlock">
+                <div class="slds-box slds-theme_default categoryBlock">
+                    <h1 class='categoryBlockHeader'>Set up your template</h1>
+                    <div class="categoryBlockDesp">
+                        <p>Choose the category that best describes your message template. Then, select the
+                            type of message that you want to send. Learn more about categories.</p>
+                    </div>
+                    <div class="tabs">
+                        <div class="slds-button-group" role="group">
+                            <template for:each={tabOptions} for:item="tab">
+                                <button key={tab.value} onclick={handleTabClick} data-tab={tab.value}
+                                    class={tab.className}>
+                                    {tab.label}
+                                </button>
+                            </template>
+                        </div>
+
+                        <template if:true={activeSection}>
+                            <div class="radio-group radiogroup">
+                                <template for:each={activeSection.options} for:item="option">
+                                    <div key={option.value} class={option.className}>
+                                        <label class="slds-radio radiobtn">
+                                            <input type="radio" name="templateOptions" value={option.value}
+                                                checked={option.checked} onclick={handleRadioChange} />
+                                            <span class="slds-radio_faux"></span>
+                                            <div class="txtwithlabel">
+                                                <p class="slds-form-element__label radiolabel">{option.label}</p>
+                                                <p class="radio-description radiodescription">{option.description}
+                                                </p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="templatePreview">
+                <div class="slds-box slds-theme_default templatePreviewmain">
+                    <h1>Template Preview</h1>
+                    <div class="templatePreviewBlock">
+                        <div class="slds-box slds-theme_default previewchild chat-bubble">
+                            <template if:true={currentTemplate.image}>
+                                <img class="image" src={currentTemplate.image} alt="Template Preview" />
+                            </template>
+                            <div class="paratext">
+                                <p class="chatBubbleHeyMessage">{currentTemplate.hey}</p>
+                                <template if:true={currentTemplate.code}>
+                                    <p class="chatBubbleCodeMessage">{currentTemplate.code}</p>
+                                </template>
+                                <p class="chatBubbleTime">{currentTemplate.time}</p>
+                            </div>
+                        </div>
+                        <div class="previewButtons">
+                            <template for:each={currentTemplate.buttons} for:item="btn">
+                                <p key={btn.label} class="previewButton1">
+                                    <template if:true={btn.icon}>
+                                        <img height="16px" width="16px" src={btn.icon} alt="Button Icon" /> {btn.label}
+                                    </template>
+                                    <template if:false={btn.icon}>
+                                        {btn.label}
+                                    </template>
+                                </p>
+                            </template>
+                        </div>
+                    </div>
+                    <p class="templatefootertxt1 firsttxt">This template is good for</p>
+                    <p class="templatefootertxt2 secondtxt">{currentTemplate.goodFor}</p>
+                    <p class="templatefootertxt1">Template areas that you can customise</p>
+                    <p class="templatefootertxt2">{currentTemplate.customizable}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

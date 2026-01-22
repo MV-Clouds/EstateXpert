@@ -1,0 +1,96 @@
+<template>
+    <template if:true={isSpinner}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+
+    <template if:true={isDataLoaded}>
+        <div class="smi_container">
+            <div class="main_header_cls">
+                <div class="sub_main_header_css">
+                    <div slot="title" class="header_block_css">
+                        <div class="svg_back_icon" onclick={backToControlCenter}>
+                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                    fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div class="portal_mapping">
+                            Cloud Storage Integration
+                        </div>
+                    </div>
+                    <div class="header">
+                        <template if:true={isAWS}>
+                            <template if:false={awsData.isValid}>
+                                <button class="save-btn" onclick={newIntegrationModal} data-name="AWS">New</button>
+                            </template>
+                            <template if:true={awsData.isValid}>
+                                <button class="save-btn" onclick={awsWatermarkUploaderMethod} data-name="AWS">Set
+                                    Watermark</button>
+                                <button class="save-btn" onclick={newIntegrationModal} data-name="AWS">Edit</button>
+                                <button class="deactivate-btn" onclick={handleDeactivateClick}>Deactivate</button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="main_container">
+                <!-- Sidebar with navigator -->
+                <div class="sidebar">
+                    <ul>
+                        <li class={awsClass} onclick={handleAWSClick}>
+                            <img src="/resource/MVEX__controlcenterimg/aws.png" alt="AWS" draggable="false"> AWS
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="content">
+                    <!-- Tab Specific Content -->
+                    <div class="tab-content">
+                        <template if:true={isAWS}>
+                            <div class="field-section">
+                                <template if:true={awsData.isValid}>
+                                    <div class="data_cls"><strong>Access Key :</strong><p>{displayedAccessKey}</p></div>
+                                    <div class="data_cls">
+                                        <strong>Secret Access Key :</strong>
+                                        <p>{displayedClientSecret}</p>
+                                    </div>
+                                    <div class="data_cls"><strong>S3 Bucket Name :</strong><p>{awsData.integrationData.MVEX__S3_Bucket_Name__c}</p></div>
+                                    <div class="data_cls"><strong>S3 Region Name :</strong><p>{awsData.integrationData.MVEX__S3_Region_Name__c}</p></div>
+                                    <div class="data_cls"><strong>Created Date:</strong><p>{awsData.integrationData.CreatedDate}</p></div>
+                                    <div class="data_cls"><strong>Last Modified Date:</strong><p>{awsData.integrationData.LastModifiedDate}</p></div>
+                                </template>
+                                <template if:false={awsData.isValid}>
+                                    <div class="empty-state">
+                                        <div class="empty-state__content">
+                                            <div class="empty-state__icon">
+                                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                            </div>
+                                            <div class="empty-state__message">No Data Available to Show.</div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template if:true={isWaterMarkUploader}>
+        <c-water-mark-image-uploader onclose={closeWaterMarkModal}></c-water-mark-image-uploader>
+    </template>
+
+    <template if:true={showIntegrationModal}>
+        <c-integration-pop-up 
+            integrationname={integrationName}
+            integrationlabel={integrationLabel}
+            onclosemodal={handleModalSelect}
+        ></c-integration-pop-up>
+    </template>
+
+    <c-message-popup onconfirmation={handleConfirmation}>
+    </c-message-popup>
+</template>

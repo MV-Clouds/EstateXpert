@@ -1,0 +1,378 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.wrapper {
+    background-color: white;
+    padding: 0.5rem;
+    margin-top: -0.8rem;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.8rem;
+    min-height: calc(100% + 1.5rem);
+    background-color: aliceblue;
+    background-image: url('/resource/MVEX__MVEX__newImageandMediaBg/');
+    background-size: cover;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+}
+
+.content-header {
+    background-color: #0176D3;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    padding: 10px 0;
+    border-radius: 8px;
+    /* margin-bottom: 1rem; */
+    width: 100%;
+}
+
+.slds-card {
+    width: 100%;
+}
+
+.blur-text {
+    color: #000000B2;
+}
+
+.header-text {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.header lightning-icon {
+    margin-right: 0.5rem;
+}
+
+.header h1 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.container {
+    margin: 1rem;
+    border-radius: 1rem;
+}
+
+.content-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #9B9A9C;
+    background-color: white;
+}
+
+.content-body .content {
+    transition: transform var(--lwc-durationSlide, 0.25s) ease-in;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.edit {
+    --slds-g-color-border-base-4: #0176D3;
+}
+
+.content-details {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.content-text {
+    font-size: 18px;
+    font-weight: 500;
+    margin-right: 1rem;
+}
+
+.content-data {
+    font-size: 14px;
+}
+
+.dotted-border {
+    border: 1px dashed black;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.input-field {
+    margin-bottom: 1rem;
+}
+
+.input-field legend {
+    font-weight: 500;
+}
+
+.input-date-container {
+    width: 50%;
+    position: relative;
+}
+
+.input-date {
+    width: 50%;
+}
+
+
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 10px;
+    /* font-size: 14px; */
+}
+
+.dropdown {
+    border: 1px solid #ccc;
+    background: #fff;
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    top: 58px;
+    border-radius: 4px;
+}
+
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f4f4f4;
+}
+
+/* .slds-icon_container lightning-icon {
+    height: 1rem !important;
+    width: 1rem;
+} */
+
+.contact-input-fields {
+    display: flex;
+    gap: 0px;
+    flex-direction: column;
+}
+
+.contact-input-fields .input-field {
+    width: 100%;
+    margin: 16px 0px 0px 0px;
+    position: relative;
+}
+
+.contact-input-fields .input-field:last-child {
+    margin: 16px 0px 16px 0px;
+}
+
+.container-pill-label {
+    margin-left: 6px;
+}
+
+.input-date-combobox {
+    width: 50%;
+    position: relative;
+}
+
+.contact-date-container {
+    display: flex;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2%;
+}
+
+.plus-image-icon {
+    margin-top: 1.8rem;
+}
+
+.dropdown-imgae {
+    border: 1px solid #ccc;
+    background: #fff;
+    position: relative;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    top: 2.5rem;
+    left: 6px;
+}
+
+.plus-image {
+    display: flex;
+    align-items: inherit;
+}
+
+.table-container {
+    border-radius: 8px;
+    margin: 16px 0px;
+}
+
+.table-container th {
+    padding: 1rem;
+    background-color: #0176D3;
+    color: white;
+    font-weight: 500;
+}
+
+.slds-table {
+    border: none;
+}
+
+.slds-table tr:nth-child(even) {
+    background-color: #74b4ff2b;
+}
+
+.slds-table td {
+    border: none;
+    padding: 0.7rem;
+    /* padding-bottom: 1.2rem; */
+}
+
+.action-btn {
+    display: flex;
+    justify-content: start;
+    gap: 5%;
+}
+
+.delete-div {
+    padding: 5px;
+    border: 1px solid;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: white;
+}
+
+.delete-div:disabled {
+    background-color: rgb(192, 192, 192);
+}
+
+fieldset .slds-form-element__legend {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.display-pill-input-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+}
+
+.display-pill-input {
+    display: flex;
+    border: 2px solid #35a5ff;
+    border-radius: 6px;
+}
+
+.input-pil-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.input-pill-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    margin-left: 5px;
+}
+
+.display-pill-input button {
+    border: none;
+    margin-right: 5px;
+
+}
+
+.display-pill-input input {
+    pointer-events: none;
+}
+
+.red {
+    color: red;
+}
+
+.select-field-div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.emails-body {
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #9B9A9C;
+}
+
+.emails-body .table-head-text {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.input-field .slds-form-element__label {
+    font-weight: 500;
+}
+
+.cancel_btn_css {
+    border: none;
+    background: #FFFFFF;
+    border: 1px solid #0176D3;
+    color: #0176D3;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.10000000149011612px;
+    text-align: center;
+    padding: 8px 20px;
+}
+
+.save_btn_css {
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.10000000149011612px;
+    text-align: center;
+    padding: 8px 20px;
+}
+
+.edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+@media only screen and (max-width: 900px) {
+    .wrapper {
+        width: 100% !important;
+        height: 100% !important;
+        margin-left: unset !important;
+        margin-top: unset !important;
+    }
+}
+
+.selected_contact_css {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.dropdown-item lightning-icon {
+    margin-right: 10px;
+}

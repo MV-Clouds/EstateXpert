@@ -1,0 +1,364 @@
+<template>
+    <div class="wrapper">
+
+        <template if:true={isLoading}>
+            <c-spinner-component></c-spinner-component>
+        </template>
+
+        <div class="header">
+            <div class="content-header">
+                New Drip Campaign Template
+            </div>
+        </div>
+
+        <div class="container">
+
+            <div class="content-body">
+                <div class="content">
+                    <div class="content-details">
+                        <p class="content-text">Email Campaign Template :</p>
+
+                        <template if:true={emailCampaignTemplate}>
+                            <span class="content-data">{emailCampaignTemplate}</span>
+                        </template>
+
+                        <template if:false={emailCampaignTemplate}>
+                            <span class="content-data">-</span>
+                        </template>
+
+                    </div>
+                    <div class="content-details">
+                        <p class="content-text">Email Campaign Name :</p>
+                        <span class="content-data">{emailCampaignName}</span>
+                    </div>
+
+                    <div class="content-details">
+                        <p class="content-text">Recipient Object Type :</p>
+                        <span class="content-data">{relatedObject}</span>
+                    </div>
+
+                </div>
+                <div class="edit-btn">
+                    <button onclick={handleEdit}
+                        class="slds-button slds-button_icon slds-button_icon-border-filled edit">
+                        <lightning-icon icon-name="utility:edit" alternative-text="Edit" size="small"></lightning-icon>
+                    </button>
+                    <button onclick={openMemberModal} disabled={isOpenModalDisabled}
+                        class="slds-button slds-button_icon slds-button_icon-border-filled edit">
+                        <lightning-icon icon-name='utility:preview' alternative-text="preview"
+                            size="small"></lightning-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="contact-input-fields">
+
+                <!-- Primary Recipients -->
+                <div class="primary-recipients input-field">
+                    <legend class="slds-form-element__legend slds-form-element__label"><abbr class="slds-required"
+                            title="required">*</abbr>Select the Primary recipients</legend>
+                    <lightning-input class="blur-class" placeholder="Type to search contacts"
+                        onchange={handlePrimarySearchInputChange} onfocus={handlePrimarySearchInputFocus}
+                        onblur={handleBlur} value={inputValuePrimary} variant="label-hidden"></lightning-input>
+
+                    <template if:true={isPrimaryDropdownVisible}>
+                        <div class="dropdown" onmousedown={handlePreventDefault}>
+                            <template for:each={filteredPrimaryContacts} for:item="contact">
+                                <div key={contact.value} class="dropdown-item" onclick={handleSelectPrimaryContact}
+                                    data-id={contact.value}>
+                                    <lightning-icon icon-name="standard:account" alternative-text="Account"
+                                        title="Account" size="small"></lightning-icon>
+                                    {contact.label}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="selected_contact_css" if:true={selectedPrimaryRecipients.length}>
+                        <template for:each={selectedPrimaryRecipients} for:item="recipient">
+                            <span key={recipient.value} class="slds-pill" title={recipient.label}>
+                                <span class="slds-icon_container slds-icon-standard-account" title="Account">
+                                    <lightning-icon icon-name="standard:account" alternative-text="Account"
+                                        size="x-small"></lightning-icon>
+                                </span>
+                                <span class="slds-pill__label">{recipient.label}</span>
+                                <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                    data-id={recipient.value} onclick={removePrimaryRecipient}>
+                                    <lightning-icon icon-name="utility:close"
+                                        alternative-text="Remove"></lightning-icon>
+                                    <span class="slds-assistive-text">Remove</span>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- CC Recipients -->
+                <div class="input-field">
+                    <lightning-input class="blur-class" label="Who should be CC?" placeholder="Type to search contacts"
+                        onchange={handleCCSearchInputChange} onfocus={handleCCSearchInputFocus} onblur={handleBlur}
+                        value={inputValueCC}></lightning-input>
+
+                    <template if:true={isCCDropdownVisible}>
+                        <div class="dropdown" onmousedown={handlePreventDefault}>
+                            <template for:each={filteredCCContacts} for:item="contact">
+                                <div key={contact.value} class="dropdown-item" onclick={handleSelectCCContact}
+                                    data-id={contact.value}>
+                                    <lightning-icon icon-name="standard:account" alternative-text="Account"
+                                        title="Account" size="small"></lightning-icon>
+                                    {contact.label}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="selected_contact_css" if:true={selectedCCRecipients.length}>
+                        <template for:each={selectedCCRecipients} for:item="recipient">
+                            <span key={recipient.value} class="slds-pill" title={recipient.label}>
+                                <span class="slds-icon_container slds-icon-standard-account" title="Account">
+                                    <lightning-icon icon-name="standard:account" alternative-text="Account"
+                                        size="x-small"></lightning-icon>
+                                </span>
+                                <span class="slds-pill__label">{recipient.label}</span>
+                                <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                    data-id={recipient.value} onclick={removeCCRecipient}>
+                                    <lightning-icon icon-name="utility:close"
+                                        alternative-text="Remove"></lightning-icon>
+                                    <span class="slds-assistive-text">Remove</span>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- BCC Recipients -->
+                <div class="input-field">
+                    <lightning-input class="blur-class" label="Who should be BCC?" placeholder="Type to search contacts"
+                        onchange={handleBCCSearchInputChange} onfocus={handleBCCSearchInputFocus} onblur={handleBlur}
+                        value={inputValueBcc}></lightning-input>
+
+                    <template if:true={isBCCDropdownVisible}>
+                        <div class="dropdown" onmousedown={handlePreventDefault}>
+                            <template for:each={filteredBCCContacts} for:item="contact">
+                                <div key={contact.value} class="dropdown-item" onclick={handleSelectBCCContact}
+                                    data-id={contact.value}>
+                                    <lightning-icon icon-name="standard:account" alternative-text="Account"
+                                        title="Account" size="small"></lightning-icon>
+                                    {contact.label}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="selected_contact_css" if:true={selectedBCCRecipients.length}>
+                        <template for:each={selectedBCCRecipients} for:item="recipient">
+                            <span key={recipient.value} class="slds-pill" title={recipient.label}>
+                                <span class="slds-icon_container slds-icon-standard-account" title="Account">
+                                    <lightning-icon icon-name="standard:account" alternative-text="Account"
+                                        size="x-small"></lightning-icon>
+                                </span>
+                                <span class="slds-pill__label">{recipient.label}</span>
+                                <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                    data-id={recipient.value} onclick={removeBCCRecipient}>
+                                    <lightning-icon icon-name="utility:close"
+                                        alternative-text="Remove"></lightning-icon>
+                                    <span class="slds-assistive-text">Remove</span>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="select-field-div">
+                <!-- <fieldset class="slds-form-element">
+                    <legend class="slds-form-element__legend slds-form-element__label"><abbr class="slds-required"
+                            title="required">*</abbr>How should this Email campaign start?</legend>
+                    <div class="slds-form-element__control">
+                        <lightning-radio-group disabled={isRadioGroupDisabled} name="startDateOption"
+                            options={startDateOptions} value={startDateOption} onchange={handleStartDateOptionChange}>
+                        </lightning-radio-group>
+                    </div>
+                </fieldset> -->
+
+                <template if:true={isSpecificDateOption}>
+                    <div class="input-date-container">
+                        <lightning-input class="input-date slds-m-top_small" label="Select a date"
+                            placeholder="Choose a date" type="date" min={today} value={specificDate}
+                            onchange={handleSpecificDateChange} required></lightning-input>
+                    </div>
+                </template>
+
+                <template if:true={isContactDateFieldOption}>
+                    <div class="input-date-combobox slds-m-top_small">
+                        <div class="input-date-container">
+                            <lightning-combobox disabled={isContactDateFieldOptionDisabled} label="Select a date field"
+                                value={selectedContactDateField} placeholder="Select a date field"
+                                options={filteredContactDateFields} onchange={handleDateFieldSelect}
+                                required></lightning-combobox>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={emails}>
+                <div class="emails-body">
+                    <p class="table-head-text">Configure Drip Emails</p>
+                    <div class="table-container">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+
+                                    <th scope="col">
+
+                                        <div class="slds-truncate" title="Email Name"><abbr class="slds-required"
+                                                title="required">*</abbr>Email Name</div>
+                                    </th>
+
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Email Template"><abbr class="slds-required"
+                                                title="required">*</abbr>Email Template</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Related Listing"><abbr class="slds-required"
+                                                title="required">*</abbr>Related Listing</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Subject"><abbr class="slds-required"
+                                                title="required">*</abbr>Subject</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Days after start date"><abbr
+                                                class="slds-required" title="required">*</abbr>Days after start date
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Time to send"><abbr class="slds-required"
+                                                title="required">*</abbr>Time to send</div>
+                                    </th>
+
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Exact Date"> Exact Date</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="Action">Action</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={emails} for:item="email">
+                                    <tr key={email.id}>
+                                        <td data-label="Email Name">
+                                            <div>
+                                                <lightning-input type="text" value={email.name}
+                                                    onchange={handleNameChange} data-id={email.id} max-length="20"
+                                                    disabled={email.disabled} variant="label-hidden"></lightning-input>
+                                            </div>
+                                        </td>
+                                        <td data-label="Email Template">
+                                            <div>
+                                                <lightning-combobox name="emailName" value={email.template}
+                                                    options={quickTemplateOptions} onchange={handleTemplateChange}
+                                                    data-id={email.id} disabled={email.disabled}
+                                                    variant="label-hidden"></lightning-combobox>
+                                            </div>
+                                        </td>
+                                        <td data-label="Related Listing">
+                                            <div>
+                                                <lightning-record-picker name="relatedListing" disabled={email.isListingSelectionDisabled} 
+                                                    placeholder="Search Listing..." onchange={handleListingSelect} value={email.selectedListingId} variant="label-hidden" label="Related Listing" data-id={email.id} object-api-name="MVEX__Listing__c">
+                                                </lightning-record-picker>
+                                            </div>
+                                        </td>
+                                        <td data-label="Subject">
+                                            <div>
+                                                <lightning-input type="text" value={email.subject} disabled
+                                                    class="slds-truncate" title={email.subject}
+                                                    variant="label-hidden"></lightning-input>
+                                            </div>
+                                        </td>
+                                        <td data-label="Days after start date">
+                                            <div class="days-after-input">
+                                                <lightning-input type="number" value={email.daysAfterStartDate} min="0"
+                                                    message-when-range-underflow="Enter a positive number"
+                                                    onchange={handleDaysAfterStartDateChange} data-id={email.id}
+                                                    max-length="5" disabled={email.disabled}
+                                                    variant="label-hidden"></lightning-input>
+                                            </div>
+                                        </td>
+                                        <td data-label="Time to send">
+                                            <div class="time-to-send">
+                                                <lightning-input class="timeCmp" type="time" value={email.timeToSend}
+                                                    onchange={handleTimeToSendChange} data-id={email.id}
+                                                    disabled={email.disabled} variant="label-hidden"></lightning-input>
+                                            </div>
+                                        </td>
+                                        <td data-label="Exact Date">
+                                            <div>
+                                                <lightning-input type="date" value={email.exactDate} data-id={email.id}
+                                                    variant="label-hidden" disabled></lightning-input>
+                                            </div>
+                                        </td>
+
+                                        <td data-label="Action" class="actions">
+                                            <div class="action-btn">
+                                                <button class="delete-div" data-id={email.id}
+                                                    onclick={handlepreviewBtn}>
+                                                    <svg width="14" height="14" fill="#000000"
+                                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                                                        enable-background="new 0 0 52 52" xml:space="preserve">
+                                                        <path
+                                                            d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
+                                                        </path>
+                                                        <path
+                                                            d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
+                                                        </path>
+                                                    </svg>
+                                                </button>
+                                                <button class="delete-div" data-id={email.id}
+                                                    onclick={handleDeleteEmail} disabled={email.disabled}>
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="slds-m-top_medium add-btn">
+                        <lightning-button label="Add New Email" onclick={handleAddNewEmail}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+
+            <div class="footer-btns">
+                <div class="footer">
+                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={handleCancel}>Cancel</button>
+                    <button class="save_btn_css" onclick={handleSave}>Save</button>
+                </div>
+            </div>
+        </div>
+
+        <c-email-campaign-modal if:true={isModalOpen} form-data={navigationStateString} onclose={handleModalClose}
+            selected-template-id={templateId} onhandledatachange={handleTemplateDataChange} is-edit={isEdit}>
+        </c-email-campaign-modal>
+
+    </div>
+
+
+    <template if:true={isPreviewModal}>
+        <c-template-preview-modal templateid={selectedTemplateId} objectname={selectedobject}
+            template-type="Marketing Template" is-active={templateStatus} onclosemodal={handleCloseModal}>
+        </c-template-preview-modal>
+    </template>
+
+
+</template>

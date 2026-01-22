@@ -1,0 +1,341 @@
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
+.main_container_cls {
+    background-color: #ffffff;
+    padding: 1rem;
+    padding-bottom: 1rem;
+    height: calc(100% + 1.5rem);
+    margin-top: -0.8rem;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+}
+
+.main_header_cls {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 40.16px;
+    text-align: left;
+    justify-content: center;
+}
+
+.svg_back_icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.main_content_cls {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.filterdiv {
+    position: relative;
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+    padding: 16px;
+    padding-bottom: 0rem;
+}
+
+.table-content {
+    overflow: auto;
+    border-radius: 8px;
+    height: 100%;
+    background-color: white;
+    margin: 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    position: relative;
+}
+
+.table-content .slds-table th,
+.table-content .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 45px;
+}
+
+.table-content .slds-table th {
+    background-color: #0176D3;
+    color: white;
+}
+
+.table-content tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.table-content table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 98;
+}
+
+.table-content table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+.table-content .slds-table_resizable-cols thead th,
+.table-content .slds-table--resizable-cols thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+}
+
+.truncate_css {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 1px;
+}
+
+.truncate_css div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty-state {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-records-message {
+    height: 100%;
+}
+
+.empty-state__content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.empty-state__content .empty-state__icon {
+    width: 25%;
+    height: 100%;
+}
+
+.empty-state__content .empty-state__message {
+    color: #3a9bea;
+    font-size: 25px;
+    font-weight: 500;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.filter-icon-container {
+    cursor: pointer;
+    padding: 5px;
+    text-align: right;
+    background: white;
+    border: 1px solid gray;
+    border-radius: 4px;
+}
+
+.filter-dropdown-box {
+    position: absolute;
+    right: 16px;
+    top: 105%;
+    background: white;
+    border: 1px solid #b1d2e4;
+    border-radius: 0.25rem;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    padding: 0.75rem;
+    z-index: 1000;
+    width: 250px;
+}
+
+
+
+.chart-container {
+    height: 100%;
+    border-radius: 5px;
+}
+
+.table-content tfoot {
+    position: sticky;
+    bottom: 0;
+    background: #deedf4;
+}
+
+.table-content thead .sno div {
+    width: 55px;
+}
+
+.table-content thead .agentname div {
+    width: 10rem;
+}
+
+.table-content thead .rentprice div,
+.table-content thead .saleprice div,
+.table-content thead .totalprice div,
+.table-content thead .rentcommission div,
+.table-content thead .salecommission div,
+.table-content thead .totalcommission div,
+.table-content thead .agentcommission div {
+    width: 10rem;
+}
+
+.restricted-access {
+    padding: 48px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 450px;
+    width: 100%;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    border: 1px solid #bfdbfe;
+    background-color: linear-gradient(160deg, #ffffff, #dbeafe);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+}
+
+.restricted-access svg {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 28px;
+    fill: #1e40af;
+    animation: pulse 1.8s ease-in-out infinite;
+}
+
+.restricted-access h1 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: #1e3a8a;
+    margin-bottom: 20px;
+}
+
+.restricted-access p {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 1.25rem;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.access-ui {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+.sorting_header .slds-icon_container {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    position: absolute;
+    right: 0;
+}
+
+.sorting_header:hover .slds-icon_container {
+    opacity: 1;
+    visibility: visible;
+}
+
+.table_tr_cls .sort-cover {
+    height: 100%;
+    border-radius: 8px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.5s ease;
+    justify-content: center;
+    position: relative;
+}
+
+.table_tr_cls .sort-cover:hover {
+    background-color: #2c89d6;
+}
+
+.table_tr_cls .slds-icon-utility-arrowdown svg {
+    height: 0.8rem;
+    fill: white;
+}
+
+.listing-manager-icon {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+.table-content .slds-table_resizable-cols thead th,
+.table-content .slds-table--resizable-cols thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+}
+
+.rotate-asc {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+}
+
+.rotate-desc {
+    transform: rotate(180deg);
+    transition: transform 0.3s;
+}
+
+.salecount,
+.rentcount {
+    min-width: 8rem;
+}
+
+.totalclosing {
+    min-width: 12rem;
+}

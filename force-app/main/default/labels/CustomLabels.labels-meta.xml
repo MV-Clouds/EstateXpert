@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>CLAR_Users</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CLAR Users</shortDescription>
+        <value>{
+  &quot;isProfile&quot;: true,
+  &quot;isRole&quot;: false,
+  &quot;Profiles&quot;: [
+    &quot;System Administrator&quot;
+  ],
+  &quot;Roles&quot;: [
+    &quot;Sales Manager&quot;,
+    &quot;Support Lead&quot;,
+    &quot;Marketing Head&quot;
+  ]
+}</value>
+    </labels>
+    <labels>
+        <fullName>EmailMessageEmailService</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>EmailMessageEmailService</shortDescription>
+        <value>replyemailservice@2399seg7dczkd2wdrur97lyz9f5kxoq6rsi3uyqam30un540ms.dm-9p5p6uac.ind136.apex.salesforce.com</value>
+    </labels>
+    <labels>
+        <fullName>EstateXpert_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>EstateXpert Endpoint</shortDescription>
+        <value>https://estatexpert-dev-ed.develop.my.salesforce-sites.com/services/apexrest/MVEX/messages</value>
+    </labels>
+    <labels>
+        <fullName>GeminiApiKey</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>GeminiApiKey</shortDescription>
+        <value>AIzaSyAzzNG5wlULwCiH2cXBsEDcFpRnlA6xNZI</value>
+    </labels>
+    <labels>
+        <fullName>GmailServiceLabel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>GmailServiceLabel</shortDescription>
+        <value>whatsappwebhook@n-utklpbamzq9th3ek6frshhyn6utwzpy2u3dvxsqz9idx0o7p1.f9-enofmam.ap43.apex.salesforce.com</value>
+    </labels>
+    <labels>
+        <fullName>Gmail_Sending_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Gmail Sending Endpoint</shortDescription>
+        <value>https://www.googleapis.com/</value>
+    </labels>
+    <labels>
+        <fullName>Google_Drive_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Google Drive Endpoint</shortDescription>
+        <value>https://oauth2.googleapis.com/token</value>
+    </labels>
+    <labels>
+        <fullName>Google_Drive_Scope</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Google Drive Scope</shortDescription>
+        <value>https://www.googleapis.com/auth/drive.file</value>
+    </labels>
+    <labels>
+        <fullName>Google_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Google Endpoint</shortDescription>
+        <value>https://oauth2.googleapis.com/</value>
+    </labels>
+    <labels>
+        <fullName>InstagramEndPoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>InstagramEndPoint</shortDescription>
+        <value>https://graph.instagram.com/v21.0/</value>
+    </labels>
+    <labels>
+        <fullName>Lead_Welcome_Email_Template</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lead Welcome Email Template</shortDescription>
+        <value>Welcome_Lead_Email_Template</value>
+    </labels>
+    <labels>
+        <fullName>Outlook_Batch_Url</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Outlook Batch Url</shortDescription>
+        <value>https://graph.microsoft.com/v1.0/$batch</value>
+    </labels>
+    <labels>
+        <fullName>Outlook_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Outlook Endpoint</shortDescription>
+        <value>https://login.microsoftonline.com/common/oauth2/v2.0/</value>
+    </labels>
+    <labels>
+        <fullName>PropertyFinder_Endpoint_Production</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>PropertyFinder_Endpoint_Production</shortDescription>
+        <value>https://atlas.propertyfinder.com/v1/</value>
+    </labels>
+    <labels>
+        <fullName>ReminderBeforeDays</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>ReminderBeforeDays</shortDescription>
+        <value>1</value>
+    </labels>
+    <labels>
+        <fullName>Rightmove_Endpoint_Production</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Rightmove Endpoint Production</shortDescription>
+        <value>https://adfapi.rightmove.co.uk/v1/property/</value>
+    </labels>
+    <labels>
+        <fullName>Rightmove_Endpoint_Sandbox</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Rightmove Endpoint Sandbox</shortDescription>
+        <value>https://adfapi.adftest.rightmove.com/v1/property/</value>
+    </labels>
+    <labels>
+        <fullName>Whatsapp_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Whatsapp Endpoint</shortDescription>
+        <value>https://graph.facebook.com/</value>
+    </labels>
+    <labels>
+        <fullName>Whatsapp_Webhook_Gmail_API</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Whatsapp Webhook Gmail API</shortDescription>
+        <value>https://gmail.googleapis.com/gmail/v1/users/me/messages/send</value>
+    </labels>
+    <labels>
+        <fullName>Zoopla_Doc_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Zoopla Doc Endpoint</shortDescription>
+        <value>http://realtime-listings.webservices.zpg.co.uk/docs/v2.3/schemas/</value>
+    </labels>
+    <labels>
+        <fullName>Zoopla_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Zoopla Endpoint</shortDescription>
+        <value>https://realtime-listings-api.webservices.zpg.co.uk/</value>
+    </labels>
+    <labels>
+        <fullName>supportEmail</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>supportEmail</shortDescription>
+        <value>supportemailservice@1fwdbemcdjzputwkkm4hslcbvqdmpnmmcagkgnff0cwx6zr5ns.f9-enofmam.ap43.apex.salesforce.com,support-estatexpert@mvclouds.com</value>
+    </labels>
+</CustomLabels>

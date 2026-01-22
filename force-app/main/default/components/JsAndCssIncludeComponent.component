@@ -1,0 +1,44 @@
+<!--**********************************************************************************
+* Copyright © 2017-2025, Buildertek Inc.
+* All rights reserved
+*
+* VisualForce Component: BT_JsAndCssIncludeComponent
+* Created by Sagar: 19/09/2017
+* Modified for ConfirmationPage and ConfirmationPageAsPDF: 27/05/2025
+*
+* - Include essential JS and CSS files for jQuery and Salesforce Lightning Design System.
+*
+* - Modifications:
+* - Sagar, 19/12/2017 – Initial Development
+* - [Your Name], 27/05/2025 – Optimized for ConfirmationPage and ConfirmationPageAsPDF, removed unused resources
+***********************************************************************************-->
+<apex:component >
+    <apex:attribute name="importJquery"
+        description="Assign true to import jQuery files"
+        type="Boolean" default="false" />
+    <apex:attribute name="importLightningDesign"
+        description="Assign true to import Lightning Design System files"
+        type="Boolean" default="false" />
+
+    <!-- jQuery Stuff -->
+    <apex:outputPanel rendered="{!importJquery}">
+        <apex:stylesheet value="{!URLFOR($Resource.Jquery, 'jquery/css/ui-smoothness/jquery-ui.min.css')}" />
+        <apex:includeScript value="{!$Resource.Jquery}/jquery/js/jquery-3.2.1.min.js" />
+        <apex:includeScript value="{!$Resource.Jquery}/jquery/js/jquery-migrate-1.4.1.min.js" />
+        <apex:includeScript value="{!$Resource.Jquery}/jquery/js/jquery-ui-1.12.1.min.js" />
+        <script type="text/javascript">
+            var j$ = jQuery.noConflict();
+        </script>
+    </apex:outputPanel>
+
+    <!-- Lightning Design System css -->
+    <apex:outputPanel rendered="{!importLightningDesign}">
+        <apex:stylesheet value="{!URLFOR($Resource.SLDS, 'assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+        <apex:slds />
+        <style>
+            .slds-spinner_container {
+                z-index: 9002;
+            }
+        </style>
+    </apex:outputPanel>
+</apex:component>

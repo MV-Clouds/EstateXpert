@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Google Lead Mapping</label>
+    <protected>false</protected>
+    <values>
+        <field>Field_Mappings__c</field>
+        <value xsi:type="xsd:string">[{&quot;metaField&quot;:&quot;FIRST_NAME&quot;,&quot;salesforceField&quot;:&quot;FirstName&quot;},{&quot;metaField&quot;:&quot;FULL_NAME&quot;,&quot;salesforceField&quot;:&quot;LastName&quot;},{&quot;metaField&quot;:&quot;COMPANY_NAME&quot;,&quot;salesforceField&quot;:&quot;Company&quot;},{&quot;metaField&quot;:&quot;EMAIL&quot;,&quot;salesforceField&quot;:&quot;Email&quot;},{&quot;metaField&quot;:&quot;CITY&quot;,&quot;salesforceField&quot;:&quot;City&quot;},{&quot;metaField&quot;:&quot;REGION&quot;,&quot;salesforceField&quot;:&quot;State&quot;},{&quot;metaField&quot;:&quot;COUNTRY&quot;,&quot;salesforceField&quot;:&quot;Country&quot;},{&quot;metaField&quot;:&quot;WORK_PHONE&quot;,&quot;salesforceField&quot;:&quot;Phone&quot;},{&quot;metaField&quot;:&quot;POSTAL_CODE&quot;,&quot;salesforceField&quot;:&quot;PostalCode&quot;},{&quot;metaField&quot;:&quot;STREET_ADDRESS&quot;,&quot;salesforceField&quot;:&quot;Street&quot;}]</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Rightmove Overseas Data</label>
+    <protected>false</protected>
+    <values>
+        <field>Portal_Record__c</field>
+        <value xsi:type="xsd:string">[
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Country_Code__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;The ISO-3316 two letter code for the country the property is located in : Max length 2&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;AD Andorra, AE United Arab Emirates, AF Afghanistan, AG Antigua And Barbuda, AI Anguilla, AL Albania, AM Armenia, AN Netherlands Antilles, AO Angola, AR Argentina, AS American Samoa, AT Austria, AU Australia, AW Aruba, AZ Azerbaijan, BA Bosnia-Herzegovina, BB Barbados, BD Bangladesh, BE Belgium, BF Burkina, BG Bulgaria, BH Bahrain, BI Burundi, BJ Benin, BM Bermuda, BN Brunei, BO Bolivia, BR Brazil, BS The Bahamas, BT Bhutan, BV Bouvetoya, BW Botswana, BY Belarus, BZ Belize, CA Canada, CB Canouan Island, CC Cocos Islands, CD Democratic Republic of the Congo, CF Central African Republic, CG Congo, CH Switzerland, CI Cote d&apos;Ivoire, CK Cook Islands, CL Chile, CM Cameroon, CN China, CO Colombia, CR Costa Rica, CS Serbia and Montenegro, CU Cuba, CV Cape Verde, CX Christmas Island, CY Cyprus, CZ Czech Republic, DE Germany, DJ Djibouti, DK Denmark, DM Dominica, DO Dominican Republic, DU Dubai, DZ Algeria, EC Ecuador, EE Estonia, EG Egypt, ER Eritrea, ES Spain, ET Ethiopia, FI Finland, FJ Fiji, FK Falkland Islands, FM Federated States of Micronesia, FO Faroe Islands, FR France, GA Gabon, GD Grenada, GE Georgia, GF French Guiana, GH Ghana, GI Gibraltar, GL Greenland, GM The Gambia, GN Guinea, GO Goa, GP Guadeloupe, GQ Equatorial Guinea, GR Greece, GS South Georgia and South Sandwich Islands, GT Guatemala, GU Guam, GW Guinea-Bissau, GY Guyana, HM Heard and McDonald Islands, HN Honduras, HR Croatia, HT Haiti, HU Hungary, ID Indonesia, IE Ireland, IL Israel, IM Margarita Island, IN India, IO British Indian Ocean Territory, IQ Iraq, IR Iran, IS Iceland, IT Italy, JM Jamaica, JO Jordan, JP Japan, KE Kenya, KG Kyrgyzstan, KH Cambodia, KI Kiribati, KM Comoros, KN St Kitts and Nevis, KP North Korea, KR South Korea, KW Kuwait, KY Cayman Islands, KZ Kazakhstan, LA Laos, LB Lebanon, LC St Lucia, LI Liechtenstein, LK Sri Lanka, LR Liberia, LS Lesotho, LT Lithuania, LU Luxembourg, LV Latvia, LY Libya, MA Morocco, MC Monaco, MD Moldova, ME Montenegro, MG Madagascar, MH Marshall Islands, MK Macedonia, ML Mali, MM Myanmar, MN Mongolia, MP Northern Mariana Islands, MQ Martinique, MR Mauritania, MS Montserrat, MT Malta, MU Mauritius, MV Maldives, MW Malawi, MX Mexico, MY Malaysia, MZ Mozambique, NA Namibia, NC New Caledonia, NE Niger, NF Norfolk Island, NG Nigeria, NI Nicaragua, NL Netherlands, NO Norway, NP Nepal, NR Nauru, NU Niue, NY Northern Cyprus, NZ New Zealand, OM Oman, PA Panama, PE Peru, PF French Polynesia, PG Papua New Guinea, PH Philippines, PK Pakistan, PL Poland, PM St Pierre and Miquelon, PN Pitcairn Islands, PR Puerto Rico, PT Portugal, PW Palau, PY Paraguay, QA Qatar, RE Reunion, RO Romania, RU Russian Federation, RW Rwanda, SA Saudi Arabia, SB Solomon Islands, SC Seychelles, SD Sudan, SE Sweden, SG Singapore, SH St Helena, SI Slovenia, SJ Svalbard, SK Slovakia, SL Sierra Leone, SM San Marino, SN Senegal, SO Somalia, SP Serbia, SR Suriname, ST Sao Tome and Principe, SV El Salvador, SY Syria, SZ Swaziland, TC Turks And Caicos Islands, TD Chad, TF French Southern and Antarctic Lands, TG Togo, TH Thailand, TJ Tajikistan, TK Tokelau, TL East Timor, TM Turkmenistan, TN Tunisia, TO Tonga, TR Turkey, TT Trinidad And Tobago, TV Tuvalu, TW Taiwan, TZ Tanzania, UA Ukraine, UG Uganda, US United States of America, UY Uruguay, UZ Uzbekistan, VC St Vincent and the Grenadines, VE Venezuela, VG British Virgin Islands, VI Virgin Islands (U.S.A.), VN Vietnam, VU Vanuatu, WF Wallis and Futuna Islands, WS Samoa, XB St Barthelemy, XM St Maarten, YE Yemen, YT Mayotte, ZA South Africa, ZM Zambia, ZW Zimbabwe&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.address.country_code&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The region that the property being sent is located in.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Andalucía&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.address.region&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The sub region that the property being sent is located in.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Almería&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.address.sub_region&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The town or city that the property being sent is located in.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Mojácar&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.address.town_city&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The exact latitude of the property.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Minimum: -90, Maximum: 90&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.address.latitude&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The exact longitude of the property.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Minimum: -180, Maximum: 180&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.address.longitude&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Broker_s_Listing_ID__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;Agent&apos;s unique reference for the property.&quot;,
+        &quot;Portal_Field_Example__c&quot;: null,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.agent_ref&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Date&quot;,
+        &quot;Data_Type__c&quot;: &quot;Datetime&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Date this property was created in the format: dd-MM-yyyy HH:mm:ss&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;31-12-2001 02:30:00&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.create_date&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Accessibility measures are in place in the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;42 Not suitable for wheelchair users, 37 Level access, 38 Lift access, 39 Ramped access, 40 Wet room, 41 Wide doorways&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.accessibility&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Bathrooms__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;The number of bathrooms for the property is being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;5&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.bathrooms&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Bedrooms__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;The number of bedrooms for the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.bedrooms&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a business for sale with the commercial property being sent?&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.business_for_sale&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The commercial use class(es) of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1 A1 Shops, 4 A2 Financial and Professional Services, 7 A3 Restaurants and Cafes, 10 A4 Drinking Establishments, 13 A5 Hot Food Take away, 16 B1 Business, 19 B2 General Industrial, 22 B8 Storage and Distribution, 25 C1 Hotels, 28 C2 Residential Institutions, 31 C2A Secure Residential Institution, 34 C3 Dwelling Houses, 37 D1 Non-Residential Institutions, 40 D2 Assembly and Leisure, 43 Sui_generis_1, 46 Sui_generis_2&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.comm_use_class&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Condition of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1 Good, 2 Some work needed, 3 Work required throughout, 4 Major renovation required&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.condition&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Description__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;Full description of the property.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Property Description&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.description&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The floor on which the entrance to the property is being sent is on.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1 Basement, 2 Ground Floor, 3 1st Floor, 4 2nd Floor, 5 Higher than 2nd floor (no lift), 6 Higher than 2nd floor (with lift)&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.entrance_floor&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Features of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: null,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.features&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Floor__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;Number of floors in the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;5&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.floors&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Heating-related features of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1 Air Conditioning, 2 Central, 3 Double Glazing, 4 Eco-Friendly, 5 Electric, 6 Gas, 7 Gas Central, 8 Night Storage, 9 Oil, 10 Solar, 11 Solar Water, 12 Under Floor&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.heating&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The total internal area of the property is being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;23&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.internal_area&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Units in which the internal area is sent in.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1 sq ft 2 sq m 3 acre 4 hectares&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.internal_area_unit&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The total land area of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;100&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.land_area&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Units in which the land area is sent in.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1 sq ft 2 sq m 3 acre 4 hectares&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.land_area_unit&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Outside spaces associated with the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;29 Back Garden, 30 Communal Garden, 31 Enclosed Garden, 32 Front Garden, 33 Private Garden, 34 Rear Garden, 35 Terrace, 36 Patio&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.outside_space&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Parking options are available for the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;13 Allocated, 14 Communal, 15 Covered, 16 Garage, 17 Driveway, 18 Gated, 19 Off Street, 20 On Street, 21 Rear, 22 Permit, 23 Private, 24 Residents&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.parking&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The number of reception rooms for the property is being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;2&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.reception_rooms&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The specific description of that room.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Property Room Description&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.rooms.room_description&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Any additional description or clarification of the room dimensions?&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;12 x 8 narrowing to 6&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.rooms.room_dimension_text&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The units in which the length and width of the room have been provided.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;5 Metres, 6 Centimetres, 7 Millimetres, 8 Feet, 9 Inches&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.rooms.room_dimension_unit&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The length of the room.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;30&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.rooms.room_length&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The name of the room.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Room 1&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.rooms.room_name&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The URLs of images which should be associated with this room.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;[http://www.rightmove.co.uk/image1,http://www.rightmove.co.uk/image2]&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.rooms.room_photo_urls&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The width of the room.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;20&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.rooms.room_width&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Name&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;The summary description of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;Summary&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.summary&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The year in which the property being sent was built.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;2020&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.year_built&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a golf course within a ten minute walk of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.golf_course_on_site_or_within_10_minutes_walk&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a golf course within a twenty minute drive of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.golf_course_within_a_20_minute_drive&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a private pool at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.private_pool&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there access to a communal pool at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.communal_pool&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a beach located at or within a ten minute walk of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.at_beach_or_within_10_minute_walk&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a beach within a twenty minute drive of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.beach_within_a_20_minute_drive&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a private beach at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.private_beach&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a sea view at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.sea_view&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a ski field at or within a ten minute walk of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.at_ski_field_or_within_10_minutes_walk&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a ski field within a 45 minute drive of the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.ski_field_within_a_45_minute_drive&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there air conditioning at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.air_conditioning&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a security system at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.security_system&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there gated entry at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.gated_entry&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a balcony at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.balcony&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a ground floor terrace at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.ground_floor_terrace&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a roof terrace at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.roof_terrace&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a hot tub at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.hot_tub&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Is there a log fireplace at the property being sent.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.details.log_fireplace&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Defines whether this property is a new build.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.new_home&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
+        &quot;Data_Type__c&quot;: &quot;String&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Price__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;Price of the property&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;100000&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.price_information.price&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;The qualifier on the advertised price of the property being sent&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;0 Default, 2 Guide Price, 4 Offers in Excess of, 5 Offers in the Region of, 16 Coming Soon&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.price_information.os_price_qualifier&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Property_Type__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;Type of property&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;0 Not Specified, 1 Terraced House, 2 End of terrace house, 3 Semi-detached house, 4 Detached house, 5 Mews house, 6 Cluster house, 7 Ground floor flat, 8 Flat, 9 Studio flat, 10 Ground floor maisonette, 11 Maisonette, 12 Bungalow, 13 Terraced bungalow, 14 Semi-detached bungalow, 15 Detached bungalow, 16 Mobile home, 20 Land (Residential), 21 Link detached house, 22 Town house, 23 Cottage, 24 Chalet, 25 Character Property, 26 House (unspecified), 27 Villa, 28 Apartment, 29 Penthouse, 30 Finca, 43 Barn Conversion, 44 Serviced apartment, 45 Parking, 46 Sheltered Housing, 47 Reteirment property, 48 House share, 49 Flat share, 50 Park home, 51 Garages, 52 Farm House, 53 Equestrian facility, 56 Duplex, 59 Triplex, 62 Longere, 65 Gite, 68 Barn, 71 Trulli, 74 Mill, 77 Ruins, 80 Restaurant, 83 Cafe, 86 Mill, 92 Castle, 95 Village House, 101 Cave House, 104 Cortijo, 107 Farm Land, 110 Plot, 113 Country House, 116 Stone House, 117 Caravan, 118 Lodge, 119 Log Cabin, 120 Manor House, 121 Stately Home, 125 Off-Plan, 128 Semi-detached Villa, 131 Detached Villa, 134 Bar/Nightclub, 137 Shop, 140 Riad, 141 House Boat, 142 Hotel Room, 143 Block of Apartments, 144 Private Halls, 178 Office, 181 Business Park, 184 Serviced Office, 187 Retail Property (High Street), 190 Retail Property (Out of Town), 193 Convenience Store, 196 Garages, 199 Hairdresser/Barber Shop, 202 Hotel, 205 Petrol Station, 208 Post Office, 211 Pub, 214 Workshop &amp; Retail Space, 217 Distribution Warehouse, 220 Factory, 223 Heavy Industrial, 226 Industrial Park, 229 Light Industrial, 232 Storage, 235 Showroom, 238 Warehouse, 241 Land (Commercial), 244 Commercial Development, 247 Industrial Development, 250 Residential Development, 253 Commercial Property, 256 Data Centre, 259 Farm, 262 Healthcare Facility, 265 Marine Property, 268 Mixed Use, 271 Research &amp; Development Facility, 274 Science Park, 277 Guest House, 280 Hospitality, 283 Leisure Facility, 298 Takeaway, 301 Childcare Facility, 304 Smallholding, 307 Place of Worship, 310 Trade Counter, 511 Coach House, 512 House of Multiple Occupation, 535 Sports facilities, 538 Spa, 541 Campsite &amp; Holiday Village, 544 Retail Property (Shopping Centre), 547 Retail Property (Park), 550 Retail Property (Pop Up)&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: &quot;Apartment =&gt; 28,Townhouse =&gt; 29,Villa =&gt; 27,Duplex =&gt; 56,Penthouse =&gt; 29,Land =&gt; 20,Commercial =&gt; 241,Commercial Lease =&gt; 244,Commercial Sale =&gt; 253&quot;,
+        &quot;Name&quot;: &quot;property.property_type&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
+        &quot;Data_Type__c&quot;: &quot;Integer&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Status__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;The current transaction status for this property&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;1 Available, 2 SSTC, 4 Under Offer, 5 Reserved&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: &quot;Active =&gt; 1, Pending =&gt; 1, Under Contract =&gt; 5, Withdrawn =&gt; 5, Sold =&gt; 5, Rented =&gt; 5, Under Offer =&gt; 4&quot;,
+        &quot;Name&quot;: &quot;property.os_status&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
+        &quot;Data_Type__c&quot;: null,
+        &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Allowed_For_Portals__c&quot;,
+        &quot;Portal_Field_Description__c&quot;: &quot;Defines whether this property should be visible on Rightmove Overseas.&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;True/False&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: true,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.published&quot;
+    },
+    {
+        &quot;Allowed_Field_Datatype__c&quot;: &quot;Date&quot;,
+        &quot;Data_Type__c&quot;: &quot;Datetime&quot;,
+        &quot;Listing_Field_API_Name__c&quot;: null,
+        &quot;Portal_Field_Description__c&quot;: &quot;Date this property was last updated in the feed provider&apos;s software, in the format: dd-MM-yyyy HH:mm:ss&quot;,
+        &quot;Portal_Field_Example__c&quot;: &quot;20-06-2024 17:03:00&quot;,
+        &quot;Portal_Name__c&quot;: &quot;Rightmove Overseas&quot;,
+        &quot;Required__c&quot;: false,
+        &quot;Value_Mapping__c&quot;: null,
+        &quot;Name&quot;: &quot;property.update_date&quot;
+    }
+]</value>
+    </values>
+    <values>
+        <field>Portal_Value__c</field>
+        <value xsi:type="xsd:string">Rightmove Overseas</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>StaticFields</label>
+    <protected>false</protected>
+    <values>
+        <field>BlockedFields__c</field>
+        <value xsi:type="xsd:string">isdeleted;mailingaddress;otheraddress;contact_type__c</value>
+    </values>
+    <values>
+        <field>StaticFields__c</field>
+        <value xsi:type="xsd:string">[
+        {
+        &quot;label&quot;: &quot;Contact Name&quot;,
+        &quot;type&quot;: &quot;STRING&quot;,
+        &quot;apiName&quot;: &quot;Name&quot;,
+        &quot;objectApiName&quot;: &quot;Contact&quot;,
+        &quot;operatorName&quot;: &quot;contains&quot;,
+        &quot;searchTerm&quot;: &quot;&quot;,
+        &quot;minValue&quot;: null,
+        &quot;maxValue&quot;: null,
+        &quot;isFocused&quot;: false,
+        &quot;isNot&quot;: false,
+        &quot;string&quot;: true,
+        &quot;prevApiName&quot;: null
+        },
+        {
+           &quot;label&quot;: &quot;Listing Type&quot;,
+           &quot;type&quot;: &quot;PICKLIST&quot;,
+           &quot;apiName&quot;: &quot;MVEX__Listing_Type__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;operatorName&quot;: &quot;equals&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;picklist&quot;: true,
+           &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       },
+       {
+           &quot;label&quot;: &quot;Status&quot;,
+           &quot;type&quot;: &quot;PICKLIST&quot;,
+           &quot;apiName&quot;: &quot;MVEX__Status__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;operatorName&quot;: &quot;equals&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;picklist&quot;: true,
+             &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       },
+       {
+           &quot;label&quot;: &quot;Property Type&quot;,
+           &quot;type&quot;: &quot;PICKLIST&quot;,
+           &quot;apiName&quot;: &quot;MVEX__Property_Type__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;operatorName&quot;: &quot;equals&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;picklist&quot;: true,
+             &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       },
+       {
+           &quot;label&quot;: &quot;City&quot;,
+           &quot;type&quot;: &quot;STRING&quot;,
+           &quot;apiName&quot;: &quot;MVEX__City__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;operatorName&quot;: &quot;contains&quot;,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;string&quot;: true,
+             &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       },
+       {
+           &quot;label&quot;: &quot;Price - max&quot;,
+           &quot;type&quot;: &quot;CURRENCY&quot;,
+           &quot;apiName&quot;: &quot;MVEX__Price_max__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;operatorName&quot;: &quot;range&quot;,
+           &quot;isRange&quot;: true,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;currency&quot;: true,
+             &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       },
+       {
+           &quot;label&quot;: &quot;Bedrooms - min&quot;,
+           &quot;type&quot;: &quot;DOUBLE&quot;,
+           &quot;apiName&quot;: &quot;MVEX__Bedrooms_min__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;operatorName&quot;: &quot;range&quot;,
+           &quot;isRange&quot;: true,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;double&quot;: true,
+             &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       },
+       {
+           &quot;label&quot;: &quot;Bathrooms - min&quot;,
+           &quot;type&quot;: &quot;DOUBLE&quot;,
+           &quot;apiName&quot;: &quot;MVEX__Bathrooms_min__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;operatorName&quot;: &quot;range&quot;,
+           &quot;isRange&quot;: true,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;double&quot;: true,
+             &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       },
+       {
+           &quot;label&quot;: &quot;Size - min&quot;,
+           &quot;type&quot;: &quot;DOUBLE&quot;,
+           &quot;apiName&quot;: &quot;MVEX__Size_min__c&quot;,
+           &quot;objectApiName&quot;: &quot;MVEX__Inquiry__c&quot;,
+           &quot;searchTerm&quot;: &quot;&quot;,
+           &quot;minValue&quot;: null,
+           &quot;maxValue&quot;: null,
+           &quot;operatorName&quot;: &quot;range&quot;,
+           &quot;isRange&quot;: true,
+           &quot;isFocused&quot;: false,
+           &quot;isNot&quot;: false,
+           &quot;double&quot;: true,
+             &quot;prevApiName&quot;:&quot;MVEX__Inquiry__c&quot;
+       }
+   ]</value>
+    </values>
+</CustomMetadata>

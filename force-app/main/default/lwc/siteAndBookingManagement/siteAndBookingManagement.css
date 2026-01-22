@@ -1,0 +1,387 @@
+/* ================================
+== COMPONENT WRAPPER & HEADER
+================================
+*/
+.real-estate-wrapper {
+    /* height: calc(100% + 1.5rem);
+    margin-top: -0.8rem;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.8rem; */
+    font-family: 'Mulish';
+    user-select: none;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/newImageandMediaBg');
+}
+
+.component-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #003366; /* Navy theme */
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
+    border-bottom: 2px solid #0176d3;
+}
+
+.component-header h1 {
+    color: white;
+    font-weight: 400;
+}
+
+/* ================================
+== LEFT COLUMN: PROPERTY DETAILS
+================================
+*/
+.left-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
+}
+
+.carousel-container {
+    position: relative;
+    width: 100%;
+    height: 300px; 
+    overflow: hidden;
+    border: 1px solid #0176d3;
+    border-radius: 8px;
+}
+
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.image-counter {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(3, 118, 211, 0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #e0e0e0;
+    color: #666;
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.property-details {
+    margin-top: 20px;
+}
+
+.property-details h2 {
+    color: #003366;
+    font-size: 20px;
+    margin: 0 0 8px;
+    font-weight: 400;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    font-size: 16px;
+    color: #34495e;
+    font-weight: 400;
+}
+
+.detail-grid div {
+    padding-bottom: 8px;
+}
+
+.detail-label {
+    font-weight: 400;
+    color: #003366;
+    margin-right: 5px;
+}
+
+.left-container h3 {
+    color: #003366;
+    font-size: 20px;
+    margin: 10px 0 10px;
+    font-weight: 400;
+}
+
+.property-map {
+    height: 300px; 
+    border: 1px solid #0176d3;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ================================
+== RIGHT COLUMN: CONTACTS TABLE
+================================
+*/
+.contacts-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
+    border-radius: 10px;
+    height: 100%; 
+}
+
+.contacts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.contacts-container h2 {
+    color: #003366;
+    font-size: 20px;
+    margin: 0;
+    font-weight: 400;
+}
+
+.custom-datatable {
+    border-radius: 8px;
+    overflow: auto;
+    background-color: white;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+.contacts-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.contacts-table th,
+.contacts-table td {
+    padding: 0.6rem;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    vertical-align: middle;
+}
+
+.contacts-table th {
+    background-color: #0176D3;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 98;
+    height: 45px;
+}
+
+.contacts-table td {
+    height: 45px;
+}
+
+.contacts-table tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.contacts-table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 98;
+}
+
+.contacts-table a {
+    color: #006dcc;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.contacts-table a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #c0392b;
+    text-align: center;
+    padding: 10px;
+    background: #f9d6d5;
+    border-radius: 8px;
+    font-weight: 400;
+}
+
+.action-btn {
+    display: flex;
+    justify-content: center;
+}
+
+/* ================================
+== MODAL STYLES (SHARED)
+================================
+*/
+.slds-modal__header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0176D3;
+    color: white;
+    --slds-c-icon-color-foreground-default: white;
+}
+
+.custom-modal-header {
+    font-size: 24px !important;
+}
+
+.slds-modal {
+    --slds-c-input-color-border: #0176D3;
+    --slds-c-modal-radius-border: 8px;
+}
+
+.modal-body {
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/newImageandMediaBg');
+    border-radius: 0px 0px 8px 8px;
+    min-height: 75vh;
+    overflow: auto; /* Changed to auto for the modal body */
+}
+
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    right: -2rem;
+    bottom: 0rem;
+    background: transparent;
+}
+
+.backdrop-filter {
+    background: #06050569;
+    backdrop-filter: blur(4px);
+}
+
+/* ================================
+== MODAL 1: "View Schedule"
+================================
+*/
+.schedule-modal-container {
+    width: 70%;
+    max-width: 1000px;
+}
+
+.calender-cover {
+    display: flex;
+    width: 100%;
+}
+
+.calendar-container {
+    width: 100%;
+    border-radius: 0px 0px 8px 8px;
+    overflow: hidden;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+/* ================================
+== MODAL 2: "Manage Showing"
+================================
+*/
+.manage-modal-container {
+    width: 90%;
+    max-width: 75rem; /* NEW: Smaller width */
+}
+
+.modal-controls {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    /* height: 100%; */
+}
+
+.modal-buttons {
+    margin-top: auto;
+    border-top: 1px solid black;
+}
+
+.modal-preview-area {
+    display: flex;
+    flex-direction: column;
+    /* max-height: 70vh;  */
+}
+
+.preview-container {
+    overflow: auto;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* NEW: Style for the "Completed/Cancelled" message box */
+.center-message-box {
+    align-items: center;
+    justify-content: center;
+}
+
+.whatsapp-preview {
+    height: fit-content;
+    background-color: rgb(234, 255, 202);
+    width: 20rem;
+    margin: auto;
+    padding: 0.5rem;
+    box-shadow: 1px 0px 10px 2px grey;
+    border-radius: 8px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.email-preview-container {
+    padding: 0px;
+    border: none;
+    margin: 0;
+    width: 100%;
+}
+
+.email-preview {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.calender-modal-body{
+    min-height: auto;
+}
+
+.action-message-center{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+c-template-preview {
+    max-height: none !important;
+    --max-height-of-the-preview-div: none !important;
+}
+
+/* Responsive fix for modal 50/50 layout */
+@media (max-width: 64em) {
+    .modal-preview-area {
+        border-left: none !important;
+    }
+}

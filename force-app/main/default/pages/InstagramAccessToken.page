@@ -1,0 +1,58 @@
+<apex:page controller="InstagramController" action="{!getRefreshToken}">
+    <apex:form >
+        <apex:pageMessages />
+        <apex:outputPanel id="mainPanel" layout="block" style="width:100%; height:100vh; display:flex; justify-content:center; align-items:center; text-align:center;">
+            
+            <!-- Spinner Panel for Waiting Message -->
+            <apex:outputPanel id="spinnerPanel" rendered="{!NOT(isRecordCreated)}" layout="block" styleClass="viewClass">
+                <apex:image url="{!URLFOR($Resource.templateBuilderLogo)}" width="200" height="50"/>
+                <apex:outputPanel styleClass="spinner-container">
+                    <apex:outputText value="Please wait, processing..." style="font-size:20px; color:blue;"/>
+                    <apex:outputPanel styleClass="spinner" />
+                </apex:outputPanel>
+            </apex:outputPanel>
+            
+            <!-- Success Panel for Successful Authorization -->
+            <apex:outputPanel id="successPanel" rendered="{!isRecordCreated}" layout="block" styleClass="viewClass">
+                <apex:image url="{!URLFOR($Resource.templateBuilderLogo)}" width="200" height="50"/>
+                <apex:outputText value="Authorization done successfully!" style="font-size:24px; color:rgb(0, 109, 40);"/>
+                <script>
+                    setTimeout(function() {
+                        window.close();
+                    }, 1000);
+                </script>
+            </apex:outputPanel>
+
+        </apex:outputPanel>
+    </apex:form>
+
+    <style>
+        .viewClass {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            margin-top: 20px;
+            border: 4px solid rgba(0, 0, 255, 0.2);
+            border-left-color: blue;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</apex:page>

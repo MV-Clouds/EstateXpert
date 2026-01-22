@@ -1,0 +1,33 @@
+<template>
+    <div class="integration-error-container">
+        <div class="error-content">
+            <div class="vector-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="12" cy="16" r="0.5" fill="currentColor" stroke="currentColor"/>
+                </svg>
+            </div>
+            <h2 class="custom-heading">Integration Setup Incomplete</h2>
+            <template if:true={hasErrorMessages}>
+                <template for:each={errorMessages} for:item="message">
+                    <p key={message} class="custom-text">{message}</p>
+                </template>
+            </template>
+            <p class="custom-text" if:false={hasErrorMessages}>Please complete the integration to proceed with your setup.</p>
+            
+            <div class="button-container">
+                <template if:true={showBackButton}>
+                    <button class="button back-button" onclick={handleBackToControlCenter}>
+                        Back to Control Center
+                    </button>
+                </template>
+                <template if:true={showSetupButton}>
+                    <button class="button setup-button" onclick={handleGoToSetup}>
+                        Go to Setup
+                    </button>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

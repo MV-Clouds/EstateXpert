@@ -1,0 +1,166 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+        class="slds-modal slds-fade-in-open slds-modal_small">
+        <div class="slds-modal__container">
+            <div class="slds-modal__close closs_icon_css" onclick={handleDialogueClose}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                        fill="white" />
+                </svg>
+            </div>
+            <div class="slds-modal__header blue-header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">AWS Watermark Image
+                    Uploader</h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small forBGSetup"
+                id="modal-content-id-1">
+                <div class="content_body">
+                    <!-- Existing file selector and dropzone -->
+                    <div class="image_content">
+                        <p class="con1">Image Upload</p>
+                        <p class="con2">Add your image below. Please note that only one image can be uploaded at a time.
+                        </p>
+                    </div>
+                    <div class="slds-file-selector slds-file-selector_images" ondrop={handleDrop}
+                        ondragover={allowDrop}>
+                        <div class="slds-file-selector__dropzone flex_css">
+                            <div>
+                                <svg width="48" height="36" viewBox="0 0 36 24" fill="none">
+                                    <path
+                                        d="M29.025 9.06C28.005 3.885 23.46 0 18 0C13.665 0 9.9 2.46 8.025 6.06C3.51 6.54 0 10.365 0 15C0 19.965 4.035 24 9 24H28.5C32.64 24 36 20.64 36 16.5C36 12.54 32.925 9.33 29.025 9.06ZM28.5 21H9C5.685 21 3 18.315 3 15C3 11.925 5.295 9.36 8.34 9.045L9.945 8.88L10.695 7.455C12.12 4.71 14.91 3 18 3C21.93 3 25.32 5.79 26.085 9.645L26.535 11.895L28.83 12.06C31.17 12.21 33 14.175 33 16.5C33 18.975 30.975 21 28.5 21ZM12 13.5H15.825V18H20.175V13.5H24L18 7.5L12 13.5Z"
+                                        fill="#0176D3" />
+                                </svg>
+                            </div>
+                            <div class="formbold-drop-file images_upcss">
+                                <p>Drag Your File Here or</p>
+                                <input type="file" class="slds-file-selector__input slds-assistive-text"
+                                    onchange={handleSelectedFiles} accept="image/png" id="file-upload-input-107"
+                                    aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
+                                <label class="slds-file-selector__body" for="file-upload-input-107"
+                                    id="file-selector-secondary-label106">
+                                    <span class="formbold-browse">Click to Browse</span>
+                                </label>
+                            </div>
+                            <div class="images_details">
+                                <p>Please ensure images do not exceed 4 MB.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="image_content_btm">
+                        <p class="con2">Please upload images in .png format only.</p>
+                    </div>
+                    <!-- Modified image list with flip card -->
+                    <template if:true={isImageData}>
+                        <div lwc:if={fromData} class="image-list">
+                            <template for:each={data} for:item="imagedata">
+                                <div class="container flip-container" key={imagedata.Id} data-id={imagedata.Id}>
+                                    <div class={imagedata.flipClass}>
+                                        <!-- Front of the card (Image Preview) -->
+                                        <div class="flip-card-front">
+                                            <div class="img_css">
+                                                <img src={imagedata.VersionDataUrl} alt="Image" draggable="false">
+                                            </div>
+                                            <div class="box1">
+                                                <p class="imgd1">{imagedata.Title}</p>
+                                                <p class="imgd2">{imagedata.ContentSize} kb</p>
+                                            </div>
+                                            <div class="removeImage">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    data-id={imagedata.Id} data-name="cvdata" onclick={flipCard}>
+                                                    <path opacity="0.3"
+                                                        d="M12 4C7.59 4 4 7.59 4 12C4 16.41 7.59 20 12 20C16.41 20 20 16.41 20 12C20 7.59 16.41 4 12 4ZM16 14.59L14.59 16L12 13.41L9.41 16L8 14.59L10.59 12L8 9.41L9.41 8L12 10.59L14.59 8L16 9.41L13.41 12L16 14.59Z"
+                                                        fill="#858585" />
+                                                    <path
+                                                        d="M14.59 8L12 10.59L9.41 8L8 9.41L10.59 12L8 14.59L9.41 16L12 13.41L14.59 16L16 14.59L13.41 12L16 9.41L14.59 8ZM12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"
+                                                        fill="#858585" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <!-- Back of the card (Confirmation) -->
+                                        <div class="flip-card-back">
+                                            <div class="confirmation">
+                                                <p>Delete this image?</p>
+                                                <div class="confirmation-actions">
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                        data-id={imagedata.Id} data-name="cvdata"
+                                                        onclick={confirmDelete}>
+                                                        <path d="M9 16.2L4.8 12L3.4 13.4L9 19L21 7L19.6 5.6L9 16.2Z"
+                                                            fill="#28A745" />
+                                                    </svg>
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                        data-id={imagedata.Id} data-name="cvdata"
+                                                        onclick={cancelDelete}>
+                                                        <path
+                                                            d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+                                                            fill="#DC3545" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div lwc:elseif={fromUploader} class="image-list">
+                            <div class="container flip-container" data-id={index}>
+                                <div class={uploaderFlipClass}>
+                                    <!-- Front of the card (Image Preview) -->
+                                    <div class="flip-card-front">
+                                        <div class="img_css">
+                                            <img src={imageSrc} alt="Image" draggable="false">
+                                        </div>
+                                        <div class="box1">
+                                            <p class="imgd1">{imageName}</p>
+                                            <p class="imgd2">{imageSize}</p>
+                                        </div>
+                                        <div class="removeImage">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                data-name="uploaderdata" onclick={flipCard}>
+                                                <path opacity="0.3"
+                                                    d="M12 4C7.59 4 4 7.59 4 12C4 16.41 7.59 20 12 20C16.41 20 20 16.41 20 12C20 7.59 16.41 4 12 4ZM16 14.59L14.59 16L12 13.41L9.41 16L8 14.59L10.59 12L8 9.41L9.41 8L12 10.59L14.59 8L16 9.41L13.41 12L16 14.59Z"
+                                                    fill="#858585" />
+                                                <path
+                                                    d="M14.59 8L12 10.59L9.41 8L8 9.41L10.59 12L8 14.59L9.41 16L12 13.41L14.59 16L16 14.59L13.41 12L16 9.41L14.59 8ZM12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"
+                                                    fill="#858585" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <!-- Back of the card (Confirmation) -->
+                                    <div class="flip-card-back">
+                                        <div class="confirmation">
+                                            <p>Delete this image?</p>
+                                            <div class="confirmation-actions">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    data-name="uploaderdata" onclick={confirmDelete}>
+                                                    <path d="M9 16.2L4.8 12L3.4 13.4L9 19L21 7L19.6 5.6L9 16.2Z"
+                                                        fill="#28A745" />
+                                                </svg>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    data-name="uploaderdata" onclick={cancelDelete}>
+                                                    <path
+                                                        d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+                                                        fill="#DC3545" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="footerbtns">
+                    <button class="cancel_btn_css" aria-label="Cancel and close"
+                        onclick={handleDialogueClose}>Close</button>
+                    <button class="save_btn_css" onclick={handleSave}>Upload</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+
+    <template if:true={isSpinner}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+</template>

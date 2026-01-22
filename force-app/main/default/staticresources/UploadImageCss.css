@@ -1,0 +1,10 @@
+@media only screen and (min-width: 768px) and (max-width: 1024px) and (orientation : landscape){
+    .main-div .slds-pill{
+    max-width:100% !important;
+    }
+}
+@media only screen and (min-width: 768px) and (max-width: 1024px) and (orientation : portrait){
+    .main-div .slds-pill{
+    max-width:90% !important;
+    }
+}

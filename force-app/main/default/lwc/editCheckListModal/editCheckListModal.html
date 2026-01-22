@@ -1,0 +1,139 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+        class="slds-modal slds-fade-in-open slds-modal_large">
+        <div class="slds-modal__container">
+            <div class="slds-modal__close closs_icon_css" onclick={handleDialogueClose}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                        fill="white" />
+                </svg>
+            </div>
+
+            <div class="slds-modal__header blue-header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Manage Your Checklist
+                </h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small background_css" id="modal-content-id-1">
+                <div class="header_container_css">
+                    <div class="object_name_css">
+                        Selected Object : {selectedObjectName}
+                    </div>
+                    <div class="header_title_css">
+                        <button class="add-new-btn" onclick={addNewRow}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
+                            </svg>                                
+                            Add New
+                        </button>
+                    </div>
+                </div>
+                <div class="tableContainer">
+                    <template if:true={isDataAvailable}>
+                        <div class="table-content">
+                            <table class="slds-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="name">
+                                            <div class="slds-truncate"><abbr title="required" class="slds-required">*</abbr>Checklist Name</div>
+                                        </th>
+                                        <th scope="col" class="fieldname">
+                                            <div class="slds-truncate">Field Name</div>
+                                        </th>
+                                        <th scope="col" class="operator">
+                                            <div class="slds-truncate">Operator</div>
+                                        </th>
+                                        <th scope="col" class="value">
+                                            <div class="slds-truncate">Value</div>
+                                        </th>
+                                        <th scope="col" class="description">
+                                            <div class="slds-truncate">Description</div>
+                                        </th>
+                                        <th scope="col" class="order">
+                                            <div class="slds-truncate order_btn_grp">Order</div>
+                                        </th>
+                                        <th scope="col" class="action">
+                                            <div class="slds-truncate order_btn_grp">Action</div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={checklistItems} for:item="item" for:index="index">
+                                        <tr key={template.Id}>
+                                            <td data-label="name">
+                                                <lightning-input type="text" value={item.Name} data-index={index} data-field="Name" onchange={handleInputChange} variant="label-hidden"></lightning-input>
+                                            </td>
+                                            <td data-label="fieldname">
+                                                <lightning-combobox value={item.MVEX__Field_Name__c} data-index={index} data-field="MVEX__Field_Name__c" options={fieldoptions} onchange={handleFieldNameChange} variant="label-hidden"></lightning-combobox>
+                                            </td>
+                                            <td data-label="operator">
+                                                <lightning-combobox value={item.MVEX__Operator__c} data-fieldapiname={item.MVEX__Field_Name__c} data-index={index} data-field="MVEX__Operator__c" options={operatorOptions} onchange={handleOperatorChange} variant="label-hidden"></lightning-combobox>
+                                            </td>
+                                            <td data-label="value">
+                                                <template if:true={item.isPrimary}>
+                                                    <lightning-input type={item.MVEX__Data_Type__c} value={item.MVEX__Value__c} data-index={index} data-field="MVEX__Value__c" onchange={handleInputChange} variant="label-hidden"></lightning-input>
+                                                </template>
+                                                <template if:true={item.isPicklist}>
+                                                    <lightning-combobox value={item.MVEX__Value__c} data-index={index} data-field="MVEX__Value__c" options={item.picklistValues} onchange={handleInputChange} variant="label-hidden"></lightning-combobox>
+                                                </template>
+                                                <template if:true={item.isReference}>
+                                                    <lightning-record-picker value={item.MVEX__Value__c} label="Reference" data-index={index} data-field="MVEX__Value__c" object-api-name={item.objectApiName} onchange={handleRefChange} variant="label-hidden"></lightning-record-picker>
+                                                </template>
+                                            </td>
+                                            <td data-label="description">
+                                                <lightning-input type="text" value={item.MVEX__Description__c} data-index={index} data-field="MVEX__Description__c" onchange={handleInputChange} variant="label-hidden"></lightning-input>
+                                            </td>
+                                            <td data-label="order">
+                                                <div class="slds-button-group order_btn_grp" role="group">
+                                                    <button class="order_btn" aria-pressed="false" data-index={index} data-action="up" onclick={handleOrderChange}>
+                                                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M8.81667 6L5 2.2915L1.175 6L0 4.8583L5 -4.65616e-08L10 4.8583L8.81667 6Z" fill="#0176D3"/>
+                                                        </svg>                                                
+                                                    </button>
+                                                    <button class="order_btn" aria-pressed="false" data-index={index} data-action="down" onclick={handleOrderChange}>
+                                                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M1.18333 8.21036e-08L5 3.7085L8.825 1.0942e-08L10 1.1417L5 6L0 1.1417L1.18333 8.21036e-08Z" fill="#0176D3"/>
+                                                        </svg>                                                
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td data-label="action">
+                                                <div class="order_btn_grp">
+                                                    <button class="delete-div" onclick={handleDelete} data-index={index}>
+                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>                                                    
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={isDataAvailable}>
+                        <div class="empty-state">
+                            <div class="empty-state__content">
+                                <div class="empty-state__icon">
+                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                </div>
+                                <div class="empty-state__message">No Checklist available for this object, please create a checklist first.</div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="footerbtns">
+                    <button class="cancel_btn_css" aria-label="Cancel and close"
+                    onclick={handleDialogueClose}>Cancel</button>
+                    <button class="save_btn_css" onclick={saveChecklistRecords}>Save</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+
+    <template if:true={isSpinner}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+</template>

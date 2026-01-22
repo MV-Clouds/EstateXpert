@@ -1,0 +1,547 @@
+<template>
+    <template if:true={spinnerShow}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+    <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
+        <template if:true={isAccessible}>
+            <div class="main">
+                <div class="header-part">
+                    <div class="custom-header">
+                        <div class="slds-page-header__row first-row">
+                            <div class="slds-page-header__col-title">
+                                <div class="slds-media header-text">
+                                    <div class="portal_mapping">
+                                        Marketing List
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-page-header__col-actions header-button">
+                                <div class="slds-page-header__controls header-buttons-div">
+                                    <div class="header-buttons">
+                                        <c-record-config-body-cmp feature-name="Marketing List"></c-record-config-body-cmp>
+                                        <button onclick={handleSendMessage} class="icon-button"
+                                            disabled={isContactSelected}>
+                                            Send Message
+                                        </button>
+                                        <!-- <button onclick={openModal} class="icon-button" disabled={isContactSelected}>
+                                            Send Mass Emails
+                                        </button> -->
+                                        <button onclick={handleAdd} class="icon-button">
+                                            Send Emails
+                                        </button>
+                                        <button onclick={goTOContactPage} class="icon-button">
+                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
+                                                    fill="white" />
+                                            </svg>
+                                            New Contact
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-page-header__row second-row">
+                            <div class="slds-page-header__col-meta">
+                                <template if:false={isSelected}>
+                                    <p class="slds-page-header__meta-text">{totalContacts} {contactItems}</p>
+                                </template>
+                                <template if:true={isSelected}>
+                                    <p class="slds-page-header__meta-text">{totalSelected} {items} Selected</p>
+                                </template>
+                            </div>
+                            <div class="tab-section">
+                                <div class="sort-desc">
+                                    <div class="sort-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M10 14H2M8 10H2M6 6H2M12 18H2M19 20V4M19 20L22 17M19 20L16 17M19 4L22 7M19 4L16 7"
+                                                stroke="#131314" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                    <div class="sort-text">{sortDescription}</div>
+                                </div>
+                                <div class="tab-btns">
+                                    <ul>
+                                        <li class="tab-div active-tab-div" onclick={handleMenuTabClick} data-tab-id="1">
+                                            <svg class="activeSvg menusvg" width="24" height="14" viewBox="0 0 24 14"
+                                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path data-tab-index="1"
+                                                    d="M0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333ZM0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333Z"
+                                                    fill="#131314" />
+                                            </svg>
+                                        </li>
+                                        <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="2">
+                                            <svg class="menusvg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path data-tab-index="2" fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M8 13.3333C8.70724 13.3333 9.38552 13.6143 9.88562 14.1144C10.3857 14.6145 10.6667 15.2928 10.6667 16V21.3333C10.6667 22.0406 10.3857 22.7189 9.88562 23.219C9.38552 23.719 8.70724 24 8 24H2.66667C1.95942 24 1.28115 23.719 0.781048 23.219C0.280951 22.7189 0 22.0406 0 21.3333V16C0 15.2928 0.280951 14.6145 0.781048 14.1144C1.28115 13.6143 1.95942 13.3333 2.66667 13.3333H8ZM21.3333 13.3333C22.0406 13.3333 22.7189 13.6143 23.219 14.1144C23.719 14.6145 24 15.2928 24 16V21.3333C24 22.0406 23.719 22.7189 23.219 23.219C22.7189 23.719 22.0406 24 21.3333 24H16C15.2928 24 14.6145 23.719 14.1144 23.219C13.6143 22.7189 13.3333 22.0406 13.3333 21.3333V16C13.3333 15.2928 13.6143 14.6145 14.1144 14.1144C14.6145 13.6143 15.2928 13.3333 16 13.3333H21.3333ZM8 0C8.70724 0 9.38552 0.280951 9.88562 0.781048C10.3857 1.28115 10.6667 1.95942 10.6667 2.66667V8C10.6667 8.70724 10.3857 9.38552 9.88562 9.88562C9.38552 10.3857 8.70724 10.6667 8 10.6667H2.66667C1.95942 10.6667 1.28115 10.3857 0.781048 9.88562C0.280951 9.38552 0 8.70724 0 8V2.66667C0 1.95942 0.280951 1.28115 0.781048 0.781048C1.28115 0.280951 1.95942 0 2.66667 0H8ZM21.3333 0C22.0406 0 22.7189 0.280951 23.219 0.781048C23.719 1.28115 24 1.95942 24 2.66667V8C24 8.70724 23.719 9.38552 23.219 9.88562C22.7189 10.3857 22.0406 10.6667 21.3333 10.6667H16C15.2928 10.6667 14.6145 10.3857 14.1144 9.88562C13.6143 9.38552 13.3333 8.70724 13.3333 8V2.66667C13.3333 1.95942 13.6143 1.28115 14.1144 0.781048C14.6145 0.280951 15.2928 0 16 0H21.3333Z"
+                                                    fill="white" />
+                                            </svg>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <template if:true={mobileView}>
+                    <div class="wrap-mobile">
+                        <div>Filter</div>
+                        <div class="svg-cover" onclick={wrapFilter}>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M7.9996 0.999999L7.9996 10.3497M7.9996 13.6499L7.9996 15M7.9996 13.6499C7.53904 13.6499 7.09734 13.4761 6.77167 13.1668C6.446 12.8574 6.26304 12.4378 6.26304 12.0002C6.26304 11.5627 6.446 11.1431 6.77167 10.8337C7.09734 10.5243 7.53904 10.3505 7.9996 10.3505C8.46016 10.3505 8.90186 10.5243 9.22753 10.8337C9.5532 11.1431 9.73616 11.5627 9.73616 12.0002C9.73616 12.4378 9.5532 12.8574 9.22753 13.1668C8.90186 13.4761 8.46016 13.6499 7.9996 13.6499ZM13.2626 0.999999L13.2626 5.34984M13.2626 5.34984C13.7233 5.34984 14.1655 5.52407 14.4913 5.83352C14.817 6.14298 15 6.56269 15 7.00032C15 7.43786 14.8162 7.85747 14.4906 8.16686C14.1649 8.47624 13.7232 8.65005 13.2626 8.65005M13.2626 5.34984C12.802 5.34984 12.3606 5.52407 12.0348 5.83352C11.7091 6.14298 11.5261 6.56269 11.5261 7.00032C11.5261 7.43786 11.709 7.85747 12.0347 8.16686C12.3604 8.47624 12.8021 8.65005 13.2626 8.65005M13.2626 8.65005L13.2626 15M2.73656 0.999999L2.73656 3.34973M2.73656 6.64995L2.73656 15M2.73656 6.64995C2.27599 6.64995 1.83429 6.47614 1.50863 6.16675C1.18296 5.85737 1 5.43775 1 5.00022C1 4.78357 1.04492 4.56905 1.13219 4.36889C1.21946 4.16874 1.34737 3.98687 1.50863 3.83368C1.66988 3.68049 1.86132 3.55897 2.07201 3.47606C2.28269 3.39316 2.50851 3.35049 2.73656 3.35049C2.96461 3.35049 3.19042 3.39316 3.40111 3.47606C3.6118 3.55897 3.80323 3.68049 3.96449 3.83368C4.12574 3.98687 4.25366 4.16874 4.34093 4.36889C4.4282 4.56905 4.47311 4.78357 4.47311 5.00022C4.47311 5.43775 4.29016 5.85737 3.96449 6.16675C3.63882 6.47614 3.19712 6.64995 2.73656 6.64995Z"
+                                    stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                    </div>
+                </template>
+                <template if:false={mobileAddModal}>
+                    <div class="body">
+                        <div class="innerDiv1">
+                            <div class="filterDiv">
+                                <c-marketing-list-filter-cmp class="marketing-list-cmp"
+                                    onvalueselected={handleFilteredContacts} onmodalvaluechange={handlAddModalChange}
+                                    onvaluereset={handleReset}>
+                                </c-marketing-list-filter-cmp>
+                            </div>
+                            <div class="filterWrap" onclick={wrapFilter}>
+                                <svg width="9" height="12" viewBox="0 0 9 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.00001 11.192L0.846008 5.99998L9.00001 0.807983V11.192Z"
+                                        fill="#454545" />
+                                </svg>
+                            </div>
+                        </div>
+                        <template if:false={fieldsModal}>
+                            <div class="innerDiv2">
+                                <template if:true={showList}>
+                                    <template if:false={showSection}>
+                                        <div class="tableDiv" id="tableDiv">
+                                            <table aria-multiselectable="true"
+                                                class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
+                                                role="grid"
+                                                aria-label="Example advanced table of Opportunities in actionable mode">
+                                                <thead>
+                                                    <tr class="slds-line-height_reset fields-names">
+                                                        <th class="slds-text-align_right slds-cell_action-mode colume1"
+                                                            scope="col">
+                                                            <span id="column-group-header"
+                                                                class="slds-assistive-text">Choose a row</span>
+                                                            <div class="header-checkbox-div">
+                                                                <label class="custom-checkbox">
+                                                                    <input type="checkbox" onchange={selectAllCheckbox}
+                                                                        checked={checkAll}>
+                                                                    <span class="checkmark"></span>
+                                                                </label>
+                                                            </div>
+                                                        </th>
+                                                        <th aria-sort="none" data-id="Name" onclick={sortClick}
+                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                            scope="col">
+                                                            <div class="slds-text-link_reset sort-cover" role="button"
+                                                                tabindex="0">
+                                                                <span class="slds-assistive-text">Sort by: </span>
+                                                                <div
+                                                                    class="slds-has-flexi-truncate center-trancate-head">
+                                                                    <span class="slds-truncate" title="Title">Contact
+                                                                        Name</span>
+                                                                    <span
+                                                                        class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                        <svg data-index="Name"
+                                                                            xmlns="http://www.w3.org/2000/svg"
+                                                                            height="52" width="52" viewBox="0 0 520 520"
+                                                                            fill="#fff">
+                                                                            <path
+                                                                                d="M414 210c8-8 8-19 0-27L264 36a20 20 0 0 0-28 0L86 183c-8 8-8 19 0 27l28 27c8 8 20 8 28 0l47-46c8-8 22-2 22 9v270c0 10 9 20 20 20h40c11 0 20-11 20-20V200c0-12 14-17 22-9l47 46c8 8 20 8 28 0z" />
+                                                                        </svg>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </th>
+                                                        <template for:each={fields} for:item="contact"
+                                                            for:index="index">
+                                                            <th key={contact.fieldName} data-id={contact.fieldName}
+                                                                onclick={sortClick} aria-sort="none"
+                                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                                scope="col">
+                                                                <div class="slds-text-link_reset sort-cover"
+                                                                    role="button" tabindex="0">
+                                                                    <span class="slds-assistive-text">Sort by: </span>
+                                                                    <div
+                                                                        class="slds-has-flexi-truncate center-trancate-head">
+                                                                        <span class="slds-truncate"
+                                                                            title="Title">{contact.fieldLabel}</span>
+                                                                        <span
+                                                                            class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                            <svg data-index={contact.fieldName}
+                                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                                height="52" width="52"
+                                                                                viewBox="0 0 520 520" fill="#fff">
+                                                                                <path
+                                                                                    d="M414 210c8-8 8-19 0-27L264 36a20 20 0 0 0-28 0L86 183c-8 8-8 19 0 27l28 27c8 8 20 8 28 0l47-46c8-8 22-2 22 9v270c0 10 9 20 20 20h40c11 0 20-11 20-20V200c0-12 14-17 22-9l47 46c8 8 20 8 28 0z" />
+                                                                            </svg>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        </template>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template for:each={shownProcessedContactData} for:item="contact"
+                                                        for:index="index">
+                                                        <tr key={contact.Id} aria-selected="false" class="table-tr">
+                                                            <td class="slds-text-align_right slds-cell_action-mode checkbox-cell"
+                                                                role="gridcell">
+                                                                <label class="custom-checkbox custom-checkbox-body">
+                                                                    <input data-id={index} type="checkbox"
+                                                                        checked={contact.isChecked}
+                                                                        value={contact.isChecked}
+                                                                        onchange={checkBoxValueChange}>
+                                                                    <span class="checkmark"></span>
+                                                                </label>
+                                                            </td>
+                                                            <th class="slds-cell_action-mode conat_cls" scope="row">
+                                                                <div class="slds-truncate center-trancate-text">
+                                                                    <a data-id={contact.Id} onclick={redirectToRecord}
+                                                                        tabindex="0">{contact.Name}</a>
+                                                                </div>
+                                                            </th>
+                                                            <template for:each={contact.orderedFields} for:item="field"
+                                                                for:index="index2">
+                                                                <td key={field.fieldName} class="slds-cell_action-mode"
+                                                                    role="gridcell">
+                                                                    <div class="slds-truncate center-trancate-text">
+                                                                        {field.value}
+                                                                    </div>
+                                                                </td>
+                                                            </template>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </template>
+                                    <template if:true={showSection}>
+                                        <div class="noresult">
+                                            <div class="noresult-class">
+                                                <p class="tag1">No Result found yet...</p>
+                                                <p class="tag2">We did not find any result for your search</p>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="paginationDiv slds-var-p-around_medium">
+                                        <div class="btnCover">
+                                            <div class="pagination-container">
+                                                <button class="pagination-button" disabled={isFirstPage}
+                                                    onclick={handlePrevious}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                        viewBox="0 0 520 520" fill="#fff">
+                                                        <path
+                                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                                    </svg>
+                                                    Previous
+                                                </button>
+
+                                                <template for:each={pageNumbers} for:item="page">
+                                                    <template if:false={page.isEllipsis}>
+                                                        <button key={page.number} data-id={page.number}
+                                                            class={page.className} onclick={handlePageChange}>
+                                                            {page.number}
+                                                        </button>
+                                                    </template>
+                                                    <template if:true={page.isEllipsis}>
+                                                        <span key={page.number} class="pagination-ellipsis">...</span>
+                                                    </template>
+                                                </template>
+
+                                                <button class="pagination-button" disabled={isLastPage}
+                                                    onclick={handleNext}>
+                                                    Next
+                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                        viewBox="0 0 520 520" fill="#fff">
+                                                        <path
+                                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <templete if:true={showTile}>
+                                    <c-marketing-list-tile-view onvalueselected={handleContactSelect}
+                                        contactsdata={processedContactData} pagesize={pageSize}>
+                                    </c-marketing-list-tile-view>
+                                </templete>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:false={isAccessible}>
+            <div class="restricted-access">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        fill="currentColor" />
+                </svg>
+                <h1>Access Restricted</h1>
+                <p>You don't have permission to access this page. Please contact your administrator for further
+                    assistance.</p>
+            </div>
+        </template>
+    </div>
+    <template if:true={addModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Header -->
+                <div class="slds-modal__close closs_icon_css" onclick={handleClose}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">New Contact</h1>
+                </div>
+                <!-- Modal/Popup Body -->
+                <div class="slds-modal__content slds-p-around_medium custom-modal-content">
+                    <slot>
+                        <lightning-card title="Contact Details" icon-name="standard:contact">
+                            <template if:true={mobileView}>
+                                <lightning-record-form record-id={recordId} object-api-name="Contact" layout-type="Full"
+                                    mode="edit" columns="1" onsubmit={newContactHandle} oncancel={cancelRecordForm}>
+                                </lightning-record-form>
+                            </template>
+                            <template if:false={mobileView}>
+                                <lightning-record-form record-id={recordId} object-api-name="Contact" layout-type="Full"
+                                    mode="edit" columns="2" onsubmit={newContactHandle} oncancel={cancelRecordForm}>
+                                </lightning-record-form>
+                            </template>
+                        </lightning-card>
+                    </slot>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- <c-email-campaign-modal if:true={isModalOpen} onclose={handleModalClose} selected-contacts={selectedContactList}>
+    </c-email-campaign-modal> -->
+
+    <c-send-emails if:true={isModalOpen} onclose={handleModalClose} show-modal={isModalOpen} object-api-name={objectName}
+        selected-contacts={selectedContactList}>
+    </c-send-emails>
+
+    <template if:true={isMassEmailModalOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Header -->
+                <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Send Mass Email</h1>
+                </div>
+
+                <!-- Modal/Popup Body -->
+                <div class="slds-modal__content slds-p-around_medium custom-modal-content">
+                    <template if:true={isFirstScreen}>
+                        <div class="total-records">
+                            Total Contact Selected : {totalSelected}
+                        </div>
+
+                        <div class="dotted-border"></div>
+
+                        <div class="input-box">
+                            <legend class="slds-form-element__legend slds-form-element__label"><span
+                                    class="red">*</span>How do you want to send?</legend>
+                            <lightning-combobox name="sendMethod" value={sendMethod} placeholder="Select a method"
+                                options={messageOptions} onchange={handleSendMethodChange}>
+                            </lightning-combobox>
+                        </div>
+
+                        <div class="input-box">
+                            <legend class="slds-form-element__legend slds-form-element__label"><span
+                                    class="red">*</span>Select Custom Template</legend>
+                            <lightning-combobox name="gmailTemplate" value={selectedTemplate}
+                                placeholder="Select a template" options={getQuickTemplates}
+                                onchange={handleGmailTemplateChange}>
+                            </lightning-combobox>
+                        </div>
+                    </template>
+
+                    <template if:false={isFirstScreen}>
+                        <div class="content-body">
+                            <template if:true={isTemplateBody}>
+                                <div class="template-body-header">
+                                    <h3>Preview</h3>
+                                </div>
+                                <div class="dotted-border"></div>
+                                <div class="scrollable-content">
+                                    <div class="richText"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="footer-btns">
+                        <template if:true={isFirstScreen}>
+                            <button class="save_btn_css" onclick={handleFooterButtonClick}>Next</button>
+                        </template>
+                        <template if:false={isFirstScreen}>
+                            <button class="cancel_btn_css" onclick={handleBack}>Back</button>
+                            <button class="save_btn_css" onclick={handleFooterButtonClick}>Send</button>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+
+    </template>
+
+    <template if:true={showTemplate}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container send-template-modal-container">
+                <div class="slds-modal__close closs_icon_css" onclick={handleCloseTemplate}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{popupHeader}</h1>
+                </div>
+
+                <div class="modal-body">
+                    <div class="custom-modal-body" id="modal-content-id-1">
+                        <template if:true={popUpFirstPage}>
+                            <div class="bcTableDiv tableDiv" id="broadcastTableDiv">
+                                <table aria-multiselectable="true"
+                                    class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
+                                    aria-label="Selected Contacts for Broadcast Group">
+                                    <thead>
+                                        <tr class="slds-line-height_reset fields-names">
+                                            <th class="slds-cell_action-mode colume2" scope="col">
+                                                <div class="slds-text-link_reset" role="button" tabindex="0">
+                                                    <div class="slds-has-flexi-truncate center-trancate-head">
+                                                        <span class="slds-truncate" title="Contact Name">Contact
+                                                            Name</span>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th class="slds-cell_action-mode colume2" scope="col">
+                                                <div class="slds-text-link_reset" role="button" tabindex="0">
+                                                    <div class="slds-has-flexi-truncate center-trancate-head">
+                                                        <span class="slds-truncate" title="Phone">Phone</span>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={selectedContactList} for:item="contact" for:index="index">
+                                            <tr key={contact.Id} aria-selected="false" class="table-tr">
+                                                <th class="slds-cell_action-mode conat_cls" scope="row">
+                                                    <div class="slds-truncate center-trancate-text">
+                                                        <a data-id={contact.Id} onclick={redirectToRecord}
+                                                            tabindex="0">{contact.Name}</a>
+                                                    </div>
+                                                </th>
+                                                <td class="slds-cell_action-mode" role="gridcell">
+                                                    <div class="slds-truncate center-trancate-text">
+                                                        {contact.Phone}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="rightDivBc">
+                                <div class="headerDivBc">
+                                    <h1>Broadcast Group Details</h1>
+                                </div>
+                                <div class="rightDivBc-body">
+                                    <div class="modal-body-content">
+                                        <lightning-input placeholder="Enter Name Here" type="text" label="Name"
+                                            name="name" onchange={handleInputChange} value={broadcastGroupName}
+                                            class="slds-m-bottom_medium" required
+                                            message-when-value-missing="Name is required"></lightning-input>
+                                        <lightning-textarea name="message" label="Description"
+                                            placeholder="Enter Descriptive Message Here" class="slds-m-bottom_medium"
+                                            value={messageText} required
+                                            message-when-value-missing="Description is required"
+                                            onchange={handleInputChange}></lightning-textarea>
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                    <button class="icon-button" onclick={handleNextOnPopup}>Next</button>
+                                </div>
+                            </div>
+                        </template>
+                        <template if:true={popUpSecondPage}>
+                            <div class="secondPage">
+                                <div class="popUpBody slds-p-around--large">
+                                    <div>
+                                        <lightning-combobox name="template" label="Select Template"
+                                            options={templateOptions} onchange={handleInputChange}
+                                            value={selectedTemplate} required
+                                            message-when-value-missing="Template is required"
+                                            class="slds-m-bottom_medium">
+                                        </lightning-combobox>
+                                    </div>
+                                </div>
+                                <div class="popUpFooter slds-text-align--center slds-p-bottom--large">
+                                    <lightning-button variant="brand-outline" onclick={handlePreviousOnPopup}
+                                        label="Previous" class="slds-m-left_x-small"></lightning-button>
+                                    <lightning-button variant="brand" label="Send" onclick={handleSendOnPopup}
+                                        class="slds-m-left_x-small"></lightning-button>
+                                    <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
+                                        class="slds-m-left_x-small"></lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                        <template if:true={popUpLastPage}>
+                            <div class="lastPage">
+                                <div
+                                    class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium">
+                                    <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime}
+                                        onchange={handleInputChange} class="slds-align_absolute-center" required
+                                        message-when-value-missing="Date and time are required"></lightning-input>
+                                </div>
+                                <div class="popUpFooter slds-text-align_center slds-p-bottom_large">
+                                    <lightning-button variant="brand-outline" onclick={handlePreviousLastPage}
+                                        label="Previous" class="slds-m-left_x-small"></lightning-button>
+                                    <lightning-button variant="brand" label="Schedule and Send" onclick={handleSchedule}
+                                        class="slds-m-left_x-small"></lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

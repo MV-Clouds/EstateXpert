@@ -1,0 +1,50 @@
+
+.input-template .slds-input-has-icon_left-right .slds-input, .input-template .slds-input-has-icon_left-right .slds-input_faux, .input-template .slds-input-has-icon_left-right .slds-input_bare, .input-template .slds-input-has-icon_left-right .slds-input--bare, .input-template .slds-input-has-icon--left-right .slds-input, .input-template .slds-input-has-icon--left-right .slds-input_faux, .input-template .slds-input-has-icon--left-right .slds-input_bare, .input-template .slds-input-has-icon--left-right .slds-input--bare{
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.condition-container .condition-container-input .slds-input{
+  height: 34px !important;
+}
+
+.condition-container .condition-container-item .slds-input__icon-group, .condition-container .slds-input__icon-group_right svg{
+  fill: #747474;
+}
+
+.scrollable-container .pairs-cover .slds-combobox__input, .scrollable-container .slds-input_faux , .scrollable-container .fix-slds-input_faux{
+  height: 34px !important;
+  display: flex;
+  align-items: center;
+  border: 1px solid #BFC4D7;
+}
+
+.scrollable-container .pairs-cover .slds-input__icon-group, .scrollable-container .slds-input__icon-group_right svg{
+  fill:#0176D3;
+}
+
+
+.scrollable-container .slds-form-element__label{
+  margin-bottom: 8px !important;
+  font-size: 14px !important;
+}
+
+.condition-container .slds-form-element__label{
+  margin-bottom: 8px !important;
+  font-size: 14px !important;
+}
+
+.condition-container-item .slds-has-error .slds-form-element__help{
+  position: absolute;
+}
+
+.custom-modal .closebtn svg{
+  fill: white;
+}
+
+@media only screen and (max-width: 900px) {
+  .wrapper .slds-input{
+    height:2.1rem;
+  }
+}
+

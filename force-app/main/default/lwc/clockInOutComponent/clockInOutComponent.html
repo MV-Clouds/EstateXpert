@@ -1,0 +1,215 @@
+<template>
+    <div class="timer-container">
+        <div class="timer-header">Timesheet</div>
+        <div class="timer-content">
+            <div class="timer-column">
+
+                <div class="timer-text">
+                    <span>Current Time: </span>
+                    <lightning-formatted-date-time
+                        value={currentTime}
+                        hour="2-digit"
+                        minute="2-digit"
+                        second="2-digit">
+                    </lightning-formatted-date-time>
+                </div>
+
+                <template if:false={isClockOutDisabled}>
+                    <div class="timer-text">Current Task: {taskName}</div>
+                </template>
+            </div>
+            <div class="timer-column">
+                <div class="timer-text">Status: {currentStatus}</div>
+                <div class="timer-text">Elapsed: {elapsedTime}</div>
+            </div>
+        </div>
+        <div class="button-container">
+
+            <template if:true={isClockOutDisabled}>
+                <lightning-input
+                    type="text"
+                    value={taskName}
+                    onchange={handleInputChange}
+                    class="task-name-input"
+                    data-name="taskName"
+                    variant="label-hidden"
+                    placeholder="Enter task name">
+                </lightning-input>
+            </template>
+
+            <lightning-button
+                variant="success"
+                label="Clock In"
+                onclick={handleClockIn}
+                class="timer-button"
+                disabled={isClockInDisabled}>
+            </lightning-button>
+                <template if:true={isResumeButtonVisible}>
+                    <lightning-button
+                        variant="brand"
+                        label="Resume"
+                        onclick={handleResume}
+                        class="timer-button">
+                    </lightning-button>
+                </template>
+                <template if:true={isPauseButtonVisible}>
+                    <lightning-button
+                        variant="neutral"
+                        label="Pause"
+                        onclick={handlePause}
+                        class="timer-button">
+                    </lightning-button>
+                </template>
+
+                <template if:false={isClockOutDisabled}>
+                    <lightning-button
+                        variant="destructive"
+                        label="Clock Out"
+                        onclick={handleClockOut}
+                        class="timer-button">
+                    </lightning-button>
+                </template>
+
+        </div>
+        <div class="manual-entry-toggle">
+            <lightning-button
+                variant="neutral"
+                label="Add Manual Entry"
+                onclick={openModal}>
+            </lightning-button>
+        </div>
+        <template if:true={showModal}>
+            <section role="dialog" tabindex="-1" class="modal" aria-labelledby="modal-heading-01" aria-modal="true">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h2 id="modal-heading-01">Add Manual Entry</h2>
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            variant="bare"
+                            onclick={closeModal}
+                            class="close-button">
+                        </lightning-button-icon>
+                    </div>
+                    <div class="modal-body">
+                        <lightning-input
+                            type="text"
+                            label="Task Name"
+                            value={taskName}
+                            onchange={handleInputChange}
+                            required
+                            class="modal-input"
+                            data-name="taskName">
+                        </lightning-input>
+                        <lightning-textarea
+                            label="Task Description"
+                            value={taskDescription}
+                            onchange={handleInputChange}
+                            class="modal-input"
+                            data-name="taskDescription">
+                        </lightning-textarea>
+                        <lightning-input
+                            type="datetime-local"
+                            label="Clock In Time"
+                            value={manualClockIn}
+                            onchange={handleInputChange}
+                            required
+                            class="modal-input"
+                            data-name="manualClockIn">
+                        </lightning-input>
+                        <lightning-input
+                            type="datetime-local"
+                            label="Clock Out Time"
+                            value={manualClockOut}
+                            onchange={handleInputChange}
+                            class="modal-input"
+                            required
+                            data-name="manualClockOut">
+                        </lightning-input>
+                        <lightning-button
+                            variant="brand"
+                            label="Save"
+                            onclick={saveManualEntry}
+                            class="modal-button">
+                        </lightning-button>
+                    </div>
+                </div>
+            </section>
+        </template>
+        <div class="timesheet-section">
+            <lightning-input
+                type="date"
+                label="Select Date"
+                value={selectedDate}
+                onchange={handleDateChange}
+                class="date-picker">
+            </lightning-input>
+            <template if:true={timesheetEntries.length}>
+                <div class="timesheet-cards">
+                    <template for:each={timesheetEntries} for:item="entry">
+                        <div key={entry.Id} class="timesheet-card">
+                            <div class="card-header">
+                                <span class="card-title">{entry.Name}</span>
+                                <lightning-button-icon
+                                    icon-name="utility:delete"
+                                    variant="bare"
+                                    onclick={handleDelete}
+                                    data-id={entry.Id}
+                                    class="delete-button">
+                                </lightning-button-icon>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-field">
+                                    <span class="field-label">Clock In:</span>
+
+                                    <template if:true={entry.MVEX__Clock_In__c}>
+
+                                        <lightning-formatted-date-time
+                                            value={entry.MVEX__Clock_In__c}
+                                            year="numeric"
+                                            month="2-digit"
+                                            day="2-digit"
+                                            hour="2-digit"
+                                            minute="2-digit">
+                                        </lightning-formatted-date-time>
+                                    </template>
+
+                                    <template if:true={entry.MVEX__Clock_Out__c}>
+                                        <span> - </span>
+                                    </template>
+                                </div>
+                                <div class="card-field">
+                                    <span class="field-label">Clock Out:</span>
+                                    <template if:true={entry.MVEX__Clock_Out__c}>
+                                        <lightning-formatted-date-time
+                                            value={entry.MVEX__Clock_Out__c}
+                                            year="numeric"
+                                            month="2-digit"
+                                            day="2-digit"
+                                            hour="2-digit"
+                                            minute="2-digit">
+                                        </lightning-formatted-date-time>
+                                    </template>
+
+                                    <template if:false={entry.MVEX__Clock_Out__c}>
+                                        <span>-</span>
+                                    </template>
+                                </div>
+                                <!-- <div class="card-field" if:true={entry.Task_Description__c}>
+                                    <span class="field-label">Description:</span>
+                                    <span class="field-value">{entry.Task_Description__c}</span>
+                                </div> -->
+                                <div class="card-field">
+                                    <span class="field-label">Duration:</span>
+                                    <span class="field-value">{entry.formattedDuration}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={timesheetEntries.length}>
+                <div class="no-entries">No entries for selected date</div>
+            </template>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,124 @@
+.integration-error-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.error-content {
+    background: white;
+    padding: 40px;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    max-width: 550px;
+    width: 100%;
+    border-top: 4px solid #ff4d4f;
+    position: relative;
+}
+
+.error-content:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff4d4f, #ff7a45, #ffa940);
+    border-radius: 4px 4px 0 0;
+}
+
+.vector-icon {
+    margin-bottom: 24px;
+    color: #ff4d4f;
+}
+
+.vector-icon svg {
+    width: 80px;
+    height: 80px;
+}
+
+.custom-heading {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #262626;
+}
+
+.custom-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #595959;
+    margin-bottom: 24px;
+}
+
+.custom-text:last-of-type {
+    margin-bottom: 0;
+}
+
+.button-container {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.button {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    min-width: 160px;
+}
+
+.back-button {
+    background-color: #f5f5f5;
+    color: #262626;
+    border: 1px solid #d9d9d9;
+}
+
+.back-button:hover {
+    background-color: #e6e6e6;
+    border-color: #bfbfbf;
+}
+
+.setup-button {
+    background-color: #1890ff;
+    color: white;
+}
+
+.setup-button:hover {
+    background-color: #40a9ff;
+}
+
+@media (max-width: 600px) {
+    .integration-error-container {
+        padding: 16px;
+    }
+    
+    .error-content {
+        padding: 24px;
+    }
+    
+    .vector-icon svg {
+        width: 64px;
+        height: 64px;
+    }
+    
+    .custom-heading {
+        font-size: 1.5rem;
+    }
+    
+    .button-container {
+        flex-direction: column;
+    }
+    
+    .button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,62 @@
+.instagram-post-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #f8f8f8; /* Light background */
+}
+
+.image-upload, .video-upload, .caption {
+    margin-bottom: 15px;
+    width: 100%; /* Make elements full width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image-preview, .video-preview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px; /* Add gap between images/videos */
+}
+
+img, video {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical; /* Allow vertical resizing */
+}
+
+button {
+    padding: 12px 25px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+    font-weight: bold; /* Add bold font weight */
+}
+
+button:hover {
+    background-color: #0069d9;
+}

@@ -1,0 +1,17 @@
+.dropdown-option {
+    position: absolute;
+    top: 107%;
+    left: 0px;
+    right: 0px;
+    z-index: 999;
+    background-color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid rgb(197 196 196);
+}
+
+.check-icon {
+    --slds-c-icon-color-foreground-default: #0363f1;
+}

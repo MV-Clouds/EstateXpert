@@ -1,0 +1,26 @@
+<!--
+* @description:  Error pop component for showing error, success and warning pop up
+* Date: 12/06/2024
+* Created By: Mitrajsinh Gohil
+-->
+<template>
+    <div class="slds-modal__container">
+        <div class="popup">
+            <img src={iconUrl} alt="Error Image" draggable="false" />
+            <h1>{title}</h1>
+            <p>{message}</p>
+            <div if:true={isError} class="code-section code">
+                <div class="copy">v2rF93A5</div>
+                <button class="btn" onclick={copyCode}>Copy Code</button>
+            </div>
+            <div class="footer" if:true={isError}>
+                <button class="btn" onclick={support}>Support</button>
+                <button class="btn" onclick={knowledge}>Knowledge</button>
+            </div>
+            <div class="footer" if:true={isWarning}>
+                <button class="btn" onclick={cancel}>Cancel</button>
+                <button class="btn" onclick={resume}>Continue</button>
+            </div>
+        </div>
+    </div>
+</template>

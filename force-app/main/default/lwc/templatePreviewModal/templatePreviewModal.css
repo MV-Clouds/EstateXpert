@@ -1,0 +1,406 @@
+:host {
+  --pdfWidth: 72rem;
+  --pdfActualPreviewWidth: calc(var(--pdfWidth) - 18.9rem);
+  --ff_Bahnschrift: Bahnschrift, 'Segoe UI', 'Segoe UI Web (West European)', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+  --ff_Montserrat: "Montserrat";
+  --ff_Poppins: Poppins;
+  --timeoutTime: 0s;
+}
+
+.preview_mainDiv {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background: rgb(0 0 0 / 65%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9001;
+
+}
+
+.preview_mainDiv[data-fix-position=true] {
+  position: static;
+  background: none;
+}
+
+.preview_Contanier {
+  height: 85%;
+  width: max-content;
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.preview_Contanier[data-full-width=true] {
+  width: 100% !important;
+}
+
+.preview_SubContanier {
+  width: max-content;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.preview_SubContanier[data-full-width=true] {
+  width: 100% !important;
+}
+
+.preview_leftSection {
+  width: 25rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.titleSection {
+  width: 100%;
+  height: 3.5rem;
+  border-bottom: 1px solid #0176D3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-family: var(--ff_Bahnschrift);
+  letter-spacing: 1px;
+  color: #0176D3;
+}
+
+.optionSection {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.recordSelectionSection {
+  width: 100%;
+}
+
+.buttonSection {
+  width: 100%;
+  height: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.buttonSection.footerBtn {
+  flex-direction: row;
+  border-top: 1px solid rgb(160, 160, 160);
+}
+
+.buttonSection button {
+  width: max-content;
+  min-width: 6rem;
+  height: 2rem;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--ff_Bahnschrift);
+  border-radius: 6px;
+  padding-inline: 1rem;
+  transition: all linear 0.19s;
+  cursor: pointer;
+}
+
+.buttonSection button:hover {
+  filter: saturate(1.5) brightness(0.9);
+}
+
+.buttonSection button:disabled {
+  background: #b1b1b1 !important;
+  cursor: not-allowed;
+}
+
+.generatePreviewBtn {
+  background: #0176D3;
+  color: white;
+}
+
+.generatePreviewBtn svg {
+  width: 18px;
+  height: 18px;
+  fill: white;
+}
+
+.generatePreviewBtn .cls-1 {
+  fill: none;
+}
+
+.exportBtn {
+  background: #0176D3;
+  color: white;
+}
+
+.exportBtn svg {
+  width: 18px;
+  height: 18px;
+  fill: white;
+}
+
+.closeBtn {
+  background: white;
+  color: #0176D3;
+  border: 1px solid #0176D3 !important;
+}
+
+.closeBtn svg {
+  width: 16px;
+  height: 16px;
+  fill: #0176D3;
+}
+
+.preview_rightSection {
+  width: max-content;
+  height: 100%;
+  background: #f2f9ff;
+}
+
+.preview_rightSection[data-full-width=true] {
+  width: 100%;
+}
+
+.iframe_outer {
+  width: min(var(--pdfWidth, 72rem), 60rem);
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.iframe_outer[data-full-width=true] {
+  width: 100% !important;
+}
+
+.preview_iframe {
+  width: 100%;
+  height: 100%;
+  float: right;
+  border: none;
+}
+
+.iframeToolbarSection {
+  visibility: hidden;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 10rem;
+  height: 3.5rem;
+  background: #323639;
+}
+
+.iframeToolbarSection.show {
+  visibility: visible;
+}
+
+.intiImg {
+  width: min(35rem, 70%);
+  filter: drop-shadow(2px 2px 3px #7b7b7b);
+}
+
+.generate_iframe {
+  position: absolute;
+  z-index: -999999;
+  visibility: hidden;
+}
+
+
+/* -------------------- ----------------------- Error Popup Detail CSS ----------------------- --------------------- */
+.errorMessageContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --designCurveColor: #FF000033;
+  --statusIconColor: #FF0000;
+}
+
+.popupContainer {
+  width: 16rem;
+  height: fit-content;
+}
+
+.popupBody {
+  background-color: white;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0px 0px 35px 0px #00000042;
+}
+
+.topDesingSection {
+  width: 100%;
+  min-height: max-content;
+  height: 9rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.curveDesign {
+  position: absolute;
+  top: -100%;
+  left: 0%;
+  transform: translate(-5%, 0%);
+  width: 110%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--designCurveColor);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 2.75rem;
+}
+
+.contentSection {
+  width: 100%;
+  height: 13.5rem;
+  padding: 1rem 1rem 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.ballDesignIcon {
+  width: 4rem;
+  height: 4rem;
+  stroke: var(--statusIconColor);
+}
+
+.toastIcon .ballDesignIcon {
+  width: 24px;
+  height: 24px;
+  stroke: var(--statusIconColor);
+}
+
+.titleDiv {
+  font-size: 21px;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  color: var(--statusIconColor);
+}
+
+.titleDiv h2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.messageDiv {
+  font-size: 14px;
+  text-align: center;
+  color: var(--statusIconColor);
+  opacity: 85%;
+  flex-grow: 1;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.messageDiv p {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+/* -------------------- ----------------------- Error Popup Detail CSS - END - ----------------------- --------------------- */
+
+/* ------------------ ------------------------ Loading State CSS ------------------------- --------------------------- */
+
+.loadingContainer {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  --documerPageHeight: 17rem;
+}
+
+.loadingInfo {
+  width: max-content;
+  max-width: 94%;
+  text-align: center;
+  position: absolute;
+  top: calc(50% + (var(--documerPageHeight)/2) + 2rem);
+  left: 50%;
+  transform: translate(-50%, 0px);
+  font-size: 20px;
+  font-family: var(--ff_Poppins);
+  color: #0176D3;
+  text-transform: capitalize;
+}
+
+.customSetTimeout {
+  width: 0px;
+  height: 0px;
+}
+
+.customSetTimeout.setTimeAnimation {
+  animation: dummyAnimation var(--timeoutTime) linear 0s 1 forwards normal;
+}
+
+@keyframes dummyAnimation {
+  to {
+    width: 0px;
+  }
+}
+
+
+/* ------------------ ------------------------ Loading State CSS ------------------------- --------------------------- */
+@media screen and (max-width: 1440px) {
+  .preview_Contanier {
+    width: 90%;
+  }
+
+  .preview_SubContanier {
+    width: 100%;
+  }
+
+  .preview_leftSection {
+    min-width: 20rem;
+  }
+
+  .preview_rightSection {
+    flex-grow: 1;
+  }
+
+  .preview_rightSection[data-full-width=true] {
+    width: 100%;
+  }
+
+  .iframe_outer {
+    width: 100%;
+  }
+}
+
+.quick_preview_css {
+  flex: 2;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 0px 2px 0px, rgba(60, 64, 67, 0.15) 0px 0px 6px 2px;
+  background-color: white;
+  margin: 2rem;
+  padding: 1rem;
+  font-size: 1rem;
+  transition: margin-left 0.3s ease;
+  overflow: scroll;
+  border-radius: 6px;
+  height: -webkit-fill-available;
+}

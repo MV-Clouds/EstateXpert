@@ -1,0 +1,113 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(60, 60, 60, 0.425);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.upload-wrapper {
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    height: 30rem;
+    width: 35rem;
+    background-color: aliceblue;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: right;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+}
+
+.upload-animation {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    height: 60%;
+}
+
+.instagram-icon {
+    width: 80px;
+    height: 80px;
+    color: #E1306C;
+    margin-bottom: 10px;
+}
+
+.up-arrow {
+    animation: moveArrow 3s linear infinite;
+}
+
+@keyframes moveArrow {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(0, -200px);
+    }
+}
+
+.progress-section {
+    width: 100%;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #0069aa33;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #0069aa;
+    border-radius: 5px;
+}
+
+.progress-text {
+    font-size: 20px;
+    margin-inline: auto;
+    font-weight: 600;
+    opacity: 1;
+    background: linear-gradient(to right, #0069aa 0%, #70c8ff 100%);
+    background-clip: text !important;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #ffffff00;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.upload-wrapper img {
+    max-width: 60%;
+}
+
+.saturationAnimation{
+    animation: saturate 4s cubic-bezier(0.34, 0.05, 0.12, 0.95) infinite 0s forwards;
+}
+@keyframes saturate{
+    0% {
+        filter: grayscale(1) brightness(1.5);
+    }
+    15% {
+        filter: grayscale(0) brightness(1);
+    }
+    50% {
+        filter: grayscale(1) brightness(1.5);
+    }
+    65% {
+        filter: grayscale(0) brightness(1);
+    }
+    100% {
+        filter: grayscale(1) brightness(1.5);
+    }
+}

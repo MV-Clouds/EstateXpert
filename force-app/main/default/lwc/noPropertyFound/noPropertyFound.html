@@ -1,0 +1,38 @@
+<template>
+    <template if:true={showError}>
+        <div class="no-property-container">
+            <div class="content-wrapper">
+                <!-- Header Section -->
+                <div class="header-section">
+                    <svg class="house-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M32 8L8 28H12V44H24V36H40V44H52V28H56L32 8Z" fill="#0176D3"/>
+                        <path d="M28 44H36V40H28V44Z" fill="#FFFFFF"/>
+                        <circle cx="32" cy="28" r="4" fill="#FFD700"/>
+                    </svg>
+                    <h1 class="main-title">No Properties Found</h1>
+                    <p class="subtitle">{errorMessage}</p>
+                </div>
+
+                <!-- Illustration Section -->
+                <div class="illustration-section">
+                    <svg class="real-estate-scene" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Background Sky -->
+                        <rect width="400" height="120" fill="#E6F3FA"/>
+                        <!-- Sun -->
+                        <circle cx="350" cy="30" r="20" fill="#FFD700"/>
+                        <!-- House -->
+                        <path d="M150 80L120 110V170H180V110L150 80Z" fill="#0176D3"/>
+                        <rect x="140" y="120" width="20" height="20" fill="#FFFFFF"/>
+                        <rect x="165" y="120" width="15" height="30" fill="#FFFFFF"/>
+                        <!-- Tree -->
+                        <rect x="200" y="140" width="10" height="30" fill="#8B4513"/>
+                        <circle cx="205" cy="130" r="15" fill="#228B22"/>
+                        <!-- Ground -->
+                        <rect y="170" width="400" height="30" fill="#D1DCE5"/>
+                        <!-- Cloud -->
+                        <path d="M80 60C80 60 70 50 60 60C50 70 40 60 40 60C40 60 30 70 20 60C10 50 0 60 0 60H80Z" fill="#FFFFFF"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </template>

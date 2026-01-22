@@ -1,0 +1,67 @@
+<template>
+    <div class="main-container">
+        <!-- <div class="heading">
+            <div>
+                <p class="name">Preview Flow</p>
+                <p class="subtitle">{flowname}</p>
+            </div>
+            <div>
+                <lightning-button 
+                  variant="neutral"
+                  label="Documentation"
+                  onclick={handleDocumentClick} 
+                ></lightning-button>
+            </div>
+        </div> -->
+
+        <div class="preview-main">
+            <div class="menu-bar slds-grid slds-align_absolute-center slds-p-around_small">
+                <!-- Left side - Preview label -->
+                <div class="slds-m-right_medium">
+                    <p class="menu-heading">Preview</p>
+                </div>
+
+                <!-- Refresh Icon Button -->
+                <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh"
+                    onclick={handleRefreshAll} class="slds-m-right_small"></lightning-button-icon>
+
+                <!-- DETAILS Dropdown -->
+                <lightning-combobox value={detailsValue} options={detailsOptions} variant="label-hidden"
+                    onchange={handleDetailsChange} class="slds-m-right_small currentPreview"></lightning-combobox>
+
+                <!-- Settings Icon Dropdown -->
+                <lightning-button-menu icon-name="utility:settings" alternative-text="Settings" menu-alignment="right"
+                    variant="border-filled" class="slds-m-right_small" onselect={handleSettingsMenuSelect}>
+                    <lightning-menu-item value="light" label="Light"></lightning-menu-item>
+                    <lightning-menu-item value="dark" label="Dark"></lightning-menu-item>
+                </lightning-button-menu>
+            </div>
+            <div class={previewContainerClass}>
+                <div class="phone-frame">
+                    <div class="header">
+                        <lightning-icon icon-name="utility:store" alternative-text="Store" size="medium"
+                            class="store-icon"></lightning-icon>
+                        <div class="header-bar"></div>
+                    </div>
+                    <div class="chat-window">
+                        <div class="message user-message"></div>
+                        <div class="message system-message">
+                            <div class="message-bubble">
+                                <div class="msg-line short"></div>
+                                <div class="msg-line shorter"></div>
+                                <button class="preview-btn" onclick={handlePreviewFlow}>Preview Flow</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-bar"></div>
+                    <template if:true={showPreview}>
+                        <div class={previewClass}>
+                            <c-whatsapp-flow-previewer jsondata={jsonstringdata} selectedtheme={theme}
+                                currentscreenid={detailsValue} onclosepreview={handleClose}></c-whatsapp-flow-previewer>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

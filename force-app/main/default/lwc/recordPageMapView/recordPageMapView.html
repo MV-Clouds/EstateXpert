@@ -1,0 +1,21 @@
+<template>
+    <div class="wrapper">
+        <div class="mapCmp">
+            <lightning-map
+                class="map-class"
+                map-markers={mapMarkers}
+                list-view="hide"
+                zoom-level="12"
+            ></lightning-map>
+        </div>
+    
+        <template if:true={isLoading}>
+            <lightning-spinner 
+              alternative-text="Loading" 
+              size="small"
+              variant="brand"
+            ></lightning-spinner>
+        </template>
+    </div>
+
+</template>

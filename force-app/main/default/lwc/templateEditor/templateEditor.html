@@ -1,0 +1,528 @@
+<template>
+  <div class="templateBuilder_Maindiv" lwc:ref="mainDiv" data-name="mainDiv" style={loadStyle}>
+    <div class="contentSection">
+      <div class="editorSection">
+        <div class="tabSection">
+          <div class="tabSection_sub">
+            <button class="homeBtn" title="Home" onclick={handleCloseEdit}>
+              <svg viewBox="0 0 24 24">
+                <g stroke-width="0"></g>
+                <g stroke-linecap="round" stroke-linejoin="round"></g>
+                <g>
+                  <path
+                    d="M21.71,11.29l-9-9a1,1,0,0,0-1.42,0l-9,9a1,1,0,0,0,1.42,1.42l.29-.3V20.3A1.77,1.77,0,0,0,5.83,22H8.5a1,1,0,0,0,1-1V16.1a1,1,0,0,1,1-1h3a1,1,0,0,1,1,1V21a1,1,0,0,0,1,1h2.67A1.77,1.77,0,0,0,20,20.3V12.41l.29.3a1,1,0,0,0,1.42,0A1,1,0,0,0,21.71,11.29Z">
+                  </path>
+                </g>
+              </svg>
+            </button>
+            <div class="tab" data-name="contentTab" onclick={activeTab}>
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M1 2V5H3V4H5V9H3.5V11H8.5V9H7V4H9V5H11V2H1ZM21 3H14V5H20V19H4V14H2V20C2 20.5523 2.44772 21 3 21H21C21.5523 21 22 20.5523 22 20V4C22 3.44772 21.5523 3 21 3Z">
+                </path>
+              </svg>
+              <div>Template Content</div>
+            </div>
+            <div class="tab" data-name="headerTab" onclick={activeTab}>
+              <svg viewBox="0 0 92.344 92.344">
+                <g stroke-width="0"></g>
+                <g stroke-linecap="round" stroke-linejoin="round"></g>
+                <g>
+                  <g>
+                    <g>
+                      <path d="M9.932,0v92.344h72.48V0H9.932z M75.645,85.577H16.699V6.768h58.946V85.577L75.645,85.577z">
+                      </path>
+                      <rect x="24.178" y="13.818" width="43.988" height="12.707"></rect>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+              <div>Header</div>
+            </div>
+            <div class="tab" data-name="footerTab" onclick={activeTab}>
+              <svg viewBox="0 0 92.344 92.344">
+                <g stroke-width="0"></g>
+                <g stroke-linecap="round" stroke-linejoin="round"></g>
+                <g>
+                  <g>
+                    <g>
+                      <path d="M9.932,0v92.344h72.48V0H9.932z M75.645,85.577H16.699V6.768h58.946V85.577L75.645,85.577z">
+                      </path>
+                      <rect x="24.178" y="65.818" width="43.988" height="12.707"></rect>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+              <div>Footer</div>
+            </div>
+            <div class="tab" data-name="basicTab" onclick={activeTab}>
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M20 22H4C3.44772 22 3 21.5523 3 21V3C3 2.44772 3.44772 2 4 2H20C20.5523 2 21 2.44772 21 3V21C21 21.5523 20.5523 22 20 22ZM19 20V4H5V20H19ZM7 6H11V10H7V6ZM7 12H17V14H7V12ZM7 16H17V18H7V16ZM13 7H17V9H13V7Z">
+                </path>
+              </svg>
+              <div>Basic Details</div>
+            </div>
+            <div class="templateName" onclick={activeTab} data-name="basicTab" title="Edit Template Detail">
+              <div class="recordSVG">
+                <svg viewBox="0 0 1024 1024">
+                  <g stroke-width="0"></g>
+                  <g stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g>
+                    <path
+                      d="M714 762.2h-98.2c-16.6 0-30 13.4-30 30s13.4 30 30 30H714c16.6 0 30-13.4 30-30s-13.4-30-30-30zM487.4 762.2H147.1c-16.6 0-30 13.4-30 30s13.4 30 30 30h340.3c16.6 0 30-13.4 30-30s-13.4-30-30-30z"
+                      fill="#33CC99"></path>
+                    <path d="M838.253 130.023l65.548 65.548-57.982 57.983-65.549-65.549z" fill="#6be6ff"></path>
+                    <path
+                      d="M743.7 955.9H195.8c-53.7 0-97.4-43.7-97.4-97.4V174.8c0-53.7 43.7-97.4 97.4-97.4H615c16.6 0 30 13.4 30 30s-13.4 30-30 30H195.8c-20.6 0-37.4 16.8-37.4 37.4v683.7c0 20.6 16.8 37.4 37.4 37.4h547.9c20.6 0 37.4-16.8 37.4-37.4v-395c0-16.6 13.4-30 30-30s30 13.4 30 30v395.1c0 53.6-43.7 97.3-97.4 97.3z"
+                      fill="#000000"></path>
+                    <path
+                      d="M907.7 122.1l-39.2-39.2c-24-24-65.1-21.9-91.7 4.7L419.5 445 347 643.6l198.6-72.4L903 213.8c12.1-12.1 19.6-27.7 21.1-44 1.8-18.1-4.3-35.5-16.4-47.7zM512.6 519.3L447.5 543l23.7-65.1 264.7-264.7 40.9 41.7-264.2 264.4z m348-347.9l-41.3 41.3-40.9-41.7 40.9-40.9c3.1-3.1 6.2-3.9 7.6-3.9l37.6 37.6c-0.1 1.3-0.9 4.5-3.9 7.6z">
+                    </path>
+                  </g>
+                </svg>
+              </div>
+              <div class="templateNameText">
+                {templateRecord.MVEX__Template_Name__c}
+              </div>
+            </div>
+            <div class="activeTabBar"></div>
+          </div>
+        </div>
+        <!-- === ==== ==== Main Editing Tab Section - Start - === ==== ==== -->
+        <div class="editingSection">
+          <!-- === ==== ==== ## Content Editor Tab Section === ==== ==== -->
+          <div class="tabArea" data-section="contentTab" data-key-mapping="true" data-toolbar="true">
+            <div data-name="templateContent"></div>
+          </div>
+          <!-- === ==== ==== ## Header Editor - === ==== ==== -->
+          <div class="headerSection tabArea deactiveTabs" data-section="headerTab" data-key-mapping="true"
+            data-toolbar="true">
+            <div data-name="headerEditor"></div>
+            <div class="footerConfigSection">
+              <div class="headerConfig_sub">
+                <div class="headerConfigTitle">Header</div>
+                <div class="headerConfigOptions">
+                  <lightning-input class="showHeaderToggle" type="toggle" label="Show Header" data-config="header"
+                    data-name="show" onchange={managePageConfigs} checked={pageConfigs.header.show}
+                    message-toggle-active="" message-toggle-inactive="" disabled={isForEmail}></lightning-input>
+                  <div class="marginInputContainer">Header From Top :
+                    <input class="pageMarginInput" step={inputStep} type="number" data-config="header"
+                      onkeyup={managePageConfigs} value={pageConfigs.header.marginTop} data-name="marginTop"
+                      onfocus={selectAllOnFocus} />
+                    <p class="pageConfigUnitText">{pageConfigs.unit}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- === ==== ====  ## Footer Editor === ==== ==== -->
+          <div class="footerSection tabArea deactiveTabs" data-section="footerTab" data-key-mapping="true"
+            data-toolbar="true">
+            <div data-name="footerEditor"></div>
+            <div class="headerConfigSection">
+              <div class="footerConfig_sub">
+                <div class="footerConfigTitle">Footer</div>
+                <div class="footerConfigOptions">
+                  <lightning-input class="showFooterToggle" type="toggle" label="Show Footer" data-config="footer"
+                    data-name="show" onchange={managePageConfigs} checked={pageConfigs.footer.show}
+                    message-toggle-active="" message-toggle-inactive="" disabled={isForEmail}></lightning-input>
+                  <div class="marginInputContainer">Footer From Bottom :
+                    <input class="pageMarginInput" step={inputStep} type="number" data-config="footer"
+                      onkeyup={managePageConfigs} value={pageConfigs.footer.marginBottom} data-name="marginBottom"
+                      onfocus={selectAllOnFocus} />
+                    <p class="pageConfigUnitText">{pageConfigs.unit}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- #fieldMapping... -->
+          <c-key-mapping-container class="keyMappingContainer desicionContainer" object-name={objectName}
+            template-id={templateId} save-button-label="Save" preview-button-label="Save &#38; Preview"
+            cancel-button-label="Close" template-type={templateType} onsave={saveTemplateData}
+            onpreview={handleSaveNPreview} onclose={handleCloseEdit} onfullheight={toggleMappingContainerHeight}
+            ontogglemapping={showHideMappingContainer} onopengenchildtable={openGenChildTablePopup} onfieldlistready={handleFieldListReady} onmappingkeysready={handleMappingKeysReady}>
+          </c-key-mapping-container>
+          <!-- === ==== ==== ## Basic Detail Edit Tab Section === ==== ==== -->
+          <div class="basicDetailSetion tabArea deactiveTabs" data-section="basicTab" data-key-mapping="false"
+            data-toolbar="false">
+            <div class="desicionContainer updateDetailContainer">
+              <div class="basicDetails">
+                <div class="basicDetails_sub">
+                  <!-- === ==== ## Basic Detail Section  === ==== -->
+                  <div class="templateDetails">
+                    <div class="detailHeader">Template Basic Detail</div>
+                    <div class="detailEditSection">
+                      <template lwc:if={showTempDetail}>
+                        <div class="editName editField">
+                          <div class="floatingLabel"><abbr title="required"
+                              class="slds-required asterisk">*</abbr>Template Name</div>
+                          <lightning-input type="text" pattern="\S(.*\S)?"
+                            message-when-pattern-mismatch="Complete this field." maxlength="255" required="true"
+                            variant="label-hidden" class="fieldInput" value={templateRecord.MVEX__Template_Name__c}
+                            data-name="MVEX__Template_Name__c" onkeyup={handleEditDetail}></lightning-input>
+                        </div>
+                        <div class="editDescription editField">
+                          <div class="floatingLabel">Description</div>
+                          <lightning-textarea class="descriptionInput" value={templateRecord.MVEX__Description__c}
+                            variant="label-hidden" data-name="MVEX__Description__c"
+                            onkeyup={handleEditDetail} maxlength="255"></lightning-textarea>
+                        </div>
+                        <div class="editStatus">
+                          <span class="statusLabel">Status: </span>
+                          <div class="tempToggle">
+                            <input class="checkBox" type="checkbox" id={templateRecord.Id}
+                              data-name="MVEX__Template_Status__c" onchange={handleEditDetail} style="display: none;"
+                              checked={templateRecord.MVEX__Template_Status__c} />
+                            <label for={templateRecord.Id}>
+                              <div class="toggleDiv">
+                                <div class="toggleBtnBg">
+                                  <div class="StatusText">
+                                    <span>Inactive</span>
+                                    <span>Active</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                        <div class="previewTwise">
+                          <div class="previewField">
+                            <div class="previewLabel">Source Object</div>
+                            <lightning-input type="text" class="nonEditInput"
+                              value={templateRecord.MVEX__Object_API_Name__c} variant="label-hidden"
+                              disabled="true"></lightning-input>
+                          </div>
+                          <div class="previewField">
+                            <div class="previewLabel">Template Type</div>
+                            <lightning-input type="text" class="nonEditInput"
+                              value={templateRecord.MVEX__Template_pattern__c} variant="label-hidden"
+                              disabled="true"></lightning-input>
+                          </div>
+                        </div>
+                        <div class="previewTwise">
+                          <div class="previewField ">
+                            <div class="previewLabel">Create Date and Time</div>
+                            <lightning-input type="datetime" class="nonEditInput" value={templateRecord.CreatedDate}
+                              variant="label-hidden" disabled="true"></lightning-input>
+                          </div>
+                          <div class="previewField">
+                            <div class="previewLabel">Last Modified Date and Time</div>
+                            <lightning-input type="datetime" class="nonEditInput"
+                              value={templateRecord.LastModifiedDate} variant="label-hidden"
+                              disabled="true"></lightning-input>
+                          </div>
+                        </div>
+                        <div class="previewTwise">
+                          <div class="previewField ">
+                            <div class="previewLabel">Create By</div>
+                            <lightning-input type="text" class="nonEditInput" value={templateRecord.CreatedBy.Name}
+                              variant="label-hidden" disabled="true"></lightning-input>
+                          </div>
+                          <div class="previewField">
+                            <div class="previewLabel">Last Modified By</div>
+                            <lightning-input type="text" class="nonEditInput" value={templateRecord.LastModifiedBy.Name}
+                              variant="label-hidden" disabled="true"></lightning-input>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  <div class="vertical-line"></div>
+                  <!-- === ==== ## Page Configuration Section  === ==== -->
+                  <div class="pageConfigs">
+                    <div class="pageConfigTitle">Page Configurations</div>
+                    <div class="pageConfig_sub">
+                      <div class="pageConfigOptions">
+                        <lightning-accordion allow-multiple-sections-open active-section-name={activePageConfigs}>
+                          <lightning-accordion-section name="pageMarginConfig" label="Page Margin">
+                            <div class="pageConfigSections">
+                              <!-- <div class="pageOptiontitle">Page Margin</div> -->
+                              <div class="pageMarginConfig configOpt">
+                                <div class="optionInputs">
+                                  <template for:each={pageConfigs.pageMargins} for:item="margin">
+                                    <div class="marginInputContainer" key={margin.name}>{margin.name} :
+                                      <input class="pageMarginInput" step={inputStep} type="number"
+                                        data-config="pageMargins" onchange={managePageConfigs}
+                                        onfocus={selectAllOnFocus} value={margin.value} data-name={margin.name} />
+                                    </div>
+                                  </template>
+                                  <div class="marginInputContainer">Unit :
+                                    <select class="marginUnitOption" data-config="unitOptions"
+                                      onchange={managePageConfigs}>
+                                      <template for:each={pageConfigs.unitOptions} for:item="option">
+                                        <option value={option.value} selected={option.selected} key={option.name}>
+                                          {option.name}</option>
+                                      </template>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </lightning-accordion-section>
+                          <lightning-accordion-section name="pageSizeConfig" label="Page Size">
+                            <div class="pageConfigSections">
+                              <!-- <div class="pageOptiontitle">Page Size</div> -->
+                              <div class="pageSizeConfig">
+                                <div class="optionInputs pageSizeInout">
+                                  <template for:each={pageConfigs.pageSize} for:item="pageSize">
+                                    <div class="sizeInputContainer" key={pageSize.value}>
+                                      <input type="radio" id={pageSize.value} style="display : none;"
+                                        checked={pageSize.selected} data-config="pageSize" value={pageSize.value}
+                                        data-name={pageSize.name} onchange={managePageConfigs} />
+                                      <label for={pageSize.value}>
+                                        <div class="sizeInputLable">{pageSize.name}<span class="subLabel">
+                                            ({pageSize.size})</span></div>
+                                      </label>
+                                    </div>
+                                  </template>
+                                </div>
+                              </div>
+                            </div>
+                          </lightning-accordion-section>
+                          <lightning-accordion-section name="pageOrientationConfig" label="Page Orientation">
+                            <div class="pageConfigSections">
+                              <!-- <div class="pageOptiontitle oriTitle">Page Orientation</div> -->
+                              <div class="pageOrientationConfig">
+                                <div class="optionInputs pageOriInputs">
+                                  <template for:each={pageConfigs.pageOrientation} for:item="pageOri">
+                                    <div class="oriInputContainer" key={pageOri.value}>
+                                      <input type="radio" id={pageOri.value} checked={pageOri.selected}
+                                        style="display : none;" data-config="pageOrientation" value={pageOri.value}
+                                        data-oriantation={pageOri.value} data-name={pageOri.name}
+                                        onchange={managePageConfigs} />
+                                      <label for={pageOri.value}>
+                                        <div class="sizeInputLable">{pageOri.name}</div>
+                                      </label>
+                                    </div>
+                                  </template>
+                                </div>
+                              </div>
+                            </div>
+                          </lightning-accordion-section>
+                          <lightning-accordion-section name="pageHeaderConfig" label="Page Header">
+                            <div class="pageConfigSections">
+                              <lightning-input class="showHeaderToggle" type="toggle" label="Show Header"
+                                data-config="header" data-name="show" onchange={managePageConfigs}
+                                checked={pageConfigs.header.show} message-toggle-active="" message-toggle-inactive=""
+                                disabled={isForEmail}></lightning-input>
+                              <div class="marginInputContainer">Header From Top :
+                                <input class="pageMarginInput" step={inputStep} type="number" data-config="header"
+                                  onkeyup={managePageConfigs} value={pageConfigs.header.marginTop} data-name="marginTop"
+                                  onfocus={selectAllOnFocus} />
+                                <p class="pageConfigUnitText">{pageConfigs.unit}</p>
+                              </div>
+                            </div>
+                          </lightning-accordion-section>
+                          <lightning-accordion-section class="lastAccordion" name="pageFooterConfig"
+                            label="Page Footer">
+                            <div class="pageConfigSections">
+                              <lightning-input class="showFooterToggle" type="toggle" label="Show Footer"
+                                data-config="footer" data-name="show" onchange={managePageConfigs}
+                                checked={pageConfigs.footer.show} message-toggle-active="" message-toggle-inactive=""
+                                disabled={isForEmail}></lightning-input>
+                              <div class="marginInputContainer">Footer From Bottom :
+                                <input class="pageMarginInput" step={inputStep} type="number" data-config="footer"
+                                  onkeyup={managePageConfigs} value={pageConfigs.footer.marginBottom}
+                                  data-name="marginBottom" onfocus={selectAllOnFocus} />
+                                <p class="pageConfigUnitText">{pageConfigs.unit}</p>
+                              </div>
+                            </div>
+                          </lightning-accordion-section>
+                        </lightning-accordion>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="buttonSection">
+                <button class="footerBtn" title="Cancel" onclick={handleCloseEdit}>
+                  <svg viewBox="0 0 520 520">
+                    <g>
+                      <path
+                        d="M310 254l130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 01-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0114 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 010-14z">
+                      </path>
+                    </g>
+                  </svg>
+                  Close
+                </button>
+                <button class="footerBtn" title="Cancel" onclick={cancelEditTemplate}>
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M5.82843 6.99955L8.36396 9.53509L6.94975 10.9493L2 5.99955L6.94975 1.0498L8.36396 2.46402L5.82843 4.99955H13C17.4183 4.99955 21 8.58127 21 12.9996C21 17.4178 17.4183 20.9996 13 20.9996H4V18.9996H13C16.3137 18.9996 19 16.3133 19 12.9996C19 9.68584 16.3137 6.99955 13 6.99955H5.82843Z">
+                    </path>
+                  </svg>
+                  Cancel
+                </button>
+                <button class="footerBtn" title="Save" onclick={saveTemplateData} disabled={isSaveDisable}>
+                  <svg viewBox="0 0 520 520">
+                    <g>
+                      <path
+                        d="M371 40v136c0 10-8 19-19 19H139c-10 0-19-8-19-19V40H80a40 40 0 00-40 40v360a40 40 0 0040 40h360a40 40 0 0040-40V112l-72-72zm70 381c0 10-8 19-19 19H99c-10 0-19-8-19-19V254c0-10 8-19 19-19h323c10 0 19 8 19 19zM248 136c0 10 8 19 19 19h46c10 0 19-8 19-19V40h-83z">
+                      </path>
+                    </g>
+                  </svg>
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- === AI Generate Tab === -->
+          <!-- <div class="tabArea deactiveTabs" data-section="aiGenerateTab" data-key-mapping="false" data-toolbar="false">
+            <div class="aiGenerateContainer">
+              <div class="aiPromptSection">
+
+                <textarea name="comment" class="aiPromptTextarea" placeholder="Write a modern, clean invoice template for Account and OpportunityLineItem with company logo placeholder..." onchange={handleAIPromptChange}></textarea>
+                <div class="aiActions">
+                  <lightning-button 
+                    label="Generate with Gemini" 
+                    class="aiGenerateBtn"
+                    variant="brand" 
+                    onclick={generateWithGemini}
+                    disabled={isGenerating}>
+                  </lightning-button>
+                  <lightning-spinner if:true={isGenerating} size="small"></lightning-spinner>
+                </div>
+              </div>
+            </div>
+          </div> -->
+       
+        </div>
+        <!-- === ==== ==== Main Editing Section - END - === ==== ==== -->
+      </div>
+    </div>
+
+    <!-- === AI CHAT PANEL === -->
+    <div class={chatContainerClass}>
+      <!-- Floating Toggle Button -->
+      <button class="ai-chat-toggle-btn" onclick={toggleChat} title="AI Template Assistant">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" >
+          <path d="M12 2L2 12H5V22H19V12H22L12 2Z"/>
+          <circle cx="12" cy="12" r="3" fill="white"/>
+        </svg>
+        <span class="ai-badge">AI</span>
+      </button>
+
+      <!-- Chat Panel -->
+    <div class="ai-chat-panel">
+       
+
+        <div class="ai-chat-header">
+            <div class="ai-header-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="24" height="24">
+                    <path d="M12 2L2 12H5V22H19V12H22L12 2Z"/>
+                    <circle cx="12" cy="12" r="3" fill="white"/>
+                </svg>
+                AI Template Assistant
+            </div>
+            <button class="ai-close-btn" onclick={toggleChat}>X</button>
+        </div>
+
+        <div class="ai-chat-mode-toggle">
+          <button class="mode-btn active" data-mode="new" onclick={handleModeToggle}>New Generate</button>
+          <button class="mode-btn" data-mode="edit" onclick={handleModeToggle}>Edit Existing</button>
+        </div>
+
+        <!-- CHAT MESSAGES -->
+        <div class="ai-chat-messages" onscroll={handleChatScroll}>
+          <template for:each={chatMessages} for:item="msg">
+            <div key={msg.id} class="ai-message" data-ai={msg.isUser} class:ai-user={msg.isUser} class:ai-history={msg.isHistory}>
+              <div class="ai-avatar">
+                <template lwc:if={msg.isUser}>
+                  <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </template>
+                <template lwc:else>
+                  <svg viewBox="0 0 24 24"><path d="M12 2L2 12H5V22H19V12H22L12 2Z"/><circle cx="12" cy="12" r="3" fill="white"/></svg>
+                </template>
+              </div>
+
+              <div class="ai-bubble">
+                <!-- HISTORY HEADER -->
+                <div if:true={msg.isHistory} class="ai-history-header">
+                  <span class="ai-history-time">{msg.timestamp}</span>
+                  <button class="ai-restore-btn" data-id={msg.id} title="Restore this version">
+                    <svg viewBox="0 0 24 24" width="14" height="14"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.26 19.71 10.06 21 12 21a9 9 0 0 0 0-18z"/></svg>
+                    Restore
+                  </button>
+                </div>
+
+                <!-- MESSAGE TEXT – manual DOM -->
+                <div lwc:dom="manual" data-msg-id={msg.id}></div>
+              </div>
+            </div>
+          </template>
+
+          <div if:false={chatMessages.length} class="ai-chat-empty">
+            Start by generating or editing your template.
+          </div>
+        </div>
+
+        <div class="ai-chat-input">
+            <textarea
+                placeholder={placeholderText}
+                rows="1"
+                value={aiPrompt}
+                oninput={handleAIPromptChange}
+                onkeydown={handleKeyDown}
+                disabled={isGenerating}>
+            </textarea>
+            <button onclick={sendPrompt} disabled={isSendButtonDisabled}>
+                <template lwc:if={isGenerating}>
+                    <lightning-spinner size="small" variant="brand"></lightning-spinner>
+                </template>
+                <template lwc:else>
+                    <svg viewBox="0 0 24 24" fill="white">
+                        <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z"/>
+                    </svg>
+                </template>
+            </button>
+        </div>
+    </div>
+    </div>
+    <!-- === ==== ==== ### Page Configuration Popover === ==== ==== -->
+    <div class="pageConfigPopover close" onclick={togglePageConfigPopover}>
+      <div class="pageConfigPopover_sub" onclick={eventStopPropagation}>
+        <div class="pageConfigDiv"></div>
+        <div class="pageConfigPopover_footer">
+          <button class="footerBtn" title="Cancel" onclick={cancelPageConfig}>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M5.82843 6.99955L8.36396 9.53509L6.94975 10.9493L2 5.99955L6.94975 1.0498L8.36396 2.46402L5.82843 4.99955H13C17.4183 4.99955 21 8.58127 21 12.9996C21 17.4178 17.4183 20.9996 13 20.9996H4V18.9996H13C16.3137 18.9996 19 16.3133 19 12.9996C19 9.68584 16.3137 6.99955 13 6.99955H5.82843Z">
+              </path>
+            </svg>
+            Cancel
+          </button>
+          <button class="footerBtn done" title="Done" onclick={togglePageConfigPopover}>
+            <svg viewBox="0 0 24 24" fill="none">
+              <g stroke-width="0"></g>
+              <g stroke-linecap="round" stroke-linejoin="round"></g>
+              <g>
+                <path d="M5 14L9 17L18 6" stroke="#ffffff" stroke-width="2"></path>
+              </g>
+            </svg>
+            <!-- <svg viewBox="0 0 520 520" ><g><path d="M310 254l130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 01-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0114 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 010-14z"></path></g></svg> -->
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div data-name="custom_timeout"></div>
+
+  <template lwc:if={isPreview}>
+    <c-template-preview-modal templateid={templateRecord.Id} objectname={templateRecord.MVEX__Object_API_Name__c}
+      template-type={templateRecord.MVEX__Template_pattern__c} is-active={templateRecord.MVEX__Template_Status__c}
+      onclosemodal={closeTemplatePreview}>
+    </c-template-preview-modal>
+  </template>
+
+  <c-message-popup onconfirmation={handleMsgPopConfirmation}></c-message-popup>
+
+  <template if:true={isSpinner}>
+    <c-spinner-component></c-spinner-component>
+  </template>
+
+
+</template>

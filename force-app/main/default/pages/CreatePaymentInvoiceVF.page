@@ -1,0 +1,279 @@
+<apex:page controller="InvoiceVFController" renderAs="{!IF(isRenderAsPDF, 'pdf', null)}" applyHtmlTag="false" applyBodyTag="false" showHeader="false" sidebar="false">
+    <html>
+        <head>
+            <style>
+                @page {
+                    size: A4 portrait;
+                    margin: 10mm;
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: white;
+                    color: black;
+                }
+                .invoice-container {
+                    width: 85%;
+                    min-height: 230mm;
+                    padding: 10mm;
+                    box-sizing: border-box;
+                    background-color: #ffffff;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 5px;
+                    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                    margin: 0 auto;
+                }
+                .invoice-header {
+                    display: table;
+                    width: 100%;
+                    margin-bottom: 15mm;
+                    padding-bottom: 5mm;
+                    border-bottom: 2px solid #1a73e8;
+                }
+                .invoice-header .logo-section {
+                    display: table-cell;
+                    vertical-align: middle;
+                    width: 33%;
+                }
+                .invoice-header .logo-img {
+                    max-height: 30px; /* Adjust height as needed */
+                    width: 150px;
+                    display: block;
+                }
+                .invoice-header .title-section {
+                    display: table-cell;
+                    vertical-align: middle;
+                    text-align: center;
+                    width: 33%;
+                }
+                .invoice-header .title {
+                    font-size: 1rem;
+                    font-weight: bold;
+                    color: #333333;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    display: flex;
+                    justify-content: end;
+                }
+                .invoice-header .company-details {
+                    display: table-cell;
+                    vertical-align: middle;
+                    text-align: right;
+                    width: 33%;
+                    font-size: 9pt;
+                    color: #666666;
+                }
+                .section-title {
+                    font-size: 12pt;
+                    font-weight: bold;
+                    color: #1a73e8;
+                    margin-bottom: 5mm;
+                    border-left: 4px solid #1a73e8;
+                    padding-left: 5mm;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 15mm;
+                    font-size: 9pt;
+                }
+                th, td {
+                    border: 1px solid #e0e0e0;
+                    padding: 3mm;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f5f7fa;
+                    font-weight: bold;
+                    color: #333333;
+                }
+                td {
+                    background-color: #ffffff;
+                }
+                tr:nth-child(even) td {
+                    background-color: #fafafa;
+                }
+                .highlight-row td {
+                    font-weight: bold;
+                    background-color: #e8f0fe;
+                    color: #1a73e8;
+                }
+                .property-details, .payment-details, .payment-milestone {
+                    margin-bottom: 15mm;
+                }
+                .footer-note {
+                    font-size: 8pt;
+                    color: #666666;
+                    margin-top: 10mm;
+                    border-top: 1px dashed #e0e0e0;
+                    padding-top: 5mm;
+                }
+                .date {
+                    font-size: 9pt;
+                    text-align: right;
+                    color: #666666;
+                    margin-top: 10mm;
+                }
+                .error-message {
+                    color: #d32f2f;
+                    font-size: 10pt;
+                    text-align: center;
+                    padding: 5mm;
+                    border: 1px solid #d32f2f;
+                    border-radius: 3px;
+                    background-color: #ffebee;
+                }
+            </style>
+        </head>
+        <body>
+            <apex:outputPanel >
+                <div class="invoice-container">
+                    <!-- Invoice Header -->
+                    <div class="invoice-header">
+                        <div class="logo-section">
+                            <img src="{!$Resource.Companylogo}" class="logo-img" alt="Company Logo" />
+                        </div>
+                        <div class="title-section">
+                            <div class="title">Property Statement</div>
+                        </div>
+                    </div>
+
+                    <!-- Property Details -->
+                    <apex:outputPanel rendered="{!property != null}">
+                        <div class="property-details">
+                            <div class="section-title">Property Details</div>
+                            <table>
+                                <tr>
+                                    <th>Property Name</th>
+                                    <td>{!property.Name}</td>
+                                    <th>Unit No.</th>
+                                    <td>{!property.Apartment_Number_and_Name__c}</td>
+                                </tr>
+                                <tr>
+                                    <th>Project</th>
+                                    <td>{!property.Name}</td>
+                                    <th>Type</th>
+                                    <td>{!property.Type__c}</td>
+                                </tr>
+                                <tr>
+                                    <th>Saleable Area (SQFT)</th>
+                                    <td>
+                                        <apex:outputText value="{0, number, ###,###,##0.00}">
+                                            <apex:param value="{!property.Size__c}" />
+                                        </apex:outputText>
+                                    </td>
+                                    <th>Purchase Price (AED)</th>
+                                    <td>
+                                        <apex:outputText value="{0, number, ###,###,##0.00}">
+                                            <apex:param value="{!property.Sale_Price__c}" />
+                                        </apex:outputText>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </apex:outputPanel>
+
+                    <!-- Payment Details -->
+                    <!-- <div class="payment-details">
+                        <div class="section-title">Payment Details</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Particulars</th>
+                                    <th>Installment</th>
+                                    <th>Payment Due Date</th>
+                                    <th>Amount (AED)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>DLD Fees</td>
+                                    <td>4%</td>
+                                    <td>Immediate</td>
+                                    <td>70,465</td>
+                                </tr>
+                                <tr>
+                                    <td>Registration Fees</td>
+                                    <td>0%</td>
+                                    <td>Immediate</td>
+                                    <td>7,090</td>
+                                </tr>
+                                <tr>
+                                    <td>Service Charges</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr class="highlight-row">
+                                    <td>Reservation Total</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>429,511</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div> -->
+
+                    <!-- Payment Milestones -->
+                    <div class="payment-milestone">
+                        <div class="section-title">Payment Milestones</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Particulars</th>
+                                    <th>Installment (%)</th>
+                                    <th>Payment Due Date</th>
+                                    <th>Amount (AED)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <apex:repeat value="{!paymentSchedules}" var="paymentSchedule">
+                                    <tr>
+                                        <td>{!paymentSchedule.Installment_Type__c}</td>
+                                        <td>
+                                            <apex:outputText value="{0, number, ###,###,##0.00}%">
+                                                <apex:param value="{!paymentSchedule.Percentage__c}" />
+                                            </apex:outputText>
+                                        </td>
+                                        <td>
+                                            <apex:outputText value="{!paymentSchedule.Due_Date__c}" rendered="{!paymentSchedule.Due_Date__c != null}"/>
+                                            <apex:outputText value="-" rendered="{!paymentSchedule.Due_Date__c == null}"/>
+                                        </td>
+                                        <td>
+                                            <apex:outputText value="{0, number, ###,###,##0.00}">
+                                                <apex:param value="{!paymentSchedule.Amount__c}" />
+                                            </apex:outputText>
+                                        </td>
+                                    </tr>
+                                </apex:repeat>
+                                <tr class="highlight-row">
+                                    <td>Total (Including Reservation Fees)</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>
+                                        <apex:outputText value="{0, number, ###,###,##0.00}">
+                                            <apex:param value="{!totalAmount}" />
+                                        </apex:outputText>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer Notes -->
+                    <div class="footer-note">
+                        <p>* All taxes and other measurements are approximate and may vary. Floor plans and finishes are subject to change.</p>
+                        <p>* All applicable charges need to be paid by the Purchaser at the time of signing the agreement.</p>
+                        <p>* This invoice is generated automatically and does not require a signature.</p>
+                    </div>
+
+                    <!-- Generation Date -->
+                    <div class="date">
+                        <p><strong>Generated On:</strong> {!generationDate}</p>
+                    </div>
+                </div>
+            </apex:outputPanel>
+        </body>
+    </html>
+</apex:page>

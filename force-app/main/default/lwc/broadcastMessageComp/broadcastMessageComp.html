@@ -1,0 +1,169 @@
+<template>           
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+
+    <div class="wrapper">
+        <div class="main_header_cls">
+            <div class="sub_main_header_css">
+                <div slot="title" class="header_block_css">
+                    <div class="svg_back_icon" onclick={handleBack}>
+                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div class="portal_mapping">
+                        {broadcastHeading}
+                    </div>
+                </div>
+                <div class="header">
+                    <button class="btn" onclick={handleModalOpen} disabled={isBtnDisabled}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
+                        </svg> 
+                        Add Group Members          
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main_content_cls">
+            <!-- Comboboxes in Grid -->
+            <div class="comboboxdiv">
+                <div class="internal-comboboxdiv">
+                    <lightning-combobox label="Select Object" value={selectedObject} options={objectOptions} onchange={handleObjectChange}></lightning-combobox>
+                    <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
+                </div>
+                <div>
+                    <lightning-input type="text" label="Search Records" placeholder="Search record by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
+                </div>
+            </div>
+
+            <!-- Custom Table -->
+            <template if:true={paginatedData.length}>
+                <div class="table-content">
+                    <table class="slds-table">
+                        <thead>
+                            <tr class="table_tr_cls">
+                                <th scope="col" class="checkbox sno" >
+                                    <lightning-input type="checkbox" checked={isAllSelected} onchange={handleSelectAll} indeterminate={isIndeterminate}></lightning-input>
+                                </th>
+                                <th scope="col" class="sno">
+                                    <div>No.</div>
+                                </th>
+                                <th scope="col" class="name">
+                                    <div>Name</div>
+                                </th>
+                                <template if:true={showPhoneColumn}>
+                                    <th scope="col" class="phone">
+                                        <div>Phone</div>
+                                    </th>
+                                </template>
+                                <template if:true={showEmailColumn}>
+                                    <th scope="col" class="">
+                                        <div>Email</div>
+                                    </th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={paginatedData} for:item="row" for:index="index">
+                                <tr key={row.Id}>
+                                    <td data-label="Checkbox">
+                                        <lightning-input type="checkbox" checked={row.isSelected} data-recordid={row.Id} onchange={handleRecordSelection}></lightning-input>
+                                    </td>
+                                    <td data-label="S.No." class="truncate_css">
+                                        <div>{row.index}</div>
+                                    </td>
+                                    <td data-label="Name">
+                                        <div>{row.name}</div>
+                                    </td>
+                                    <template if:true={showPhoneColumn}>
+                                        <td data-label="Phone">
+                                            <div>{row.phone}</div>
+                                        </td>
+                                    </template>
+                                    <template if:true={showEmailColumn}>
+                                        <td data-label="Email">
+                                            <div>{row.email}</div>
+                                        </td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- No Records Message -->
+            <template if:true={showNoRecordsMessage}>
+                <div class="no-records-message">
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-state__icon">
+                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                            </div>
+                            <div class="empty-state__message">No Data Available to Show.</div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+    
+            <template if:true={paginatedData.length}>
+                <div class="pagination-container">
+                    <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                            <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                        </svg>
+                        Previous
+                    </button>
+            
+                    <template for:each={pageNumbers} for:item="page">
+                        <template if:false={page.isEllipsis}>
+                            <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
+                                {page.number}
+                            </button>
+                        </template>
+                        <template if:true={page.isEllipsis}>
+                            <span key={page.number} class="pagination-ellipsis">...</span>
+                        </template>
+                    </template>
+            
+                    <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                        Next
+                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                            <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </template>
+        </div>
+
+        <template if:true={isCreateBroadcastModalOpen}>
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__content slds-p-around_medium modal-content" id="modal-content-id-2">
+                        <div>
+                            <div class="modal-heading slds-modal__header">
+                                <h1>Create/Edit Broadcast Group</h1>
+                            </div>
+                            <div class="modal-body">
+                                <div class="modal-body-content">
+                                    <lightning-input placeholder="Enter Name Here" type="text" label="Name" name="name" onchange={handleInputChange} value={broadcastGroupName} class="slds-m-bottom_medium" required message-when-value-missing=" "></lightning-input>
+                                    <lightning-textarea name="message" label="Description" placeholder="Enter Descriptive Message Here" class="slds-m-bottom_medium" value={messageText} required message-when-value-missing=" " onchange={handleInputChange}></lightning-textarea>
+                                </div>
+                            </div>
+                            <div class="footer">
+                                <button class="close-btn" onclick={closePopUp}>Close</button>
+                                <button class="save-btn" onclick={handleSave}>Save Group</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>        
+    </div>
+</template>

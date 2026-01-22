@@ -1,0 +1,351 @@
+* {
+  font-family: 'Mulish';
+  user-select: none;
+}
+
+.logo img {
+  width: 8rem;
+  height: auto;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-right: auto;
+  margin-left: 50px;
+}
+
+.title h2 {
+  margin-left: 10px;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.318rem;
+  letter-spacing: 0.05em;
+  padding-right: 1rem;
+}
+
+.field-mapping-container {
+  background-color: aliceblue;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: unset;
+  background-image: url('/resource/MVEX__newImageandMediaBg');
+  padding: 16px;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  border-radius: 8px;
+}
+
+.buttons {
+  display: inline-flex;
+  align-items: center;
+}
+
+.buttons .settings {
+  margin-right: 10px;
+  padding: 8px 12px;
+  border: 0.1px solid black;
+  border-radius: 5px;
+  background-color: white;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.segmented-buttons {
+  display: inline-flex;
+}
+
+.segmented-buttons .segmented {
+  padding: 8px 12px;
+  border: 0.1px solid black;
+  background-color: white;
+  color: #007bff;
+  cursor: pointer;
+  margin-left: -1px;
+}
+
+.segmented-buttons .segmented:first-child {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  margin-left: 0;
+}
+
+.segmented-buttons .segmented:last-child {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.tableContainer {
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.portalMapping_header-row {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr;
+  padding: 1rem;
+  background: #0176D3;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 16px;
+  text-align: left;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  gap: 0.5rem;
+}
+
+.portalMapping_recordValues {
+  overflow: auto;
+  height: 100%;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  background: white;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #0170d27d transparent;
+}
+
+.portalMapping_data-row {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  /* border-bottom: 1px solid #00000045; */
+  align-items: center;
+}
+
+.portalMapping_data-row:nth-child(odd) {
+  background: aliceblue;
+}
+
+.slds-col {
+  width: 90%;
+  word-break: break-word;
+}
+
+.view_input {
+  color: black;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+button[disabled] {
+  cursor: default !important;
+  background-color: unset !important;
+  color: unset !important;
+}
+
+.red_css {
+  color: red;
+  position: absolute;
+  left: 4px;
+  z-index: 99;
+}
+
+.position_css {
+  position: relative;
+  white-space: nowrap;
+  /* overflow: hidden; */
+  text-overflow: ellipsis;
+}
+
+.badge {
+  border-radius: 6px;
+  padding: 5px 15px;
+  display: inline-block;
+  background: #E6F7F0;
+  color: #06C270;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+}
+
+.badge-red {
+  border-radius: 6px;
+  padding: 5px 15px;
+  display: inline-block;
+  background: #f7e6e6;
+  color: #c20606;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+}
+
+.empty-state {
+  width: -webkit-fill-available;
+  height: -webkit-fill-available;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-state__content {
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  /* position: fixed; */
+}
+
+.empty-state__content .empty-state__icon {
+  width: 30%;
+  height: -webkit-fill-available;
+}
+
+.empty-state__content .empty-state__message {
+  color: #31a9be;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-top: 0.85rem;
+}
+
+.font_styles {
+  color: black;
+}
+
+.main_div_portal_mapping_landing_container {
+  background-color: #ffffff;
+  padding: 1rem;
+  height: calc(100% + 1.5rem);
+  margin-top: -0.8rem;
+  width: calc(100% + 1.5rem);
+  margin-left: -0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.main_header {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: aliceblue;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+  background-image: url('/resource/MVEX__newImageandMediaBg');
+}
+
+.main_sub_header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.portal_mapping {
+  font-size: 24px;
+  font-weight: 500;
+  /* line-height: 40.16px; */
+  text-align: left;
+  color: #131314;
+}
+
+.svg_back_icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.bc_cls {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  height: inherit;
+  overflow: hidden;
+}
+
+.font_styles1 {
+  color: black;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  color: #636363;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal_label_truncate_css {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.font_styles2 {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: center;
+  color: #35353A;
+}
+
+.btn_in_blue {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 34px;
+  text-align: center;
+  border: 1px solid #0176D3;
+  padding: 0px 20px;
+  background: #0176D3;
+  color: white;
+  border-radius: 5px;
+}
+
+.btn_in_white {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 34px;
+  text-align: center;
+  padding: 0px 20px;
+  background: #FFFFFF;
+  border: 1px solid #0176D3;
+  color: #0176D3;
+  border-radius: 5px;
+}
+
+.action {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+@media only screen and (max-width: 900px) {
+  .position_css {
+    min-width: 10rem;
+  }
+
+  .main_div_portal_mapping_landing_container {
+    width: 100% !important;
+    height: 100% !important;
+    margin-left: unset !important;
+    margin-top: unset !important;
+  }
+}
+
+.header-text {
+  text-align: center;
+}
+
+.portalMapping_data-row:hover {
+  background-color: #ebf3f6 !important;
+}

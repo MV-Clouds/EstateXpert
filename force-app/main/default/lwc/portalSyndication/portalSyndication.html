@@ -1,0 +1,62 @@
+<template>
+    <div class="portal-syndication">
+        <h2>Portal Syndication</h2>
+        <template if:true={isDataAvailable}>
+            <div class="portal_syndication_table">
+                <table class="slds-table">
+                    <thead>
+                        <tr class="table_tr_cls">
+                            <th scope="col" class="name">
+                                <div>Name</div>
+                            </th>
+                            <th scope="col" class="status">
+                                <div>Status</div>
+                            </th>
+                            <th scope="col" class="action">
+                                <div>Action</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={portals} for:item="portal" for:index="index">
+                            <tr key={portal.id}>
+                                <td data-label="Name">
+                                    <div class="name_truncate_css">{portal.name}</div>
+                                </td>
+                                <td data-label="Status">
+                                    <span class={portal.badgeColor}>
+                                        {portal.status}
+                                    </span>
+                                </td>
+                                <td data-label="Action">
+                                    <button class={portal.buttonColor} onclick={handleToggleStatus} data-id={portal.id}
+                                        data-pname={portal.pname} data-button-label={portal.buttonLabel}>
+                                        {portal.buttonLabel}
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+        <template if:false={isDataAvailable}>
+            <div class="no-data-container">
+                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                <div class="no-data-message">No Data Found</div>
+            </div>
+        </template>
+
+        <div if:true={showSpinner}>
+            <lightning-spinner variant="brand" alternative-text="Loading Portals" size="medium">
+            </lightning-spinner>
+        </div>
+    </div>
+    <template if:true={isErrorPopup}>
+        <div class="popup-container my_popup_container">
+            <c-error-popup-for-portals jsonbody={errorBody} portalname={portalName} type={errorType}
+                onhidepopup={handleHidePopup}></c-error-popup-for-portals>
+        </div>
+    </template>
+</template>

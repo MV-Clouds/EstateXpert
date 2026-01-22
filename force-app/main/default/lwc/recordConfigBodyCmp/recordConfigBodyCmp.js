@@ -17,7 +17,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
     // Tracker variables from child
     @track fieldOptions = [];
     @track setScroll = false;
-    @track pageSize = 30;
+    @track pageSize = 30; // Default Page Size
     @track checklistItems = [];
     @track searchText = '';
     @track filteredFieldOptions = [];
@@ -41,6 +41,21 @@ export default class RecordConfigBodyCmp extends LightningElement {
         { label: 'MM-DD-YYYY (12 hour)', value: 'mmddyyyy12' },
         { label: 'YYYY-MM-DD (12 hour)', value: 'yyyymmdd12' }
     ];
+
+    // Computed Property: Decide if Card View should be shown
+    get showCardView() {
+        return this.featureName !== 'Inquiry Manager' && this.featureName !== 'Listing_Configuration';
+    }
+
+    // Computed Property: Dynamic Grid Class for Header
+    get headerClass() {
+        return this.showCardView ? 'popup__header-row-5' : 'popup__header-row-4';
+    }
+
+    // Computed Property: Dynamic Grid Class for Rows
+    get rowClass() {
+        return this.showCardView ? 'popup__data-row-5 popup__data-row' : 'popup__data-row-4 popup__data-row';
+    }
 
     // Computed Property to get Object Name based on Feature
     get selectedTabObject() {
@@ -97,6 +112,14 @@ export default class RecordConfigBodyCmp extends LightningElement {
         this.dispatchEvent(new CustomEvent('close'));
     }
 
+    handlePageSizeChange(event) {
+        let value = parseInt(event.target.value, 10);
+        if (isNaN(value) || value < 1) {
+            value = 30; // Default fallback
+        }
+        this.pageSize = value;
+    }
+
     /* ================= DATA FETCHING ================= */
 
     fetchMetadata() {
@@ -133,6 +156,8 @@ export default class RecordConfigBodyCmp extends LightningElement {
                     }
                     if(result.metadataRecords[1]) {
                         this.pageSize = parseInt(result.metadataRecords[1], 10);
+                    } else {
+                        this.pageSize = 30; // Default if not found
                     }
                 }
                 this.isLoading = false;
@@ -474,9 +499,12 @@ export default class RecordConfigBodyCmp extends LightningElement {
             
             this.isLoading = true;
 
+            // Ensure pageSize is valid before saving
+            const pageSizeToSave = this.pageSize || 30;
+
             saveMetadata({ 
                 checklistData: checklistData, 
-                totalPages: this.pageSize, 
+                totalPages: pageSizeToSave, 
                 objectApiName: this.selectedTabObject, 
                 featureName: this.featureName 
             })

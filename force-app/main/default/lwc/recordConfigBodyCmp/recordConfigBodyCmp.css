@@ -3,6 +3,11 @@
     user-select: none;
 }
 
+.modal__container{
+    width: 70%;
+    max-width: 70rem;
+}
+
 /* Modal Basics */
 .blue-header {
     background-color: #0176D3;
@@ -71,7 +76,7 @@
     background-size: cover;
 }
 
-/* Header Action (Add Row) */
+/* Header Action (Page Size + Add Row) */
 .header_container_css {
     display: flex;
     flex-direction: row;
@@ -80,6 +85,34 @@
     align-items: center;
     width: 100%;
     flex-shrink: 0;
+}
+
+.header-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+}
+
+.page-size-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-size-label {
+    font-size: 14px;
+    color: #333;
+}
+
+.page-size-input {
+    width: 60px;
+    height: 32px;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    padding: 0 8px;
+    text-align: center;
 }
 
 .add-new-btn {
@@ -112,15 +145,28 @@
     background-color: white;
     border-radius: 0.5rem;
     position: relative;
-    /* Scrollbar styling */
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
 }
 
-.popup__header-row {
+/* Grid Layouts */
+/* 5 Columns (With Card View) */
+.popup__header-row-5, .popup__data-row-5 {
     display: grid;
-    grid-template-columns: 30px 1.5fr 1fr 1fr 1fr; /* Matched to Data Row */
+    grid-template-columns: 30px 1fr 1fr 0.5fr 0.5fr;
     gap: 0.5rem;
+    align-items: center;
+}
+
+/* 4 Columns (Without Card View) */
+.popup__header-row-4, .popup__data-row-4 {
+    display: grid;
+    grid-template-columns: 30px 1fr 1fr 0.5fr; /* Matched to Data Row */
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.popup__header-row-5, .popup__header-row-4 {
     padding: 0.7rem 0rem;
     background: #0176D3;
     color: white;
@@ -130,19 +176,22 @@
     z-index: 100;
 }
 
+.popup__data-row-5, .popup__data-row-4 {
+    padding: 8px 0;
+    border-bottom: 1px solid #f2f2f2;
+    background: white;
+}
+
 .display_css {
     display: flex;
     justify-content: center;
 }
 
 .popup__recordValues {
-    padding-bottom: 150px; /* Space for dropdowns at bottom */
+    padding-bottom: 150px;
 }
 
 .popup__data-row {
-    display: grid;
-    grid-template-columns: 30px 1.5fr 1fr 1fr 1fr;
-    gap: 0.5rem;
     align-items: center;
     padding: 8px 0;
     border-bottom: 1px solid #f2f2f2;
@@ -218,7 +267,7 @@
 }
 
 .option-box-parent {
-    left: 100%; /* Show to the right */
+    left: 100%;
     top: 0;
 }
 
@@ -320,7 +369,7 @@
     color: white;
 }
 
-.order_btn_grp{
+.order_btn_grp {
     display: flex;
     justify-content: center;
 }

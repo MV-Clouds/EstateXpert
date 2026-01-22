@@ -1,7 +1,7 @@
 <template>
     <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
-        class="slds-modal slds-fade-in-open slds-modal_large">
-        <div class="slds-modal__container">
+        class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container modal__container">
             <div class="slds-modal__close closs_icon_css" onclick={handleDialogueClose}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -28,22 +28,25 @@
                                 <div class="mainDiv">
                                     <div class="main-cover">
                                         <div class="header_container_css">
-                                            <div class="header_title_css">
-                                                <div class="header-action">
-                                                    <button class="add-new-btn" onclick={addNewRow}>
-                                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M6.85714 9.14286H0V6.85714H6.85714V0H9.14286V6.85714H16V9.14286H9.14286V16H6.85714V9.14286Z" fill="white"/>
-                                                        </svg>
-                                                        Add Row
-                                                    </button>
+                                            <div class="header-action">
+                                                <div class="page-size-container">
+                                                    <label class="page-size-label">Page Size:</label>
+                                                    <input type="number" class="page-size-input" value={pageSize} onchange={handlePageSizeChange} min="1" max="200"/>
                                                 </div>
+
+                                                <button class="add-new-btn" onclick={addNewRow}>
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M6.85714 9.14286H0V6.85714H6.85714V0H9.14286V6.85714H16V9.14286H9.14286V16H6.85714V9.14286Z" fill="white"/>
+                                                    </svg>
+                                                    Add Row
+                                                </button>
                                             </div>
                                         </div>
 
                                         <div class="table-body-div">
                                             <div class="tableContainer">
                                                 <template if:true={isDataAvailable}>
-                                                    <div class="popup__header-row">
+                                                    <div class={headerClass}>
                                                         <div class="slds-col display_css"></div>
                                                         <div class="slds-col display_css">
                                                             <p class="header-text">Field</p>
@@ -51,9 +54,13 @@
                                                         <div class="slds-col display_css">
                                                             <p class="header-text">Display Format</p>
                                                         </div>
-                                                        <div class="slds-col display_css">
-                                                            <p class="header-text">Card view</p>
-                                                        </div>
+                                                        
+                                                        <template if:true={showCardView}>
+                                                            <div class="slds-col display_css">
+                                                                <p class="header-text">Card view</p>
+                                                            </div>
+                                                        </template>
+
                                                         <div class="slds-col display_css">
                                                             <p class="header-text">Delete</p>
                                                         </div>
@@ -61,7 +68,7 @@
 
                                                     <div class="popup__recordValues">
                                                         <template for:each={checklistItems} for:item="item" for:index="index">
-                                                            <div key={item.id} class="popup__data-row" draggable="true" data-index={index} 
+                                                            <div key={item.id} class={rowClass} draggable="true" data-index={index} 
                                                                  ondragstart={handleDragStart} ondragover={handleDragOver} 
                                                                  ondrop={handleDrop} ondragleave={handleDragLeave} 
                                                                  ondragend={handleDragEnd}>
@@ -140,12 +147,14 @@
                                                                    <lightning-combobox options={item.picklist} variant="label-hidden" value={item.format} onchange={handleFormatChange} data-id={index} disabled={item.isDisable}></lightning-combobox>
                                                                 </div>
 
-                                                                <div class="slds-col wrap_css order_btn_grp">
-                                                                    <label class="custom-checkbox">
-                                                                        <input type="checkbox" checked={item.cardView} data-index={index} onchange={handleCardViewChange}>
-                                                                        <span class="checkmark"></span>
-                                                                    </label>
-                                                                </div>
+                                                                <template if:true={showCardView}>
+                                                                    <div class="slds-col wrap_css order_btn_grp">
+                                                                        <label class="custom-checkbox">
+                                                                            <input type="checkbox" checked={item.cardView} data-index={index} onchange={handleCardViewChange}>
+                                                                            <span class="checkmark"></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </template>
 
                                                                 <div class="slds-col wrap_css order_btn_grp">
                                                                     <div class="delete-div" onclick={handleDelete} data-index={index}>

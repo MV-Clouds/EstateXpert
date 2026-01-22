@@ -313,13 +313,20 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name : pagedInquries
-    * @description : getter for paged inquiries with processed data
+    * @description : getter for paged inquiries with processed data and pagination
     */
     get pagedInquries() {
         if (!this.pagedFilteredInquiryData || this.pagedFilteredInquiryData.length === 0) {
             return [];
         }
-        return this.processInquiryData(this.pagedFilteredInquiryData);
+        // Calculate start and end indices for current page
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        
+        // Slice the data for current page
+        const pagedData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
+        
+        return this.processInquiryData(pagedData);
     }
 
     /**
@@ -945,7 +952,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     parsedFilters.forEach((filter, index) => {
                         let fieldValue, filterValue;
 
-                        if (filter.object === 'Inquiry__c') {
+                        if (filter.object === 'MVEX__Inquiry__c') {
                             // Validate field existence
                             if (!(filter.field in inquiry)) {
                                 console.warn(`applyFiltersData: Field ${filter.field} not found in inquiry`, inquiry);
@@ -1078,7 +1085,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             .then(result => {
                 const data = result;
                 let listing = {};
-                if (this.objectName === 'Listing__c') {
+                if (this.objectName === 'MVEX__Listing__c') {
                     this.totalinquiry = this.convertKeysToLowercase(data.inquiries);
                     listing = data.listings[0];
                 }
@@ -1153,7 +1160,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
                     this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
                     this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.Data_Type__c = fieldType;
+                    this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
 
                     if (fieldType === 'REFERENCE') {
                         this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
@@ -1167,7 +1174,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         }
                     }
 
-                    this.inquiryFieldObject.Field_Name__c = currentMapping.field;
+                    this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
                     this.selectedConditionOperator = currentMapping.operator;
                     this.selectedListingField = currentMapping.valueField;
                 }
@@ -1413,7 +1420,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 });
             } else if (this.selectedConditionType === 'Related List') {
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    return inquiry.listing__c === this.recordId;
+                    return inquiry.mvex__listing__c === this.recordId;
                 });
             } else if (this.selectedConditionType === 'None') {
                 this.pagedFilteredInquiryData = this.totalinquiry;
@@ -1574,7 +1581,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handleInquiryFieldChange(event) {
         try {
             const value = event.detail.value;
-            this.inquiryFieldObject.Field_Name__c = value;
+            this.inquiryFieldObject.MVEX__Field_Name__c = value;
             this.selectedConditionOperator = '';
             this.selectedListingField = '';
 
@@ -1590,7 +1597,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
                 this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
                 this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-                this.inquiryFieldObject.Data_Type__c = fieldType;
+                this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
 
                 if (fieldType === 'REFERENCE') {
                     this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
@@ -1650,7 +1657,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     closeAddConditionModal() {
         try {
-            this.inquiryFieldObject.Field_Name__c = '';
+            this.inquiryFieldObject.MVEX__Field_Name__c = '';
             this.inquiryFieldObject.isPrimary = true;
             this.inquiryFieldObject.isPicklist = false;
             this.inquiryFieldObject.isReference = false;
@@ -1675,13 +1682,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By:Rachit Shah
     */
     saveCondition() {
-        if (this.inquiryFieldObject.Field_Name__c && this.selectedListingField && this.selectedConditionOperator) {
-            let displaylabel = this.getValueFromLabel(this.inquiryFieldObject.Field_Name__c);
+        if (this.inquiryFieldObject.MVEX__Field_Name__c && this.selectedListingField && this.selectedConditionOperator) {
+            let displaylabel = this.getValueFromLabel(this.inquiryFieldObject.MVEX__Field_Name__c);
 
             if (!this.selectedMappingId) {
                 this.mappings.push({
                     id: this.mappings.length + 1,
-                    field: this.inquiryFieldObject.Field_Name__c,
+                    field: this.inquiryFieldObject.MVEX__Field_Name__c,
                     operator: this.selectedConditionOperator,
                     displayOperator: this.displayOperator(this.selectedConditionOperator),
                     valueField: this.selectedListingField ? this.selectedListingField : '',
@@ -1692,7 +1699,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     if (mapping.id === this.selectedMappingId) {
                         return {
                             ...mapping,
-                            field: this.inquiryFieldObject.Field_Name__c,
+                            field: this.inquiryFieldObject.MVEX__Field_Name__c,
                             operator: this.selectedConditionOperator,
                             displayOperator: this.displayOperator(this.selectedConditionOperator),
                             valueField: this.selectedListingField ? this.selectedListingField : '',
@@ -1814,7 +1821,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (!this.selectedGroupIds.some(group => group.Id === groupId)) {
                     this.selectedGroupIds = [
                         ...this.selectedGroupIds,
-                        { Id: groupId, ObjName: selectedGroup.Object_Name__c, Name: selectedGroup.Name }
+                        { Id: groupId, ObjName: selectedGroup.MVEX__Object_Name__c, Name: selectedGroup.Name }
                     ];
                 }
             } else {
@@ -1855,7 +1862,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
         // Convert to combobox options format
         this.templateOptions = combinedTemplates.map(template => ({
-            label: template.Template_Name__c,
+            label: template.MVEX__Template_Name__c,
             value: template.Id
         }));
     }
@@ -2110,7 +2117,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     fetchInquiryConfiguration() {
-        getConfigObjectFields({ objectApiName: 'Inquiry__c', configName: 'Inquiry_Fields' })
+        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', configName: 'Inquiry_Fields' })
             .then(result => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {

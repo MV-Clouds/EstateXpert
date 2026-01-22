@@ -7,18 +7,18 @@ public with sharing class GenerateDocumentController {
     @return           : {String} - current session Id
     ********************************************************
     */
-    // @AuraEnabled
-    // public static String getSessionId(){
-    //     String sessionId;
-    //     try{
-    //         if(Test.isRunningTest()) { 
-    //             sessionId = 'testSessionId';
-    //         }else{
-    //             sessionId = Page.UserSessionIdPage.getContent().toString();
-    //         }
-    //     }catch(Exception e){
-    //         ErrorHandler.insertErrorData(e, 'GenerateDocumentController', 'getSessionId', 'Error while getting session id.');
-    //     }
-    //     return sessionId;
-    // }
+    @AuraEnabled
+    public static String getSessionId(){
+        String sessionId;
+        try{
+            if(Test.isRunningTest()) { 
+                sessionId = 'testSessionId';
+            }else{
+                sessionId = Page.UserSessionIdPage.getContent().toString();
+            }
+        }catch(Exception e){
+            ErrorHandler.insertErrorData(e, 'GenerateDocumentController', 'getSessionId', 'Error while getting session id.');
+        }
+        return sessionId;
+    }
 }

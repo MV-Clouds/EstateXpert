@@ -56,13 +56,13 @@ export function errorDebugger(componentName, methodName, error, debugMode, addit
     additionalInfo && (errorInfo.additionalInfo = additionalInfo);
 
     if (debugMode?.toLowerCase() === 'error') {
-        console.error('Error from DG Component : ', errorInfo);
+        console.error('Error from EXP Component : ', errorInfo);
     }
     else if (debugMode?.toLowerCase() === 'warn') {
-        console.warn('Warning from DG Component : ', errorInfo);
+        console.warn('Warning from EXP Component : ', errorInfo);
     }
     else {
-        console.log('Message from DG Component : ', errorInfo);
+        console.log('Message from EXP Component : ', errorInfo);
     }
 }
 

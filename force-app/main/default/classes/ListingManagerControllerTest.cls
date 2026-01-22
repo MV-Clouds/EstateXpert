@@ -44,7 +44,7 @@ public class ListingManagerControllerTest {
             // Assert that media URLs are returned correctly
             System.assertEquals(1, result.medias.size());
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ListingManagerControllerTest', 'testGetListingData', 'Error while creating test data.');
+            ErrorHandler.insertErrordata(e, 'ListingManagerControllerTest', 'testGetListingData', 'Error while creating test data.');
         }
     }
 

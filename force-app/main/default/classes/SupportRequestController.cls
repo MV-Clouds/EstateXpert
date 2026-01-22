@@ -64,7 +64,7 @@ public with sharing class SupportRequestController {
             }
 
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'SupportRequestController', 'sendEmail', 'Error while sending email.');
+            ErrorHandler.insertErrordata(e, 'SupportRequestController', 'sendEmail', 'Error while sending email.');
             response.status = false;
             response.message = e.getMessage();
         }
@@ -81,7 +81,7 @@ public with sharing class SupportRequestController {
             }
 
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'SupportRequestController', 'deleteContentVersion', 'Error while deleting content version.');
+            ErrorHandler.insertErrordata(e, 'SupportRequestController', 'deleteContentVersion', 'Error while deleting content version.');
         }
     }
 
@@ -93,7 +93,7 @@ public with sharing class SupportRequestController {
                 delete as user document;
             }
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'SupportRequestController', 'deleteContentDocument', 'Error while deleting content version.');
+            ErrorHandler.insertErrordata(e, 'SupportRequestController', 'deleteContentDocument', 'Error while deleting content version.');
         }
     }
 }

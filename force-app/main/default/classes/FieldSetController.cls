@@ -59,7 +59,7 @@ public with sharing class FieldSetController {
                 return null;
             }
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'FieldSetController', 'getListOfFieldsForObjects', 'Error while getting list of fields for objects.');
+            ErrorHandler.insertErrordata(e, 'FieldSetController', 'getListOfFieldsForObjects', 'Error while getting list of fields for objects.');
             throw new AuraHandledException(e.getMessage());
         }
     }
@@ -207,7 +207,7 @@ public with sharing class FieldSetController {
             wc.records = lstMap;
             return wc; 
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'FieldSetController', 'fetchListings', 'Error while fetching listings.');
+            ErrorHandler.insertErrordata(e, 'FieldSetController', 'fetchListings', 'Error while fetching listings.');
             return null;
         }
     }
@@ -264,7 +264,7 @@ public with sharing class FieldSetController {
                 return null;
             }
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'FieldSetController', 'fetchContacts', 'Error while fetching contacts.');
+            ErrorHandler.insertErrordata(e, 'FieldSetController', 'fetchContacts', 'Error while fetching contacts.');
             return null;
         }
     }

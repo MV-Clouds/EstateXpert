@@ -80,7 +80,7 @@ public with sharing class PortalMappingControllerTest {
             System.assertNotEquals(null, wrapper, 'Result should not be a null.');
             System.assertNotEquals(null, wrapper.portalRecords, 'Portal records list should not be null');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testGetPortalRecords', 'Error while getting portal records.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testGetPortalRecords', 'Error while getting portal records.');
         }
     }
 
@@ -93,16 +93,16 @@ public with sharing class PortalMappingControllerTest {
         try {
             Test.startTest();
             // Test for Propertyfinder (uses BFFPF__c)
-            List<PortalMappingController.FieldWrapper> fieldWrappersPF = PortalMappingController.getObjectFields('Propertyfinder');
+            List<PortalMappingController.FieldWrapper> fieldWrappersPF = PortalMappingController.getObjectFields('Propertyfinder', false);
             
             // Test for Bayut (uses BFFB__c) to cover switch case
-            List<PortalMappingController.FieldWrapper> fieldWrappersBayut = PortalMappingController.getObjectFields('Bayut');
+            List<PortalMappingController.FieldWrapper> fieldWrappersBayut = PortalMappingController.getObjectFields('Bayut', false);
             
             // Test for Dubizzle (uses BFFB__c) to cover switch case
-            List<PortalMappingController.FieldWrapper> fieldWrappersDubizzle = PortalMappingController.getObjectFields('Dubizzle');
+            List<PortalMappingController.FieldWrapper> fieldWrappersDubizzle = PortalMappingController.getObjectFields('Dubizzle', false);
             
             // Test null/else case
-            List<PortalMappingController.FieldWrapper> fieldWrappersNull = PortalMappingController.getObjectFields(null);
+            List<PortalMappingController.FieldWrapper> fieldWrappersNull = PortalMappingController.getObjectFields(null, false);
             Test.stopTest();
 
             System.assert(fieldWrappersPF.size() > 0, 'Should return fields for Propertyfinder');
@@ -111,7 +111,7 @@ public with sharing class PortalMappingControllerTest {
             PortalMappingController.FieldWrapper pfWrapper = fieldWrappersPF[0];
             System.assertNotEquals(null, pfWrapper.blockfields, 'Blocked fields should be retrieved');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testGetObjectFields', 'Error while getting object fields.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testGetObjectFields', 'Error while getting object fields.');
         }
     }
 
@@ -146,7 +146,7 @@ public with sharing class PortalMappingControllerTest {
             Portal__c updatedPortal = [SELECT Field_Mapping__c FROM Portal__c WHERE Id = :portal.Id];
             System.assertEquals(jsonList, updatedPortal.Field_Mapping__c, 'Portal Field Mapping JSON should be updated');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testSaveChangedFields', 'Error while saving changed fields.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testSaveChangedFields', 'Error while saving changed fields.');
         }
     }
 
@@ -174,7 +174,7 @@ public with sharing class PortalMappingControllerTest {
             System.assertEquals('deleted', deleteResult, 'Expected deleted status.');
             System.assertEquals('Portal is missing.', resultMissing);
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testPortalAction', 'Error while performing portal action.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testPortalAction', 'Error while performing portal action.');
         }
     }
 
@@ -192,7 +192,7 @@ public with sharing class PortalMappingControllerTest {
             System.assertNotEquals(null, customFields, 'Expected non-null result.'); 
             System.assertNotEquals(null, customFields.customFields, 'Custom fields list should be initialized.');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testGetAllCustomFields', 'Error while getting all custom fields.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testGetAllCustomFields', 'Error while getting all custom fields.');
         }
     }
 
@@ -229,7 +229,7 @@ public with sharing class PortalMappingControllerTest {
             System.assertEquals('Propertyfinder', createdPortals[0].Generator__c, 'Generator should be mapped correctly');
             System.assert(createdPortals[0].XML_Feed_URL__c != null, 'XML Feed URL should be generated');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testSavePropertyPortalRecord', 'Error testing save property portal.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testSavePropertyPortalRecord', 'Error testing save property portal.');
         }
     }
 
@@ -260,7 +260,7 @@ public with sharing class PortalMappingControllerTest {
             System.assertEquals('Updated Portal Name', updatedPortal.Name);
             System.assertEquals('Bayut', updatedPortal.Generator__c);
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testUpdatePropertyPortalRecord', 'Error testing update property portal.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testUpdatePropertyPortalRecord', 'Error testing update property portal.');
         }
     }
 
@@ -285,7 +285,7 @@ public with sharing class PortalMappingControllerTest {
             System.assertNotEquals(null, wrapper, 'Wrapper should not be null');
             System.assertNotEquals(null, wrapper.fieldsValue, 'Fields value should be populated from config');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testGetAllEditDatas', 'Error testing get all edit datas.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testGetAllEditDatas', 'Error testing get all edit datas.');
         }
     }
 
@@ -311,7 +311,7 @@ public with sharing class PortalMappingControllerTest {
             
             System.assertEquals('Failed', emptyResponse.status, 'Status should be Failed for invalid ID/no data');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PortalMappingControllerTest', 'testGetXMLFeedListingsData', 'Error testing XML Feed listings data.');
+            ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testGetXMLFeedListingsData', 'Error testing XML Feed listings data.');
         }
     }
 }

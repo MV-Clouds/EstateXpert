@@ -21,35 +21,6 @@
 		<name>AuraDefinitionBundle</name>
 	</types>
 	<types>
-		<members>CLAR_Users</members>
-		<members>EmailMessageEmailService</members>
-		<members>EstateXpert_Endpoint</members>
-		<members>GeminiApiKey</members>
-		<members>GmailServiceLabel</members>
-		<members>Gmail_Sending_Endpoint</members>
-		<members>Google_Drive_Endpoint</members>
-		<members>Google_Drive_Scope</members>
-		<members>Google_Endpoint</members>
-		<members>InstagramEndPoint</members>
-		<members>Lead_Welcome_Email_Template</members>
-		<members>Outlook_Batch_Url</members>
-		<members>Outlook_Endpoint</members>
-		<members>PropertyFinder_Endpoint_Production</members>
-		<members>ReminderBeforeDays</members>
-		<members>Rightmove_Endpoint_Production</members>
-		<members>Rightmove_Endpoint_Sandbox</members>
-		<members>Whatsapp_Endpoint</members>
-		<members>Whatsapp_Webhook_Gmail_API</members>
-		<members>Zoopla_Doc_Endpoint</members>
-		<members>Zoopla_Endpoint</members>
-		<members>supportEmail</members>
-		<name>CustomLabel</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomLabels</name>
-	</types>
-	<types>
 		<members>*</members>
 		<name>CustomMetadata</name>
 	</types>
@@ -61,5 +32,5 @@
 		<members>*</members>
 		<name>StaticResource</name>
 	</types>
-	<version>62.0</version>
+	<version>65.0</version>
 </Package>

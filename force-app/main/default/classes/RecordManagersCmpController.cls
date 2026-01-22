@@ -10,10 +10,23 @@ public with sharing class RecordManagersCmpController {
         @AuraEnabled public String label;
     }
 
+    // --- HELPER TO IDENTIFY CONFIGURATION RECORDS ---
+    // This maps the frontend "Feature Name" to the stored "Feature Name" in the custom object
+    private static String getStoredFeatureName(String objectApiName, String featureName) {
+        if (featureName == 'Listing_Configuration' && objectApiName == 'MVEX__Listing__c') {
+            return 'Listing_Configuration';
+        } else if (objectApiName == 'MVEX__Listing__c') {
+            return 'Listing Manager'; 
+        } else if (objectApiName == 'MVEX__Inquiry__c') {
+            return 'Inquiry Manager';
+        } else {
+            return 'Marketing List';
+        }
+    }
+
     /**
      * Method Name : getObjectFields
-     * @description : get object fields.
-     * @param objectApiName String value.
+     * @description : Get object fields and fetch configuration from Custom Object.
      */
     @AuraEnabled
     public static RecordManagerData getObjectFields(String objectApiName, String featureName) {
@@ -21,6 +34,7 @@ public with sharing class RecordManagersCmpController {
             RecordManagerData recordData = new RecordManagerData();
             List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
 
+            // 1. Get Schema Details
             Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectApiName).getDescribe();
             Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
 
@@ -58,28 +72,28 @@ public with sharing class RecordManagersCmpController {
             }
             recordData.fieldDetailsList = fieldDetailsList;
 
-            List<String> metadataValues = new List<String>();
-            String metadataType;
-            if (featureName == 'Listing_Configuration' && objectApiName == 'Listing__c') {
-                metadataType = 'listingData__mdt';
-            }
-            else if(objectApiName == 'Listing__c'){
-                metadataType = 'recordManagerConfig__mdt';
-            } else if(objectApiName == 'Inquiry__c'){  // Add Inquiry support
-                metadataType = 'recordManagerInquiryConfig__mdt';
-            } else {
-                metadataType = 'recordManagerMarketingConfig__mdt';
-            }
-            String query = 'SELECT FieldsData__c, PageSize__c FROM ' + String.escapeSingleQuotes(metadataType) + ' LIMIT 1';
-            List<SObject> metadataRecords = Database.query(query, AccessLevel.USER_MODE);
+            // 2. Fetch Configuration from Custom Object
+            List<String> configValues = new List<String>();
+            String storedFeatureName = getStoredFeatureName(objectApiName, featureName);
+            
+            // Query the generic Custom Object
+            List<MVEX__Configuration_Settings__c> settings = [
+                SELECT MVEX__Fields_Data__c, MVEX__Page_Size__c 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Object_API_Name__c = :objectApiName 
+                AND MVEX__Feature_Name__c = :storedFeatureName
+                AND MVEX__Configuration_Type__c = 'Manager Config'
+                WITH USER_MODE 
+                LIMIT 1
+            ];
 
-            if (!metadataRecords.isEmpty()) {
-                SObject metadataRecord = metadataRecords[0];
-                metadataValues.add((String)metadataRecord.get('FieldsData__c'));
-                metadataValues.add(String.valueOf(metadataRecord.get('PageSize__c')));
+            if (!settings.isEmpty()) {
+                MVEX__Configuration_Settings__c setting = settings[0];
+                configValues.add(setting.MVEX__Fields_Data__c);
+                configValues.add(String.valueOf(setting.MVEX__Page_Size__c));
             }
 
-            recordData.metadataRecords = metadataValues;
+            recordData.metadataRecords = configValues;
 
             return recordData;
         } catch (Exception e) {
@@ -90,13 +104,11 @@ public with sharing class RecordManagersCmpController {
 
     /**
      * Method Name : getObjectFieldsWithMetaData
-     * @description : get object fields with metadata.
-     * @param objectApiName String value.
+     * @description : Get configuration for "New Record Fields" logic.
      */
     @AuraEnabled
     public static RecordManagerData getObjectFieldsWithMetaData(String objectApiName) {
         try {
-            String escapedObjectApiName = String.escapeSingleQuotes(objectApiName);
             RecordManagerData recordData = new RecordManagerData();
             List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
 
@@ -115,177 +127,127 @@ public with sharing class RecordManagersCmpController {
                 fieldDetailsList.add(fieldDetails);
             }
             recordData.fieldDetailsList = fieldDetailsList;
-            List<String> metadataValues = new List<String>();
+            
+            List<String> configValues = new List<String>();
 
-            List<New_Record_Fields__mdt> metadataRecords = [SELECT Field_Data__c FROM New_Record_Fields__mdt WHERE Object_API_Name__c = :escapedObjectApiName WITH USER_MODE];
-            if (!metadataRecords.isEmpty()) {
-                New_Record_Fields__mdt metadataRecord = metadataRecords[0];
-                metadataValues.add(metadataRecord.Field_Data__c);
+            // Query Custom Object for 'New Record Fields' type
+            List<MVEX__Configuration_Settings__c> settings = [
+                SELECT MVEX__Fields_Data__c 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Object_API_Name__c = :objectApiName 
+                AND MVEX__Configuration_Type__c = 'New Record Fields'
+                WITH USER_MODE 
+                LIMIT 1
+            ];
+
+            if (!settings.isEmpty()) {
+                configValues.add(settings[0].MVEX__Fields_Data__c);
             }
 
-            recordData.metadataRecords = metadataValues;
+            recordData.metadataRecords = configValues;
 
             return recordData;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'MarketingListFilterController', 'getObjectFieldsWithMetaData', e.getMessage());
+            ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'getObjectFieldsWithMetaData', e.getMessage());
             return null;
         }
     }
 
-   /**
-    * Class Name : FieldDetails
-    * @description : this is a wrapper class to pass multiple values to the LWC component.
-    */
     public class FieldDetails {
-        @AuraEnabled
-        public String label { get; set; }
-        @AuraEnabled
-        public String value { get; set; }
-        @AuraEnabled
-        public String fieldType { get; set; }
-        @AuraEnabled
-        public String referenceObjectName { get; set; }
-        @AuraEnabled
-        public String relationshipName { get; set; }
-        @AuraEnabled
-        public List<PicklistValue> picklistValues { get; set; }
+        @AuraEnabled public String label { get; set; }
+        @AuraEnabled public String value { get; set; }
+        @AuraEnabled public String fieldType { get; set; }
+        @AuraEnabled public String referenceObjectName { get; set; }
+        @AuraEnabled public String relationshipName { get; set; }
+        @AuraEnabled public List<PicklistValue> picklistValues { get; set; }
     }
 
-    /**
-    * Class Name : PicklistValue
-    * @description : this is a wrapper class to represent picklist values with label and value.
-    */
     public class PicklistValue {
-        @AuraEnabled
-        public String label { get; set; }
-        @AuraEnabled
-        public String value { get; set; }
+        @AuraEnabled public String label { get; set; }
+        @AuraEnabled public String value { get; set; }
     }
 
     /**
      * Method Name : saveMappings
-     * @description : save mapping in the of the fields.
-     * @param checklistData String value.
-     * @param totalPages Integer value.
-     * @param objectApiName String value.
+     * @description : Save mappings using standard DML on Custom Object (No Metadata Deploy needed).
      */
     @AuraEnabled
-    public static void saveMappings(String checklistData, Integer totalPages, String objectApiName,String featureName) {
+    public static void saveMappings(String checklistData, Integer totalPages, String objectApiName, String featureName) {
         try {
-            String metadataType;
+            String storedFeatureName = getStoredFeatureName(objectApiName, featureName);
 
-            System.debug('Feature Name: ' + featureName);
-            if (featureName == 'Listing_Configuration' && objectApiName == 'Listing__c') {
-                metadataType = 'listingData__mdt';
-            }
-            else if (objectApiName == 'Listing__c') {
-                metadataType = 'recordManagerConfig__mdt';
-            } else if (objectApiName == 'Inquiry__c') {  // Add Inquiry support
-                metadataType = 'recordManagerInquiryConfig__mdt';
+            // Check if record exists
+            List<MVEX__Configuration_Settings__c> settingsList = [
+                SELECT Id 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Object_API_Name__c = :objectApiName 
+                AND MVEX__Feature_Name__c = :storedFeatureName
+                AND MVEX__Configuration_Type__c = 'Manager Config'
+                WITH USER_MODE
+                LIMIT 1
+            ];
+
+            MVEX__Configuration_Settings__c settingToSave;
+
+            if (!settingsList.isEmpty()) {
+                settingToSave = settingsList[0];
             } else {
-                metadataType = 'recordManagerMarketingConfig__mdt';
+                settingToSave = new MVEX__Configuration_Settings__c();
+                settingToSave.MVEX__Object_API_Name__c = objectApiName;
+                settingToSave.MVEX__Feature_Name__c = storedFeatureName;
+                settingToSave.MVEX__Configuration_Type__c = 'Manager Config';
+                // Setting a Name is optional if Auto-Number, but good for reference
+                settingToSave.Name = storedFeatureName.replaceAll(' ', '_') + '_' + objectApiName; 
             }
 
-            String developerName = 'RecordConfig';
-            String masterLabel = 'RecordConfig';
-            String query = 'SELECT MasterLabel, DeveloperName FROM ' + String.escapeSingleQuotes(metadataType) + ' LIMIT 1';
-            List<SObject> metaList = Database.query(query, AccessLevel.USER_MODE);
+            settingToSave.MVEX__Fields_Data__c = checklistData;
+            settingToSave.MVEX__Page_Size__c = totalPages;
 
-            if (featureName == 'Listing_Configuration' && objectApiName == 'Listing__c') {
-                listingData__mdt config;
-                if (!metaList.isEmpty()) {
-                    config = (listingData__mdt) metaList[0];
-                    developerName = config.DeveloperName;
-                    masterLabel = config.MasterLabel;
-                }
-            }
-            else if (objectApiName == 'Listing__c') {
-                recordManagerConfig__mdt config;
-                if (!metaList.isEmpty()) {
-                    config = (recordManagerConfig__mdt) metaList[0];
-                    developerName = config.DeveloperName;
-                    masterLabel = config.MasterLabel;
-                }
-            } else if (objectApiName == 'Inquiry__c') {  // Add Inquiry support
-                recordManagerInquiryConfig__mdt config;
-                if (!metaList.isEmpty()) {
-                    config = (recordManagerInquiryConfig__mdt) metaList[0];
-                    developerName = config.DeveloperName;
-                    masterLabel = config.MasterLabel;
-                }
-            } else {
-                recordManagerMarketingConfig__mdt config;
-                if (!metaList.isEmpty()) {
-                    config = (recordManagerMarketingConfig__mdt) metaList[0];
-                    developerName = config.DeveloperName;
-                    masterLabel = config.MasterLabel;
-                }
+            // Perform standard DML
+            if (Schema.sObjectType.MVEX__Configuration_Settings__c.isUpdateable() || 
+                Schema.sObjectType.MVEX__Configuration_Settings__c.isCreateable()) {
+                upsert settingToSave;
             }
 
-            Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = metadataType + '.' + developerName;
-            mdata.label = masterLabel;
-
-            Metadata.CustomMetadataValue fieldsDataValue = new Metadata.CustomMetadataValue();
-            fieldsDataValue.field = 'FieldsData__c';
-            fieldsDataValue.value = checklistData;
-            mdata.values.add(fieldsDataValue);
-
-            Metadata.CustomMetadataValue pageSizeValue = new Metadata.CustomMetadataValue();
-            pageSizeValue.field = 'PageSize__c';
-            pageSizeValue.value = totalPages;
-            mdata.values.add(pageSizeValue);
-
-            Metadata.DeployContainer container = new Metadata.DeployContainer();
-            container.addMetadata(mdata);
-
-            Metadata.Operations.enqueueDeployment(container, null);
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'saveMappings', e.getStackTraceString());
+            throw new AuraHandledException('Error saving settings: ' + e.getMessage());
         }
     }
 
     /**
      * Method Name : saveMappingsNewFields
-     * @description : save mapping in the of the fields.
-     * @param selectFieldsData String value.
-     * @param objectApiName String value.
+     * @description : Save mappings for 'New Record Fields' type using DML.
      */
     @AuraEnabled
     public static String saveMappingsNewFields(String selectFieldsData, String objectApiName) {
         try {
-            String escapedObjectApiName = String.escapeSingleQuotes(objectApiName);
-            List<New_Record_Fields__mdt> metaList = [SELECT MasterLabel, DeveloperName, Field_Data__c, Object_API_Name__c FROM New_Record_Fields__mdt WHERE Object_API_Name__c = :escapedObjectApiName WITH USER_MODE LIMIT 1];
+            List<MVEX__Configuration_Settings__c> settingsList = [
+                SELECT Id 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Object_API_Name__c = :objectApiName 
+                AND MVEX__Configuration_Type__c = 'New Record Fields'
+                WITH USER_MODE
+                LIMIT 1
+            ];
 
-            String devName = objectApiName.replace('', '').replace('__c', '') + 'Fields';
-            String masterLabel = objectApiName.replace('', '').replace('__c', '') + 'Fields';
+            MVEX__Configuration_Settings__c settingToSave;
 
-            New_Record_Fields__mdt config = new New_Record_Fields__mdt();
-
-            if (!metaList.isEmpty()) {
-                config = metaList[0];
-                devName = config.DeveloperName;
-                masterLabel = config.MasterLabel;
+            if (!settingsList.isEmpty()) {
+                settingToSave = settingsList[0];
+            } else {
+                settingToSave = new MVEX__Configuration_Settings__c();
+                settingToSave.MVEX__Object_API_Name__c = objectApiName;
+                settingToSave.MVEX__Configuration_Type__c = 'New Record Fields';
+                settingToSave.Name = 'NewFields_' + objectApiName;
             }
 
-            Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = 'New_Record_Fields__mdt.' + devName;
-            mdata.label = masterLabel;
-            
-            Metadata.CustomMetadataValue instance = new Metadata.CustomMetadataValue();
-            instance.field = 'Field_Data__c';
-            instance.value = selectFieldsData;
-            mdata.values.add(instance);
+            settingToSave.MVEX__Fields_Data__c = selectFieldsData;
 
-            Metadata.CustomMetadataValue instance1 = new Metadata.CustomMetadataValue();
-            instance1.field = 'Object_API_Name__c';
-            instance1.value = objectApiName;
-            mdata.values.add(instance1);
-
-            Metadata.DeployContainer container = new Metadata.DeployContainer();
-            container.addMetadata(mdata);
-            
-            Metadata.Operations.enqueueDeployment(container, null);
+            if (Schema.sObjectType.MVEX__Configuration_Settings__c.isUpdateable() || 
+                Schema.sObjectType.MVEX__Configuration_Settings__c.isCreateable()) {
+                upsert settingToSave;
+            }
 
             return 'success';
         } catch (Exception e) {
@@ -296,24 +258,29 @@ public with sharing class RecordManagersCmpController {
 
     /**
      * Method Name : getListingFieldsParent
-     * @description : get listing fields parent.
-     * @param objectApiName String value.
+     * @description : Get listing fields excluding blocked ones defined in Global Config.
      */
     @AuraEnabled
     public static List<FieldDetails> getListingFieldsParent(String objectApiName) {
-
         try {
             List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
 
-            ListingManagerFilterConfig__mdt filterConfig = [SELECT BlockedFields__c FROM ListingManagerFilterConfig__mdt WITH USER_MODE LIMIT 1];
+            // Fetch Blocked Fields from the "Global Config" record in Custom Object
+            List<MVEX__Configuration_Settings__c> configList = [
+                SELECT MVEX__Blocked_Fields__c 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Configuration_Type__c = 'Global Config' 
+                AND MVEX__Feature_Name__c = 'Listing Filter Config'
+                WITH USER_MODE
+                LIMIT 1
+            ];
 
             Set<String> blockedFields = new Set<String>();
-            if (filterConfig != null && filterConfig.BlockedFields__c != null) {
-                blockedFields.addAll(filterConfig.BlockedFields__c.split(';'));
+            if (!configList.isEmpty() && configList[0].MVEX__Blocked_Fields__c != null) {
+                blockedFields.addAll(configList[0].MVEX__Blocked_Fields__c.split(';'));
             }
         
             Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectApiName).getDescribe();
-        
             Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
         
             for (String fieldName : fieldsMap.keySet()) {
@@ -333,7 +300,7 @@ public with sharing class RecordManagersCmpController {
                     if (!referenceTo.isEmpty()) {
                         fieldDetails.referenceObjectName = referenceTo[0].getDescribe().getName();
                     }
-                }else{
+                } else {
                     fieldDetails.referenceObjectName = objectApiName;
                 }
 

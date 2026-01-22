@@ -289,4 +289,187 @@ public with sharing class InstagramPostController {
             return false;
         }
     }
+
+    public class InstagramPostResponse {
+        @AuraEnabled public String status { get; set; }
+        @AuraEnabled public String message { get; set; }
+    }
+
+    @AuraEnabled
+    public static InstagramPostResponse postToInstagram(List<String> mediaUrls, String caption , List<String> awsObjectKeys , List<String> awsObjectKeysToPreserve) {
+        InstagramPostResponse apexResponse = new InstagramPostResponse();
+        try {
+
+            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
+
+            String userId = instaCredential.User_Id__c;
+            String accessToken = instaCredential.Long_Access_Token__c;
+
+            Http http = new Http();
+
+            if (mediaUrls.size() == 1) {
+                String mediaUrl = mediaUrls[0];
+                String mediaType = getMediaTypeFromUrl(mediaUrl);
+
+                HttpRequest req = new HttpRequest();
+                req.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+                req.setMethod('POST');
+                req.setHeader('Content-Type', 'application/json');
+
+                Map<String, Object> requestBody = new Map<String, Object>{
+                    (mediaType == 'REELS' ? 'video_url' : 'image_url') => mediaUrl,
+                    'access_token' => accessToken,
+                    'caption' => caption
+                };
+
+                if(mediaType == 'REELS'){
+                    requestBody.put('media_type', mediaType);
+                }
+                req.setBody(JSON.serialize(requestBody));
+
+                HttpResponse response = http.send(req);
+
+                if (response.getStatusCode() == 200) {
+                    MediaResponse mediaResponse = (MediaResponse) JSON.deserialize(response.getBody(), MediaResponse.class);
+                    String mediaContainerId = mediaResponse.id;
+
+                    Map<String, Object> params = new Map<String, Object>{
+                        'userId' => userId,
+                        'accessToken' => accessToken,
+                        'mediaContainerIds' => new List<String>(),
+                        'creationId' => mediaContainerId,
+                        'isCarousel' => false,
+                        'caption' => caption,
+                        'awsObjectKeys' => awsObjectKeys,
+                        'awsObjectKeysToPreserve' => awsObjectKeysToPreserve
+                    };
+
+                    InstagramPostScheduler job = new InstagramPostScheduler(params);
+                    String cronExpression = System.now().addMinutes(1).format('s m H d M \'?\' yyyy');
+                    System.schedule('Instagram Media Publish ' + mediaContainerId, cronExpression, job);
+
+                    apexResponse.status = 'SUCCESS';
+                    apexResponse.message = 'Media container created. Publishing scheduled.';
+                    return apexResponse;
+                } else {
+                    sendEmailNotification(response.getBody());
+                    apexResponse.status = 'ERROR';
+                    apexResponse.message = 'Failed to create media container: ' + response.getBody();
+                    return apexResponse;
+
+                }
+            } else {
+                List<String> mediaContainerIds = new List<String>();
+
+                for (String mediaUrl : mediaUrls) {
+                    String mediaType = getMediaTypeFromUrl(mediaUrl);
+
+                    HttpRequest req = new HttpRequest();
+                    req.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+                    req.setMethod('POST');
+                    req.setHeader('Content-Type', 'application/json');
+
+                    Map<String, Object> requestBody = new Map<String, Object>{
+                        (mediaType == 'REELS' ? 'video_url' : 'image_url') => mediaUrl,
+                        'is_carousel_item' => true,
+                        'access_token' => accessToken
+                    };
+
+                    if(mediaType == 'REELS'){
+                        requestBody.put('media_type', mediaType);
+                    }
+
+                    req.setBody(JSON.serialize(requestBody));
+
+                    HttpResponse response = http.send(req);
+
+                    if (response.getStatusCode() == 200) {
+                        MediaResponse mediaResponse = (MediaResponse) JSON.deserialize(response.getBody(), MediaResponse.class);
+                        mediaContainerIds.add(mediaResponse.id);
+                    } else {
+                        sendEmailNotification(response.getBody());
+                        apexResponse.status = 'ERROR';
+                        apexResponse.message = 'Failed to create media container: ' + response.getBody();
+                        return apexResponse;
+                    }
+                }
+
+                Map<String, Object> params = new Map<String, Object>{
+                    'userId' => userId,
+                    'accessToken' => accessToken,
+                    'mediaContainerIds' => mediaContainerIds,
+                    'creationId' => '',
+                    'isCarousel' => true,
+                    'caption' => caption,
+                    'awsObjectKeys' => awsObjectKeys,
+                    'awsObjectKeysToPreserve' => awsObjectKeysToPreserve
+                };
+
+                InstagramPostScheduler job = new InstagramPostScheduler(params);
+                String cronExpression = System.now().addMinutes(1).format('s m H d M \'?\' yyyy');
+                System.schedule('Instagram Media Publish' + mediaContainerIds[0], cronExpression, job);
+
+                apexResponse.status = 'SUCCESS';
+                apexResponse.message = 'Media container created. Publishing scheduled.';
+                return apexResponse;
+
+            }
+        } catch (Exception e) {
+            sendEmailNotification(e.getMessage());
+            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'postToInstagram', 'Error while posting to instagram.');
+            apexResponse.status = 'ERROR';
+            apexResponse.message = 'Exception: ' + e.getMessage();
+            return apexResponse;
+        }
+    }
+
+    public static void sendEmailNotification(String errorMessage) {
+
+        try {
+            
+            String emailId = UserInfo.getUserEmail();
+            // String emailId = 'karan.s@mvclouds.com';
+            String userName = UserInfo.getName();
+    
+            EmailTemplate emailTemplate = [SELECT Id, HtmlValue, Subject FROM EmailTemplate WHERE DeveloperName = 'Instagram_Error_Template' WITH SECURITY_ENFORCED LIMIT 1];
+        
+            String emailBody = emailTemplate.HtmlValue;
+            emailBody = emailBody.replace('{!errorDetails}', errorMessage);
+            emailBody = emailBody.replace('{!User}', userName);
+    
+            GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
+    
+            String refreshToken = settings.Refresh_Token__c;
+    
+            if(refreshToken != null && emailId != null){
+                List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
+    
+                GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
+                singleGmail.toAddresses = new List<String>{emailId};
+                singleGmail.subject = emailTemplate.Subject;
+                singleGmail.body = emailBody;
+    
+                gmails.add(singleGmail);
+    
+                GmailIntegrationControllerV1.requestNewAccessToken(gmails,null,null,false);
+    
+            }
+            else if(emailId != null){
+                    
+                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+                mail.setToAddresses(new String[] { emailId });
+                mail.setSubject(emailTemplate.Subject);
+                mail.setHtmlBody(emailBody);
+        
+                Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+                System.debug('Email sent to user: ' + emailId);
+            }
+                
+        } catch (Exception e) {
+            System.debug('Error: ' + e.getMessage());
+            System.debug('Error: ' + e.getLineNumber());
+            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'sendEmailNotification', 'Error while sending email notification.');
+        }
+
+    }
 }

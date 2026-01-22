@@ -106,7 +106,7 @@ public with sharing class AWSActionControllerV1 {
             
             return response;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'uploadAndCreateMedia', ACTIVITY);
+            ErrorHandler.insertErrordata(e, CTL, 'uploadAndCreateMedia', ACTIVITY);
             response.put('status', 'error');
             response.put('message', 'Unexpected error: ' + e.getMessage());
             return response;
@@ -164,7 +164,7 @@ public with sharing class AWSActionControllerV1 {
             initializeAWSConfig();
             return deleteImagesFromS3(new List<String>{propertyFile[0].Filename__c}, propertyFileId, null);
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'deleteAWSImage', ACTIVITY);
+            ErrorHandler.insertErrordata(e, CTL, 'deleteAWSImage', ACTIVITY);
             response.put('status', 'error');
             response.put('message', 'Failed to delete image: ' + e.getMessage());
             return response;
@@ -203,7 +203,7 @@ public with sharing class AWSActionControllerV1 {
             
             return deleteImagesFromS3(fileNames, null, propertyId);
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'deleteAllAWSImages', ACTIVITY);
+            ErrorHandler.insertErrordata(e, CTL, 'deleteAllAWSImages', ACTIVITY);
             response.put('status', 'error');
             response.put('message', 'Failed to delete images: ' + e.getMessage());
             return response;
@@ -307,7 +307,7 @@ public with sharing class AWSActionControllerV1 {
             response.put('data', 'data:' + mimeType + ';base64,' + base64String);
             return response;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'getBase64Data', ACTIVITY);
+            ErrorHandler.insertErrordata(e, CTL, 'getBase64Data', ACTIVITY);
             response.put('status', 'error');
             response.put('message', 'Failed to fetch Base64 data: ' + e.getMessage());
             return response;
@@ -371,7 +371,7 @@ public with sharing class AWSActionControllerV1 {
             }
             throw new AuraHandledException('S3 upload failed with status ' + res.getStatusCode() + ': ' + res.getStatus());
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'uploadObject', ACTIVITY);
+            ErrorHandler.insertErrordata(e, CTL, 'uploadObject', ACTIVITY);
             throw new AuraHandledException('S3 upload error: ' + e.getMessage());
         }
     }
@@ -418,7 +418,7 @@ public with sharing class AWSActionControllerV1 {
                 return deletelistingmedia(fileId, propertyId);
             }
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'deleteImagesFromS3', ACTIVITY);
+            ErrorHandler.insertErrordata(e, CTL, 'deleteImagesFromS3', ACTIVITY);
             response.put('status', 'error');
             response.put('message', 'S3 delete error: ' + e.getMessage());
             return response;
@@ -507,7 +507,7 @@ public with sharing class AWSActionControllerV1 {
 
             return headers;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'generateAWSHeaders', ACTIVITY);
+            ErrorHandler.insertErrordata(e, CTL, 'generateAWSHeaders', ACTIVITY);
             throw new AuraHandledException('Failed to generate AWS headers: ' + e.getMessage());
         }
     }
@@ -567,7 +567,7 @@ public with sharing class AWSActionControllerV1 {
             }
             return response;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, CTL, 'deletelistingmedia', 'Error while deleting Media record.');
+            ErrorHandler.insertErrordata(e, CTL, 'deletelistingmedia', 'Error while deleting Media record.');
             response.put('status', 'error');
             response.put('message', 'Error while deleting Media record: ' + e.getMessage());
             return response;

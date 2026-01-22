@@ -21,7 +21,7 @@ public class RecordManagersCmpControllerTest {
         
         String checklistData = 'Test Checklist Data';
         Integer totalPages = 5;
-        RecordManagersCmpController.saveMappings(checklistData, totalPages, 'MVEX__Listing__c');
+        RecordManagersCmpController.saveMappings(checklistData, totalPages, 'MVEX__Listing__c', 'test');
         
         Test.stopTest();
 
@@ -32,7 +32,7 @@ public class RecordManagersCmpControllerTest {
     @IsTest
     static void testGetObjectFields() {
         Test.startTest();
-        RecordManagersCmpController.RecordManagerData results = RecordManagersCmpController.getObjectFields('MVEX__Listing__c');
+        RecordManagersCmpController.RecordManagerData results = RecordManagersCmpController.getObjectFields('MVEX__Listing__c', 'Test F');
         Test.stopTest();
 
         System.assertNotEquals(null, results, 'The result should not be null.');

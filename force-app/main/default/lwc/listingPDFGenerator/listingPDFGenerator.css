@@ -252,6 +252,30 @@
   gap: 0.5rem;
 }
 
+.emptyStateContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* padding: 3rem 1rem;
+  min-height: 25rem; */
+}
+
+.emptyStateImage {
+  width: 15rem;
+  height: auto;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+.emptyStateMessage {
+  font-size: 16px;
+  color: #0176D3;
+  text-align: center;
+  font-weight: 500;
+  /* margin-bottom: 2rem; */
+}
+
 @media only screen and (max-width: 1440px) {
   .iframe_outer {
     width: 100%;

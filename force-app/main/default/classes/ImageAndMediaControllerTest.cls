@@ -70,7 +70,7 @@ public with sharing class ImageAndMediaControllerTest {
 
             insert new List<Property_File__c> { propertyFile1, propertyFile2 };
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ImageAndMediaControllerTest', 'setupTestData', 'Error while creating test data.');
+            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'setupTestData', 'Error while creating test data.');
         }
     }
 
@@ -91,7 +91,7 @@ public with sharing class ImageAndMediaControllerTest {
             System.assertEquals(listing.Property__c, result.propertyId, 'Property Id should match');
             System.assertEquals(2, result.listingImages.size(), 'There should be 2 images');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ImageAndMediaControllerTest', 'testFetchListingAndImages', 'Error while fetching listing and images.');
+            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testFetchListingAndImages', 'Error while fetching listing and images.');
         }
     }
 
@@ -132,7 +132,7 @@ public with sharing class ImageAndMediaControllerTest {
             System.assert(result != null, 'Media should be created successfully');
                         
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ImageAndMediaControllerTest', 'testCreateMediaForListing', 'Error while creating media for listing.');
+            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testCreateMediaForListing', 'Error while creating media for listing.');
         }
     }
 
@@ -149,7 +149,7 @@ public with sharing class ImageAndMediaControllerTest {
 
             System.assertNotEquals(null, config, 'Config settings should not be null');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ImageAndMediaControllerTest', 'testGetS3ConfigSettings', 'Error while getting S3 config settings.');
+            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testGetS3ConfigSettings', 'Error while getting S3 config settings.');
         }
     }
 
@@ -182,7 +182,7 @@ public with sharing class ImageAndMediaControllerTest {
             // Add assertions here
             System.assertEquals('success', result, 'Method should return success');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ImageAndMediaControllerTest', 'testUpdatePropertyFileRecords', 'Error while updating property file records.');
+            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testUpdatePropertyFileRecords', 'Error while updating property file records.');
         }
     }
     
@@ -200,7 +200,7 @@ public with sharing class ImageAndMediaControllerTest {
             Test.stopTest();
            System.assert(cv != null, 'Contentversion inserted.');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ImageAndMediaControllerTest', 'testGetS3ConfigSettings', 'Error while getting S3 config settings.');
+            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testGetS3ConfigSettings', 'Error while getting S3 config settings.');
         }
     }
 }

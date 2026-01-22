@@ -45,7 +45,7 @@ public with sharing class PropertyFileTriggerHandler {
                 deleteImagesFromS3(fileNames, awsBucket, awsKey, awsSecret, awsRegion, payloadHash);
             }
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PropertyFileTriggerHandler', 'handleAfterDelete', 'Error while deleting property files from S3.');
+            ErrorHandler.insertErrordata(e, 'PropertyFileTriggerHandler', 'handleAfterDelete', 'Error while deleting property files from S3.');
         }
     }
     
@@ -89,7 +89,7 @@ public with sharing class PropertyFileTriggerHandler {
             Http http = new Http();
             HttpResponse res = http.send(req);
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PropertyFileTriggerHandler', 'deleteImagesFromS3', 'Error while deleting property files from S3.');
+            ErrorHandler.insertErrordata(e, 'PropertyFileTriggerHandler', 'deleteImagesFromS3', 'Error while deleting property files from S3.');
         }
     }
     
@@ -154,7 +154,7 @@ public with sharing class PropertyFileTriggerHandler {
         
             return headers;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PropertyFileTriggerHandler', 'generateAWSHeaders', 'Error while generating AWS headers.');
+            ErrorHandler.insertErrordata(e, 'PropertyFileTriggerHandler', 'generateAWSHeaders', 'Error while generating AWS headers.');
             return null;
         }
     }
@@ -176,7 +176,7 @@ public with sharing class PropertyFileTriggerHandler {
             Blob kSigning = Crypto.generateMac('HmacSHA256', Blob.valueOf('aws4_request'), kService);
             return kSigning;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'PropertyFileTriggerHandler', 'getSignatureKey', 'Error while getting signature key.');
+            ErrorHandler.insertErrordata(e, 'PropertyFileTriggerHandler', 'getSignatureKey', 'Error while getting signature key.');
             return null;
         }
     }

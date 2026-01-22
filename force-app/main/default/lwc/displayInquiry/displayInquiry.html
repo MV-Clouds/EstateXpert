@@ -117,7 +117,7 @@
                                             <div class="condition-div-body">
                                                 <div class="slds-form_element">
                                                     <lightning-combobox name="inquiryField" label="Inquiry Field"
-                                                        value={inquiryFieldObject.Field_Name__c}
+                                                        value={inquiryFieldObject.MVEX__Field_Name__c}
                                                         options={inquirypicklistoptions}
                                                         onchange={handleInquiryFieldChange} required>
                                                     </lightning-combobox>
@@ -135,21 +135,21 @@
 
                                                     <label>Value<span class="red">*</span></label>
                                                     <template if:true={inquiryFieldObject.isPrimary}>
-                                                        <lightning-input type={inquiryFieldObject.Data_Type__c}
-                                                            value={selectedListingField} data-field="Value__c"
+                                                        <lightning-input type={inquiryFieldObject.MVEX__Data_Type__c}
+                                                            value={selectedListingField} data-field="MVEX__Value__c"
                                                             onchange={handleListingFieldChange}
                                                             variant="label-hidden"></lightning-input>
                                                     </template>
                                                     <template if:true={inquiryFieldObject.isPicklist}>
                                                         <lightning-combobox value={selectedListingField}
-                                                            data-field="Value__c"
+                                                            data-field="MVEX__Value__c"
                                                             options={inquiryFieldObject.picklistValues}
                                                             onchange={handleListingFieldChange}
                                                             variant="label-hidden"></lightning-combobox>
                                                     </template>
                                                     <template if:true={inquiryFieldObject.isReference}>
                                                         <lightning-record-picker value={selectedListingField}
-                                                            label="Reference" data-field="Value__c"
+                                                            label="Reference" data-field="MVEX__Value__c"
                                                             object-api-name={inquiryFieldObject.objectApiName}
                                                             onchange={handleRefChange}
                                                             
@@ -500,6 +500,4 @@
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
     </template>
-
-
 </template>

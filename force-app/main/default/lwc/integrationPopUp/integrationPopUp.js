@@ -156,55 +156,76 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                             this.fieldsData = { ...data.objectData };
                         }
                         
-                        // Store original AWS credentials if editing
+                        // Store original AWS credentials if editing (only if values exist)
                         if (this.integrationname === 'AWS' && data.objectData) {
-                            this.originalCredentials.MVEX__AWS_Access_Key__c = data.objectData.MVEX__AWS_Access_Key__c;
-                            this.originalCredentials.MVEX__AWS_Secret_Access_Key__c = data.objectData.MVEX__AWS_Secret_Access_Key__c;
-                            // Replace with placeholder in fieldsData
-                            this.fieldsData.MVEX__AWS_Access_Key__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__AWS_Secret_Access_Key__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            if (data.objectData.MVEX__AWS_Access_Key__c) {
+                                this.originalCredentials.MVEX__AWS_Access_Key__c = data.objectData.MVEX__AWS_Access_Key__c;
+                                this.fieldsData.MVEX__AWS_Access_Key__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__AWS_Secret_Access_Key__c) {
+                                this.originalCredentials.MVEX__AWS_Secret_Access_Key__c = data.objectData.MVEX__AWS_Secret_Access_Key__c;
+                                this.fieldsData.MVEX__AWS_Secret_Access_Key__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
                         }
                         
-                        // Store original Gmail credentials if editing
+                        // Store original Gmail credentials if editing (only if values exist)
                         if (this.integrationname === 'Gmail' && data.objectData) {
-                            this.originalCredentials.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
-                            this.originalCredentials.MVEX__Client_Secret__c = data.objectData.MVEX__Client_Secret__c;
-                            this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
-                            // Replace with placeholder in fieldsData
-                            this.fieldsData.MVEX__Client_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__Refresh_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            if (data.objectData.MVEX__Client_ID__c) {
+                                this.originalCredentials.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
+                                this.fieldsData.MVEX__Client_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__Client_Secret__c) {
+                                this.originalCredentials.MVEX__Client_Secret__c = data.objectData.MVEX__Client_Secret__c;
+                                this.fieldsData.MVEX__Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__Refresh_Token__c) {
+                                this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
+                                this.fieldsData.MVEX__Refresh_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
                         }
                         
-                        // Store original Outlook credentials if editing
+                        // Store original Outlook credentials if editing (only if values exist)
                         if (this.integrationname === 'Outlook' && data.objectData) {
-                            this.originalCredentials.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
-                            this.originalCredentials.MVEX__Azure_Client_Secret__c = data.objectData.MVEX__Azure_Client_Secret__c;
-                            this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
-                            // Replace with placeholder in fieldsData
-                            this.fieldsData.MVEX__Client_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__Azure_Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__Refresh_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            if (data.objectData.MVEX__Client_ID__c) {
+                                this.originalCredentials.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
+                                this.fieldsData.MVEX__Client_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__Azure_Client_Secret__c) {
+                                this.originalCredentials.MVEX__Azure_Client_Secret__c = data.objectData.MVEX__Azure_Client_Secret__c;
+                                this.fieldsData.MVEX__Azure_Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__Refresh_Token__c) {
+                                this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
+                                this.fieldsData.MVEX__Refresh_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
                         }
                         
-                        // Store original Instagram credentials if editing
+                        // Store original Instagram credentials if editing (only if values exist)
                         if (this.integrationname === 'Instagram' && data.objectData) {
-                            this.originalCredentials.MVEX__ClientId__c = data.objectData.MVEX__ClientId__c;
-                            this.originalCredentials.MVEX__ClientSecret__c = data.objectData.MVEX__ClientSecret__c;
-                            this.originalCredentials.MVEX__AccessToken__c = data.objectData.MVEX__AccessToken__c;
-                            this.originalCredentials.MVEX__Long_Access_Token__c = data.objectData.MVEX__Long_Access_Token__c;
-                            // Replace with placeholder in fieldsData
-                            this.fieldsData.MVEX__ClientId__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__ClientSecret__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__AccessToken__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            this.fieldsData.MVEX__Long_Access_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            if (data.objectData.MVEX__ClientId__c) {
+                                this.originalCredentials.MVEX__ClientId__c = data.objectData.MVEX__ClientId__c;
+                                this.fieldsData.MVEX__ClientId__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__ClientSecret__c) {
+                                this.originalCredentials.MVEX__ClientSecret__c = data.objectData.MVEX__ClientSecret__c;
+                                this.fieldsData.MVEX__ClientSecret__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__AccessToken__c) {
+                                this.originalCredentials.MVEX__AccessToken__c = data.objectData.MVEX__AccessToken__c;
+                                this.fieldsData.MVEX__AccessToken__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__Long_Access_Token__c) {
+                                this.originalCredentials.MVEX__Long_Access_Token__c = data.objectData.MVEX__Long_Access_Token__c;
+                                this.fieldsData.MVEX__Long_Access_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
                         }
                         
-                        // Store original Meta credentials if editing
+                        // Store original Meta credentials if editing (only if values exist)
                         if (this.integrationname === 'Meta' && data.objectData) {
-                            this.originalCredentials.MVEX__ACCESS_TOKEN__c = data.objectData.MVEX__ACCESS_TOKEN__c;
-                            // Replace with placeholder in fieldsData
-                            this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            if (data.objectData.MVEX__ACCESS_TOKEN__c) {
+                                this.originalCredentials.MVEX__ACCESS_TOKEN__c = data.objectData.MVEX__ACCESS_TOKEN__c;
+                                this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
                         }
                     } else {
                         this.fieldsData = {};

@@ -1,65 +1,73 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
 	<types>
-		<members>*</members>
+		<members>AWSActionControllerV1</members>
+		<members>CreateInstallmentInvoiceController</members>
+		<members>CreatePaymentInvoiceController</members>
+		<members>DocGenerateController</members>
+		<members>EventReminderScheduler</members>
+		<members>FieldSetController</members>
+		<members>FileDownloadController</members>
+		<members>FileUploaderController</members>
+		<members>GenerateDocumentController</members>
+		<members>GoogleLeadFieldMappingController</members>
+		<members>GoogleLeadsWebhook</members>
+		<members>ImageAndMediaControllerTest</members>
+		<members>InstagramController</members>
+		<members>InstagramPostController</members>
+		<members>InstagramPostControllerTest</members>
+		<members>IntegrationPopupController</members>
+		<members>KeyMappingController</members>
+		<members>ListingManagerControllerTest</members>
+		<members>ListingManagerFilterControllerTest</members>
+		<members>ListingTriggerHandler</members>
+		<members>MetaLeadWebhook</members>
+		<members>PortalMappingController</members>
+		<members>PortalMappingControllerTest</members>
+		<members>PortalSyndicationControllerTest</members>
+		<members>PropertyFileTriggerHandler</members>
+		<members>PropertySearchController</members>
+		<members>RecordManagersCmpController</members>
+		<members>RecordManagersCmpControllerTest</members>
+		<members>SupportRequestController</members>
+		<members>TemplateBuilderController</members>
 		<name>ApexClass</name>
 	</types>
 	<types>
-		<members>*</members>
-		<name>ApexComponent</name>
-	</types>
-	<types>
-		<members>*</members>
+		<members>DocGeneratePage</members>
+		<members>FileDownloadVFPage</members>
 		<name>ApexPage</name>
 	</types>
 	<types>
-		<members>*</members>
-		<name>ApexTrigger</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>AuraDefinitionBundle</name>
-	</types>
-	<types>
-		<members>CLAR_Users</members>
-		<members>EmailMessageEmailService</members>
-		<members>EstateXpert_Endpoint</members>
-		<members>GeminiApiKey</members>
-		<members>GmailServiceLabel</members>
-		<members>Gmail_Sending_Endpoint</members>
-		<members>Google_Drive_Endpoint</members>
-		<members>Google_Drive_Scope</members>
-		<members>Google_Endpoint</members>
-		<members>InstagramEndPoint</members>
-		<members>Lead_Welcome_Email_Template</members>
-		<members>Outlook_Batch_Url</members>
-		<members>Outlook_Endpoint</members>
-		<members>PropertyFinder_Endpoint_Production</members>
-		<members>ReminderBeforeDays</members>
-		<members>Rightmove_Endpoint_Production</members>
-		<members>Rightmove_Endpoint_Sandbox</members>
-		<members>Whatsapp_Endpoint</members>
-		<members>Whatsapp_Webhook_Gmail_API</members>
-		<members>Zoopla_Doc_Endpoint</members>
-		<members>Zoopla_Endpoint</members>
-		<members>supportEmail</members>
-		<name>CustomLabel</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomLabels</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomMetadata</name>
-	</types>
-	<types>
-		<members>*</members>
+		<members>displayCampaigns</members>
+		<members>displayInquiry</members>
+		<members>emailIntegration</members>
+		<members>globalProperties</members>
+		<members>instagramPost</members>
+		<members>instagramPostFromListing</members>
+		<members>integrationPopUp</members>
+		<members>keyMappingContainer</members>
+		<members>leadCaptureCmp</members>
+		<members>listingPDFGenerator</members>
+		<members>mapFields</members>
+		<members>mappingComponent</members>
+		<members>objectConfigComp</members>
+		<members>portalMappingComponent</members>
+		<members>siteAndBookingManagement</members>
+		<members>socialMediaIntegration</members>
+		<members>storageIntegration</members>
+		<members>templateEditor</members>
+		<members>templateHomePage</members>
+		<members>templatePreviewModal</members>
+		<members>wbAllBroadcastGroupPage</members>
+		<members>wbAllBroadcastPage</members>
+		<members>wbAllFlowsPage</members>
+		<members>wbAllTemplatePage</members>
 		<name>LightningComponentBundle</name>
 	</types>
 	<types>
-		<members>*</members>
+		<members>leadassignmentcss</members>
 		<name>StaticResource</name>
 	</types>
-	<version>62.0</version>
+	<version>65.0</version>
 </Package>

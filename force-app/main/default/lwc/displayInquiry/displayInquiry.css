@@ -373,7 +373,7 @@ span {
     z-index: 10;
     border-radius: 8px;
     background-color: aliceblue;
-    background-image: url('/resource/newImageandMediaBg');
+    background-image: url('/resource/MVEX__newImageandMediaBg');
     background-position: bottom;
     box-shadow: 0px 0px 10px 0px #00000040;
     display: flex;
@@ -434,7 +434,7 @@ span {
     padding: 1rem;
     width: 100%;
     background-color: aliceblue;
-    background-image: url('/resource/newImageandMediaBg');
+    background-image: url('/resource/MVEX__newImageandMediaBg');
     background-position: bottom;
     box-shadow: 0px 0px 10px 0px #00000040;
     border-radius: 8px;
@@ -513,7 +513,7 @@ span {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: unset;
-    background-image: url('/resource/newImageandMediaBg');
+    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
 }
@@ -569,7 +569,7 @@ span {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: unset;
-    background-image: url(/resource/newImageandMediaBg);
+    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-radius: 0px 0px 8px 8px;
 }
 

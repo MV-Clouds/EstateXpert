@@ -22,6 +22,7 @@ export default class ListingPDFGenerator extends LightningElement {
     @track isStep2 = false;
     @track selectedValue = null;
     @track vfGeneratePageSRC;
+    @track isDataAvailable = true;
 
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
@@ -117,13 +118,13 @@ export default class ListingPDFGenerator extends LightningElement {
             }
             var paraDataStringify = JSON.stringify(paraData);
 
-            var newSRC = '/apex/DocGeneratePage?paraData=' + paraDataStringify;
+            var newSRC = '/apex/MVEX__DocGeneratePage?paraData=' + paraDataStringify;
 
             if(newSRC !== previousSRC){
                 this.vfPageSRC = newSRC;
             }
             else{
-                this.vfPageSRC = '/apex/DocGeneratePage';
+                this.vfPageSRC = '/apex/MVEX__DocGeneratePage';
 
                 this.template.querySelector('[data-id="previewTimeout"]')?.setCustomTimeoutMethod(() => {
                     this.vfPageSRC = newSRC;
@@ -162,12 +163,12 @@ export default class ListingPDFGenerator extends LightningElement {
                 'fileName' : this.listingName
             }
             let paraDataStringify2 = JSON.stringify(paraData2);
-            let newSRC = '/apex/DocGeneratePage?paraData=' + encodeURIComponent(paraDataStringify2);
+            let newSRC = '/apex/MVEX__DocGeneratePage?paraData=' + encodeURIComponent(paraDataStringify2);
 
             if(newSRC !== previousSRC){
                 this.vfGeneratePageSRC = newSRC;
             } else{
-                this.vfGeneratePageSRC = '/apex/DocGeneratePage';
+                this.vfGeneratePageSRC = '/apex/MVEX__DocGeneratePage';
                 previewTimeout?.setCustomTimeoutMethod(() => {
                     this.vfGeneratePageSRC = newSRC;
                 }, 300);

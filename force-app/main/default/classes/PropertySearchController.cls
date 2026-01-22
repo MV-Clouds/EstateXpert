@@ -56,16 +56,16 @@ public with sharing class PropertySearchController {
             List<Listing__c> currentListing = new List<Listing__c>();
             List<Inquiry__c> currentInquiry = new List<Inquiry__c>();
             
-            String listingFields = String.escapeSingleQuotes(getAllFields('Listing__c'));
-            String inquiryFields = String.escapeSingleQuotes(getAllFields('Inquiry__c'));
+            String listingFields = String.escapeSingleQuotes(getAllFields('MVEX__Listing__c'));
+            String inquiryFields = String.escapeSingleQuotes(getAllFields('MVEX__Inquiry__c'));
             
-            String listingData = 'SELECT ' + listingFields + ', (SELECT ' + inquiryFields + ' FROM Inquiries__r) FROM Listing__c WHERE Id = :recId';
-            String inquiryData = 'SELECT ' + inquiryFields + ' FROM Inquiry__c';
+            String listingData = 'SELECT ' + listingFields + ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r) FROM MVEX__Listing__c WHERE Id = :recId';
+            String inquiryData = 'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c';
             
-            String listingData2 = 'SELECT ' + listingFields + ', (SELECT ' + inquiryFields + ' FROM Inquiries__r) FROM Listing__c';
-            String inquiryData2 = 'SELECT ' + inquiryFields + ' FROM Inquiry__c WHERE id =:recId';
+            String listingData2 = 'SELECT ' + listingFields + ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r) FROM MVEX__Listing__c';
+            String inquiryData2 = 'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE id =:recId';
             
-            if (objectName == 'Listing__c') {
+            if (objectName == 'MVEX__Listing__c') {
                 currentListing = Database.query(listingData, AccessLevel.USER_MODE);
                 inquiries = Database.query(inquiryData, AccessLevel.USER_MODE);
 
@@ -73,7 +73,7 @@ public with sharing class PropertySearchController {
                 wc.inquiries = inquiries;
                 
             }
-            else if (objectName == 'Inquiry__c') {
+            else if (objectName == 'MVEX__Inquiry__c') {
                 currentInquiry = Database.query(inquiryData2, AccessLevel.USER_MODE);
                 listings = Database.query(listingData2, AccessLevel.USER_MODE);
                 
@@ -168,8 +168,8 @@ public with sharing class PropertySearchController {
             // Extract the Contact__c IDs from the inquiries
             List<Id> contactIds = new List<Id>();
             for (Map<String, Object> inquiry : inquiries) {
-                if (inquiry.containsKey('contact__c') && inquiry.get('contact__c') != null) {
-                    contactIds.add((Id) inquiry.get('contact__c'));
+                if (inquiry.containsKey('mvex__contact__c') && inquiry.get('mvex__contact__c') != null) {
+                    contactIds.add((Id) inquiry.get('mvex__contact__c'));
                 }
             }
 

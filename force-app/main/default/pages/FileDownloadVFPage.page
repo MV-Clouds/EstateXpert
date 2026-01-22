@@ -30,11 +30,11 @@
                 }
             </style>
             {!fileDownload}
-            <div class="main-control-center-div">
+            <!-- <div class="main-control-center-div">
                 <div class="logo-div">
                     <img class="logo-image" src="/resource/WBConnectLogo" alt="WBConnect Logo"></img>
                 </div>
-            </div>
+            </div> -->
         </body>
     </html>
 </apex:page>

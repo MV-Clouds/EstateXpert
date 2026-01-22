@@ -1,72 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
 	<types>
-		<members>AWSActionControllerV1</members>
-		<members>CreateInstallmentInvoiceController</members>
-		<members>CreatePaymentInvoiceController</members>
-		<members>DocGenerateController</members>
-		<members>EventReminderScheduler</members>
-		<members>FieldSetController</members>
-		<members>FileDownloadController</members>
-		<members>FileUploaderController</members>
-		<members>GenerateDocumentController</members>
-		<members>GoogleLeadFieldMappingController</members>
-		<members>GoogleLeadsWebhook</members>
-		<members>ImageAndMediaControllerTest</members>
-		<members>InstagramController</members>
-		<members>InstagramPostController</members>
-		<members>InstagramPostControllerTest</members>
-		<members>IntegrationPopupController</members>
-		<members>KeyMappingController</members>
-		<members>ListingManagerControllerTest</members>
-		<members>ListingManagerFilterControllerTest</members>
-		<members>ListingTriggerHandler</members>
-		<members>MetaLeadWebhook</members>
-		<members>PortalMappingController</members>
-		<members>PortalMappingControllerTest</members>
-		<members>PortalSyndicationControllerTest</members>
-		<members>PropertyFileTriggerHandler</members>
-		<members>PropertySearchController</members>
-		<members>RecordManagersCmpController</members>
-		<members>RecordManagersCmpControllerTest</members>
-		<members>SupportRequestController</members>
-		<members>TemplateBuilderController</members>
+		<members>*</members>
 		<name>ApexClass</name>
 	</types>
 	<types>
-		<members>DocGeneratePage</members>
-		<members>FileDownloadVFPage</members>
+		<members>*</members>
+		<name>ApexComponent</name>
+	</types>
+	<types>
+		<members>*</members>
 		<name>ApexPage</name>
 	</types>
 	<types>
-		<members>displayCampaigns</members>
-		<members>displayInquiry</members>
-		<members>emailIntegration</members>
-		<members>globalProperties</members>
-		<members>instagramPost</members>
-		<members>instagramPostFromListing</members>
-		<members>integrationPopUp</members>
-		<members>keyMappingContainer</members>
-		<members>leadCaptureCmp</members>
-		<members>listingPDFGenerator</members>
-		<members>mapFields</members>
-		<members>mappingComponent</members>
-		<members>objectConfigComp</members>
-		<members>portalMappingComponent</members>
-		<members>siteAndBookingManagement</members>
-		<members>socialMediaIntegration</members>
-		<members>storageIntegration</members>
-		<members>templateEditor</members>
-		<members>templateHomePage</members>
-		<members>templatePreviewModal</members>
-		<members>wbAllBroadcastGroupPage</members>
-		<members>wbAllBroadcastPage</members>
-		<members>wbAllFlowsPage</members>
-		<members>wbAllTemplatePage</members>
+		<members>*</members>
+		<name>ApexTrigger</name>
+	</types>
+	<types>
+		<members>*</members>
+		<name>AuraDefinitionBundle</name>
+	</types>
+	<types>
+		<members>*</members>
+		<name>CustomMetadata</name>
+	</types>
+	<types>
+		<members>*</members>
 		<name>LightningComponentBundle</name>
 	</types>
 	<types>
-		<members>leadassignmentcss</members>
+		<members>*</members>
 		<name>StaticResource</name>
 	</types>
 	<version>65.0</version>

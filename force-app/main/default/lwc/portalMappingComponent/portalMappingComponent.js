@@ -19,10 +19,6 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     @track portals = [];
     @track isSpinner = true;
     @track portalMappingIcon = portalMappingIcon;
-    @track isCreateable = false;
-    @track isAccessible = false;
-    @track isUpdateable = false;
-    @track isDeletable = false;
     @track subscription = {};
     @track channelName = '/event/MVEX__ResponseEvent__e';
     @track errorBody;
@@ -65,10 +61,6 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
             getPortalRecords()
                 .then(result => {
                     this.portals = result.portalDetailsRecords;
-                    this.isCreateable = result.isCreateable;
-                    this.isAccessible = result.isAccessible;
-                    this.isUpdateable = result.isUpdateable;
-                    this.isDeletable = result.isDeletable;
                     this.isXMLForPF = result.isXMLForPF;
                     if (result.portalRecords.length > 0) {
                         this.portalRecordList = result.portalRecords.map((val, index) => ({
@@ -220,7 +212,6 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
                     portalName: portalName,
                     portalIconUrl: portalIconURL,
                     portalStatus: portalStatus,
-                    isCreateable: this.isCreateable,
                     isXMLForPF: this.isXMLForPF
                 }
             };

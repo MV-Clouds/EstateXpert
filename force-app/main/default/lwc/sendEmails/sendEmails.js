@@ -233,10 +233,14 @@ export default class SendEmails extends LightningElement {
     // Template options based on selected template type and listing
     get availableTemplates() {
         let templates = [];
+        console.log('campaign==> ',JSON.stringify(this.campaignDetails));
+        
         
         if (this.campaignDetails.templateType === 'Email Template') {
             templates = [...this.filteredEmailTemplates];
         } else if (this.campaignDetails.templateType === 'EstateXpert Template') {
+            console.log('here2');
+            
             templates = [...this.filteredCustomTemplates];
         }
     
@@ -454,6 +458,8 @@ export default class SendEmails extends LightningElement {
         getTemplatesByObject()
             .then(data => {
                 if (data) {
+                    console.log('data from backend ',data);
+                    
                     this.allEmailTemplates = data.emailTemplates ? data.emailTemplates.map(template => ({
                         label: template.label,
                         value: template.value,
@@ -471,6 +477,8 @@ export default class SendEmails extends LightningElement {
                         objectName: template.objectName
                     })) : [];
 
+                    console.log('all custom template => ', JSON.stringify(this.allCustomTemplates));
+                    
                     this.filterTemplatesByObject();
                 }
             })
@@ -590,17 +598,25 @@ export default class SendEmails extends LightningElement {
     filterTemplatesByObject() {
         const objectName = this.campaignDetails.objectName;
 
+        console.log('obj name => ',objectName);
+        
         if (!objectName) {
             this.filteredEmailTemplates = [];
             this.filteredCustomTemplates = [];
             return;
         }
         
+        
+        
         this.filteredEmailTemplates = [...this.allEmailTemplates];
         
         this.filteredCustomTemplates = this.allCustomTemplates.filter(template => 
             template.objectName === objectName || template.objectName === 'Generic'
         );
+
+        console.log('all custom ',JSON.stringify(this.allCustomTemplates));
+        console.log('filter custom temp--> ', JSON.stringify(this.filteredCustomTemplates));
+        
     }
 
     // Handle campaign type selection (auto-advance)
@@ -1112,8 +1128,11 @@ export default class SendEmails extends LightningElement {
 
         try {
             if (this.isSingleCampaign) {
+                console.log('handleSingleCampaignSend');
+                
                 this.handleSingleCampaignSend();
             } else {
+                console.log('handleDripCampaignCreate');
                 this.handleDripCampaignCreate();
             }
         } catch (error) {

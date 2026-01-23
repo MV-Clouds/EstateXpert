@@ -18,14 +18,17 @@
                             <div class="slds-page-header__col-actions header-button">
                                 <div class="slds-page-header__controls header-buttons-div">
                                     <div class="header-buttons">
-                                        <c-record-config-body-cmp feature-name="Marketing List"></c-record-config-body-cmp>
-                                        <button onclick={handleSendMessage} class="icon-button"
+                                        <button onclick={openConfigureSettings} class="icon-button">
+                                            Configure Settings
+                                        </button>
+                                        <template if:true={isConfigOpen}>
+                                            <c-record-config-body-cmp feature-name="Marketing List"
+                                                onclose={handleCloseModal}></c-record-config-body-cmp>
+                                        </template> <button onclick={handleSendMessage} class="icon-button"
                                             disabled={isContactSelected}>
                                             Send Message
                                         </button>
-                                        <!-- <button onclick={openModal} class="icon-button" disabled={isContactSelected}>
-                                            Send Mass Emails
-                                        </button> -->
+
                                         <button onclick={handleAdd} class="icon-button">
                                             Send Emails
                                         </button>
@@ -338,84 +341,9 @@
     <!-- <c-email-campaign-modal if:true={isModalOpen} onclose={handleModalClose} selected-contacts={selectedContactList}>
     </c-email-campaign-modal> -->
 
-    <c-send-emails if:true={isModalOpen} onclose={handleModalClose} show-modal={isModalOpen} object-api-name={objectName}
-        selected-contacts={selectedContactList}>
+    <c-send-emails if:true={isModalOpen} onclose={handleModalClose} show-modal={isModalOpen}
+        object-api-name={objectName} selected-contacts={selectedContactList}>
     </c-send-emails>
-
-    <template if:true={isMassEmailModalOpen}>
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
-            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
-            <div class="slds-modal__container">
-                <!-- Modal/Popup Header -->
-                <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                            fill="white" />
-                    </svg>
-                </div>
-
-                <div class="slds-modal__header blue-header">
-                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Send Mass Email</h1>
-                </div>
-
-                <!-- Modal/Popup Body -->
-                <div class="slds-modal__content slds-p-around_medium custom-modal-content">
-                    <template if:true={isFirstScreen}>
-                        <div class="total-records">
-                            Total Contact Selected : {totalSelected}
-                        </div>
-
-                        <div class="dotted-border"></div>
-
-                        <div class="input-box">
-                            <legend class="slds-form-element__legend slds-form-element__label"><span
-                                    class="red">*</span>How do you want to send?</legend>
-                            <lightning-combobox name="sendMethod" value={sendMethod} placeholder="Select a method"
-                                options={messageOptions} onchange={handleSendMethodChange}>
-                            </lightning-combobox>
-                        </div>
-
-                        <div class="input-box">
-                            <legend class="slds-form-element__legend slds-form-element__label"><span
-                                    class="red">*</span>Select Custom Template</legend>
-                            <lightning-combobox name="gmailTemplate" value={selectedTemplate}
-                                placeholder="Select a template" options={getQuickTemplates}
-                                onchange={handleGmailTemplateChange}>
-                            </lightning-combobox>
-                        </div>
-                    </template>
-
-                    <template if:false={isFirstScreen}>
-                        <div class="content-body">
-                            <template if:true={isTemplateBody}>
-                                <div class="template-body-header">
-                                    <h3>Preview</h3>
-                                </div>
-                                <div class="dotted-border"></div>
-                                <div class="scrollable-content">
-                                    <div class="richText"></div>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    <div class="footer-btns">
-                        <template if:true={isFirstScreen}>
-                            <button class="save_btn_css" onclick={handleFooterButtonClick}>Next</button>
-                        </template>
-                        <template if:false={isFirstScreen}>
-                            <button class="cancel_btn_css" onclick={handleBack}>Back</button>
-                            <button class="save_btn_css" onclick={handleFooterButtonClick}>Send</button>
-                        </template>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-
-    </template>
 
     <template if:true={showTemplate}>
         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"

@@ -79,13 +79,22 @@ public with sharing class MarketingListCmpController {
     */
     private static List<Map<String, String>> getConfiguredFields() {
         try {
-            List<recordManagerMarketingConfig__mdt> configs = [SELECT FieldsData__c FROM recordManagerMarketingConfig__mdt WITH USER_MODE LIMIT 1];
+            // Query Custom Object instead of Metadata
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT MVEX__Fields_Data__c 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Feature_Name__c = 'Marketing List' 
+                AND MVEX__Object_API_Name__c = 'Contact' 
+                AND MVEX__Configuration_Type__c = 'Manager Config'
+                WITH USER_MODE 
+                LIMIT 1
+            ];
             
             List<Map<String, String>> fields = new List<Map<String, String>>();
             
             if (!configs.isEmpty()) {
-                recordManagerMarketingConfig__mdt config = configs[0];
-                String fieldsDataJson = config.FieldsData__c;
+                MVEX__Configuration_Settings__c config = configs[0];
+                String fieldsDataJson = config.MVEX__Fields_Data__c;
                 
                 if (String.isNotBlank(fieldsDataJson)) {
                     // Deserialize JSON to List<Map<String, String>>
@@ -103,11 +112,20 @@ public with sharing class MarketingListCmpController {
     // Helper method to get pageSize from metadata
     private static Integer getPageSizeFromConfig() {
         try {
-            List<recordManagerMarketingConfig__mdt> configs = [SELECT PageSize__c FROM recordManagerMarketingConfig__mdt WITH USER_MODE LIMIT 1];
+            // Query Custom Object instead of Metadata
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT MVEX__Page_Size__c 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Feature_Name__c = 'Marketing List' 
+                AND MVEX__Object_API_Name__c = 'Contact' 
+                AND MVEX__Configuration_Type__c = 'Manager Config'
+                WITH USER_MODE 
+                LIMIT 1
+            ];
         
             if (!configs.isEmpty()) {
-                recordManagerMarketingConfig__mdt config = configs[0];
-                return config.PageSize__c != null ? Integer.valueOf(config.PageSize__c) : 30; // Default to 30 if not set
+                MVEX__Configuration_Settings__c config = configs[0];
+                return config.MVEX__Page_Size__c != null ? Integer.valueOf(config.MVEX__Page_Size__c) : 30; // Default to 30 if not set
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MarketingListCmpController', 'getPageSizeFromConfig', 'Error while getting page size from config.');

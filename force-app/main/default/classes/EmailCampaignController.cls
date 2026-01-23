@@ -203,7 +203,7 @@ public with sharing class EmailCampaignController {
                 templateWrappers.marketingTemplates.add(wrapper);
             }
             
-            List<Template__c> templatedatas = [SELECT Id, Template_Name__c FROM Template__c WHERE Object_API_Name__c = 'MVEX__Listing__c' AND Template_Status__c = true WITH USER_MODE ORDER BY Template_Name__c ASC];
+            List<Template__c> templatedatas = [SELECT Id, Template_Name__c FROM Template__c WHERE Object_API_Name__c = 'Listing__c' AND Template_Status__c = true WITH USER_MODE ORDER BY Template_Name__c ASC];
             
             for (Template__c template : templatedatas) {
                 TemplateWrapper wrapper = new TemplateWrapper();
@@ -324,12 +324,12 @@ public with sharing class EmailCampaignController {
                 Set<String> broadcastRecipientIds = new Set<String>();
                 
                 // Determine the correct recipient field to query based on relatedObject
-                String recipientIdField = 'MVEX__Member_Record_Id__c';
+                String recipientIdField = 'Member_Record_Id__c';
                 
                 // Build dynamic SOQL query string
                 String query = 'SELECT ' + recipientIdField + 
-                            ' FROM MVEX__Broadcast_Group_Member__c' +
-                            ' WHERE MVEX__Broadcast_Group_ID__c IN :selectedBroadcastGroups' +
+                            ' FROM Broadcast_Group_Member__c' +
+                            ' WHERE Broadcast_Group_ID__c IN :selectedBroadcastGroups' +
                             ' AND ' + recipientIdField + ' != NULL' ;
                             
                 // Execute dynamic query
@@ -434,7 +434,7 @@ public with sharing class EmailCampaignController {
                         if (adjustedDate < System.today()) {
                             adjustedDate = adjustedDate.addYears(1);
                         }
-                    } else if (selectedContactDateField == 'MVEX__Next_Available_Date__c' && fieldValue <= System.today()) {
+                    } else if (selectedContactDateField == 'Next_Available_Date__c' && fieldValue <= System.today()) {
                         failedEmails += marketingEmailCount;
                         conMap.put(conId, email);
                         continue;
@@ -702,10 +702,10 @@ public with sharing class EmailCampaignController {
             if (!selectedBroadcastGroups.isEmpty()) {
                 Set<String> broadcastRecipientIds = new Set<String>();
                 
-                String recipientIdField = 'MVEX__Member_Record_Id__c';
+                String recipientIdField = 'Member_Record_Id__c';
                 String query = 'SELECT ' + recipientIdField + 
-                                ' FROM MVEX__Broadcast_Group_Member__c' +
-                                ' WHERE MVEX__Broadcast_Group_ID__c IN :selectedBroadcastGroups' +
+                                ' FROM Broadcast_Group_Member__c' +
+                                ' WHERE Broadcast_Group_ID__c IN :selectedBroadcastGroups' +
                                 ' AND ' + recipientIdField + ' != NULL' ;
                 
                 List<SObject> groupMembers = Database.query(String.escapeSingleQuotes(query));
@@ -812,7 +812,7 @@ public with sharing class EmailCampaignController {
                         if (adjustedDate < System.today()) {
                             adjustedDate = adjustedDate.addYears(1);
                         }
-                    } else if (selectedContactDateField == 'MVEX__Next_Available_Date__c' && fieldValue <= System.today()) {
+                    } else if (selectedContactDateField == 'Next_Available_Date__c' && fieldValue <= System.today()) {
                         failedEmails += marketingEmailCount;
                         conMap.put(conId, email);
                         continue;
@@ -1514,6 +1514,9 @@ public with sharing class EmailCampaignController {
     @InvocableMethod(label='Send Emails (Specific Date)' description='Send emails to primary, cc, and bcc recipients for specific date campaigns')
     public static void sendEmails(List<EmailRequests> emailRequests) {
         try {
+   
+            System.debug('email request==> '+ emailRequests);
+            System.debug('template body ==> '+ emailRequests[0].body);
 
             Map<String, Map<String, String>> contactEmailInfoMap = new Map<String, Map<String, String>>();
             Map<Id, String> templateBodyMap = new Map<Id, String>();
@@ -1524,8 +1527,8 @@ public with sharing class EmailCampaignController {
             Set<String> campaignIds = new Set<String>();
             Set<String> recipientIds = new Set<String>();
 
-            String processedBody = '';
-                                    
+            String processedBody = ''; 
+
             // Track processed Email_Member__c IDs to avoid duplicates
             Set<String> processedKeys = new Set<String>();
 
@@ -1577,7 +1580,7 @@ public with sharing class EmailCampaignController {
             for (EmailRequests req : emailRequests) {
                 campaignIds.add(req.campaignId);
                 templateIds.add(req.templateDataId);
-                if (req.listingId != null && req.RelatedObjectName == 'MVEX__Listing__c') {
+                if (req.listingId != null && req.RelatedObjectName == 'Listing__c') {
                     listingIds.add(req.listingId);
                 }
 

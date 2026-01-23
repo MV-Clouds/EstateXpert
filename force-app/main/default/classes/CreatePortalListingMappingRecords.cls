@@ -40,39 +40,39 @@ public with sharing class CreatePortalListingMappingRecords {
                 Map<String, String> stringMap = new Map<String, String>();
                 
                 for (Map<String, Object> recordData : jsonData) {
-                    if (recordData.containsKey('MVEX__Listing_Field_API_Name__c') && recordData.get('MVEX__Listing_Field_API_Name__c') != null && recordData.containsKey('Name')) {
-                        stringMap.put((String) recordData.get('MVEX__Listing_Field_API_Name__c'), (String) recordData.get('Name'));
+                    if (recordData.containsKey('Listing_Field_API_Name__c') && recordData.get('Listing_Field_API_Name__c') != null && recordData.containsKey('Name')) {
+                        stringMap.put((String) recordData.get('Listing_Field_API_Name__c'), (String) recordData.get('Name'));
                     }
 
                     Portal_Listing_Mapping__c newRecord = new Portal_Listing_Mapping__c();
                     
-                    if (recordData.containsKey('MVEX__Allowed_Field_Datatype__c')) {
-                        newRecord.Allowed_Field_Datatype__c = (String) recordData.get('MVEX__Allowed_Field_Datatype__c');
+                    if (recordData.containsKey('Allowed_Field_Datatype__c')) {
+                        newRecord.Allowed_Field_Datatype__c = (String) recordData.get('Allowed_Field_Datatype__c');
                     }
-                    if (recordData.containsKey('MVEX__Data_Type__c')) {
-                        newRecord.Data_Type__c = (String) recordData.get('MVEX__Data_Type__c');
+                    if (recordData.containsKey('Data_Type__c')) {
+                        newRecord.Data_Type__c = (String) recordData.get('Data_Type__c');
                     }
-                    if (recordData.containsKey('MVEX__Listing_Field_API_Name__c')) {
-                        newRecord.Listing_Field_API_Name__c = (String) recordData.get('MVEX__Listing_Field_API_Name__c');
+                    if (recordData.containsKey('Listing_Field_API_Name__c')) {
+                        newRecord.Listing_Field_API_Name__c = (String) recordData.get('Listing_Field_API_Name__c');
                     }
-                    if (recordData.containsKey('MVEX__Portal_Field_Description__c')) {
-                        newRecord.Portal_Field_Description__c = (String) recordData.get('MVEX__Portal_Field_Description__c');
+                    if (recordData.containsKey('Portal_Field_Description__c')) {
+                        newRecord.Portal_Field_Description__c = (String) recordData.get('Portal_Field_Description__c');
                     }
-                    if (recordData.containsKey('MVEX__Portal_Field_Example__c')) {
-                        newRecord.Portal_Field_Example__c = (String) recordData.get('MVEX__Portal_Field_Example__c');
+                    if (recordData.containsKey('Portal_Field_Example__c')) {
+                        newRecord.Portal_Field_Example__c = (String) recordData.get('Portal_Field_Example__c');
                     }
-                    if (recordData.containsKey('MVEX__Portal_Name__c')) {
+                    if (recordData.containsKey('Portal_Name__c')) {
                         if (portalName == 'Propertyfinder' && isXMLForPF) {
                             newRecord.Portal_Name__c = 'Propertyfinder XML';
                         } else {
-                            newRecord.Portal_Name__c = (String) recordData.get('MVEX__Portal_Name__c');
+                            newRecord.Portal_Name__c = (String) recordData.get('Portal_Name__c');
                         }
                     }
-                    if (recordData.containsKey('MVEX__Required__c')) {
-                        newRecord.Required__c = (Boolean) recordData.get('MVEX__Required__c');
+                    if (recordData.containsKey('Required__c')) {
+                        newRecord.Required__c = (Boolean) recordData.get('Required__c');
                     }
-                    if (recordData.containsKey('MVEX__Value_Mapping__c')) {
-                        newRecord.Value_Mapping__c = (String) recordData.get('MVEX__Value_Mapping__c');
+                    if (recordData.containsKey('Value_Mapping__c')) {
+                        newRecord.Value_Mapping__c = (String) recordData.get('Value_Mapping__c');
                     }
                     if (recordData.containsKey('Name')) {
                         newRecord.Name = (String) recordData.get('Name');

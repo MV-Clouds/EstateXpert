@@ -21,7 +21,7 @@ public with sharing class SendEmailToCustomer {
                 Messaging.sendEmail(new Messaging.SingleEmailMessage[] {email});
             }
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'SupportEmailNotification', 'sendAcknowledgmentEmail', 'Error while sending acknowledgment email.');
+            ErrorHandler.insertErrordata(e, 'SupportEmailNotification', 'sendAcknowledgmentEmail', 'Error while sending acknowledgment email.');
         }
     }
 }

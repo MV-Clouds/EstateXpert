@@ -33,16 +33,9 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
                 supportCase.Subject__c = email.subject; 
                 supportCase.Description__c = parsedEmail.body;
                 supportCase.Priority__c = parsedEmail.priority;
-                if (Schema.sObjectType.Support_Case__c.isCreateable() &&
-                    Schema.sObjectType.Support_Case__c.fields.Name__c.isCreateable() &&
-                    Schema.sObjectType.Support_Case__c.fields.Email__c.isCreateable() &&
-                    Schema.sObjectType.Support_Case__c.fields.Subject__c.isCreateable() &&
-                    Schema.sObjectType.Support_Case__c.fields.Description__c.isCreateable() &&
-                    Schema.sObjectType.Support_Case__c.fields.Priority__c.isCreateable()) {
-                    insert as user  supportCase;
+                insert as user  supportCase;
 
-                    SendEmailToCustomer.sendAcknowledgmentEmail(supportCase);
-                }
+                SendEmailToCustomer.sendAcknowledgmentEmail(supportCase);
         
                 List<ContentVersion> contentVersions = new List<ContentVersion>();
                 List<ContentDocumentLink> contentLinks = new List<ContentDocumentLink>();
@@ -59,12 +52,7 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
                         contentVersions.add(contentVersion);
                     }
         
-                    if (!contentVersions.isEmpty() && Schema.sObjectType.ContentVersion.isCreateable() &&
-                        Schema.sObjectType.ContentVersion.fields.Title.isCreateable() &&
-                        Schema.sObjectType.ContentVersion.fields.PathOnClient.isCreateable() &&
-                        Schema.sObjectType.ContentVersion.fields.VersionData.isCreateable() &&
-                        Schema.sObjectType.ContentVersion.fields.IsMajorVersion.isCreateable() &&
-                        Schema.sObjectType.ContentVersion.fields.FirstPublishLocationId.isCreateable()) {
+                    if (!contentVersions.isEmpty()) {
                         insert as user contentVersions;   
                     }
                 }
@@ -86,14 +74,7 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
                         }
             
                         if (!contentVersions.isEmpty()) {
-                            if (Schema.sObjectType.ContentVersion.isCreateable() &&
-                                Schema.sObjectType.ContentVersion.fields.Title.isCreateable() &&
-                                Schema.sObjectType.ContentVersion.fields.PathOnClient.isCreateable() &&
-                                Schema.sObjectType.ContentVersion.fields.VersionData.isCreateable() &&
-                                Schema.sObjectType.ContentVersion.fields.IsMajorVersion.isCreateable() &&
-                                Schema.sObjectType.ContentVersion.fields.FirstPublishLocationId.isCreateable()) {
-                                insert as user contentVersions;   
-                            }
+                            insert as user contentVersions;   
                         }
                     }
 
@@ -116,7 +97,7 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
             result.success = true;
             return result;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'SupportEmailService', 'handleInboundEmail', 'Error while processing email.');
+            ErrorHandler.insertErrordata(e, 'SupportEmailService', 'handleInboundEmail', 'Error while processing email.');
             return null;
         }
 
@@ -155,7 +136,7 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
             }
             return emailWrapper;
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'SupportEmailService', 'parseEmail', 'Error while parsing email.');
+            ErrorHandler.insertErrordata(e, 'SupportEmailService', 'parseEmail', 'Error while parsing email.');
             return null;
         }
 
@@ -201,31 +182,20 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
             }
 
             if (!emailMessagesToInsert.isEmpty()) {
-                if (Schema.sObjectType.EmailMessage.isCreateable() && Schema.sObjectType.EmailMessage.fields.FromAddress.isCreateable() &&
-                    Schema.sObjectType.EmailMessage.fields.ToAddress.isCreateable() && Schema.sObjectType.EmailMessage.fields.FromName.isCreateable() &&
-                    Schema.sObjectType.EmailMessage.fields.Subject.isCreateable() && Schema.sObjectType.EmailMessage.fields.HtmlBody.isCreateable() &&  
-                    Schema.sObjectType.EmailMessage.fields.Incoming.isCreateable() && Schema.sObjectType.EmailMessage.fields.MessageDate.isCreateable()) {
+                insert as user emailMessagesToInsert; 
 
-                    insert as user emailMessagesToInsert; 
+                for (EmailMessage emailMessage : emailMessagesToInsert) {
+                    emailMessage.Status = '2'; 
+                }
 
-                    for (EmailMessage emailMessage : emailMessagesToInsert) {
-                        emailMessage.Status = '2'; 
-                    }
+                update as user emailMessagesToInsert; 
 
-                    if (Schema.sObjectType.EmailMessage.isUpdateable() && Schema.sObjectType.EmailMessage.fields.Status.isUpdateable()) {
-                        update as user emailMessagesToInsert; 
-                    }
-
-                    if (!contentVersionsToInsert.isEmpty() && Schema.sObjectType.ContentVersion.isCreateable() && Schema.sObjectType.ContentVersion.fields.Title.isCreateable() &&
-                        Schema.sObjectType.ContentVersion.fields.PathOnClient.isCreateable() && Schema.sObjectType.ContentVersion.fields.VersionData.isCreateable() &&
-                        Schema.sObjectType.ContentVersion.fields.FirstPublishLocationId.isCreateable()) {
-
-                        insert as user contentVersionsToInsert; 
-                    }
+                if (!contentVersionsToInsert.isEmpty()) {
+                    insert as user contentVersionsToInsert; 
                 }
             }
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ReplyEmailService', 'createCaseEmailMessage', 'Error while creating Case Email Message');
+            ErrorHandler.insertErrordata(e, 'ReplyEmailService', 'createCaseEmailMessage', 'Error while creating Case Email Message');
         }
     }
 }

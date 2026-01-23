@@ -14,153 +14,124 @@
                 </div>
             </div>
         </div>
-        <template if:true={isAccessible}>
-            <div class="main_body">
-                <div class="body_1">
-                    <div class="card-header" slot="title">
-                        Available Portals
-                    </div>
+        <div class="main_body">
+            <div class="body_1">
+                <div class="card-header" slot="title">
+                    Available Portals
+                </div>
 
-                    <div class="grid-style available-portals">
-                        <template for:each={portals} for:item="portal">
-                            <div key={portal.Id} class="portal-box">
-                                <div class="count_p_css">
-                                    <p>{portal.recordCount}</p>
-                                    <span class="helptext">Integration Count : {portal.recordCount}</span>
+                <div class="grid-style available-portals">
+                    <template for:each={portals} for:item="portal">
+                        <div key={portal.Id} class="portal-box">
+                            <div class="count_p_css">
+                                <p>{portal.recordCount}</p>
+                                <span class="helptext">Integration Count : {portal.recordCount}</span>
+                            </div>
+                            <div class="add_icon_css" onclick={handleNew} data-portalname={portal.portalName}
+                                data-portaliconurl={portal.logoURL}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 2V18M2 10H18" stroke="#0176D3" stroke-width="3"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div class="portal_img_cls">
+                                <img src={portal.logoURL} alt={portal.portalName} class="portal-logo"
+                                    draggable="false">
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="body_2">
+                <div class="card-header" slot="title">
+                    Connected Portals
+                </div>
+                <template if:true={isPortalData}>
+                    <div class="field-mapping-container">
+                        <template for:each={portalRecordList} for:item="record" for:index="index">
+                            <div key={record.val.Id} class="portalMapping_data-row">
+                                <div class="name_icon_css">
+                                    <img src={record.val.MVEX__Endpoint__c} alt={record.val.MVEX__Generator__c}
+                                        class="small-logo" draggable="false">
+                                    <p class="font_style_css">
+                                        {record.val.Name}
+                                    </p>
                                 </div>
-                                <template if:true={isCreateable}>
-                                    <div class="add_icon_css" onclick={handleNew} data-portalname={portal.portalName}
-                                        data-portaliconurl={portal.logoURL}>
-                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M10 2V18M2 10H18" stroke="#0176D3" stroke-width="3"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
+                                <div class="status_btn_cls">
+                                    <div class="tableStatusCol">
+                                        <div class="slds-truncate">
+                                            <div class="container">
+                                                <div class="content">
+                                                    <label class="switch">
+                                                        <input type="checkbox" checked={record.val.MVEX__Is_Active__c}
+                                                            onchange={handleStatusChange}
+                                                            data-portal-id={record.val.Id}
+                                                            data-portal-name={record.val.Name} />
+                                                        <small></small>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </template>
-                                <div class="portal_img_cls">
-                                    <img src={portal.logoURL} alt={portal.portalName} class="portal-logo"
-                                        draggable="false">
+                                    <div class="action-btn">
+                                        <button class="action-div" data-portalname={record.val.Name}
+                                            data-portaliconurl={record.val.MVEX__Endpoint__c}
+                                            data-portalstatus={record.val.MVEX__Is_Active__c}
+                                            data-portalgen={record.val.MVEX__Generator__c} data-portalid={record.val.Id}
+                                            onclick={handleClick}>
+                                            <svg width="14" height="14" fill="#000000"
+                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                                                enable-background="new 0 0 52 52" xml:space="preserve">
+                                                <path
+                                                    d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
+                                                </path>
+                                                <path
+                                                    d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                        <button class="action-div" onclick={handleEditPortal}
+                                            data-portal-id={record.val.Id}
+                                            data-portaliconurl={record.val.MVEX__Endpoint__c}
+                                            data-portalgen={record.val.MVEX__Generator__c}>
+                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </button>
+                                        <button class="delete-div" onclick={handleDelete}
+                                            data-portal-id={record.val.Id} data-portal-name={record.val.Name}>
+                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </template>
                     </div>
-                </div>
-
-                <div class="body_2">
-                    <div class="card-header" slot="title">
-                        Connected Portals
-                    </div>
-                    <template if:true={isPortalData}>
-                        <div class="field-mapping-container">
-                            <template for:each={portalRecordList} for:item="record" for:index="index">
-                                <div key={record.val.Id} class="portalMapping_data-row">
-                                    <div class="name_icon_css">
-                                        <img src={record.val.MVEX__Endpoint__c} alt={record.val.MVEX__Generator__c}
-                                            class="small-logo" draggable="false">
-                                        <p class="font_style_css">
-                                            {record.val.Name}
-                                        </p>
-                                    </div>
-                                    <div class="status_btn_cls">
-                                        <template if:false={isUpdateable}>
-                                            <div class="status_cls">
-                                                <template if:true={record.val.MVEX__Is_Active__c}>
-                                                    <span class="badge">Active</span>
-                                                </template>
-                                                <template if:false={record.val.MVEX__Is_Active__c}>
-                                                    <span class="badge-red">Inactive</span>
-                                                </template>
-                                            </div>
-                                        </template>
-                                        <template if:true={isUpdateable}>
-                                            <div class="tableStatusCol">
-                                                <div class="slds-truncate">
-                                                    <div class="container">
-                                                        <div class="content">
-                                                            <label class="switch">
-                                                                <input type="checkbox" checked={record.val.MVEX__Is_Active__c}
-                                                                    onchange={handleStatusChange}
-                                                                    data-portal-id={record.val.Id}
-                                                                    data-portal-name={record.val.Name} />
-                                                                <small></small>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </template>
-                                        <div class="action-btn">
-                                            <button class="action-div" data-portalname={record.val.Name}
-                                                data-portaliconurl={record.val.MVEX__Endpoint__c}
-                                                data-portalstatus={record.val.MVEX__Is_Active__c}
-                                                data-portalgen={record.val.MVEX__Generator__c} data-portalid={record.val.Id}
-                                                onclick={handleClick}>
-                                                <svg width="14" height="14" fill="#000000"
-                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                                                    enable-background="new 0 0 52 52" xml:space="preserve">
-                                                    <path
-                                                        d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
-                                                    </path>
-                                                    <path
-                                                        d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
-                                                    </path>
-                                                </svg>
-                                            </button>
-                                            <template if:true={isUpdateable}>
-                                                <button class="action-div" onclick={handleEditPortal}
-                                                    data-portal-id={record.val.Id}
-                                                    data-portaliconurl={record.val.MVEX__Endpoint__c}
-                                                    data-portalgen={record.val.MVEX__Generator__c}>
-                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                            stroke-linejoin="round" />
-                                                    </svg>
-                                                </button>
-                                            </template>
-                                            <template if:true={isDeletable}>
-                                                <button class="delete-div" onclick={handleDelete}
-                                                    data-portal-id={record.val.Id} data-portal-name={record.val.Name}>
-                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                            stroke-linejoin="round" />
-                                                    </svg>
-                                                </button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-                    <template if:false={isPortalData}>
-                        <div class="empty-state">
-                            <div class="empty-state__content">
-                                <div class="empty-state__icon">
-                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                </div>
-                                <div class="empty-state__message">No Portals are available to show.</div>
+                </template>
+                <template if:false={isPortalData}>
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-state__icon">
+                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
                             </div>
+                            <div class="empty-state__message">No Portals are available to show.</div>
                         </div>
-                    </template>
-                </div>
+                    </div>
+                </template>
             </div>
-        </template>
-        <template if:false={isAccessible}>
-            <div class="access-denied">
-                <h2>Access Restricted</h2>
-                <p>
-                    We're sorry, but you don't have permission to access this portal record. Please contact your
-                    administrator or support team for assistance.
-                </p>
-            </div>
-        </template>
+        </div>
     </div>
 
     <template if:true={showModal}>

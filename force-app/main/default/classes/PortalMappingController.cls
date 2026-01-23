@@ -15,10 +15,6 @@ public with sharing class PortalMappingController {
     public class ObjectFieldsWrapper {
         @AuraEnabled public List<PortalDetailWrapper> portalDetailsRecords;
         @AuraEnabled public List<Portal__c> portalRecords;
-        @AuraEnabled public Boolean isCreateable;
-        @AuraEnabled public Boolean isAccessible;
-        @AuraEnabled public Boolean isUpdateable;
-        @AuraEnabled public Boolean isDeletable;
         @AuraEnabled public Boolean isXMLForPF;
     }
     
@@ -48,28 +44,8 @@ public with sharing class PortalMappingController {
         ObjectFieldsWrapper result = new ObjectFieldsWrapper();
         result.portalDetailsRecords = new List<PortalDetailWrapper>();
         result.portalRecords = new List<Portal__c>();
-        result.isCreateable = false;
-        result.isAccessible = false;
-        result.isUpdateable = false;
-        result.isDeletable = false;
         result.isXMLForPF = false;
         try {
-            if (Schema.sObjectType.PortalListing__c.isAccessible()) {
-                result.isAccessible = true;
-            }
-
-            if (Schema.sObjectType.PortalListing__c.isCreateable()) {
-                result.isCreateable = true;
-            }
-
-            if (Schema.sObjectType.Portal__c.isUpdateable()) {
-                result.isUpdateable = true;
-            }
-
-            if (Schema.sObjectType.Portal__c.isDeletable()) {
-                result.isDeletable = true;
-            }
-
             Map<String, Integer> generatorCountMap = new Map<String, Integer>();
     
             List<PortalDetail__mdt> portalMetaRecords = [SELECT MasterLabel, Logo_URL__c FROM PortalDetail__mdt WITH USER_MODE ORDER BY MasterLabel LIMIT 100];

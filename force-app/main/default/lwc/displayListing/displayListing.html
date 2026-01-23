@@ -51,7 +51,10 @@
                     </div>
 
                     <div class="btn-container">
-                        <c-record-config-body-cmp feature-name="Listing_Configuration"></c-record-config-body-cmp>
+                        <button class="btn mapping-btn" onclick={openConfigureSettings}>Configure Settings</button>
+                        <template if:true={isConfigOpen}>
+                            <c-record-config-body-cmp feature-name="Listing_Configuration" onclose={handleCloseModal}></c-record-config-body-cmp>
+                        </template>
                     </div>
 
                     <div class="open-mapping-div" onclick={handleInsideClick}>

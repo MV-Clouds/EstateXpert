@@ -25,17 +25,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
 
     get isWhatsappSectionAvailable() {
         return !this.featureAvailability?.Whatsapp_Flow_Builder &&
-            !this.featureAvailability?.Whatsapp_Template_Builder &&
-            !this.featureAvailability?.Whatsapp_Broadcast_Group &&
-            !this.featureAvailability?.Whatsapp_Broadcast &&
-            !this.featureAvailability?.Object_Config
-            ? false
-            : true;
-    }
-
-    get isMarketingSectionAvailable() {
-        return !this.featureAvailability?.Marketing_Campaign &&
-            !this.featureAvailability?.Template_Builder
+            !this.featureAvailability?.Whatsapp_Template_Builder
             ? false
             : true;
     }
@@ -44,6 +34,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         return !this.featureAvailability?.Cloud_Storage_Integration &&
             !this.featureAvailability?.Email_Integration &&
             !this.featureAvailability?.Social_Media_Integration &&
+            !this.featureAvailability?.Portal_Integration &&
             !this.featureAvailability?.Lead_Capture
             ? false
             : true;
@@ -52,12 +43,10 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     get isGeneralSectionAvailable() {
         return !this.featureAvailability?.Map_Listing_And_Property &&
             !this.featureAvailability?.Map_Listing_And_Inquiry &&
-            !this.featureAvailability?.Portal_Integration &&
             !this.featureAvailability?.Configure_Settings &&
-            !this.featureAvailability?.AWS_Watermark_Uploader &&
-            !this.featureAvailability?.Instagram_Post_Uploader &&
-            !this.featureAvailability?.Support &&
-            !this.featureAvailability?.Lead_Assignment_Rule
+            !this.featureAvailability?.Lead_Assignment_Rule &&
+            !this.featureAvailability?.Object_Config &&
+            !this.featureAvailability?.Template_Builder
             ? false
             : true;
     }
@@ -129,30 +118,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         event.preventDefault();
         let componentDef = {
             componentDef: "MVEX:leadAssignmentRule"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    /**
-     * Method Name: recordManagerMethod
-     * @description: Used to open recordConfigBodyCmp component.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    recordManagerMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:recordConfigBodyCmp",
-            attributes: {
-                isFromListingManager: false
-            }
         };
 
         let encodedComponentDef = btoa(JSON.stringify(componentDef));
@@ -330,51 +295,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         event.preventDefault();
         let componentDef = {
             componentDef: "MVEX:wbAllFlowsPage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    wbAllBroadcastPageMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:wbAllBroadcastPage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    wbAllBroadcastGroupPageMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:wbAllBroadcastGroupPage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    instagramFileUploaderMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:instagramPost"
         };
 
         let encodedComponentDef = btoa(JSON.stringify(componentDef));

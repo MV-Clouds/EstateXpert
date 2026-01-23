@@ -590,7 +590,7 @@ public with sharing class PortalMappingController {
                 }
             }
     
-            Schema.DescribeSObjectResult describeResult = Schema.getGlobalDescribe().get('Listing__c').getDescribe();
+            Schema.DescribeSObjectResult describeResult = Schema.getGlobalDescribe().get('MVEX__Listing__c').getDescribe();
             Map<String, Schema.SObjectField> fieldsMap = describeResult.fields.getMap();
     
             for (Schema.SObjectField field : fieldsMap.values()) {

@@ -1,88 +1,191 @@
 <template>
-    <template if:false={isModalOpen}>
-        <!-- <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
-            onclick={openModal}>
-            </button> -->
-        <button onclick={openModal} class="icon-button">Configure Settings</button>
-    </template>
-    <template if:true={isModalOpen}>
-        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
-            class="slds-modal slds-fade-in-open slds-modal_large">
-            <div class="slds-modal__container">
-                <div class="slds-modal__close closs_icon_css" onclick={handleDialogueClose}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                            fill="white" />
-                    </svg>
-                </div>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+        class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container modal__container">
+            <div class="slds-modal__close closs_icon_css" onclick={handleDialogueClose}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                        fill="white" />
+                </svg>
+            </div>
 
-                <div class="slds-modal__header blue-header">
-                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Configure Settings
-                    </h1>
-                </div>
-                <div class="slds-modal__content background_css custom-modal-container"
-                    id="modal-content-id-1">
-                        <div class="main-div">
-                            <!-- <div class="main_header_cls">
-                                <div slot="title" class="header_block_css">
-                                    <div class="svg_back_icon" onclick={backToControlCenter}>
-                                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                                                fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <div class="portal_mapping">
-                                        Configure Settings
-                                    </div>
-                                </div>
-                                <div class="details_cls">
-                                    <p>
-                                        The "Configure Settings" modal enables users to customize the filtering experience in Marketing
-                                        Lists and the Listing Manager, enhancing efficiency and productivity through personalized
-                                        preferences for default filters, fields, values, help text, and column visibility.
-                                    </p>
-                                </div>
-                            </div> -->
-                            <div class="body-div">
-                                <!-- <div class="side-section">
-                                    <div data-tab-id="tab1" class={tab1Class} data-objectname="Listing__c" onclick={handleTabClick}>
-                                        Listing Manager</div>
-                                    <div data-tab-id="tab2" class={tab2Class} data-objectname="Contact" onclick={handleTabClick}>Marketing
-                                        List</div>
-                                    <div data-tab-id="tab3" class={tab3Class} data-objectname="Listing__c" onclick={handleTabClick}>
-                                        New Listing Fields</div>
-                                    <div data-tab-id="tab4" class={tab4Class} data-objectname="Contact" onclick={handleTabClick}>New Contact
-                                        Fields</div>
-                                </div> -->
-                                <div class="content-section">
-                                    <div class="cmp-cover">
-                                        <!-- <template if:true={isTab1Active}> -->
-                                            <c-record-config-cmp object-api-name={selectedTabObject} feature-name={featureName}></c-record-config-cmp>
-                                        <!-- </template> -->
-                                        <!-- <template if:true={isTab2Active}> -->
-                                            <!-- <c-record-config-cmp object-api-name={selectedTabObject}></c-record-config-cmp> -->
-                                        <!-- </template> -->
-    
-                                        <!-- <template if:true={isTab3Active}>
-                                            <c-new-record-fields-config object-api-name={selectedTabObject}></c-new-record-fields-config>
-                                        </template>
-                                        <template if:true={isTab4Active}>
-                                            <c-new-record-fields-config object-api-name={selectedTabObject}></c-new-record-fields-config>
-                                        </template> -->
+            <div class="slds-modal__header blue-header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Configure Settings
+                </h1>
+            </div>
+
+            <div class="slds-modal__content background_css custom-modal-container" id="modal-content-id-1">
+                
+                <template if:true={isLoading}>
+                    <c-spinner-component></c-spinner-component>
+                </template>
+
+                <div class="main-div">
+                    <div class="body-div">
+                        <div class="content-section">
+                            <div class="cmp-cover">
+                                <div class="mainDiv">
+                                    <div class="main-cover">
+                                        <div class="header_container_css">
+                                            <div class="header-action">
+                                                <div class="page-size-container">
+                                                    <label class="page-size-label">Page Size:</label>
+                                                    <input type="number" class="page-size-input" value={pageSize} onchange={handlePageSizeChange} min="1" max="200"/>
+                                                </div>
+
+                                                <button class="add-new-btn" onclick={addNewRow}>
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M6.85714 9.14286H0V6.85714H6.85714V0H9.14286V6.85714H16V9.14286H9.14286V16H6.85714V9.14286Z" fill="white"/>
+                                                    </svg>
+                                                    Add Row
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-body-div">
+                                            <div class="tableContainer">
+                                                <template if:true={isDataAvailable}>
+                                                    <div class={headerClass}>
+                                                        <div class="slds-col display_css"></div>
+                                                        <div class="slds-col display_css">
+                                                            <p class="header-text">Field</p>
+                                                        </div>
+                                                        <div class="slds-col display_css">
+                                                            <p class="header-text">Display Format</p>
+                                                        </div>
+                                                        
+                                                        <template if:true={showCardView}>
+                                                            <div class="slds-col display_css">
+                                                                <p class="header-text">Card view</p>
+                                                            </div>
+                                                        </template>
+
+                                                        <div class="slds-col display_css">
+                                                            <p class="header-text">Delete</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="popup__recordValues">
+                                                        <template for:each={checklistItems} for:item="item" for:index="index">
+                                                            <div key={item.id} class={rowClass} draggable="true" data-index={index} 
+                                                                 ondragstart={handleDragStart} ondragover={handleDragOver} 
+                                                                 ondrop={handleDrop} ondragleave={handleDragLeave} 
+                                                                 ondragend={handleDragEnd}>
+                                                                
+                                                                <div class="slds-col drag-icon" title="Drag to reorder">
+                                                                    <svg width="16" height="16" viewBox="0 0 20 20" fill="#666" xmlns="http://www.w3.org/2000/svg">
+                                                                        <circle cx="4" cy="4" r="1.5"/><circle cx="4" cy="10" r="1.5"/><circle cx="4" cy="16" r="1.5"/>
+                                                                        <circle cx="10" cy="4" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="16" r="1.5"/>
+                                                                    </svg>
+                                                                </div>
+
+                                                                <div class="slds-col wrap_css">
+                                                                    <div class="combobox-cover">
+                                                                        <div class="combobox-input" data-index={index} data-field="fieldName" data-id={index} onclick={handleFocus1}>
+                                                                            <div class="input-show">{item.label}</div>
+                                                                            <div class="add-btn-class" data-index={index} data-field="fieldName" data-id={index} onclick={handleFocus1}>
+                                                                                <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                    <path d="M2 1.75L8 7.75L14 1.75" stroke="#131314" stroke-width="2" stroke-linecap="square"/>
+                                                                                </svg>                                                                                                                       
+                                                                            </div>
+
+                                                                            <template if:true={item.isFocused}>
+                                                                                <div class="options-box">
+                                                                                    <input type="text" class="slds-input slds-combobox__input picklist-input"
+                                                                                        placeholder="Search Picklist Value" data-id={index} 
+                                                                                        data-index={index} data-field="fieldName"
+                                                                                        onkeyup={handleSearchChange} onfocus={handleFocus1} onblur={handleBlur1} 
+                                                                                        minlength="0" maxlength="25"/>
+                                                                                    <ul class="options-cover" onmousedown={handlePreventDefault}>
+                                                                                        <template for:each={filteredFieldOptions} for:item="option1">
+                                                                                            <template if:false={option1.showRightIcon}>
+                                                                                                <template if:false={option1.showRightRef}>
+                                                                                                    <li key={option1.value} data-index={index} data-label={option1.label} data-type={option1.fieldType} data-id={option1.value} onclick={selectOption1} class="options-value">
+                                                                                                        <span class="slds-media__body">
+                                                                                                            <span class="_entity">{option1.label}</span>
+                                                                                                        </span>
+                                                                                                    </li>
+                                                                                                </template>
+                                                                                            </template>
+                                                                                            <template if:true={option1.showRightRef}>
+                                                                                                <li key={option1.value} data-index={index} data-label={option1.relationshipName} data-id={option1.value} onclick={clickOnRef} class="slds-listbox__item">
+                                                                                                    <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center picklist-option">
+                                                                                                        <span class="slds-media__body">
+                                                                                                            <span class="slds-truncate" title={option1.label}>{option1.label}</span>
+                                                                                                        </span>
+                                                                                                        <span class="slds-media__figure slds-media__figure_reverse">
+                                                                                                            <lightning-icon icon-name="utility:chevronright" alternative-text="Lookup Field" size="x-small"></lightning-icon>
+                                                                                                        </span>
+                                                                                                    </div>
+                                                                                                </li>
+                                                                                            </template>  
+                                                                                        </template>
+                                                                                    </ul>
+                                                                                </div>
+                                                                                <template if:true={showParentDropDown}>
+                                                                                    <div class="options-box option-box-parent">
+                                                                                        <ul class="options-cover" onmousedown={handlePreventDefault}>
+                                                                                            <template for:each={parentFieldsOption} for:item="option1">
+                                                                                                <template if:false={option1.showRightIcon}>
+                                                                                                    <li key={option1.value} data-index={index} data-label={option1.label} data-type={option1.fieldType} data-id={option1.value} onclick={selectOptionParent} class="options-value">
+                                                                                                        <span class="slds-media__body">
+                                                                                                            <span class="_entity">{option1.label}</span>
+                                                                                                        </span>
+                                                                                                    </li>
+                                                                                                </template>
+                                                                                            </template>
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                </template>
+                                                                            </template>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="slds-col wrap_css">
+                                                                   <lightning-combobox options={item.picklist} variant="label-hidden" value={item.format} onchange={handleFormatChange} data-id={index} disabled={item.isDisable}></lightning-combobox>
+                                                                </div>
+
+                                                                <template if:true={showCardView}>
+                                                                    <div class="slds-col wrap_css order_btn_grp">
+                                                                        <label class="custom-checkbox">
+                                                                            <input type="checkbox" checked={item.cardView} data-index={index} onchange={handleCardViewChange}>
+                                                                            <span class="checkmark"></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </template>
+
+                                                                <div class="slds-col wrap_css order_btn_grp">
+                                                                    <div class="delete-div" onclick={handleDelete} data-index={index}>
+                                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                                <template if:false={isDataAvailable}>
+                                                    <div class="no-data-container">
+                                                        <span>No Fields Are Selected. Please Add New Fields</span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="footerbtns">
+                                                <button class="cancel_btn_css" aria-label="Cancel and close" onclick={handleDialogueClose}>Cancel</button>
+                                                <button class="save_btn_css" onclick={saveChecklistRecords}>Save</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- <div class="footerbtns">
-                        <button class="cancel_btn_css" aria-label="Cancel and close"
-                            onclick={handleDialogueClose}>Cancel</button>
-                        <button class="save_btn_css" onclick={saveChecklistRecords}>Save</button>
-                    </div> -->
+                    </div>
                 </div>
             </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
-    </template>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
 </template>

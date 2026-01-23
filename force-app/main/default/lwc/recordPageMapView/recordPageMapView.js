@@ -20,27 +20,32 @@ export default class RecordPageMapView extends LightningElement {
                     this.mapMarkers = [
                         {
                             location: {
-                                Street: data.MVEX__Address__Street__s,
-                                City: data.MVEX__Address__City__s,
-                                State: data.MVEX__Address__StateCode__s,
-                                PostalCode: data.MVEX__Address__PostalCode__s,
-                                Country: data.MVEX__Address__CountryCode__s
+                                Street: data.MVEX__Listing_Address__Street__s,
+                                City: data.MVEX__Listing_Address__City__s,
+                                State: data.MVEX__Listing_Address__StateCode__s,
+                                PostalCode: data.MVEX__Listing_Address__PostalCode__s,
+                                Country: data.MVEX__Listing_Address__CountryCode__s
                             },
                             title: data.Name,
                             description: `
-                                <b>Address:</b> 
-                                ${data.MVEX__Address__Street__s || ''}, 
-                                ${data.MVEX__Address__City__s || ''}, 
-                                ${data.MVEX__Address__StateCode__s || ''}, 
-                                ${data.MVEX__Address__CountryCode__s || ''}
-                                <br><b>Sq Ft:</b> ${data.Sq_Ft__c || 'N/A'}
+                                <b>Listing Type:-</b>
+                                ${data.MVEX__Listing_Type__c ? data.MVEX__Listing_Type__c : ''}
+                                <br><b>Property Type:-</b> 
+                                ${data.MVEX__Property_Type__c ? data.MVEX__Property_Type__c : ''}
+                                <br><b>Property Category:-</b>
+                                ${data.MVEX__Property_Category__c ? data.MVEX__Property_Category__c : ''}
+                                <br><b>Address:-</b></br>
+                                ${data.MVEX__Listing_Address__Street__s ? data.MVEX__Listing_Address__Street__s + ',' : ''} 
+                                ${data.MVEX__Listing_Address__City__s ? data.MVEX__Listing_Address__City__s + ',' : ''}
+                                ${data.MVEX__Listing_Address__StateCode__s ? data.MVEX__Listing_Address__StateCode__s + ',' : ''}
+                                ${data.MVEX__Listing_Address__CountryCode__s ? data.MVEX__Listing_Address__CountryCode__s + ',' : ''} 
                             `
                         }
                     ];
                 }
             })
             .catch(error => {
-                this.showToast('Error loading map', error?.body?.message || 'Unable to load listing details', 'error');
+                this.showToast('Error loading map', error?.body?.message || error.stack, 'error');
             }). finally(() => {
                 this.isLoading = false;
             }

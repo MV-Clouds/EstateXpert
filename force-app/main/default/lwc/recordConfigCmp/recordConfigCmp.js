@@ -358,6 +358,8 @@ export default class RecordConfigCmp extends LightningElement {
             }));
             const checklistData = JSON.stringify(itemsToSave);
             const totalPages = this.pageSize;
+            console.log('checklistData', checklistData, 'totalPages', totalPages, 'objectApiName', this.objectApiName, 'featureName', this.featureName);
+            
             saveMetadata({ checklistData, totalPages, objectApiName: this.objectApiName, featureName: this.featureName })
                 .then(() => {
                     this.toast('Success', 'Configuration updated successfully', 'success');

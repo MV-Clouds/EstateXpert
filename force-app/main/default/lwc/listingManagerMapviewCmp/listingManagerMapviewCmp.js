@@ -80,13 +80,19 @@ export default class ListingManagerMapviewCmp extends LightningElement {
                         },
                         title: record.Name,
                         description: `
-                        <b>Address:-</b> 
+                        
+                        <b>Listing Type:-</b>
+                        ${record.MVEX__Listing_Type__c ? record.MVEX__Listing_Type__c : ''}
+                        <br><b>Property Type:-</b> 
+                        ${record.MVEX__Property_Type__c ? record.MVEX__Property_Type__c : ''}
+                        <br><b>Property Category:-</b>
+                        ${record.MVEX__Property_Category__c ? record.MVEX__Property_Category__c : ''}
+                        <br><b>Address:-</b></br>
                         ${record.MVEX__Listing_Address__Street__s ? record.MVEX__Listing_Address__Street__s + ',' : ''} 
                         ${record.MVEX__Listing_Address__City__s ? record.MVEX__Listing_Address__City__s + ',' : ''}
                         ${record.MVEX__Listing_Address__StateCode__s ? record.MVEX__Listing_Address__StateCode__s + ',' : ''}
                         ${record.MVEX__Listing_Address__CountryCode__s ? record.MVEX__Listing_Address__CountryCode__s + ',' : ''} 
-                        <br><b>Sq_Ft:-</b> 
-                        ${record.MVEX__Sq_Ft__c ? record.MVEX__Sq_Ft__c : ''}
+
                     `
                     });
                 });

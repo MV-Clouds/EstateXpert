@@ -142,7 +142,6 @@
 .tableContainer {
     flex-grow: 1;
     overflow-y: auto;
-    background-color: white;
     border-radius: 0.5rem;
     position: relative;
     scrollbar-width: thin;
@@ -336,8 +335,13 @@
 .no-data-container {
     padding: 2rem;
     text-align: center;
-    color: #666;
+    color: #0076d3;
     font-size: 1rem;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
 }
 
 /* Footer */

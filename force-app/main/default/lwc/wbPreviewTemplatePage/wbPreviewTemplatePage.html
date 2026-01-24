@@ -15,64 +15,34 @@
                     <div class="createtempdiv2">
                         <div class="slds-box templateContent3">
                             <div class="left">
-                                    <!-- <p class="variable-heading">Contact Records</p> -->
-                                  
-                                    <div class="true-div">
-                                        <!-- <div class="object-div">
-                                            <select class="object-dropdown dropdown" disabled={isDisabled}>
-                                                <template for:each={options} for:item="option">
-                                                    <option key={option.value} value={option.value} selected={option.isSelected}>
-                                                        {option.label}
-                                                    </option>
-                                                </template>
-                                            </select>
-                                        </div> -->
-                                      
-                                        <!-- <template if:true={getObjectName}>
-                                            <div class="object-label">{getObjectName}</div>
-
-                                            <c-custom-lookup-lwc icon-name="standard:contact"
-                                            s-object-api-name={getObjectName}
-                                            onlookupupdate={handleRecordSelection}
-                                            class="custom-lookup"
-                                             disabled={isDisabled}
-                                            placeholder="Search contacts here..."></c-custom-lookup-lwc>
-                                        </template> -->
+                                <template if:false={hasVarFields}>
+                                    <div class="slds-align_absolute-center no-variable">
+                                        <h1>Selected template does not have any merge fields.</h1>
                                     </div>
-
-                                    <template if:false={noContact}>
-                                        <div class="slds-align_absolute-center no-variable">
-                                            <h1>Selected template does not have any merge fields.</h1>
+                                </template>
+                                <template if:true={hasVarFields}>
+                                    <div class="custom-var">
+                                        <div class="var-head">
+                                            <p>Add Variable</p>
                                         </div>
-                                    </template>
-                                    <template if:true={noContact}>
-                                        <div class="custom-var">
-                                            <div class="var-head">
-                                                <p>Add Variable</p>
-                                            </div>
-                                            <div class="sub-var">
-                                                <p>Add sample text for the parameter, to help Meta in the process of reviewing the Message Template.</p>
-                                            </div>
-                                          
-                                            <template for:each={groupedVariables} for:item="group">
-                                                <div key={group.type} class="body-var">
-                                                    <h3 class="variable-head">{group.type}</h3> 
-                                                    <template for:each={group.mappings} for:item="mapping">
-                                                        <div key={mapping.variable} class="single-var">
-                                                            <label for="" class="var-label">{mapping.variable}</label>
-                                                            <input 
-                                                                name={mapping.variable}
-                                                                data-group={group.type}
-                                                                value={mapping.value} 
-                                                                onchange={handleInputChange}  
-                                                            />
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </template>
-                                            
+                                        <div class="sub-var">
+                                            <p>Add sample text for the parameter, to help Meta in the process of reviewing the Message Template.</p>
                                         </div>
-                                    </template>
+                                        
+                                        <template for:each={groupedVariables} for:item="group">
+                                            <div key={group.type} class="body-var">
+                                                <h3 class="variable-head">{group.type}</h3> 
+                                                <template for:each={group.mappings} for:item="mapping">
+                                                    <div key={mapping.variable} class="single-var">
+                                                        <label for="" class="var-label">{mapping.variable}</label>
+                                                        <input  name={mapping.variable} data-group={group.type} value={mapping.value} onchange={handleInputChange} />
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        
+                                    </div>
+                                </template>
                             </div>
                             <div class="creattempdiv3">
                                 <div class="PreviewmainWP">
@@ -91,7 +61,6 @@
                                                 </template>
                                                 <template if:true={isVidSelected}>
                                                     <div class="videoPreview">
-                                                        <!-- <p>{tempHeader}</p> -->
                                                         <video width="100%" height="100%" controls>
                                                             <source src={tempHeader} type="video/mp4">
                                                             Your browser does not support the video tag.
@@ -118,11 +87,7 @@
                                             <template if:true={buttonList}>
                                                 <template for:each={buttonList} for:item="button" for:index="index">
                                                     <div key={button.id} class="button-label-preview">
-                                                        <lightning-icon 
-                                                        icon-name={button.iconName} 
-                                                        size="x-small" 
-                                                        class="button-icon">
-                                                    </lightning-icon>                                    
+                                                        <lightning-icon icon-name={button.iconName} size="x-small" class="button-icon"></lightning-icon>                                    
                                                         <p>{button.btntext}</p>
                                                     </div>
                                                 </template>
@@ -132,9 +97,7 @@
                                 </div>
                             </div> 
                         </div>
-                       
                     </div>
-
                 </div>
                 <div class="phone">
                     <label for="phone" class="phone-label">Phone No.</label>
@@ -151,19 +114,4 @@
             </div>
         </div>
     </template>
-    <!-- <template if:false={showLicenseError}>
-        
-
-    </template>
-    
-    <template if:true={showLicenseError}>
-        <div class="license-error">
-            <div class="popup-container">
-                <div class="popup-content">
-                    <h2>⚠️ License Expired</h2>
-                    <p>WBConnect license has expired. Please renew to continue using.</p>
-                </div>
-            </div>
-        </div>
-    </template> -->
 </template>

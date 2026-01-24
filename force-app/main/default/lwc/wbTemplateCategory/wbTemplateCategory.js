@@ -54,13 +54,13 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
                     description: 'Send messages about an existing order or account.',
                     checked: true
                 },
-                {
-                    className: 'radio2',
-                    label: 'Order status',
-                    value: 'ORDER_STATUS',
-                    description: 'Send messages to tell customers about the progress of their orders.',
-                    checked: false
-                },
+                // {
+                //     className: 'radio2',
+                //     label: 'Order status',
+                //     value: 'ORDER_STATUS',
+                //     description: 'Send messages to tell customers about the progress of their orders.',
+                //     checked: false
+                // },
                 {
                     className: 'radio3',
                     label: 'Flows',

@@ -91,7 +91,8 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
 
     getMappingMetadata() {
         try {
-            getObjectFields({ objectName: 'Lead' })
+            // Changed objectName from 'Lead' to 'Contact'
+            getObjectFields({ objectName: 'Contact' })
                 .then(data => {
                     this.handleSalesforceObjectFields(data);
                     if (this.mainSalesforceOptions.length !== 0) {

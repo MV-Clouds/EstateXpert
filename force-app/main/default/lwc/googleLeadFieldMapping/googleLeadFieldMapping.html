@@ -13,12 +13,12 @@
                     </svg>
                 </div>
                 <div class="portal_mapping">
-                    Map {integrationLabel} Form Fields to Salesforce Lead Fields
+                    Map {integrationLabel} Form Fields to Salesforce Contact Fields
                 </div>
             </div>
             <div class="details_cls">
                 <p>
-                    The "Map {integrationLabel} Form Fields" modal enables users to define mappings between {integrationLabel} form fields and Salesforce Lead fields. This ensures seamless data integration from {integrationLabel} leads into Salesforce, reducing manual data entry and errors.
+                    The "Map {integrationLabel} Form Fields" modal enables users to define mappings between {integrationLabel} form fields and Salesforce Contact fields. This ensures seamless data integration from {integrationLabel} leads into Salesforce, reducing manual data entry and errors.
                 </p>
             </div>
         </div>
@@ -44,7 +44,7 @@
                                     <div>{integrationLabel} Form Field</div>
                                 </th>
                                 <th scope="col" class="salesforce-field">
-                                    <div>Salesforce Lead Field</div>
+                                    <div>Salesforce Contact Field</div>
                                 </th>
                                 <th scope="col" class="actions">
                                     <div>Action</div>
@@ -73,11 +73,11 @@
                                     </td>
                                     <td data-label="Salesforce Field">
                                         <div class="combobox_cls">
-                                            <lightning-combobox label="Salesforce Lead Field" 
+                                            <lightning-combobox label="Salesforce Contact Field" 
                                                 options={pair.salesforceOptions} 
                                                 data-index={index} 
                                                 value={pair.salesforceField} 
-                                                placeholder="Select Salesforce Lead Field"
+                                                placeholder="Select Salesforce Contact Field"
                                                 onchange={handleSalesforceFieldChange} 
                                                 dropdown-alignment="auto"
                                                 variant="label-hidden">

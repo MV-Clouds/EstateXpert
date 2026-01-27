@@ -46,6 +46,8 @@ public with sharing class IntegrationPopupController {
                 }
     
                 for (String apiName : stringFieldMap.keySet()) {
+                    // FIX: Removed the check that only saved Refresh Token. 
+                    // Now it saves ClientID, Secret, and RedirectURI as well.
                     gmailSettings.put(apiName, stringFieldMap.get(apiName));
                 }
 
@@ -143,8 +145,26 @@ public with sharing class IntegrationPopupController {
                 result.objectData = AWS_Config__c.getOrgDefaults();
             } else if (integrationType == 'Gmail') {
                 GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
+                
+                // Fetch Credentials from Custom Metadata
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 3) {
+                        settings.MVEX__Client_ID__c = parts[0];
+                        settings.MVEX__Client_Secret__c = parts[1];
+                        settings.MVEX__Redirect_URI__c = parts[2];
+                    }
+                }
+                
                 result.objectData = settings;
-                result.siteUrl = getSiteUrl(settings.Redirect_URI__c, 'Gmail');
+                // Use the redirect URI from metadata for siteUrl or fallback to helper
+                if(settings.MVEX__Redirect_URI__c != null) {
+                    result.siteUrl = settings.MVEX__Redirect_URI__c;
+                } else {
+                    result.siteUrl = getSiteUrl(settings.MVEX__Redirect_URI__c, 'Gmail');
+                }
             } else if (integrationType == 'Outlook') {
                 OutlookConfig__c outlookSettings = OutlookConfig__c.getOrgDefaults();
                 result.objectData = outlookSettings;

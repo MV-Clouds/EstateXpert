@@ -224,7 +224,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                         if (this.integrationname === 'Meta' && data.objectData) {
                             if (data.objectData.MVEX__ACCESS_TOKEN__c) {
                                 this.originalCredentials.MVEX__ACCESS_TOKEN__c = data.objectData.MVEX__ACCESS_TOKEN__c;
-                                this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                // this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
                             }
                         }
                     } else {

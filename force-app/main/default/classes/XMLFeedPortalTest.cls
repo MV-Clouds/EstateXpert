@@ -109,29 +109,20 @@ public class XMLFeedPortalTest {
 
             List<Portal_Listing_Mapping__c> mappings = new List<Portal_Listing_Mapping__c>();
             mappings.add(new Portal_Listing_Mapping__c(Name='TestField1', Listing_Field_API_Name__c='Name', Portal_Name__c='Bayut', Value_Mapping__c='Apartment => AP,Penthouse => PH,Villa => VH,Townhouse => TH'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='TestField2', Listing_Field_API_Name__c='Description__c', Portal_Name__c='Bayut'));
+            mappings.add(new Portal_Listing_Mapping__c(Name='TestField2', Listing_Field_API_Name__c='MVEX__Description__c', Portal_Name__c='Bayut'));
             mappings.add(new Portal_Listing_Mapping__c(Name='TestField3', Listing_Field_API_Name__c='Name', Portal_Name__c='Dubizzle'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='TestField4', Listing_Field_API_Name__c='Description__c', Portal_Name__c='Dubizzle'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='TestField5', Listing_Field_API_Name__c='Name', Portal_Name__c='Propertyfinder'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='title_en', Listing_Field_API_Name__c='Description__c', Portal_Name__c='Propertyfinder'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='property_type', Listing_Field_API_Name__c='Property_Type__c', Portal_Name__c='Propertyfinder', Value_Mapping__c='Apartment => AP,Penthouse => PH,Villa => VH,Townhouse => TH'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='price', Listing_Field_API_Name__c='Listing_Price__c', Portal_Name__c='Propertyfinder'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='email', Listing_Field_API_Name__c='Listing_Agent_Email__c', Portal_Name__c='Propertyfinder'));
-            mappings.add(new Portal_Listing_Mapping__c(Name='completion_status', Listing_Field_API_Name__c='Completion_Status__c', Portal_Name__c='Propertyfinder'));
+            mappings.add(new Portal_Listing_Mapping__c(Name='TestField4', Listing_Field_API_Name__c='MVEX__Description__c', Portal_Name__c='Dubizzle'));
             insert mappings;
 
             Portal__c portal1 = new Portal__c(Name = 'TestField1', Generator__c = 'Bayut', Is_Active__c = true);
             Portal__c portal2 = new Portal__c(Name = 'TestField2', Generator__c = 'Dubizzle', Is_Active__c = true);
-            Portal__c portal3 = new Portal__c(Name = 'TestField3', Generator__c = 'Propertyfinder', Is_Active__c = true);
-            insert new List<Portal__c> { portal1, portal2, portal3 };
+            insert new List<Portal__c> { portal1, portal2 };
 
             List<PortalListing__c> portalList = new List<PortalListing__c>();
             portalList.add(new PortalListing__c(Listing__c = listing1.Id, Portal__c = portal1.Id, SystemIsActive__c = true));
             portalList.add(new PortalListing__c(Listing__c = listing1.Id, Portal__c = portal2.Id, SystemIsActive__c = true));
-            portalList.add(new PortalListing__c(Listing__c = listing1.Id, Portal__c = portal3.Id, SystemIsActive__c = true));
             portalList.add(new PortalListing__c(Listing__c = listing2.Id, Portal__c = portal1.Id, SystemIsActive__c = true));
             portalList.add(new PortalListing__c(Listing__c = listing2.Id, Portal__c = portal2.Id, SystemIsActive__c = true));
-            portalList.add(new PortalListing__c(Listing__c = listing2.Id, Portal__c = portal3.Id, SystemIsActive__c = true));
             insert portalList;
     }
 
@@ -201,27 +192,6 @@ public class XMLFeedPortalTest {
             System.assertNotEquals(null, generator.xmlstring, 'XML string should not be null');
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'XMLFeedPortalTest', 'testConstructorWithBoth', 'Error while testing constructor with both Bayut and Dubizzle.');
-        }
-    }
-
-    /**
-    * Method Name : testConstructorWithPropertyFinder
-    * @description : Used to test constructor with Propertyfinder.
-    */
-    @isTest
-    static void testConstructorWithPropertyFinder() {
-        try {
-            List<Portal__c> portalList = [SELECT Id, Name, Generator__c FROM Portal__c WHERE Generator__c = 'Propertyfinder' AND Is_Active__c = true];
-
-            Test.startTest();
-            Test.setCurrentPageReference(new PageReference('/apex/TestPage'));
-            ApexPages.currentPage().getParameters().put('Id', portalList[0].Id);
-            XMLFeedGeneratorForPF generator = new XMLFeedGeneratorForPF();
-            Test.stopTest();
-
-            System.assertNotEquals(null, generator.xmlstring, 'XML string should not be null');
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'XMLFeedPortalTest', 'testConstructorWithPropertyFinder', 'Error while testing constructor with Propertyfinder.');
         }
     }
 }

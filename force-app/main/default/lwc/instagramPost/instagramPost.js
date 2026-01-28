@@ -717,7 +717,7 @@ export default class InstagramPost extends NavigationMixin(LightningElement) {
 
     navigateToIntegrationPage() {
         let componentDef = {
-            componentDef: "c:socialMediaIntegration",
+            componentDef: "MVEX:socialMediaIntegration",
             attributes: {
                 redirectto: "instagramPost"
             }

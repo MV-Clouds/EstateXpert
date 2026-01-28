@@ -172,15 +172,15 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                         if (this.integrationname === 'Gmail' && data.objectData) {
                             if (data.objectData.MVEX__Client_ID__c) {
                                 this.originalCredentials.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
-                                this.fieldsData.MVEX__Client_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
                             }
                             if (data.objectData.MVEX__Client_Secret__c) {
                                 this.originalCredentials.MVEX__Client_Secret__c = data.objectData.MVEX__Client_Secret__c;
-                                this.fieldsData.MVEX__Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__Client_Secret__c = data.objectData.MVEX__Client_Secret__c;
                             }
                             if (data.objectData.MVEX__Refresh_Token__c) {
                                 this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
-                                this.fieldsData.MVEX__Refresh_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
                             }
                         }
                         
@@ -224,7 +224,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                         if (this.integrationname === 'Meta' && data.objectData) {
                             if (data.objectData.MVEX__ACCESS_TOKEN__c) {
                                 this.originalCredentials.MVEX__ACCESS_TOKEN__c = data.objectData.MVEX__ACCESS_TOKEN__c;
-                                this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                // this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
                             }
                         }
                     } else {
@@ -537,16 +537,20 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                     }
                 }
                 
-                // For Gmail, restore original credentials if placeholder is still there
+                // For Gmail: STRICTLY FILTER to only save Refresh Token
+                // We discard Client ID, Secret, and Redirect URI here so they are never sent to Apex for saving
                 if (this.integrationname === 'Gmail') {
-                    if (dataToSave.MVEX__Client_ID__c === this.CREDENTIAL_DISPLAY_TEXT) {
-                        dataToSave.MVEX__Client_ID__c = this.originalCredentials.MVEX__Client_ID__c;
+                    // dataToSave = {
+                    //     MVEX__Refresh_Token__c: this.fieldsData.MVEX__Refresh_Token__c
+                    // };
+                    if (this.fieldsData.MVEX__Client_ID__c) {
+                        dataToSave.MVEX__Client_ID__c = this.fieldsData.MVEX__Client_ID__c;
                     }
-                    if (dataToSave.MVEX__Client_Secret__c === this.CREDENTIAL_DISPLAY_TEXT) {
-                        dataToSave.MVEX__Client_Secret__c = this.originalCredentials.MVEX__Client_Secret__c;
+                    if (this.fieldsData.MVEX__Client_Secret__) {
+                        dataToSave.MVEX__Client_Secret__c = this.fieldsData.MVEX__Client_Secret__c;
                     }
-                    if (dataToSave.MVEX__Refresh_Token__c === this.CREDENTIAL_DISPLAY_TEXT) {
-                        dataToSave.MVEX__Refresh_Token__c = this.originalCredentials.MVEX__Refresh_Token__c;
+                    if (this.fieldsData.MVEX__Refresh_Token__c) {
+                        dataToSave.MVEX__Refresh_Token__c = this.fieldsData.MVEX__Refresh_Token__c;
                     }
                 }
                 
@@ -587,6 +591,9 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                 }
                 
                 const jsonData = JSON.stringify(dataToSave);
+
+                console.log('jsonData -> ', jsonData);
+                
                 saveSettings({ jsonData: jsonData, integrationType: this.integrationname })
                     .then(() => {
                         this.showToast('Success', 'Credentials saved successfully.', 'success');
@@ -755,16 +762,19 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
             for (let i = 0; i < requiredFields.length; i++) {
                 const field = requiredFields[i];
                 if (!this.fieldsData[field]) {
-                    this.showToast('Error', `${field.replace('', '').replace('__c', '').replace(/_/g, ' ')} is empty. Please fill it before proceeding.`, 'error');
+                    this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
                     return;
                 }
             }
+
+            console.log('Client ID:', this.fieldsData.MVEX__Client_ID__c, 'Client Secret:', this.fieldsData.MVEX__Client_Secret__c, 'Redirect URI:', this.fieldsData.MVEX__Redirect_URI__c);
+            
 
             this.saveTempData(this.fieldsData.MVEX__Client_ID__c, this.fieldsData.MVEX__Client_Secret__c, this.fieldsData.MVEX__Redirect_URI__c);
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
                 attributes: {
-                    url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + this.fieldsData.MVEX__Client_ID__c + '&redirect_uri=' + this.fieldsData.MVEX__Redirect_URI__c + '&response_type=code&access_type=offline&scope=https://www.googleapis.com/auth/gmail.send'
+                    url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + this.fieldsData.MVEX__Client_ID__c + '&redirect_uri=' + this.fieldsData.MVEX__Redirect_URI__c + '&response_type=code&access_type=offline&prompt=consent&scope=https://www.googleapis.com/auth/gmail.send'
                 }
             });
         } catch (error) {

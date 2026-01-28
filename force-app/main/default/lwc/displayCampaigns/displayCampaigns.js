@@ -387,11 +387,11 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
 
             let cmpDef;                
             cmpDef = {
-                componentDef: 'c:emailCampaignTemplateForm',
+                componentDef: 'MVEX:emailCampaignTemplateForm',
                 attributes: {                    
-                    c__navigationState: serializedState,
-                    c__recordId : this.currentRecId
-                }                
+                        c__navigationState: serializedState,
+                        c__recordId : this.currentRecId
+                    }                
                 };
 
             let encodedDef = btoa(JSON.stringify(cmpDef));
@@ -622,21 +622,20 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
 
     openMemberModal(event){
         const campaignId = event.currentTarget.dataset.id;
-        var compDefinition = {
-            componentDef: "c:campaignMembersTable",
+        let cmpDef;                
+        cmpDef = {
+            componentDef: 'MVEX:campaignMembersTable',
             attributes: {
-                campaignId: campaignId
-            }
-        };
-        // Base64 encode the compDefinition JS object
-        var encodedCompDef = btoa(JSON.stringify(compDefinition));
-        this[NavigationMixin.GenerateUrl]({
-            type: 'standard__webPage',
+                    campaignId: campaignId
+                }            
+            };
+
+        let encodedDef = btoa(JSON.stringify(cmpDef));
+            this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
             attributes: {
-                url: '/one/one.app#' + encodedCompDef
+                url:  "/one/one.app#" + encodedDef                                                         
             }
-        }).then(url => {
-            window?.globalThis?.open(url, "_blank");
         });
     }
 

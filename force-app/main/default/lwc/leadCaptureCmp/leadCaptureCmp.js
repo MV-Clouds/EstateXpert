@@ -7,9 +7,9 @@ import revokeGoogleAccess from '@salesforce/apex/IntegrationPopupController.revo
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
-    @api integrationType = 'Google';
+    @api integrationType = 'Meta';
     @track isDataLoaded = false;
-    @track activeTab = 'Google';
+    @track activeTab = 'Meta';
     @track showIntegrationModal = false;
     @track isSpinner = true;
     @track integrationName = 'GoogleAds';
@@ -185,7 +185,7 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
    configureMapping() {
         try {
             let componentDef = {
-                componentDef: "c:googleLeadFieldMapping",
+                componentDef: "MVEX:googleLeadFieldMapping",
                 attributes: {
                     integrationType: this.activeTab // Pass 'Google' or 'Meta'
                 }

@@ -113,9 +113,9 @@ private class BroadcastMessageControllerTest {
         Map<String, Object> result = BroadcastMessageController.getObjectConfigs();
         Test.stopTest();
 
-        // System.assertNotEquals(null, result, 'Result should not be null');
-        // System.assert(result.containsKey('objectOptions'), 'Response should have objectOptions');
-        // System.assert(result.containsKey('configMap'), 'Response should have configMap');
+        System.assertNotEquals(null, result, 'Result should not be null');
+        System.assert(result.containsKey('objectOptions'), 'Response should have objectOptions');
+        System.assert(result.containsKey('configMap'), 'Response should have configMap');
     }
 
     @isTest
@@ -332,6 +332,256 @@ private class BroadcastMessageControllerTest {
         Test.stopTest();
 
         System.assertEquals('testSessionId', sessionId, 'Should return test session Id when running tests');
+    }
+
+    @isTest
+    static void testGetBroadcastRecsWithReplies() {
+        // Create broadcast with template
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+        Broadcast_Group__c testGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
+        
+        Broadcast__c broadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Completed',
+            Broadcast_Group_IDs__c = testGroup.Id
+        );
+        insert broadcast;
+        
+        // Create Chat records for testing
+        List<Chat__c> chats = new List<Chat__c>();
+        chats.add(new Chat__c(
+            Phone__c = '1234567890',
+            Type_of_Message__c = 'Outbound Messages',
+            Message_Status__c = 'Sent'
+        ));
+        chats.add(new Chat__c(
+            Phone__c = '1234567890',
+            Type_of_Message__c = 'Inbound Messages',
+            Message_Status__c = 'Seen'
+        ));
+        chats.add(new Chat__c(
+            Phone__c = '9876543210',
+            Type_of_Message__c = 'Outbound Messages',
+            Message_Status__c = 'Delivered'
+        ));
+        insert chats;
+        
+        Test.startTest();
+        List<Map<String, Object>> result = BroadcastMessageController.getBroadcastRecsWithReplies();
+        Test.stopTest();
+        
+        System.assertNotEquals(null, result, 'Result should not be null');
+        System.assert(result.size() > 0, 'Should return broadcast records');
+    }
+    
+    @isTest
+    static void testGetCronExpression() {
+        DateTime testDateTime = DateTime.newInstance(2025, 12, 31, 14, 30, 0);
+        
+        Test.startTest();
+        String cronExpression = BroadcastMessageController.getCronExpression(testDateTime);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, cronExpression, 'Cron expression should not be null');
+        System.assert(cronExpression.contains('30'), 'Should contain minute');
+        System.assert(cronExpression.contains('14'), 'Should contain hour');
+        System.assert(cronExpression.contains('31'), 'Should contain day');
+        System.assert(cronExpression.contains('12'), 'Should contain month');
+        System.assert(cronExpression.contains('2025'), 'Should contain year');
+    }
+    
+    @isTest
+    static void testGetBroadcastGroupsByBroadcastId_WithGroups() {
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+        Broadcast_Group__c testGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
+        
+        Broadcast__c broadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Pending',
+            Broadcast_Group_IDs__c = testGroup.Id
+        );
+        insert broadcast;
+        
+        Test.startTest();
+        List<Broadcast_Group__c> groups = BroadcastMessageController.getBroadcastGroupsByBroadcastId(broadcast.Id);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, groups, 'Groups should not be null');
+        System.assertEquals(1, groups.size(), 'Should return one group');
+    }
+    
+    @isTest
+    static void testGetBroadcastGroupsWithStats() {
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+        Broadcast_Group__c testGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
+        
+        Broadcast__c broadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Completed',
+            Broadcast_Group_IDs__c = testGroup.Id
+        );
+        insert broadcast;
+        
+        Broadcast_Group_Member__c member = [SELECT Id, Phone_Number__c FROM Broadcast_Group_Member__c LIMIT 1];
+        
+        // Create Chat records
+        List<Chat__c> chats = new List<Chat__c>();
+        chats.add(new Chat__c(
+            Phone__c = member.Phone_Number__c,
+            Type_of_Message__c = 'Outbound Messages',
+            Message_Status__c = 'Delivered'
+        ));
+        chats.add(new Chat__c(
+            Phone__c = member.Phone_Number__c,
+            Type_of_Message__c = 'Inbound Messages',
+            Message_Status__c = 'Seen'
+        ));
+        insert chats;
+        
+        Test.startTest();
+        List<Map<String, Object>> result = BroadcastMessageController.getBroadcastGroupsWithStats(broadcast.Id);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, result, 'Result should not be null');
+    }
+    
+    @isTest
+    static void testProcessBroadcastMessageWithObject_WithRecipients() {
+        Contact contact = [SELECT Id, Phone FROM Contact LIMIT 1];
+        
+        List<Map<String, Object>> recipients = new List<Map<String, Object>>();
+        recipients.add(new Map<String, Object>{
+            'Id' => contact.Id,
+            'phone' => contact.Phone,
+            'email' => 'test@example.com'
+        });
+        
+        Map<String, Object> requestMap = new Map<String, Object>{
+            'name' => 'Test Broadcast With Recipients',
+            'description' => 'Test Description',
+            'objectApiName' => 'Contact',
+            'recipients' => recipients,
+            'listViewName' => 'Test List View',
+            'isUpdate' => false,
+            'phoneField' => 'Phone',
+            'emailField' => 'Email',
+            'communicationType' => 'Phone'
+        };
+        
+        String requestJson = JSON.serialize(requestMap);
+        
+        Test.startTest();
+        BroadcastMessageController.processBroadcastMessageWithObject(requestJson);
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testProcessBroadcastMessageWithObject_UpdateWithRecipients() {
+        Broadcast_Group__c existingGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
+        Contact contact = [SELECT Id, Phone FROM Contact LIMIT 1];
+        
+        List<Map<String, Object>> recipients = new List<Map<String, Object>>();
+        recipients.add(new Map<String, Object>{
+            'Id' => contact.Id,
+            'phone' => '9999999999',
+            'email' => 'updated@example.com'
+        });
+        
+        Map<String, Object> requestMap = new Map<String, Object>{
+            'name' => 'Updated Group',
+            'description' => 'Updated Description',
+            'objectApiName' => 'Contact',
+            'recipients' => recipients,
+            'listViewName' => 'Updated List View',
+            'isUpdate' => true,
+            'broadcastGroupId' => existingGroup.Id,
+            'phoneField' => 'Phone',
+            'emailField' => 'Email',
+            'communicationType' => 'Both'
+        };
+        
+        String requestJson = JSON.serialize(requestMap);
+        
+        Test.startTest();
+        BroadcastMessageController.processBroadcastMessageWithObject(requestJson);
+        Test.stopTest();
+        
+        Broadcast_Group__c updatedGroup = [SELECT Name, Communication_Type__c FROM Broadcast_Group__c WHERE Id = :existingGroup.Id];
+        System.assertEquals('Updated Group', updatedGroup.Name, 'Group should be updated');
+        System.assertEquals('Both', updatedGroup.Communication_Type__c, 'Communication type should be updated');
+    }
+    
+    @isTest
+    static void testGetBroadcastMembersByGroupId_WithBroadcast() {
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+        Broadcast_Group__c testGroup = [SELECT Id, Communication_Type__c FROM Broadcast_Group__c LIMIT 1];
+        
+        Broadcast__c broadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Completed'
+        );
+        insert broadcast;
+        
+        Broadcast_Group_Member__c member = [SELECT Id, Phone_Number__c FROM Broadcast_Group_Member__c LIMIT 1];
+        
+        // Create Chat records for status and replies
+        List<Chat__c> chats = new List<Chat__c>();
+        chats.add(new Chat__c(
+            Phone__c = member.Phone_Number__c,
+            Type_of_Message__c = 'Outbound Messages',
+            Message_Status__c = 'Seen'
+        ));
+        chats.add(new Chat__c(
+            Phone__c = member.Phone_Number__c,
+            Type_of_Message__c = 'Inbound Messages',
+            Message_Status__c = 'Delivered'
+        ));
+        insert chats;
+        
+        Test.startTest();
+        List<BroadcastMessageController.BroadcastMemberWrapper> result = 
+            BroadcastMessageController.getBroadcastMembersByGroupId(testGroup.Id, 'Contact', broadcast.Id);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, result, 'Result should not be null');
+    }
+    
+    @isTest
+    static void testGetBroadcastMembersByGroupId_EmailCommunication() {
+        // Create a group with Email communication type
+        Broadcast_Group__c emailGroup = new Broadcast_Group__c(
+            Name = 'Email Test Group',
+            Description__c = 'Test Email Group',
+            Object_Name__c = 'Contact',
+            Communication_Type__c = 'Email',
+            Email_Field__c = 'Email'
+        );
+        insert emailGroup;
+        
+        Contact contact = [SELECT Id, Email FROM Contact LIMIT 1];
+        contact.Email = 'test@example.com';
+        update contact;
+        
+        Broadcast_Group_Member__c emailMember = new Broadcast_Group_Member__c(
+            Broadcast_Group_ID__c = emailGroup.Id,
+            Email__c = 'test@example.com',
+            Member_Record_Id__c = contact.Id
+        );
+        insert emailMember;
+        
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+        Broadcast__c broadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Completed'
+        );
+        insert broadcast;
+        
+        Test.startTest();
+        List<BroadcastMessageController.BroadcastMemberWrapper> result = 
+            BroadcastMessageController.getBroadcastMembersByGroupId(emailGroup.Id, 'Contact', broadcast.Id);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, result, 'Result should not be null');
     }
 
 }

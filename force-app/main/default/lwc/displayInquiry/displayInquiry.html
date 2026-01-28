@@ -22,7 +22,11 @@
 
                     <div class="btn-container">
 
-                        <c-record-config-body-cmp feature-name="Inquiry Manager"></c-record-config-body-cmp>
+                        <button class="btn mapping-btn" onclick={openConfigureSettings}>Configure Settings
+                        </button>
+                        <template if:true={isConfigOpen}>
+                            <c-record-config-body-cmp feature-name="Inquiry Manager" onclose={handleCloseModal}></c-record-config-body-cmp>
+                        </template>
 
                         <button class="btn mapping-btn" onclick={handleSendMessage}
                             disabled={isSendEmailButtonDisabled}>Send Message
@@ -194,6 +198,7 @@
                                     </label>
                                 </div>
                             </th>
+                            <th class="header-cell slds-truncate">Inquiry Name</th>
                             <template for:each={tableColumns} for:item="column">
                                 <th key={column.fieldName} class="header-cell slds-truncate">{column.label}</th>
                             </template>
@@ -208,6 +213,10 @@
                                             value={inquiry.isSelected} onchange={checkBoxValueChange}>
                                         <span class="checkmark"></span>
                                     </label>
+                                </td>
+                                <td class="slds-truncate">
+                                    <a href="javascript:void(0)" data-id={inquiry.id}
+                                        onclick={navigateToRecord}>{inquiry.name}</a>
                                 </td>
                                 <template for:each={inquiry.displayFields} for:item="field">
                                     <td key={field.key} class="slds-truncate">

@@ -585,16 +585,21 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
     }
 
     handleTogglePDFPreview(event) {
-        let isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobileDevice) {
-            return;
-        }
-        let action = event.currentTarget.dataset.action;
-
-        if (action === 'open') {
-            event.currentTarget.classList.add('pdf-preview');
-        } else if (action === 'close') {
-            event.currentTarget.classList.remove('pdf-preview');
+        try {
+            let isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (isMobileDevice) {
+                return;
+            }
+            let action = event.currentTarget.dataset.action;
+    
+            if (action === 'open') {
+                event.currentTarget.classList.add('pdf-preview');
+            } else if (action === 'close') {
+                event.stopPropagation();
+                event.currentTarget.closest('.pdf-preview')?.classList.remove('pdf-preview');
+            }
+        } catch (error) {
+            console.log('Error in handleTogglePDFPreview :: ', error);
         }
     }
 

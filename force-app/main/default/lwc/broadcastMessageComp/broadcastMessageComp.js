@@ -620,7 +620,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     navigateToAllGroup() {
         let componentDef = {
-            componentDef: "c:wbAllBroadcastGroupPage"
+            componentDef: "MVEX:wbAllBroadcastGroupPage"
         };
         let encodedComponentDef = btoa(JSON.stringify(componentDef));
         this[NavigationMixin.Navigate]({

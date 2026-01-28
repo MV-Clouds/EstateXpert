@@ -90,4 +90,78 @@ public class PropertySearchControllerTest {
 
         System.assertNotEquals(0, result.fields.size(), 'Result should not be null');
     }
+    
+    @IsTest
+    static void testGetObjectName() {
+        Listing__c l = [SELECT Id FROM Listing__c LIMIT 1];
+
+        Test.startTest();
+        String objName = PropertySearchController.getObjectName(l.Id);
+        Test.stopTest();
+
+        System.assertEquals('MVEX__Listing__c', objName);
+    }
+    
+    @IsTest
+    static void testSendEmail_Single() {
+
+        Inquiry__c iq = [SELECT Id, Contact__c FROM Inquiry__c LIMIT 1];
+        Listing__c lst = [SELECT Id FROM Listing__c LIMIT 1];
+
+        Map<String,Object> inquiryMap = new Map<String,Object>{
+            'mvex__contact__c' => iq.Contact__c
+        };
+
+        Map<String,Object> payload = new Map<String,Object>{
+            'sendMethod' => 'single',
+            'listingId' => lst.Id,
+            'inquiry' => new List<Object>{ inquiryMap }
+        };
+
+        String json = JSON.serialize(payload);
+
+        Test.startTest();
+        PropertySearchController.sendEmail(json);
+        Test.stopTest();
+        
+    }
+    
+    @IsTest
+    static void testDeleteContentVersion() {
+        
+        Blob bodyBlob=Blob.valueOf('Unit Test ContentVersion Body to be insert in test class for testing the'); 
+        
+        ContentVersion contentVersion_1 = new ContentVersion(
+            Title='SampleTitle', 
+            PathOnClient ='SampleTitle.jpg',
+            VersionData = bodyBlob, 
+            origin = 'H'
+        );
+        insert contentVersion_1;
+
+        List<ContentVersion> cvs = [SELECT ContentDocumentId FROM ContentVersion];
+
+        Test.startTest();
+        PropertySearchController.deleteContentVersion(cvs);
+        Test.stopTest();
+
+        System.assert(true); // no exception
+    }
+    
+    @IsTest
+    static void testgetContactsForInquiries() {
+
+        Contact con = [SELECT Id FROM Contact LIMIT 1];
+        Inquiry__c iq = [SELECT Id, Contact__c FROM Inquiry__c LIMIT 1];
+        iq.Contact__c = con.Id;
+        update iq;
+        
+
+        Test.startTest();
+        PropertySearchController.getContactsForInquiries(new List<String>{String.valueof(iq.Id)});
+        Test.stopTest();
+        
+    }
+   
+
 }

@@ -42,16 +42,21 @@
                         </template>
                     </div>
                 </div>
+                <div class="details_cls">
+                    <p>
+                        The "Lead Capture" simplifies the integration of leads from social media platforms.
+                    </p>
+                </div>
             </div>
             <div class="main_container">
                 <!-- Sidebar with navigator -->
                 <div class="sidebar">
                     <ul>
-                        <li class={GoogleClass} onclick={handleGoogleClick}>
-                            <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google" draggable="false"> Google Ads
-                        </li>
                         <li class={MetaClass} onclick={handleMetaClick}>
                             <img src="/resource/MVEX__controlcenterimg/meta.png" alt="Meta" draggable="false"> Meta Ads
+                        </li>
+                        <li class={GoogleClass} onclick={handleGoogleClick}>
+                            <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google" draggable="false"> Google Ads
                         </li>
                     </ul>
                 </div>
@@ -63,7 +68,7 @@
                         <template if:true={isGoogle}>
                             <div class="field-section">
                                 <template if:true={GoogleData.isValid}>
-                                    <div class="data_cls"><strong>Google Ads Webhook Endpoint :</strong><p>{GoogleData.integrationData.MVEX__Google_Ads_Endpoint__c}</p></div>
+                                    <!-- <div class="data_cls"><strong>Google Ads Webhook Endpoint :</strong><p>{GoogleData.integrationData.Google_Ads_Endpoint__c}</p></div> -->
                                     <div class="data_cls"><strong>Google Ads Lead Form Secret :</strong><p>{GoogleData.integrationData.MVEX__Google_lead_Form_Secret__c}</p></div>
                                     <div class="data_cls"><strong>Created Date :</strong><p>{GoogleData.integrationData.CreatedDate}</p></div>
                                     <div class="data_cls"><strong>Last Modified Date :</strong><p>{GoogleData.integrationData.LastModifiedDate}</p></div>
@@ -83,11 +88,11 @@
                         <template if:true={isMeta}>
                             <div class="field-section">
                                 <template if:true={MetaData.isValid}>
-                                    <div class="data_cls"><strong>Meta Page Webhook Endpoint :</strong><p>{MetaData.integrationData.MVEX__META_PAGE_ENDPOINT__c}</p></div>
-                                    <div class="data_cls"><strong>Meta Page Access Token :</strong><p>{displayedAccessToken}</p></div>
+                                    <!-- <div class="data_cls"><strong>Meta Page Webhook Endpoint :</strong><p>{MetaData.integrationData.META_PAGE_ENDPOINT__c}</p></div> -->
+                                    <div class="data_cls"><strong>Meta Page Access Token :</strong><p>{MetaData.integrationData.MVEX__ACCESS_TOKEN__c}</p></div>
                                     <div class="data_cls"><strong>Verify Token :</strong><p>{MetaData.integrationData.MVEX__VERIFY_TOKEN__c}</p></div>
                                     <div class="data_cls"><strong>App ID :</strong><p>{MetaData.integrationData.MVEX__APP_ID__c}</p></div>
-                                    <!-- <div class="data_cls"><strong>App Secret :</strong><p>{MetaData.integrationData.MVEX__APP_SECRET__c}</p></div> -->
+                                    <!-- <div class="data_cls"><strong>App Secret :</strong><p>{MetaData.integrationData.APP_SECRET__c}</p></div> -->
                                     <div class="data_cls"><strong>Facebook API Version :</strong><p>{MetaData.integrationData.MVEX__FB_API_VERSION__c}</p></div>
                                     <div class="data_cls"><strong>Created Date :</strong><p>{MetaData.integrationData.CreatedDate}</p></div>
                                     <div class="data_cls"><strong>Last Modified Date :</strong><p>{MetaData.integrationData.LastModifiedDate}</p></div>

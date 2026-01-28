@@ -3,7 +3,4 @@
     <apiVersion>63.0</apiVersion>
     <isExposed>true</isExposed>
     <masterLabel>Property View</masterLabel>
-    <targets>
-        <target>lightningCommunity__Page</target>
-    </targets>
 </LightningComponentBundle>

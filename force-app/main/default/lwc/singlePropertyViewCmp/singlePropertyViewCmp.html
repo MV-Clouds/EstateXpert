@@ -72,13 +72,43 @@
                                             <button class="offer_button" onclick={makeOffer}>Make an Offer</button>
                                         </template>
                                         <template if:true={showSiteVisit}>
-                                            <div class="site_visit_buttons">
-                                                <template if:false={isConfirmed}>
-                                                    <button class="offer_button" onclick={confirmSiteVisit} disabled={isDateInPast}>Confirm Site Visit</button>
+                                            <div class="site_visit_section">
+                                                <!-- Status Message (shown when no buttons are visible) -->
+                                                <template if:true={showStatusMessageBox}>
+                                                    <div class="status-message">
+                                                        <p class="status-text">{statusMessage}</p>
+                                                        <template if:true={showingDate}>
+                                                            <p class="showing-date">Scheduled for: {showingDate}</p>
+                                                        </template>
+                                                        <template if:true={rescheduleMessage}>
+                                                            <p class="reschedule-date">{rescheduleMessage}</p>
+                                                        </template>
+                                                    </div>
                                                 </template>
-                                                <template if:false={isCancelled}>
-                                                    <button class="offer_button" onclick={rescheduleSiteVisit} disabled={isDateInPast}>Reschedule</button>
-                                                    <button class="offer_button" onclick={cancelSiteVisit} disabled={isDateInPast}>Cancel</button>
+
+                                                <!-- Primary Action Buttons (Initial State) -->
+                                                <template if:false={showStatusMessageBox}>
+                                                    <div class="site_visit_buttons">
+                                                        <template if:true={showConfirmButton}>
+                                                            <button class="offer_button offer_button-primary" onclick={confirmSiteVisit}>Confirm</button>
+                                                        </template>
+                                                        <template if:true={showRescheduleButton}>
+                                                            <button class="offer_button offer_button-secondary" onclick={rescheduleSiteVisit}>Reschedule</button>
+                                                        </template>
+                                                        <template if:true={showCancelButton}>
+                                                            <button class="offer_button offer_button-neutral" onclick={cancelSiteVisit}>Cancel</button>
+                                                        </template>
+                                                        <template if:true={showReactivateButton}>
+                                                            <button class="offer_button offer_button-primary" onclick={reactivateSiteVisit}>Reactivate Request</button>
+                                                        </template>
+                                                    </div>
+
+                                                    <!-- Change Plans Link (Confirmed State) -->
+                                                    <template if:true={showChangeLinksAfterConfirm}>
+                                                        <div class="change-plans-section">
+                                                            <p class="change-plans-text">Need to change plans?</p>
+                                                        </div>
+                                                    </template>
                                                 </template>
                                             </div>
                                         </template>
@@ -141,13 +171,43 @@
                                             <button class="offer_button sticky-offer" onclick={makeOffer}>Make an Offer</button>
                                         </template>
                                         <template if:true={showSiteVisit}>
-                                            <div class="site_visit_buttons">
-                                                <template if:false={isConfirmed}>
-                                                    <button class="offer_button sticky-offer" onclick={confirmSiteVisit} disabled={isDateInPast}>Confirm Site Visit</button>
+                                            <div class="site_visit_section">
+                                                <!-- Status Message (shown when no buttons are visible) -->
+                                                <template if:true={showStatusMessageBox}>
+                                                    <div class="status-message">
+                                                        <p class="status-text">{statusMessage}</p>
+                                                        <template if:true={showingDate}>
+                                                            <p class="showing-date">Scheduled for: {showingDate}</p>
+                                                        </template>
+                                                        <template if:true={rescheduleMessage}>
+                                                            <p class="reschedule-date">{rescheduleMessage}</p>
+                                                        </template>
+                                                    </div>
                                                 </template>
-                                                <template if:false={isCancelled}>
-                                                    <button class="offer_button sticky-offer" onclick={rescheduleSiteVisit} disabled={isDateInPast}>Reschedule</button>
-                                                    <button class="offer_button sticky-offer" onclick={cancelSiteVisit} disabled={isDateInPast}>Cancel</button>
+
+                                                <!-- Mobile Buttons -->
+                                                <template if:false={showStatusMessageBox}>
+                                                    <div class="site_visit_buttons">
+                                                        <template if:true={showConfirmButton}>
+                                                            <button class="offer_button sticky-offer offer_button-primary" onclick={confirmSiteVisit}>Confirm</button>
+                                                        </template>
+                                                        <template if:true={showRescheduleButton}>
+                                                            <button class="offer_button sticky-offer offer_button-secondary" onclick={rescheduleSiteVisit}>Reschedule</button>
+                                                        </template>
+                                                        <template if:true={showCancelButton}>
+                                                            <button class="offer_button sticky-offer offer_button-neutral" onclick={cancelSiteVisit}>Cancel</button>
+                                                        </template>
+                                                        <template if:true={showReactivateButton}>
+                                                            <button class="offer_button sticky-offer offer_button-primary" onclick={reactivateSiteVisit}>Reactivate Request</button>
+                                                        </template>
+                                                    </div>
+
+                                                    <!-- Change Plans Link (Confirmed State) -->
+                                                    <template if:true={showChangeLinksAfterConfirm}>
+                                                        <div class="change-plans-section">
+                                                            <p class="change-plans-text">Need to change plans?</p>
+                                                        </div>
+                                                    </template>
                                                 </template>
                                             </div>
                                         </template>
@@ -170,7 +230,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="tab active-tab-content" data-id="tab1">
+                        <div class="tab-css active-tab-content" data-id="tab1">
                             <template for:each={propertyData} for:item="item">
                                 <div class="about" key={item.Id}>
                                     <h1>About this Property</h1>
@@ -296,10 +356,10 @@
                                                     <p class="details_value">{item.MVEX__Available_From__c}</p>
                                                 </div>
                                             </template>
-                                            <template if:true={item.MVEX__Available_To__c}>
+                                            <template if:true={item.MVEX__Available_to__c}>
                                                 <div class="details_class">
                                                     <p class="details_field">Available To</p>
-                                                    <p class="details_value">{item.MVEX__Available_To__c}</p>
+                                                    <p class="details_value">{item.MVEX__Available_to__c}</p>
                                                 </div>
                                             </template>
                                         </template>
@@ -338,7 +398,7 @@
                                 </div>
                             </template>
                         </div>
-                        <div class="tab" data-id="tab2">
+                        <div class="tab-css" data-id="tab2">
                             <div class="images_total">
                                 <p>All Images <b>({totalImagesInGallery})</b></p>
                             </div>
@@ -418,10 +478,10 @@
         </template>
 
         <template if:true={showConfirmPopup}>
-            <section role="dialog" class="slds-modal slds-fade-in-open" aria-modal="true">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header">
-                        <button class="slds-button slds-button_icon slds-modal__close" title="Close"
+            <section role="dialog" class="slds-modal slds-fade-in-open custom-modal" aria-modal="true">
+                <div class="slds-modal__container custom-modal-container">
+                    <header class="slds-modal__header custom-modal-header">
+                        <button class="slds-button slds-button_icon custom-modal-close" title="Close"
                             onclick={closePopup}>
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -429,25 +489,25 @@
                             </svg>
                             <span class="slds-assistive-text">Close</span>
                         </button>
-                        <h2 class="slds-modal__title">Confirm Site Visit</h2>
+                        <h2 class="slds-modal__title custom-modal-title">Confirm Site Visit</h2>
                     </header>
-                    <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-modal__content custom-modal-content slds-p-around_medium">
                         <p>Are you sure you want to confirm the site visit for {showingDate}?</p>
                     </div>
-                    <footer class="slds-modal__footer">
-                        <button class="slds-button slds-button_neutral" onclick={closePopup}>Cancel</button>
-                        <button class="slds-button slds-button_brand" onclick={handleConfirm}>Confirm</button>
+                    <footer class="slds-modal__footer custom-modal-footer">
+                        <button class="slds-button slds-button_neutral custom-button custom-button-neutral" onclick={closePopup}>Cancel</button>
+                        <button class="slds-button slds-button_brand custom-button custom-button-brand" onclick={handleConfirm}>Confirm</button>
                     </footer>
                 </div>
             </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
+            <div class="slds-backdrop custom-backdrop slds-backdrop_open"></div>
         </template>
 
         <template if:true={showCancelPopup}>
-            <section role="dialog" class="slds-modal slds-fade-in-open" aria-modal="true">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header">
-                        <button class="slds-button slds-button_icon slds-modal__close" title="Close"
+            <section role="dialog" class="slds-modal slds-fade-in-open custom-modal" aria-modal="true">
+                <div class="slds-modal__container custom-modal-container">
+                    <header class="slds-modal__header custom-modal-header">
+                        <button class="slds-button slds-button_icon custom-modal-close" title="Close"
                             onclick={closePopup}>
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -455,27 +515,27 @@
                             </svg>
                             <span class="slds-assistive-text">Close</span>
                         </button>
-                        <h2 class="slds-modal__title">Cancel Site Visit</h2>
+                        <h2 class="slds-modal__title custom-modal-title">Cancel Site Visit</h2>
                     </header>
-                    <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-modal__content custom-modal-content slds-p-around_medium">
                         <p>Are you sure you want to cancel the site visit scheduled for {showingDate}?</p>
                         <lightning-input type="text" label="Reason for Cancellation" required
-                            value={cancellationReason} onchange={handleReasonChange}></lightning-input>
+                            value={cancellationReason} onchange={handleReasonChange} class="input-width"></lightning-input>
                     </div>
-                    <footer class="slds-modal__footer">
-                        <button class="slds-button slds-button_neutral" onclick={closePopup}>No</button>
-                        <button class="slds-button slds-button_destructive" onclick={handleCancel}>Yes, Cancel</button>
+                    <footer class="slds-modal__footer custom-modal-footer">
+                        <button class="slds-button slds-button_neutral custom-button custom-button-neutral" onclick={closePopup}>No</button>
+                        <button class="slds-button slds-button_destructive custom-button custom-button-destructive" onclick={handleCancel}>Yes, Cancel</button>
                     </footer>
                 </div>
             </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
+            <div class="slds-backdrop custom-backdrop slds-backdrop_open"></div>
         </template>
 
         <template if:true={showReschedulePopup}>
-            <section role="dialog" class="slds-modal slds-fade-in-open" aria-modal="true">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header">
-                        <button class="slds-button slds-button_icon slds-modal__close" title="Close"
+            <section role="dialog" class="slds-modal slds-fade-in-open custom-modal" aria-modal="true">
+                <div class="slds-modal__container custom-modal-container">
+                    <header class="slds-modal__header custom-modal-header">
+                        <button class="slds-button slds-button_icon custom-modal-close" title="Close"
                             onclick={closePopup}>
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -483,19 +543,19 @@
                             </svg>
                             <span class="slds-assistive-text">Close</span>
                         </button>
-                        <h2 class="slds-modal__title">Reschedule Site Visit</h2>
+                        <h2 class="slds-modal__title custom-modal-title">Reschedule Site Visit</h2>
                     </header>
-                    <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-modal__content custom-modal-content slds-p-around_medium">
                         <lightning-input type="datetime" label="Select New Date and Time" value={newScheduleDate}
                             onchange={handleDateChange} required></lightning-input>
                     </div>
-                    <footer class="slds-modal__footer">
-                        <button class="slds-button slds-button_neutral" onclick={closePopup}>Cancel</button>
-                        <button class="slds-button slds-button_brand" onclick={handleReschedule}>Save</button>
+                    <footer class="slds-modal__footer custom-modal-footer">
+                        <button class="slds-button slds-button_neutral custom-button custom-button-neutral" onclick={closePopup}>Cancel</button>
+                        <button class="slds-button slds-button_brand custom-button custom-button-brand" onclick={handleReschedule}>Save</button>
                     </footer>
                 </div>
             </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
+            <div class="slds-backdrop custom-backdrop slds-backdrop_open"></div>
         </template>
     </template>
     <c-custom-toast message={toastMessage} type={toastType} show={showToast}

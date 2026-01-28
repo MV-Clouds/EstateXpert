@@ -381,6 +381,15 @@ export default class SendEmails extends LightningElement {
         }
         return 'custom-input time-input';
     }
+
+    get formattedDripStartDate() {
+        if (this.dripStartDate) {
+            // dripStartDate is in YYYY-MM-DD format
+            const [year, month, day] = this.dripStartDate.split('-');
+            return `${day}-${month}-${year}`;
+        }
+        return '';
+    }
     
     connectedCallback() {
         if (this.objectApiName) {
@@ -530,6 +539,8 @@ export default class SendEmails extends LightningElement {
                         label: `${contact.name} (${contact.email})`,
                         value: contact.id
                     }));
+
+                    console.log('Data ==> ', this.allContacts);
                     
                     // Update selected contacts details if any pre-selected
                     this.updateSelectedContactsDetails();
@@ -541,11 +552,16 @@ export default class SendEmails extends LightningElement {
             .catch(error => {
                 this.showToast('Error', 'Failed to load contacts', 'error');
                 console.error('Contact loading error:', error);
+                console.error('Contact loading error:', error.stack);
             });
     }
     
     // Update selected contacts details
     updateSelectedContactsDetails() {
+
+        // Ensure safe defaults
+        this.selectedContacts = this.selectedContacts || [];
+        this.selectedCCContacts = this.selectedCCContacts || [];
         // Ensure selectedContacts contains only IDs
         if (this.selectedContacts && this.selectedContacts.length > 0 && typeof this.selectedContacts[0] === 'object') {
             this.selectedContacts = this.selectedContacts.map(contact => contact.Id || contact.id);

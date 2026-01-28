@@ -21,7 +21,7 @@ global without sharing class GoogleLeadsWebhook {
             String savedGoogleKey;
             List<GoogleLeadConfig__c> configs = [
                 SELECT Google_Lead_Form_Secret__c 
-                FROM GoogleLeadConfig__c WITH USER_MODE
+                FROM GoogleLeadConfig__c
                 LIMIT 1
             ];
             if (!configs.isEmpty()) {
@@ -33,7 +33,6 @@ global without sharing class GoogleLeadsWebhook {
             List<GoogleLeadFieldMapping__mdt> fieldMappingsRecords = [
                 SELECT Field_Mappings__c 
                 FROM GoogleLeadFieldMapping__mdt 
-                WITH USER_MODE
                 LIMIT 1
             ];
             if (!fieldMappingsRecords.isEmpty()) {
@@ -61,10 +60,8 @@ global without sharing class GoogleLeadsWebhook {
                 }
             }
 
-            // Create a new lead
-            Lead newLead = new Lead();
-            newLead.Status = 'Pending';
-            newLead.Company = 'Mvclouds PVT LTD';
+            // Create a new contact
+            Contact newContact = new Contact();
 
             // Apply field mappings
             for (FieldMapping mapping : fieldMappings) {
@@ -81,22 +78,20 @@ global without sharing class GoogleLeadsWebhook {
                         value = value.substring(0, 80);
                     } else if (mapping.salesforceField == 'Phone' && value.length() > 40) {
                         value = value.substring(0, 40);
-                    } else if (mapping.salesforceField == 'Company' && value.length() > 255) {
-                        value = value.substring(0, 255);
                     }
                     
                     // Set the field value dynamically
-                    newLead.put(mapping.salesforceField, value);
+                    newContact.put(mapping.salesforceField, value);
                 }
             }
 
             // Handle GCLID separately if needed
             String gclid = leadMap.get('GCLID');
             if (String.isNotBlank(gclid)) {
-                newLead.put('GCLID__c', gclid); // Assuming a custom field for GCLID
+                newContact.put('GCLID__c', gclid); // Assuming a custom field for GCLID
             }
 
-            insert as user newLead;
+            insert newContact;
 
         } catch (Exception e) {
             ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'Error processing webhook: ' + e.getMessage() + '\nStack Trace: ' + e.getStackTraceString());

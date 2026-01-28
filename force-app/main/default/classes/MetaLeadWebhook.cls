@@ -48,10 +48,14 @@ global without sharing class MetaLeadWebhook {
     
     @HttpGet
     global static void doGet() {
-        RestResponse response = RestContext.response;
-        RestRequest request = RestContext.request;
-        if (request.params.get('hub.verify_token') == verifyToken) {
-            response.responseBody = Blob.valueOf(request.params.get('hub.challenge'));
+        try{
+            RestResponse response = RestContext.response;
+            RestRequest request = RestContext.request;
+            if (request.params.get('hub.verify_token') == verifyToken) {
+                response.responseBody = Blob.valueOf(request.params.get('hub.challenge'));
+            }
+        }catch(Exception e){
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'doGet', e.getMessage());
         }
     }
     
@@ -78,7 +82,7 @@ global without sharing class MetaLeadWebhook {
                     if (String.isNotBlank(accessToken)) {
                         Map<String, Object> leadData = fetchLeadData(leadgenId);
                         System.debug('leadData--->' + leadData);
-                        createSalesforceLead(leadData);
+                        createSalesforceContact(leadData);
                     }
                 }
             }
@@ -93,8 +97,9 @@ global without sharing class MetaLeadWebhook {
     }
     
     public static Map<String, Object> fetchLeadData(String leadgenId) {
+        // Request specific fields: field_data for form answers, platform for source (IG vs FB)
         String url = 'https://graph.facebook.com/' + fbApiVersion + '/' + leadgenId + 
-                     '?access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8');
+                     '?fields=field_data,platform&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8');
         
         HttpRequest req = new HttpRequest();
         req.setEndpoint(url);
@@ -116,20 +121,33 @@ global without sharing class MetaLeadWebhook {
         public Boolean isCustom { get; set; }
     }
     
-    private static void createSalesforceLead(Map<String, Object> leadData) {
+    private static void createSalesforceContact(Map<String, Object> leadData) {
+
+        System.debug('leadData in createSalesforceContact--->' + leadData);
         if (leadData.containsKey('id')) {
-            Lead newLead = new Lead();
-            newLead.Company = 'Facebook Lead';
-            newLead.LeadSource = 'Facebook';
-            newLead.MetaLeadId__c = leadId;
-            newLead.MetaPageId__c = pageId;
-            newLead.MetaFormId__c = formId;
+            Contact newContact = new Contact();
+            // Company field is not available on standard Contact object
+            
+            // Check platform field to separate Instagram vs Facebook leads
+            String platform = '';
+            if (leadData.containsKey('platform')) {
+                platform = (String) leadData.get('platform');
+            }
+            
+            if (platform == 'ig') {
+                newContact.LeadSource = 'Instagram';
+            } else {
+                newContact.LeadSource = 'Facebook';
+            }
+
+            newContact.MetaLeadId__c = leadId;
+            newContact.MetaPageId__c = pageId;
+            newContact.MetaFormId__c = formId;
             
             // Fetch the mapping from custom metadata
             MetaLeadFieldMapping__mdt mappingRecord = [
                 SELECT FieldMappingJson__c
                 FROM MetaLeadFieldMapping__mdt
-                WITH USER_MODE
                 LIMIT 1
             ];
             
@@ -158,13 +176,13 @@ global without sharing class MetaLeadWebhook {
                     if (fieldMappingMap.containsKey(fieldName)) {
                         FieldMapping mapping = fieldMappingMap.get(fieldName);
                         String sfField = mapping.salesforceField;
-                        newLead.put(sfField, fieldValue);
+                        newContact.put(sfField, fieldValue);
                     }
                 }
             }
             
             try {
-                insert as user newLead;
+                insert newContact;
             } catch (DmlException e) {
                 ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceLead', e.getMessage());
             }

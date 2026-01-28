@@ -457,7 +457,7 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
     backToAllFlowPage(){
         if(!this.isFlowSubmissionDetails){
             let componentDef = {
-                componentDef: "c:wbAllFlowsPage",
+                componentDef: "MVEX:wbAllFlowsPage",
             };
             
             let encodedComponentDef = btoa(JSON.stringify(componentDef));

@@ -36,6 +36,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @track visiblePages = 5;
     @track fieldsModal = false;
     @track isAccessible = false;
+    isConfigOpen = false;
 
     /**
     * Method Name : totalItems
@@ -976,21 +977,30 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * date: 14/10/2024
     * Created By:Vyom Soni
     */
-    handleRecordManager(){
-        let componentDef = {
-            componentDef: "c:recordConfigBodyCmp",
-            attributes: {
-                isFromListingManager: true
-            }
-        };
+    // handleRecordManager(){
+    //     let componentDef = {
+    //         componentDef: "c:recordConfigBodyCmp",
+    //         attributes: {
+    //             isFromListingManager: true
+    //         }
+    //     };
         
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/one/one.app#' + encodedComponentDef
-            }
-        });
+    //     let encodedComponentDef = btoa(JSON.stringify(componentDef));
+    //     this[NavigationMixin.Navigate]({
+    //         type: 'standard__webPage',
+    //         attributes: {
+    //             url: '/one/one.app#' + encodedComponentDef
+    //         }
+    //     });
+    // }
+
+    openConfigureSettings(){
+        this.isConfigOpen = true;
+    }
+
+    handleCloseModal() {
+        this.isConfigOpen = false;
+        this.getListingDataMethod();
     }
 
     /**

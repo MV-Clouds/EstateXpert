@@ -191,6 +191,7 @@ public with sharing class ChatWindowController {
             Http http = new Http();
             HttpResponse response = http.send(httpReq);
             Integer statusCode = response.getStatusCode();
+            System.debug('WhatsApp API Response: ' + response.getBody());
             if(response != null && statusCode == 200){
                 String responseBody = response.getBody();
                 Map<String, Object> jsonMap = (Map<String, Object>)JSON.deserializeUntyped(responseBody);

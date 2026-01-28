@@ -187,7 +187,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
 
     showCreateTemplate(){
         let cmpDef = {
-            componentDef: "c:wbTemplateParent",
+            componentDef: "MVEX:wbTemplateParent",
         };
 
         let encodedDef = btoa(JSON.stringify(cmpDef));
@@ -289,7 +289,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     
         this.editTemplateId = recordId;
         let cmpDef = {
-            componentDef: "c:wbTemplateParent",
+            componentDef: "MVEX:wbTemplateParent",
             attributes: {
                 edittemplateid: this.editTemplateId
             }

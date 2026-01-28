@@ -18,7 +18,12 @@
                             <div class="slds-page-header__col-actions header-button">
                                 <div class="slds-page-header__controls header-buttons-div">
                                     <div class="header-buttons">
-                                        <c-record-config-body-cmp feature-name="Listing Manager"></c-record-config-body-cmp>
+                                        <button onclick={openConfigureSettings} class="icon-button">
+                                            Configure Settings
+                                        </button>
+                                        <template if:true={isConfigOpen}>
+                                            <c-record-config-body-cmp feature-name="Listing Manager" onclose={handleCloseModal}></c-record-config-body-cmp>
+                                        </template>
                                         <button onclick={goTONewListing} class="icon-button">
                                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">

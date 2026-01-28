@@ -139,20 +139,18 @@ public without sharing class DataMappingControllerV2 {
             'listingMediaImages' => new map<string, string>()
         };
         try {
-         
+            Set<String> extractedKeys = collectMappingKeys(extractedKeyMap);
 
-                Set<String> extractedKeys = collectMappingKeys(extractedKeyMap);
+            Map<String, String> mappigKeysValue = getMappingKeyVsValue2(new List<String>(extractedKeys), sourceObjectAPI, recordIds);
+            mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(mappigKeysValue);
 
-                Map<String, String> mappigKeysValue = getMappingKeyVsValue2(new List<String>(extractedKeys), sourceObjectAPI, recordIds);
-                mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(mappigKeysValue);
+            Map<String, String> sfImagesSRCVsID = getSFimageVsId(extractedKeyMap);
+            mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(sfImagesSRCVsID);
 
-                Map<String, String> sfImagesSRCVsID = getSFimageVsId(extractedKeyMap);
-                mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(sfImagesSRCVsID);
-
-                if(includeMergTemKeys == true){
-                    set<String> mergTemplateKeys = collectMergeTemplateKeys(extractedKeyMap);
-                }
-                                        
+            if(includeMergTemKeys == true){
+                set<String> mergTemplateKeys = collectMergeTemplateKeys(extractedKeyMap);
+            }
+                                    
             return mapingKeyVsValuesGroup;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'DataMappingControllerV2', 'getMappingsKeyValues2', e.getMessage());
@@ -168,45 +166,45 @@ public without sharing class DataMappingControllerV2 {
             'listingMediaImages' => new map<string, string>()
         };
         try {
-                String extractedKeyString = '';
-                String sourceObjectAPI = '';
+            String extractedKeyString = '';
+            String sourceObjectAPI = '';
 
-                if(!temps.isEmpty()){
-                    for(Template_Data__c fieldData : temps[0].Template_Data__r){
-                        extractedKeyString +=  fieldData.Template_Value_Simple__c;
-                    }
-
-                    extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
-
-                    sourceObjectAPI = temps[0].Object_API_Name__c;
+            if(!temps.isEmpty()){
+                for(Template_Data__c fieldData : temps[0].Template_Data__r){
+                    extractedKeyString +=  fieldData.Template_Value_Simple__c;
                 }
 
-                Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);
-                // Collect and Store mapping keys in to set of string from keys stored in field...
-                Set<String> extractedKeys = collectMappingKeys(extractedKeyMap);
-                // collect mapping key values for object field and general fields....
-                Map<String, String> mappigKeysValue = getMappingKeyVsValue(new List<String>(extractedKeys), sourceObjectAPI, recordId);
-                mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(mappigKeysValue);
+                extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
 
-                // Collect and Store Salesforce image SRC in to set ...
-                Map<String, String> sfImagesSRCVsID = getSFimageVsId(extractedKeyMap);
-                mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(sfImagesSRCVsID);
+                sourceObjectAPI = temps[0].Object_API_Name__c;
+            }
 
-                // this varibale will be FALSE when it call from "getKeyNValueFromMergeTemps" Method...
-                if(includeMergTemKeys == true){
-                    // collect merge template key from keys stored in field ...
-                    set<String> mergTemplateKeys = collectMergeTemplateKeys(extractedKeyMap);
+            Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);
+            // Collect and Store mapping keys in to set of string from keys stored in field...
+            Set<String> extractedKeys = collectMappingKeys(extractedKeyMap);
+            // collect mapping key values for object field and general fields....
+            Map<String, String> mappigKeysValue = getMappingKeyVsValue(new List<String>(extractedKeys), sourceObjectAPI, recordId);
+            mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(mappigKeysValue);
 
-                    // create map for merge template key with Values....
-                    map<String, Map<String, String>> keyWithValues = getKeyNValueFromMergeTemps(new List<String>(mergTemplateKeys), sourceObjectAPI, recordId);
+            // Collect and Store Salesforce image SRC in to set ...
+            Map<String, String> sfImagesSRCVsID = getSFimageVsId(extractedKeyMap);
+            mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(sfImagesSRCVsID);
 
-                    // colelct extracted key with actual value from marge template add them into exsiting map of main tempalte.
-                    mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(keyWithValues?.get('objectNGeneral'));
-                    mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(keyWithValues?.get('salesforceImages'));
-                    mapingKeyVsValuesGroup?.get('margeTemplate')?.putAll(keyWithValues?.get('margeTemplate'));
+            // this varibale will be FALSE when it call from "getKeyNValueFromMergeTemps" Method...
+            if(includeMergTemKeys == true){
+                // collect merge template key from keys stored in field ...
+                set<String> mergTemplateKeys = collectMergeTemplateKeys(extractedKeyMap);
 
-                    // Note : no need to add signatureImage for merge tempalte key, because signature key will be same for each template...
-                }
+                // create map for merge template key with Values....
+                map<String, Map<String, String>> keyWithValues = getKeyNValueFromMergeTemps(new List<String>(mergTemplateKeys), sourceObjectAPI, recordId);
+
+                // colelct extracted key with actual value from marge template add them into exsiting map of main tempalte.
+                mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(keyWithValues?.get('objectNGeneral'));
+                mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(keyWithValues?.get('salesforceImages'));
+                mapingKeyVsValuesGroup?.get('margeTemplate')?.putAll(keyWithValues?.get('margeTemplate'));
+
+                // Note : no need to add signatureImage for merge tempalte key, because signature key will be same for each template...
+            }
                                         
             return mapingKeyVsValuesGroup;
         } catch (Exception e) {
@@ -235,7 +233,7 @@ public without sharing class DataMappingControllerV2 {
         try {
             List<Template__c> temps = [SELECT Id, Name, Object_API_Name__c, Template_Name__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate,
                                       (SELECT Id, Name, Template_Value_Simple__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC)
-                                       FROM Template__c  WHERE Id In :templateIDs];
+                                       FROM Template__c WHERE Id In :templateIDs WITH USER_MODE];
 
             for(Template__c temp : temps){
                 String extractedKeyString = '';
@@ -276,8 +274,6 @@ public without sharing class DataMappingControllerV2 {
                     mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(keyWithValues?.get('objectNGeneral'));
                     mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(keyWithValues?.get('salesforceImages'));
                     mapingKeyVsValuesGroup?.get('margeTemplate')?.putAll(keyWithValues?.get('margeTemplate'));
-
-                    // Note : no need to add signatureImage for merge tempalte key, because signature key will be same for each template...
                 }
             }
                                         
@@ -322,9 +318,8 @@ public without sharing class DataMappingControllerV2 {
      * @description : extract and collect merge template keys.
      */
     public static Set<String> collectMergeTemplateKeys(Map<String, Object> extractedKeyMap){
-        set<String> mergTemplateKeys = new set<String>();
+        Set<String> mergTemplateKeys = new Set<String>();
         try {
-            
             Object mergeTempKeys = extractedKeyMap?.get('mergeTempKeys') != null ? extractedKeyMap.get('mergeTempKeys') : (Object) JSON.deserializeUntyped('[]');
             String mergerTempString = JSON.serialize(mergeTempKeys);
             List<Object> mergerTempKeys = (List<Object>) JSON.deserializeUntyped(mergerTempString);
@@ -348,7 +343,6 @@ public without sharing class DataMappingControllerV2 {
     public static Map<String, String> getSFimageVsId(Map<String, Object> extractedKeyMap){
         Map<String, String> sfImages = new  Map<String,String>();
         try {
-            
             Object sfImageSRCs = extractedKeyMap?.get('salesforceImages') != null ? extractedKeyMap.get('salesforceImages') : (Object) JSON.deserializeUntyped('[]');
             String sfImagesSRCString = JSON.serialize(sfImageSRCs);
             List<Object> sfImgKeys = (List<Object>) JSON.deserializeUntyped(sfImagesSRCString);
@@ -677,12 +671,6 @@ public without sharing class DataMappingControllerV2 {
             List<KeyMappingController.MappingFields> objectWithFields = new List<KeyMappingController.MappingFields>();
             Map<String, String> validFields = getValidFields(startingSymbol, sourceObjectAPI);
 
-            // System.debug('validFields : ' + validFields);
-            // for(String fieldAPI : validFields.keySet()){
-            //     System.debug('validFields : ' + fieldAPI);
-            // }
-
-
             for(String key : mappingKeyList){
                 String subMapping = key.substringBetween('{{','}}');
                 // Used Switch instead of if/else to avoid pmd error of congantive complexity....
@@ -783,20 +771,11 @@ public without sharing class DataMappingControllerV2 {
      * 
      * @description : generic Method to fetch object field using schema and modify api name as per replationshipName
      */
-    public static map<String, string> fetchObjectFields(String objectAPI, String fieldType, String replationshipName){
+    public static Map<String, String> fetchObjectFields(String objectAPI, String fieldType, String replationshipName){
         Map<String, String> fields = new Map<String, String>();
         try {
-            // Schema.SObjectType sobjType = Schema.getGlobalDescribe().get(objectAPI);
 
-            // System.debug('Object found: ' + sobjType);
-            // One-liner approach
-String namespace = DataMappingControllerV2.class.getName().contains('.') 
-    ? DataMappingControllerV2.class.getName().substringBefore('.') + '__' 
-    : '';
-
-Schema.SObjectType sobjType = Schema.getGlobalDescribe().get(namespace + objectAPI);
-System.debug('Object found: ' + sobjType);
-System.debug('namespace: ' + namespace);
+            Schema.SObjectType sobjType = Schema.getGlobalDescribe().get(objectAPI);
             Schema.DescribeSObjectResult r = sobjType.getDescribe();
             Map<String, Schema.SObjectField> mapOfFields = r.fields.getMap();
             List<String> fieldsList = new List<String>(mapOfFields.keySet());
@@ -991,26 +970,14 @@ System.debug('namespace: ' + namespace);
         try {
             // Step 1: Get all listings with their Property__c
             Map<Id, Id> listingIdToPropertyId = new Map<Id, Id>();
-            for (Listing__c listing : [
-                SELECT Id, Property__c 
-                FROM Listing__c 
-                WHERE Id IN :listingIds
-                WITH USER_MODE
-            ]) {
+            for (Listing__c listing : [SELECT Id, Property__c FROM Listing__c WHERE Id IN :listingIds WITH USER_MODE]) {
                 listingIdToPropertyId.put(listing.Id, listing.Property__c);
             }
     
             // Step 2: Get all Property_File__c records in a single query
             Map<Id, List<Property_File__c>> propertyIdToFiles = new Map<Id, List<Property_File__c>>();
-            for (Property_File__c file : [
-                SELECT Id, BaseUrl__c, Property__c 
-                FROM Property_File__c 
-                WHERE Property__c IN :listingIdToPropertyId.values() 
-                AND IsOnExpose__c = true 
-                AND Size__c != null 
-                WITH USER_MODE
-                ORDER BY Sort_on_Expose__c ASC NULLS LAST, Name ASC
-            ]) {
+            for (Property_File__c file : [SELECT Id, BaseUrl__c, Property__c FROM Property_File__c WHERE Property__c IN :listingIdToPropertyId.values() 
+                                            AND IsOnExpose__c = true AND Size__c != null WITH USER_MODE ORDER BY Sort_on_Expose__c ASC NULLS LAST, Name ASC]) {
                 if (!propertyIdToFiles.containsKey(file.Property__c)) {
                     propertyIdToFiles.put(file.Property__c, new List<Property_File__c>());
                 }
@@ -1078,6 +1045,4 @@ System.debug('namespace: ' + namespace);
         @AuraEnabled public List<String> orgFields = new List<String>();
         @AuraEnabled public List<String> userFields = new List<String>();
     }
-      
-
 }

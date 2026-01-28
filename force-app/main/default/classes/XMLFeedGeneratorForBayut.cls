@@ -37,7 +37,7 @@ public with sharing class XMLFeedGeneratorForBayut {
                 portalListings = [SELECT Id, Listing__c FROM PortalListing__c WHERE Portal__c = :recordID AND SystemIsActive__c = TRUE WITH USER_MODE
                                     ORDER BY CreatedDate DESC];
             } else {
-                portalListings = new List<PortalListing__c>();
+                portalListings = [SELECT Id, Listing__c FROM PortalListing__c WHERE SystemIsActive__c = TRUE WITH USER_MODE ORDER BY CreatedDate DESC];
             }
 
             for (PortalListing__c pl : portalListings) {
@@ -68,7 +68,7 @@ public with sharing class XMLFeedGeneratorForBayut {
             // Collect property IDs for media
             Set<Id> propertyIds = new Set<Id>();
             for (Map<String, Object> record : modifiedRecords) {
-                Id propertyId = (Id) record.get('Property__c');
+                Id propertyId = (Id) record.get('MVEX__Property__c');
                 if (propertyId != null) {
                     propertyIds.add(propertyId);
                 }

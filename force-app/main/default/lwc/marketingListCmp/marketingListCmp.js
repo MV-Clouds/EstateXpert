@@ -39,7 +39,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track isModalOpen = false;
     @track selectedContactList = [];
     @track isContactSelected = true;
-    isConfigOpen = false;
+        isConfigOpen = false;
 
     //new variables
     @track wrapOn = false;
@@ -342,39 +342,39 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         this.screenWidth = window?.globalThis?.innerWidth;
         window?.globalThis?.addEventListener('resize', this.handleResize);
         loadStyle(this, designcss)
-            .then(() => {
-                console.log('Styles loaded successfully');
-            })
-            .catch(error => {
-                console.error('Error loading styles', error);
-            });
+        .then(() => {
+            console.log('Styles loaded successfully');
+        })
+        .catch(error => {
+            console.error('Error loading styles', error);
+        });
         this.getAccessible();
     }
 
     getAccessible() {
         getMetadataRecords()
-            .then(data => {
-                const marketingListFeature = data.find(
-                    item => item.DeveloperName === 'Marketing_List'
-                );
-                this.isAccessible = marketingListFeature ? Boolean(marketingListFeature.MVEX__isAvailable__c) : false;
-                console.log('Marketing List Feature Accessibility:', this.isAccessible);
-
-                if (this.isAccessible) {
-                    this.getContactDataMethod();
-                    this.loadQuickTemplates();
-                    this.loadMessageOptions();
-                    this.loadListViewId();
-                    this.loadAllTemplates();
-                } else {
-                    this.spinnerShow = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching accessible fields', error);
-                this.isAccessible = false;
+        .then(data => {
+            const marketingListFeature = data.find(
+                item => item.DeveloperName === 'Marketing_List'
+            );
+            this.isAccessible = marketingListFeature ? Boolean(marketingListFeature.MVEX__isAvailable__c) : false;
+            console.log('Marketing List Feature Accessibility:', this.isAccessible);
+            
+            if (this.isAccessible) {
+                this.getContactDataMethod();
+                this.loadQuickTemplates();
+                this.loadMessageOptions();
+                this.loadListViewId();
+                this.loadAllTemplates();
+            } else {
                 this.spinnerShow = false;
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching accessible fields', error);
+            this.isAccessible = false;
+            this.spinnerShow = false;
+        });
     }
 
     /**
@@ -442,11 +442,11 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             })
     }
 
-    loadListViewId() {
+    loadListViewId(){
         getListViewId().then(data => {
             this.listViewId = data;
         }).catch(error => {
-            this.showToast('Error', 'Failed to load list view id: ' + error.stack, 'error');
+            this.showToast('Error', 'Failed to load list view id: '+error.stack, 'error');
         })
     }
 
@@ -463,7 +463,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.contactData = result.contacts;
                 console.log('Contact Data:', JSON.stringify(this.contactData, null, 2));
                 console.log('Total Contacts Fetched:', this.contactData.length);
-
+                
                 this.pageSize = result.pageSize;
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
@@ -1330,7 +1330,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
-    openConfigureSettings() {
+openConfigureSettings(){
         this.isConfigOpen = true;
     }
     handleCloseModal() {
@@ -1363,19 +1363,19 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     //         }
 
     //         console.log('selectedContactList', JSON.stringify(this.selectedContactList));
-
+    
     //         const phoneNumbers = Array.from(this.selectedContactList)
     //         .map(recordId => {
     //             return recordId ? recordId.Phone : null;
     //         })
     //         .filter(Phone => Phone !== null && Phone !== '');
-
-
+      
+                
     //         const isUpdate = false;
-
+            
     //         const phoneField = 'Phone';
     //         // const listViewName = '00BdM00000XfLjwUAF';
-
+    
     //         const messageData = {
     //             objectApiName: this.selectedObject,
     //             listViewName: this.listViewId,
@@ -1386,11 +1386,11 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     //             broadcastGroupId: null,
     //             phoneField: phoneField
     //         };
-
+    
     //         this.spinnerShow = true;
 
     //         console.log('messageData', JSON.stringify(messageData));
-
+    
     //         // Call the Apex method
     //         processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) })
     //         .then(() => {
@@ -1447,7 +1447,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     handleInputChange(event) {
         const { name, value } = event.target;
-        switch (name) {
+        switch(name) {
             case 'name':
                 this.broadcastGroupName = value;
                 break;
@@ -1499,7 +1499,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             return;
         }
 
-        if (this.tempBroadcastGroupName == this.broadcastGroupName) {
+        if(this.tempBroadcastGroupName == this.broadcastGroupName){
             this.popUpFirstPage = false;
             this.popUpSecondPage = true;
             this.popupHeader = 'Choose Template';

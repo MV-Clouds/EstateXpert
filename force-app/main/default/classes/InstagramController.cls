@@ -1,4 +1,4 @@
-public with sharing class InstagramController {
+public without sharing class InstagramController {
 
     public Boolean isRecordCreated { get; set; }
     
@@ -71,6 +71,8 @@ public with sharing class InstagramController {
     
             Http http = new Http();
             HttpResponse res = http.send(req);
+
+            System.debug('Long Lived Token Response: ' + res.getBody());
     
             if (res.getStatusCode() == 200) {
                 Map<String, Object> responseBody = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
@@ -79,6 +81,7 @@ public with sharing class InstagramController {
             } else {
                 throw new AuraHandledException('Failed to get long-lived token: ' + res.getBody());
             }
+
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'InstagramController', 'getLongLivedAccessToken', 'Error while getting long-lived token.');
             return null;

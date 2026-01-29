@@ -1,6 +1,5 @@
 import { LightningElement, track, wire } from 'lwc';
 import getContacts from '@salesforce/apex/EmailCampaignController.getContacts';
-import getLeads from '@salesforce/apex/EmailCampaignController.getLeads';
 import getDateFieldsForPicklist from '@salesforce/apex/EmailCampaignController.getDateFieldsForPicklist';
 import createCampaignAndEmails from '@salesforce/apex/EmailCampaignController.createCampaignAndEmails';
 import updateCampaignAndEmails from '@salesforce/apex/EmailCampaignController.updateCampaignAndEmails';
@@ -152,23 +151,13 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             console.log('Navigation State string ');
             console.log(navigationStateString);
 
-
-            let ifLead = false;
-
             if(recId){
                 this.campaignId = recId;
                 getCampaign({ campaignId: this.campaignId }).then(result => {
-
-                    console.log('result ==> ' , result.MVEX__RelatedObject__c);
-                    if(result && result.MVEX__RelatedObject__c == 'Lead'){
-                        this.relatedObject = 'Lead';
-                        this.loadLeads();
-                    }
-                    else{
-                        this.relatedObject = 'Contact';
-                        this.loadContacts();
-                    }
-                    console.log('contacts' + this.contacts);
+                        if(result && result.MVEX__RelatedObject__c == 'Contact'){
+                            this.relatedObject = 'Contact';
+                            this.loadContacts();
+                        }
                     }
                 ).catch(error => {  
                     console.error('Error fetching campaign:', error);
@@ -185,16 +174,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 this.templateType = this.navigationStateString.templateType;
                 
                 console.log(typeof this.relatedObject);
-                console.log(' is lead ' , this.relatedObject == 'Lead');
                 console.log( 'related object ' + this.relatedObject);
-
-                if(this.relatedObject == 'Lead'){   
-                    ifLead = true
-                }else{
-                    ifLead = false
-                }
-
-                console.log('ifLead ==> ' , ifLead);
 
                 this.emailsFromTemplate = this.navigationStateString.marketingEmails;
                 console.log(this.emailsFromTemplate);
@@ -237,12 +217,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     console.log('this.emailsWithTemplate JSON.stringify ==> ' , JSON.stringify(this.emailsWithTemplate));
                     console.log('emails ==> ' , this.emails);
                 }
-                console.log(ifLead);
-                if(!ifLead){
-                    this.loadContacts();
-                }else{
-                    this.loadLeads();
-                }
+                this.loadContacts();
                 console.log(this.contacts);
 
             }
@@ -308,24 +283,6 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     */
     loadContacts() {
          getContacts()
-            .then(result => {
-                // console.log('result ==> ' , JSON.stringify(result));
-                this.contacts = result.map(contact => ({
-                    label: contact.Name,
-                    value: contact.Id,
-                    email: contact.Email
-                }));
-                this.updateFilteredLists();
-                this.loadCamapignData();
-
-            })
-            .catch(error => {
-                console.error('Error fetching contacts:', error);
-            });
-    }
-
-    loadLeads() {
-         getLeads()
             .then(result => {
                 // console.log('result ==> ' , JSON.stringify(result));
                 this.contacts = result.map(contact => ({
@@ -546,13 +503,9 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 } 
                 
 
-                // Filter templates based on relatedObject (Lead or Contact)
+                // Filter templates based on relatedObject (Contact)
                 let filteredTemplates = [];
-                if (this.relatedObject === 'Lead') {
-                    filteredTemplates = result.marketingTemplates.filter(
-                        option => option.objectApiName === 'Lead' || option.objectApiName === 'MVEX__Listing__c'
-                    );
-                } else if (this.relatedObject === 'Contact') {
+                if (this.relatedObject === 'Contact') {
                     filteredTemplates = result.marketingTemplates.filter(
                         option => option.objectApiName === 'Contact' || option.objectApiName === 'MVEX__Listing__c'
                     );

@@ -46,11 +46,11 @@
 
 .modal-wrapper .slds-modal__content.custom-content {
     background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    background-image: url('/resource/newImageandMediaBg/');
     background-position: bottom;
     background-repeat: no-repeat;
     background-size: cover;
-    max-height: 70vh;
+    height: 70vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -167,7 +167,7 @@
     margin: 0 0 1rem 0;
     color: var(--text-color);
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .option-card p {
@@ -208,7 +208,7 @@
 .template-selection-container {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1rem;
     padding: 1rem 0;
     flex: 1;
     min-height: 400px;
@@ -217,8 +217,8 @@
 
 @media (min-width: 768px) {
     .template-selection-container {
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
+        grid-template-columns: 1fr 2fr;
+        gap: 0rem;
     }
 }
 
@@ -233,7 +233,7 @@
     margin: 0 0 0.5rem 0;
     color: var(--text-color);
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .template-selection-header p {
@@ -259,7 +259,7 @@
     margin: 0 0 0.75rem 0;
     color: var(--primary-color);
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .selected-template-info p {
@@ -290,7 +290,7 @@
 .template-preview-header h3 {
     margin: 0;
     font-size: 1.125rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .template-preview-content {
@@ -435,7 +435,7 @@
 }
 
 .listing-name {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 1rem;
     margin-bottom: 0.25rem;
 }
@@ -574,7 +574,7 @@
     margin: 0 0 0.25rem 0;
     color: var(--text-color);
     font-size: 1.125rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .section-subtitle {
@@ -621,7 +621,7 @@
 }
 
 .contact-name {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
     margin-bottom: 0.25rem;
     color: var(--text-color);
@@ -651,7 +651,7 @@
     margin: 0 0 1rem 0;
     color: var(--text-color);
     font-size: 1.125rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .summary-grid {
@@ -670,12 +670,12 @@
 }
 
 .summary-label {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-color);
 }
 
 .summary-value {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--primary-color);
     font-size: 1.25rem;
 }
@@ -767,7 +767,7 @@
 .drip-sequence-header h3 {
     margin: 0;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #333;
 }
 
@@ -841,7 +841,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.875rem;
     flex-shrink: 0;
 }
@@ -856,7 +856,7 @@
 }
 
 .drip-sequence-title {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 1rem;
     color: #333;
     margin-bottom: 0.25rem;
@@ -881,7 +881,7 @@
 
 .drip-sequence-timing.invalid-time {
     color: #dc3545;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .drip-sequence-template.invalid-time {
@@ -942,7 +942,7 @@
 .configure-email-form h3 {
     margin: 0 0 1.5rem 0;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #333;
 }
 
@@ -954,7 +954,7 @@
 .form-label {
     display: block;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #333;
     margin-bottom: 0.5rem;
 }
@@ -1055,7 +1055,7 @@
 .no-selection-message h3 {
     margin: 0 0 1rem 0;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #333;
 }
 
@@ -1184,7 +1184,6 @@
 .broadcast-groups-title {
     margin: 0 0 0.25rem 0;
     font-size: 1rem;
-    font-weight: 600;
     color: #333;
 }
 

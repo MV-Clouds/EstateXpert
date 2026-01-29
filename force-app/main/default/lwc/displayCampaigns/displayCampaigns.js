@@ -387,7 +387,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
 
             let cmpDef;                
             cmpDef = {
-                componentDef: 'c:emailCampaignTemplateForm',
+                componentDef: 'MVEX:emailCampaignTemplateForm',
                 attributes: {                    
                     c__navigationState: serializedState,
                     c__recordId : this.currentRecId
@@ -403,7 +403,9 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             });
         }
         catch(e){
+            console.log('error in handleEdit - ', e.stack);
             this.showToast('Error', 'Error while redirecting to edit campaign', 'error');
+            
         }
     }
 
@@ -621,23 +623,28 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     }
 
     openMemberModal(event){
-        const campaignId = event.currentTarget.dataset.id;
-        var compDefinition = {
-            componentDef: "c:campaignMembersTable",
-            attributes: {
-                campaignId: campaignId
-            }
-        };
-        // Base64 encode the compDefinition JS object
-        var encodedCompDef = btoa(JSON.stringify(compDefinition));
-        this[NavigationMixin.GenerateUrl]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/one/one.app#' + encodedCompDef
-            }
-        }).then(url => {
-            window?.globalThis?.open(url, "_blank");
-        });
+        try{
+            const campaignId = event.currentTarget.dataset.id;
+            let cmpDef;                
+            cmpDef = {
+                componentDef: 'MVEX:campaignMembersTable',
+                attributes: {                    
+                    campaignId: campaignId
+                }                
+            };
+    
+            let encodedDef = btoa(JSON.stringify(cmpDef));
+                this[NavigationMixin.Navigate]({
+                type: "standard__webPage",
+                attributes: {
+                    url:  "/one/one.app#" + encodedDef                                                         
+                }
+            });
+        }catch(e){
+            console.log('error in openMemberModal - ', e.stack);
+            // this.showToast('Error', 'Error while redirecting to campaign members '+e.stack, 'error');
+            
+        }
     }
 
     showMessagePopup(Status, Title, Message) {

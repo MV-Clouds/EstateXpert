@@ -1967,7 +1967,7 @@ public with sharing class EmailCampaignController {
                         }
 
                         Map<String, Map<String, String>> mappingKeys;
-                        if (request.RelatedObjectName == 'Listing__c') {
+                        if (request.RelatedObjectName == 'MVEX__Listing__c') {
                             mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, request.RelatedObjectName, listingIds, true);
                         } 
                         

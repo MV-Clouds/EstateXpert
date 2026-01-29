@@ -59,7 +59,7 @@ public with sharing class MarketingListFilterController {
                 }
 
                 // Check if the field is a picklist
-                if (fieldDescribe.getType() == Schema.DisplayType.Picklist) {
+                if (fieldDescribe.getType() == Schema.DisplayType.Picklist || fieldDescribe.getType() == Schema.DisplayType.MultiPicklist) {
                     List<PicklistValue> picklistValues = new List<PicklistValue>();
                     for (Schema.PicklistEntry picklistEntry : fieldDescribe.getPicklistValues()) {
                         PicklistValue picklistValue = new PicklistValue();

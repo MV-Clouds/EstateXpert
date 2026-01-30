@@ -42,6 +42,9 @@ export default class SinglePropertyView extends LightningElement {
     objectId = '';
     showingStatus = '';
     showingDate = '';
+    rawShowingDate = '';
+    rescheduleDate = '';
+    rawRescheduleDate = '';
     showConfirmPopup = false;
     showCancelPopup = false;
     showReschedulePopup = false;
@@ -55,8 +58,17 @@ export default class SinglePropertyView extends LightningElement {
     plvimg2 = plvimg + '/plvimgs/Bathroom.png';
     plvimg4 = plvimg + '/plvimgs/CarParking.png';
 
+    // State-based getters
+    get isProposed() {
+        return this.showingStatus === 'Proposed' || this.showingStatus === 'Waiting For Confirmation' || !this.showingStatus;
+    }
+
     get isConfirmed() {
         return this.showingStatus === 'Scheduled';
+    }
+
+    get isRescheduled() {
+        return this.showingStatus === 'Rescheduled';
     }
 
     get isCancelled() {
@@ -68,6 +80,63 @@ export default class SinglePropertyView extends LightningElement {
         const scheduledDate = new Date(this.showingDate);
         const today = new Date();
         return scheduledDate < today;
+    }
+
+    // Button visibility logic
+    get showConfirmButton() {
+        return this.isProposed && !this.isDateInPast;
+    }
+
+    get showRescheduleButton() {
+        return (this.isProposed || this.isConfirmed) && !this.isDateInPast;
+    }
+
+    get showCancelButton() {
+        return (this.isProposed || this.isConfirmed) && !this.isDateInPast;
+    }
+
+    get showReactivateButton() {
+        return this.isCancelled;
+    }
+
+    get showChangeLinksAfterConfirm() {
+        return this.isConfirmed && !this.isDateInPast;
+    }
+
+    get showDatePassedMessage() {
+        return this.isDateInPast && !this.isCancelled;
+    }
+
+    get showStatusMessageBox() {
+        // Show message when no buttons are visible
+        const hasAnyButton = this.showConfirmButton || this.showRescheduleButton || 
+                            this.showCancelButton || this.showReactivateButton;
+        return !hasAnyButton;
+    }
+
+    get statusMessage() {
+        if (this.isDateInPast && !this.isCancelled) {
+            return 'This appointment time has passed';
+        } else if (this.isConfirmed) {
+            return `Appointment Confirmed! We will see you on ${this.showingDate}.`;
+        } else if (this.isRescheduled) {
+            return 'We have sent your reschedule request to the agent. They will update the time shortly.';
+        } else if (this.isCancelled) {
+            return 'Visit Cancelled';
+        } else if (this.showingStatus === 'Waiting For Confirmation') {
+            return 'Appointment Proposed';
+        } else if (this.showingStatus === 'Proposed') {
+            return 'Site Visit Request Reactivated';
+        } else {
+            return 'Appointment Proposed';
+        }
+    }
+
+    get rescheduleMessage() {
+        if (this.isRescheduled && this.rescheduleDate) {
+            return `Requested new time: ${this.rescheduleDate}`;
+        }
+        return '';
     }
 
     connectedCallback() {
@@ -97,13 +166,37 @@ export default class SinglePropertyView extends LightningElement {
             .then(result => {
                 if (result != null) {
                     this.showingStatus = result.MVEX__Status__c;
-                    this.showingDate = result.MVEX__Scheduled_Date__c ? new Date(result.MVEX__Scheduled_Date__c).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '';
+                    if (result.MVEX__Scheduled_Date__c) {
+                        const dateObj = new Date(result.MVEX__Scheduled_Date__c);
+                        this.showingDate = dateObj.toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        // Store raw datetime in ISO format for lightning-input
+                        this.rawShowingDate = dateObj.toISOString().slice(0, 16);
+                    } else {
+                        this.showingDate = '';
+                        this.rawShowingDate = '';
+                    }
+                    
+                    // Fetch reschedule date if exists
+                    if (result.MVEX__Reschedule_Date__c) {
+                        const rescheduleDateObj = new Date(result.MVEX__Reschedule_Date__c);
+                        this.rescheduleDate = rescheduleDateObj.toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        this.rawRescheduleDate = rescheduleDateObj.toISOString().slice(0, 16);
+                    } else {
+                        this.rescheduleDate = '';
+                        this.rawRescheduleDate = '';
+                    }
                 }
             })
             .catch(error => {
@@ -173,7 +266,7 @@ export default class SinglePropertyView extends LightningElement {
                 });
                 element.classList.add("active-tab");
 
-                this.template.querySelectorAll(".tab").forEach(tabdata => {
+                this.template.querySelectorAll(".tab-css").forEach(tabdata => {
                     tabdata.classList.remove("active-tab-content");
                     tabdata.style.opacity = '0';
                 });
@@ -249,10 +342,10 @@ export default class SinglePropertyView extends LightningElement {
 
     formatAddress(record) {
         const addressParts = [
-            record.MVEX__Address__Street__s,
-            record.MVEX__Address__City__s,
-            record.MVEX__Address__StateCode__s,
-            record.MVEX__Address__PostalCode__s
+            record.MVEX__Listing_Address__Street__s,
+            record.MVEX__Listing_Address__City__s,
+            record.MVEX__Listing_Address__StateCode__s,
+            record.MVEX__Listing_Address__PostalCode__s
         ].filter(part => part != null && part !== '');
         return addressParts.length > 0 ? addressParts.join(', ') : 'Address not available';
     }
@@ -261,8 +354,8 @@ export default class SinglePropertyView extends LightningElement {
         if (record.MVEX__Listing_Type__c === 'Sale') {
             return record.MVEX__Sale_Price__c ? `AED ${record.MVEX__Sale_Price__c.toLocaleString()}` : 'Price not available';
         } else if (record.MVEX__Listing_Type__c === 'Rent') {
-            return record.MVEX__Monthly_Rent__c && record.MVEX__Rent_Frequency__c
-                ? `AED ${record.MVEX__Monthly_Rent__c.toLocaleString()} / ${record.MVEX__Rent_Frequency__c}`
+            return record.MVEX__Rental_Price__c && record.MVEX__Rent_Frequency__c
+                ? `AED ${record.MVEX__Rental_Price__c.toLocaleString()} / ${record.MVEX__Rent_Frequency__c}`
                 : 'Rent not available';
         }
         return 'Price not available';
@@ -270,30 +363,30 @@ export default class SinglePropertyView extends LightningElement {
 
     getLocationFromRecord(record) {
         const addressFields = [
-            record.MVEX__Address__Street__s,
-            record.MVEX__Address__City__s,
-            record.MVEX__Address__StateCode__s,
-            record.MVEX__Address__PostalCode__s
+            record.MVEX__Listing_Address__Street__s,
+            record.MVEX__Listing_Address__City__s,
+            record.MVEX__Listing_Address__StateCode__s,
+            record.MVEX__Listing_Address__PostalCode__s
         ].filter(field => field != null && field !== '');
 
         if (addressFields.length > 0) {
             return {
                 marker: {
                     location: {
-                        Street: record.MVEX__Address__Street__s || '',
-                        City: record.MVEX__Address__City__s || '',
-                        StateCode: record.MVEX__Address__StateCode__s || '',
-                        PostalCode: record.MVEX__Address__PostalCode__s || ''
+                        Street: record.MVEX__Listing_Address__Street__s || '',
+                        City: record.MVEX__Listing_Address__City__s || '',
+                        StateCode: record.MVEX__Listing_Address__StateCode__s || '',
+                        PostalCode: record.MVEX__Listing_Address__PostalCode__s || ''
                     },
                     title: record.Name,
                     description: `${record.Name}\n${this.formatAddress(record)}`
                 },
                 center: {
                     location: {
-                        Street: record.MVEX__Address__Street__s || '',
-                        City: record.MVEX__Address__City__s || '',
-                        StateCode: record.MVEX__Address__StateCode__s || '',
-                        PostalCode: record.MVEX__Address__PostalCode__s || ''
+                        Street: record.MVEX__Listing_Address__Street__s || '',
+                        City: record.MVEX__Listing_Address__City__s || '',
+                        StateCode: record.MVEX__Listing_Address__StateCode__s || '',
+                        PostalCode: record.MVEX__Listing_Address__PostalCode__s || ''
                     }
                 }
             };
@@ -358,7 +451,7 @@ export default class SinglePropertyView extends LightningElement {
         this.template.querySelectorAll(".tab-menu a").forEach(tab => {
             tab.classList.remove("active-tab");
         });
-        this.template.querySelectorAll(".tab").forEach(tabContent => {
+        this.template.querySelectorAll(".tab-css").forEach(tabContent => {
             tabContent.classList.remove("active-tab-content");
             tabContent.style.opacity = '0';
         });
@@ -497,7 +590,7 @@ export default class SinglePropertyView extends LightningElement {
     }
 
     rescheduleSiteVisit() {
-        this.newScheduleDate = this.showingDate;
+        this.newScheduleDate = this.rawShowingDate;
         this.showReschedulePopup = true;
     }
 
@@ -565,12 +658,25 @@ export default class SinglePropertyView extends LightningElement {
         updateShowingDate({ showingId: this.objectId, status: 'Rescheduled', newDate: this.newScheduleDate })
             .then(() => {
                 this.showReschedulePopup = false;
-                this.showCustomToast('Site visit rescheduled successfully', 'success');
+                this.showCustomToast('Reschedule request sent to agent', 'success');
                 this.getShowingStatus();
             })
             .catch(error => {
                 console.error('Error rescheduling site visit:', error);
                 this.showCustomToast('Failed to reschedule site visit', 'error');
+            });
+    }
+
+    reactivateSiteVisit() {
+        updateShowingStatus({ showingId: this.objectId, status: 'Proposed', reason: null })
+            .then(() => {
+                this.showingStatus = 'Proposed';
+                this.showCustomToast('Site visit request reactivated', 'success');
+                this.getShowingStatus();
+            })
+            .catch(error => {
+                console.error('Error reactivating site visit:', error);
+                this.showCustomToast('Failed to reactivate site visit', 'error');
             });
     }
 

@@ -81,8 +81,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist1 = new Checklist__c();
         cheklist1.Name = 'Test Checklist';
-        cheklist1.Field_Name__c = 'Availability_Date__c';
-        cheklist1.Object_Name__c = 'Listing__c';
+        cheklist1.Field_Name__c = 'MVEX__Availability_Date__c';
+        cheklist1.Object_Name__c = 'MVEX__Listing__c';
         cheklist1.Operator__c = 'Equals';
         cheklist1.Sequence__c = 1;
         cheklist1.Value__c = DateTime.now().format();
@@ -91,8 +91,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist2 = new Checklist__c();
         cheklist2.Name = 'Test Checklist';
-        cheklist2.Field_Name__c = 'Available_From__c';
-        cheklist2.Object_Name__c = 'Listing__c';
+        cheklist2.Field_Name__c = 'MVEX__Available_From__c';
+        cheklist2.Object_Name__c = 'MVEX__Listing__c';
         cheklist2.Operator__c = 'Contains';
         cheklist2.Sequence__c = 2;
         cheklist2.Value__c = Date.today().format();
@@ -101,8 +101,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist3 = new Checklist__c();
         cheklist3.Name = 'Test Checklist';
-        cheklist3.Field_Name__c = 'Bedrooms__c';
-        cheklist3.Object_Name__c = 'Listing__c';
+        cheklist3.Field_Name__c = 'MVEX__Bedrooms__c';
+        cheklist3.Object_Name__c = 'MVEX__Listing__c';
         cheklist3.Operator__c = 'Not Equals to';
         cheklist3.Sequence__c = 3;
         cheklist3.Value__c = '4';
@@ -110,8 +110,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist4 = new Checklist__c();
         cheklist4.Name = 'Test Checklist';
-        cheklist4.Field_Name__c = 'Bedrooms__c';
-        cheklist4.Object_Name__c = 'Listing__c';
+        cheklist4.Field_Name__c = 'MVEX__Bedrooms__c';
+        cheklist4.Object_Name__c = 'MVEX__Listing__c';
         cheklist4.Operator__c = 'Not Contains';
         cheklist4.Sequence__c = 4;
         cheklist4.Value__c = '1';
@@ -119,8 +119,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist5 = new Checklist__c();
         cheklist5.Name = 'Test Checklist';
-        cheklist5.Field_Name__c = 'Available_to__c';
-        cheklist5.Object_Name__c = 'Listing__c';
+        cheklist5.Field_Name__c = 'MVEX__Available_to__c';
+        cheklist5.Object_Name__c = 'MVEX__Listing__c';
         cheklist5.Operator__c = 'Is Null';
         cheklist5.Sequence__c = 5;
         cheklist5.Value__c = 'true';
@@ -128,8 +128,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist6 = new Checklist__c();
         cheklist6.Name = 'Test Checklist';
-        cheklist6.Field_Name__c = 'Available_to__c';
-        cheklist6.Object_Name__c = 'Listing__c';
+        cheklist6.Field_Name__c = 'MVEX__Available_to__c';
+        cheklist6.Object_Name__c = 'MVEX__Listing__c';
         cheklist6.Operator__c = 'Equals';
         cheklist6.Sequence__c = 5;
         cheklist6.Value__c = 'true';
@@ -137,8 +137,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist7 = new Checklist__c();
         cheklist7.Name = 'Test Checklist';
-        cheklist7.Field_Name__c = 'Available_to__c';
-        cheklist7.Object_Name__c = 'Listing__c';
+        cheklist7.Field_Name__c = 'MVEX__Available_to__c';
+        cheklist7.Object_Name__c = 'MVEX__Listing__c';
         cheklist7.Operator__c = 'Not Equals to';
         cheklist7.Sequence__c = 5;
         cheklist7.Value__c = 'true';
@@ -146,8 +146,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist8 = new Checklist__c();
         cheklist8.Name = 'Test Checklist';
-        cheklist8.Field_Name__c = 'Available_to__c';
-        cheklist8.Object_Name__c = 'Listing__c';
+        cheklist8.Field_Name__c = 'MVEX__Available_to__c';
+        cheklist8.Object_Name__c = 'MVEX__Listing__c';
         cheklist8.Operator__c = 'Is Null';
         cheklist8.Sequence__c = 5;
         cheklist8.Value__c = 'false';
@@ -155,8 +155,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist9 = new Checklist__c();
         cheklist9.Name = 'Test Checklist';
-        cheklist9.Field_Name__c = 'Available_to__c';
-        cheklist9.Object_Name__c = 'Listing__c';
+        cheklist9.Field_Name__c = 'MVEX__Available_to__c';
+        cheklist9.Object_Name__c = 'MVEX__Listing__c';
         cheklist9.Operator__c = 'Contains';
         cheklist9.Sequence__c = 5;
         cheklist9.Value__c = 'true';
@@ -164,8 +164,8 @@ public class CheckListItemControllerTest {
 
         Checklist__c cheklist50 = new Checklist__c();
         cheklist50.Name = 'Test Checklist';
-        cheklist50.Field_Name__c = 'Available_to__c';
-        cheklist50.Object_Name__c = 'Listing__c';
+        cheklist50.Field_Name__c = 'MVEX__Available_to__c';
+        cheklist50.Object_Name__c = 'MVEX__Listing__c';
         cheklist50.Operator__c = 'Not Contains';
         cheklist50.Sequence__c = 5;
         cheklist50.Value__c = 'true';
@@ -189,7 +189,7 @@ public class CheckListItemControllerTest {
     @isTest
     static void testGetObjectFields() {
         Test.startTest();
-        CheckListItemController.ObjectFieldsWrapper result = CheckListItemController.getObjectFields('Listing__c');
+        CheckListItemController.ObjectFieldsWrapper result = CheckListItemController.getObjectFields('MVEX__Listing__c');
         Test.stopTest();
 
         System.assertNotEquals(null, result, 'Result should not be null');
@@ -200,7 +200,7 @@ public class CheckListItemControllerTest {
         Listing__c testListing = [SELECT Id FROM Listing__c WHERE Name = 'Dev Test 12' LIMIT 1];
 
         Test.startTest();
-        CheckListItemController.ChecklistProgressData result = CheckListItemController.getCheckList('Listing__c', testListing.Id);
+        CheckListItemController.ChecklistProgressData result = CheckListItemController.getCheckList('MVEX__Listing__c', testListing.Id);
         Test.stopTest();
 
         System.assertNotEquals(null, result, 'The result should not be null.');
@@ -226,12 +226,12 @@ public class CheckListItemControllerTest {
         List<Map<String, Object>> itemsToCreate = new List<Map<String, Object>>();
         Map<String, Object> newItem = new Map<String, Object>{
             'Name' => 'New Checklist Item',
-            'Field_Name__c' => 'Bedrooms__c',
-            'Object_Name__c' => 'Listing__c',
-            'Operator__c' => 'Equals',
-            'Sequence__c' => 1,
-            'Value__c' => '5',
-            'Description__c' => 'New Description'
+            'MVEX__Field_Name__c' => 'MVEX__Bedrooms__c',
+            'MVEX__Object_Name__c' => 'MVEX__Listing__c',
+            'MVEX__Operator__c' => 'Equals',
+            'MVEX__Sequence__c' => 1,
+            'MVEX__Value__c' => '5',
+            'MVEX__Description__c' => 'New Description'
         };
         itemsToCreate.add(newItem);
 
@@ -239,7 +239,7 @@ public class CheckListItemControllerTest {
         Checklist__c existingChecklist = [SELECT Id FROM Checklist__c LIMIT 1];
         Map<String, Object> updateItem = new Map<String, Object>{
             'Id' => existingChecklist.Id,
-            'Description__c' => 'Updated Description'
+            'MVEX__Description__c' => 'Updated Description'
         };
         itemsToUpdate.add(updateItem);
 

@@ -33,7 +33,7 @@ public class ListingManagerFilterControllerTest {
             }
             System.assert(hasNameField, 'Field list should contain Name field');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ListingManagerFilterControllerTest', 'testGetListingFields', 'Error while testing getListingFields method.');
+            ErrorHandler.insertErrordata(e, 'ListingManagerFilterControllerTest', 'testGetListingFields', 'Error while testing getListingFields method.');
         }
     }
 
@@ -56,7 +56,7 @@ public class ListingManagerFilterControllerTest {
             System.assertNotEquals(null, picklistValues);
             System.assert(picklistValues.size() > 0, 'Picklist values should not be empty');
         } catch (Exception e) {
-            ErrorHandler.insert_errordata(e, 'ListingManagerFilterControllerTest', 'testGetPicklistValues', 'Error while testing getPicklistValues method.');
+            ErrorHandler.insertErrordata(e, 'ListingManagerFilterControllerTest', 'testGetPicklistValues', 'Error while testing getPicklistValues method.');
         }
     }
 
@@ -72,8 +72,7 @@ public class ListingManagerFilterControllerTest {
     @isTest
     static void testGetFilteredListings() {
         Test.startTest();
-        List<String> strnglst = new List<String>();
-        strnglst.add('Name = \'Test\'');
+        String strnglst = ('Name = \'Test\'');
         List<MVEX__Listing__c> listings = ListingManagerFilterController.getFilteredListings(strnglst);
 
         Test.stopTest();

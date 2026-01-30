@@ -98,8 +98,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track vfGeneratePageSRC;
 
     @track inquiryColumns = [];
-    @track defaultColumns = [
-        { label: 'Name', fieldName: 'name', type: 'text' },
+   @track defaultColumns = [
         { label: 'Listing Type', fieldName: 'mvex__listing_type__c', type: 'text' },
         { label: 'City', fieldName: 'mvex__city__c', type: 'text' },
         { label: 'Min Bedrooms', fieldName: 'mvex__bedrooms_min__c', type: 'number' },
@@ -132,6 +131,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track selectedObject = 'Contact'; // Default to Contact for messaging
     @track listViewId = '';
     @track spinnerShow = false;
+    @track isConfigOpen = false;
 
     /**
     * Method Name : isCustomLogicSelected
@@ -2122,12 +2122,14 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
                         const fieldsData = JSON.parse(result.metadataRecords[0]);
-                        this.inquiryColumns = fieldsData.map(field => ({
-                            label: field.label || field.fieldLabel,
-                            fieldName: (field.fieldName || field.value || '').toLowerCase(),
-                            type: this.getColumnType(field.fieldType),
-                            format: field.format
-                        }));
+                        this.inquiryColumns = fieldsData
+                            .filter(field => (field.fieldName || field.value || '').toLowerCase() !== 'name')
+                            .map(field => ({
+                                label: field.label || field.fieldLabel,
+                                fieldName: (field.fieldName || field.value || '').toLowerCase(),
+                                type: this.getColumnType(field.fieldType),
+                                format: field.format
+                            }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                     } catch (e) {
                         this.inquiryColumns = this.defaultColumns;
@@ -2173,7 +2175,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return 'text';
         }
     }
-       
+
+    openConfigureSettings() {
+        this.isConfigOpen = true;
+    }
+
+    handleCloseModal() {
+        this.isConfigOpen = false;
+        this.fetchInquiryConfiguration();
+    }
 
     /**
     * Method Name : get tableColumns

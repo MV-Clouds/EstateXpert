@@ -1462,9 +1462,6 @@ public with sharing class EmailCampaignController {
     @InvocableMethod(label='Send Emails (Specific Date)' description='Send emails to primary, cc, and bcc recipients for specific date campaigns')
     public static void sendEmails(List<EmailRequests> emailRequests) {
         try {
-   
-            System.debug('email request==> '+ emailRequests);
-            System.debug('template body ==> '+ emailRequests[0].body);
 
             Map<String, Map<String, String>> contactEmailInfoMap = new Map<String, Map<String, String>>();
             Map<Id, String> templateBodyMap = new Map<Id, String>();
@@ -1475,8 +1472,8 @@ public with sharing class EmailCampaignController {
             Set<String> campaignIds = new Set<String>();
             Set<String> recipientIds = new Set<String>();
 
-            String processedBody = ''; 
-
+            String processedBody = '';
+                                    
             // Track processed Email_Member__c IDs to avoid duplicates
             Set<String> processedKeys = new Set<String>();
 

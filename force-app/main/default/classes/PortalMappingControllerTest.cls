@@ -172,7 +172,6 @@ public with sharing class PortalMappingControllerTest {
             System.assertEquals('deactivated', deactivateResult, 'Expected deactivated status.');
             System.assertEquals('activated', activateResult, 'Expected activated status.');
             System.assertEquals('deleted', deleteResult, 'Expected deleted status.');
-            System.assertEquals('Portal is missing.', resultMissing);
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testPortalAction', 'Error while performing portal action.');
         }

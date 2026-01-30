@@ -1,5 +1,5 @@
 public with sharing class EventReminderScheduler{
-    private Id eventId;
+    /*private Id eventId;
 
     // Constructor to pass Event Id
     public EventReminderScheduler(Id eventId) {
@@ -55,5 +55,5 @@ public with sharing class EventReminderScheduler{
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'EventReminderScheduler', 'execute', e.getMessage());
         }
-    }
+    }*/
 }

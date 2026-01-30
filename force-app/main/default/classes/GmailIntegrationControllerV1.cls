@@ -19,10 +19,27 @@ public with sharing class GmailIntegrationControllerV1 {
                     return;
                 }
                 
-                TempData__c settings = TempData__c.getOrgDefaults();
-                String clientId = settings.Client_ID__c;
-                String clientSecret = settings.Client_Secret__c;
-                String redirectUrl = settings.Redirect_URI__c;
+                // Replaced TempData__c with Custom Metadata retrieval
+                String clientId = '';
+                String clientSecret = '';
+                String redirectUrl = '';
+                
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 3) {
+                        clientId = parts[0];
+                        clientSecret = parts[1];
+                        redirectUrl = parts[2];
+                    }
+                }
+
+                if(String.isBlank(clientId) || String.isBlank(clientSecret) || String.isBlank(redirectUrl)){
+                    isFailed = true;
+                    errorMessage = 'Gmail Credentials configuration missing in Custom Metadata.';
+                    return;
+                }
+                
                 String endPoint = gmailEndpoint + 'token';
                 
                 HttpRequest req = new HttpRequest();
@@ -92,9 +109,27 @@ public with sharing class GmailIntegrationControllerV1 {
         
                 // Step 1: Refresh the access token
                 GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
-                String clientId = settings.Client_ID__c;
-                String clientSecret = settings.Client_Secret__c;
                 String refreshToken = settings.Refresh_Token__c;
+                
+                // Fetch Client ID and Secret from Custom Metadata
+                String clientId = '';
+                String clientSecret = '';
+                
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 2) {
+                        clientId = parts[0];
+                        clientSecret = parts[1];
+                        // redirectUrl would be parts[2], but not needed for refresh flow
+                    }
+                }
+
+                if(String.isBlank(clientId) || String.isBlank(clientSecret)) {
+                    // Log error or handle missing credentials
+                    throw new CalloutException('Gmail Client ID or Secret missing in Metadata.');
+                }
+
                 String endPoint = gmailEndpoint + 'token';
         
                 HttpRequest tokenReq = new HttpRequest();

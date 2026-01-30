@@ -64,14 +64,6 @@ public with sharing class FieldSetController {
         }
     }
 
-    public class FieldSetForm {
-        @AuraEnabled
-        public List<FormField> fields { get; set; }
-        public FieldSetForm() {
-            fields = new List<FormField>();
-        }
-    }
-
     public class FilterWrapper {
         @AuraEnabled
         public Map<String,List<Listing__c>> records  { get; set; }

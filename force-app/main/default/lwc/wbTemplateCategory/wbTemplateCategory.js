@@ -36,13 +36,13 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
                     description: 'Send promotions or announcements to increase awareness and engagement.',
                     checked: true
                 },
-                {
-                    className: 'radio2',
-                    label: 'Flows',
-                    value: 'Flow',
-                    description: 'Send a form to capture customer interests, appointment requests or run surveys.',
-                    checked: false
-                }
+                // {
+                //     className: 'radio2',
+                //     label: 'Flows',
+                //     value: 'Flow',
+                //     description: 'Send a form to capture customer interests, appointment requests or run surveys.',
+                //     checked: false
+                // }
             ]
         },
         section2: {
@@ -54,20 +54,20 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
                     description: 'Send messages about an existing order or account.',
                     checked: true
                 },
-                {
-                    className: 'radio2',
-                    label: 'Order status',
-                    value: 'ORDER_STATUS',
-                    description: 'Send messages to tell customers about the progress of their orders.',
-                    checked: false
-                },
-                {
-                    className: 'radio3',
-                    label: 'Flows',
-                    value: 'flowutility',
-                    description: 'Send a form to collect feedback, send reminders or manage orders.',
-                    checked: false
-                }
+                // {
+                //     className: 'radio2',
+                //     label: 'Order status',
+                //     value: 'ORDER_STATUS',
+                //     description: 'Send messages to tell customers about the progress of their orders.',
+                //     checked: false
+                // },
+                // {
+                //     className: 'radio3',
+                //     label: 'Flows',
+                //     value: 'flowutility',
+                //     description: 'Send a form to collect feedback, send reminders or manage orders.',
+                //     checked: false
+                // }
             ]
         },
         section3: {

@@ -58,8 +58,6 @@ global with sharing class DocGenerateController {
      */
     public static void getTemplateDetails(){
         try {
-            sessionId = GenerateDocumentController.getSessionId();
-
             if(ApexPages.currentPage().getParameters().get('paraData') != null){
                 String paraData = ApexPages.currentPage().getParameters().get('paraData');
                 Map<String, Object> rawData = (Map<String, Object>)JSON.deserializeUntyped(paraData);

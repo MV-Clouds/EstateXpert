@@ -389,9 +389,9 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             cmpDef = {
                 componentDef: 'MVEX:emailCampaignTemplateForm',
                 attributes: {                    
-                    c__navigationState: serializedState,
-                    c__recordId : this.currentRecId
-                }                
+                        c__navigationState: serializedState,
+                        c__recordId : this.currentRecId
+                    }                
                 };
 
             let encodedDef = btoa(JSON.stringify(cmpDef));

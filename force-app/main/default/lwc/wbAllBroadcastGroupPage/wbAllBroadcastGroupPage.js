@@ -286,7 +286,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
 
     navigateToNewBroadcast() {
         let componentDef = {
-            componentDef: "c:broadcastMessageComp",
+            componentDef: "MVEX:broadcastMessageComp",
             attributes: {
                 broadcastGroupId: this.broadcastGroupId,
                 communicationType: this.selectedCommunicationType

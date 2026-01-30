@@ -1,6 +1,6 @@
 public with sharing class FlowEventHandler {
 
-    @InvocableMethod(label='Process Event Records from Flow' description='Receive List of Event records from Flow and schedule reminders')
+    /*@InvocableMethod(label='Process Event Records from Flow' description='Receive List of Event records from Flow and schedule reminders')
     public static void handleEvents(List<FlowInputs> inputs) {
 
         try {
@@ -53,5 +53,5 @@ public with sharing class FlowEventHandler {
     public class FlowInputs {
         @InvocableVariable(required=true)
         public List<Event> eventsFromFlow;
-    }
+    }*/
 }

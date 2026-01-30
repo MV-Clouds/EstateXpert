@@ -193,7 +193,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     showCreateFlow(){
         this.isEditMode = false;
         let cmpDef = {
-            componentDef: "c:createFlowManagement",
+            componentDef: "MVEX:createFlowManagement",
             attributes: {
                 isEditMode: this.isEditMode,
             }
@@ -303,7 +303,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         this.selectedFlowId = event.currentTarget.dataset.id;
         this.isEditMode = true;
         let cmpDef = {
-            componentDef: "c:createFlowManagement",
+            componentDef: "MVEX:createFlowManagement",
             attributes: {
                 isEditMode: this.isEditMode,
                 selectedFlowId: this.selectedFlowId

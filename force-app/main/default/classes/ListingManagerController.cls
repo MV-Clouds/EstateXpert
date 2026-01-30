@@ -14,7 +14,7 @@ public with sharing class ListingManagerController {
     */
     public class WrapperClass{
         @AuraEnabled
-        public List<Listing__c> listings;  
+        public List<MVEX__Listing__c> listings;  
         @AuraEnabled
         public Map<Id, String> medias;  
         @AuraEnabled
@@ -25,11 +25,11 @@ public with sharing class ListingManagerController {
     /**
     * Method Name : getListingData
     * @description : for the retrieve the listing data.
-    * @return List<Listing__c>.
+    * @return List<MVEX__Listing__c>.
     */
     @AuraEnabled
     public static WrapperClass getListingData(){
-        if (!Schema.sObjectType.Listing__c.isAccessible()) {
+        if (!Schema.sObjectType.MVEX__Listing__c.isAccessible()) {
             throw new AuraHandledException('You do not have permission to access Listing records.');
         }
         try {
@@ -68,21 +68,21 @@ public with sharing class ListingManagerController {
 
             String query = 'SELECT ' + listingFields + ' FROM MVEX__Listing__c';
             // Fetch the listings with related records
-            List<Listing__c> listing = Database.query(query, AccessLevel.USER_MODE);
+            List<MVEX__Listing__c> listing = Database.query(query, AccessLevel.USER_MODE);
             Set<Id> propertyIds = new Set<Id>();     
 
-            for(Listing__c listingrec :listing) {
+            for(MVEX__Listing__c listingrec :listing) {
                 Id propertyId = (Id)listingrec.get('MVEX__Property__c');
                 if (propertyId != null) {
                     propertyIds.add(propertyId);
                 }
             }
 
-            List<Property_File__c> medias = [SELECT Id, BaseUrl__c, Property__c FROM Property_File__c WHERE Property__c IN:propertyIds WITH USER_MODE LIMIT 50000 ];
+            List<MVEX__Property_File__c> medias = [SELECT Id, MVEX__BaseUrl__c, MVEX__Property__c FROM MVEX__Property_File__c WHERE MVEX__Property__c IN:propertyIds WITH USER_MODE LIMIT 50000 ];
 
             Map<Id, String> propertyMediaUrlsMap = new Map<Id, String>();
-            for (Property_File__c media : medias) {
-                    propertyMediaUrlsMap.put(media.Property__c,media.BaseUrl__c);
+            for (MVEX__Property_File__c media : medias) {
+                    propertyMediaUrlsMap.put(media.MVEX__Property__c,media.MVEX__BaseUrl__c);
             }
             WrapperClass wc = new WrapperClass();
             wc.listings = listing;
@@ -106,13 +106,22 @@ public with sharing class ListingManagerController {
     private static List<Map<String, String>> getConfiguredFields() {
 
         try {
-            List<recordManagerConfig__mdt> configs = [SELECT FieldsData__c FROM recordManagerConfig__mdt WITH USER_MODE LIMIT 1];
+            // Query Custom Object instead of Metadata
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT MVEX__Fields_Data__c 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Feature_Name__c = 'Listing Manager' 
+                AND MVEX__Object_API_Name__c = 'MVEX__Listing__c' 
+                AND MVEX__Configuration_Type__c = 'Manager Config'
+                WITH USER_MODE 
+                LIMIT 1
+            ];
             
             List<Map<String, String>> fields = new List<Map<String, String>>();
             
             if (!configs.isEmpty()) {
-                recordManagerConfig__mdt config = configs[0];
-                String fieldsDataJson = config.FieldsData__c;
+                MVEX__Configuration_Settings__c config = configs[0];
+                String fieldsDataJson = config.MVEX__Fields_Data__c;
                 
                 if (String.isNotBlank(fieldsDataJson)) {
                     // Deserialize JSON to List<Map<String, String>>
@@ -132,11 +141,20 @@ public with sharing class ListingManagerController {
     private static Integer getPageSizeFromConfig() {
 
         try {
-            List<recordManagerConfig__mdt> configs = [SELECT PageSize__c FROM recordManagerConfig__mdt WITH USER_MODE LIMIT 1];
+            // Query Custom Object instead of Metadata
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT MVEX__Page_Size__c 
+                FROM MVEX__Configuration_Settings__c 
+                WHERE MVEX__Feature_Name__c = 'Listing Manager' 
+                AND MVEX__Object_API_Name__c = 'MVEX__Listing__c' 
+                AND MVEX__Configuration_Type__c = 'Manager Config'
+                WITH USER_MODE 
+                LIMIT 1
+            ];
 
             if (!configs.isEmpty()) {
-                recordManagerConfig__mdt config = configs[0];
-                return config.PageSize__c != null ? Integer.valueOf(config.PageSize__c) : 30; // Default to 30 if not set
+                MVEX__Configuration_Settings__c config = configs[0];
+                return config.MVEX__Page_Size__c != null ? Integer.valueOf(config.MVEX__Page_Size__c) : 30; // Default to 30 if not set
             }
             
         } catch (Exception e) {

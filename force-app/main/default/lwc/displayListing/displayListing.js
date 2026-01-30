@@ -70,6 +70,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track divElement;
 
     @track listingColumns = [];
+    @track isConfigOpen = false;
     @track defaultColumns = [
         { label: 'Image', fieldName: 'media_url', type: 'image' },
         { label: 'Name', fieldName: 'name', type: 'text' },

@@ -82,7 +82,6 @@ public with sharing class RecordManagersCmpController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Object_API_Name__c = :objectApiName 
                 AND MVEX__Feature_Name__c = :storedFeatureName
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE 
                 LIMIT 1
             ];
@@ -135,7 +134,6 @@ public with sharing class RecordManagersCmpController {
                 SELECT MVEX__Fields_Data__c 
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Object_API_Name__c = :objectApiName 
-                AND MVEX__Configuration_Type__c = 'New Record Fields'
                 WITH USER_MODE 
                 LIMIT 1
             ];
@@ -182,7 +180,6 @@ public with sharing class RecordManagersCmpController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Object_API_Name__c = :objectApiName 
                 AND MVEX__Feature_Name__c = :storedFeatureName
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE
                 LIMIT 1
             ];
@@ -195,7 +192,6 @@ public with sharing class RecordManagersCmpController {
                 settingToSave = new MVEX__Configuration_Settings__c();
                 settingToSave.MVEX__Object_API_Name__c = objectApiName;
                 settingToSave.MVEX__Feature_Name__c = storedFeatureName;
-                settingToSave.MVEX__Configuration_Type__c = 'Manager Config';
                 // Setting a Name is optional if Auto-Number, but good for reference
                 settingToSave.Name = storedFeatureName.replaceAll(' ', '_') + '_' + objectApiName; 
             }
@@ -226,7 +222,6 @@ public with sharing class RecordManagersCmpController {
                 SELECT Id 
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Object_API_Name__c = :objectApiName 
-                AND MVEX__Configuration_Type__c = 'New Record Fields'
                 WITH USER_MODE
                 LIMIT 1
             ];
@@ -238,7 +233,6 @@ public with sharing class RecordManagersCmpController {
             } else {
                 settingToSave = new MVEX__Configuration_Settings__c();
                 settingToSave.MVEX__Object_API_Name__c = objectApiName;
-                settingToSave.MVEX__Configuration_Type__c = 'New Record Fields';
                 settingToSave.Name = 'NewFields_' + objectApiName;
             }
 
@@ -269,8 +263,7 @@ public with sharing class RecordManagersCmpController {
             List<MVEX__Configuration_Settings__c> configList = [
                 SELECT MVEX__Blocked_Fields__c 
                 FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Configuration_Type__c = 'Global Config' 
-                AND MVEX__Feature_Name__c = 'Listing Filter Config'
+                WHERE MVEX__Feature_Name__c = 'Listing Filter Config'
                 WITH USER_MODE
                 LIMIT 1
             ];

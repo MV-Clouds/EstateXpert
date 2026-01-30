@@ -1497,4 +1497,13 @@ get tableColumns() {
     disconnectedCallback() {
         window?.globalThis?.removeEventListener('click', this.handleClickOutside);
     }
+
+    openConfigureSettings(){
+        this.isConfigOpen = true;
+    }
+
+    handleCloseModal() {
+        this.isConfigOpen = false;
+        this.fetchListingConfiguration();
+    }
 }

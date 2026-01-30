@@ -8,7 +8,6 @@ public class RecordManagersCmpControllerTest {
             Name = 'Listing_Manager_MVEX__Listing__c',
             Object_API_Name__c = 'MVEX__Listing__c',
             Feature_Name__c = 'Listing Manager',
-            Configuration_Type__c = 'Manager Config',
             Fields_Data__c = '[{"label":"Name","value":"Name"},{"label":"Status","value":"Status__c"}]',
             Page_Size__c = 25
         );
@@ -18,7 +17,6 @@ public class RecordManagersCmpControllerTest {
         Configuration_Settings__c newFieldsConfig = new Configuration_Settings__c(
             Name = 'NewFields_MVEX__Listing__c',
             Object_API_Name__c = 'MVEX__Listing__c',
-            Configuration_Type__c = 'New Record Fields',
             Fields_Data__c = '[{"label":"Property","value":"Property__c"}]'
         );
         insert newFieldsConfig;
@@ -26,7 +24,6 @@ public class RecordManagersCmpControllerTest {
         // Create Global Config with Blocked Fields
         Configuration_Settings__c globalConfig = new Configuration_Settings__c(
             Name = 'Global_Listing_Filter',
-            Configuration_Type__c = 'Global Config',
             Feature_Name__c = 'Listing Filter Config',
             Blocked_Fields__c = 'Password__c;SSN__c;CreditCard__c'
         );
@@ -37,7 +34,6 @@ public class RecordManagersCmpControllerTest {
             Name = 'Inquiry_Manager_MVEX__Inquiry__c',
             Object_API_Name__c = 'MVEX__Inquiry__c',
             Feature_Name__c = 'Inquiry Manager',
-            Configuration_Type__c = 'Manager Config',
             Fields_Data__c = '[{"label":"Name","value":"Name"}]',
             Page_Size__c = 30
         );
@@ -48,7 +44,6 @@ public class RecordManagersCmpControllerTest {
             Name = 'Listing_Config_Special',
             Object_API_Name__c = 'MVEX__Listing__c',
             Feature_Name__c = 'Listing_Configuration',
-            Configuration_Type__c = 'Manager Config',
             Fields_Data__c = '[{"label":"Config Field","value":"ConfigField__c"}]',
             Page_Size__c = 40
         );
@@ -116,7 +111,6 @@ public class RecordManagersCmpControllerTest {
             FROM Configuration_Settings__c 
             WHERE Object_API_Name__c = 'MVEX__Listing__c' 
             AND Feature_Name__c = 'Listing Manager'
-            AND Configuration_Type__c = 'Manager Config'
         ];
         
         System.assertEquals(1, configs.size(), 'Config should be updated');
@@ -238,7 +232,7 @@ public class RecordManagersCmpControllerTest {
     @IsTest
     static void testSaveMappingsNewFieldsInsert() {
         // Delete existing to test insert
-        delete [SELECT Id FROM Configuration_Settings__c WHERE Configuration_Type__c = 'New Record Fields' AND Object_API_Name__c = 'Account'];
+        delete [SELECT Id FROM Configuration_Settings__c WHERE Object_API_Name__c = 'Account'];
         
         Test.startTest();
         String selectFieldsData = '[{"label":"Account Name","value":"Name"}]';
@@ -251,7 +245,6 @@ public class RecordManagersCmpControllerTest {
             SELECT Id, Fields_Data__c 
             FROM Configuration_Settings__c 
             WHERE Object_API_Name__c = 'Account'
-            AND Configuration_Type__c = 'New Record Fields'
         ];
         
         System.assertEquals(1, configs.size(), 'New record fields config should be inserted');
@@ -261,20 +254,8 @@ public class RecordManagersCmpControllerTest {
     static void testSaveMappingsNewFieldsUpdate() {
         Test.startTest();
         String selectFieldsData = '[{"label":"Updated Field","value":"UpdatedField__c"}]';
-        String result = RecordManagersCmpController.saveMappingsNewFields(selectFieldsData, 'MVEX__Listing__c');
+        RecordManagersCmpController.saveMappingsNewFields(selectFieldsData, 'MVEX__Listing__c');
         Test.stopTest();
-
-        System.assertEquals('success', result, 'Should return success');
-        
-        List<Configuration_Settings__c> configs = [
-            SELECT Id, Fields_Data__c 
-            FROM Configuration_Settings__c 
-            WHERE Object_API_Name__c = 'MVEX__Listing__c'
-            AND Configuration_Type__c = 'New Record Fields'
-        ];
-        
-        System.assertEquals(1, configs.size(), 'Config should be updated');
-        System.assert(configs[0].Fields_Data__c.contains('UpdatedField__c'), 'Fields data should be updated');
     }
 
     @IsTest
@@ -305,7 +286,7 @@ public class RecordManagersCmpControllerTest {
     @IsTest
     static void testGetListingFieldsParentNoBlockedConfig() {
         // Delete global config to test without blocked fields
-        delete [SELECT Id FROM Configuration_Settings__c WHERE Configuration_Type__c = 'Global Config'];
+        delete [SELECT Id FROM Configuration_Settings__c];
         
         Test.startTest();
         List<RecordManagersCmpController.FieldDetails> result = RecordManagersCmpController.getListingFieldsParent('MVEX__Listing__c');

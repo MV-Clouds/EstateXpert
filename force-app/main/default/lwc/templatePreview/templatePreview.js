@@ -399,4 +399,13 @@ export default class TemplatePreview extends LightningElement {
             console.error('Error in function createJSONBody:::', e.message);
         }
     }
+
+    @api refreshComponent(templateId){
+        try {
+            this.templateId = templateId;
+            this.fetchInitialData();
+        } catch (e) {
+            console.error('Error in function refreshComponent:::', e.message);
+        }
+    }
 }

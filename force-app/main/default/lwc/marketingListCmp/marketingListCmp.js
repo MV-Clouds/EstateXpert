@@ -77,6 +77,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track broadcastGroupId = null;
     @track templateMap = new Map();
     @track isAccessible = false;
+    selectedTemplate = '';
 
     /**
     * Method Name : totalPages
@@ -330,6 +331,14 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
      */
     get checkAllBroadcast() {
         return this.selectedContactList.every(item => item.isChecked);
+    }
+
+    // Getter to provide a record ID for the preview component
+    get previewRecordId() {
+        if (this.selectedContactList && this.selectedContactList.length > 0) {
+            return this.selectedContactList[0].Id;
+        }
+        return null;
     }
 
     /**
@@ -1456,6 +1465,7 @@ openConfigureSettings(){
                 break;
             case 'template':
                 this.selectedTemplate = value;
+                this.handleRefreshClick();
                 break;
             case 'dateTime':
                 this.selectedDateTime = value;
@@ -1468,14 +1478,15 @@ openConfigureSettings(){
     // Handle send message button click
     handleSendMessage() {
         this.showTemplate = true;
-        this.popUpFirstPage = true;
-        this.popUpSecondPage = false;
+        this.popUpFirstPage = false; // Changed to false to skip UI group details
+        this.popUpSecondPage = true; // Directly show template selection
         this.popUpLastPage = false;
-        this.popupHeader = 'Create Broadcast Group';
+        this.popupHeader = 'Choose Template';
         this.broadcastGroupName = '';
         this.messageText = '';
         this.selectedTemplate = '';
         this.selectedDateTime = '';
+        this.updateTemplateOptions();
     }
 
     // Handle closing the template modal
@@ -1490,6 +1501,41 @@ openConfigureSettings(){
         this.selectedTemplate = '';
         this.selectedDateTime = '';
         this.broadcastGroupId = null;
+    }
+
+    // New helper to auto-create group in background
+    async createBroadcastGroupBackground() {
+        const now = new Date();
+        const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        const autoGroupName = 'Marketing List - ' + timestamp;
+        const autoDesc = 'Broadcast initiated from Marketing List at ' + timestamp;
+
+        const phoneNumbers = this.selectedContactList
+            .map(contact => contact.Phone)
+            .filter(phone => phone);
+
+        const messageData = {
+            objectApiName: this.selectedObject,
+            listViewName: this.listViewId,
+            phoneNumbers: phoneNumbers,
+            description: autoDesc,
+            name: autoGroupName,
+            isUpdate: false,
+            broadcastGroupId: null,
+            phoneField: 'Phone'
+        };
+
+        console.log('Auto-creating broadcast group with data:', JSON.stringify(messageData));
+        
+
+        try {
+            const result = await processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) });
+            this.broadcastGroupId = result;
+            return true;
+        } catch (error) {
+            this.showToast('Error', 'Background group creation failed: ' + (error.body?.message || error.message), 'error');
+            return false;
+        }
     }
 
     // Handle next button on first page (create broadcast group)
@@ -1551,13 +1597,20 @@ openConfigureSettings(){
     }
 
     // Handle send button on second page
-    handleSendOnPopup() {
+    async handleSendOnPopup() {
         if (!this.selectedTemplate) {
             this.showToast('Error', 'Please select a template', 'error');
             return;
         }
 
         this.spinnerShow = true;
+
+        // Auto-create the group in background before sending
+        const groupCreated = await this.createBroadcastGroupBackground();
+        if (!groupCreated) {
+            this.spinnerShow = false;
+            return;
+        }
 
         createChatRecods({
             templateId: this.selectedTemplate,
@@ -1601,8 +1654,15 @@ openConfigureSettings(){
         this.popupHeader = 'Choose Template';
     }
 
+    handleRefreshClick() {
+        const childComponent = this.template.querySelector('c-template-preview');
+        if (childComponent && this.selectedTemplate) {
+            childComponent.refreshComponent(this.selectedTemplate);
+        }
+    }
+
     // Handle schedule and send button on last page
-    handleSchedule() {
+    async handleSchedule() {
         if (!this.selectedDateTime) {
             this.showToast('Error', 'Please select date and time', 'error');
             return;
@@ -1617,6 +1677,13 @@ openConfigureSettings(){
         }
 
         this.spinnerShow = true;
+
+        // Auto-create the group in background before scheduling
+        const groupCreated = await this.createBroadcastGroupBackground();
+        if (!groupCreated) {
+            this.spinnerShow = false;
+            return;
+        }
 
         createChatRecods({
             templateId: this.selectedTemplate,

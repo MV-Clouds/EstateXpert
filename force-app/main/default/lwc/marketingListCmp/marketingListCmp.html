@@ -363,86 +363,41 @@
 
                 <div class="modal-body">
                     <div class="custom-modal-body" id="modal-content-id-1">
-                        <template if:true={popUpFirstPage}>
-                            <div class="bcTableDiv tableDiv" id="broadcastTableDiv">
-                                <table aria-multiselectable="true"
-                                    class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
-                                    aria-label="Selected Contacts for Broadcast Group">
-                                    <thead>
-                                        <tr class="slds-line-height_reset fields-names">
-                                            <th class="slds-cell_action-mode colume2" scope="col">
-                                                <div class="slds-text-link_reset" role="button" tabindex="0">
-                                                    <div class="slds-has-flexi-truncate center-trancate-head">
-                                                        <span class="slds-truncate" title="Contact Name">Contact
-                                                            Name</span>
-                                                    </div>
-                                                </div>
-                                            </th>
-                                            <th class="slds-cell_action-mode colume2" scope="col">
-                                                <div class="slds-text-link_reset" role="button" tabindex="0">
-                                                    <div class="slds-has-flexi-truncate center-trancate-head">
-                                                        <span class="slds-truncate" title="Phone">Phone</span>
-                                                    </div>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template for:each={selectedContactList} for:item="contact" for:index="index">
-                                            <tr key={contact.Id} aria-selected="false" class="table-tr">
-                                                <th class="slds-cell_action-mode conat_cls" scope="row">
-                                                    <div class="slds-truncate center-trancate-text">
-                                                        <a data-id={contact.Id} onclick={redirectToRecord}
-                                                            tabindex="0">{contact.Name}</a>
-                                                    </div>
-                                                </th>
-                                                <td class="slds-cell_action-mode" role="gridcell">
-                                                    <div class="slds-truncate center-trancate-text">
-                                                        {contact.Phone}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="rightDivBc">
-                                <div class="headerDivBc">
-                                    <h1>Broadcast Group Details</h1>
-                                </div>
-                                <div class="rightDivBc-body">
-                                    <div class="modal-body-content">
-                                        <lightning-input placeholder="Enter Name Here" type="text" label="Name"
-                                            name="name" onchange={handleInputChange} value={broadcastGroupName}
-                                            class="slds-m-bottom_medium" required
-                                            message-when-value-missing="Name is required"></lightning-input>
-                                        <lightning-textarea name="message" label="Description"
-                                            placeholder="Enter Descriptive Message Here" class="slds-m-bottom_medium"
-                                            value={messageText} required
-                                            message-when-value-missing="Description is required"
-                                            onchange={handleInputChange}></lightning-textarea>
-                                    </div>
-                                </div>
-                                <div class="footer">
-                                    <button class="icon-button" onclick={handleNextOnPopup}>Next</button>
-                                </div>
-                            </div>
-                        </template>
                         <template if:true={popUpSecondPage}>
                             <div class="secondPage">
-                                <div class="popUpBody slds-p-around--large">
-                                    <div>
-                                        <lightning-combobox name="template" label="Select Template"
-                                            options={templateOptions} onchange={handleInputChange}
-                                            value={selectedTemplate} required
-                                            message-when-value-missing="Template is required"
-                                            class="slds-m-bottom_medium">
-                                        </lightning-combobox>
+                                <div class="popUpBody">
+                                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small inner-body-grid">
+                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                            <lightning-combobox name="template" label="Select Template"
+                                                options={templateOptions} onchange={handleInputChange}
+                                                value={selectedTemplate} required
+                                                message-when-value-missing="Template is required"
+                                                class="slds-m-bottom_medium">
+                                            </lightning-combobox>
+                                        </div>
+
+                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
+                                            <template if:true={selectedTemplate}>
+                                                <div class="preview-container">
+                                                    <p class="slds-text-title_caps slds-m-bottom_small">Template Preview</p>
+                                                    <template if:true={selectedTemplate}>
+                                                        <c-template-preview 
+                                                            template-id={selectedTemplate} 
+                                                            record-id={previewRecordId}
+                                                            object-api-name={selectedObject}>
+                                                        </c-template-preview>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template if:false={selectedTemplate}>
+                                                <div class="slds-text-body_small slds-text-color_weak no-text">
+                                                    Please select a template to preview.
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="popUpFooter slds-text-align--center slds-p-bottom--large">
-                                    <lightning-button variant="brand-outline" onclick={handlePreviousOnPopup}
-                                        label="Previous" class="slds-m-left_x-small"></lightning-button>
+                                <div class="popUpFooter slds-text-align--center">
                                     <lightning-button variant="brand" label="Send" onclick={handleSendOnPopup}
                                         class="slds-m-left_x-small"></lightning-button>
                                     <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}

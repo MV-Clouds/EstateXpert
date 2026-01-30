@@ -112,7 +112,6 @@ public with sharing class ListingManagerController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Feature_Name__c = 'Listing Manager' 
                 AND MVEX__Object_API_Name__c = 'MVEX__Listing__c' 
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE 
                 LIMIT 1
             ];
@@ -147,7 +146,6 @@ public with sharing class ListingManagerController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Feature_Name__c = 'Listing Manager' 
                 AND MVEX__Object_API_Name__c = 'MVEX__Listing__c' 
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE 
                 LIMIT 1
             ];

@@ -85,7 +85,6 @@ public with sharing class MarketingListCmpController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Feature_Name__c = 'Marketing List' 
                 AND MVEX__Object_API_Name__c = 'Contact' 
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE 
                 LIMIT 1
             ];
@@ -118,7 +117,6 @@ public with sharing class MarketingListCmpController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Feature_Name__c = 'Marketing List' 
                 AND MVEX__Object_API_Name__c = 'Contact' 
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE 
                 LIMIT 1
             ];

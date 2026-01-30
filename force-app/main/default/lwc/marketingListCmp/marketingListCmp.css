@@ -1148,7 +1148,7 @@ input[type=checkbox]::before {
 }
 
 .preview-container {
-    background-color: #e5ddd5; /* WhatsApp background-like color */
+    background-color: #dcf8c6; /* WhatsApp background-like color */
     border-radius: 8px;
     max-height: 400px;
     overflow-y: auto;
@@ -1158,6 +1158,29 @@ input[type=checkbox]::before {
 /* Ensure the preview component matches the container width */
 c-template-preview {
     width: 100%;
+}
+
+.popUpBody{
+    flex-grow: 1;
+    margin-bottom: 0.5rem;
+}
+
+.inner-body-grid{
+    height: 100%;
+}
+
+.no-text{
+    font-size: large;
+    color: #0076d3;
+}
+
+.right-section-preview{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid #cabcbf;
+    padding-bottom: 0.5rem;
 }
 
 @keyframes pulse {

@@ -365,8 +365,8 @@
                     <div class="custom-modal-body" id="modal-content-id-1">
                         <template if:true={popUpSecondPage}>
                             <div class="secondPage">
-                                <div class="popUpBody slds-p-around--large">
-                                    <div class="slds-grid slds-gutters slds-wrap">
+                                <div class="popUpBody">
+                                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small inner-body-grid">
                                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                                             <lightning-combobox name="template" label="Select Template"
                                                 options={templateOptions} onchange={handleInputChange}
@@ -376,7 +376,7 @@
                                             </lightning-combobox>
                                         </div>
 
-                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
                                             <template if:true={selectedTemplate}>
                                                 <div class="preview-container">
                                                     <p class="slds-text-title_caps slds-m-bottom_small">Template Preview</p>
@@ -384,21 +384,20 @@
                                                         <c-template-preview 
                                                             template-id={selectedTemplate} 
                                                             record-id={previewRecordId}
-                                                            object-api-name={selectedObject}
-                                                            show-buttons="false">
+                                                            object-api-name={selectedObject}>
                                                         </c-template-preview>
                                                     </template>
-                                                    <template if:false={selectedTemplate}>
-                                                        <div class="slds-text-body_small slds-text-color_weak">
-                                                            Please select a template to preview.
-                                                        </div>
-                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template if:false={selectedTemplate}>
+                                                <div class="slds-text-body_small slds-text-color_weak no-text">
+                                                    Please select a template to preview.
                                                 </div>
                                             </template>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="popUpFooter slds-text-align--center slds-p-bottom--large">
+                                <div class="popUpFooter slds-text-align--center">
                                     <lightning-button variant="brand" label="Send" onclick={handleSendOnPopup}
                                         class="slds-m-left_x-small"></lightning-button>
                                     <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}

@@ -1,4 +1,4 @@
-@RestResource(urlMapping='/PAGE/Lead/*')
+@RestResource(urlMapping='/Lead/*')
 global without sharing class GoogleLeadsWebhook {
     @HttpPost
     global static void handleNotification() {

@@ -53,11 +53,6 @@ private class EmailCampaignControllerTest {
         contacts.add(new Contact(LastName = 'Test Contact 2', Email = 'test2@example.com'));
         insert contacts;
         
-        // Create Leads
-        List<Lead> leads = new List<Lead>();
-        leads.add(new Lead(LastName = 'Test Lead 1', Company = 'Test Company', Email = 'lead1@example.com'));
-        leads.add(new Lead(LastName = 'Test Lead 2', Company = 'Test Company', Email = 'lead2@example.com'));
-        insert leads;
         
         // Create Marketing Campaign
         Marketing_Campaign__c campaign = new Marketing_Campaign__c(
@@ -67,14 +62,13 @@ private class EmailCampaignControllerTest {
             Schedule_Type__c = 'Specific Date',
             Start_Date__c = Date.today(),
             Campaign_Start_Date__c = Date.today(),
-            RelatedObject__c = 'Contact,Lead'
+            RelatedObject__c = 'Contact'
         );
         insert campaign;
         
         // Create Marketing Campaign Members
         List<Marketing_Campaign_Member__c> members = new List<Marketing_Campaign_Member__c>();
         members.add(new Marketing_Campaign_Member__c(Marketing_Campaign__c = campaign.Id, RecipientId__c = contacts[0].Id, Contact_Type__c = 'Primary'));
-        members.add(new Marketing_Campaign_Member__c(Marketing_Campaign__c = campaign.Id, RecipientId__c = leads[0].Id, Contact_Type__c = 'Primary'));
         insert members;
         
         // Create Marketing Email
@@ -113,16 +107,10 @@ private class EmailCampaignControllerTest {
     }
     
     @isTest
-    static void testGetLeads() {
-        List<Lead> result = EmailCampaignController.getLeads();
-        System.assertEquals(2, result.size(), 'Expected exactly two leads');
-    }
-    
-    @isTest
     static void testGetCampaign() {
         Marketing_Campaign__c campaign = [SELECT Id FROM Marketing_Campaign__c LIMIT 1];
         Marketing_Campaign__c result = EmailCampaignController.getCampaign(campaign.Id);
-        System.assertEquals('Contact,Lead', result.RelatedObject__c, 'Expected RelatedObject__c to be Contact,Lead');
+        System.assertEquals('Contact', result.RelatedObject__c, 'Expected RelatedObject__c to be Contact');
     }
     
     @isTest

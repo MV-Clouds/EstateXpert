@@ -376,3 +376,125 @@ fieldset .slds-form-element__legend {
 .dropdown-item lightning-icon {
     margin-right: 10px;
 }
+
+.email-template {
+    max-width: 15rem;
+}
+
+/* --- Styles for Broadcast Groups Section --- */
+
+.section-divider {
+    position: relative;
+    text-align: center;
+    /* Add top margin when followed by selected pills */
+    margin: 1.5rem 0 1rem 0; 
+}
+
+.section-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e5e5e5;
+}
+
+.divider-text {
+    background: #f4f6f9; /* Match background for floating effect, adjust if needed */
+    padding: 0 1rem;
+    color: #706e6b;
+    font-size: 0.875rem;
+    position: relative;
+    z-index: 1;
+}
+
+.broadcast-groups-container {
+    background: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    padding: 1rem;
+    height: 20rem;
+    overflow: auto;
+}
+
+.broadcast-groups-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.broadcast-groups-subtitle {
+    margin: 0 0 1rem 0;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.broadcast-groups-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.broadcast-group-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.broadcast-group-item:hover {
+    border-color: var(--primary-color, #0176D3);
+    background: #f3f9ff;
+}
+
+.broadcast-group-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color, #0176D3);
+    margin: 0;
+    cursor: pointer;
+}
+
+.broadcast-group-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    cursor: pointer;
+    flex: 1;
+    margin: 0;
+}
+
+.group-name {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.group-count {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.selected-groups-summary {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(1, 118, 211, 0.1);
+    border-radius: 4px;
+    border-left: 4px solid var(--primary-color, #0176D3);
+}
+
+.summary-text {
+    font-size: 0.875rem;
+    color: var(--primary-color, #0176D3);
+    font-weight: 500;
+}
+
+/* Ensure consistent spacing below the primary recipients field */
+.primary-recipients.input-field {
+    margin-bottom: 1.5rem; /* Increase margin to make room for groups */
+}

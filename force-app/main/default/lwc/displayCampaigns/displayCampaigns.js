@@ -403,7 +403,9 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             });
         }
         catch(e){
+            console.log('error in handleEdit - ', e.stack);
             this.showToast('Error', 'Error while redirecting to edit campaign', 'error');
+            
         }
     }
 
@@ -621,22 +623,28 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     }
 
     openMemberModal(event){
-        const campaignId = event.currentTarget.dataset.id;
-        let cmpDef;                
-        cmpDef = {
-            componentDef: 'MVEX:campaignMembersTable',
-            attributes: {
+        try{
+            const campaignId = event.currentTarget.dataset.id;
+            let cmpDef;                
+            cmpDef = {
+                componentDef: 'MVEX:campaignMembersTable',
+                attributes: {                    
                     campaignId: campaignId
-                }            
+                }                
             };
-
-        let encodedDef = btoa(JSON.stringify(cmpDef));
-            this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url:  "/one/one.app#" + encodedDef                                                         
-            }
-        });
+    
+            let encodedDef = btoa(JSON.stringify(cmpDef));
+                this[NavigationMixin.Navigate]({
+                type: "standard__webPage",
+                attributes: {
+                    url:  "/one/one.app#" + encodedDef                                                         
+                }
+            });
+        }catch(e){
+            console.log('error in openMemberModal - ', e.stack);
+            // this.showToast('Error', 'Error while redirecting to campaign members '+e.stack, 'error');
+            
+        }
     }
 
     showMessagePopup(Status, Title, Message) {

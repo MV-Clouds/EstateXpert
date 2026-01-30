@@ -8,7 +8,7 @@
 public with sharing class EmailCampaignController {
     
     /**
-     * Method Name : getEmailCampaignTemplates
+     * Method Name : getEmailCampaignTemplates 
      * Date : 23/07/2024
      * Created By : Rachit Shah
      * @description : Used for getting campaign data
@@ -42,21 +42,6 @@ public with sharing class EmailCampaignController {
         }
     }
     
-    /**
-     * Method Name : getLeads
-     * Date : 22/05/2025
-     * Created By : Yash Parekh
-     * @description : Used for getting Lead data
-     */
-    @AuraEnabled(cacheable=true)
-    public static List<Lead> getLeads() {
-        try {
-            return [SELECT Id, Name, Email FROM Lead WITH USER_MODE LIMIT 50000];
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getLeads', 'Error while getting data from leads');
-            return null;
-        }
-    }
 
     /**
      * Method Name : getCampaign
@@ -69,30 +54,8 @@ public with sharing class EmailCampaignController {
         try {
             return [SELECT Id,RelatedObject__c FROM Marketing_Campaign__c WHERE Id = :campaignId WITH USER_MODE];
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getLeads', 'Error while getting data from leads');
+            ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getCampaign', 'Error while getting data from campaign');
             return null;
-        }
-    }
-    
-    /**
-     * Method Name : getLeads
-     * Date : 22/05/2025
-     * Created By : Parekh Yash 
-     * @description : Get all contact data for all the fields
-     */
-    public static List<Lead> getLeads(Set<Id> leadIds) {
-        try {
-            List<String> fieldNames = getAllFieldNames('Lead');
-            
-            String query = 'SELECT ' + String.join(fieldNames, ', ') + ' FROM Lead WHERE Id IN : leadIds AND Email != null';
-            
-            List<Lead> leadRecords = Database.query(String.escapeSingleQuotes(query), AccessLevel.USER_MODE);
-            
-            return leadRecords;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getLeads', 'Error while getting Leads');
-            return null;
-            
         }
     }
 
@@ -385,7 +348,7 @@ public with sharing class EmailCampaignController {
             if (!String.isEmpty(selectedContactDateField)) {
                 queryForFailedEmails += ', ' + selectedContactDateField;
             }
-            String objectName = (relatedObject == 'Lead') ? 'Lead' : 'Contact';
+            String objectName = 'Contact';
             queryForFailedEmails += ' FROM ' + objectName + ' WHERE Id IN :selectedPrimaryRecipients';
             
             List<SObject> contlst = Database.query(String.escapeSingleQuotes(queryForFailedEmails), AccessLevel.USER_MODE);
@@ -401,8 +364,6 @@ public with sharing class EmailCampaignController {
                 
                 if(con1 instanceof Contact) {
                     con = (Contact) con1;
-                } else if(con1 instanceof Lead) {
-                    con = (Lead) con1;
                 }
                 
                 // Now you can safely use con.Email and con.Id
@@ -758,7 +719,7 @@ public with sharing class EmailCampaignController {
             if (!String.isEmpty(selectedContactDateField)) {
                 queryForFailedEmails += ', ' + selectedContactDateField;
             }
-            String objectName = (relatedObject == 'Lead') ? 'Lead' : 'Contact';
+            String objectName = 'Contact';
             // This query now uses the merged selectedPrimaryRecipients list
             queryForFailedEmails += ' FROM ' + objectName + ' WHERE Id IN :selectedPrimaryRecipients';
             
@@ -773,10 +734,8 @@ public with sharing class EmailCampaignController {
                 
                 if (con1 instanceof Contact) {
                     con = (Contact) con1;
-                } else if (con1 instanceof Lead) {
-                    con = (Lead) con1;
                 } else {
-                    // If neither Contact nor Lead, skip this iteration
+                    // If neither Contact, skip this iteration
                     continue;
                 }
 
@@ -1309,9 +1268,9 @@ public with sharing class EmailCampaignController {
                 recipientIds.add(member.RecipientId__c);
             }
 
-            // Query Contacts and Leads based on RelatedObject__c
+            // Query Contacts based on RelatedObject__c
             Map<Id, SObject> recipients = new Map<Id, SObject>();
-            if (relatedObject == 'Contact' || relatedObject == 'Contact,Lead') {
+            if (relatedObject == 'Contact') {
                 List<Contact> contacts = [
                     SELECT Id, Name, Email
                     FROM Contact
@@ -1320,17 +1279,6 @@ public with sharing class EmailCampaignController {
                 ];
                 for (Contact con : contacts) {
                     recipients.put(con.Id, con);
-                }
-            }
-            if (relatedObject == 'Lead' || relatedObject == 'Contact,Lead') {
-                List<Lead> leads = [
-                    SELECT Id, Name, Email
-                    FROM Lead
-                    WHERE Id IN :recipientIds
-                    WITH USER_MODE
-                ];
-                for (Lead lead : leads) {
-                    recipients.put(lead.Id, lead);
                 }
             }
 
@@ -1539,19 +1487,13 @@ public with sharing class EmailCampaignController {
             Set<Id> listingIds = new Set<Id>();
             Map<String, Id> emailToRecipientIdMap = new Map<String, Id>();
 
-            // Query Contacts and Leads to map recipient IDs to emails
+            // Query Contacts to map recipient IDs to emails
             Map<Id, SObject> idToRecipientMap = new Map<Id, SObject>();
             if (!recipientIds.isEmpty()) {
                 List<Contact> contacts = [SELECT Id, Email FROM Contact WHERE Id IN :recipientIds WITH USER_MODE];
                 for (Contact c : contacts) {
                     if (c.Email != null) {
                         idToRecipientMap.put(c.Id, c);
-                    }
-                }
-                List<Lead> leads = [SELECT Id, Email FROM Lead WITH USER_MODE];
-                for (Lead l : leads) {
-                    if (l.Email != null) {
-                        idToRecipientMap.put(l.Id, l);
                     }
                 }
             }
@@ -1628,23 +1570,19 @@ public with sharing class EmailCampaignController {
             
             // Determine which objects to query based on RelatedObject__c
             Map<String, Set<Id>> objectToIdsMap = new Map<String, Set<Id>>{
-                'Contact' => new Set<Id>(),
-                'Lead' => new Set<Id>()
+                'Contact' => new Set<Id>()
             };
             for (String campaignId : campaignMap.keySet()) {
                 String relatedObject = campaignMap.get(campaignId).RelatedObject__c;
                 List<Id> recipientIdsForCampaign = campaignToRecipientMap.get(campaignId);
                 if (recipientIdsForCampaign != null) {
-                    if (relatedObject == 'Contact' || relatedObject == 'Contact,Lead') {
+                    if (relatedObject == 'Contact') {
                         objectToIdsMap.get('Contact').addAll(recipientIdsForCampaign);
-                    }
-                    if (relatedObject == 'Lead' || relatedObject == 'Contact,Lead') {
-                        objectToIdsMap.get('Lead').addAll(recipientIdsForCampaign);
                     }
                 }
             }
             
-            // Query Contacts and Leads
+            // Query Contacts
             Map<String, SObject> emailToRecipientMap = new Map<String, SObject>();
             if (!objectToIdsMap.get('Contact').isEmpty()) {
                 List<Contact> contactList = getContacts(objectToIdsMap.get('Contact'));
@@ -1652,15 +1590,6 @@ public with sharing class EmailCampaignController {
                     if (contact.Email != null) {
                         emailToRecipientMap.put(contact.Email, contact);
                         emailToRecipientIdMap.put(contact.Email, contact.Id);
-                    }
-                }
-            }
-            if (!objectToIdsMap.get('Lead').isEmpty()) {
-                List<Lead> leadList = getLeads(objectToIdsMap.get('Lead'));
-                for (Lead lead : leadList) {
-                    if (lead.Email != null) {
-                        emailToRecipientMap.put(lead.Email, lead);
-                        emailToRecipientIdMap.put(lead.Email, lead.Id);
                     }
                 }
             }
@@ -1704,7 +1633,7 @@ public with sharing class EmailCampaignController {
                     Matcher matcher = pattern.matcher(body);
             
                     while (matcher.find()) {
-                        String objectName = matcher.group(1);  // e.g., Lead
+                        String objectName = matcher.group(1); 
                         String fieldPath = matcher.group(2);   // e.g., Owner.FullName
             
                         if (!globalFieldMap.containsKey(objectName)) {
@@ -2035,11 +1964,11 @@ public with sharing class EmailCampaignController {
                         }
 
                         Map<String, Map<String, String>> mappingKeys;
-                        if (request.RelatedObjectName == 'Listing__c') {
+                        if (request.RelatedObjectName == 'MVEX__Listing__c') {
                             mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, request.RelatedObjectName, listingIds, true);
                         } 
                         
-                        if(request.RelatedObjectName == 'Contact' || request.RelatedObjectName == 'Lead') {
+                        if(request.RelatedObjectName == 'Contact') {
                             Set<Id> idsToMap = new Set<Id>();
                             idsToMap.add(recipient.Id);
                             mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, request.RelatedObjectName, idsToMap, true);
@@ -2280,7 +2209,7 @@ public with sharing class EmailCampaignController {
         @InvocableVariable(required=true description='Related Object Name')
         public String RelatedObjectName;
 
-        @InvocableVariable(required=true description='Template Type')
+        @InvocableVariable(required=false description='Template Type')
         public String templateType;
         
     }
@@ -2358,8 +2287,8 @@ public with sharing class EmailCampaignController {
         Matcher matcher = pattern.matcher(body);
     
         while (matcher.find()) {
-            String fullMatch = matcher.group(0);  // e.g. {!Lead.Name} or {!DATETIMEVALUE(ServiceAppointment.SchedStartTime)}
-            String raw = matcher.group(1);        // e.g. Lead.Name or DATETIMEVALUE(ServiceAppointment.SchedStartTime)
+            String fullMatch = matcher.group(0);
+            String raw = matcher.group(1);
     
             Boolean isDatetime = raw.startsWith('DATETIMEVALUE(');
             Boolean isDate = raw.startsWith('DATEVALUE(');

@@ -32,7 +32,6 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
 
     get objectOptions (){
         return [
-            { label: 'Lead', value: 'Lead' },
             { label: 'Contact', value: 'Contact' }
         ];
     }

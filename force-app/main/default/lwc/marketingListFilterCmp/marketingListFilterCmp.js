@@ -139,7 +139,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                     isNot: field.isNot || false,
                     searchTerm:'',
                     isFocused:false,
-                    picklist: field.type === 'PICKLIST',
+                    picklist: field.type === 'PICKLIST'||field.type === 'MULTIPICKLIST',
                     string: field.type === 'STRING'||field.type === 'TEXTAREA'||field.type === 'URL'||field.type === 'ID'||field.type === 'EMAIL'||field.type === 'PHONE',
                     fieldChecked:false,
                     currency: field.type === 'CURRENCY',

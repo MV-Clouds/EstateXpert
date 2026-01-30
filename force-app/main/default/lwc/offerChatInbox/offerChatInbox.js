@@ -16,7 +16,7 @@ import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { NavigationMixin } from 'lightning/navigation';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { subscribe} from 'lightning/empApi';
-import updateOfferRecord from '@salesforce/apex/OfferManagerController.updateOfferRecord';
+// import updateOfferRecord from '@salesforce/apex/OfferManagerController.updateOfferRecord';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class OfferChatInbox extends NavigationMixin(LightningElement) {
@@ -1136,16 +1136,16 @@ export default class OfferChatInbox extends NavigationMixin(LightningElement) {
         console.log('Edited Offer Data:', JSON.stringify(offerData, null, 2));
         
         // Save the edited offer
-        updateOfferRecord({ offerData: offerData })
-            .then(() => {
-                this.showToast('Success', 'Offer updated successfully.', 'success');
-                this.offerRecord = { ...this.editedOffer };
-                this.isEditing = false;
-                this.editedOffer = {};
-            }).catch(error => {
-                this.showToast('Error', 'Failed to update offer.', 'error');
-                console.error('Error updating offer:', error);
-            });
+        // updateOfferRecord({ offerData: offerData })
+        //     .then(() => {
+        //         this.showToast('Success', 'Offer updated successfully.', 'success');
+        //         this.offerRecord = { ...this.editedOffer };
+        //         this.isEditing = false;
+        //         this.editedOffer = {};
+        //     }).catch(error => {
+        //         this.showToast('Error', 'Failed to update offer.', 'error');
+        //         console.error('Error updating offer:', error);
+        //     });
     }
 
 

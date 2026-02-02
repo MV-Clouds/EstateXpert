@@ -1867,6 +1867,14 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }));
     }
 
+    // Handle send message button click
+    get previewRecordId() {
+        if (this.broadcastContactList && this.broadcastContactList.length > 0) {
+            return this.broadcastContactList[0].ContactId;
+        }
+        return null;
+    }
+
     handleInputChange(event) {
         const { name, value } = event.target;
         switch (name) {
@@ -1878,6 +1886,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 break;
             case 'template':
                 this.selectedTemplate = value;
+                this.handleRefreshClick(); // Trigger preview refresh
                 break;
             case 'dateTime':
                 this.selectedDateTime = value;
@@ -1888,7 +1897,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    // Handle send message button click
+    // Handle send message button click - Modified to skip first screen
     handleSendMessage() {
         try {
             if (this.sendMailInquiryDataList.length === 0) {
@@ -1899,7 +1908,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.isLoading = true;
             const inquiryIds = this.sendMailInquiryDataList.map(inquiry => inquiry.id);
 
-            // Fetch inquiry and contact records
             getContactsForInquiries({ inquiryIds })
                 .then(records => {
                     if (records.length === 0) {
@@ -1917,15 +1925,16 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     }));
 
                     this.showTemplate = true;
-                    this.popUpFirstPage = true;
-                    this.popUpSecondPage = false;
+                    this.popUpFirstPage = false; // Skip UI group details
+                    this.popUpSecondPage = true; // Show template selection directly
                     this.popUpLastPage = false;
-                    this.popupHeader = 'Create Broadcast Group';
+                    this.popupHeader = 'Choose Template';
                     this.broadcastGroupName = '';
                     this.messageText = '';
                     this.selectedTemplate = '';
                     this.selectedDateTime = '';
                     this.broadcastGroupId = null;
+                    this.updateTemplateOptions();
                 })
                 .catch(error => {
                     errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Failed to fetch records');
@@ -1938,6 +1947,98 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Error opening send message modal');
             this.showToast('Error', 'Error opening send message modal', 'error');
             this.isLoading = false;
+        }
+    }
+
+    // Add this getter for the preview component
+    get previewRecordId() {
+        if (this.broadcastContactList && this.broadcastContactList.length > 0) {
+            return this.broadcastContactList[0].ContactId;
+        }
+        return null;
+    }
+
+    // Handle send message button click - Modified to skip first screen
+    handleSendMessage() {
+        try {
+            if (this.sendMailInquiryDataList.length === 0) {
+                this.showToast('Error', 'Please select at least one inquiry', 'error');
+                return;
+            }
+
+            this.isLoading = true;
+            const inquiryIds = this.sendMailInquiryDataList.map(inquiry => inquiry.id);
+
+            getContactsForInquiries({ inquiryIds })
+                .then(records => {
+                    if (records.length === 0) {
+                        this.showToast('Error', 'No contacts found for the selected inquiries', 'error');
+                        this.isLoading = false;
+                        return;
+                    }
+
+                    this.broadcastContactList = records.map(record => ({
+                        InquiryId: record.InquiryId,
+                        InquiryName: record.InquiryName,
+                        ContactId: record.ContactId,
+                        ContactName: record.ContactName,
+                        Phone: record.Phone
+                    }));
+
+                    this.showTemplate = true;
+                    this.popUpFirstPage = false; // Skip UI group details
+                    this.popUpSecondPage = true; // Show template selection directly
+                    this.popUpLastPage = false;
+                    this.popupHeader = 'Choose Template';
+                    this.broadcastGroupName = '';
+                    this.messageText = '';
+                    this.selectedTemplate = '';
+                    this.selectedDateTime = '';
+                    this.broadcastGroupId = null;
+                    this.updateTemplateOptions();
+                })
+                .catch(error => {
+                    errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Failed to fetch records');
+                    this.showToast('Error', 'Failed to fetch records', 'error');
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        } catch (error) {
+            errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Error opening send message modal');
+            this.showToast('Error', 'Error opening send message modal', 'error');
+            this.isLoading = false;
+        }
+    }
+
+    async createBroadcastGroupBackground() {
+        const now = new Date();
+        const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        const autoGroupName = 'Suggested Inquiry - ' + timestamp;
+        const autoDesc = 'Broadcast initiated from Inquiry Manager at ' + timestamp;
+
+        const phoneNumbers = this.broadcastContactList
+            .map(record => record.Phone)
+            .filter(phone => phone);
+
+        const messageData = {
+            objectApiName: this.selectedObject,
+            listViewName: this.listViewId,
+            phoneNumbers: phoneNumbers,
+            description: autoDesc,
+            name: autoGroupName,
+            isUpdate: false,
+            broadcastGroupId: null,
+            phoneField: 'Phone'
+        };
+
+        try {
+            const result = await processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) });
+            this.broadcastGroupId = result;
+            return true;
+        } catch (error) {
+            this.showToast('Error', 'Background group creation failed: ' + (error.body?.message || error.message), 'error');
+            return false;
         }
     }
 
@@ -2020,13 +2121,20 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     // Handle send button on second page
-    handleSendOnPopup() {
+    async handleSendOnPopup() {
         if (!this.selectedTemplate) {
             this.showToast('Error', 'Please select a template', 'error');
             return;
         }
 
         this.spinnerShow = true;
+
+        // Auto-create the group in background before sending
+        const groupCreated = await this.createBroadcastGroupBackground();
+        if (!groupCreated) {
+            this.spinnerShow = false;
+            return;
+        }
 
         createChatRecods({
             templateId: this.selectedTemplate,
@@ -2071,7 +2179,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     // Handle schedule and send button on last page
-    handleSchedule() {
+    async handleSchedule() {
         if (!this.selectedDateTime) {
             this.showToast('Error', 'Please select date and time', 'error');
             return;
@@ -2086,6 +2194,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
 
         this.spinnerShow = true;
+
+        // Auto-create the group in background before scheduling
+        const groupCreated = await this.createBroadcastGroupBackground();
+        if (!groupCreated) {
+            this.spinnerShow = false;
+            return;
+        }
 
         createChatRecods({
             templateId: this.selectedTemplate,
@@ -2183,6 +2298,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handleCloseModal() {
         this.isConfigOpen = false;
         this.fetchInquiryConfiguration();
+    }
+
+    handleRefreshClick() {
+        const childComponent = this.template.querySelector('c-template-preview');
+        if (childComponent && this.selectedTemplate) {
+            childComponent.refreshComponent(this.selectedTemplate);
+        }
     }
 
     /**

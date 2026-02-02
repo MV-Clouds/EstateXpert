@@ -142,8 +142,6 @@ global without sharing class WhatsAppWebhook{
             }
             String formattedNumber = senderId.substring(0, 3) + senderId.substring(3);
 
-            List<Lead> contacts = new List<Lead>();
-
             Map<String, Object> profile = (Map<String, Object>) sender.get('profile');
             String senderName = (String) profile.get('name');
             String senderPhone = formattedNumber;

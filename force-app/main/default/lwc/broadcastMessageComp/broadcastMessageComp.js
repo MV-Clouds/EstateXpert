@@ -447,12 +447,12 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                         let recordData = {
                             index: index + 1,
                             Id: record.Id,
-                            name: record[fields.nameField] ? record[fields.nameField] : '',
-                            phone: record[fields.phoneField] ? record[fields.phoneField] : '',
+                            name: record[fields.nameField] ? record[fields.nameField] : ' - ',
+                            phone: record[fields.phoneField] ? record[fields.phoneField] : ' - ',
                             isSelected: false
                         };
                         if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
-                            recordData.email = record[fields.emailField] ? record[fields.emailField] : '';
+                            recordData.email = record[fields.emailField] ? record[fields.emailField] : ' - ';
                         }
                         return recordData;
                     });

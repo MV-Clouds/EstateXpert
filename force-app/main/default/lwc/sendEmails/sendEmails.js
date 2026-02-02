@@ -72,8 +72,7 @@ export default class SendEmails extends LightningElement {
 
     // Combobox options
     objectOptions = [
-        { label: 'Contact', value: 'Contact' },
-        // { label: 'Lead', value: 'Lead' },
+        { label: 'Contact', value: 'Contact' }
     ];
 
     templateTypeOptions = [

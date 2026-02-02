@@ -1,11 +1,11 @@
 import { LightningElement, track , wire, api} from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
-import getOfferData from '@salesforce/apex/OfferManagerController.getOfferData';
+// import getOfferData from '@salesforce/apex/OfferManagerController.getOfferData';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import redirectImg from '@salesforce/resourceUrl/redirect';
-import getOfferHistory from '@salesforce/apex/OfferManagerController.getOfferHistory';
+// import getOfferHistory from '@salesforce/apex/OfferManagerController.getOfferHistory';
 import { errorDebugger } from 'c/globalProperties';
 import { CurrentPageReference } from 'lightning/navigation';
 
@@ -40,47 +40,47 @@ export default class OfferManager extends NavigationMixin(LightningElement) {
     }
 
 
-    async loadData() {
+    // async loadData() {
 
-        try {
-            this.isLoading = true;
-            console.log('Listing ID:', this.recordId);
+    //     try {
+    //         this.isLoading = true;
+    //         console.log('Listing ID:', this.recordId);
             
-            const data = await getOfferData({ listingId: this.recordId });
-            console.log('Offer Data:', data);
+    //         const data = await getOfferData({ listingId: this.recordId });
+    //         console.log('Offer Data:', data);
 
-            this.offers = data.offers.map(offer => ({
-                ...offer,
-                FormattedOfferDate: offer.MVEX__Offer_Date__c ? new Date(offer.MVEX__Offer_Date__c).toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }) : '',
-                FormattedExpirationDate: offer.MVEX__Offer_Expiration_Date__c ? new Date(offer.MVEX__Offer_Expiration_Date__c).toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }) : '',
-                contactName: offer.MVEX__Buyer_Contact__c ? offer.MVEX__Buyer_Contact__r.Name : 'N/A'
-            }));
-            this.error = undefined;
-            setTimeout(() => {
-                this.isLoading = false;
-            }, 2000);
-        } catch (error) {
-            this.error = error;
-            this.showToast('Error', 'Failed to load data', 'error');
-            this.offers = [];
-            console.error('Error loading offer data:', error);
-            console.error('Error loading offer data:', error.stack);
-        } finally {
-            this.isLoading = false;
-        }
-    }
+    //         this.offers = data.offers.map(offer => ({
+    //             ...offer,
+    //             FormattedOfferDate: offer.MVEX__Offer_Date__c ? new Date(offer.MVEX__Offer_Date__c).toLocaleString('en-US', {
+    //                 year: 'numeric',
+    //                 month: 'short',
+    //                 day: 'numeric',
+    //                 hour: '2-digit',
+    //                 minute: '2-digit'
+    //             }) : '',
+    //             FormattedExpirationDate: offer.MVEX__Offer_Expiration_Date__c ? new Date(offer.MVEX__Offer_Expiration_Date__c).toLocaleString('en-US', {
+    //                 year: 'numeric',
+    //                 month: 'short',
+    //                 day: 'numeric',
+    //                 hour: '2-digit',
+    //                 minute: '2-digit'
+    //             }) : '',
+    //             contactName: offer.MVEX__Buyer_Contact__c ? offer.MVEX__Buyer_Contact__r.Name : 'N/A'
+    //         }));
+    //         this.error = undefined;
+    //         setTimeout(() => {
+    //             this.isLoading = false;
+    //         }, 2000);
+    //     } catch (error) {
+    //         this.error = error;
+    //         this.showToast('Error', 'Failed to load data', 'error');
+    //         this.offers = [];
+    //         console.error('Error loading offer data:', error);
+    //         console.error('Error loading offer data:', error.stack);
+    //     } finally {
+    //         this.isLoading = false;
+    //     }
+    // }
 
     redirectToRecord(event) {
         try {
@@ -102,29 +102,29 @@ export default class OfferManager extends NavigationMixin(LightningElement) {
         }
     }
 
-    handleOfferHistory(event) {
-        console.log('handleOfferHistory called');
-        const recordId = event.currentTarget.dataset.id;
-        this.offerName = event.currentTarget.dataset.name;
+    // handleOfferHistory(event) {
+    //     console.log('handleOfferHistory called');
+    //     const recordId = event.currentTarget.dataset.id;
+    //     this.offerName = event.currentTarget.dataset.name;
 
-        getOfferHistory({ offerId: recordId })
-            .then(result => {
-                console.log('Offer History:', result);
-                if (result && result.length > 0) {
-                    this.processedHistory = this.processHistoryData(result);
-                    this.showModal = true;
-                    console.log('processedHistory:', this.processedHistory);
-                    // You can handle the result further, e.g., display in a modal or table
-                } else {
-                    this.showToast('Info', 'No offer history found', 'info');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching offer history:', error);
-                this.showToast('Error', 'Failed to load offer history', 'error');
-            });
+    //     getOfferHistory({ offerId: recordId })
+    //         .then(result => {
+    //             console.log('Offer History:', result);
+    //             if (result && result.length > 0) {
+    //                 this.processedHistory = this.processHistoryData(result);
+    //                 this.showModal = true;
+    //                 console.log('processedHistory:', this.processedHistory);
+    //                 // You can handle the result further, e.g., display in a modal or table
+    //             } else {
+    //                 this.showToast('Info', 'No offer history found', 'info');
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching offer history:', error);
+    //             this.showToast('Error', 'Failed to load offer history', 'error');
+    //         });
 
-    }
+    // }
 
     closeModal() {
         this.showModal = false;

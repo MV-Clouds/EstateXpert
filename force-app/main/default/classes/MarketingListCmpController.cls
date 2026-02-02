@@ -85,7 +85,6 @@ public with sharing class MarketingListCmpController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Feature_Name__c = 'Marketing List' 
                 AND MVEX__Object_API_Name__c = 'Contact' 
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE 
                 LIMIT 1
             ];
@@ -118,7 +117,6 @@ public with sharing class MarketingListCmpController {
                 FROM MVEX__Configuration_Settings__c 
                 WHERE MVEX__Feature_Name__c = 'Marketing List' 
                 AND MVEX__Object_API_Name__c = 'Contact' 
-                AND MVEX__Configuration_Type__c = 'Manager Config'
                 WITH USER_MODE 
                 LIMIT 1
             ];
@@ -217,7 +215,7 @@ public with sharing class MarketingListCmpController {
             // Convert contact IDs to contact objects for processing
             List<Map<String, Object>> contacts = new List<Map<String, Object>>();
             
-            // Query all contacts/leads based on object type
+            // Query all contacts based on object type
             if (objectName == 'Contact') {
                 List<Contact> contactRecords = [SELECT Id, Name, Email FROM Contact WHERE Id IN :allContactIds WITH USER_MODE];
                 for (Contact con : contactRecords) {
@@ -225,15 +223,6 @@ public with sharing class MarketingListCmpController {
                         'Id' => con.Id,
                         'Name' => con.Name,
                         'Email' => con.Email
-                    });
-                }
-            } else if (objectName == 'Lead') {
-                List<Lead> leadRecords = [SELECT Id, Name, Email FROM Lead WHERE Id IN :allContactIds WITH USER_MODE];
-                for (Lead lead : leadRecords) {
-                    contacts.add(new Map<String, Object>{
-                        'Id' => lead.Id,
-                        'Name' => lead.Name,
-                        'Email' => lead.Email
                     });
                 }
             }
@@ -349,7 +338,7 @@ public with sharing class MarketingListCmpController {
     public static String getListViewId() {
         try {
             String objectName = 'Contact';
-            String developerName = 'AllContacts';
+            String developerName = 'All_Contacts';
             // Validate inputs
             if (String.isBlank(objectName) || String.isBlank(developerName)) {
                 throw new AuraHandledException('Object name and developer name must not be blank');

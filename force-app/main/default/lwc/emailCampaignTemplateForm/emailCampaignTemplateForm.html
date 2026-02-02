@@ -53,7 +53,6 @@
 
             <div class="contact-input-fields">
 
-                <!-- Primary Recipients -->
                 <div class="primary-recipients input-field">
                     <legend class="slds-form-element__legend slds-form-element__label"><abbr class="slds-required"
                             title="required">*</abbr>Select the Primary recipients</legend>
@@ -91,9 +90,46 @@
                             </span>
                         </template>
                     </div>
-                </div>
 
-                <!-- CC Recipients -->
+                    <template if:true={showBroadcastGroups}>
+                        <div class="section-divider">
+                            <span class="divider-text">OR select from groups</span>
+                        </div>
+                        
+                        <div class="broadcast-groups-container">
+                            <h4 class="broadcast-groups-title">Contact Groups</h4>
+                            <p class="broadcast-groups-subtitle">Select predefined groups for this {relatedObject}</p>
+                            
+                            <div class="broadcast-groups-list">
+                                <template for:each={filteredBroadcastGroups} for:item="group">
+                                    <div key={group.value} class="broadcast-group-item">
+                                        <input 
+                                            type="checkbox" 
+                                            id={group.value} 
+                                            data-value={group.value} 
+                                            onchange={handleBroadcastGroupChange}
+                                            checked={group.selected}
+                                            class="broadcast-group-checkbox" />
+                                        <label for={group.value} class="broadcast-group-label">
+                                            <span class="group-name">{group.label}</span>
+                                            <span class="group-count">{group.contactCount} contacts</span>
+                                        </label>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <template if:true={selectedBroadcastGroupsCount}>
+                                <div class="selected-groups-summary">
+                                    <span class="summary-text">
+                                        {selectedBroadcastGroupsCount} group(s) selected • 
+                                        {estimatedContactsFromGroups} estimated contacts
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    </div>
+
                 <div class="input-field">
                     <lightning-input class="blur-class" label="Who should be CC?" placeholder="Type to search contacts"
                         onchange={handleCCSearchInputChange} onfocus={handleCCSearchInputFocus} onblur={handleBlur}
@@ -131,7 +167,6 @@
                     </div>
                 </div>
 
-                <!-- BCC Recipients -->
                 <div class="input-field">
                     <lightning-input class="blur-class" label="Who should be BCC?" placeholder="Type to search contacts"
                         onchange={handleBCCSearchInputChange} onfocus={handleBCCSearchInputFocus} onblur={handleBlur}
@@ -170,16 +205,6 @@
                 </div>
             </div>
             <div class="select-field-div">
-                <!-- <fieldset class="slds-form-element">
-                    <legend class="slds-form-element__legend slds-form-element__label"><abbr class="slds-required"
-                            title="required">*</abbr>How should this Email campaign start?</legend>
-                    <div class="slds-form-element__control">
-                        <lightning-radio-group disabled={isRadioGroupDisabled} name="startDateOption"
-                            options={startDateOptions} value={startDateOption} onchange={handleStartDateOptionChange}>
-                        </lightning-radio-group>
-                    </div>
-                </fieldset> -->
-
                 <template if:true={isSpecificDateOption}>
                     <div class="input-date-container">
                         <lightning-input class="input-date slds-m-top_small" label="Select a date"
@@ -254,7 +279,7 @@
                                                     disabled={email.disabled} variant="label-hidden"></lightning-input>
                                             </div>
                                         </td>
-                                        <td data-label="Email Template">
+                                        <td data-label="Email Template" class="email-template">
                                             <div>
                                                 <lightning-combobox name="emailName" value={email.template}
                                                     options={quickTemplateOptions} onchange={handleTemplateChange}

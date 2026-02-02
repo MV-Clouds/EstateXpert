@@ -125,6 +125,8 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
         this.isLoading = true;
         getBroadcastGroups()
             .then(result => {
+                console.log('Broadcast Groups fetched:', JSON.stringify(result));
+                
                 this.data = result.map((item, index) => ({
                     ...item,
                     index: index + 1,
@@ -186,7 +188,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     
     handlePageChange(event) {
         try {
-            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+            const selectedPage = parseInt(event.currentTarget.getAttribute('data-id'), 10);
             if (selectedPage !== this.currentPage) {
                 this.currentPage = selectedPage;
                 this.updateShownData();
@@ -199,6 +201,8 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     handleEditGroup(event) {
         const recordId = event.currentTarget.dataset.id;
         const communicationType = event.currentTarget.dataset.communicationType;
+        console.log();
+        
         this.broadcastGroupId = recordId;
         this.selectedCommunicationType = communicationType;
         this.navigateToNewBroadcast();
@@ -214,7 +218,10 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     }
 
     handleCommunicationTypeChange(event) {
-        this.selectedCommunicationType = event.target.value;
+        this.selectedCommunicationType = event.currentTarget.value;
+
+        console.log('Selected Communication Type:', this.selectedCommunicationType);
+        
     }
 
     handlePopupContinue() {
@@ -285,6 +292,10 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     }
 
     navigateToNewBroadcast() {
+        console.log('Navigate to new broadcast');
+        console.log('broadcastGroupId: ' + this.broadcastGroupId);
+        console.log('communicationType: ' + this.selectedCommunicationType);
+        
         let componentDef = {
             componentDef: "MVEX:broadcastMessageComp",
             attributes: {

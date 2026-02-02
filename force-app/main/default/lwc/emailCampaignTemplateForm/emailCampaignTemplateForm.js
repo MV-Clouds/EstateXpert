@@ -1,6 +1,5 @@
 import { LightningElement, track, wire } from 'lwc';
 import getContacts from '@salesforce/apex/EmailCampaignController.getContacts';
-import getLeads from '@salesforce/apex/EmailCampaignController.getLeads';
 import getDateFieldsForPicklist from '@salesforce/apex/EmailCampaignController.getDateFieldsForPicklist';
 import createCampaignAndEmails from '@salesforce/apex/EmailCampaignController.createCampaignAndEmails';
 import updateCampaignAndEmails from '@salesforce/apex/EmailCampaignController.updateCampaignAndEmails';
@@ -13,6 +12,9 @@ import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuick
 import checkContactDateFields from '@salesforce/apex/EmailCampaignController.checkContactDateFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getCampaign from '@salesforce/apex/EmailCampaignController.getCampaign';
+// New import for Broadcast Groups
+import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastGroups';
+
 
 export default class EmailCampaignTemplateForm extends NavigationMixin(LightningElement) {
     @track contacts = [];
@@ -61,10 +63,16 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     @track currentDateTime = new Date();
 
     @track selectedobject = 'Contact';
+    @track templateType = '';
     @track subscription = {};
     @track templateStatus = true;
     @track selectedTemplateId = '';
     @track isRadioGroupDisabled = false;
+
+    // Broadcast Group Properties
+    @track broadcastGroupOptions = [];
+    @track selectedBroadcastGroups = [];
+
 
     @track startDateOptions = [
         { label: 'Sending emails on specific dates', value: 'specificDate' },
@@ -72,9 +80,6 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     ];
     @track startDateOption = 'specificDate';
 
-    
-    
-    
     get isSpecificDateOption() {
         return this.startDateOption === 'specificDate';
     }
@@ -94,7 +99,38 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     get isOpenModalDisabled(){
         return this.campaignId!='' ? false : true;
     }
+    
+    // Broadcast Group Getters
+    get showBroadcastGroups() {
+        // Show broadcast groups only when no individual primary recipients are selected
+        return this.relatedObject && this.selectedPrimaryRecipients.length === 0 && this.filteredBroadcastGroups.length > 0;
+    }
 
+    get filteredBroadcastGroups() {
+        if (!this.relatedObject || !this.broadcastGroupOptions) {
+            return [];
+        }
+        
+        return this.broadcastGroupOptions.filter(group => 
+            group.objectName === this.relatedObject
+        ).map(group => ({
+            ...group,
+            selected: this.selectedBroadcastGroups.includes(group.value)
+        }));
+    }
+
+    get selectedBroadcastGroupsCount() {
+        return this.selectedBroadcastGroups.length;
+    }
+
+    get estimatedContactsFromGroups() {
+        if (!this.selectedBroadcastGroups.length) return 0;
+        
+        return this.filteredBroadcastGroups
+            .filter(group => this.selectedBroadcastGroups.includes(group.value))
+            .reduce((total, group) => total + (group.contactCount || 0), 0);
+    }
+    
     /*
     * Method Name: setCurrentPageReference
     * @description: Method to load the data when click on the tab or again come on the tab with redirection
@@ -115,22 +151,13 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             console.log('Navigation State string ');
             console.log(navigationStateString);
 
-
-            let ifLead = false;
-
             if(recId){
                 this.campaignId = recId;
                 getCampaign({ campaignId: this.campaignId }).then(result => {
-                    console.log('result ==> ' , result.MVEX__RelatedObject__c);
-                    if(result && result.MVEX__RelatedObject__c == 'Lead'){
-                        this.relatedObject = 'Lead';
-                        this.loadLeads();
-                    }
-                    else{
-                        this.relatedObject = 'Contact';
-                        this.loadContacts();
-                    }
-                    console.log('contacts' + this.contacts);
+                        if(result && result.MVEX__RelatedObject__c == 'Contact'){
+                            this.relatedObject = 'Contact';
+                            this.loadContacts();
+                        }
                     }
                 ).catch(error => {  
                     console.error('Error fetching campaign:', error);
@@ -144,17 +171,10 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 this.emailCampaignName = this.navigationStateString.campaignName;
                 this.templateId = this.navigationStateString.selectedTemplateId;
                 this.relatedObject = this.navigationStateString.selectedObject;
+                this.templateType = this.navigationStateString.templateType;
+                
                 console.log(typeof this.relatedObject);
-                console.log(' is lead ' , this.relatedObject == 'Lead');
                 console.log( 'related object ' + this.relatedObject);
-
-                if(this.relatedObject == 'Lead'){   
-                    ifLead = true
-                }else{
-                    ifLead = false
-                }
-
-                console.log('ifLead ==> ' , ifLead);
 
                 this.emailsFromTemplate = this.navigationStateString.marketingEmails;
                 console.log(this.emailsFromTemplate);
@@ -169,6 +189,12 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                         email: contact.Email
                     }));
                 }
+                
+                // Load selected broadcast groups if available (assuming they are passed from the previous step)
+                const selectedGroups = this.navigationStateString.selectedBroadcastGroups;
+                if(selectedGroups){
+                    this.selectedBroadcastGroups = selectedGroups;
+                }
 
 
 
@@ -176,7 +202,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     console.log('this.emailsFromTemplate ==> ' , this.emailsFromTemplate);
                     this.emails = this.emailsFromTemplate.map(email => ({
                         id: email.Id, 
-                        template: email.MVEX__Quick_Template__c,
+                        template: email.MVEX__Template_Id__c,
+                        templateType: email.MVEX__Template_Type__c,
                         subject: email.MVEX__Subject__c, 
                         daysAfterStartDate: email.MVEX__Days_After_Start_Date__c, 
                         timeToSend: '',
@@ -190,19 +217,10 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     console.log('this.emailsWithTemplate JSON.stringify ==> ' , JSON.stringify(this.emailsWithTemplate));
                     console.log('emails ==> ' , this.emails);
                 }
-                console.log(ifLead);
-                if(!ifLead){
-                    this.loadContacts();
-                }else{
-                    this.loadLeads();
-                }
+                this.loadContacts();
                 console.log(this.contacts);
 
             }
-            
-            
-
-
 
         }
     }
@@ -221,6 +239,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         .then(() => {
             this.fetchDateFields();
             this.fetchQuickTemplates();
+            this.loadBroadcastGroups();
         })
         .catch(error => {
             console.error('Error loading external CSS', error);
@@ -229,6 +248,32 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         this.handleSubscribe();
         this.registerErrorListener();
     }
+    
+    /*
+    * Method Name: loadBroadcastGroups
+    * @description: Method to load broadcast groups from the backend
+    * Date: 19/11/2025
+    * Created By: Gemini
+    */
+    loadBroadcastGroups(){
+        getBroadcastGroups()
+        .then(data => {
+            if(data && data.length > 0){
+                this.broadcastGroupOptions = data.map(option => ({
+                    label: option.Name,
+                    value: option.Id,
+                    objectName: option.MVEX__Object_Name__c, 
+                    contactCount: option.MVEX__Count_of_Members__c || 0,
+                    selected: false // Initial state
+                }));
+            }
+        })
+        .catch(error => {
+            this.showToast('Error', 'Failed to fetch broadcast groups', 'error');
+            console.error('Error loading broadcast groups:', error);
+        });
+    }
+
 
     /*
     * Method Name: loadContacts
@@ -238,24 +283,6 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     */
     loadContacts() {
          getContacts()
-            .then(result => {
-                // console.log('result ==> ' , JSON.stringify(result));
-                this.contacts = result.map(contact => ({
-                    label: contact.Name,
-                    value: contact.Id,
-                    email: contact.Email
-                }));
-                this.updateFilteredLists();
-                this.loadCamapignData();
-
-            })
-            .catch(error => {
-                console.error('Error fetching contacts:', error);
-            });
-    }
-
-    loadLeads() {
-         getLeads()
             .then(result => {
                 // console.log('result ==> ' , JSON.stringify(result));
                 this.contacts = result.map(contact => ({
@@ -283,6 +310,13 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         if (this.campaignId) {
             getCamapaignAndRelatedData({ campaignId: this.campaignId })
                 .then(result => {
+
+                    // Store all selected contacts, including failed ones
+                    var primaryContacts1 = [];
+                    var ccContacts1 = [];
+                    var bccContacts1 = [];
+                    var selectedGroups = [];
+
                     const data = JSON.parse(result);
                     if (data && data?.marketingCampaignMembers.length > 0) {
                         this.isRadioGroupDisabled = true;
@@ -290,7 +324,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     if (data && (data?.selectedContactDateField != null || data?.selectedContactDateField != '')) {
                         this.isContactDateFieldOptionDisabled = true;
                     }
-    
+        
                     this.emailCampaignName = data.label;
                     const formData = {
                         selectedTemplate: '',
@@ -300,7 +334,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                         messagingService: '',
                         selectedObject : ''
                     };
-    
+        
                     this.templateId = data.templateId;
                     this.emailCampaignTemplate = data.templateName;
                     formData.messagingService = data.emailType;
@@ -309,7 +343,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     formData.saveForFuture = data.isMarketingCampaignTemplate;
                     formData.selectedObject = data.relatedObject;
                     this.navigationStateString = formData;
-    
+        
                     if (data.startDate != null) {
                         this.specificDate = data.startDate;
                         this.startDateOption = 'specificDate';
@@ -318,14 +352,20 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                         this.startDateOption = 'contactDateField';
                         this.selectedContactDateField = data.selectedContactDateField;
                     }
-    
-                    // Store all selected contacts, including failed ones
-                    var primaryContacts1 = [];
-                    var ccContacts1 = [];
-                    var bccContacts1 = [];
+
                     
                     console.log(data);
-                    if (data.marketingCampaignMembers) {
+                    
+                    // 1. Handle Broadcast Groups FIRST
+                    if (data.selectedBroadcastGroups) {
+                        // FIX: Use '@@@' as the delimiter, matching the Apex save format
+                        selectedGroups = data.selectedBroadcastGroups.split('@@@').filter(id => id.length > 0);
+                        this.selectedBroadcastGroups = selectedGroups;
+                    }
+
+                    // 2. Handle individual Primary Recipients. 
+                    // We only load individual recipients if NO groups were selected.
+                    if (data.marketingCampaignMembers && this.selectedBroadcastGroups.length === 0) {
                         data.marketingCampaignMembers.forEach(member => {
                             console.log('member ==> ' , member);
                             if (member.MVEX__Contact_Type__c === "Primary") {
@@ -334,11 +374,16 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                         });
                         console.log('primaryContacts1 ==> ' , primaryContacts1);
                         console.log('this.contacts ==> ' , this.contacts);
-                        // Fetch all contacts, including those not in Marketing_Campaign_Member__c
+                        
+                        // Populate individual recipients only if no groups were explicitly selected
                         this.selectedPrimaryRecipients = this.contacts.filter(contact => primaryContacts1.includes(contact.value));
                         this.filteredPrimaryContacts = this.filteredPrimaryContacts.filter(contact => !this.selectedPrimaryRecipients.some(selected => selected.value === contact.value));
+                    } else if (this.selectedBroadcastGroups.length > 0) {
+                        // BUG FIX: If groups were selected, ensure the individual contact list is empty
+                        this.selectedPrimaryRecipients = [];
                     }
-    
+                    
+                    // 3. Handle CC/BCC Recipients (which are always individuals)
                     if (data.cCContacts) {
                         data.cCContacts.split('@@@').forEach(ccContact => {
                             let [id] = ccContact.split(':');
@@ -346,7 +391,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                         });
                         this.selectedCCRecipients = this.contacts.filter(contact => ccContacts1.includes(contact.value));
                     }
-    
+        
                     if (data.bCCContacts) {
                         data.bCCContacts.split('@@@').forEach(bccContact => {
                             let [id] = bccContact.split(':');
@@ -354,13 +399,14 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                         });
                         this.selectedBCCRecipients = this.contacts.filter(contact => bccContacts1.includes(contact.value));
                     }
-    
+        
                     if (data.emailRecords) {
                         console.log('data.emailRecords ==> ' );
                         console.log(data.emailRecords);
                         this.emails = data.emailRecords.map(email => ({
                             id: email.Id,
-                            template: email.MVEX__Quick_Template__c,
+                            template: email.MVEX__Template_Id__c,
+                            templateType: email.MVEX__Template_Type__c,
                             subject: email.MVEX__Subject__c,
                             daysAfterStartDate: email.MVEX__Days_After_Start_Date__c,
                             timeToSend: this.parseTimeString(email.MVEX__TimeToSend__c),
@@ -368,11 +414,11 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                             name: email.Name,
                             disabled: this.shouldDisableEmail(data.selectedContactDateField, email?.MVEX__Send_Date_Time__c),
                             selectedListingId : email.MVEX__Listing__c,
-                            isListingSelectionDisabled : (email.MVEX__Listing__c == null || email.MVEX__Listing__c == '' ) ? true  : false 
+                            isListingSelectionDisabled : (email.MVEX__Listing__c == null || email.MVEX__Listing__c == '' ) ? true  : false
                         }));
                         this.emailsWithTemplate = [...this.emails];
                     }
-    
+        
                     this.isLoading = false;
                     this.updateFilteredLists();
                     this.updateExactDates();
@@ -387,6 +433,26 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     }
 
     /*
+    * Method Name: handleBroadcastGroupChange
+    * @description: Method to handle broadcast group selection
+    * Date: 19/11/2025
+    * Created By: Gemini
+    */
+    handleBroadcastGroupChange(event) {
+        const groupId = event.target.dataset.value;
+        const isChecked = event.target.checked;
+
+        if (isChecked) {
+            if (!this.selectedBroadcastGroups.includes(groupId)) {
+                this.selectedBroadcastGroups = [...this.selectedBroadcastGroups, groupId];
+            }
+        } else {
+            this.selectedBroadcastGroups = this.selectedBroadcastGroups.filter(id => id !== groupId);
+        }
+    }
+
+
+    /*
     * Method Name: fetchDateFields
     * @description: Method to fetch data fields for the contact
     * Date: 24/06/2024
@@ -396,6 +462,10 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     fetchDateFields() {
         getDateFieldsForPicklist()
             .then(result => {
+
+                console.log('result ==> ' , result);
+                console.table(result);
+
                 this.contactDateFieldOptions = result.map(option => ({
                     label: option.label,
                     value: option.value
@@ -417,13 +487,25 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         getQuickTemplates()
             .then(result => {
 
-                // Filter templates based on relatedObject (Lead or Contact)
+                console.log('Template Type ==> ' , this.templateType);
+                console.log('Email Campaign list ==> ' , result.emailTemplates);
+
+                if(this.templateType === 'EmailTemplate') {
+                    // Filter templates based on Email Campaign type
+                    this.quickTemplates = result.emailTemplates.map(option => {
+                        return { label: option.Name, value: option.Id, body: option.HtmlValue, subject: option.Subject, objectApiName : option.RelatedEntityType };
+                    });
+                    this.quickTemplateOptions = this.quickTemplates.map(option => {
+                        return { label: option.label, value: option.value };
+                    });
+
+                    return;
+                } 
+                
+
+                // Filter templates based on relatedObject (Contact)
                 let filteredTemplates = [];
-                if (this.relatedObject === 'Lead') {
-                    filteredTemplates = result.marketingTemplates.filter(
-                        option => option.objectApiName === 'Lead' || option.objectApiName === 'MVEX__Listing__c'
-                    );
-                } else if (this.relatedObject === 'Contact') {
+                if (this.relatedObject === 'Contact') {
                     filteredTemplates = result.marketingTemplates.filter(
                         option => option.objectApiName === 'Contact' || option.objectApiName === 'MVEX__Listing__c'
                     );
@@ -492,6 +574,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         } catch (error) {
             console.log('Error parsing time string:', error);
         }
+
+        return ''
     }
     
     /*
@@ -512,10 +596,9 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             const [year, month, day] = localDate.split('/');
             console.log(`${day}-${month}-${year}`);
             return `${day}-${month}-${year}`;
-        } else {
-            console.error('Invalid date value:', dateString);
-            return '';
         }
+        
+        return '';
     }
     
     /*
@@ -615,7 +698,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             if (this.emailsFromTemplate) {
                 this.emails = this.emailsFromTemplate.map(email => ({
                     id: email.Id, 
-                    template: email.MVEX__Quick_Template__c,
+                    template: email.MVEX__Template_Id__c,
+                    templateType: email.MVEX__Template_Type__c,
                     subject: email.MVEX__Subject__c, 
                     daysAfterStartDate: email.MVEX__Days_After_Start_Date__c, 
                     timeToSend: '',
@@ -682,6 +766,9 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         inputs.forEach(input => input.blur());
 
         this.isPrimaryDropdownVisible = false;
+        
+        // Clear broadcast groups when individual contacts are selected
+        this.selectedBroadcastGroups = [];
 
     }
 
@@ -834,6 +921,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
 
         if (type === 'Primary' && selectedContact && !this.selectedPrimaryRecipients.some(recipient => recipient.value === contactId)) {
             this.selectedPrimaryRecipients = [...this.selectedPrimaryRecipients, selectedContact];
+            // Clear broadcast groups when individual contacts are selected
+            this.selectedBroadcastGroups = [];
         } else if (type === 'CC' && selectedContact && !this.selectedCCRecipients.some(recipient => recipient.value === contactId)) {
             this.selectedCCRecipients = [...this.selectedCCRecipients, selectedContact];
         } else if (type === 'BCC' && selectedContact && !this.selectedBCCRecipients.some(recipient => recipient.value === contactId)) {
@@ -1044,8 +1133,6 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
 
         // console.log('selectedTemplate ==> ' , selectedTemplate);
         // console.log('selectedTemplate JSON.stringify ==> ' , JSON.stringify(selectedTemplate));
-        
-        
 
         this.emails = this.emails.map(email => {
             console.log('email.id ==> ' , email.id);
@@ -1053,7 +1140,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             
             if (email.id == emailId) {
                 email.subject = selectedTemplate.subject;
-                email.isListingSelectionDisabled  = selectedTemplate.objectApiName == 'MVEX__Listing__c' ? false : true;
+                email.isListingSelectionDisabled  = selectedTemplate.objectApiName == 'Listing__c' ? false : true;
+                email.templateType = this.templateType == 'EmailTemplate' ? 'EmailTemplate' : 'EstateXpertTemplate';
                 console.log(selectedTemplate.selectedListingId);
                 email.selectedListingId = '';
                 const picker = this.template.querySelector(`lightning-record-picker[data-id="${emailId}"]`);
@@ -1076,6 +1164,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             if (email.id == emailId) {
                 email.template = selectedTemplate.value;
                 email.subject = selectedTemplate.subject;
+                email.templateType = this.templateType == 'EmailTemplate' ? 'EmailTemplate' : 'EstateXpertTemplate';
                 console.log(email.selectedListingId);
                 email.selectedListingId = '';
                 email.isListingSelectionDisabled  = selectedTemplate.objectApiName == 'MVEX__Listing__c' ? false : true;
@@ -1134,7 +1223,6 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
 
         
     }
-
     
 
     /*
@@ -1166,8 +1254,6 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
 
 
     openMemberModal(){
-        console.log('openMemberModal');
-        console.log('this.campaignId ==> ' , this.campaignId);
         var compDefinition = {
             componentDef: "MVEX:campaignMembersTable",
             attributes: {
@@ -1277,11 +1363,11 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     
                 return;
             }
-            else{
-                if (inputElement) {
-                    inputElement.setCustomValidity("");
-                }           
-            }
+
+            if (inputElement) {
+                inputElement.setCustomValidity("");
+            } 
+
             this.emails = this.emails.map(email => {
                 if (email.id == emailId) {
                     email.timeToSend = newTimeToSend;
@@ -1419,18 +1505,21 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             this.isLoading = false;
             return;
         }
-        
 
-        if (this.navigationStateString.messagingService === 'outlook' && (this.selectedPrimaryRecipients.length + this.selectedBCCRecipients.length + this.selectedCCRecipients.length) > 20){
+        // Calculate total recipients
+        const estimatedTotalPrimary = this.selectedPrimaryRecipients.length + this.estimatedContactsFromGroups;
+        const totalRecipients = estimatedTotalPrimary + this.selectedBCCRecipients.length + this.selectedCCRecipients.length;
+        
+        if (this.navigationStateString.messagingService === 'outlook' && totalRecipients > 20){
             this.showToast('Error', 'In Outlook there is a limit of 20 recipients. Please select a smaller group of recipients or use another messaging service.', 'error');
             this.isLoading = false;
             return;
-        } else if(this.navigationStateString.messagingService === 'gmail' && (this.selectedPrimaryRecipients.length + this.selectedBCCRecipients.length + this.selectedCCRecipients.length) > 100){
+        } else if(this.navigationStateString.messagingService === 'gmail' && totalRecipients > 100){
             this.showToast('Error', 'In Gmail there is a limit of 100 recipients. Please select a smaller group of recipients or use another messaging service.', 'error');
             this.isLoading = false;
             return;
         }
-        else if((this.selectedPrimaryRecipients.length + this.selectedBCCRecipients.length + this.selectedCCRecipients.length) > 100){
+        else if(totalRecipients > 100){
             this.showToast('Error', 'In Salesforce there is a limit of 100 recipients. Please select a smaller group of recipients or use another messaging service.', 'error');
             this.isLoading = false;
             return;
@@ -1453,7 +1542,9 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 emails: emailsWithTemplate,
                 specificDate : this.specificDate,
                 selectedContactDateField : this.selectedContactDateField,
-                deletedEmailList : this.deletedEmailList
+                deletedEmailList : this.deletedEmailList,
+                // Include selected broadcast groups
+                selectedBroadcastGroups: this.selectedBroadcastGroups
             };
 
             console.log('campaignEmailData ==> ' , JSON.stringify(campaignEmailData));
@@ -1576,7 +1667,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
  */
     validateInputs() {
         console.log('Validating inputs');
-        const hasRecipients = this.selectedPrimaryRecipients.length > 0;
+        // Check if individual recipients OR groups are selected
+        const hasRecipients = this.selectedPrimaryRecipients.length > 0 || this.selectedBroadcastGroups.length > 0;
         const isDateSelected = this.specificDate || this.selectedContactDateField;
         const emails = this.emailsWithTemplate.filter(email => !email.disabled);
         const areEmailsValid = emails.every(email =>

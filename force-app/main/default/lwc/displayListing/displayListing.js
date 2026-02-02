@@ -70,6 +70,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track divElement;
 
     @track listingColumns = [];
+    @track isConfigOpen = false;
     @track defaultColumns = [
         { label: 'Image', fieldName: 'media_url', type: 'image' },
         { label: 'Name', fieldName: 'name', type: 'text' },
@@ -1496,5 +1497,14 @@ get tableColumns() {
     */
     disconnectedCallback() {
         window?.globalThis?.removeEventListener('click', this.handleClickOutside);
+    }
+
+    openConfigureSettings(){
+        this.isConfigOpen = true;
+    }
+
+    handleCloseModal() {
+        this.isConfigOpen = false;
+        this.fetchListingConfiguration();
     }
 }

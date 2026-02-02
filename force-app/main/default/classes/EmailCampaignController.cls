@@ -448,33 +448,33 @@ public with sharing class EmailCampaignController {
                 ));
             }
             
-            // Add CC recipients to campaign members
-            for (String ccRecipient : selectedCCRecipients) {
-                // Extract ID from "id:email" format if needed
-                String recipientId = ccRecipient;
-                if (ccRecipient.contains(':')) {
-                    recipientId = ccRecipient.split(':')[0];
-                }
-                marketingCampaignMembers.add(new Marketing_Campaign_Member__c(
-                    Marketing_Campaign__c = campaign.Id,
-                    RecipientId__c = recipientId,
-                    Contact_Type__c = 'CC'
-                ));
-            }
+            // // Add CC recipients to campaign members
+            // for (String ccRecipient : selectedCCRecipients) {
+            //     // Extract ID from "id:email" format if needed
+            //     String recipientId = ccRecipient;
+            //     if (ccRecipient.contains(':')) {
+            //         recipientId = ccRecipient.split(':')[0];
+            //     }
+            //     marketingCampaignMembers.add(new Marketing_Campaign_Member__c(
+            //         Marketing_Campaign__c = campaign.Id,
+            //         RecipientId__c = recipientId,
+            //         Contact_Type__c = 'CC'
+            //     ));
+            // }
             
-            // Add BCC recipients to campaign members
-            for (String bccRecipient : selectedBCCRecipients) {
-                // Extract ID from "id:email" format if needed
-                String recipientId = bccRecipient;
-                if (bccRecipient.contains(':')) {
-                    recipientId = bccRecipient.split(':')[0];
-                }
-                marketingCampaignMembers.add(new Marketing_Campaign_Member__c(
-                    Marketing_Campaign__c = campaign.Id,
-                    RecipientId__c = recipientId,
-                    Contact_Type__c = 'BCC'
-                ));
-            }
+            // // Add BCC recipients to campaign members
+            // for (String bccRecipient : selectedBCCRecipients) {
+            //     // Extract ID from "id:email" format if needed
+            //     String recipientId = bccRecipient;
+            //     if (bccRecipient.contains(':')) {
+            //         recipientId = bccRecipient.split(':')[0];
+            //     }
+            //     marketingCampaignMembers.add(new Marketing_Campaign_Member__c(
+            //         Marketing_Campaign__c = campaign.Id,
+            //         RecipientId__c = recipientId,
+            //         Contact_Type__c = 'BCC'
+            //     ));
+            // }
             insert as user marketingCampaignMembers;
             
             // Group Marketing_Email__c by schedule to avoid duplicates for Specific Date
@@ -831,9 +831,10 @@ public with sharing class EmailCampaignController {
             for (Marketing_Campaign_Member__c member : existingMembers) {
                 existingContactIds.add(member.RecipientId__c);
             }
+
             List<Marketing_Campaign_Member__c> membersToDelete = new List<Marketing_Campaign_Member__c>();
             for (Marketing_Campaign_Member__c member : existingMembers) {
-                // This now correctly checks against the merged list of recipients (individuals + group members)
+                // Only keep primary recipients in the member table for reporting
                 if (!selectedPrimaryRecipients.contains(member.RecipientId__c)) {
                     membersToDelete.add(member);
                 }

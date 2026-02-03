@@ -20,13 +20,14 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     @api message;
     @track a_Record_URL
     @track name;
-    @track isLoading = false;
+    @track isLoading = true;
     @track isLoading2 = false;
     @track propertyId;
     @track propertyMediaUrls = [];
     @track firstCheck = true;
     @track backParam = null;
     @track recordTypes = [];
+    debounceTimeout;
 
     @wire(CurrentPageReference)
     currentPageReference;
@@ -52,7 +53,7 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     }
 
     loadRecordTypes() {
-    fetchRecordTypes()
+    fetchRecordTypes({ sObjectApiName: this.objectName })
         .then(result => {
             this.recordTypes = result.map(rt => ({
                 label: rt.DeveloperName,
@@ -231,16 +232,22 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     handleFieldChange(event) {
         const fieldName = event.target.fieldName;
         const fieldValue = event.target.value;
+
         try {
             if (fieldName === 'Name') {
                 this.name = fieldValue;
-            }
-            if (this.name !== '') {
-                if (fieldName === 'Name') {
-                    this.fetchList();
+
+                //  Clear previous debounce
+                window.clearTimeout(this.debounceTimeout);
+
+                if (this.name && this.name.trim() !== '') {
+                    // ✅ Debounce API call
+                    this.debounceTimeout = window.setTimeout(() => {
+                        this.fetchList();
+                    }, 500); // 300–500ms is ideal
+                } else {
+                    this.mylist = [];
                 }
-            } else {
-                this.mylist = [];
             }
         } catch (error) {
             this.showToast('Fields Change', error, 'error');

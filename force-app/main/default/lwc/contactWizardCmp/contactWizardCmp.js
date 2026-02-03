@@ -1,5 +1,6 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import getListOfFieldsForObjects from '@salesforce/apex/FieldSetController.getListOfFieldsForObjects';
+import fetchRecordTypes from '@salesforce/apex/FieldSetController.fetchRecordTypes';
+import getContactFieldsByRecordType from '@salesforce/apex/FieldSetController.getContactFieldsByRecordType';
 import fetchContacts from '@salesforce/apex/FieldSetController.fetchContacts';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
@@ -31,6 +32,9 @@ export default class ContactWizardCmp extends NavigationMixin(LightningElement){
     isLoading2 = false;
     isHandlingFieldChange = false;
     @track backParam = null;
+    @track recordTypes = [];
+    @track recordTypeId = null;
+    duplicateDebounce;
 
     @wire(CurrentPageReference)
     currentPageReference;
@@ -49,27 +53,72 @@ export default class ContactWizardCmp extends NavigationMixin(LightningElement){
         if (this.currentPageReference && this.currentPageReference.state) {
             this.backParam = this.currentPageReference.state.c__customParam;
         }
-        this.loadFormData();
+        this.loadRecordTypes();
         this.a_Record_URL = window?.globalThis?.location?.origin;
     }
 
-    loadFormData() {
-        this.isLoading = true;
-        getListOfFieldsForObjects({ objectApiName: this.objectName })
+    loadRecordTypes() {
+        fetchRecordTypes({sObjectApiName : this.objectName})
             .then(result => {
-                if (result != null) {
-                    this.fields = result;
-                    this.error = undefined;
-                }  
+                this.recordTypes = result.map(rt => ({
+                    label: rt.DeveloperName,
+                    value: rt.Id
+                }));
+
+                // Default to first record type if available
+                if (result && result.length > 0) {
+                    this.recordTypeId = result[0].Id;
+                    this.loadFieldsByRecordType();
+                }
+            })
+            .catch(error => {
+                errorDebugger(
+                    'ContactWizardCmp',
+                    'loadRecordTypes',
+                    error,
+                    'warn',
+                    'Error in loadRecordTypes'
+                );
+                this.isLoading = false;
+            });
+    }
+
+    handleRecordTypeChange(event) {
+        this.recordTypeId = event.detail.value;
+        this.mylist = [];
+        this.loadFieldsByRecordType();
+    }
+
+    loadFieldsByRecordType() {
+        if (!this.recordTypeId) {
+            return;
+        }
+
+        this.isLoading = true;
+
+        getContactFieldsByRecordType({ recordTypeId: this.recordTypeId })
+            .then(result => {
+                if (result) {
+                    console.log('loadFieldsByRecordType', result);
+
+                    // normalize for UI
+                    this.fields = result.map(field => ({
+                        ...field,
+                        value: null
+                    }));
+                    console.log('loadFieldsByRecordType', this.fields);
+                }
                 this.isLoading = false;
             })
             .catch(error => {
+                errorDebugger(
+                    'ContactWizardCmp',
+                    'loadFieldsByRecordType',
+                    error,
+                    'warn',
+                    'Error loading fields by record type'
+                );
                 this.isLoading = false;
-                this.error = error;
-                errorDebugger('ContactWizardCmp', 'loadFormData:getListOfFieldsForObjects', error, 'warn', 'Error in Fetching Fields');
-            })
-            .finally(() => {
-                this.isLoading = false; 
             });
     }
 
@@ -79,6 +128,7 @@ export default class ContactWizardCmp extends NavigationMixin(LightningElement){
         inputFields.forEach(field => {
             fieldsData[field.fieldName] = field.value;
         });
+        fieldsData['RecordTypeId'] = this.recordTypeId;
         if (this.validateFields()) {
             this.template.querySelector('lightning-record-edit-form').submit(fieldsData);
         }
@@ -136,36 +186,52 @@ export default class ContactWizardCmp extends NavigationMixin(LightningElement){
         this.showToast('An error occurred while saving the record.', msg, 'error');
     }
 
-    handleFieldChange(event) {   
-        const fieldName = event.target.fieldName;
-        const fieldValue = event.target.value;
-        try {
-            if (fieldName === 'FirstName') {
-                this.firstname = fieldValue;
-            } else if (fieldName === 'LastName') {
-                this.lastname = fieldValue;
-            }
-            if (this.firstname !== '' ||this.lastname !== '' ) {
-                if (fieldName === 'FirstName' || fieldName === 'LastName') {
-                    this.fetchList();
-                }
-            }else{
-                this.mylist = [];
-            }
-        } catch (error) {
-            this.showToast('Fields Change', error, 'error');
-        } finally {
-            this.isHandlingFieldChange = false;
+    handleFieldChange(event) {
+    const fieldName = event.target.fieldName;
+    const fieldValue = event.target.value;
+
+    try {
+        // Store values
+        if (fieldName === 'FirstName') {
+            this.firstname = fieldValue;
+        } else if (fieldName === 'LastName') {
+            this.lastname = fieldValue;
+        } else if (fieldName === 'Email') {
+            this.email = fieldValue;
+        } else if (fieldName === 'Phone') {
+            this.phone = fieldValue;
         }
+
+        // Clear previous debounce
+        window.clearTimeout(this.duplicateDebounce);
+
+        // Check if we have enough data to search
+        const shouldSearch =
+            this.firstname || this.lastname ||
+            this.email ||
+            this.phone;
+
+        if (shouldSearch) {
+            this.duplicateDebounce = window.setTimeout(() => {
+                this.fetchList();
+            }, 500); // debounce delay
+        } else {
+            this.mylist = [];
+        }
+    } catch (error) {
+        this.showToast('Fields Change', error.message || error, 'error');
     }
+}
     
     fetchList() {
         try {
             let listObj = { 'sobjectType': 'Contact' };
             this.isLoading2 = true;
-            if (this.firstname !== '' ||this.lastname !== '') {
+            if (this.firstname !== '' ||this.lastname !== '' || this.email !== '' || this.phone !== '') {
                 listObj.FirstName = this.firstname;
                 listObj.LastName = this.lastname;
+                listObj.Email = this.email;
+                listObj.Phone = this.phone;
                 let soqlquery = 'Id,'+this.tableFields.map(field => field.fieldName).join(',');
                 fetchContacts({ listin: listObj,soqlquery: soqlquery })
                     .then(result => {

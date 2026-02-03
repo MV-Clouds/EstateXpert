@@ -13,7 +13,7 @@
                 }
                 .main-control-center-div {
                     height: 100%;
-                    background-image: url('/resource/newImageandMediaBg');
+                    background-image: url('/resource/MVEX__newImageandMediaBg');
                     background-size: cover;
                     background-repeat: no-repeat;
                     display: flex;

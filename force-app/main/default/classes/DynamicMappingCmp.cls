@@ -88,7 +88,7 @@ public with sharing class DynamicMappingCmp {
             }
 
             Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = 'MVEX__Dynamicmapping__mdt.'+ devName;
+            mdata.fullName = 'MVEX__Dynamicmapping__mdt.MVEX__'+ devName;
             mdata.label = masterLabel;
             
             Metadata.CustomMetadataValue instance = new Metadata.CustomMetadataValue();

@@ -357,7 +357,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         
                 this.listingData.forEach((listing)=>{
                     const prop_id = listing.MVEX__Property__c;
-                    listing.media_url = this.propertyMediaUrls[prop_id] ? this.propertyMediaUrls[prop_id] : '/resource/blankImage';
+                    listing.media_url = this.propertyMediaUrls[prop_id] ? this.propertyMediaUrls[prop_id] : '/resource/MVEX__blankImage';
                     listing.isChecked = false;
                     listing.isActive = listing.MVEX__Status__c === 'Active' ? true : false;
                 })

@@ -90,7 +90,7 @@ public with sharing class MapFieldCmp {
             }
 
             Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = 'MVEX__Mapping_Metadata__mdt.' + devName;
+            mdata.fullName = 'MVEX__Mapping_Metadata__mdt.MVEX__' + devName;
             mdata.label = masterLabel;
             
             Metadata.CustomMetadataValue instance = new Metadata.CustomMetadataValue();

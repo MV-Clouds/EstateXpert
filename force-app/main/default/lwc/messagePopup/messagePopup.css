@@ -61,7 +61,7 @@
   background-size: cover;
   background-position: center;
   background-color: aliceblue;
-  background-image: url('/resource/newImageandMediaBg');
+  background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .topDesingSection {
@@ -388,7 +388,7 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-image: url('/resource/newImageandMediaBg/');
+  background-image: url('/resource/MVEX__newImageandMediaBg/');
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }

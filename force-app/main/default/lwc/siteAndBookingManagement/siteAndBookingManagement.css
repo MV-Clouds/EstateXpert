@@ -13,7 +13,7 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-position: unset;
-    background-image: url('/resource/newImageandMediaBg');
+    background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .component-header {
@@ -253,7 +253,7 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-position: unset;
-    background-image: url('/resource/newImageandMediaBg');
+    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-radius: 0px 0px 8px 8px;
     min-height: 75vh;
     overflow: auto; /* Changed to auto for the modal body */

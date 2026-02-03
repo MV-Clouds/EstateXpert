@@ -29,10 +29,23 @@
                             <div class="slds-grid slds-gutters div-cover">
                                 <div class="custom-grid1" >
                                         <div class="fields-cover">
+                                            <div class="record-type-div">
+                                                <lightning-combobox
+                                                    label="Record Type"
+                                                    options={recordTypes}
+                                                    value={recordTypeId}
+                                                    onchange={handleRecordTypeChange}
+                                                    required>
+                                                </lightning-combobox>
+                                            </div>
                                             <template if:true={fields}>
                                                 <template for:each={fields} for:item="f">
-                                                   <div key={f.Id} class="form-fields">
-                                                    <lightning-input-field field-name={f.APIName} required={f.Required} onchange={handleFieldChange}>
+                                                   <div key={f.APIName} class="form-fields">
+                                                    <lightning-input-field 
+                                                        field-name={f.APIName}
+                                                        value={f.value}
+                                                        required={f.Required}
+                                                        onchange={handleFieldChange}>
                                                     </lightning-input-field>
                                                     </div>
                                                 </template>

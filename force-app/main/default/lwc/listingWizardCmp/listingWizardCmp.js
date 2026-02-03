@@ -1,5 +1,4 @@
 import { LightningElement, api, wire, track } from 'lwc';
-import getListOfFieldsForObjects from '@salesforce/apex/FieldSetController.getListOfFieldsForObjects';
 import fetchRecordTypes from '@salesforce/apex/FieldSetController.fetchRecordTypes';
 import fetchListings from '@salesforce/apex/FieldSetController.fetchListings';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -9,6 +8,8 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import customcss from '@salesforce/resourceUrl/newListingCss';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
+import getListingFieldsByRecordType
+    from '@salesforce/apex/FieldSetController.getListingFieldsByRecordType';
 
 export default class ListingWizardCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'MVEX__Listing__c';
@@ -19,19 +20,19 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     @api message;
     @track a_Record_URL
     @track name;
-    @track isLoading = true;
+    @track isLoading = false;
     @track isLoading2 = false;
     @track propertyId;
     @track propertyMediaUrls = [];
     @track firstCheck = true;
     @track backParam = null;
     @track recordTypes = [];
-    
+
     @wire(CurrentPageReference)
     currentPageReference;
 
-    get foundDupli(){
-        if (this.mylist.length < 1 ) {
+    get foundDupli() {
+        if (this.mylist.length < 1) {
             return false;
         } else {
             return true;
@@ -46,53 +47,77 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
         if (this.currentPageReference && this.currentPageReference.state) {
             this.backParam = this.currentPageReference.state.c__customParam;
         }
-        this.loadFormData();
         this.loadRecordTypes();
         this.a_Record_URL = window?.globalThis?.location?.origin;
     }
 
     loadRecordTypes() {
-        fetchRecordTypes()
-            .then(result => {
-                this.recordTypes = result.map(rt => ({
-                    label: rt.DeveloperName,
-                    value: rt.Id
-                }));
-            })
-            .catch(error => {
-                errorDebugger('ListingWizardCmp', 'loadRecordTypes', error, 'warn', 'Error in loadRecordTypes');
-            });
-    }
+    fetchRecordTypes()
+        .then(result => {
+            this.recordTypes = result.map(rt => ({
+                label: rt.DeveloperName,
+                value: rt.Id
+            }));
+
+            // ✅ Default to Sale
+            const saleRT = result.find(rt => rt.DeveloperName === 'Sale');
+
+            if (saleRT) {
+                this.recordTypeId = saleRT.Id;
+                this.loadFieldsByRecordType();
+            }
+        })
+        .catch(error => {
+            errorDebugger(
+                'ListingWizardCmp',
+                'loadRecordTypes',
+                error,
+                'warn',
+                'Error in loadRecordTypes'
+            );
+        });
+}
 
     handleRecordTypeChange(event) {
         this.recordTypeId = event.detail.value;
+        this.mylist = [];
+        this.loadFieldsByRecordType();
     }
 
-    /**
-    * Method Name: loadFormData
-    * @description: Fetch fields data.
-    * Date: 15/09/2024
-    * Created By: Vyom Soni
-    */
-    loadFormData() {
-        this.isLoading = true; 
-        getListOfFieldsForObjects({ objectApiName: this.objectName })
+    loadFieldsByRecordType() {
+        if (!this.recordTypeId) {
+            return;
+        }
+
+        this.isLoading = true;
+
+        getListingFieldsByRecordType({ recordTypeId: this.recordTypeId })
             .then(result => {
-                if (result != null) {
-                    this.fields = result;
-                    this.error = undefined;
-                    this.isLoading = false; 
+                if (result) {
+                    console.log('loadFieldsByRecordType', result);
+
+                    // normalize for UI
+                    this.fields = result.map(field => ({
+                        ...field,
+                        value: null
+                    }));
+                    console.log('loadFieldsByRecordType', this.fields);
+
                 }
+                this.isLoading = false;
             })
             .catch(error => {
-                errorDebugger('ListingWizardCmp', 'loadFormData', error, 'warn', 'Error in loadFormData');
-                this.error = error;
-                this.isLoading = false; 
-            })
-            .finally(() => {
-                this.isLoading = false; 
+                errorDebugger(
+                    'ListingWizardCmp',
+                    'loadFieldsByRecordType',
+                    error,
+                    'warn',
+                    'Error loading fields by record type'
+                );
+                this.isLoading = false;
             });
     }
+
 
     /**
     * Method Name: handleButtonClick
@@ -103,14 +128,14 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     handleButtonClick() {
         const inputFields = this.template.querySelectorAll('lightning-input-field');
         let fieldsData = {};
-    
+
         inputFields.forEach(field => {
             fieldsData[field.fieldName] = field.value;
         });
-    
-        fieldsData['MVEX__Property__c'] = this.propertyId; 
+
+        fieldsData['MVEX__Property__c'] = this.propertyId;
         fieldsData['RecordTypeId'] = this.recordTypeId;
-    
+
         if (this.validateFields()) {
             this.template.querySelector('lightning-record-edit-form').submit(fieldsData);
         }
@@ -123,11 +148,11 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     * Created By: Vyom Soni
     */
     clearForm() {
-        if(this.backParam == 'ListingManager'){
+        if (this.backParam == 'ListingManager') {
             let componentDef = {
                 componentDef: "MVEX:listingManager",
             };
-            
+
             let encodedComponentDef = btoa(JSON.stringify(componentDef));
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -135,14 +160,14 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
                     url: '/one/one.app#' + encodedComponentDef
                 }
             });
-        }else{
+        } else {
             this[NavigationMixin.Navigate]({
-            type: 'standard__objectPage',
-            attributes: {
-                objectApiName: 'MVEX__Listing__c',
-                actionName: 'home'
-            }
-        });
+                type: 'standard__objectPage',
+                attributes: {
+                    objectApiName: 'MVEX__Listing__c',
+                    actionName: 'home'
+                }
+            });
         }
     }
 
@@ -155,7 +180,7 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     validateFields() {
         const inputFields = [...this.template.querySelectorAll("lightning-input-field")];
         const comboboxes = [...this.template.querySelectorAll("lightning-combobox")];
-        
+
         const inputFieldsValid = inputFields.reduce((validSoFar, field) => {
             return (validSoFar && field.reportValidity());
         }, true);
@@ -214,14 +239,14 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
                 if (fieldName === 'Name') {
                     this.fetchList();
                 }
-            }else{
+            } else {
                 this.mylist = [];
             }
         } catch (error) {
             this.showToast('Fields Change', error, 'error');
         }
     }
-    
+
     /**
     * Method Name: fetchList
     * @description: Fetch list.
@@ -238,12 +263,12 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
                     .then(result => {
 
                         this.mylist = [];
-                        if(result != null){
+                        if (result != null) {
                             this.propertyMediaUrls = result.medias;
-                            if (Object.keys(result.records).length > 0 ) {
+                            if (Object.keys(result.records).length > 0) {
                                 this.mylist = [];
                                 for (let key in result.records) {
-                                    if(key.split('::')[0] != ''){
+                                    if (key.split('::')[0] != '') {
                                         const propertyData = JSON.parse(key.split('::')[3]);
                                         delete propertyData.attributes;
                                         delete propertyData.MVEX__Listings__r;
@@ -252,7 +277,7 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
                                             key: key.split('::')[0],
                                             name: key.split('::')[1],
                                             address: key.split('::')[2],
-                                            property:propertyData
+                                            property: propertyData
                                         });
                                     }
                                 }
@@ -261,16 +286,16 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
                                     const propId = listing.key;
                                     listing.media_url = this.propertyMediaUrls[propId] ? this.propertyMediaUrls[propId] : '/resource/MVEX__blankImage';
                                 });
+                            }
+                        } else {
+                            this.mylist = [];
+                            this.isLoading2 = false;
                         }
-                    }else{
-                        this.mylist = [];
-                        this.isLoading2 = false;
-                    }
                     })
                     .catch(error => {
                         errorDebugger('ListingWizardCmp', 'fetchList', error, 'warn', 'Error in fetchList');
                     });
-            } else{
+            } else {
                 this.isLoading2 = false;
                 this.mylist = [];
             }
@@ -314,7 +339,7 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
             this.firstCheck = false;
             this.propertyId = event.target.value;
             const item = this.getPropertyById(this.propertyId);
-            
+
             // Clear all field values first
             this.fields = this.fields.map(field => {
                 return { ...field, value: null };
@@ -343,10 +368,10 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
     * Date: 15/09/2024
     * Created By: Vyom Soni
     */
-    firstRadio(){
+    firstRadio() {
         this.mylist = this.mylist.map(item => {
-                return { ...item, ischecked: false };
-            });
+            return { ...item, ischecked: false };
+        });
         this.fields = this.fields.map(field => {
             return { ...field, value: null };
         });
@@ -365,7 +390,7 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
             this.id2 = event.currentTarget.id;
             this.id2 = this.id2.split('-')[0];
             const cols = this.template.querySelectorAll('[data-id="' + this.id2 + '"]');
-            
+
             cols.forEach(e => {
                 e.classList.toggle('showH');
             })
@@ -374,7 +399,7 @@ export default class ListingWizardCmp extends NavigationMixin(LightningElement) 
             this.showToast('Handle the listing accordian', error, 'error');
         }
     }
-    
+
     /**
     * Method Name: linkOpener
     * @description: Link opener.

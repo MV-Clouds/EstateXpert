@@ -21,49 +21,6 @@ public with sharing class FieldSetController {
         }
     }
 
-    /**
-     * Method Name : getListOfFieldsForObjects
-     * @description : Fetches a list of fields for a given object API name from New_Record_Fields__mdt metadata type.
-     * @param objectApiName String value representing the object API name.
-     * @return List of Map<String, Object> containing field details.
-    */
-    
-    @AuraEnabled
-    public static List<Map<String, Object>> getListOfFieldsForObjects(String objectApiName){
-        try {
-            List<New_Record_Fields__mdt> metaList = [SELECT Field_Data__c FROM New_Record_Fields__mdt WHERE Object_API_Name__c = :objectApiName WITH USER_MODE ORDER BY SystemModstamp LIMIT 1];
-
-            List<Map<String, Object>> transformedData = new List<Map<String, Object>>();
-
-            if (!metaList.isEmpty()) {
-                String jsonFieldData = metaList[0].Field_Data__c;
-
-                List<Object> fieldDataList = (List<Object>) JSON.deserializeUntyped(jsonFieldData);
-
-                for (Object fieldObj : fieldDataList) {
-                    Map<String, Object> field = (Map<String, Object>) fieldObj;
-
-                    Map<String, Object> newItem = new Map<String, Object>();
-
-                    newItem.put('APIName', field.get('value'));
-                    newItem.put('IsRequired', false);
-                    newItem.put('Label', field.get('label'));
-                    newItem.put('Required', field.get('isRequired'));
-                    newItem.put('Type', field.get('fieldType'));
-
-                    transformedData.add(newItem);
-                }
-
-                return transformedData;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'FieldSetController', 'getListOfFieldsForObjects', 'Error while getting list of fields for objects.');
-            throw new AuraHandledException(e.getMessage());
-        }
-    }
-
     public class FilterWrapper {
         @AuraEnabled
         public Map<String,List<Listing__c>> records  { get; set; }
@@ -260,4 +217,78 @@ public with sharing class FieldSetController {
             return null;
         }
     }
+
+    @AuraEnabled
+    public static List<Map<String, Object>> getListingFieldsByRecordType(Id recordTypeId) {
+        try {
+            RecordType rt = [
+                SELECT DeveloperName
+                FROM RecordType
+                WHERE Id = :recordTypeId
+                AND SObjectType = 'MVEX__Listing__c'
+                WITH USER_MODE
+                LIMIT 1
+            ];
+
+            String fieldSetName;
+            if (rt.DeveloperName == 'Sale') {
+                fieldSetName = 'MVEX__ListingManagerFieldSet';
+            } else if (rt.DeveloperName == 'Rent') {
+                fieldSetName = 'MVEX__RentListingManager';
+            } else {
+                throw new AuraHandledException('Unsupported record type');
+            }
+
+            // Object describe
+            Schema.DescribeSObjectResult objDescribe =
+                MVEX__Listing__c.SObjectType.getDescribe();
+
+            // Field sets
+            Schema.FieldSet fs =
+                objDescribe.fieldSets.getMap().get(fieldSetName);
+
+            if (fs == null) {
+                throw new AuraHandledException('Field set not found: ' + fieldSetName);
+            }
+
+            // Field map (IMPORTANT)
+            Map<String, Schema.SObjectField> fieldMap =
+                objDescribe.fields.getMap();
+
+            List<Map<String, Object>> result = new List<Map<String, Object>>();
+
+            for (Schema.FieldSetMember fsm : fs.getFields()) {
+
+                Schema.SObjectField fieldRef =
+                    fieldMap.get(fsm.getFieldPath());
+
+                if (fieldRef == null) {
+                    continue; // safety
+                }
+
+                Schema.DescribeFieldResult dfr =
+                    fieldRef.getDescribe();
+
+                Map<String, Object> fieldInfo = new Map<String, Object>();
+                fieldInfo.put('APIName', fsm.getFieldPath());
+                fieldInfo.put('Label', fsm.getLabel());
+                fieldInfo.put('Type', String.valueOf(dfr.getType()));
+            fieldInfo.put('Required', fsm.getRequired());
+
+                result.add(fieldInfo);
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(
+                e,
+                'FieldSetController',
+                'getListingFieldsByRecordType',
+                'Error while getting listing fields by record type.'
+            );
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
 }

@@ -58,7 +58,7 @@ public with sharing class GoogleLeadFieldMappingController {
             String devName = integrationType == 'Meta' ? 'FieldMappings' : 'GoogleLeadMapping';
             String masterLabel = integrationType == 'Meta' ? 'FieldMappings' : 'Google Lead Mapping';
             String metadataType = integrationType == 'Meta' ? 'MVEX__MetaLeadFieldMapping__mdt' : 'MVEX__GoogleLeadFieldMapping__mdt';
-            String fieldName = integrationType == 'Meta' ? 'MVEX__FieldMappingJson__c' : 'MVEX__Field_Mappings__c';
+            String fieldName = integrationType == 'Meta' ? 'MVEX__New_Field_Mapping__c' : 'MVEX__Field_Mappings__c';
 
             Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
             mdata.fullName = metadataType + '.' + devName;
@@ -89,7 +89,7 @@ public with sharing class GoogleLeadFieldMappingController {
     public static String getMetadata(String integrationType) {
         try {
             String metadataType = integrationType == 'Meta' ? 'MVEX__MetaLeadFieldMapping__mdt' : 'MVEX__GoogleLeadFieldMapping__mdt';
-            String fieldName = integrationType == 'Meta' ? 'MVEX__FieldMappingJson__c' : 'MVEX__Field_Mappings__c';
+            String fieldName = integrationType == 'Meta' ? 'MVEX__New_Field_Mapping__c' : 'MVEX__Field_Mappings__c';
             String query = 'SELECT ' + fieldName + ' FROM ' + metadataType + ' ORDER BY SystemModstamp DESC LIMIT 1';
             List<SObject> metadataRecords = Database.query(String.escapeSingleQuotes(query), AccessLevel.USER_MODE);
             
@@ -112,7 +112,7 @@ public with sharing class GoogleLeadFieldMappingController {
     @AuraEnabled
     public static String getSocialMediaFieldsJson(String integrationType) {
         try {
-            String fieldName = integrationType == 'Meta' ? 'MVEX__Meta_Ads_Fields__c' : 'MVEX__Google_Ads_Fields__c';
+            String fieldName = integrationType == 'Meta' ? 'MVEX__New_Meta_Fields__c' : 'MVEX__Google_Ads_Fields__c';
             String query = 'SELECT ' + fieldName + ' FROM MVEX__Form_Fields__mdt LIMIT 1';
             List<SObject> configRecords = Database.query(String.escapeSingleQuotes(query), AccessLevel.USER_MODE);
             
@@ -138,10 +138,10 @@ public with sharing class GoogleLeadFieldMappingController {
         try {
             String devName = 'Default_Configuration';
             String masterLabel = 'Default_Configuration';
-            String fieldName = integrationType == 'Meta' ? 'MVEX__Meta_Ads_Fields__c' : 'MVEX__Google_Ads_Fields__c';
+            String fieldName = integrationType == 'Meta' ? 'MVEX__New_Meta_Fields__c' : 'MVEX__Google_Ads_Fields__c';
 
             Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = 'MVEX__Form_Fields__mdt.' + devName;
+            mdata.fullName = 'MVEX__Form_Fields__mdt.MVEX__' + devName;
             mdata.label = masterLabel;
             
             Metadata.CustomMetadataValue instance = new Metadata.CustomMetadataValue();

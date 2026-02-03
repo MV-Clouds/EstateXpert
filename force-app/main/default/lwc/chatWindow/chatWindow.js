@@ -61,7 +61,7 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
     @track recordName;
     @track replyBorderColors = ['#34B7F1', '#FF9500', '#B38F00', '#ffa5c0', '#ff918b'];
     @track subscription = {};
-    @track channelName = '/event/Chat_Message__e';
+    @track channelName = '/event/MVEX__Chat_Message__e';
     pageNumber = 1;
     pageSize = 50;
     isLoading = false;
@@ -819,7 +819,7 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
 
     handleImageError(event) {
         try {
-            event.currentTarget.src = "/resource/Alt_Image";
+            event.currentTarget.src = "/resource/MVEX__Alt_Image";
             event.currentTarget.parentNode.classList.add('not-loaded-image');
         } catch (e) {
             console.error('Error in function handleImageError:::', e.message);

@@ -38,7 +38,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     @track editTemplateId='';
     @track subscription = null;
     showFilters = false;
-    channelName = '/event/Template_Update__e';
+    channelName = '/event/MVEX__Template_Update__e';
 
     get actionButtonClass(){
         return 'custom-button cus-btns' ;

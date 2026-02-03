@@ -11,8 +11,8 @@ import saveTemplateApex from '@salesforce/apex/TemplateBuilderController.saveTem
 import saveTempDataRecordsInBatch from '@salesforce/apex/TemplateBuilderController.saveTempDataRecordsInBatch';
 import { initializeSummerNote } from './editorConf.js';
 import { navigationComps, nameSpace, pageFormats, unitMultiplier, unitConverter, errorDebugger } from 'c/globalProperties';
-import generateTemplate from '@salesforce/apex/GeminiTemplateGenerator.generateTemplate';
-import editTemplateWithGemini from '@salesforce/apex/GeminiTemplateGenerator.editTemplateWithGemini';
+// import generateTemplate from '@salesforce/apex/GeminiTemplateGenerator.generateTemplate';
+// import editTemplateWithGemini from '@salesforce/apex/GeminiTemplateGenerator.editTemplateWithGemini';
 
 export default class TemplateEditor extends NavigationMixin(LightningElement) {
 
@@ -1494,46 +1494,46 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
         this.aiPrompt = event.target.value;
     }
 
-    async generateWithGemini() {
-        if (!this.aiPrompt.trim()) {
-            this.showToast('Error', 'Please enter a prompt', 'error');
-            return;
-        }
+    // async generateWithGemini() {
+    //     if (!this.aiPrompt.trim()) {
+    //         this.showToast('Error', 'Please enter a prompt', 'error');
+    //         return;
+    //     }
 
-        this.isGenerating = true;
-        try {
-            const result = await generateTemplate({
-                prompt           : this.aiPrompt,
-                objectApiName    : this.objectName,
-                objectFieldKeys  : this.objectFieldKeys,
-                generalFieldKeys : this.generalFieldKeys,
-                signatureKey     : this.signatureKey,
-                isForEmail: this.isForEmail
-            });
+    //     this.isGenerating = true;
+    //     try {
+    //         const result = await generateTemplate({
+    //             prompt           : this.aiPrompt,
+    //             objectApiName    : this.objectName,
+    //             objectFieldKeys  : this.objectFieldKeys,
+    //             generalFieldKeys : this.generalFieldKeys,
+    //             signatureKey     : this.signatureKey,
+    //             isForEmail: this.isForEmail
+    //         });
 
-            // Insert into editors
-            if (result.header) {
-                $(this.headerEditor).summernote('code', result.header);
-            }
-            if (result.body) {
-                $(this.contentEditor).summernote('code', result.body);
-            }
-            if (result.footer) {
-                $(this.footerEditor).summernote('code', result.footer);
-            }
+    //         // Insert into editors
+    //         if (result.header) {
+    //             $(this.headerEditor).summernote('code', result.header);
+    //         }
+    //         if (result.body) {
+    //             $(this.contentEditor).summernote('code', result.body);
+    //         }
+    //         if (result.footer) {
+    //             $(this.footerEditor).summernote('code', result.footer);
+    //         }
 
-            this.showToast('Success', 'AI template generated and inserted!', 'success');
+    //         this.showToast('Success', 'AI template generated and inserted!', 'success');
 
-            // Switch to content tab to show result
-            this.currentTab = 'contentTab';
-            this.setActiveTab();
+    //         // Switch to content tab to show result
+    //         this.currentTab = 'contentTab';
+    //         this.setActiveTab();
 
-        } catch (error) {
-            this.showToast('Error', error.body?.message || error.message, 'error');
-        } finally {
-            this.isGenerating = false;
-        }
-    }
+    //     } catch (error) {
+    //         this.showToast('Error', error.body?.message || error.message, 'error');
+    //     } finally {
+    //         this.isGenerating = false;
+    //     }
+    // }
 
     handleMappingKeysReady(event) {
         const { objectFieldKeys, generalFieldKeys, signatureKey } = event.detail;
@@ -1568,7 +1568,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     handleKeyDown(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            this.sendPrompt();
+            // this.sendPrompt();
         }
     }
 
@@ -1610,64 +1610,64 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
         this.aiPrompt = '';
     }
 
-    async sendPrompt() {
-        if (!this.aiPrompt?.trim()) return;
+    // async sendPrompt() {
+    //     if (!this.aiPrompt?.trim()) return;
 
-        const userPrompt = this.aiPrompt.trim();
-        this.aiPrompt = '';
+    //     const userPrompt = this.aiPrompt.trim();
+    //     this.aiPrompt = '';
 
-        // 1. USER MESSAGE (now also a version)
-        this.addUserMessage(userPrompt);
+    //     // 1. USER MESSAGE (now also a version)
+    //     this.addUserMessage(userPrompt);
 
-        // 2. Capture the *before* state (still useful for AI edit mode)
-        const beforeState = this.captureCurrentTemplate();
+    //     // 2. Capture the *before* state (still useful for AI edit mode)
+    //     const beforeState = this.captureCurrentTemplate();
 
-        this.isGenerating = true;
-        try {
-            let result;
-            if (this.isEditMode) {
-                const fullHtml = `${beforeState.header}\n<!-- BODY -->\n${beforeState.body}\n<!-- FOOTER -->\n${beforeState.footer}`;
-                result = await editTemplateWithGemini({
-                    userPrompt,
-                    currentHtml: fullHtml,
-                    objectApiName: this.objectName,
-                    objectFieldKeys: this.objectFieldKeys,
-                    generalFieldKeys: this.generalFieldKeys,
-                    signatureKey: this.signatureKey,
-                    isForEmail: this.isForEmail
-                });
-            } else {
-                result = await generateTemplate({
-                    prompt: userPrompt,
-                    objectApiName: this.objectName,
-                    objectFieldKeys: this.objectFieldKeys,
-                    generalFieldKeys: this.generalFieldKeys,
-                    signatureKey: this.signatureKey,
-                    isForEmail: this.isForEmail
-                });
-            }
+    //     this.isGenerating = true;
+    //     try {
+    //         let result;
+    //         if (this.isEditMode) {
+    //             const fullHtml = `${beforeState.header}\n<!-- BODY -->\n${beforeState.body}\n<!-- FOOTER -->\n${beforeState.footer}`;
+    //             result = await editTemplateWithGemini({
+    //                 userPrompt,
+    //                 currentHtml: fullHtml,
+    //                 objectApiName: this.objectName,
+    //                 objectFieldKeys: this.objectFieldKeys,
+    //                 generalFieldKeys: this.generalFieldKeys,
+    //                 signatureKey: this.signatureKey,
+    //                 isForEmail: this.isForEmail
+    //             });
+    //         } else {
+    //             result = await generateTemplate({
+    //                 prompt: userPrompt,
+    //                 objectApiName: this.objectName,
+    //                 objectFieldKeys: this.objectFieldKeys,
+    //                 generalFieldKeys: this.generalFieldKeys,
+    //                 signatureKey: this.signatureKey,
+    //                 isForEmail: this.isForEmail
+    //             });
+    //         }
 
-            // ---- APPLY AI RESULT -------------------------------------------------
-            if (result.header !== undefined) $(this.headerEditor).summernote('code', result.header);
-            if (result.body   !== undefined) $(this.contentEditor).summernote('code', result.body);
-            if (result.footer !== undefined) $(this.footerEditor).summernote('code', result.footer);
+    //         // ---- APPLY AI RESULT -------------------------------------------------
+    //         if (result.header !== undefined) $(this.headerEditor).summernote('code', result.header);
+    //         if (result.body   !== undefined) $(this.contentEditor).summernote('code', result.body);
+    //         if (result.footer !== undefined) $(this.footerEditor).summernote('code', result.footer);
 
-            // ---- CAPTURE AFTER ---------------------------------------------------
-            const afterState = this.captureCurrentTemplate();
+    //         // ---- CAPTURE AFTER ---------------------------------------------------
+    //         const afterState = this.captureCurrentTemplate();
 
-            // ---- AI VERSION (unchanged) -----------------------------------------
-            this.addAIVersion(userPrompt, afterState);
+    //         // ---- AI VERSION (unchanged) -----------------------------------------
+    //         this.addAIVersion(userPrompt, afterState);
 
-            this.showToast('Success', this.isEditMode ? 'Template updated!' : 'Template generated!', 'success');
-        } catch (err) {
-            this.addUserMessage(`Error: ${err.body?.message || err.message}`);
-            this.showToast('Error', err.body?.message || err.message, 'error');
-        } finally {
-            this.isGenerating = false;
-            this.scrollToBottom();
-            this._renderChatMessages();
-        }
-    }
+    //         this.showToast('Success', this.isEditMode ? 'Template updated!' : 'Template generated!', 'success');
+    //     } catch (err) {
+    //         this.addUserMessage(`Error: ${err.body?.message || err.message}`);
+    //         this.showToast('Error', err.body?.message || err.message, 'error');
+    //     } finally {
+    //         this.isGenerating = false;
+    //         this.scrollToBottom();
+    //         this._renderChatMessages();
+    //     }
+    // }
 
     
 

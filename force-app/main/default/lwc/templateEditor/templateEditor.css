@@ -43,7 +43,7 @@ input[type=number]::-webkit-outer-spin-button {
   width: 100%;
   height: 100%;
   background-color: aliceblue;
-  background: transparent url('/resource/newImageandMediaBg') 0% 0% no-repeat padding-box;
+  background: transparent url('/resource/MVEX__newImageandMediaBg') 0% 0% no-repeat padding-box;
   background-size: 100%;
   display: flex;
   flex-direction: row;
@@ -65,7 +65,7 @@ input[type=number]::-webkit-outer-spin-button {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: unset;
-  background-image: url('/resource/newImageandMediaBg') !important;
+  background-image: url('/resource/MVEX__newImageandMediaBg') !important;
 }
 
 /* ---- TAB SECTION CSS --- START ---- */

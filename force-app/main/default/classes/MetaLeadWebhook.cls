@@ -146,15 +146,15 @@ global without sharing class MetaLeadWebhook {
             
             // Fetch the mapping from custom metadata
             MetaLeadFieldMapping__mdt mappingRecord = [
-                SELECT FieldMappingJson__c
+                SELECT MVEX__New_Field_Mapping__c
                 FROM MetaLeadFieldMapping__mdt
                 LIMIT 1
             ];
             
             // Deserialize the JSON string into a list of mappings
             List<FieldMapping> fieldMappings = new List<FieldMapping>();
-            if (mappingRecord != null && String.isNotBlank(mappingRecord.FieldMappingJson__c)) {
-                fieldMappings = (List<FieldMapping>) JSON.deserialize(mappingRecord.FieldMappingJson__c, List<FieldMapping>.class);
+            if (mappingRecord != null && String.isNotBlank(mappingRecord.MVEX__New_Field_Mapping__c)) {
+                fieldMappings = (List<FieldMapping>) JSON.deserialize(mappingRecord.MVEX__New_Field_Mapping__c, List<FieldMapping>.class);
             }
             
             // Create a map for easier lookup

@@ -87,7 +87,7 @@ private class MetaLeadWebhookTest {
         String mappingJson = JSON.serialize(mappings);
         
         // Mock custom metadata query
-        MetaLeadFieldMapping__mdt mockMetadata = new MetaLeadFieldMapping__mdt(FieldMappingJson__c = mappingJson);
+        MetaLeadFieldMapping__mdt mockMetadata = new MetaLeadFieldMapping__mdt(MVEX__New_Field_Mapping__c = mappingJson);
         
         // Setup RestContext for POST request
         RestRequest req = new RestRequest();

@@ -40,7 +40,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track sortOrder = 'asc';
 
     subscription = {};
-    channelName = '/event/BroadcastUpdateEvent__e';
+    channelName = '/event/MVEX__BroadcastUpdateEvent__e';
 
     get showNoRecordsMessage() {
         return this.filteredData.length === 0;

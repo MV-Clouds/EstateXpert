@@ -58,7 +58,7 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-position: bottom;
-    background-image: url(/resource/MVEX__newImageandMediaBg/);
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
 }
 
 .categoryBlockHeader{

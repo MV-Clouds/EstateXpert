@@ -75,7 +75,7 @@ public without sharing class WhatsappConfigController {
                 mdata.fullName = 'MVEX__WBConnect_Configuration__mdt.' + metaList[0].DeveloperName; 
                 mdata.label = metaList[0].MasterLabel;
             } else {
-                mdata.fullName = 'MVEX__WBConnect_Configuration__mdt.WBConnect_Configuration'; 
+                mdata.fullName = 'MVEX__WBConnect_Configuration__mdt.MVEX__WBConnect_Configuration'; 
                 mdata.label = 'WB_Connect_Config_Details';
             }
 

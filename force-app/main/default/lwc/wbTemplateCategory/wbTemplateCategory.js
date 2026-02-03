@@ -85,13 +85,13 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
 
     @track templates = {
         "defaultPreview": {
-            "image": "/resource/previewImage",
+            "image": "/resource/MVEX__previewImage",
             "hey": "Hey there! Check out our fresh groceries now!",
             "code": "Use code <b>HEALTH</b> to get additional 10% off on your entire purchase.",
             "time": "11:59",
             "buttons": [
-                { "icon": "/resource/redirect", "label": "Shop now" },
-                { "icon": "/resource/copy", "label": "Copy code" }
+                { "icon": "/resource/MVEX__redirect", "label": "Shop now" },
+                { "icon": "/resource/MVEX__copy", "label": "Copy code" }
             ],
             "goodFor": "Welcome messages, promotions, offers, coupons, newsletters, announcements",
             "customizable": "Header, body, footer, button"

@@ -19,7 +19,7 @@ export default class PortalSyndication extends LightningElement {
     @track listingPopupId;
     @track isErrorPopup = false;
     @track subscription = {};
-    @track channelName = '/event/ResponseEvent__e';
+    @track channelName = '/event/MVEX__ResponseEvent__e';
     @track isDataAvailable = false;
     @track errorType = 'publish';
     @track isXMLForPF = false;

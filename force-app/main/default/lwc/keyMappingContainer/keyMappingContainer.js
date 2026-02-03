@@ -1144,7 +1144,7 @@ export default class KeyMappingContainer extends LightningElement {
             event.stopPropagation();
             let listingno = event.currentTarget.dataset.name;
 
-            const ImgUrl = '/resource/tempimage';
+            const ImgUrl = '/resource/MVEX__tempimage';
 
             const textarea = document.createElement('textarea');
             textarea.value = ImgUrl;

@@ -8,6 +8,8 @@ import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getBroadcastRecsWithReplies from '@salesforce/apex/BroadcastMessageController.getBroadcastRecsWithReplies';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 
 export default class WbAllBroadcastPage extends NavigationMixin(LightningElement) {
     @track data = [];
@@ -38,6 +40,8 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track selectedRecordId = '';
     @track sortField = '';
     @track sortOrder = 'asc';
+    @track isAccessible = false;
+    @track hasBusinessAccountConfigured = false;
 
     subscription = {};
     channelName = '/event/MVEX__BroadcastUpdateEvent__e';
@@ -121,7 +125,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         return this.selectedGroupIds.length === 0;
     }
     
-    connectedCallback(){
+    async connectedCallback(){
         try {
             loadStyle(this, MulishFontCss)
             .then(() => {
@@ -130,10 +134,23 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             .catch(error => {
                 console.log('Error occuring during loading external css', error);
             });
+            
+            await this.getAccessible();
+            if (!this.isAccessible) {
+                this.isLoading = false;
+                return;
+            }
+            
+            await this.checkBusinessAccountConfig();
+            if (!this.hasBusinessAccountConfigured) {
+                this.isLoading = false;
+                return;
+            }
+            
             this.isTemplateVisible = true;
             this.loadBroadcastGroups();
             this.subscribeToPlatformEvent();
-            this.loadAllTemplates(); // Load templates on component initialization
+            this.loadAllTemplates();
             
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
@@ -142,6 +159,41 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     disconnectedCallback(){
         this.unsubscribeFromPlatformEvent();
+    }
+
+    /*
+    * Method Name: getAccessible
+    * @description: Method to check if user has access to Broadcast feature
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    async getAccessible() {
+        try {
+            const data = await getMetadataRecords();
+            const broadcastFeature = data.find(
+                item => item.DeveloperName === 'Broadcast'
+            );
+            this.isAccessible = broadcastFeature ? Boolean(broadcastFeature.MVEX__isAvailable__c) : false;
+        } catch (error) {
+            console.error('Error fetching accessible fields', error);
+            this.isAccessible = false;
+        }
+    }
+
+    /*
+    * Method Name: checkBusinessAccountConfig
+    * @description: Method to check if WBConnect business account is configured
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
+        }
     }
 
     // Load all templates once during initialization

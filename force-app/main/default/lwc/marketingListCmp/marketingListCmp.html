@@ -24,10 +24,14 @@
                                         <template if:true={isConfigOpen}>
                                             <c-record-config-body-cmp feature-name="Marketing List"
                                                 onclose={handleCloseModal}></c-record-config-body-cmp>
-                                        </template> <button onclick={handleSendMessage} class="icon-button"
-                                            disabled={isContactSelected}>
-                                            Send Message
-                                        </button>
+                                        </template>
+                                        
+                                        <template if:true={hasBusinessAccountConfigured}>
+                                            <button onclick={handleSendMessage} class="icon-button"
+                                                disabled={isContactSelected}>
+                                                Send Message
+                                            </button>
+                                        </template>
 
                                         <button onclick={handleAdd} class="icon-button">
                                             Send Emails

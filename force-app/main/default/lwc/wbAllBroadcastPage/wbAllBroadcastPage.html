@@ -1,18 +1,8 @@
 <template>
-    <template if:true={showLicenseError}>
-        <div class="license-error">
-            <div class="popup-container">
-                <div class="popup-content">
-                    <h2>⚠️ License Expired</h2>
-                    <p>WBConnect license has expired. Please renew to continue using.</p>
-                </div>
-            </div>
-        </div>
-    </template>
-    
-    <template if:false={showLicenseError}>
-        <template if:true={isTemplateVisible}>
-            <div class="wrapper">
+    <template if:true={isAccessible}>
+        <template if:true={hasBusinessAccountConfigured}>
+            <template if:true={isTemplateVisible}>
+                <div class="wrapper">
 
                 <!-- Spinner -->
                 <template if:true={isLoading}>
@@ -357,5 +347,35 @@
                 </template>
             </div>
         </template>
+    </template>
+
+    <template if:false={hasBusinessAccountConfigured}>
+        <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
+            <div class="configuration-error-container">
+                <div class="configuration-error-content">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="error-icon">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                    </svg>
+                    <h1>Configuration Required</h1>
+                    <p>WhatsApp Business Account is not configured. Please complete the WhatsApp configuration to enable broadcast functionality.</p>
+                </div>
+            </div>
+        </div>
+    </template>
+    </template>
+
+    <template if:false={isAccessible}>
+        <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
+            <div class="restricted-access">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        fill="currentColor" />
+                </svg>
+                <h1>Access Restricted</h1>
+                <p>You don't have permission to access this page. Please contact your administrator for further
+                    assistance.</p>
+            </div>
+        </div>
     </template>
 </template>

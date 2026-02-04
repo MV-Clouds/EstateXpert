@@ -172,7 +172,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     @track imageurl = '';
     @track contentDocumentId = '';
     @track isRendered = false;
-    @track showLicenseError = false;
     @track utilityOrderStatusSelected = false;
     @track defaultPreview = true;
     @track authenticationPasscodeSelected = false;
@@ -745,11 +744,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     connectedCallback() {
         try {
-            // this.isLoading = true;
-            // await this.checkLicenseStatus();
-            // if (this.showLicenseError) {
-            //     return;
-            // }
             loadStyle(this, MulishFontCss)
             .then(() => {
                 console.log('External Css Loaded');

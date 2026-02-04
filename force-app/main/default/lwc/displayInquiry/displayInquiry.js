@@ -12,6 +12,7 @@ import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuick
 import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController.getMessagingServiceOptions';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import getObjectName from '@salesforce/apex/PropertySearchController.getObjectName';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
 import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
 import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
@@ -132,6 +133,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track listViewId = '';
     @track spinnerShow = false;
     @track isConfigOpen = false;
+    @track hasBusinessAccountConfigured = false;
 
     /**
     * Method Name : isCustomLogicSelected
@@ -404,6 +406,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     async connectedCallback() {
         await this.getObjectApiName();
+        await this.checkBusinessAccountConfig();
         loadStyle(this, MulishFontCss)
             .then(() => {
                 console.log('Css loaded successfully');
@@ -467,6 +470,22 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         } catch (error) {
             errorDebugger('displayInquiry', 'getObjectApiName', error, 'warn', 'Error fetching object API name');
             return null;
+        }
+    }
+
+    /**
+    * Method Name : checkBusinessAccountConfig
+    * @description : method to check if business account ID is configured in custom metadata
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            errorDebugger('displayInquiry', 'checkBusinessAccountConfig', error, 'warn', 'Error checking business account configuration');
+            this.hasBusinessAccountConfigured = false;
         }
     }
 
@@ -744,7 +763,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         'fileName': 'ListingPDF'
                     }
                     let paraDataStringify = JSON.stringify(paraData);
-                    let newSRC = '/apex/DocGeneratePage?paraData=' + encodeURIComponent(paraDataStringify);
+                    let newSRC = '/apex/MVEX__DocGeneratePage?paraData=' + encodeURIComponent(paraDataStringify);
                     this.vfGeneratePageSRC = newSRC;
                 } else {
                     this.handleSave();

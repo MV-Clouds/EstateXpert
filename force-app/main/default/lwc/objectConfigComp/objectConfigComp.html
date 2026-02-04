@@ -15,9 +15,7 @@
             </div>
 
             <template if:true={isLoading}>
-                <div class="spinner-overlay">
-                    <c-spinner-component></c-spinner-component>
-                </div>
+                <c-spinner-component></c-spinner-component>
             </template>
 
             <div class="main_content_cls">
@@ -105,8 +103,9 @@
                             </div>
                         </template>
                     </lightning-accordion-section>
-                    <lightning-accordion-section name="webhookConfig" label="Whatsapp Webhook Configuration">
-                        <template if:false={isWebhookConfigEdit}>
+                    <template if:true={hasBusinessAccountConfigured}>
+                        <lightning-accordion-section name="webhookConfig" label="Whatsapp Webhook Configuration">
+                            <template if:false={isWebhookConfigEdit}>
                             <div class="user-header">
                                 <div class="selectedObject">Selected Object: {selectedObject}</div>
                                 <div>
@@ -265,6 +264,7 @@
                             </div>
                         </template>
                     </lightning-accordion-section>
+                    </template>
                 </lightning-accordion>
             </div>
         </div>

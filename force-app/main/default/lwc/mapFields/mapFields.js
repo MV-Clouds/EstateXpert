@@ -22,6 +22,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     @track savebutton = true;
     @track showConfirmationModal = false;
     @track isScroll = false;
+    @track isDirectAccess = false;
 
     /**
     * Method Name: delButtonClass
@@ -67,6 +68,16 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     * Created By: Vyom Soni
     */
     connectedCallback() {
+        // Check if accessed directly via URL
+        if (typeof window !== 'undefined') {
+            const currentUrl = window.location.href;
+            if (currentUrl.includes('MVEX__Map_Listing_and_Property')) {
+                this.isDirectAccess = true;
+                this.isLoading = false;
+                return;
+            }
+        }
+        
         loadStyle(this, externalCss);
         loadStyle(this, MulishFontCss);
         this.getMappingMetadata();

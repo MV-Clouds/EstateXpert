@@ -9,6 +9,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import deleteCampaign from '@salesforce/apex/EmailCampaignController.deleteCampaign';
 import getCampaigns from '@salesforce/apex/EmailCampaignController.getCampaigns';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
@@ -29,6 +30,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     @track visiblePages = 5;
     @track pageSize = 20;
     @track pageNumber = 1;
+    @track isAccessible = false;
 
     @track statusOptions = [
         {label: 'None' , value: ''},
@@ -190,7 +192,33 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         .catch(() => {
             this.showToast('Error', 'Error loading external CSS', 'error');
         });
-        this.loadCampaigns();
+        this.getAccessible();
+    }
+
+    /*
+    * Method Name: getAccessible
+    * @description: Method to check if user has access to Marketing Campaign feature
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    getAccessible() {
+        getMetadataRecords()
+        .then(data => {
+            const marketingCampaignFeature = data.find(
+                item => item.DeveloperName === 'Marketing_Campaign'
+            );
+            this.isAccessible = marketingCampaignFeature ? Boolean(marketingCampaignFeature.MVEX__isAvailable__c) : false;
+            if (this.isAccessible) {
+                this.loadCampaigns();
+            } else {
+                this.isLoading = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching accessible fields', error);
+            this.isAccessible = false;
+            this.isLoading = false;
+        });
     }
 
     /*

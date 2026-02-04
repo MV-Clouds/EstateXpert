@@ -22,7 +22,6 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     @track flowPreviewURL = '';
     @track showPopup = false;
     @track isFlowDraft = false;
-    @track showLicenseError = false;
     @track isEditMode = false;
     @track selectedFlowId = '';
     @track currentPage = 1;
@@ -139,17 +138,6 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
             console.error('Error in connectedCallback:::', e.message);
         }
     }
-
-    // async checkLicenseStatus() {
-    //     try {
-    //         const isLicenseValid = await checkLicenseUsablility();
-    //         if (!isLicenseValid) {
-    //             this.showLicenseError = true;
-    //         }
-    //     } catch (error) {
-    //         console.error('Error checking license:', error);
-    //     }
-    // }
 
     handleFlowNameClick(event) {
         try {

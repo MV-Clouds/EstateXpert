@@ -1,3 +1,51 @@
+.configuration-error-content {
+    text-align: center;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.configuration-error-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.configuration-error-message {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+    margin: 1rem 0;
+    text-align: left;
+}
+
+.configuration-error-message strong {
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.configuration-error-submessage {
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: 1.5rem;
+    font-style: italic;
+}
+
 .lightTheme {
     /* General Purpose Variables */
     --height-of-main-chat-container: 30rem;

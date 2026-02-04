@@ -38,6 +38,7 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
 
     @track listingLogicError = null;
     @track inquiryLogicError = null;
+    @track isDirectAccess = false;
 
     @track conditionsOptions = [
         { label: 'Greater Than', value: 'greaterThan', type: 'DOUBLE', type2: 'DOUBLE' },
@@ -137,6 +138,16 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     }
     
     connectedCallback() {
+        // Check if accessed directly via URL
+        if (typeof window !== 'undefined') {
+            const currentUrl = window.location.href;
+            if (currentUrl.includes('MVEX__Map_Listing_and_Inquiry')) {
+                this.isDirectAccess = true;
+                this.isLoading = false;
+                return;
+            }
+        }
+        
         this.isLoading = true;
         loadStyle(this, MulishFontCss);
         getObjectFields({ objectName: 'MVEX__Listing__c' })

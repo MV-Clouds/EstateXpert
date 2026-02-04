@@ -1,378 +1,317 @@
+<!--
+  @description       : Embedded Sign-Up Page for WhatsApp Business Integration
+  @group             : MVEX
+  @author            : Vyom Soni
+  @last modified on  : 02-04-2026
+  @last modified by  : Harsh Gandhi
+-->
 <apex:page html-style="height: 100%;" showHeader="false" sidebar="false" controller="WhatsappConfigController">
-<html>
-    <body>
-        <style>
-            body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            body.sfdcBody {
-                padding: unset !important;
-            }
-            .main-control-center-div {
-                height: 100%;
-                background-image: url('/resource/MVEX__ControlCenterBG');
-                background-repeat: no-repeat;
-                background-size: 100% 100%;
-                background-position: center;
-                display: flex;
-                flex-direction: column;
-                background-position-x: right;
-            }
-            .config-component-div {
-                display: flex;
-                width: 50%;
-                gap: 1rem;
-                margin: 0 1rem;
-                height: fit-content;
-                flex-direction: column;
-            }
-            .sign-up-card {
-                box-shadow: 0 0 5px 0 lightgray;
-                padding: 1rem;
-                background: white;
-                border-radius: 4px;
-                margin-top: 1rem;
-            }
-            .sign-up-card p {
-                font-size: 1.5rem;
-                font-weight: bold;
-                margin: 0;
-            }
-            .input-app-id {
-                display: flex;
-                font-size: 12px;
-                flex-direction: column;
-                gap: 0.2rem;
-                padding-block: 1rem 0;
-            }
-            input#app-id-input {
-                height: 20px;
-                padding-inline: 0.5rem;
-            }
-            .error-message-text {
-                color: red;
-                padding: 0.2rem 0;
-                font-size: small !important;
-            }
-            .control-btn {
-                letter-spacing: 1px;
-                background-color: #0176D3;
-                border: none;
-                border-radius: 0.2rem;
-                padding: 0.8rem 2rem;
-                color: white;
-                font-weight: 600;
-                margin-top: 1rem;
-                width: fit-content;
-                cursor: pointer;
-                height: fit-content;
-            }
-            .input-app-id-div {
-                display: flex;
-                gap: 0.4rem;
-                align-items: end;
-            }
-            .input-app-id {
-                flex-grow: 1;
-            }
-            .validate-button {
-                display: none;
-            }
-            .resource-cards {
-                display: flex;
-                gap: 1rem;
-            }
-            .resource-card {
-                width: calc(50% - 0.5rem);
-            }
-            .user-details {
-                display: none;
-                align-items: center;
-                gap: 1rem;
-                padding: 1rem;
-                background-color: #d8ffd8;
-                border-radius: 4px;
-                margin-top: 0.3rem;
-                font-size: 12px;
-            }
-            img.user-image {
-                height: 4rem;
-                width: 4rem;
-                object-fit: cover;
-                border-radius: 50%;
-                border: 1px solid gray;
-            }
-            .waba-id-container {
-                display: flex;
-                flex-direction: column;
-                gap: 0.4rem;
-                flex-grow: 1;
-            }
-            .waba-id-container h2 {
-                color: green;
-                font-size: xx-large;
-            }
-            .unlink-button {
-                background-color: #ffa9a9;
-                padding: 0.2rem;
-                border-radius: 0.3rem;
-                cursor: pointer;
-            }
-            .buttonCSS {
-                box-shadow: 0 0 5px 0 lightgray;
-                border-radius: 6px;
-                width: 100%;
-                height: 12rem;
-                text-decoration: none;
-                color: #fff;
-                position: relative;
-                display: inline-block;
-                transition: all 0.3s ease-in-out;
-                overflow: hidden;
-                background-color: white;
-            }
-            .buttonCSS:active {
-                transform: translate(0px, 5px);
-                box-shadow: 0px 1px 0px 0px;
-            }
-            .buttonCSS-blue {
-                box-shadow: 0 0 5px 0 lightgray;
-            }
-            .buttonCSS-blue h3,
-            .buttonCSS-blue p {
-                visibility: hidden;
-                transition: all 0.1s ease-in-out;
-                text-align: center;
-            }
-            .buttonCSS-blue:hover {
-                box-shadow: inset 0 0 0 1000px #d5ebffdd;
-            }
-            .buttonCSS-blue:hover h3,
-            .buttonCSS-blue:hover p {
-                visibility: visible !important;
-            }
-            .buttonCSS-bg-userguide {
-                background-position: center;
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-image: url('/resource/MVEX__UserGuideImage');
-            }
-            .buttonCSS-bg-faqs {
-                background-position: center;
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-image: url('/resource/MVEX__FAQsImages');
-            }
-            .popup-container {
-                background: #b71c1c;
-                color: white;
-                padding: 24px 30px;
-                border-radius: 10px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-                max-width: 400px;
-                text-align: center;
-                font-family: Arial, sans-serif;
-                animation: fadeIn 0.5s ease-in-out;
-            }
-            .popup-content h2 {
-                font-size: 24px;
-                font-weight: bold;
-                margin-bottom: 10px;
-                text-transform: uppercase;
-            }
-            .popup-content p {
-                font-size: 16px;
-                margin: 0;
-            }
-        </style>
-        <div id="licensePopup" style="display: none;">
-            <div class="license-error">
-                <div class="popup-container">
-                    <div class="popup-content">
-                        <h2>⚠️ License Expired</h2>
-                        <p>WBConnect license has expired. Please renew to continue using.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="main-containerdiv" style="display: block;" class="main-control-center-div">
-            <div class="config-component-div">
-                <div class="sign-up-card">
-                    <p><b>Embedded Sign-Up</b></p>
-                    <div class="input-container" id="input-container-div">
-                        <div class="input-app-id-div">
-                            <div class="input-app-id">
-                                <label>Enter Your Application Id</label>
-                                <input type="text" id="app-id-input"></input>
+    <html>
+        <body>
+            <style>
+                body{
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                body.sfdcBody{
+                    padding: unset !important;
+                }
+                .main-control-center-div {
+                    height: 100%;
+                    background-image: url('/resource/MVEX__ControlCenterBG');
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    display: flex;
+                    flex-direction: column;
+                    background-position-x: right;
+                }
+        
+                .config-component-div {
+                    display: flex;
+                    width: 50%;
+                    gap: 1rem;
+                    margin: 0 2rem;
+                    height: fit-content;
+                    flex-direction: column;
+                }
+        
+                .sign-up-card {
+                    box-shadow: 0 0 5px 0 lightgray;
+                    padding: 1rem;
+                    background: white;
+                    border-radius: 4px;
+                }
+        
+                .sign-up-card p {
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    margin: 0;
+                }
+
+                .input-app-id {
+                    display: flex;
+                    font-size: 12px;
+                    flex-direction: column;
+                    gap: 0.2rem;
+                    padding-block: 1rem 0;
+                }
+
+                input#app-id-input {
+                    height: 20px;
+                    padding-inline: 0.5rem;
+                }
+
+                .error-message-text{
+                    color: red;
+                    padding: 0.2rem 0;
+                    font-size: small !important;
+                }
+        
+                .control-btn {
+                    letter-spacing: 1px;
+                    background-color: #0077B6;
+                    border: none;
+                    border-radius: 0.2rem;
+                    padding: 0.8rem 2rem;
+                    color: white;
+                    font-weight: 600;
+                    margin-top: 1rem;
+                    width: fit-content;
+                    cursor: pointer;
+                    height: fit-content
+                }
+
+                .input-app-id-div {
+                    display: flex;
+                    gap: 0.4rem;
+                    align-items: end;
+                }
+                
+                .input-app-id {
+                    flex-grow: 1;
+                }
+
+                .validate-button{
+                    display: none;
+                }
+        
+                .resource-cards {
+                    display: flex;
+                    gap: 1rem;
+                }
+        
+                .resource-card {
+                    width: calc(50% - 0.5rem);
+                }
+                .user-details {
+                    display: none;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 1rem;
+                    background-color: #d8ffd8;
+                    border-radius: 4px;
+                    margin-top: 0.3rem;
+                    font-size: 12px;
+                }
+
+                img.user-image {
+                    height: 4rem;
+                    width: 4rem;
+                    object-fit: cover;
+                    border-radius: 50%;
+                    border: 1px solid gray;
+                }
+
+                .waba-id-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.4rem;
+                    flex-grow: 1;
+                }
+
+                .waba-id-container h2 {
+                    color: green;
+                    font-size: xx-large;
+                }
+
+                .unlink-button {
+                    background-color: #ffa9a9;
+                    padding: 0.2rem;
+                    border-radius: 0.3rem;
+                    cursor: pointer;
+                }
+            </style>
+            
+            <div id="main-containerdiv" class="main-control-center-div">
+
+                <!-- Containers -->
+                <div class="config-component-div">
+                    <div class="sign-up-card">
+                        <p><b>Embedded Sign-Up</b></p>
+                        <div class="input-container" id="input-container-div">
+                            <div class="input-app-id-div">
+                                <div class="input-app-id">
+                                    <label>Enter Your Application Id</label>
+                                    <input type="text" id="app-id-input"></input>
+                                </div>
+                                <div id="validate-button" class="validate-button control-btn" onclick="validateAndSubmit()">Validate</div>
                             </div>
-                            <div id="validate-button" class="validate-button control-btn" onclick="validateAndSubmit()">Validate</div>
+                            <div id="login-button" class="login-button control-btn" onclick="launchWhatsAppSignup()">Login</div>
+                            <p class="error-message-text" id="error-message"></p>
                         </div>
-                        <div id="login-button" class="login-button control-btn" onclick="launchWhatsAppSignup()">Login</div>
-                        <p class="error-message-text" id="error-message"></p>
-                    </div>
-                    <div class="user-details" id="user-details-div">
-                        <img class="user-image" src="/resource/MVEX__WBConnectLogo" alt="User"></img>
-                        <div class="waba-id-container">
-                            <h5>WhatsApp Business Account Id</h5>
-                            <h2 id="waba-id"></h2>
+                        <div class="user-details" id="user-details-div">
+                            <!-- <img class="user-image" src="/resource/MVEX__WBConnectLogo" alt="User"></img> -->
+                            <div class="waba-id-container">
+                                <h5>WhatsApp Business Account Id</h5>
+                                <h2 id="waba-id"></h2>
+                            </div>
+                            <svg class="unlink-button" onclick="logoutFacebook()" xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" height="24" width="24"><path d="M10.625 13.75v-1.25" stroke-width="1.5"></path><path d="m5.625 9.375 3.75 -3.75" stroke-width="1.5"></path><path d="m6.875 3.75 0.289375 -0.335a3.125 3.125 0 0 1 4.419375 4.42L11.25 8.125" stroke-width="1.5"></path><path d="m8.125 11.25 -0.248125 0.33375a3.1674999999999995 3.1674999999999995 0 0 1 -4.454375 0 3.1075000000000004 3.1075000000000004 0 0 1 0 -4.419375L3.75 6.875" stroke-width="1.5"></path><path d="M12.5 10.625h1.25" stroke-width="1.5"></path><path d="M1.25 4.375h1.25" stroke-width="1.5"></path><path d="M4.375 1.25v1.25" stroke-width="1.5"></path></svg>
                         </div>
-                        <svg class="unlink-button" onclick="logoutFacebook()" xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" height="24" width="24">
-                            <path d="M10.625 13.75v-1.25" stroke-width="1.5"></path>
-                            <path d="m5.625 9.375 3.75 -3.75" stroke-width="1.5"></path>
-                            <path d="m6.875 3.75 0.289375 -0.335a3.125 3.125 0 0 1 4.419375 4.42L11.25 8.125" stroke-width="1.5"></path>
-                            <path d="m8.125 11.25 -0.248125 0.33375a3.1674999999999995 3.1674999999999995 0 0 1 -4.454375 0 3.1075000000000004 3.1075000000000004 0 0 1 0 -4.419375L3.75 6.875" stroke-width="1.5"></path>
-                            <path d="M12.5 10.625h1.25" stroke-width="1.5"></path>
-                            <path d="M1.25 4.375h1.25" stroke-width="1.5"></path>
-                            <path d="M4.375 1.25v1.25" stroke-width="1.5"></path>
-                        </svg>
                     </div>
                 </div>
             </div>
-        </div>
-        <script crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" async="true" defer="true"></script>
-        <script>
-            let phoneNumberId = '';
-            let wabaId = '{!whatsappBusinessAppId}';
-            if (wabaId) {
-                document.getElementById("input-container-div").style.display = "none";
-                document.getElementById("user-details-div").style.display = "flex";
-                document.getElementById('waba-id').textContent = wabaId;
-            }
-
-            window.addEventListener('message', (event) => {
-                if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") {
-                    if (event.data === 'unlinkSuccess') {
-                        document.getElementById("input-container-div").style.display = "block";
-                        document.getElementById("user-details-div").style.display = "none";
-                        document.getElementById('waba-id').textContent = "";
-                        document.getElementById("error-message").textContent = "";
-                        document.getElementById("login-button").style.display = 'block';
-                        document.getElementById("validate-button").style.display = 'none';
-                        window.parent.postMessage('reloadVF', '*');
-                    } else if (event.data === 'unlinkError') {
-                        console.error('Unlink failed');
-                        document.getElementById("error-message").textContent = "Error unlinking account, please try again.";
-                    }
-                    return;
+            
+            <script crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" async="true" defer="true"></script>
+            
+            <script>
+                let phoneNumberId = '';
+                let wabaId = '{!whatsappBusinessAppId}';
+                if(wabaId){
+                    document.getElementById("input-container-div").style.display = "none";
+                    document.getElementById("user-details-div").style.display = "flex";
+                    document.getElementById('waba-id').textContent = wabaId;
                 }
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'WA_EMBEDDED_SIGNUP') {
-                        if (data.event === 'FINISH') {
-                            const { phone_number_id, waba_id } = data.data;
-                            phoneNumberId = phone_number_id;
-                            wabaId = waba_id;
-                        } else if (data.event === 'CANCEL') {
-                            document.getElementById("error-message").textContent = "Please complete all the steps.";
-                        } else if (data.event === 'ERROR') {
-                            document.getElementById("error-message").textContent = "There was some error logging you in.";
-                        }
+                
+                window.addEventListener('message', (event) => {
+                    if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") {
+                        return;
                     }
-                } catch {
-                    if (event.data.includes('error=')) {
-                        document.getElementById("error-message").textContent = "Could not log you in, try again...";
-                    }
-                }
-            });
-
-            let appId = '';
-            let accessToken = '';
-
-            function fbLoginCallback(response) {
-                if (response.status === 'connected') {
-                    accessToken = response.authResponse.accessToken;
-                    validateAndSubmit();
-                } else {
-                    document.getElementById("error-message").textContent = 'Could not authorize, try again...';
-                }
-            }
-
-            function validateAndSubmit() {
-                appId = document.getElementById("app-id-input").value;
-                fetch("https://graph.facebook.com/v22.0/" + appId + "?access_token=" + accessToken)
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.error) {
-                            document.getElementById("error-message").textContent = "The Application Id is incorrect! Please Validate it.";
-                            document.getElementById("validate-button").style.display = 'block';
-                            document.getElementById("login-button").style.display = 'none';
-                        } else {
-                            if (!phoneNumberId.length || !wabaId.length || !appId.length || !accessToken.length) {
-                                document.getElementById("error-message").textContent = "Could not log you in, please try again...";
-                                return;
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'WA_EMBEDDED_SIGNUP') {
+                            // if user finishes the Embedded Signup flow
+                            if (data.event === 'FINISH') {
+                                const {phone_number_id, waba_id} = data.data;
+                                phoneNumberId = phone_number_id;
+                                wabaId = waba_id;
+                            } 
+                            // if user cancels the Embedded Signup flow
+                            else if (data.event === 'CANCEL') {
+                                const {current_step} = data.data;
+                                document.getElementById("error-message").textContent = "Please complete all the steps.";
+                            } 
+                            // if user reports an error during the Embedded Signup flow
+                            else if (data.event === 'ERROR') {
+                                const {error_message} = data.data;
+                                document.getElementById("error-message").textContent = "There was some error logging you in.";
                             }
-                            Visualforce.remoting.Manager.invokeAction(
-                                '{!$RemoteAction.WhatsappConfigController.saveFBLoginDetails}',
-                                accessToken, phoneNumberId, wabaId, appId,
-                                function(result, event) {
-                                    if (event.status && result) {
-                                        document.getElementById("input-container-div").style.display = "none";
-                                        document.getElementById("user-details-div").style.display = "flex";
-                                        document.getElementById('waba-id').textContent = result;
-                                    } else {
-                                        document.getElementById("error-message").textContent = "There was some error, please try again...";
-                                    }
-                                },
-                                { escape: true }
-                            );
                         }
+                        // document.getElementById("session-info-response").textContent = JSON.stringify(data, null, 2);
+                    } catch {
+                        if(event.data.includes('error=')){
+                            document.getElementById("error-message").textContent = "Could not log you in, try again...";
+                        } 
+                    }
+                });
+            </script>
+            
+            <script>
+                let appId = '';
+                let appName = null;
+                let accessToken = '';
+                const fbLoginCallback = (response) => {
+                    if(response.status === 'connected'){
+                        FB.getLoginStatus(function(response) {
+                            
+                            if (response.status === 'connected') {
+                                accessToken = response.authResponse.accessToken;
+                                validateAndSubmit();
+                            } 
+                        }, true );
+                    }else{
+                        document.getElementById("error-message").textContent = 'Could not authorize, try again...';
+                    }
+                }
+
+                function validateAndSubmit(){
+                    appId = document.getElementById("app-id-input").value;
+                    fetch("https://graph.facebook.com/v22.0/" + appId + "?access_token="+ accessToken)
+                        .then(response => response.json())
+                            .then(result => {
+                                if(result.error){
+                                    document.getElementById("error-message").textContent = "The Application Id is incorrect! Please Validate it.";
+                                    document.getElementById("validate-button").style.display = 'block';
+                                    document.getElementById("login-button").style.display = 'none';
+                                } else {
+                                    if(!phoneNumberId.length || !wabaId.length || !appId.length || !accessToken.length){
+                                        document.getElementById("error-message").textContent = "Could not log you in, please try again...";
+                                        return;
+                                    }
+                                    
+                                    Visualforce.remoting.Manager.invokeAction(
+                                        //Invoking controller action getcon
+                                        '{!$RemoteAction.WhatsappConfigController.saveFBLoginDetails}', accessToken, phoneNumberId, wabaId, appId,
+                                        function(result, event){
+                                            //We can access the records through the parameter result
+                                            //event.status determines if there is error or not 
+                                            if(event.status && result){
+                                                document.getElementById("input-container-div").style.display = "none";
+                                                document.getElementById("user-details-div").style.display = "flex";
+                                                document.getElementById('waba-id').textContent = result;
+                                            } else {
+                                                document.getElementById("error-message").textContent = "There was some error, please try again...";
+                                            }
+                                        },
+                                        {
+                                            escape: true
+                                        }
+                                    );
+                                }
                     })
                     .catch(error => {
                         document.getElementById("error-message").textContent = "Could not validate Application Id! Please try again.";
                     });
-            }
-
-            function launchWhatsAppSignup() {
-                appId = document.getElementById("app-id-input").value;
-                if (!'{!clientId}') {
-                    document.getElementById("error-message").textContent = "Could not fetch the configuration data.";
-                    return;
                 }
-                if (appId) {
-                    document.getElementById("error-message").textContent = "";
-                    try {
-                        FB.login(fbLoginCallback, {
-                            config_id: '{!configurationId}',
-                            response_type: 'code',
-                            override_default_response_type: true,
-                            extras: {
-                                setup: {},
-                                featureType: '',
-                                sessionInfoVersion: '2',
-                            }
-                        });
-                    } catch (error) {
-                        console.error('Error in FB.login:', error);
-                        document.getElementById("error-message").textContent = "Failed to initiate login. Please try again.";
+            
+                const launchWhatsAppSignup = () => {
+                    appId = document.getElementById("app-id-input").value;
+                    if(!'{!clientId}'){
+                        document.getElementById("error-message").textContent = "Could not fetch the configuration data.";
+                        return;
                     }
-                } else {
-                    document.getElementById("error-message").textContent = "Please enter Application Id to login.";
+                    if(appId){
+                        // if(appName){
+                            document.getElementById("error-message").textContent = "";
+                            // Launch Facebook login
+                            FB.login(fbLoginCallback, {
+                                config_id: '{!configurationId}', // configuration ID goes here
+                                response_type: 'code', // must be set to 'code' for System User access token
+                                override_default_response_type: true, // when true, any response types passed in the "response_type" will take precedence over the default types
+                                extras: {
+                                    setup: {},
+                                    featureType: '',
+                                    sessionInfoVersion: '2',
+                                }
+                            });
+                        // }
+                    }else{
+                        document.getElementById("error-message").textContent = "Please enter Application Id to login.";
+                    }
                 }
-            }
-
-            function logoutFacebook() {
-                window.parent.postMessage('triggerUnlink', '*');
-            }
-
-            window.fbAsyncInit = function() {
-                try {
+            </script>
+        
+            <script>
+                window.fbAsyncInit = function() {
                     FB.init({
-                        appId: '{!clientId}',
-                        autoLogAppEvents: true,
-                        xfbml: true,
-                        version: 'v21.0'
+                        appId            : '{!clientId}',
+                        autoLogAppEvents : true,
+                        xfbml            : true,
+                        version          : 'v21.0'
                     });
-                } catch (error) {
-                    console.error('Error initializing Facebook SDK:', error);
-                }
-            };
-
-            window.onload = function() {
-                window.parent.postMessage('vfPageLoaded', '*');
-            };
-        </script>
-    </body>
-</html>
+                };
+            </script>
+        </body>
+    </html>
 </apex:page>

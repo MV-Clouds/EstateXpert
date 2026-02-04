@@ -514,6 +514,7 @@ export default class InstagramPostFromListing extends LightningElement {
                     if (result.status === 'SUCCESS') {
                         this.showToast('Success', result.message, 'success');
                         this.clearFiles();
+                        this.closeAction();
                     } else {
                         this.showToast('Error', result.message, 'error');
                     }
@@ -593,7 +594,6 @@ export default class InstagramPostFromListing extends LightningElement {
             return true;
         }
         
-
     }
     uploadFileToS3(file, percentagePerFile, index, fileProgressArray) {
         return new Promise((resolve, reject) => {

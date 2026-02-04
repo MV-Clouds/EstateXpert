@@ -349,7 +349,8 @@ public with sharing class InstagramPostController {
                     System.schedule('Instagram Media Publish ' + mediaContainerId, cronExpression, job);
 
                     apexResponse.status = 'SUCCESS';
-                    apexResponse.message = 'Media container created. Publishing scheduled.';
+                    // apexResponse.message = 'Media container created. Publishing scheduled.';
+                    apexResponse.message = 'Instagram post is successfully created.';
                     return apexResponse;
                 } else {
                     sendEmailNotification(response.getBody());

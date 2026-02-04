@@ -18,6 +18,9 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
     @track MetaData = {};
     @track isClientSecretHidden = true;
     CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
+    @track metaVerificationStatus = 'Checking...';
+    @track appReviewStatus = 'Checking...';
+    @track connectionDetails = {};
 
     get isGoogle() {
         return this.activeTab === 'Google';
@@ -37,6 +40,23 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     get displayedAccessToken() {
         return this.CREDENTIAL_DISPLAY_TEXT;
+    }
+
+    get reviewClass() {
+        return this.appReviewStatus === 'Verified' ? 'status-success' : 'status-warning';
+    }
+
+    get statusClass() {
+        return this.metaVerificationStatus === 'Connected' ? 'status-success' : 'status-error';
+    }
+
+    // Helpers for UI display
+    get appName() { return this.connectionDetails.application || 'Meta Integration'; }
+    get appType() { return this.connectionDetails.type || 'Page Integration'; }
+    get tokenExpires() { 
+        return this.connectionDetails.data_access_expires_at 
+            ? new Date(this.connectionDetails.data_access_expires_at * 1000).toLocaleDateString() 
+            : 'Never'; 
     }
 
     connectedCallback() {
@@ -76,6 +96,11 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
                         }
                         this.integrationName = 'Meta';
                         this.MetaData = item;
+                        
+                        // NEW LOGIC: Check status if token exists
+                        if (item.isValid && item.integrationData.MVEX__ACCESS_TOKEN__c) {
+                            this.checkMetaStatus(item.integrationData.MVEX__ACCESS_TOKEN__c);
+                        }
                     }
                 });
                 this.isDataLoaded = true;
@@ -84,6 +109,33 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
             .catch(error => {
                 console.log('Error in fetching data -->', error.stack);
                 this.isSpinner = false;
+            });
+    }
+
+    checkMetaStatus(accessToken) {
+        // 1. We ONLY use debug_token because it is the only one that works with your Page Token
+        fetch(`https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${accessToken}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.data) {
+                    const data = result.data;
+                    this.connectionDetails = data;
+                    
+                    // 1. Connection Status (Token Validity)
+                    this.metaVerificationStatus = data.is_valid ? 'Connected' : 'Expired or Invalid';
+
+                    // 2. App Review / Permission Status logic
+                    if (data.scopes && data.scopes.includes('leads_retrieval')) {
+                        this.appReviewStatus = 'Verified'; 
+                    } else {
+                        this.appReviewStatus = 'Permission Missing';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Meta Status Error:', err);
+                this.metaVerificationStatus = 'Connection Error';
+                this.appReviewStatus = 'Unknown';
             });
     }
 

@@ -1,5 +1,6 @@
 <template>
-    <template if:true={showSpinner}>
+    <div class="wrapper-instagram-post">
+         <template if:true={showSpinner}>
         <div class="overlay-spinner">
             <div class="upload-wrapper-spinner">
                 <img src="/resource/MVEX__Animationimg" alt="Loading..." draggable="false">
@@ -14,114 +15,114 @@
         </div>
     </template>
 
-    <div class="wrapper-instagram-post">
         <div class="slds-modal__header blue-header">
             <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Instagram Post Uploader</h1>
         </div>
 
-        <template if:false={hasAllCredentials}>
-            <div class="credentials-missing-container">
-                <div class="credentials-missing-content">
-                    <img src="/resource/MVEX__emptyState" alt="Credentials Required" class="credentials-empty-icon" draggable="false"/>
-                    <div class="credentials-missing-message">
-                        {missingCredentialsMessage}
-                    </div>
-                    <div class="credentials-missing-submessage">
-                        Please configure your credentials in the integration settings.
-                    </div>
-                </div>
-            </div>
-        </template>
-
-        <template if:true={hasAllCredentials}>
-            <div class="instagram-post-body">
-
-                <div class="media_upload_css">
-                    <h3>Media Upload</h3>
-                    <p>Add your Image and Video here.</p>
-                </div>
-                <div class="fileuploader_container">
-                    <div class="slds-file-selector slds-file-selector_images" ondrop={handleDrop}
-                        ondragover={allowDrop}>
-                        <div class="slds-file-selector__dropzone flex_css">
-                            <div>
-                                <svg width="36" height="28" viewBox="0 0 36 28" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M3.232 28C2.31067 28 1.542 27.692 0.926 27.076C0.31 26.46 0.00133333 25.6907 0 24.768V3.232C0 2.31067 0.308667 1.542 0.926 0.926C1.54333 0.31 2.31133 0.00133333 3.23 0H11.85C12.2807 0 12.6993 0.0866669 13.106 0.26C13.5127 0.436 13.8607 0.668667 14.15 0.958L17.192 4H32.77C33.69 4 34.4587 4.30867 35.076 4.926C35.6933 5.54333 36.0013 6.312 36 7.232V24.77C36 25.69 35.692 26.4587 35.076 27.076C34.46 27.6933 33.6913 28.0013 32.77 28H3.232ZM18 22.46C18.2853 22.46 18.5233 22.3653 18.714 22.176C18.9047 21.9867 19 21.7487 19 21.462V13.062L22.532 16.592C22.7187 16.7787 22.9473 16.8787 23.218 16.892C23.4887 16.9053 23.7313 16.8053 23.946 16.592C24.1607 16.3787 24.2673 16.1427 24.266 15.884C24.2647 15.6253 24.158 15.39 23.946 15.178L19.13 10.362C18.8073 10.0393 18.4307 9.878 18 9.878C17.5693 9.878 17.192 10.0393 16.868 10.362L12.132 15.1C11.944 15.2867 11.844 15.516 11.832 15.788C11.82 16.06 11.92 16.3027 12.132 16.516C12.344 16.7293 12.5793 16.836 12.838 16.836C13.0967 16.836 13.3327 16.7293 13.546 16.516L17 13.06V21.46C17 21.744 17.0953 21.982 17.286 22.174C17.4767 22.366 17.7147 22.4613 18 22.46Z"
-                                        fill="#0276D3" />
-                                </svg>
-                            </div>
-                            <div class="formbold-drop-file images_upcss">
-                                <p>Choose a file or drag & drop it here</p>
-                                <p>OR</p>
-                                <input type="file" class="slds-file-selector__input slds-assistive-text"
-                                    onchange={handleSelectedFiles}
-                                    accept="image/png, image/jpeg, image/jpg , video/mp4"
-                                    id="file-upload-input-107" multiple
-                                    aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
-                                <label class="slds-file-selector__body" for="file-upload-input-107"
-                                    id="file-selector-secondary-label106">
-                                    <span class="formbold-browse">Browse File</span>
-                                </label>
-                            </div>
+        <div class="content-body">
+            <template if:false={hasAllCredentials}>
+                <div class="credentials-missing-container">
+                    <div class="credentials-missing-content">
+                        <img src="/resource/MVEX__emptyState" alt="Credentials Required" class="credentials-empty-icon" draggable="false"/>
+                        <div class="credentials-missing-message">
+                            {missingCredentialsMessage}
+                        </div>
+                        <div class="credentials-missing-submessage">
+                            Please configure your credentials in the integration settings.
                         </div>
                     </div>
                 </div>
-            </div>
+            </template>
 
-            <div class="caption-input">
-                <div class="input_class_css">
-                    <label for="caption">Caption<abbr title="required"
-                        class="slds-required">*</abbr></label>
-                    <input type="text" data-id="caption" placeholder="Enter your Caption" maxlength="2200" class="caption"
-                        value={caption} onchange={handleCaptionChange} />
-                </div>          
-            </div>
+            <template if:true={hasAllCredentials}>
+                <div class="instagram-post-body">
 
-            <div class="submit-button">
-                <button onclick={handlePost} class="upload-button">Upload</button>
-            </div>
-
-            <div class="image-preview-container-wrapper" ondrop={handleDropImages} ondragover={handleDragOver}>
-                <template if:true={isFileAvailable}>
-                    <div class="image-preview-container">
-                        <template for:each={selectedFileWithPreview} for:item="file" for:index="index">
-                            <div key={file.name} class="image-preview-item dropableimage" data-index={index}
-                                draggable="true" ondragstart={handleDragStart} ondragenter={handleDragEnter}
-                                ondragleave={handleDragLeave} ondragend={handleDragEnd}>
-                                <img src={file.preview} alt={file.name} class="image-preview"
-                                    draggable="true" data-index={index} />
-                                <div class="overlay">
-                                    <div class="cancel-button" data-name={file.name}
-                                        onclick={handleRemoveFile}>✕</div>
-                                    <div class="file-name">{file.name}</div>
+                    <div class="media_upload_css">
+                        <h3>Media Upload</h3>
+                        <p>Add your Image and Video here.</p>
+                    </div>
+                    <div class="fileuploader_container">
+                        <div class="slds-file-selector slds-file-selector_images" ondrop={handleDrop}
+                            ondragover={allowDrop}>
+                            <div class="slds-file-selector__dropzone flex_css">
+                                <div>
+                                    <svg width="36" height="28" viewBox="0 0 36 28" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M3.232 28C2.31067 28 1.542 27.692 0.926 27.076C0.31 26.46 0.00133333 25.6907 0 24.768V3.232C0 2.31067 0.308667 1.542 0.926 0.926C1.54333 0.31 2.31133 0.00133333 3.23 0H11.85C12.2807 0 12.6993 0.0866669 13.106 0.26C13.5127 0.436 13.8607 0.668667 14.15 0.958L17.192 4H32.77C33.69 4 34.4587 4.30867 35.076 4.926C35.6933 5.54333 36.0013 6.312 36 7.232V24.77C36 25.69 35.692 26.4587 35.076 27.076C34.46 27.6933 33.6913 28.0013 32.77 28H3.232ZM18 22.46C18.2853 22.46 18.5233 22.3653 18.714 22.176C18.9047 21.9867 19 21.7487 19 21.462V13.062L22.532 16.592C22.7187 16.7787 22.9473 16.8787 23.218 16.892C23.4887 16.9053 23.7313 16.8053 23.946 16.592C24.1607 16.3787 24.2673 16.1427 24.266 15.884C24.2647 15.6253 24.158 15.39 23.946 15.178L19.13 10.362C18.8073 10.0393 18.4307 9.878 18 9.878C17.5693 9.878 17.192 10.0393 16.868 10.362L12.132 15.1C11.944 15.2867 11.844 15.516 11.832 15.788C11.82 16.06 11.92 16.3027 12.132 16.516C12.344 16.7293 12.5793 16.836 12.838 16.836C13.0967 16.836 13.3327 16.7293 13.546 16.516L17 13.06V21.46C17 21.744 17.0953 21.982 17.286 22.174C17.4767 22.366 17.7147 22.4613 18 22.46Z"
+                                            fill="#0276D3" />
+                                    </svg>
+                                </div>
+                                <div class="formbold-drop-file images_upcss">
+                                    <p>Choose a file or drag & drop it here</p>
+                                    <p>OR</p>
+                                    <input type="file" class="slds-file-selector__input slds-assistive-text"
+                                        onchange={handleSelectedFiles}
+                                        accept="image/png, image/jpeg, image/jpg , video/mp4"
+                                        id="file-upload-input-107" multiple
+                                        aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
+                                    <label class="slds-file-selector__body" for="file-upload-input-107"
+                                        id="file-selector-secondary-label106">
+                                        <span class="formbold-browse">Browse File</span>
+                                    </label>
                                 </div>
                             </div>
-                        </template>
-                    </div>
-                </template>
-            
-            
-                <template if:false={isFileAvailable}>
-            
-                    <div class="no-file-image">
-                        <img src={noUploadImageLink} alt="No Image Found" draggable="false">
-                    </div>
-            
-                    <div class="no-file-image-data">
-            
-                        <div class="upload-heading-1">
-                            No media files yet...
-                        </div>
-                        <div class="upload-heading-2">
-                            Please upload your images or video
                         </div>
                     </div>
-            
-                </template>
-        
-            </div>
-        </template>
+                </div>
+
+                <div class="caption-input">
+                    <div class="input_class_css">
+                        <label for="caption">Caption<abbr title="required"
+                            class="slds-required">*</abbr></label>
+                        <input type="text" data-id="caption" placeholder="Enter your Caption" maxlength="2200" class="caption"
+                            value={caption} onchange={handleCaptionChange} />
+                    </div>          
+                </div>
+
+                <div class="submit-button">
+                    <button onclick={handlePost} class="upload-button">Upload</button>
+                </div>
+
+                <div class="image-preview-container-wrapper" ondrop={handleDropImages} ondragover={handleDragOver}>
+                    <template if:true={isFileAvailable}>
+                        <div class="image-preview-container">
+                            <template for:each={selectedFileWithPreview} for:item="file" for:index="index">
+                                <div key={file.name} class="image-preview-item dropableimage" data-index={index}
+                                    draggable="true" ondragstart={handleDragStart} ondragenter={handleDragEnter}
+                                    ondragleave={handleDragLeave} ondragend={handleDragEnd}>
+                                    <img src={file.preview} alt={file.name} class="image-preview"
+                                        draggable="true" data-index={index} />
+                                    <div class="overlay">
+                                        <div class="cancel-button" data-name={file.name}
+                                            onclick={handleRemoveFile}>✕</div>
+                                        <div class="file-name">{file.name}</div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>            
+                
+                    <template if:false={isFileAvailable}>
+                
+                        <div class="no-file-image">
+                            <img src={noUploadImageLink} alt="No Image Found" draggable="false">
+                        </div>
+                
+                        <div class="no-file-image-data">
+                
+                            <div class="upload-heading-1">
+                                No media files yet...
+                            </div>
+                            <div class="upload-heading-2">
+                                Please upload your images or video
+                            </div>
+                        </div>
+                
+                    </template>
+                </div>
+
+            </template>
+        </div>
     </div>
 </template>

@@ -249,11 +249,13 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map(record => ({
+            
+            // Map over the slice to add a dynamic index based on current filtered sequence
+            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((record, relativeIndex) => ({
                 ...record,
+                index: startIndex + relativeIndex + 1, // Dynamically calculate sequence number
                 isSelected: this.selectedRecords.has(record.Id)
             }));
-            console.log('paginatedData', JSON.stringify(this.paginatedData));
             
         } catch (error) {
             this.showToast('Error', 'Error updating shown data', 'error');
@@ -447,12 +449,12 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                         let recordData = {
                             index: index + 1,
                             Id: record.Id,
-                            name: record[fields.nameField] ? record[fields.nameField] : '',
-                            phone: record[fields.phoneField] ? record[fields.phoneField] : '',
+                            name: record[fields.nameField] ? record[fields.nameField] : ' - ',
+                            phone: record[fields.phoneField] ? record[fields.phoneField] : ' - ',
                             isSelected: false
                         };
                         if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
-                            recordData.email = record[fields.emailField] ? record[fields.emailField] : '';
+                            recordData.email = record[fields.emailField] ? record[fields.emailField] : ' - ';
                         }
                         return recordData;
                     });

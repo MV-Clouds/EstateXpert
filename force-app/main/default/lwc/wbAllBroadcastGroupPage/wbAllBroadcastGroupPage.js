@@ -186,7 +186,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     
     handlePageChange(event) {
         try {
-            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+            const selectedPage = parseInt(event.currentTarget.getAttribute('data-id'), 10);
             if (selectedPage !== this.currentPage) {
                 this.currentPage = selectedPage;
                 this.updateShownData();
@@ -214,7 +214,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     }
 
     handleCommunicationTypeChange(event) {
-        this.selectedCommunicationType = event.target.value;
+        this.selectedCommunicationType = event.currentTarget.value;
     }
 
     handlePopupContinue() {

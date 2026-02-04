@@ -8,6 +8,7 @@ import getSessionId from '@salesforce/apex/BroadcastMessageController.getSession
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { NavigationMixin } from 'lightning/navigation';
+import { errorDebugger } from 'c/globalProperties';
 
 export default class BroadcastMessageComp extends NavigationMixin(LightningElement) {
     @api broadcastGroupId;
@@ -44,7 +45,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             return [];
         }
         const fields = this.configMap[this.selectedObject];
-        const fieldNames = [`${this.selectedObject}.${fields.nameField}`];
+        const fieldNames = [`${this.selectedObject}.Name`];
         if (this.communicationType === 'Email') {
             fieldNames.push(`${this.selectedObject}.${fields.emailField}`);
         } else if (this.communicationType === 'Phone' || this.communicationType === 'WhatsApp') {
@@ -249,11 +250,13 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map(record => ({
+            
+            // Map over the slice to add a dynamic index based on current filtered sequence
+            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((record, relativeIndex) => ({
                 ...record,
+                index: startIndex + relativeIndex + 1, // Dynamically calculate sequence number
                 isSelected: this.selectedRecords.has(record.Id)
             }));
-            console.log('paginatedData', JSON.stringify(this.paginatedData));
             
         } catch (error) {
             this.showToast('Error', 'Error updating shown data', 'error');
@@ -317,12 +320,20 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     handleSearch(event) {
         this.searchTerm = event.target.value.toLowerCase();
         const term = this.searchTerm.trim();
-        this.filteredData = this.data.filter(item => {
+        let results = this.data.filter(item => {
             const name = item.name?.toLowerCase() || '';
             const phone = item.phone?.toLowerCase() || '';
             const email = item.email?.toLowerCase() || '';
             return !term || name.includes(term) || phone.includes(term) || email.includes(term);
         });
+
+        // Apply sorting to show selected records at the top
+        this.filteredData = results.sort((a, b) => {
+            const aSelected = this.selectedRecords.has(a.Id);
+            const bSelected = this.selectedRecords.has(b.Id);
+            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        });
+
         this.currentPage = 1;
         this.updateShownData();
     }
@@ -396,7 +407,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
         if (response.status === 200) {
             const fields = this.configMap[this.selectedObject];
-            let fieldsString = `Id, ${fields.nameField}, ${fields.phoneField}`;
+            let fieldsString = `Id, Name, ${fields.phoneField}`;
             if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
                 fieldsString += `, ${fields.emailField}`;
             }
@@ -445,20 +456,16 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                     const fields = this.configMap[this.selectedObject];
                     this.data = result.records.map((record, index) => {
                         let recordData = {
-                            index: index + 1,
                             Id: record.Id,
-                            name: record[fields.nameField] ? record[fields.nameField] : '',
-                            phone: record[fields.phoneField] ? record[fields.phoneField] : '',
+                            name: record['Name'] ? record['Name'] : ' - ',
+                            phone: record[fields.phoneField] ? record[fields.phoneField] : ' - ',
                             isSelected: false
                         };
                         if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
-                            recordData.email = record[fields.emailField] ? record[fields.emailField] : '';
+                            recordData.email = record[fields.emailField] ? record[fields.emailField] : ' - ';
                         }
                         return recordData;
                     });
-
-                    this.filteredData = [...this.data];
-                    this.currentPage = 1;
 
                     if (this.isIntialRender && this.broadcastGroupId && this.groupMembers.length > 0) {
                         this.isIntialRender = false;
@@ -469,10 +476,18 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                                 this.selectedRecords.add(record.Id);
                             }
                         });
-                        this.filteredData = [...this.data];
                     } else {
                         this.selectedRecords.clear();
                     }
+
+                    // Sort initially to bring group members to top
+                    this.filteredData = [...this.data].sort((a, b) => {
+                        const aSel = this.selectedRecords.has(a.Id);
+                        const bSel = this.selectedRecords.has(b.Id);
+                        return (aSel === bSel) ? 0 : aSel ? -1 : 1;
+                    });
+
+                    this.currentPage = 1;
                     this.updateShownData();
 
                     if (result.records && Array.isArray(result.records)) {
@@ -492,22 +507,161 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     handleRecordSelection(event) {
         const recordId = event.target.dataset.recordid;
-        const record = this.paginatedData.find(row => row.Id === recordId);
-        if (record) {
-            record.isSelected = event.target.checked;
-            if (record.isSelected) {
-                this.selectedRecords.add(recordId);
-            } else {
-                this.selectedRecords.delete(recordId);
-            }
-            this.selectedRecords = new Set(this.selectedRecords);
+        const isChecked = event.target.checked;
+        
+        if (isChecked) {
+            this.selectedRecords.add(recordId);
+        } else {
+            this.selectedRecords.delete(recordId);
         }
+        this.selectedRecords = new Set(this.selectedRecords);
+
+        // Re-sort filtered data to bring newly selected items to top
+        this.filteredData = [...this.filteredData].sort((a, b) => {
+            const aSelected = this.selectedRecords.has(a.Id);
+            const bSelected = this.selectedRecords.has(b.Id);
+            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        });
+
+        this.updateShownData();
+    }
+
+    updateShownData() {
+        try {
+            const startIndex = (this.currentPage - 1) * this.pageSize;
+            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+            
+            // Map over the slice to add a dynamic index based on current filtered sequence
+            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((record, relativeIndex) => ({
+                ...record,
+                index: startIndex + relativeIndex + 1, // Dynamically calculate sequence number
+                isSelected: this.selectedRecords.has(record.Id)
+            }));
+            
+        } catch (error) {
+            this.showToast('Error', 'Error updating shown data', 'error');
+        }
+    }
+
+    handleSearch(event) {
+        this.searchTerm = event.target.value.toLowerCase();
+        const term = this.searchTerm.trim();
+        let results = this.data.filter(item => {
+            const name = item.name?.toLowerCase() || '';
+            const phone = item.phone?.toLowerCase() || '';
+            const email = item.email?.toLowerCase() || '';
+            return !term || name.includes(term) || phone.includes(term) || email.includes(term);
+        });
+
+        // Apply sorting to show selected records at the top
+        this.filteredData = results.sort((a, b) => {
+            const aSelected = this.selectedRecords.has(a.Id);
+            const bSelected = this.selectedRecords.has(b.Id);
+            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        });
+
+        this.currentPage = 1;
+        this.updateShownData();
+    }
+
+    fetchRecords(queryUrl, sessionId, maxLimit) {
+        const domainURL = location.origin.replace('lightning.force.com', 'my.salesforce.com');
+
+        const headers = {
+            "Authorization": "Bearer " + sessionId,
+            "Content-Type": "application/json"
+        };
+
+        const requestOptions = {
+            method: "GET",
+            headers: headers,
+            redirect: "follow"
+        };
+
+        return fetch(domainURL + queryUrl, requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                if (!this.selectedObject || !this.selectedListView) {
+                    return;
+                }
+
+                if (result) {
+                    const fields = this.configMap[this.selectedObject];
+                    this.data = result.records.map((record, index) => {
+                        let recordData = {
+                            Id: record.Id,
+                            name: record['Name'] ? record['Name'] : ' - ',
+                            phone: record[fields.phoneField] ? record[fields.phoneField] : ' - ',
+                            isSelected: false
+                        };
+                        if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
+                            recordData.email = record[fields.emailField] ? record[fields.emailField] : ' - ';
+                        }
+                        return recordData;
+                    });
+
+                    if (this.isIntialRender && this.broadcastGroupId && this.groupMembers.length > 0) {
+                        this.isIntialRender = false;
+                        const memberIds = new Set(this.groupMembers.map(member => member.MVEX__Member_Record_Id__c));
+                        this.data.forEach(record => {
+                            if (memberIds.has(record.Id)) {
+                                record.isSelected = true;
+                                this.selectedRecords.add(record.Id);
+                            }
+                        });
+                    } else {
+                        this.selectedRecords.clear();
+                    }
+
+                    // Sort initially to bring group members to top
+                    this.filteredData = [...this.data].sort((a, b) => {
+                        const aSel = this.selectedRecords.has(a.Id);
+                        const bSel = this.selectedRecords.has(b.Id);
+                        return (aSel === bSel) ? 0 : aSel ? -1 : 1;
+                    });
+
+                    this.currentPage = 1;
+                    this.updateShownData();
+
+                    if (result.records && Array.isArray(result.records)) {
+                        this.fetchedResults = maxLimit ? result.records.slice(0, maxLimit) : result.records;
+                        return true;
+                    } else {
+                        this.showToast('warning', 'No Records', 'No records were found.');
+                        return false;
+                    }
+                }
+            })
+            .catch(() => {
+                this.showToast('error', 'Error', 'Failed to retrieve records');
+                return false;
+            });
+    }
+
+    handleRecordSelection(event) {
+        const recordId = event.target.dataset.recordid;
+        const isChecked = event.target.checked;
+        
+        if (isChecked) {
+            this.selectedRecords.add(recordId);
+        } else {
+            this.selectedRecords.delete(recordId);
+        }
+        this.selectedRecords = new Set(this.selectedRecords);
+
+        // Re-sort filtered data to bring newly selected items to top
+        this.filteredData = [...this.filteredData].sort((a, b) => {
+            const aSelected = this.selectedRecords.has(a.Id);
+            const bSelected = this.selectedRecords.has(b.Id);
+            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        });
+
+        this.updateShownData();
     }
 
     handleSelectAll(event) {
         const isChecked = event.target.checked;
         this.paginatedData.forEach(record => {
-            record.isSelected = isChecked;
             if (isChecked) {
                 this.selectedRecords.add(record.Id);
             } else {
@@ -515,6 +669,15 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             }
         });
         this.selectedRecords = new Set(this.selectedRecords);
+
+        // Re-sort to maintain "selected at top" consistency
+        this.filteredData = [...this.filteredData].sort((a, b) => {
+            const aSelected = this.selectedRecords.has(a.Id);
+            const bSelected = this.selectedRecords.has(b.Id);
+            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        });
+
+        this.updateShownData();
     }
 
     handleModalOpen() {
@@ -619,15 +782,15 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     }
 
     navigateToAllGroup() {
-        let componentDef = {
-            componentDef: "MVEX:wbAllBroadcastGroupPage"
-        };
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/one/one.app#' + encodedComponentDef
-            }
-        });
+        try {
+            this[NavigationMixin.Navigate]({
+                type: "standard__navItemPage",
+                attributes: {
+                    apiName: "MVEX__Multi_Channel_Group",
+                },
+            });
+        } catch (error) {
+            errorDebugger('broadcastMessageComp', 'navigateToAllGroup', error, 'warn', 'Error in navigateToAllGroup');
+        }
     }
 }

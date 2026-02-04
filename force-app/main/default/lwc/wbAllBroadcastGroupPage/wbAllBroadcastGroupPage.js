@@ -16,6 +16,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     @track isLoading = true;
     @track showCommunicationPopup = false;
     @track selectedCommunicationType = 'Email';
+    @track hasBusinessAccountConfigured = false;
 
     broadcastGroupId = null;
 
@@ -106,7 +107,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
         return this.selectedCommunicationType === 'Both';
     }
     
-    connectedCallback() {
+    async connectedCallback() {
         try {
             loadStyle(this, MulishFontCss)
                 .then(() => {
@@ -115,6 +116,9 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
                 .catch(error => {
                     console.log('Error occurring during loading external css', error);
                 });
+            
+            // Check WhatsApp configuration and load groups
+            await this.checkBusinessAccountConfig();
             this.loadBroadcastGroups();
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
@@ -152,10 +156,14 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
 
     handleSearch(event) {
         try {
-            this.filteredData = this.data.filter((item) =>
-                (item.Name?.toLowerCase() ?? '').includes(
-                    (event.detail.value.toLowerCase() ?? ''))
-            );
+            const searchTerm = event.detail.value.toLowerCase();
+            this.filteredData = this.data
+                .filter((item) => (item.Name?.toLowerCase() ?? '').includes(searchTerm))
+                .map((item, index) => ({
+                    ...item,
+                    index: index + 1 // Re-indexing based on filtered results
+                }));
+            this.currentPage = 1; // Reset to first page on search
             this.updateShownData();
         } catch (error) {
             this.showToast('Error', 'Error searching records', 'error');
@@ -186,7 +194,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     
     handlePageChange(event) {
         try {
-            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+            const selectedPage = parseInt(event.currentTarget.getAttribute('data-id'), 10);
             if (selectedPage !== this.currentPage) {
                 this.currentPage = selectedPage;
                 this.updateShownData();
@@ -210,11 +218,18 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     }
 
     handleNewGroupClick() {
-        this.showCommunicationPopup = true;
+        if (this.hasBusinessAccountConfigured) {
+            this.showCommunicationPopup = true;
+        } else {
+            // Bypass popup if no WhatsApp integration exists
+            this.selectedCommunicationType = 'Email';
+            this.broadcastGroupId = null;
+            this.navigateToNewBroadcast();
+        }
     }
 
     handleCommunicationTypeChange(event) {
-        this.selectedCommunicationType = event.target.value;
+        this.selectedCommunicationType = event.currentTarget.value;
     }
 
     handlePopupContinue() {
@@ -281,6 +296,16 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
                 });
         } else {
             this.broadcastGroupId = null;
+        }
+    }
+
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
         }
     }
 

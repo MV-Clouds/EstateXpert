@@ -16,6 +16,7 @@ import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.ge
 import getTemplateData from '@salesforce/apex/ChatWindowController.getTemplateData';
 import createChat from '@salesforce/apex/ChatWindowController.createChat';
 import previewEmailTemplate from '@salesforce/apex/SiteAndBookingController.previewEmailTemplate';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 
 // Define paths
 const JQUERY_PATH = `${EvoCalendarZip}/evo-jquery.js`;
@@ -47,13 +48,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track selectedDate = '';
     @track selectedTime = '';
     @track selectedDateTime = '';
-    @track selectedCommunicationMethod = 'WhatsApp';
+    @track selectedCommunicationMethod = 'Email';
     @track selectedTemplate = '';
+    @track hasBusinessAccountConfigured = false;
 
-    @track communicationMethodOptions = [
-        { label: 'WhatsApp', value: 'WhatsApp' },
-        { label: 'Email', value: 'Email' }
-    ];
     @track templateOptions = [];
     @track templateMap = new Map();
     @track selectedObject = 'MVEX__Showing__c';
@@ -82,6 +80,15 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track bodyParams = [];
 
     // --- GETTERS ---
+
+    get communicationMethodOptions() {
+        const options = [];
+        if (this.hasBusinessAccountConfigured) {
+            options.push({ label: 'WhatsApp', value: 'WhatsApp' });
+        }
+        options.push({ label: 'Email', value: 'Email' });
+        return options;
+    }
 
     get isContactDataAvailable() {
         return this.contacts && this.contacts.length > 0;
@@ -156,6 +163,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     connectedCallback() {
         this.isLoading = true;
+        this.checkBusinessAccountConfig();
         loadScript(this, JQUERY_PATH)
             .then(() => {
                 if (!window.jQuery) { throw new Error('jQuery failed to load'); }
@@ -180,6 +188,29 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 console.error('Error loading resources:', error);
                 this.isLoading = false;
             });
+    }
+
+    /**
+    * Method Name : checkBusinessAccountConfig
+    * @description : method to check if business account ID is configured in custom metadata
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+            // Update default communication method based on configuration
+            if (!result) {
+                this.selectedCommunicationMethod = 'Email';
+            } else {
+                this.selectedCommunicationMethod = 'WhatsApp';
+            }
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
+            this.selectedCommunicationMethod = 'Email';
+        }
     }
 
     renderedCallback() {
@@ -404,7 +435,17 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             this.selectedDate = scheduleDate.toISOString().slice(0, 10);
             this.selectedTime = scheduleDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:mm
 
-            this.selectedCommunicationMethod = this.currentContact.CommunicationMethod || 'WhatsApp';
+            // Set communication method based on configuration and existing data
+            const savedMethod = this.currentContact.CommunicationMethod;
+            if (savedMethod === 'WhatsApp' && this.hasBusinessAccountConfigured) {
+                this.selectedCommunicationMethod = 'WhatsApp';
+            } else if (savedMethod === 'Email') {
+                this.selectedCommunicationMethod = 'Email';
+            } else {
+                // Default based on configuration
+                this.selectedCommunicationMethod = this.hasBusinessAccountConfigured ? 'WhatsApp' : 'Email';
+            }
+            
             this.selectedTemplate = '';
             this.previewEmailHtml = '';
             this.previewEmailSubject = '';

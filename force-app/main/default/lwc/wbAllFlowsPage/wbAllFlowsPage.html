@@ -1,249 +1,237 @@
 <template>
     <template if:false={isNameClicked}>
-        <template if:true={showLicenseError}>
-            <div class="license-error">
-                <div class="popup-container">
-                    <div class="popup-content">
-                        <h2>⚠️ License Expired</h2>
-                        <p>WBConnect license has expired. Please renew to continue using.</p>
+        <div class="slds-theme_default main">
+            <template if:true={isLoading}>
+                <c-spinner-component></c-spinner-component>
+            </template>
+
+            <div class="main_header_cls">
+                <div class="sub_main_header_css">
+                    <div slot="title" class="header_block_css">
+                        <div class="svg_back_icon" onclick={backToControlCenter}>
+                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                    fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div class="portal_mapping">
+                            WhatsApp Flow
+                        </div>
+                    </div>
+                    <div class="header">
+                        <button class="btn" onclick={showCreateFlow}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                            </svg>
+                            Create Flow
+                        </button>
                     </div>
                 </div>
             </div>
-        </template>
-        <template if:false={showLicenseError}>
-            <div class="slds-theme_default main">
-                <template if:true={isLoading}>
-                    <c-spinner-component></c-spinner-component>
-                </template>
-    
-                <div class="main_header_cls">
-                    <div class="sub_main_header_css">
-                        <div slot="title" class="header_block_css">
-                            <div class="svg_back_icon" onclick={backToControlCenter}>
-                                <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                                        fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                                </svg>
-                            </div>
-                            <div class="portal_mapping">
-                                WhatsApp Flow
-                            </div>
-                        </div>
-                        <div class="header">
-                            <button class="btn" onclick={showCreateFlow}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-                                </svg>
-                                Create Flow
-                            </button>
-                        </div>
+
+
+            <div class="main_content_cls">
+                <div class="slds-m-around_medium navbar">
+                    <div class="search-input">
+                        <lightning-input type="search" onchange={handleSearchInputChange}
+                            placeholder="Search Name..." class="input-campaign"
+                            variant="label-hidden"></lightning-input>
+                    </div>
+                    <div class="status-select">
+                        <lightning-combobox name="status" value={statusValues} options={statusOptions}
+                            onchange={handleStatusChange} class="select-campaign" variant="label-hidden">
+                        </lightning-combobox>
                     </div>
                 </div>
-    
-    
-                <div class="main_content_cls">
-                    <div class="slds-m-around_medium navbar">
-                        <div class="search-input">
-                            <lightning-input type="search" onchange={handleSearchInputChange}
-                                placeholder="Search Name..." class="input-campaign"
-                                variant="label-hidden"></lightning-input>
-                        </div>
-                        <div class="status-select">
-                            <lightning-combobox name="status" value={statusValues} options={statusOptions}
-                                onchange={handleStatusChange} class="select-campaign" variant="label-hidden">
-                            </lightning-combobox>
-                        </div>
-                    </div>
-    
-                    <template if:true={paginatedData.length}>
-                        <div class="table-content">
-                            <table class="slds-table">
-                                <thead>
-                                    <tr class="table_tr_cls">
-                                        <th scope="col" class="sno">
-                                            <div>No.</div>
-                                        </th>
-                                        <th scope="col" class="flowname">
-                                            <div>Flow Name</div>
-                                        </th>
-                                        <th scope="col" class="flowid">
-                                            <div>Flow ID</div>
-                                        </th>
-                                        <th scope="col" class="status">
-                                            <div>Status</div>
-                                        </th>
-                                        <th scope="col" class="lastupdated">
-                                            <div>Last Updated</div>
-                                        </th>
-                                        <th scope="col" class="actions">
-                                            <div>Actions</div>
-                                        </th>
+
+                <template if:true={paginatedData.length}>
+                    <div class="table-content">
+                        <table class="slds-table">
+                            <thead>
+                                <tr class="table_tr_cls">
+                                    <th scope="col" class="sno">
+                                        <div>No.</div>
+                                    </th>
+                                    <th scope="col" class="flowname">
+                                        <div>Flow Name</div>
+                                    </th>
+                                    <th scope="col" class="flowid">
+                                        <div>Flow ID</div>
+                                    </th>
+                                    <th scope="col" class="status">
+                                        <div>Status</div>
+                                    </th>
+                                    <th scope="col" class="lastupdated">
+                                        <div>Last Updated</div>
+                                    </th>
+                                    <th scope="col" class="actions">
+                                        <div>Actions</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={paginatedData} for:item="record" for:index="index">
+                                    <tr key={record.id}>
+                                        <td data-label="S.No.">
+                                            <div>{record.serialNumber}</div>
+                                        </td>
+                                        <td data-label="Flow Name" class="truncate_css">
+                                            <a onclick={handleFlowNameClick} data-id={record.MVEX__Flow_Id__c} 
+                                            data-name={record.MVEX__Flow_Name__c}>{record.MVEX__Flow_Name__c}</a>
+                                        </td>
+                                        <td data-label="Flow Id" class="truncate_css">
+                                            <div>{record.MVEX__Flow_Id__c}</div>
+                                        </td>
+                                        <td data-label="Status" class="truncate_css">
+                                            <div class={record.MVEX__Status__c}>{record.MVEX__Status__c}</div>
+                                        </td>
+                                        <td data-label="Last Updated">
+                                            <div>{record.LastModifiedDate}</div>
+                                        </td>
+                                        <td data-label="Actions">
+                                            <div class="action-btn">
+                                                <template if:false={record.isDeprecated}>
+                                                    <button class="action-div" data-id={record.MVEX__Flow_Id__c}
+                                                        onclick={previewTemplate}>
+                                                        <svg width="14" height="14" fill="#000000"
+                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                                                            enable-background="new 0 0 52 52" xml:space="preserve">
+                                                            <path
+                                                                d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
+                                                            </path>
+                                                            <path
+                                                                d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </template>
+                                                <template if:true={record.isEditable}>
+                                                    <button class="action-div" data-id={record.MVEX__Flow_Id__c}
+                                                        data-status={record.MVEX__Status__c} onclick={editFlow}>
+                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </button>
+                                                </template>
+                                                <template if:true={record.isPublished}>
+                                                    <button class="delete-div" data-id={record.MVEX__Flow_Id__c}
+                                                        data-status={record.MVEX__Status__c} onclick={deprecateFlow}>
+                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </button>
+                                                </template>
+                                                <template if:true={record.isDraft}>
+                                                    <button class="delete-div" data-id={record.MVEX__Flow_Id__c}
+                                                        data-status={record.MVEX__Status__c} onclick={deleteFlow}>
+                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={paginatedData} for:item="record" for:index="index">
-                                        <tr key={record.id}>
-                                            <td data-label="S.No.">
-                                                <div>{record.serialNumber}</div>
-                                            </td>
-                                            <td data-label="Flow Name" class="truncate_css">
-                                                <a onclick={handleFlowNameClick} data-id={record.MVEX__Flow_Id__c} 
-                                                data-name={record.MVEX__Flow_Name__c}>{record.MVEX__Flow_Name__c}</a>
-                                            </td>
-                                            <td data-label="Flow Id" class="truncate_css">
-                                                <div>{record.MVEX__Flow_Id__c}</div>
-                                            </td>
-                                            <td data-label="Status" class="truncate_css">
-                                                <div class={record.MVEX__Status__c}>{record.MVEX__Status__c}</div>
-                                            </td>
-                                            <td data-label="Last Updated">
-                                                <div>{record.LastModifiedDate}</div>
-                                            </td>
-                                            <td data-label="Actions">
-                                                <div class="action-btn">
-                                                    <template if:false={record.isDeprecated}>
-                                                        <button class="action-div" data-id={record.MVEX__Flow_Id__c}
-                                                            onclick={previewTemplate}>
-                                                            <svg width="14" height="14" fill="#000000"
-                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                                                                enable-background="new 0 0 52 52" xml:space="preserve">
-                                                                <path
-                                                                    d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
-                                                                </path>
-                                                                <path
-                                                                    d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
-                                                                </path>
-                                                            </svg>
-                                                        </button>
-                                                    </template>
-                                                    <template if:true={record.isEditable}>
-                                                        <button class="action-div" data-id={record.MVEX__Flow_Id__c}
-                                                            data-status={record.MVEX__Status__c} onclick={editFlow}>
-                                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path
-                                                                    d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                                    stroke="#212529" stroke-width="1.25"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                            </svg>
-                                                        </button>
-                                                    </template>
-                                                    <template if:true={record.isPublished}>
-                                                        <button class="delete-div" data-id={record.MVEX__Flow_Id__c}
-                                                            data-status={record.MVEX__Status__c} onclick={deprecateFlow}>
-                                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path
-                                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                    stroke="#212529" stroke-width="1.25"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                            </svg>
-                                                        </button>
-                                                    </template>
-                                                    <template if:true={record.isDraft}>
-                                                        <button class="delete-div" data-id={record.MVEX__Flow_Id__c}
-                                                            data-status={record.MVEX__Status__c} onclick={deleteFlow}>
-                                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path
-                                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                    stroke="#212529" stroke-width="1.25"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                            </svg>
-                                                        </button>
-                                                    </template>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </template>
-                    <template if:true={showNoRecordsMessage}>
-                        <div class="no-records-message">
-                            <div class="empty-state">
-                                <div class="empty-state__content">
-                                    <div class="empty-state__icon">
-                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                    </div>
-                                    <div class="empty-state__message">No data available to show</div>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:true={showNoRecordsMessage}>
+                    <div class="no-records-message">
+                        <div class="empty-state">
+                            <div class="empty-state__content">
+                                <div class="empty-state__icon">
+                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
                                 </div>
+                                <div class="empty-state__message">No data available to show</div>
                             </div>
                         </div>
-                    </template>
-                    <template if:true={paginatedData.length}>
-                        <div class="pagination-container">
-                            <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                    fill="#fff">
-                                    <path
-                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                </svg>
-                                Previous
-                            </button>
-    
-                            <template for:each={pageNumbers} for:item="page">
-                                <template if:false={page.isEllipsis}>
-                                    <button key={page.number} data-id={page.number} class={page.className}
-                                        onclick={handlePageChange}>
-                                        {page.number}
-                                    </button>
-                                </template>
-                                <template if:true={page.isEllipsis}>
-                                    <span key={page.number} class="pagination-ellipsis">...</span>
-                                </template>
+                    </div>
+                </template>
+                <template if:true={paginatedData.length}>
+                    <div class="pagination-container">
+                        <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                fill="#fff">
+                                <path
+                                    d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                            </svg>
+                            Previous
+                        </button>
+
+                        <template for:each={pageNumbers} for:item="page">
+                            <template if:false={page.isEllipsis}>
+                                <button key={page.number} data-id={page.number} class={page.className}
+                                    onclick={handlePageChange}>
+                                    {page.number}
+                                </button>
                             </template>
-    
-                            <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
-                                Next
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                    fill="#fff">
-                                    <path
-                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </template>
-                </div>
-    
-    
-                <template if:true={showPopup}>
-                    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
-                        aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
-                        <div class="slds-modal__container">
-                            <div class="slds-modal__close closs_icon_css" onclick={closePopup}>
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                        fill="white" />
-                                </svg>
-                            </div>
-                            <div class="slds-modal__content slds-p-around_medium flow-preview" id="modal-content-id-2">
-                                <div class="slds-modal__header blue-header">
-                                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Flow Preview</h1>
-                                </div>
-                                <template if:true={isFlowDraft}>
-                                    <div class="slds-text-align--right slds-m-horizontal--medium slds-m-top--medium">
-                                        <button class="publish-btn" onclick={publishFlow}>Publish Flow</button>
-                                    </div>
-                                </template>
-                                <div class="previewContainer slds-m-top--medium">
-                                    <iframe class="flowIframe" src={flowPreviewURL} width="430" height="800"></iframe>
-                                </div>
-                                <div class="footer">
-                                    <button class="close-btn" onclick={closePopup}>Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    <div class="slds-backdrop slds-backdrop_open" onclick={closePopup}></div>
+                            <template if:true={page.isEllipsis}>
+                                <span key={page.number} class="pagination-ellipsis">...</span>
+                            </template>
+                        </template>
+
+                        <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                fill="#fff">
+                                <path
+                                    d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                            </svg>
+                        </button>
+                    </div>
                 </template>
             </div>
-        </template>
+
+
+            <template if:true={showPopup}>
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+                    aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+                    <div class="slds-modal__container">
+                        <div class="slds-modal__close closs_icon_css" onclick={closePopup}>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="white" />
+                            </svg>
+                        </div>
+                        <div class="slds-modal__content slds-p-around_medium flow-preview" id="modal-content-id-2">
+                            <div class="slds-modal__header blue-header">
+                                <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Flow Preview</h1>
+                            </div>
+                            <template if:true={isFlowDraft}>
+                                <div class="slds-text-align--right slds-m-horizontal--medium slds-m-top--medium">
+                                    <button class="publish-btn" onclick={publishFlow}>Publish Flow</button>
+                                </div>
+                            </template>
+                            <div class="previewContainer slds-m-top--medium">
+                                <iframe class="flowIframe" src={flowPreviewURL} width="430" height="800"></iframe>
+                            </div>
+                            <div class="footer">
+                                <button class="close-btn" onclick={closePopup}>Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open" onclick={closePopup}></div>
+            </template>
+        </div>
     </template>
     <template if:true={isNameClicked}>
         <c-wb-flows-report selected-flow-id={selectedFlowId} selected-flow-name={selectedFlowName}></c-wb-flows-report>

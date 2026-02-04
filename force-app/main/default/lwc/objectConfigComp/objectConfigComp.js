@@ -6,6 +6,7 @@ import getUserConfig from '@salesforce/apex/ObjectConfigController.getUserConfig
 import saveUserConfig from '@salesforce/apex/ObjectConfigController.saveUserConfig';
 import getObjectsWithPhoneField from '@salesforce/apex/ObjectConfigController.getObjectsWithPhoneField';
 import getRecordName from '@salesforce/apex/ObjectConfigController.getRecordName';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import MulishFontCss from '@salesforce/resourceUrl/leadassignmentcss';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
@@ -28,15 +29,33 @@ export default class ObjectConfigComp extends NavigationMixin(LightningElement) 
     @track isChatWindowConfigEdit = false;
     @track isLoading = false;
     @track selectedWebhookPhoneField = '';
+    @track hasBusinessAccountConfigured = false;
 
     // Fetch saved metadata on load
     async connectedCallback(){
         try {
             this.showSpinner = true;
             loadStyle(this, MulishFontCss);
+            await this.checkBusinessAccountConfig();
             this.loadSavedValues();
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
+        }
+    }
+
+    /*
+    * Method Name: checkBusinessAccountConfig
+    * @description: Method to check if WBConnect business account is configured
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
         }
     }
 

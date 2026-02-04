@@ -1,20 +1,21 @@
 <template>
-    <div class="wrapper">
-        <div class="main_header_cls">
-            <div class="sub_main_header_css">
-                <div slot="title" class="header_block_css">
-                    Marketing Campaign
-                </div>
-                <div class="header">
-                    <button class="btn" onclick={handleAdd}>
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
-                        </svg> 
-                        Add New                       
-                    </button>
+    <template if:true={isAccessible}>
+        <div class="wrapper">
+            <div class="main_header_cls">
+                <div class="sub_main_header_css">
+                    <div slot="title" class="header_block_css">
+                        Marketing Campaign
+                    </div>
+                    <div class="header">
+                        <button class="btn" onclick={handleAdd}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
+                            </svg> 
+                            Add New                       
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <div class="main_content_cls">
             <div class="slds-m-around_medium navbar">
@@ -170,6 +171,22 @@
             </template>
         </div>  
     </div>
+    </template>
+
+    <template if:false={isAccessible}>
+        <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
+            <div class="restricted-access">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        fill="currentColor" />
+                </svg>
+                <h1>Access Restricted</h1>
+                <p>You don't have permission to access this page. Please contact your administrator for further
+                    assistance.</p>
+            </div>
+        </div>
+    </template>
 
     <!-- <c-email-campaign-modal if:true={isModalOpen} onclose={handleModalClose}> </c-email-campaign-modal> -->
 

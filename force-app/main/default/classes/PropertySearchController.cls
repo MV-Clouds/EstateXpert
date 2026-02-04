@@ -429,4 +429,24 @@ public with sharing class PropertySearchController {
             return new List<Map<String, String>>();
         }
     }
+
+    /**
+     * @description       : This method checks if Business Account ID is configured in custom metadata
+     * @last modified on  : 03-02-2026
+     **/
+    @AuraEnabled
+    public static Boolean hasBusinessAccountId() {
+        try {
+            List<MVEX__WBConnect_Configuration__mdt> configs = [
+                SELECT Id, MVEX__Business_Account_Id__c 
+                FROM MVEX__WBConnect_Configuration__mdt 
+                WHERE MVEX__Business_Account_Id__c != NULL 
+                LIMIT 1
+            ];
+            return !configs.isEmpty() && String.isNotBlank(configs[0].MVEX__Business_Account_Id__c);
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'hasBusinessAccountId', 'Error while checking business account ID.');
+            return false;
+        }
+    }
 }

@@ -1,8 +1,9 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getSocialMediaData from '@salesforce/apex/IntegrationPopupController.getSocialMediaData';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
 import unlinkAccount from '@salesforce/apex/WhatsappConfigController.unlinkAccount';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -13,17 +14,46 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
     @api redirectto = '';
     @track isDataLoaded = false;
     @track isVfLoaded = false;
-    @track activeTab = 'WhatsApp';
+    @track activeTab = 'Instagram';
     @track showIntegrationModal = false;
     @track isSpinner = true;
     @track integrationName;
     @track integrationLabel;
     @track instagramData;
     @track isClientSecretHidden = true;
+    @track featureAvailability = {};
     @track whatsappUrl = `/apex/MVEX__facebookSDK?source=lwc&t=${Date.now()}`;
     lastClickTime = 0;
     debounceDelay = 500;
     CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
+
+    @wire(getMetadataRecords)
+    metadataRecords({ error, data }) {
+        if (data) {
+            this.featureAvailability = data.reduce((acc, record) => {
+                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
+                return acc;
+            }, {});
+            
+            // Set default active tab based on WhatsApp availability
+            if (this.isWhatsAppAvailable) {
+                this.activeTab = 'WhatsApp';
+            } else {
+                this.activeTab = 'Instagram';
+            }
+            
+            // Handle redirect if needed
+            if (this.redirectto === 'instagramPost') {
+                this.activeTab = 'Instagram';
+            }
+        } else if (error) {
+            console.error('Error fetching metadata records:', error);
+        }
+    }
+
+    get isWhatsAppAvailable() {
+        return this.featureAvailability?.Whatsapp_Template_Builder === true;
+    }
 
     get isWhatsApp() {
         return this.activeTab === 'WhatsApp';
@@ -80,10 +110,6 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
             this.showToast('Success', 'Permanent access token generated successfully!', 'success');
         } else if (this.c__status === 'fail') {
             this.showToast('Error', 'Failed to generate access token.', 'error');
-        }
-
-        if (this.redirectto === 'instagramPost') {
-            this.activeTab = 'Instagram';
         }
 
         window.addEventListener('message', this.handleVfPageLoaded.bind(this));

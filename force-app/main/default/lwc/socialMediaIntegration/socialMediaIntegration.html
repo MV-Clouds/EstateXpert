@@ -36,9 +36,11 @@
                 <!-- Sidebar with navigator -->
                 <div class="sidebar">
                     <ul>
-                        <li class={whatsappClass} onclick={handleWhatsAppClick}>
-                            <img src="/resource/MVEX__controlcenterimg/whatsapp.png" alt="whatsapp" draggable="false"> WhatsApp
-                        </li>
+                        <template if:true={isWhatsAppAvailable}>
+                            <li class={whatsappClass} onclick={handleWhatsAppClick}>
+                                <img src="/resource/MVEX__controlcenterimg/whatsapp.png" alt="whatsapp" draggable="false"> WhatsApp
+                            </li>
+                        </template>
                         <li class={instagramClass} onclick={handleInstagramClick}>
                             <img src="/resource/MVEX__controlcenterimg/instagram.png" alt="insta" draggable="false"> Instagram
                         </li>

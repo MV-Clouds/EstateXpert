@@ -1,8 +1,9 @@
 <template>
-    <template if:true={isLoading}>
-        <c-spinner-component></c-spinner-component>
-    </template>
-    <div class="wrapper">
+    <template if:false={isDirectAccess}>
+        <template if:true={isLoading}>
+            <c-spinner-component></c-spinner-component>
+        </template>
+        <div class="wrapper">
         <div class="main_header_cls">
             <div slot="title" class="header_block_css">
                 <div class="svg_back_icon" onclick={backToControlCenter}>
@@ -130,5 +131,19 @@
                 </div>
             </div>
         </section>
+    </template>
+    </div>
+    </template>
+
+    <template if:true={isDirectAccess}>
+        <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
+            <div class="invalid-access">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                </svg>
+                <h1>Invalid Access Path</h1>
+                <p>This page can only be accessed from the Control Center. Please navigate to Control Center to configure listing and property mappings.</p>
+            </div>
+        </div>
     </template>
 </template>

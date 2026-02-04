@@ -1,0 +1,487 @@
+.main-container {
+    position: relative;
+    height: 100%;
+}
+
+.main{
+    padding: 1%;
+    padding-bottom: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 5px;
+    height: 100%;
+    overflow-x: scroll;
+    scrollbar-width: none;
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.5), 0 1px 8px 0 rgba(0, 0, 0, 0.29);
+}
+
+.heading{
+    display: flex;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.txt{
+    font-size: x-large;
+    font-weight: 500;
+}
+
+.spinner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.templatetxt {
+    font-weight: 500;
+    font-family: sans-serif;
+    font-size: x-large;
+}
+
+.divcontainer2 {
+    width: 100%;
+}
+
+.flow-content{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.edit-content{
+    width: 70%;
+}
+
+.previewFlow{
+    margin-top: 1rem;
+}
+
+.templateContent3 {
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    padding: 1rem;
+    padding-bottom: 1.5rem;
+    margin-top: 1rem;
+}
+
+.nameLan {
+    display: flex;
+    margin-top: 0.3rem;
+}
+
+.namediv {
+    display: grid;
+    width: 100%;
+    position: relative;
+}
+
+.nameInput {
+    padding: 0.5rem;
+    padding-right: 4rem;
+    border-color: #80808087;
+    border-radius: 5px;
+    border-top-color: #dddbdb87;
+    border-left-color: #dddbdb87;
+}
+
+.tempname-count {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.5rem;
+}
+
+.templateContent4 {
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    padding: 1rem;
+    padding-bottom: 1.5rem;
+    margin-top: 1rem;
+}
+
+.tempHead {
+    font-weight: 500;
+}
+
+.conInput {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 5px;
+    border-color: #80808087;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.authContent1 {
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0.5rem;
+    margin-top: 1rem;
+}
+
+.radio-item {
+    margin-bottom: 20px;
+}
+
+.radio-name {
+    color: black;
+    transform: scale(1);
+    margin-top: 0.2rem;
+}
+
+.radio {
+    display: flex;
+    align-items: self-end;
+    cursor: pointer;
+}
+
+.radio-label {
+    color: black;
+    font-size: 14px;
+}
+
+.templatebtn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    margin-top: 2%;
+    position: sticky;
+    bottom: 0;
+}
+
+.footer-btn{
+    display: flex;
+    align-items: center;
+}
+
+.footer-desp{
+    margin-left: 1rem;
+}
+
+label{
+    font-size: large;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.contentType{
+    margin-top: 0.5rem;
+}
+
+.contentType pre {
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.run-btn{
+    width: 67px;
+    height: 41px;
+    margin-top: 5px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid darkgrey;
+    font-size: 14px;
+}
+
+.editor-div {
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+}
+
+.editor-heading{
+    font-weight: 600;
+}
+
+.editor-container {
+    height: 742px;
+    border: 1px solid #d8dde6;
+    overflow-y: scroll;
+    /* pointer-events: none; */
+}
+
+.editor {
+    width: 100%;
+    height: 100%;
+}
+
+.error-rate{
+    color: green;
+    background: #0080002e;
+    border-radius: 10px;
+    padding: 0.1rem;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.err{
+    width: -webkit-fill-available;
+}
+
+.puzzle{
+    display: grid;
+    align-items: center;
+    width: fit-content;
+    background: #00804E;
+    border-radius: 5px;
+    padding: 0.9rem;
+}
+
+img{
+    width: 1.5rem;
+}
+
+.name-header{
+    display: flex;
+    justify-content: space-between;
+}
+
+.flow-info{
+    display: flex;
+    justify-content: space-between;
+}
+
+.action-buttons{
+
+}
+
+.formatted-text1 {
+    display: flex;
+    align-items: center;
+}
+
+.segment {
+    margin: 0 5px;
+}
+
+.one{
+    color: #e79b0e;
+    background: #ffa50026;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+    border-radius: 5px;
+}
+
+.two {
+    color: #797878;
+}
+
+.dot {
+    color: #797878;
+    margin-bottom: 0.2rem;
+    font-size: 15px;
+    line-height: 1;
+}
+
+.flow-name{
+    font-weight: bold;
+    font-size: large;
+}
+
+/* Publish Popup */
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    width: 480px;
+    border-radius: 8px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.popup-content {
+    display: flex;
+    gap: 16px;
+}
+
+.left-section img {
+    width: 120px;
+    height: auto;
+}
+
+.right-section h2 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.right-section p {
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.right-section ul {
+    margin-top: 8px;
+}
+
+.right-section li {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.button-group {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.cancel {
+    background: #e0e0e0;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.publish {
+    background: #0078D4;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+/* Publish Popup */
+
+/* Delete Popup */
+.edit-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.edit-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    width: 400px;
+    border-radius: 8px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    padding: 15px;
+}
+
+.edit-popup-content {
+    position: relative;
+}
+
+.edit-popup-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.edit-popup-text {
+    font-size: 14px;
+    color: #5c5c5c;
+    margin-bottom: 20px;
+}
+
+.edit-button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.edit-cancel-button {
+    background: #e0e0e0;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.edit-delete-button {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+/* Delete ppopup */
+
+.flowIframe{
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    border: none;
+}
+
+
+/* Backdrop covers the entire component */
+.license-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); /* Dark overlay */
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Centered popup */
+.popup-container {
+    background: #b71c1c; /* Dark red for warning */
+    color: white;
+    padding: 24px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Styling for title */
+.popup-content h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* Styling for message */
+.popup-content p {
+    font-size: 16px;
+    margin: 0;
+}

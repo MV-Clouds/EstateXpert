@@ -28,9 +28,11 @@
                             <c-record-config-body-cmp feature-name="Inquiry Manager" onclose={handleCloseModal}></c-record-config-body-cmp>
                         </template>
 
-                        <button class="btn mapping-btn" onclick={handleSendMessage}
-                            disabled={isSendEmailButtonDisabled}>Send Message
-                        </button>
+                        <template if:true={hasBusinessAccountConfigured}>
+                            <button class="btn mapping-btn" onclick={handleSendMessage}
+                                disabled={isSendEmailButtonDisabled}>Send Message
+                            </button>
+                        </template>
 
                         <button class="btn mapping-btn" onclick={openModal} disabled={isSendEmailButtonDisabled}> Send
                             Mail

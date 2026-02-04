@@ -17,6 +17,7 @@ import { NavigationMixin } from 'lightning/navigation';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { subscribe } from 'lightning/empApi';
 import getOlderChats from '@salesforce/apex/ChatWindowController.getOlderChats';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 
 export default class ChatWindow extends NavigationMixin(LightningElement) {
 
@@ -62,6 +63,7 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
     @track replyBorderColors = ['#34B7F1', '#FF9500', '#B38F00', '#ffa5c0', '#ff918b'];
     @track subscription = {};
     @track channelName = '/event/MVEX__Chat_Message__e';
+    @track hasBusinessAccountConfigured = false;
     pageNumber = 1;
     pageSize = 50;
     isLoading = false;
@@ -105,6 +107,17 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
     async connectedCallback() {
         try {
             this.showSpinner = true;
+            
+            // Check business account configuration first
+            await this.checkBusinessAccountConfig();
+            
+            // If configuration is not valid, stop here and don't fetch any other data
+            if (!this.hasBusinessAccountConfigured) {
+                this.showSpinner = false;
+                return;
+            }
+            
+            // Continue with other initialization only if configuration is valid
             if (this.pageRef) {
                 this.objectApiName = this.pageRef.attributes.objectApiName;
             }
@@ -116,6 +129,22 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
             this.showSpinner = false;
+        }
+    }
+
+    /**
+    * Method Name : checkBusinessAccountConfig
+    * @description : method to check if business account ID is configured in custom metadata
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
         }
     }
 
@@ -1219,7 +1248,7 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
     downloadRowImage(event) {
         try {
             const fileName = event.currentTarget.dataset.name;
-            const vfPageUrl = `/apex/FileDownloadVFPage?fileName=${encodeURIComponent(fileName)}`;
+            const vfPageUrl = `/apex/MVEX__FileDownloadVFPage?fileName=${encodeURIComponent(fileName)}`;
             window.open(vfPageUrl, '_blank');
         } catch (error) {
             this.showSpinner = false;

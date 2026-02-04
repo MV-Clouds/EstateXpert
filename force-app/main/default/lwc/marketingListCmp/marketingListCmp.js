@@ -16,6 +16,7 @@ import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmp
 import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController.getMessagingServiceOptions';
 import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
 import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
@@ -77,6 +78,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track broadcastGroupId = null;
     @track templateMap = new Map();
     @track isAccessible = false;
+    @track hasBusinessAccountConfigured = false;
     selectedTemplate = '';
 
     /**
@@ -357,7 +359,24 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         .catch(error => {
             console.error('Error loading styles', error);
         });
+        this.checkBusinessAccountConfig();
         this.getAccessible();
+    }
+
+    /**
+    * Method Name : checkBusinessAccountConfig
+    * @description : method to check if business account ID is configured in custom metadata
+    * Date: 03/02/2026
+    * Created By: GitHub Copilot
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
+        }
     }
 
     getAccessible() {

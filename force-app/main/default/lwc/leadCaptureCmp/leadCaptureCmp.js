@@ -113,7 +113,7 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
     }
 
     checkMetaStatus(accessToken) {
-        // 1. We ONLY use debug_token because it is the only one that works with your Page Token
+        // 1. Check Connection Status (Page Token Validity)
         fetch(`https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${accessToken}`)
             .then(response => response.json())
             .then(result => {
@@ -121,14 +121,21 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
                     const data = result.data;
                     this.connectionDetails = data;
                     
-                    // 1. Connection Status (Token Validity)
+                    // Update Connection Status based on token validity
                     this.metaVerificationStatus = data.is_valid ? 'Connected' : 'Expired or Invalid';
 
-                    // 2. App Review / Permission Status logic
-                    if (data.scopes && data.scopes.includes('leads_retrieval')) {
-                        this.appReviewStatus = 'Verified'; 
+                    // 2. Check Real App Review Status
+                    // Scopes in the token only mean the USER granted it. To see if META approved it, 
+                    // we must query the app permissions using the App Secret.
+                    const appId = this.MetaData.integrationData.MVEX__APP_ID__c;
+                    const appSecret = this.MetaData.integrationData.MVEX__APP_SECRET__c;
+                    console.log('App ID:', appId, 'App Secret:', appSecret);
+                    
+                    if (appId && appSecret) {
+                        console.log('Checking App Review Status for App ID:', appId);
+                        this.checkAppRealStatus(appId, appSecret);
                     } else {
-                        this.appReviewStatus = 'Permission Missing';
+                         this.appReviewStatus = 'Pending / In-Review';
                     }
                 }
             })
@@ -136,6 +143,38 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
                 console.error('Meta Status Error:', err);
                 this.metaVerificationStatus = 'Connection Error';
                 this.appReviewStatus = 'Unknown';
+            });
+    }
+
+    checkAppRealStatus(appId, appSecret) {
+        // Construct an App Access Token to query the Platform Status directly
+        const appAccessToken = `${appId}|${appSecret}`;
+        console.log('App Access Token:', appAccessToken);
+        
+        fetch(`https://graph.facebook.com/v21.0/${appId}/permissions?access_token=${appAccessToken}`)
+            .then(response => response.json())
+            .then(result => {
+
+                console.log('App Permissions Result:', JSON.stringify(result));
+                
+                if (result.data) {
+                    // Check if 'leads_retrieval' is explicitly GRANTED by Meta in the App Review
+                    const leadPerm = result.data.find(p => p.permission === 'leads_retrieval');
+                    
+                    if (leadPerm) {
+                         this.appReviewStatus = 'Verified';
+                    } else {
+                         // If missing or 'declined', the review is not complete
+                         this.appReviewStatus = 'Pending / In-Review';
+                    }
+                } else {
+                    console.error('Permission Fetch Error:', result);
+                    this.appReviewStatus = 'Check Failed';
+                }
+            })
+            .catch(err => {
+                console.error('Network Error:', err);
+                this.appReviewStatus = 'Network Error';
             });
     }
 

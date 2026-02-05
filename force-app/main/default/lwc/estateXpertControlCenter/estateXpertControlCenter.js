@@ -25,7 +25,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
 
     get isWhatsappSectionAvailable() {
         return !this.featureAvailability?.Whatsapp_Flow_Builder &&
-            !this.featureAvailability?.Whatsapp_Template_Builder
+            !this.featureAvailability?.Whatsapp_Template_Builder &&
+            !this.featureAvailability?.Whatsapp_Embedded_Signup
             ? false
             : true;
     }
@@ -272,6 +273,17 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             type: "standard__webPage",
             attributes: {
                 url: "/one/one.app#" + encodedComponentDef
+            }
+        });
+    }
+
+    whatsappEmbeddedSignuprMethod(event) {
+        event.preventDefault();
+        
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: '/apex/facebookSDK'
             }
         });
     }

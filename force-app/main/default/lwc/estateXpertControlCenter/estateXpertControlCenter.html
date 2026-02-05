@@ -178,18 +178,12 @@
                                 <img src="/resource/MVEX__controlcenterimg/socialmedia.png" alt="field mapping"
                                     class="tile-icon-img" draggable="false" />
                             </div>
-                            <h1 class="tile-title">Social Media Integration</h1>
+                            <h1 class="tile-title">Instragram Integration</h1>
                             <div class="tile-description-wrapper">
                                 <p class="tile-description">
-                                    The "Social Media Integration" modal simplifies social media
-                                    management by providing a centralized platform for connecting
-                                    and managing accounts on platforms like WhatsApp, enhancing
-                                    efficiency and reach.
+                                    The "Instragram Integration" allows users to connect their Instagram accounts with EstateXpert, enabling them to manage posts, enhancing their social media presence and marketing efforts.
                                 </p>
-                                <span class="helptext">The "Social Media Integration" modal simplifies social media
-                                    management by providing a centralized platform for connecting
-                                    and managing accounts on platforms like WhatsApp, enhancing
-                                    efficiency and reach.</span>
+                                <span class="helptext">The "Instragram Integration" allows users to connect their Instagram accounts with EstateXpert, enabling them to manage posts, enhancing their social media presence and marketing efforts.</span>
                             </div>
                         </div>
                         <div class="tile" onclick={leadCaptureMethod} if:true={featureAvailability.Lead_Capture}>
@@ -212,20 +206,18 @@
                 <div class="tiles-section" if:true={isWhatsappSectionAvailable}>
                     <div class="tiles-section-header">WhatsApp</div>
                     <div class="tile-flex">
-                        <div class="tile" onclick={whatsappFlowBuilderMethod}
-                            if:true={featureAvailability.Whatsapp_Flow_Builder}>
+                        <div class="tile" onclick={whatsappEmbeddedSignuprMethod}
+                            if:true={featureAvailability.Whatsapp_Embedded_Signup}>
                             <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/planning.png" alt="field mapping"
+                                <img src="/resource/MVEX__controlcenterimg/whatsappTemplate.png" alt="field mapping"
                                     class="tile-icon-img" draggable="false" />
                             </div>
-                            <h1 class="tile-title">WhatsApp Flow Builder</h1>
+                            <h1 class="tile-title">WhatsApp Embedded Signup</h1>
                             <div class="tile-description-wrapper">
                                 <p class="tile-description">
-                                    The "WhatsApp Flow Builder" allows users to create flows for
-                                    use in WhatsApp chat.
+                                    The "WhatsApp Embedded Signup" allows users to sync Meta WhatsApp Business Account with EstateXpert and create templates for use in WhatsApp chat.
                                 </p>
-                                <span class="helptext">The "WhatsApp Flow Builder" allows users to create flows for
-                                    use in WhatsApp chat.</span>
+                                <span class="helptext">The "WhatsApp Embedded Signup" allows users to sync Meta WhatsApp Business Account with EstateXpert and create templates for use in WhatsApp chat.</span>
                             </div>
                         </div>
                         <div class="tile" onclick={whatsappTemplateBuilderMethod}
@@ -242,6 +234,22 @@
                                 </p>
                                 <span class="helptext">The "WhatsApp Template Builder" allows users to create
                                     templates for use in WhatsApp chat.</span>
+                            </div>
+                        </div>
+                        <div class="tile" onclick={whatsappFlowBuilderMethod}
+                            if:true={featureAvailability.Whatsapp_Flow_Builder}>
+                            <div class="tile-icon">
+                                <img src="/resource/MVEX__controlcenterimg/planning.png" alt="field mapping"
+                                    class="tile-icon-img" draggable="false" />
+                            </div>
+                            <h1 class="tile-title">WhatsApp Flow Builder</h1>
+                            <div class="tile-description-wrapper">
+                                <p class="tile-description">
+                                    The "WhatsApp Flow Builder" allows users to create flows for
+                                    use in WhatsApp chat.
+                                </p>
+                                <span class="helptext">The "WhatsApp Flow Builder" allows users to create flows for
+                                    use in WhatsApp chat.</span>
                             </div>
                         </div>
                     </div>

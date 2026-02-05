@@ -3,17 +3,13 @@ import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getSocialMediaData from '@salesforce/apex/IntegrationPopupController.getSocialMediaData';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
-import unlinkAccount from '@salesforce/apex/WhatsappConfigController.unlinkAccount';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import FacebookSdk from '@salesforce/resourceUrl/FacebookSdk';
 
 export default class SocialMediaIntegration extends NavigationMixin(LightningElement) {
     @api c__status = '';
     @api redirectto = '';
     @track isDataLoaded = false;
-    @track isVfLoaded = false;
     @track activeTab = 'Instagram';
     @track showIntegrationModal = false;
     @track isSpinner = true;
@@ -21,50 +17,12 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
     @track integrationLabel;
     @track instagramData;
     @track isClientSecretHidden = true;
-    @track featureAvailability = {};
-    @track whatsappUrl = `/apex/MVEX__facebookSDK?source=lwc&t=${Date.now()}`;
     lastClickTime = 0;
     debounceDelay = 500;
     CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
 
-    @wire(getMetadataRecords)
-    metadataRecords({ error, data }) {
-        if (data) {
-            this.featureAvailability = data.reduce((acc, record) => {
-                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
-                return acc;
-            }, {});
-            
-            // Set default active tab based on WhatsApp availability
-            if (this.isWhatsAppAvailable) {
-                this.activeTab = 'WhatsApp';
-            } else {
-                this.activeTab = 'Instagram';
-            }
-            
-            // Handle redirect if needed
-            if (this.redirectto === 'instagramPost') {
-                this.activeTab = 'Instagram';
-            }
-        } else if (error) {
-            console.error('Error fetching metadata records:', error);
-        }
-    }
-
-    get isWhatsAppAvailable() {
-        return this.featureAvailability?.Whatsapp_Template_Builder === true;
-    }
-
-    get isWhatsApp() {
-        return this.activeTab === 'WhatsApp';
-    }
-
     get isInstagram() {
         return this.activeTab === 'Instagram';
-    }
-
-    get whatsappClass() {
-        return this.activeTab === 'WhatsApp' ? 'active' : '';
     }
 
     get instagramClass() {
@@ -96,14 +54,6 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
                 console.error('Error loading style:', error);
             });
 
-        loadScript(this, FacebookSdk)
-            .then(() => {
-                console.log('Facebook SDK loaded successfully');
-            })
-            .catch(error => {
-                console.error('Error loading Facebook SDK:', error);
-            });
-
         this.getSocialMediaDataToShow();
 
         if (this.c__status === 'success') {
@@ -120,35 +70,9 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
     }
 
     handleVfPageLoaded(event) {
-        if (event.data === 'vfPageLoaded' && event.source === this.template.querySelector('iframe.whatsapp-iframe')?.contentWindow) {
-            this.isVfLoaded = true;
-        } else if (event.data === 'reloadVF') {
-            this.isVfLoaded = false;
-            this.whatsappUrl = `/apex/MVEX__facebookSDK?source=lwc&t=${Date.now()}`;
-        } else if (event.data === 'triggerUnlink') {
+        if (event.data === 'triggerUnlink') {
             this.showMessagePopup('Warning','Delete Integration','Are you sure you want to delete this integration? This action cannot be undone.');
         }
-    }
-
-    handleUnlink() {
-        this.isSpinner = true;
-        unlinkAccount()
-            .then(result => {
-                this.isSpinner = false;
-                if (result) {
-                    this.template.querySelector('iframe.whatsapp-iframe').contentWindow.postMessage('unlinkSuccess', '*');
-                    this.showToast('Success', 'WhatsApp account unlinked successfully.', 'success');
-                } else {
-                    this.template.querySelector('iframe.whatsapp-iframe').contentWindow.postMessage('unlinkError', '*');
-                    this.showToast('Error', 'Failed to unlink WhatsApp account.', 'error');
-                }
-            })
-            .catch(error => {
-                this.isSpinner = false;
-                console.error('Error unlinking WhatsApp:', error);
-                this.template.querySelector('iframe.whatsapp-iframe').contentWindow.postMessage('unlinkError', '*');
-                this.showToast('Error', 'Error unlinking WhatsApp account: ' + error.body?.message || 'Unknown error', 'error');
-            });
     }
 
     getSocialMediaDataToShow() {
@@ -193,20 +117,6 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
         const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
         const paddedSeconds = seconds < 10 ? `0${seconds}` : seconds;
         return `${paddedDay}/${paddedMonth}/${year}, ${paddedHours}:${paddedMinutes}:${paddedSeconds} ${ampm}`;
-    }
-
-    handleWhatsAppClick() {
-        const now = Date.now();
-        if (now - this.lastClickTime < this.debounceDelay) {
-            return;
-        }
-        this.lastClickTime = now;
-
-        if (this.activeTab !== 'WhatsApp') {
-            this.activeTab = 'WhatsApp';
-            this.isVfLoaded = false;
-            this.whatsappUrl = `/apex/MVEX__facebookSDK?source=lwc&t=${Date.now()}`;
-        }
     }
 
     handleInstagramClick() {

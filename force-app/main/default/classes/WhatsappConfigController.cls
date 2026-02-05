@@ -1,16 +1,30 @@
 public without sharing class WhatsappConfigController {
 
-    public static String whatsappBusinessAppId {get; set;}
+    public static String appId {get; set;}
+    public static String businessAccountId {get; set;}
+    public static String phoneNumberId {get; set;}
+    public static String accessToken {get; set;}
     public static String clientId {get; set;}
     public static String configurationId {get; set;}
     public static String clientSecret {get; set;}
 
     public WhatsappConfigController() {
-        List<WBConnect_Configuration__mdt> metaList = [SELECT MasterLabel, Business_Account_Id__c FROM WBConnect_Configuration__mdt WITH USER_MODE];
+        List<WBConnect_Configuration__mdt> metaList = [
+            SELECT MasterLabel, MVEX__Application_Id__c, Business_Account_Id__c, MVEX__Phone_Number_Id__c, 
+            MVEX__Access_Token__c
+            FROM WBConnect_Configuration__mdt WITH USER_MODE
+        ];
+
         if (metaList.size() > 0) {
-            whatsappBusinessAppId = metaList[0].Business_Account_Id__c;
+            appId = metaList[0].MVEX__Application_Id__c;
+            businessAccountId = metaList[0].Business_Account_Id__c;
+            phoneNumberId = metaList[0].MVEX__Phone_Number_Id__c;
+            accessToken = metaList[0].MVEX__Access_Token__c;
         } else {
-            whatsappBusinessAppId = '';
+            appId = '';
+            businessAccountId = '';
+            phoneNumberId = '';
+            accessToken = '';
         }
 
         List<EmbeddedSignUpConfig__c> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM EmbeddedSignUpConfig__c WITH USER_MODE];

@@ -171,7 +171,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         try {
             const data = await getMetadataRecords();
             const broadcastFeature = data.find(
-                item => item.DeveloperName === 'Broadcast'
+                item => item.DeveloperName === 'Whatsapp_Broadcast'
             );
             this.isAccessible = broadcastFeature ? Boolean(broadcastFeature.MVEX__isAvailable__c) : false;
         } catch (error) {

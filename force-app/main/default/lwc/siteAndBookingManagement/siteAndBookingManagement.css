@@ -199,7 +199,7 @@
 .contacts-table thead tr {
     position: sticky;
     top: 0;
-    z-index: 98;
+    z-index: 90;
 }
 
 .contacts-table a {

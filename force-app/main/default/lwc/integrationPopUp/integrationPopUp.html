@@ -338,10 +338,11 @@
                                         </button>
                                     </div>
                                     <lightning-input label="Verify Token" value={fieldsData.MVEX__VERIFY_TOKEN__c}
-                                        placeholder="Enter Verify Token" onchange={handleInputChange}
+                                        placeholder="Enter Verify Token" onchange={handleInputChange} onfocus={handleCredentialFocus}
                                         data-id="MVEX__VERIFY_TOKEN__c" class="custom-input" required></lightning-input>
                                     <lightning-input label="App ID" value={fieldsData.MVEX__APP_ID__c}
                                         placeholder="Enter App ID" onchange={handleInputChange} data-id="MVEX__APP_ID__c"
+                                        onfocus={handleCredentialFocus}
                                         class="custom-input" required></lightning-input>
                                     <div class="copyclass">
                                         <lightning-input type="password" label="App Secret"
@@ -381,14 +382,12 @@
                                     <lightning-input label="Facebook API Version" value={fieldsData.MVEX__FB_API_VERSION__c}
                                         placeholder="Enter Facebook API Version" onchange={handleInputChange}
                                         data-id="MVEX__FB_API_VERSION__c" class="custom-input" required></lightning-input>
-                                    <!-- <div class="copyclass"> -->
                                     <lightning-input type="text" label="Access Token" value={fieldsData.MVEX__ACCESS_TOKEN__c}
                                         placeholder="Enter Access Token" onchange={handleInputChange}
                                         onfocus={handleCredentialFocus}
                                         data-id="MVEX__ACCESS_TOKEN__c" data-name="secret-key-input" class="custom-input"
                                         required></lightning-input>
-                                    <!-- </div> -->
-                                </template>
+                                    </template>
                             </div>
                         </div>
                     </div>

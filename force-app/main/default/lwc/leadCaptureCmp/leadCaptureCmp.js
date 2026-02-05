@@ -18,6 +18,9 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
     @track MetaData = {};
     @track isClientSecretHidden = true;
     CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
+    @track metaVerificationStatus = 'Checking...';
+    @track appReviewStatus = 'Checking...';
+    @track connectionDetails = {};
 
     get isGoogle() {
         return this.activeTab === 'Google';
@@ -37,6 +40,23 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     get displayedAccessToken() {
         return this.CREDENTIAL_DISPLAY_TEXT;
+    }
+
+    get reviewClass() {
+        return this.appReviewStatus === 'Verified' ? 'status-success' : 'status-warning';
+    }
+
+    get statusClass() {
+        return this.metaVerificationStatus === 'Connected' ? 'status-success' : 'status-error';
+    }
+
+    // Helpers for UI display
+    get appName() { return this.connectionDetails.application || 'Meta Integration'; }
+    get appType() { return this.connectionDetails.type || 'Page Integration'; }
+    get tokenExpires() { 
+        return this.connectionDetails.data_access_expires_at 
+            ? new Date(this.connectionDetails.data_access_expires_at * 1000).toLocaleDateString() 
+            : 'Never'; 
     }
 
     connectedCallback() {
@@ -76,6 +96,11 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
                         }
                         this.integrationName = 'Meta';
                         this.MetaData = item;
+                        
+                        // NEW LOGIC: Check status if token exists
+                        if (item.isValid && item.integrationData.MVEX__ACCESS_TOKEN__c) {
+                            this.checkMetaStatus(item.integrationData.MVEX__ACCESS_TOKEN__c);
+                        }
                     }
                 });
                 this.isDataLoaded = true;
@@ -84,6 +109,72 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
             .catch(error => {
                 console.log('Error in fetching data -->', error.stack);
                 this.isSpinner = false;
+            });
+    }
+
+    checkMetaStatus(accessToken) {
+        // 1. Check Connection Status (Page Token Validity)
+        fetch(`https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${accessToken}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.data) {
+                    const data = result.data;
+                    this.connectionDetails = data;
+                    
+                    // Update Connection Status based on token validity
+                    this.metaVerificationStatus = data.is_valid ? 'Connected' : 'Expired or Invalid';
+
+                    // 2. Check Real App Review Status
+                    // Scopes in the token only mean the USER granted it. To see if META approved it, 
+                    // we must query the app permissions using the App Secret.
+                    const appId = this.MetaData.integrationData.MVEX__APP_ID__c;
+                    const appSecret = this.MetaData.integrationData.MVEX__APP_SECRET__c;
+                    console.log('App ID:', appId, 'App Secret:', appSecret);
+                    
+                    if (appId && appSecret) {
+                        console.log('Checking App Review Status for App ID:', appId);
+                        this.checkAppRealStatus(appId, appSecret);
+                    } else {
+                         this.appReviewStatus = 'Pending / In-Review';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Meta Status Error:', err);
+                this.metaVerificationStatus = 'Connection Error';
+                this.appReviewStatus = 'Unknown';
+            });
+    }
+
+    checkAppRealStatus(appId, appSecret) {
+        // Construct an App Access Token to query the Platform Status directly
+        const appAccessToken = `${appId}|${appSecret}`;
+        console.log('App Access Token:', appAccessToken);
+        
+        fetch(`https://graph.facebook.com/v21.0/${appId}/permissions?access_token=${appAccessToken}`)
+            .then(response => response.json())
+            .then(result => {
+
+                console.log('App Permissions Result:', JSON.stringify(result));
+                
+                if (result.data) {
+                    // Check if 'leads_retrieval' is explicitly GRANTED by Meta in the App Review
+                    const leadPerm = result.data.find(p => p.permission === 'leads_retrieval');
+                    
+                    if (leadPerm) {
+                         this.appReviewStatus = 'Verified';
+                    } else {
+                         // If missing or 'declined', the review is not complete
+                         this.appReviewStatus = 'Pending / In-Review';
+                    }
+                } else {
+                    console.error('Permission Fetch Error:', result);
+                    this.appReviewStatus = 'Check Failed';
+                }
+            })
+            .catch(err => {
+                console.error('Network Error:', err);
+                this.appReviewStatus = 'Network Error';
             });
     }
 

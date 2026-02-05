@@ -222,9 +222,21 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                         
                         // Store original Meta credentials if editing (only if values exist)
                         if (this.integrationname === 'Meta' && data.objectData) {
+                            if (data.objectData.MVEX__VERIFY_TOKEN__c) {
+                                this.originalCredentials.MVEX__VERIFY_TOKEN__c = data.objectData.MVEX__VERIFY_TOKEN__c;
+                                this.fieldsData.MVEX__VERIFY_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__APP_ID__c) {
+                                this.originalCredentials.MVEX__APP_ID__c = data.objectData.MVEX__APP_ID__c;
+                                this.fieldsData.MVEX__APP_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
+                            if (data.objectData.MVEX__APP_SECRET__c) {
+                                this.originalCredentials.MVEX__APP_SECRET__c = data.objectData.MVEX__APP_SECRET__c;
+                                this.fieldsData.MVEX__APP_SECRET__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            }
                             if (data.objectData.MVEX__ACCESS_TOKEN__c) {
                                 this.originalCredentials.MVEX__ACCESS_TOKEN__c = data.objectData.MVEX__ACCESS_TOKEN__c;
-                                // this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__ACCESS_TOKEN__c = this.CREDENTIAL_DISPLAY_TEXT;
                             }
                         }
                     } else {
@@ -383,7 +395,8 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                 } else if (value === '') {
                     this.fieldsData[field] = value;
                 }
-            } else if (this.integrationname === 'Meta' && field === 'MVEX__ACCESS_TOKEN__c') {
+            } else if (this.integrationname === 'Meta' && 
+                (field === 'MVEX__ACCESS_TOKEN__c' || field === 'MVEX__VERIFY_TOKEN__c' || field === 'MVEX__APP_ID__c' || field === 'MVEX__APP_SECRET__c')) {
                 // If the value is still the placeholder, don't update
                 if (value !== this.CREDENTIAL_DISPLAY_TEXT && value !== '') {
                     this.fieldsData[field] = value;
@@ -585,6 +598,15 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                 
                 // For Meta, restore original credentials if placeholder is still there
                 if (this.integrationname === 'Meta') {
+                    if (dataToSave.MVEX__VERIFY_TOKEN__c === this.CREDENTIAL_DISPLAY_TEXT) {
+                        dataToSave.MVEX__VERIFY_TOKEN__c = this.originalCredentials.MVEX__VERIFY_TOKEN__c;
+                    }
+                    if (dataToSave.MVEX__APP_ID__c === this.CREDENTIAL_DISPLAY_TEXT) {
+                        dataToSave.MVEX__APP_ID__c = this.originalCredentials.MVEX__APP_ID__c;
+                    }
+                    if (dataToSave.MVEX__APP_SECRET__c === this.CREDENTIAL_DISPLAY_TEXT) {
+                        dataToSave.MVEX__APP_SECRET__c = this.originalCredentials.MVEX__APP_SECRET__c;
+                    }
                     if (dataToSave.MVEX__ACCESS_TOKEN__c === this.CREDENTIAL_DISPLAY_TEXT) {
                         dataToSave.MVEX__ACCESS_TOKEN__c = this.originalCredentials.MVEX__ACCESS_TOKEN__c;
                     }

@@ -89,13 +89,46 @@
                             <div class="field-section">
                                 <template if:true={MetaData.isValid}>
                                     <!-- <div class="data_cls"><strong>Meta Page Webhook Endpoint :</strong><p>{MetaData.integrationData.META_PAGE_ENDPOINT__c}</p></div> -->
-                                    <div class="data_cls"><strong>Meta Page Access Token :</strong><p>{MetaData.integrationData.MVEX__ACCESS_TOKEN__c}</p></div>
+                                    <div class="status_container">
+                                        <div class="detail_grid">
+                                            <div class="grid-item"><strong>Linked App:</strong> <p>{appName}</p></div>
+                                            <div class="grid-item"><strong>Token Type:</strong> <p>{appType}</p></div>
+                                            <div class="grid-item"><strong>Access Expires:</strong> <p>{tokenExpires}</p></div>
+                                        </div>
+
+                                        <div class="data_cls status_row grid-item">
+                                            <strong><p>Token Verification Status :</p></strong>
+                                            <span class={statusClass}>{metaVerificationStatus}</span>
+                                        </div>
+
+                                        <div class="data_cls status_row grid-item">
+                                            <strong><p>Permission Status :</p></strong>
+                                            <span class={reviewClass}>{appReviewStatus}</span>
+                                        </div>
+
+                                        <div class="data_cls status_row grid-item">
+                                            <strong><p>Facebook API Version :</p></strong>
+                                            <span><p>{MetaData.integrationData.MVEX__FB_API_VERSION__c}</p></span>
+                                        </div>
+
+                                        <!-- <div class="data_cls status_row grid-item">
+                                            <strong>Created Date :</strong>
+                                            <span><p>{MetaData.integrationData.CreatedDate}</p></span>
+                                        </div> -->
+
+                                        <div class="data_cls status_row grid-item">
+                                            <strong><p>Last Modified Date :</p></strong>
+                                            <span><p>{MetaData.integrationData.LastModifiedDate}</p></span>
+                                        </div>
+
+                                    </div>
+                                    <!-- <div class="data_cls"><strong>Meta Page Access Token :</strong><p>{MetaData.integrationData.MVEX__ACCESS_TOKEN__c}</p></div>
                                     <div class="data_cls"><strong>Verify Token :</strong><p>{MetaData.integrationData.MVEX__VERIFY_TOKEN__c}</p></div>
-                                    <div class="data_cls"><strong>App ID :</strong><p>{MetaData.integrationData.MVEX__APP_ID__c}</p></div>
+                                    <div class="data_cls"><strong>App ID :</strong><p>{MetaData.integrationData.MVEX__APP_ID__c}</p></div> -->
                                     <!-- <div class="data_cls"><strong>App Secret :</strong><p>{MetaData.integrationData.APP_SECRET__c}</p></div> -->
-                                    <div class="data_cls"><strong>Facebook API Version :</strong><p>{MetaData.integrationData.MVEX__FB_API_VERSION__c}</p></div>
+                                    <!-- <div class="data_cls"><strong>Facebook API Version :</strong><p>{MetaData.integrationData.MVEX__FB_API_VERSION__c}</p></div>
                                     <div class="data_cls"><strong>Created Date :</strong><p>{MetaData.integrationData.CreatedDate}</p></div>
-                                    <div class="data_cls"><strong>Last Modified Date :</strong><p>{MetaData.integrationData.LastModifiedDate}</p></div>
+                                    <div class="data_cls"><strong>Last Modified Date :</strong><p>{MetaData.integrationData.LastModifiedDate}</p></div> -->
                                 </template>
                                 <template if:false={MetaData.isValid}>
                                     <div class="empty-state">

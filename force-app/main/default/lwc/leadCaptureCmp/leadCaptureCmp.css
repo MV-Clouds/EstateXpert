@@ -133,12 +133,10 @@
 }
 
 .field-section .data_cls strong{
-    width: 20%;
     font-weight: 500;
 }
 
 .field-section .data_cls p{
-    width: 80%;
     text-wrap: wrap;
     word-break: break-all;
 }
@@ -247,6 +245,90 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+
+.status_container {
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.status_row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed #d1d5db;
+    padding-bottom: 8px;
+}
+
+.status_row:last-of-type {
+    border-bottom: none;
+}
+
+/* Status Badges */
+.status-success {
+    background-color: #ecfdf5;
+    color: #047857;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid #10b981;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Add a checkmark icon before verified text via CSS */
+.status-success::before {
+    content: '✔';
+    margin-right: 5px;
+}
+
+.status-warning {
+    background-color: #fffbeb;
+    color: #b45309;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid #f59e0b;
+}
+
+.status-error {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid #ef4444;
+}
+
+/* Grid for details */
+.detail_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+    border-style: dotted;
+    border: 0px;
+    border-bottom: 1px dashed #d1d5db;
+}
+
+.grid-item strong {
+    display: block;
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-bottom: 2px;
+}
+
+.grid-item p {
+    font-size: 0.85rem;
+    color: #111827;
+    font-weight: 500;
+    margin: 0;
 }
 
 @media only screen and (max-width: 1050px) {

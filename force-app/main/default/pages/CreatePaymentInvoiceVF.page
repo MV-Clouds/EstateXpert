@@ -132,7 +132,7 @@
                     <!-- Invoice Header -->
                     <div class="invoice-header">
                         <div class="logo-section">
-                            <img src="{!$Resource.Companylogo}" class="logo-img" alt="Company Logo" />
+                            <img src="{!$Resource.MVEX__estatexpertlogo}" class="logo-img" alt="Company Logo" />
                         </div>
                         <div class="title-section">
                             <div class="title">Property Statement</div>

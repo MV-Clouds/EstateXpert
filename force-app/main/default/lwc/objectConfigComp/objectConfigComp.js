@@ -47,7 +47,7 @@ export default class ObjectConfigComp extends NavigationMixin(LightningElement) 
     * Method Name: checkBusinessAccountConfig
     * @description: Method to check if WBConnect business account is configured
     * Date: 03/02/2026
-    * Created By: GitHub Copilot
+    * Created By: Karan Singh
     */
     async checkBusinessAccountConfig() {
         try {

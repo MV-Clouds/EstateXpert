@@ -194,7 +194,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     * Method Name : checkBusinessAccountConfig
     * @description : method to check if business account ID is configured in custom metadata
     * Date: 03/02/2026
-    * Created By: GitHub Copilot
+    * Created By: Karan Singh
     */
     async checkBusinessAccountConfig() {
         try {
@@ -220,9 +220,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.initializeScheduleCalendar();
             }
             // Initialize "Manage Showing" modal calendar
-            if (this.showManageModal && !this.manageCalendarInitialized && this.showDateTimeInputs) {
-                this.initializeManageCalendar();
-            }
+            // if (this.showManageModal && !this.manageCalendarInitialized && this.showDateTimeInputs) {
+            //     this.initializeManageCalendar();
+            // }
         }
 
         // Render Email Preview Safely

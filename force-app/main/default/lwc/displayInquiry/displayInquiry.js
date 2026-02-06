@@ -477,7 +477,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Method Name : checkBusinessAccountConfig
     * @description : method to check if business account ID is configured in custom metadata
     * Date: 03/02/2026
-    * Created By: GitHub Copilot
+    * Created By: Karan Singh
     */
     async checkBusinessAccountConfig() {
         try {

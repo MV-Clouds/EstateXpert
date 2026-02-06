@@ -582,6 +582,118 @@ span {
     line-height: 1.6;
 }
 
+.custom-card {
+    max-width: 600px;
+    margin: auto;
+    background-color: linear-gradient(135deg, #F0F8FF 0%, #E6F0FA 100%);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.icon-container {
+    background-color: #FFF8DC;
+    /* Warm contrast to AliceBlue */
+    border-radius: 50%;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.icon-container:hover {
+    transform: scale(1.1);
+}
+
+.custom-icon {
+    stroke: #FFD700;
+    /* Gold for warning icon */
+}
+
+.custom-heading {
+    color: #1C2526;
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin: 0 0 1rem;
+    line-height: 1.3;
+}
+
+.custom-text {
+    color: #333;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0 0 1rem;
+    /* max-width: 80%; */
+}
+
+.custom-button {
+    background-color: #4682B4;
+    /* SteelBlue */
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-top: 1rem;
+}
+
+.custom-button:hover {
+    /* background-color: #4169E1; */
+    /* RoyalBlue */
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.custom-button:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 600px) {
+    .custom-card {
+        padding: 1.5rem;
+    }
+
+    .custom-heading {
+        font-size: 1.5rem;
+    }
+
+    .custom-text {
+        font-size: 1rem;
+        max-width: 100%;
+    }
+
+    .custom-button {
+        padding: 0.6rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .icon-container {
+        padding: 0.75rem;
+    }
+
+    .custom-icon {
+        width: 32px;
+        height: 32px;
+    }
+}
+
 .configuration-error-container {
     padding: 48px;
     border-radius: 20px;

@@ -585,6 +585,7 @@ span {
 
 .full-page-container {
     padding: 1rem;
+    background-color: #ffffff;
     height: calc(100% + 1.5rem);
     margin-top: -0.8rem;
     width: calc(100% + 1.5rem);

@@ -199,7 +199,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Method Name: getAccessible
     * @description: Method to check if user has access to Marketing Campaign feature
     * Date: 03/02/2026
-    * Created By: GitHub Copilot
+    * Created By: Karan Singh
     */
     getAccessible() {
         getMetadataRecords()

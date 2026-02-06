@@ -10,6 +10,7 @@ import checkInstagramIntegration from '@salesforce/apex/InstagramPostController.
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { NavigationMixin } from 'lightning/navigation';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 
 export default class InstagramPost extends NavigationMixin(LightningElement) {
     s3;
@@ -33,6 +34,7 @@ export default class InstagramPost extends NavigationMixin(LightningElement) {
     @track containerIds = [];
     @track isCarousel = false;
     @track showPublishButton = false;
+    @track isAccessible = false;
 
 
     get isFileAvailable() {
@@ -45,7 +47,7 @@ export default class InstagramPost extends NavigationMixin(LightningElement) {
     * * Date: 04/11/2024
     * Created By:Rachit Shah
     */
-    connectedCallback() {
+    async connectedCallback() {
         loadStyle(this, MulishFontCss)
             .then(() => {
                 console.log('Mulish Font loaded successfully');
@@ -54,9 +56,34 @@ export default class InstagramPost extends NavigationMixin(LightningElement) {
                 console.error('Error loading Mulish Font:', error);
             });
 
+        await this.getAccessible();
+        if (!this.isAccessible) {
+            this.showSpinner = false;
+            return;
+        }
+
         this.loadScripts();
         this.getS3ConfigDataAsync();
         this.checkIntegration();
+    }
+
+    /*
+    * Method Name: getAccessible
+    * @description: Method to check if user has access to Instagram Post Uploader feature
+    * Date: 03/02/2026
+    * Created By: Karan Singh
+    */
+    async getAccessible() {
+        try {
+            const data = await getMetadataRecords();
+            const broadcastFeature = data.find(
+                item => item.DeveloperName === 'Instagram_Post_Uploader'
+            );
+            this.isAccessible = broadcastFeature ? Boolean(broadcastFeature.MVEX__isAvailable__c) : false;
+        } catch (error) {
+            console.error('Error fetching accessible fields', error);
+            this.isAccessible = false;
+        }
     }
 
     checkIntegration(){

@@ -3,365 +3,398 @@
         <template if:true={hasBusinessAccountConfigured}>
             <template if:true={isTemplateVisible}>
                 <div class="wrapper">
-
-                <!-- Spinner -->
-                <template if:true={isLoading}>
-                    <c-spinner-component></c-spinner-component>
-                </template>
-
-                <!-- <h1 class="slds-text-align_center heading">Recent Broadcasts</h1> -->
-                <div class="main_header_cls">
-                    <div class="sub_main_header_css">
-                        <div slot="title" class="header_block_css">
-                            Recent Broadcasts
-                        </div>
-                        <div class="header">
-                            <button class="btn" onclick={newBroadcast}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
-                                </svg> 
-                                New Broadcast                      
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="main_content_cls">
-                    <div class="filterparent">
-                        <div class="filterdiv">
-                            <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" type="search"
-                                placeholder="Search by Name" onchange={handleSearch}></lightning-input>
-                        </div>
-                    </div>
-
-                    <!-- Custom Table -->
-                    <template if:true={paginatedData.length}>
-                        <div class="table-content">
-                            <table class="slds-table">
-                                <thead>
-                                    <tr class="table_tr_cls">
-                                        <th scope="col" class="sno">
-                                            <div>No.</div>
-                                        </th>
-                                        <th data-id="Name" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Name">Name</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="Name" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <th data-id="MVEX__Recipient_Count__c" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header recipient-count"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Recipient Count">Recipient Count</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="MVEX__Recipient_Count__c" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <th data-id="MVEX__Status__c" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header status"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Status">Status</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="MVEX__Status__c" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <th data-id="MVEX__Total_Sent__c" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-sent"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Total Sent">Total Sent</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="MVEX__Total_Sent__c" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <th data-id="MVEX__Total_Delivered__c" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-delivered"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Total Delivered">Total Delivered</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="MVEX__Total_Delivered__c" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <th data-id="MVEX__Total_Read__c" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-read"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Total Read">Total Read</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="MVEX__Total_Read__c" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <th data-id="MVEX__Total_Failed__c" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-failed"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Total Failed">Total Failed</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="MVEX__Total_Failed__c" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <!-- <th data-id="MVEX__Total_Replies__c" onclick={sortClick} aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-replies"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Total Replies">Total Replies</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="MVEX__Total_Replies__c" class="listing-manager-icon"
-                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th> -->
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={paginatedData} for:item="row" for:index="index">
-                                        <tr key={row.Id}>
-                                            <td data-label="S.No.">
-                                                <div>{row.index}</div>
-                                            </td>
-                                            <td data-label="Name" class="truncate_css">
-                                                <div><a href="javascript:void(0);" class="clickable-name" data-record-id={row.Id} onclick={handleNameClick}>{row.Name}</a></div>
-                                            </td>
-                                            <td data-label="Recipient Count">
-                                                <div>{row.MVEX__Recipient_Count__c}</div>
-                                            </td>
-                                            <td data-label="Status">
-                                                <div>{row.MVEX__Status__c}</div>
-                                            </td>
-                                            <td data-label="Total Sent">
-                                                <div>{row.MVEX__Total_Sent__c}</div>
-                                            </td>
-                                            <td data-label="Total Delivered">
-                                                <div>{row.MVEX__Total_Delivered__c}</div>
-                                            </td>
-                                            <td data-label="Total Read">
-                                                <div>{row.MVEX__Total_Read__c}</div>
-                                            </td>
-                                            <td data-label="Total Failed">
-                                                <div>{row.MVEX__Total_Failed__c}</div>
-                                            </td>
-                                            <!-- <td data-label="Total Replies">
-                                                <div>{row.MVEX__Total_Replies__c}</div>
-                                            </td> -->
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
+                    <!-- Spinner -->
+                    <template if:true={isLoading}>
+                        <c-spinner-component></c-spinner-component>
                     </template>
 
-                    <!-- No Records Message -->
-                    <template if:true={showNoRecordsMessage}>
-                        <div class="no-records-message">
-                            <div class="empty-state">
-                                <div class="empty-state__content">
-                                    <div class="empty-state__icon">
-                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                    <!-- <h1 class="slds-text-align_center heading">Recent Broadcasts</h1> -->
+                    <div class="main_header_cls">
+                        <div class="sub_main_header_css">
+                            <div slot="title" class="header_block_css">
+                                Recent Broadcasts
+                            </div>
+                            <div class="header">
+                                <button class="btn" onclick={newBroadcast}>
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
+                                    </svg> 
+                                    New Broadcast                      
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="main_content_cls">
+                        <div class="filterparent">
+                            <div class="filterdiv">
+                                <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" type="search"
+                                    placeholder="Search by Name" onchange={handleSearch}></lightning-input>
+                            </div>
+                        </div>
+
+                        <!-- Custom Table -->
+                        <template if:true={paginatedData.length}>
+                            <div class="table-content">
+                                <table class="slds-table">
+                                    <thead>
+                                        <tr class="table_tr_cls">
+                                            <th scope="col" class="sno">
+                                                <div>No.</div>
+                                            </th>
+                                            <th data-id="Name" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Name">Name</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="Name" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th data-id="MVEX__Recipient_Count__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header recipient-count"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Recipient Count">Recipient Count</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Recipient_Count__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th data-id="MVEX__Status__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header status"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Status">Status</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Status__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th data-id="MVEX__Total_Sent__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-sent"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Total Sent">Total Sent</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Total_Sent__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th data-id="MVEX__Total_Delivered__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-delivered"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Total Delivered">Total Delivered</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Total_Delivered__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th data-id="MVEX__Total_Read__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-read"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Total Read">Total Read</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Total_Read__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th data-id="MVEX__Total_Failed__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-failed"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Total Failed">Total Failed</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Total_Failed__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <!-- <th data-id="MVEX__Total_Replies__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-replies"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Total Replies">Total Replies</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Total_Replies__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={paginatedData} for:item="row" for:index="index">
+                                            <tr key={row.Id}>
+                                                <td data-label="S.No.">
+                                                    <div>{row.index}</div>
+                                                </td>
+                                                <td data-label="Name" class="truncate_css">
+                                                    <div><a href="javascript:void(0);" class="clickable-name" data-record-id={row.Id} onclick={handleNameClick}>{row.Name}</a></div>
+                                                </td>
+                                                <td data-label="Recipient Count">
+                                                    <div>{row.MVEX__Recipient_Count__c}</div>
+                                                </td>
+                                                <td data-label="Status">
+                                                    <div>{row.MVEX__Status__c}</div>
+                                                </td>
+                                                <td data-label="Total Sent">
+                                                    <div>{row.MVEX__Total_Sent__c}</div>
+                                                </td>
+                                                <td data-label="Total Delivered">
+                                                    <div>{row.MVEX__Total_Delivered__c}</div>
+                                                </td>
+                                                <td data-label="Total Read">
+                                                    <div>{row.MVEX__Total_Read__c}</div>
+                                                </td>
+                                                <td data-label="Total Failed">
+                                                    <div>{row.MVEX__Total_Failed__c}</div>
+                                                </td>
+                                                <!-- <td data-label="Total Replies">
+                                                    <div>{row.MVEX__Total_Replies__c}</div>
+                                                </td> -->
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
+                        <!-- No Records Message -->
+                        <template if:true={showNoRecordsMessage}>
+                            <div class="no-records-message">
+                                <div class="empty-state">
+                                    <div class="empty-state__content">
+                                        <div class="empty-state__icon">
+                                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                        </div>
+                                        <div class="empty-state__message">No Data Available to Show.</div>
                                     </div>
-                                    <div class="empty-state__message">No Data Available to Show.</div>
                                 </div>
                             </div>
-                        </div>
-                    </template>
+                        </template>
 
-                    <template if:true={paginatedData.length}>
-                        <div class="pagination-container">
-                            <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                    <path
-                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                </svg>
-                                Previous
-                            </button>
+                        <template if:true={paginatedData.length}>
+                            <div class="pagination-container">
+                                <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                        <path
+                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                    </svg>
+                                    Previous
+                                </button>
 
-                            <template for:each={pageNumbers} for:item="page">
-                                <template if:false={page.isEllipsis}>
-                                    <button key={page.number} data-id={page.number} class={page.className}
-                                        onclick={handlePageChange}>
-                                        {page.number}
-                                    </button>
+                                <template for:each={pageNumbers} for:item="page">
+                                    <template if:false={page.isEllipsis}>
+                                        <button key={page.number} data-id={page.number} class={page.className}
+                                            onclick={handlePageChange}>
+                                            {page.number}
+                                        </button>
+                                    </template>
+                                    <template if:true={page.isEllipsis}>
+                                        <span key={page.number} class="pagination-ellipsis">...</span>
+                                    </template>
                                 </template>
-                                <template if:true={page.isEllipsis}>
-                                    <span key={page.number} class="pagination-ellipsis">...</span>
-                                </template>
-                            </template>
 
-                            <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
-                                Next
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                                    Next
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                        <path
+                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+
+                    <template if:true={showPopup}>
+                        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+                            <div class="slds-modal__container">
+
+                                <!-- Close Button -->
+                                <div class="slds-modal__close closs_icon_css" onclick={handleCloseOnPopup}>
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
-                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </template>
-                </div>
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="white" />
+                                    </svg>
+                                </div>
 
+                                <div class="slds-modal__header blue-header">
+                                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{popupHeader}</h1>
+                                </div>
 
-                <template if:true={showPopup}>
-                    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
-                        <div class="slds-modal__container">
-
-                            <!-- Close Button -->
-                            <div class="slds-modal__close closs_icon_css" onclick={handleCloseOnPopup}>
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                    fill="white" />
-                                </svg>
-                            </div>
-
-                            <div class="slds-modal__header blue-header">
-                                <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{popupHeader}</h1>
-                            </div>
-
-                            <div class="slds-modal__content slds-p-around_medium popup_content_cls">
-                                <template if:true={popUpFirstPage}>
-                                    <div class="popUpBody">
-                                        <!-- Header Section: Search and Create New Group Button -->
-                                        <div class="slds-m-bottom_medium">
-                                            <div class="slds-grid slds-gutters">
-                                                <div class="slds-col slds-size_8-of-12">
-                                                    <lightning-input type="search" variant="label-hidden"
-                                                        placeholder="Search by Name" onchange={handleSearchPopup}>
-                                                    </lightning-input>
+                                <div class="slds-modal__content slds-p-around_medium popup_content_cls">
+                                    <template if:true={popUpFirstPage}>
+                                        <div class="popUpBody">
+                                            <!-- Header Section: Search and Create New Group Button -->
+                                            <div class="slds-m-bottom_medium">
+                                                <div class="slds-grid slds-gutters">
+                                                    <div class="slds-col slds-size_8-of-12">
+                                                        <lightning-input type="search" variant="label-hidden"
+                                                            placeholder="Search by Name" onchange={handleSearchPopup}>
+                                                        </lightning-input>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <!-- Groups List -->
-                                        <div class="box-container">
-                                            <template if:true={filteredGroups.length}>
-                                                <template for:each={filteredGroups} for:item="group">
-                                                    <div key={group.Id} class="">
-                                                        <div class="box-data">
-                                                            <div>
-                                                                <lightning-input type="checkbox" label="Select"
-                                                                    variant="label-hidden" data-id={group.Id}
-                                                                    onchange={handleGroupSelection} checked={group.IsChecked}>
-                                                                </lightning-input>
-                                                            </div>
-                                                            <div class="">
-                                                                <h3 class="slds-text-heading_small">{group.Name}</h3>
-                                                                <p>Members: {group.MVEX__Count_of_Members__c}</p>
-                                                                <p>Object of Group Members: {group.MVEX__Object_Name__c}</p>
-                                                                <p>Description: {group.MVEX__Description__c}</p>
+                                            <!-- Groups List -->
+                                            <div class="box-container">
+                                                <template if:true={filteredGroups.length}>
+                                                    <template for:each={filteredGroups} for:item="group">
+                                                        <div key={group.Id} class="">
+                                                            <div class="box-data">
+                                                                <div>
+                                                                    <lightning-input type="checkbox" label="Select"
+                                                                        variant="label-hidden" data-id={group.Id}
+                                                                        onchange={handleGroupSelection} checked={group.IsChecked}>
+                                                                    </lightning-input>
+                                                                </div>
+                                                                <div class="">
+                                                                    <h3 class="slds-text-heading_small">{group.Name}</h3>
+                                                                    <p>Members: {group.MVEX__Count_of_Members__c}</p>
+                                                                    <p>Object of Group Members: {group.MVEX__Object_Name__c}</p>
+                                                                    <p>Description: {group.MVEX__Description__c}</p>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </template>
                                                 </template>
+                                            </div>
+
+                                            <template if:true={filteredGroups.length}>
+                                                <div class="popUpFooter slds-text-align--center">
+                                                    <button class="cancel_btn_css slds-m-left_x-small" onclick={handleCloseOnPopup}>Close</button>
+                                                    <button class="save_btn_css slds-m-left_x-small" onclick={handleNextOnPopup} disabled={isNextDisabled}>Next</button>
+                                                </div>
+                                            </template>
+
+                                            <template if:false={filteredGroups.length}>
+                                                <div class="empty-state__content">
+                                                    <div class="empty-state__icon">
+                                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                                    </div>
+                                                    <div class="empty-state__message">No Data Available to Show.</div>
+                                                </div>
                                             </template>
                                         </div>
-
-                                        <template if:true={filteredGroups.length}>
-                                            <div class="popUpFooter slds-text-align--center">
-                                                <button class="cancel_btn_css slds-m-left_x-small" onclick={handleCloseOnPopup}>Close</button>
-                                                <button class="save_btn_css slds-m-left_x-small" onclick={handleNextOnPopup} disabled={isNextDisabled}>Next</button>
+                                    </template>
+                                    <template if:true={popUpSecondpage}>
+                                        <div class="popUpBody">
+                                            <div>
+                                                <lightning-combobox name="template" label="Select Template"
+                                                    options={templateOptions} onchange={handleInputChange} value={selectedTemplate}
+                                                    required message-when-value-missing=" " class="slds-m-bottom_medium">
+                                                </lightning-combobox>
                                             </div>
-                                        </template>
-
-                                        <template if:false={filteredGroups.length}>
-                                            <div class="empty-state__content">
-                                                <div class="empty-state__icon">
-                                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                                </div>
-                                                <div class="empty-state__message">No Data Available to Show.</div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-                                <template if:true={popUpSecondpage}>
-                                    <div class="popUpBody">
-                                        <div>
-                                            <lightning-combobox name="template" label="Select Template"
-                                                options={templateOptions} onchange={handleInputChange} value={selectedTemplate}
-                                                required message-when-value-missing=" " class="slds-m-bottom_medium">
-                                            </lightning-combobox>
                                         </div>
-                                    </div>
-                                    <div class="popUpFooter slds-text-align--center">
-                                        <button class="save_btn_css slds-m-left_x-small" onclick={handlePreviousOnPopup}>Previous</button>
-                                        <button class="save_btn_css slds-m-left_x-small" onclick={handleSendOnPopup}>Send</button>
-                                        <button class="save_btn_css slds-m-left_x-small" onclick={handleSchedulePopup}>Schedule</button>
-                                    </div>
-                                </template>
-                                <template if:true={popUpLastPage}>
-                                    <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium">
-                                        <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime} onchange={handleInputChange} class="slds-align_absolute-center"></lightning-input>
-                                    </div>
+                                        <div class="popUpFooter slds-text-align--center">
+                                            <button class="save_btn_css slds-m-left_x-small" onclick={handlePreviousOnPopup}>Previous</button>
+                                            <button class="save_btn_css slds-m-left_x-small" onclick={handleSendOnPopup}>Send</button>
+                                            <button class="save_btn_css slds-m-left_x-small" onclick={handleSchedulePopup}>Schedule</button>
+                                        </div>
+                                    </template>
+                                    <template if:true={popUpLastPage}>
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium">
+                                            <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime} onchange={handleInputChange} class="slds-align_absolute-center"></lightning-input>
+                                        </div>
 
-                                    <div class="popUpFooter slds-text-align_center">
-                                        <button class="save_btn_css slds-m-left_x-small" onclick={handlePreviousLastpage}>Previous</button>
-                                        <button class="save_btn_css slds-m-left_x-small" onclick={handleSchedule}>Schedule and Send</button>
-                                    </div>
-                                </template>
+                                        <div class="popUpFooter slds-text-align_center">
+                                            <button class="save_btn_css slds-m-left_x-small" onclick={handlePreviousLastpage}>Previous</button>
+                                            <button class="save_btn_css slds-m-left_x-small" onclick={handleSchedule}>Schedule and Send</button>
+                                        </div>
+                                    </template>
+                                </div>
+
                             </div>
-
-                        </div>
-                    </section>
-                    <div class="slds-backdrop slds-backdrop_open"></div>
-                </template>
-            </div>
+                        </section>
+                        <div class="slds-backdrop slds-backdrop_open"></div>
+                    </template>
+                </div>
+            </template>
         </template>
-    </template>
 
-    <template if:false={hasBusinessAccountConfigured}>
-        <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
-            <div class="configuration-error-container">
-                <div class="configuration-error-content">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="error-icon">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
-                    </svg>
-                    <h1>Configuration Required</h1>
-                    <p>WhatsApp Business Account is not configured. Please complete the WhatsApp configuration to enable broadcast functionality.</p>
+        <template if:false={hasBusinessAccountConfigured}>
+            <div class="wrapper">
+                <div class="custom-card">
+                    <div class="content-wrapper">
+                        <div class="icon-container">
+                            <svg class="custom-icon" width="40" height="40" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"
+                                fill="#000000">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <path style="fill:#464655;"
+                                        d="M509.435,448.962L271.75,44.367c-7.076-12.045-24.424-12.045-31.5,0L2.565,448.962 c-7.194,12.245,1.595,27.705,15.75,27.705h475.368C507.839,476.666,516.629,461.207,509.435,448.962z">
+                                    </path>
+                                    <path style="fill:#5B5D6E;"
+                                        d="M310.09,109.633c-75.525,54.5-124.731,143.208-124.731,243.46c0,44.069,9.578,85.877,26.64,123.573 h281.685c14.155,0,22.944-15.459,15.75-27.705L310.09,109.633z">
+                                    </path>
+                                    <path style="fill:#FFDC64;"
+                                        d="M252.195,93.738L53.788,431.474c-2.57,4.374,0.585,9.885,5.658,9.885h393.11 c5.073,0,8.228-5.511,5.658-9.885L259.805,93.738C258.099,90.834,253.901,90.834,252.195,93.738z">
+                                    </path>
+                                    <path style="fill:#FFF082;"
+                                        d="M185.36,353.093c0,30.722,4.638,60.357,13.216,88.267h253.98c5.073,0,8.228-5.511,5.658-9.885 L282.389,132.181C222.755,187.029,185.36,265.683,185.36,353.093z">
+                                    </path>
+                                    <g>
+                                        <circle style="fill:#464655;" cx="256.028" cy="379.568" r="17.653"></circle>
+                                        <path style="fill:#464655;"
+                                            d="M239.049,213.171l7.566,113.485c0.33,4.948,4.174,8.784,8.805,8.784h1.216 c4.631,0,8.475-3.834,8.805-8.784l7.566-113.485c0.365-5.475-3.682-10.131-8.805-10.131h-16.347 C242.731,203.04,238.684,207.697,239.049,213.171z">
+                                        </path>
+                                    </g>
+                                    <path style="fill:#FFC850;"
+                                        d="M452.556,450.186H59.442c-5.499,0-10.62-2.966-13.353-7.741c-2.733-4.78-2.698-10.697,0.086-15.442 L244.587,89.258c2.405-4.086,6.672-6.525,11.422-6.525c4.741,0,9.008,2.439,11.413,6.525l198.401,337.744 c2.784,4.75,2.819,10.667,0.086,15.442C463.176,447.22,458.055,450.186,452.556,450.186z M63.399,432.533h385.201L255.998,104.684 L63.399,432.533z">
+                                    </path>
+                                    <path style="fill:#FFDC64;"
+                                        d="M448.599,432.533H196.069c1.633,5.964,3.455,11.844,5.441,17.653h251.048 c5.499,0,10.62-2.966,13.353-7.741c2.733-4.775,2.698-10.692-0.086-15.442L289.135,126.224c-4.553,3.944-9,8.005-13.307,12.212 L448.599,432.533z">
+                                    </path>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="text-content">
+                            <h2 class="custom-heading">Connect WhatsApp Business Account</h2>
+                            <p class="custom-text">Reach your clients instantly with WhatsApp broadcasts. Connect your WhatsApp Business account to start sending property updates and communications.</p>
+                            <p class="custom-text">Set up your WhatsApp Business integration in the WhatsApp Embedded Settings page to enable broadcast messaging and enhance your client communication.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </template>
+        </template>
     </template>
 
     <template if:false={isAccessible}>

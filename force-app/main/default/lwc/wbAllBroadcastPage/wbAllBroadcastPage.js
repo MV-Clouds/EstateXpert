@@ -165,7 +165,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     * Method Name: getAccessible
     * @description: Method to check if user has access to Broadcast feature
     * Date: 03/02/2026
-    * Created By: GitHub Copilot
+    * Created By: Karan Singh
     */
     async getAccessible() {
         try {
@@ -184,7 +184,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     * Method Name: checkBusinessAccountConfig
     * @description: Method to check if WBConnect business account is configured
     * Date: 03/02/2026
-    * Created By: GitHub Copilot
+    * Created By: Karan Singh
     */
     async checkBusinessAccountConfig() {
         try {

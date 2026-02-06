@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -6,10 +6,11 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
 import revokeOutlookAccess from '@salesforce/apex/IntegrationPopupController.revokeOutlookAccess';
+import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 
 export default class EmailIntegration extends NavigationMixin(LightningElement) {
     @track isDataLoaded = false;
-    @track activeTab = 'Gmail';
+    @api activeTab = 'Gmail';
     @track showIntegrationModal = false;
     @track isSpinner = true;
     @track integrationName;
@@ -17,10 +18,27 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
     @track outlookData;
     @track gmailData;
     @track isClientSecretHidden = true;
+    @track featureAvailability = {};
     
     // Constants for credential placeholders
     CREDENTIAL_PLACEHOLDER = '••••••••••••••••';
     CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
+
+    @wire(getMetadataRecords)
+    metadataRecords({ error, data }) {
+        if (data) {
+            this.featureAvailability = data.reduce((acc, record) => {
+                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
+                return acc;
+            }, {});
+            setTimeout(() => {
+                this.isLoading = false;
+            }, 1000);
+        } else if (error) {
+            console.error("Error fetching metadata records:", error);
+            this.isLoading = false;
+        }
+    }
 
     /**
     * Method Name: isGmail
@@ -133,7 +151,6 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
             this.isSpinner = true;
             getIntegrationDetails()
             .then(data => {
-                console.log('data-->', data);
                 data.forEach(item => {
                     if (item.integrationName === 'Outlook') {
                         if (item.integrationData && item.integrationData.CreatedDate) {
@@ -249,7 +266,6 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
             this.isSpinner = true;
             revokeGmailAccess({ refreshToken: this.gmailData.integrationData.MVEX__Refresh_Token__c, recordId: this.gmailData.integrationData.Id })
             .then(data => {
-                console.log('data-->', data);
                 if (data === 'success') {
                     this.showToast('Success', 'Changes has been done successfully.', 'success');
                     this.getSocialMediaDataToShow();
@@ -298,7 +314,6 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
             this.isSpinner = true;
             revokeOutlookAccess({ refreshToken: this.outlookData.integrationData.MVEX__Refresh_Token__c, recordId: this.outlookData.integrationData.Id })
             .then(data => {
-                console.log('data-->', data);
                 if (data === 'success') {
                     this.showToast('Success', 'Changes has been done successfully.', 'success');
                     this.getSocialMediaDataToShow();
@@ -367,6 +382,36 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
         } catch (error) {
             console.error('Error in newIntegrationModal:', error); 
         }
+    }
+
+    handleAWSClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:storageIntegration"
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
+    }
+
+    handleInstagramClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:socialMediaIntegration"
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
     }
 
     /**

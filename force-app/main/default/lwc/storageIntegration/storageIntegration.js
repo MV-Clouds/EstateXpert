@@ -1,9 +1,10 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeAWSAccess';
+import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -18,10 +19,27 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track facebookData;
     @track isClientSecretHidden = true;
     @track isWaterMarkUploader = false;
+    @track featureAvailability = {};
     
     // Constants for credential placeholders
     CREDENTIAL_PLACEHOLDER = '••••••••••••••••';
     CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
+
+    @wire(getMetadataRecords)
+    metadataRecords({ error, data }) {
+        if (data) {
+            this.featureAvailability = data.reduce((acc, record) => {
+                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
+                return acc;
+            }, {});
+            setTimeout(() => {
+                this.isLoading = false;
+            }, 1000);
+        } else if (error) {
+            console.error("Error fetching metadata records:", error);
+            this.isLoading = false;
+        }
+    }
 
     /**
     * Method Name: isAWS
@@ -158,16 +176,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             errorDebugger('StorageIntegration', 'formatDate', error, 'warn', 'Error occurred while formatting the date');
             return dateStr;
         }
-    }
-
-    /**
-    * Method Name: handleAWSClick
-    * @description: Used to set active tab.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    handleAWSClick() {
-        this.activeTab = 'AWS';
     }
 
     handleDeactivateClick() {
@@ -311,6 +319,72 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
     closeWaterMarkModal() {
         this.isWaterMarkUploader = false;
+    }
+
+    handleAWSClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:storageIntegration"
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
+    }
+
+    handleGmailClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:emailIntegration",
+            attributes: {
+                activeTab: 'Gmail'
+            }
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
+    }
+
+    handleOutlookClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:emailIntegration",
+            attributes: {
+                activeTab: 'Outlook'
+            }
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
+    }
+
+    handleInstagramClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:socialMediaIntegration"
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
     }
 
     showMessagePopup(Status, Title, Message) {

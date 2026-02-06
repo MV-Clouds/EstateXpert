@@ -225,7 +225,8 @@
                                         <lightning-input label="Redirect URI" value={fieldsData.MVEX__Redirect_URI__c}
                                             onchange={handleInputChange} data-id="MVEX__Redirect_URI__c" class="custom-input"
                                             required
-                                            field-level-help="Please copy the URL and paste it as a Redirect URI in the application you created within Azure AD."></lightning-input>
+                                            field-level-help="This is will be used as Redirect URI in the application you created within Facebook for Developers. Please copy the URL and paste it as a Redirect URI in your Facebook app settings."
+                                            disabled="true"></lightning-input>
                                         <button onclick={copyTheText} class="copy-button">
                                             <svg viewBox="0 -0.5 25 25" fill="none" height="16" width="16"
                                                 xmlns="http://www.w3.org/2000/svg" stroke="#000000">

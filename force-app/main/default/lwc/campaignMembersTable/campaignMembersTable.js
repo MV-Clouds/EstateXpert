@@ -309,12 +309,10 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     backToCampaigns() {
         try {
             this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
+                type: "standard__navItemPage",
                 attributes: {
-                    url: '/one/one.app#' + btoa(JSON.stringify({
-                        componentDef: 'MVEX:displayCampaigns'
-                    }))
-                }
+                    apiName: "MVEX__Marketing_Campaign",
+                },
             });
         } catch (error) {
             console.log('error--> ', error);

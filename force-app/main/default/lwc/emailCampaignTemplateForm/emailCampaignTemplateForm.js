@@ -1642,16 +1642,11 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Created By: Rachit Shah
     */
     navigateToDisplayCampaigns() {
-        const cmpDef = {
-            componentDef: 'MVEX:displayCampaigns'
-        };
-    
-        let encodedDef = btoa(JSON.stringify(cmpDef));
         this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
+            type: "standard__navItemPage",
             attributes: {
-                url: "/one/one.app#" + encodedDef
-            }
+                apiName: "MVEX__Marketing_Campaign",
+            },
         });
     }
 

@@ -389,9 +389,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 if (field.fieldName.includes('.')) {
                     let fieldParts = field.fieldName.split('.');
                     let relatedObject = listing[fieldParts[0]];
-                    fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '';
+                    fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
                 } else {
-                    fieldValue = listing[field.fieldName] || '';
+                    fieldValue = listing[field.fieldName] || '-';
                 }
 
                 if (field.format && fieldValue) {
@@ -411,9 +411,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     if (field.fieldName.includes('.')) {
                         let fieldParts = field.fieldName.split('.');
                         let relatedObject = listing[fieldParts[0]];
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '';
+                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
                     } else {
-                        fieldValue = listing[field.fieldName] || '';
+                        fieldValue = listing[field.fieldName] || '-';
                     }
 
                     if (field.format && fieldValue) {

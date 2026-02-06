@@ -186,10 +186,6 @@
     justify-content: center;
 }
 
-.popup__recordValues {
-    padding-bottom: 150px;
-}
-
 .popup__data-row {
     align-items: center;
     padding: 8px 0;

@@ -540,6 +540,7 @@ span {
     margin-top: -0.8rem;
     width: calc(100% + 1.5rem);
     margin-left: -0.8rem;
+    background-color: white;
 }
 
 .restricted-access {

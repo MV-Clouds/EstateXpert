@@ -575,9 +575,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                         // Split the reference field name into relationship and field (e.g., Contact_r.LastName)
                         let fieldParts = field.fieldName.split('.');
                         let relatedObject = con[fieldParts[0]]; // Get the related object (e.g., Contact_r)
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : ''; // Get the related field (e.g., LastName)
+                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-'; // Get the related field (e.g., LastName)
                     } else {
-                        fieldValue = con[field.fieldName] || ''; // Regular field
+                        fieldValue = con[field.fieldName] || '-'; // Regular field
                     }
 
                     if (field.format && fieldValue) {
@@ -599,7 +599,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                             let relatedObject = con[fieldParts[0]];
                             fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '';
                         } else {
-                            fieldValue = con[field.fieldName] || '';
+                            fieldValue = con[field.fieldName] || '-';
                         }
 
                         if (field.format && fieldValue) {

@@ -112,44 +112,18 @@
                 <div class="tiles-section" if:true={isIntegrationSectionAvailable}>
                     <div class="tiles-section-header">Integration</div>
                     <div class="tile-flex">
-                        <div class="tile" onclick={cloudStorageIntegrationMethod}
-                            if:true={featureAvailability.Cloud_Storage_Integration}>
+                        <div class="tile" onclick={generalIntegrationMethod}
+                            if:true={featureAvailability.General_Integrations}>
                             <div class="tile-icon">
                                 <img src="/resource/MVEX__controlcenterimg/storage.png" alt="field mapping"
                                     class="tile-icon-img" draggable="false" />
                             </div>
-                            <h1 class="tile-title">Cloud Storage Integration</h1>
+                            <h1 class="tile-title">General Integrations</h1>
                             <div class="tile-description-wrapper">
                                 <p class="tile-description">
-                                    The "Cloud Storage Integration" modal simplifies file
-                                    management and storage by providing seamless integration with
-                                    cloud storage services like AWS, offering enhanced
-                                    accessibility and scalability.
+                                    The "General Integrations" modal simplifies storage, email, outlook, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience.
                                 </p>
-                                <span class="helptext">The "Cloud Storage Integration" modal simplifies file
-                                    management and storage by providing seamless integration with
-                                    cloud storage services like AWS, offering enhanced
-                                    accessibility and scalability.</span>
-                            </div>
-                        </div>
-                        <div class="tile" onclick={emailIntegrationMethod}
-                            if:true={featureAvailability.Email_Integration}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/email.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Email Integration</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Email Integration" modal streamlines email marketing
-                                    workflows by allowing users to seamlessly send campaigns
-                                    directly from their Gmail or Outlook accounts, improving
-                                    efficiency and productivity.
-                                </p>
-                                <span class="helptext">The "Email Integration" modal streamlines email marketing
-                                    workflows by allowing users to seamlessly send campaigns
-                                    directly from their Gmail or Outlook accounts, improving
-                                    efficiency and productivity.</span>
+                                <span class="helptext">The "General Integrations" modal simplifies storage, email, outlook, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience.</span>
                             </div>
                         </div>
                         <div class="tile" onclick={portalIntegrationMethod}
@@ -172,20 +146,6 @@
                                     audience.</span>
                             </div>
                         </div>
-                        <div class="tile" onclick={socialMediaIntegrationMethod}
-                            if:true={featureAvailability.Social_Media_Integration}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/socialmedia.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Instragram Integration</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Instragram Integration" allows users to connect their Instagram accounts with EstateXpert, enabling them to manage posts, enhancing their social media presence and marketing efforts.
-                                </p>
-                                <span class="helptext">The "Instragram Integration" allows users to connect their Instagram accounts with EstateXpert, enabling them to manage posts, enhancing their social media presence and marketing efforts.</span>
-                            </div>
-                        </div>
                         <div class="tile" onclick={leadCaptureMethod} if:true={featureAvailability.Lead_Capture}>
                             <div class="tile-icon">
                                 <img src="/resource/MVEX__controlcenterimg/leadcapture.png" alt="field mapping"
@@ -194,10 +154,10 @@
                             <h1 class="tile-title">Lead Capture</h1>
                             <div class="tile-description-wrapper">
                                 <p class="tile-description">
-                                    The "Lead Capture" simplifies the intergaration of leads from
+                                    The "Lead Capture" simplifies the integration of leads from
                                     social media platforms.
                                 </p>
-                                <span class="helptext">The "Lead Capture" simplifies the intergaration of leads from
+                                <span class="helptext">The "Lead Capture" simplifies the integration of leads from
                                     social media platforms.</span>
                             </div>
                         </div>
@@ -209,7 +169,7 @@
                         <div class="tile" onclick={whatsappEmbeddedSignuprMethod}
                             if:true={featureAvailability.Whatsapp_Embedded_Signup}>
                             <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/whatsappTemplate.png" alt="field mapping"
+                                <img src="/resource/MVEX__controlcenterimg/whatsapp.png" alt="field mapping"
                                     class="tile-icon-img" draggable="false" />
                             </div>
                             <h1 class="tile-title">WhatsApp Embedded Signup</h1>

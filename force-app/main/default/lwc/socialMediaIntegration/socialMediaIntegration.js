@@ -4,6 +4,7 @@ import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getSocialMediaData from '@salesforce/apex/IntegrationPopupController.getSocialMediaData';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
+import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class SocialMediaIntegration extends NavigationMixin(LightningElement) {
@@ -17,9 +18,26 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
     @track integrationLabel;
     @track instagramData;
     @track isClientSecretHidden = true;
+    @track featureAvailability = {};
     lastClickTime = 0;
     debounceDelay = 500;
     CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
+
+    @wire(getMetadataRecords)
+    metadataRecords({ error, data }) {
+        if (data) {
+            this.featureAvailability = data.reduce((acc, record) => {
+                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
+                return acc;
+            }, {});
+            setTimeout(() => {
+                this.isLoading = false;
+            }, 1000);
+        } else if (error) {
+            console.error("Error fetching metadata records:", error);
+            this.isLoading = false;
+        }
+    }
 
     get isInstagram() {
         return this.activeTab === 'Instagram';
@@ -119,13 +137,55 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
         return `${paddedDay}/${paddedMonth}/${year}, ${paddedHours}:${paddedMinutes}:${paddedSeconds} ${ampm}`;
     }
 
-    handleInstagramClick() {
-        const now = Date.now();
-        if (now - this.lastClickTime < this.debounceDelay) {
-            return;
-        }
-        this.lastClickTime = now;
-        this.activeTab = 'Instagram';
+    handleAWSClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:storageIntegration"
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
+    }
+
+    handleGmailClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:emailIntegration",
+            attributes: {
+                activeTab: 'Gmail'
+            }
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
+    }
+
+    handleOutlookClick(event) {
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "MVEX:emailIntegration",
+            attributes: {
+                activeTab: 'Outlook'
+            }
+        };
+
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: "/one/one.app#" + encodedComponentDef
+            }
+        });
     }
 
     deactivateInstagram() {

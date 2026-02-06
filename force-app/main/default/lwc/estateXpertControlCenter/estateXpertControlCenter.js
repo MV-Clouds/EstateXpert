@@ -32,9 +32,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     get isIntegrationSectionAvailable() {
-        return !this.featureAvailability?.Cloud_Storage_Integration &&
-            !this.featureAvailability?.Email_Integration &&
-            !this.featureAvailability?.Social_Media_Integration &&
+        return !this.featureAvailability?.General_Integrations &&
             !this.featureAvailability?.Portal_Integration &&
             !this.featureAvailability?.Lead_Capture
             ? false
@@ -152,57 +150,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: emailIntegrationMethod
-     * @description: Used to open emailIntegration component.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    emailIntegrationMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:emailIntegration"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    /**
-     * Method Name: cloudStorageIntegrationMethod
+     * Method Name: generalIntegrationMethod
      * @description: Used to open storageIntegration component.
      * Date: 09/09/2024
      * Created By: Karan Singh
      */
-    cloudStorageIntegrationMethod(event) {
+    generalIntegrationMethod(event) {
         event.preventDefault();
         let componentDef = {
             componentDef: "MVEX:storageIntegration"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    /**
-     * Method Name: socialMediaIntegrationMethod
-     * @description: Used to open Social Media integration component.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    socialMediaIntegrationMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:socialMediaIntegration"
         };
 
         let encodedComponentDef = btoa(JSON.stringify(componentDef));

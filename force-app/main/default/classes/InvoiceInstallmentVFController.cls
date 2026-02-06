@@ -1,5 +1,5 @@
 public with sharing class InvoiceInstallmentVFController {
-    public Property__c property { get; set; }
+    public MVEX__Listing__c listing { get; set; }
     public Payment_Schedule__c paymentSchedule { get; set; }
     public Decimal totalAmount { get; set; }
     public String generationDate { get; set; }
@@ -22,7 +22,7 @@ public with sharing class InvoiceInstallmentVFController {
 
         try {
             List<Payment_Schedule__c> paymentSchedules = [
-                SELECT Id, Payment_Plan__c, Payment_Plan__r.Property__c, Installment_Type__c, Amount__c, Due_Date__c, Percentage__c, Status__c
+                SELECT Id, Payment_Plan__c, Payment_Plan__r.Listing__c, Installment_Type__c, Amount__c, Due_Date__c, Percentage__c, Status__c
                 FROM Payment_Schedule__c
                 WHERE Id = :paymentScheduleId
                 WITH USER_MODE
@@ -37,16 +37,16 @@ public with sharing class InvoiceInstallmentVFController {
             paymentSchedule = paymentSchedules[0];
             System.debug('Payment Schedule Data: ' + paymentSchedule); // Debug to confirm data
 
-            if (paymentSchedule.Payment_Plan__r.Property__c != null) {
-                property = [
-                    SELECT Id, Name, CurrencyIsoCode, Completion_Status__c, Country__c, Furnished__c, 
-                           Property_Sub_Type__c, Type__c, Address__c, Apartment_Number_and_Name__c, 
-                           Area__c, Bathrooms__c, Bedrooms__c, City__c, Completion_Date__c, 
-                           Country_Code__c, Description__c, Floor__c, Number_of_Parking_Spaces__c, 
-                           Service_Charge__c, Size__c, State__c, Street__c, Subcommunity__c, Units__c, Year_Built__c, 
-                           Zip_Postal_Code__c,Sale_Price__c
-                    FROM Property__c
-                    WHERE Id = :paymentSchedule.Payment_Plan__r.Property__c
+            if (paymentSchedule.Payment_Plan__r.Listing__c != null) {
+                listing = [
+                    SELECT Id, Name, CurrencyIsoCode, MVEX__Completion_Status__c, MVEX__Country__c, MVEX__Furnished__c, 
+                           MVEX__Property_Sub_Type__c, MVEX__Property_Type__c, MVEX__Address__c, MVEX__House_Office_No__c, 
+                           MVEX__Subcommunity__c, MVEX__Bathrooms__c, MVEX__Bedrooms__c, MVEX__City__c, MVEX__Completion_Date__c, 
+                           MVEX__Country_Code__c, MVEX__Description__c, MVEX__Floor__c, MVEX__Number_of_Parking_Spaces__c, 
+                           MVEX__Service_Charge__c, MVEX__Size__c, MVEX__State__c, MVEX__Street__c, MVEX__Units__c, MVEX__Year_Built__c, 
+                           MVEX__Zip_Postal_Code__c,MVEX__Sale_Price__c
+                    FROM MVEX__Listing__c
+                    WHERE Id = :paymentSchedule.Payment_Plan__r.Listing__c
                     WITH USER_MODE
                     LIMIT 1
                 ];

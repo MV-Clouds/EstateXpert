@@ -129,7 +129,6 @@
         <body>
             <apex:outputPanel >
                 <div class="invoice-container">
-                    <!-- Invoice Header -->
                     <div class="invoice-header">
                         <div class="logo-section">
                             <img src="{!$Resource.estatexpertlogo}" class="logo-img" alt="Company Logo" />
@@ -139,34 +138,33 @@
                         </div>
                     </div>
 
-                    <!-- Property Details -->
-                    <apex:outputPanel rendered="{!property != null}">
+                    <apex:outputPanel rendered="{!listing != null}">
                         <div class="property-details">
                             <div class="section-title">Property Details</div>
                             <table>
                                 <tr>
                                     <th>Property Name</th>
-                                    <td>{!property.Name}</td>
+                                    <td>{!listing.Name}</td>
                                     <th>Unit No.</th>
-                                    <td>{!property.Apartment_Number_and_Name__c}</td>
+                                    <td>{!listing.MVEX__House_Office_No__c}</td>
                                 </tr>
                                 <tr>
                                     <th>Project</th>
-                                    <td>{!property.Name}</td>
+                                    <td>{!listing.Name}</td>
                                     <th>Type</th>
-                                    <td>{!property.Type__c}</td>
+                                    <td>{!listing.MVEX__Property_Type__c}</td>
                                 </tr>
                                 <tr>
                                     <th>Saleable Area (SQFT)</th>
                                     <td>
                                         <apex:outputText value="{0, number, ###,###,##0.00}">
-                                            <apex:param value="{!property.Size__c}" />
+                                            <apex:param value="{!listing.MVEX__Size__c}" />
                                         </apex:outputText>
                                     </td>
                                     <th>Purchase Price (AED)</th>
                                     <td>
                                         <apex:outputText value="{0, number, ###,###,##0.00}">
-                                            <apex:param value="{!property.Sale_Price__c}" />
+                                            <apex:param value="{!listing.MVEX__Sale_Price__c}" />
                                         </apex:outputText>
                                     </td>
                                 </tr>

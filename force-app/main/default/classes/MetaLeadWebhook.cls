@@ -48,13 +48,8 @@ global without sharing class MetaLeadWebhook {
                     pageId = String.valueOf(value.get('page_id'));
                     
                     if (String.isNotBlank(accessToken)) {
-                        // 1. Fetch Lead Answers
                         Map<String, Object> leadData = fetchLeadData(leadId);
-                        
-                        // 2. Fetch Form Name (New Logic)
                         String formName = fetchFormName(formId);
-                        
-                        // 3. Create Contact
                         createSalesforceContact(leadData, formName);
                     }
                 }

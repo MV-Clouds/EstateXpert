@@ -56,7 +56,7 @@ public with sharing class MarketingListCmpController {
             String contactFields = String.join(filteredFields, ', ');
             String queryFields = String.escapeSingleQuotes(contactFields);
             Integer pageSize = getPageSizeFromConfig();
-            String query = 'SELECT ' + queryFields + ' FROM Contact WHERE Contact_Type__c = \'Buyer\'';
+            String query = 'SELECT ' + queryFields + ' FROM Contact';
 
             List<Contact> contacts = Database.query(query, AccessLevel.USER_MODE);
 

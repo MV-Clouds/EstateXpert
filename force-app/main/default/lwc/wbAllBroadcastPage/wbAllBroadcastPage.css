@@ -114,13 +114,6 @@
     font-weight: 500;
 }
 
-.preview-container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2.5rem;
-}
-
 .pop-up{
     height: auto;
     max-height: 74vh;
@@ -184,6 +177,8 @@ span {
 
 .popUpBody {
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .pop-heading{
@@ -206,6 +201,7 @@ span {
     overflow: scroll;
     padding: 2px;
     scrollbar-width: none;
+    flex-grow: 1;
 }
 
 .box-data{
@@ -472,7 +468,15 @@ span {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    background-image: url('/resource/MVEX__newImageandMediaBg/');    display: flex;
+    min-height: 400px;
+    width: 100%;
+    padding: 12px;
+    overflow: auto;
+    scrollbar-width: none;
+    max-height: 470px;
+    position: relative;
+    flex-direction: column;
 }
 
 .sorting_header .slds-icon_container {
@@ -736,6 +740,41 @@ span {
     font-size: 1.25rem;
     color: #78350f;
     line-height: 1.6;
+}
+
+.inner-body-grid{
+    height: 100%;
+}
+
+.right-section-preview{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid #cabcbf;
+    padding-bottom: 0.5rem;
+}
+
+.preview-container {
+    background-color: #dcf8c6; /* WhatsApp background-like color */
+    border-radius: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.lastPage-grid{
+    flex-grow: 1;
+}
+
+.no-text{
+    font-size: large;
+    color: #0076d3;
+}
+
+/* Ensure the preview component matches the container width */
+c-template-preview {
+    width: 100%;
 }
 
 @keyframes pulse {

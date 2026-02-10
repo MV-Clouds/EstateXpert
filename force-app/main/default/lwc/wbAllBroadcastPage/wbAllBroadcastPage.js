@@ -430,12 +430,21 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         switch(name) {
             case 'template':
                 this.selectedTemplate = value;
+                this.handleRefreshClick();
             break;
             case 'dateTime':
                 this.selectedDateTime = value;                
             break;
         }
     }
+
+    handleRefreshClick() {
+        const childComponent = this.template.querySelector('c-template-preview');
+        if (childComponent && this.selectedTemplate) {
+            childComponent.refreshComponent(this.selectedTemplate);
+        }
+    }
+
 
     handleCloseOnPopup() {
         this.showPopup = false;

@@ -315,13 +315,36 @@
                                     </template>
                                     <template if:true={popUpSecondpage}>
                                         <div class="popUpBody">
-                                            <div>
-                                                <lightning-combobox name="template" label="Select Template"
-                                                    options={templateOptions} onchange={handleInputChange} value={selectedTemplate}
-                                                    required message-when-value-missing=" " class="slds-m-bottom_medium">
-                                                </lightning-combobox>
+                                                <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small inner-body-grid">
+                                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                                        <lightning-combobox name="template" label="Select Template"
+                                                            options={templateOptions} onchange={handleInputChange}
+                                                            value={selectedTemplate} required
+                                                            message-when-value-missing="Template is required"
+                                                            class="slds-m-bottom_medium">
+                                                        </lightning-combobox>
+                                                    </div>
+
+                                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
+                                                        <template if:true={selectedTemplate}>
+                                                            <div class="preview-container">
+                                                                <p class="slds-text-title_caps slds-m-bottom_small">Template Preview</p>
+                                                                <template if:true={selectedTemplate}>
+                                                                    <c-template-preview 
+                                                                        template-id={selectedTemplate} 
+                                                                        object-api-name={selectedObjectName}>
+                                                                    </c-template-preview>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                        <template if:false={selectedTemplate}>
+                                                            <div class="slds-text-body_small slds-text-color_weak no-text">
+                                                                Please select a template to preview.
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
                                         <div class="popUpFooter slds-text-align--center">
                                             <button class="save_btn_css slds-m-left_x-small" onclick={handlePreviousOnPopup}>Previous</button>
                                             <button class="save_btn_css slds-m-left_x-small" onclick={handleSendOnPopup}>Send</button>
@@ -329,7 +352,7 @@
                                         </div>
                                     </template>
                                     <template if:true={popUpLastPage}>
-                                        <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium lastPage-grid">
                                             <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime} onchange={handleInputChange} class="slds-align_absolute-center"></lightning-input>
                                         </div>
 

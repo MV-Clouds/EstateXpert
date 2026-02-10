@@ -1,0 +1,34 @@
+<template>
+    <div class="main-card">
+        <div class="data-table-container">
+            <template if:true={parsedData}>
+                <table class="custom-data-table">
+                    <thead>
+                        <tr>
+                            <th class="header-cell">Field / Question</th>
+                            <th class="header-cell">Response</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={parsedData} for:item="row">
+                            <tr key={row.key}>
+                                <td class="slds-p-left_medium">
+                                    {row.key}
+                                </td>
+                                <td class="slds-p-left_medium">
+                                    {row.value}
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            
+            <template if:false={parsedData}>
+                <div class="no_prop">
+                    <p>No Meta responses on this record.</p>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

@@ -1,38 +1,48 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
-// Ensure this API Name matches the field you created on Contact
+// Field Imports
 import JSON_FIELD from '@salesforce/schema/Contact.Meta_Raw_JSON__c';
+import FORM_NAME_FIELD from '@salesforce/schema/Contact.Meta_Form_Name__c'; // Corrected import name for clarity
 
 export default class MetaLeadViewer extends LightningElement {
     @api recordId;
     @track parsedData = [];
 
     connectedCallback() {
+        // Load custom font if needed
         loadStyle(this, MulishFontCss);
     }
 
-    @wire(getRecord, { recordId: '$recordId', fields: [JSON_FIELD] })
+    @wire(getRecord, { recordId: '$recordId', fields: [JSON_FIELD, FORM_NAME_FIELD] })
     wiredContact({ error, data }) {
         if (data) {
             const jsonString = getFieldValue(data, JSON_FIELD);
-            this.parsedData = null;
+            const formName = getFieldValue(data, FORM_NAME_FIELD);
+            
+            this.parsedData = null; // Reset data
+            
             if (jsonString) {
-                this.processJSON(jsonString);
+                this.processJSON(jsonString, formName);
             }
         } else if (error) {
             console.error('Error loading contact data', error);
         }
     }
 
-    processJSON(jsonString) {
+    processJSON(jsonString, formName) {
         try {
             const rawData = JSON.parse(jsonString);
             let tableRows = [];
 
-            // 1. Add System Fields (Platform, ID, Time)
+            // --- 0. Add Form Name (First Row, if available) ---
+            if (formName) {
+                tableRows.push({ key: 'Form Name', value: formName });
+            }
+
+            // --- 1. Add System Fields ---
             if (rawData.platform) tableRows.push({ key: 'Platform', value: rawData.platform.toUpperCase() });
             if (rawData.id) tableRows.push({ key: 'Lead ID', value: rawData.id });
             if (rawData.created_time) {

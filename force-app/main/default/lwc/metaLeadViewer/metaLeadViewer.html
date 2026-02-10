@@ -1,6 +1,5 @@
 <template>
     <div class="main-card">
-
         <div class="data-table-container">
             <template if:true={parsedData}>
                 <table class="custom-data-table">
@@ -13,10 +12,10 @@
                     <tbody>
                         <template for:each={parsedData} for:item="row">
                             <tr key={row.key}>
-                                <td class="slds-pl-left_medium">
+                                <td class="slds-p-left_medium">
                                     {row.key}
                                 </td>
-                                <td class="slds-pl-left_medium">
+                                <td class="slds-p-left_medium">
                                     {row.value}
                                 </td>
                             </tr>

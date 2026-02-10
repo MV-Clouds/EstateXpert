@@ -198,7 +198,7 @@ public with sharing class MarketingListFilterController {
                 }
             }
             contactQuery += String.join(contactFieldList, ', ');
-            contactQuery += ' FROM Contact WHERE Contact_Type__c = \'Buyer\' and Contact_Type__c != NULL ORDER BY CreatedDate DESC LIMIT 1000';
+            contactQuery += ' FROM Contact ORDER BY CreatedDate DESC LIMIT 1000';
             System.debug('Contact Query: ' + contactQuery);
             wrapper.contacts = Database.query(contactQuery, AccessLevel.USER_MODE);
 

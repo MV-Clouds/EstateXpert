@@ -23,7 +23,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @api recordId;
     @track addModal = false;
     @track spinnerShow = true;
-    @track showList = true
+    @track showList = true;
     @track showTile = false;
     @track contactData = [];
     @track fields = [];

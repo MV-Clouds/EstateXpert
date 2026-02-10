@@ -57,6 +57,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 this.filterFields = this.filterFields.concat(this.staticFields);
                 this.setPicklistValue();
                 this.updateFilterIndices();
+                this.applyFilters();
                 this.isLoading = false;
             })
             .catch(error => {

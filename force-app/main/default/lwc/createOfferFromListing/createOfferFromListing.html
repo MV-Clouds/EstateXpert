@@ -1,0 +1,52 @@
+<template>
+    <div class="modalbody">
+        <div class="slds-modal__header blue-header">
+            <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{modalTitle}</h1>
+        </div>
+        <div class="slds-p-bottom_small">
+            <template if:true={isLoading}>
+                <c-spinner-component></c-spinner-component>
+            </template>
+            <template if:false={isLoading}>
+                <lightning-record-edit-form object-api-name="MVEX__Offer__c" onsuccess={handleSuccess}
+                    onerror={handleError}>
+                    <div class="content_body">
+                        <div class="slds-grid slds-wrap slds-gutters_small">
+                            <template for:each={offerFields} for:item="field">
+                                <template if:false={field.hidden}>
+                                    <div key={field.id}
+                                        class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 field-wrapper">
+                                        <div class="slds-form-element">
+                                            <label class="slds-form-element__label">
+                                                <abbr if:true={field.required} class="slds-required"
+                                                    title="required">*</abbr>
+                                                {field.label}
+                                            </label>
+                                            <div class="slds-form-element__control">
+                                                <lightning-input-field field-name={field.fieldName}
+                                                    value={field.value} disabled={field.disabled}
+                                                    required={field.required} variant="label-hidden">
+                                                </lightning-input-field>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template if:true={field.hidden}>
+                                    <lightning-input-field key={field.id} field-name={field.fieldName}
+                                        value={field.value} class="slds-hide">
+                                    </lightning-input-field>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="edit_modal_footerbtns">
+                        <button type="button" class="cancel_btn_css" aria-label="Cancel and close"
+                            onclick={handleDialogueClose}>Cancel</button>
+                        <button type="button" class="save_btn_css" onclick={handleSaveClick}>Create Offer</button>
+                    </div>
+                </lightning-record-edit-form>
+            </template>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,75 @@
+<template>
+    <div class="offer-timeline-wrapper">
+        <!-- Header Section -->
+        <div class="timeline-header">
+            <h2 class="header-title">Offer History Timeline</h2>
+            <button class="refresh-btn" onclick={handleRefresh} title="Refresh timeline">
+                <svg class={isRefreshing} viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <template if:true={isLoading}>
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p class="loading-text">Loading...</p>
+            </div>
+        </template>
+
+        <!-- Error State -->
+        <template if:true={errorMessage}>
+            <div class="error-container">
+                <p class="error-message">{errorMessage}</p>
+            </div>
+        </template>
+
+        <!-- Timeline Content -->
+        <template if:true={hasOffers}>
+            <div class="timeline-content">
+                <template for:each={offers} for:item="offer">
+                    <div key={offer.offerId} class="timeline-item">
+                        <template if:false={offer.isLastItem}>
+                            <div class="timeline-line"></div>
+                        </template>
+                        
+                        <div class={offer.nodeClass}>
+                            <span class="node-number">{offer.sequenceNumber}</span>
+                        </div>
+                        
+                        <div class="offer-card">
+                            <div class="offer-info">
+                                <div class="info-row">
+                                    <span class="label">Offer ID:</span>
+                                    <span class="value">{offer.offerNumber}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="label">Offer Date:</span>
+                                    <span class="value">{offer.formattedOfferDate}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="label">Amount:</span>
+                                    <span class="value amount">{offer.formattedOfferAmount}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="label">Made By:</span>
+                                    <span class="value">{offer.offerMadeBy}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="label">Status:</span>
+                                    <span class={offer.statusClass}>{offer.status}</span>
+                                </div>
+                            </div>
+                            <template if:false={offer.isCurrentRecord}>
+                                <button class="view-btn" data-offer-id={offer.offerId} onclick={handleViewDetails}>
+                                    View Record
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1541,7 +1541,8 @@ openConfigureSettings(){
             name: autoGroupName,
             isUpdate: false,
             broadcastGroupId: null,
-            phoneField: 'Phone'
+            phoneField: 'Phone',
+            communicationType: 'WhatsApp'
         };
 
         console.log('Auto-creating broadcast group with data:', JSON.stringify(messageData));

@@ -582,13 +582,15 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             this.selectedRecordId = event.target.dataset.recordId;
 
             const record = this.data.find(item => item.Id === this.selectedRecordId); 
+            console.log('record--> ',JSON.stringify(record));
+            
 
             let componentDef = {
                 componentDef: "MVEX:broadcastReportComp",
                 attributes: {
                     recordId: this.selectedRecordId,
                     record: record,
-                    templateName: record?.TemplateName || '—'
+                    templateName: record?.MVEX__Template_Name__c || '—'
                 }
             };
 

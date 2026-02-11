@@ -63,12 +63,14 @@ public with sharing class SiteAndBookingController {
             String templateName = scheduleDateTime != null ? 'Showing_Confirmation' : 'RescheduleConfirmationEmail';
             EmailTemplate template = [SELECT Id, Subject, HtmlValue, Body FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
 
+            System.debug('scheduleDateTime: ' + scheduleDateTime);
             // Create or update showings
             Map<String, Object> showingResult = createShowings(contactIds, listingId, scheduleDateTime, communicationMethod);
             List<Id> showingIds = (List<Id>)showingResult.get('showingIds');
 
             // Fetch inserted/updated showings with contact email
             List<Showing__c> insertedShowings = [SELECT Id, Buyer__c, Buyer__r.Email FROM Showing__c WHERE Id IN :showingIds WITH USER_MODE];
+
 
             // Prepare emails
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
@@ -287,20 +289,80 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule) {
+    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId,  String dateStr, 
+    String timeStr ) {
         try {
+            Savepoint sp = Database.setSavepoint();
+            Showing__c showing;
+
+             // ---------------------------------------------------------
+            // 1. Create DateTime from date and time strings
             // ---------------------------------------------------------
-            // 1. Get Showing + Contact
+            DateTime scheduledDateTime = System.now(); // Default to now
+            
+            if (dateStr != null && timeStr != null) {
+                    // Parse the date string
+                    List<String> dateParts = dateStr.split('-');
+                    Date selectedDate = Date.newInstance(
+                        Integer.valueOf(dateParts[0]),  // year
+                        Integer.valueOf(dateParts[1]),  // month  
+                        Integer.valueOf(dateParts[2])   // day
+                    );
+                    
+                    // Parse the time string
+                    List<String> timeParts = timeStr.split(':');
+                    Integer hour = Integer.valueOf(timeParts[0]);  // 15
+                    Integer minute = Integer.valueOf(timeParts[1]); // 57
+                    
+                    String gmtDateTimeStr = dateStr + ' ' + timeStr + ':00';
+                    scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
+                
+            }
+
             // ---------------------------------------------------------
-            Showing__c showing = [
-                SELECT Id, Buyer__c, Buyer__r.Email 
+            // 2. Check if showing exists; if not, create a temporary one
+            // ---------------------------------------------------------
+            List<Showing__c> existingShowings = [
+                SELECT Id, Buyer__c, Buyer__r.Email, Listing__c
                 FROM Showing__c 
                 WHERE Id = :showingId WITH USER_MODE
                 LIMIT 1
             ];
 
+            if (!existingShowings.isEmpty()) {
+                showing = existingShowings[0];
+
+                if (isReschedule && scheduledDateTime != null) {
+                    showing.Reschedule_Date__c = scheduledDateTime;
+                    update showing;
+                }
+                
+            } else if (contactId != null && listingId != null) {
+                // Create a temporary showing for preview purposes
+                showing = new Showing__c();
+                showing.Listing__c = listingId;
+                showing.Buyer__c = contactId;
+                showing.Status__c = 'Waiting For Confirmation';
+                showing.Scheduled_Date__c = scheduledDateTime; 
+                
+                // Insert temporarily for preview
+                insert showing;
+            } else {
+                throw new AuraHandledException('Either showingId must exist, or both contactId and listingId must be provided for preview.');
+            }
+
             // ---------------------------------------------------------
-            // 2. Pick the correct EmailTemplate
+            // 3. Refresh to get related data
+            // ---------------------------------------------------------
+            showing = [
+                SELECT Id, Buyer__c, Buyer__r.Email, Listing__c, Listing__r.Name
+                FROM Showing__c 
+                WHERE Id = :showing.Id WITH USER_MODE
+                LIMIT 1
+            ];
+
+            // ---------------------------------------------------------
+            // 4. Pick the correct EmailTemplate
             // ---------------------------------------------------------
             String templateName = isReschedule 
                 ? 'RescheduleConfirmationEmail' 
@@ -314,10 +376,8 @@ public with sharing class SiteAndBookingController {
             ];
 
             // ---------------------------------------------------------
-            // 3. Build a dummy e-mail (same pattern as PreviewContract)
+            // 5. Build email for preview
             // ---------------------------------------------------------
-            Savepoint sp = Database.setSavepoint();
-
             Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
             mail.setTemplateId(et.Id);
             mail.setTargetObjectId(showing.Buyer__c);
@@ -326,13 +386,17 @@ public with sharing class SiteAndBookingController {
             mail.setSaveAsActivity(false);
 
             // ---------------------------------------------------------
-            // 4. Send (rolled back) → gets merged body
+            // 6. Send (will be rolled back) → gets merged body
             // ---------------------------------------------------------
             Messaging.sendEmail(new Messaging.SingleEmailMessage[]{ mail });
+
+            // ---------------------------------------------------------
+            // 7. Rollback all changes (temporary showing + email activity)
+            // ---------------------------------------------------------
             Database.rollback(sp);
 
             // ---------------------------------------------------------
-            // 5. Return merged subject + HTML
+            // 8. Return merged subject + HTML
             // ---------------------------------------------------------
             return new Map<String,String>{
                 'subject'  => mail.getSubject(),

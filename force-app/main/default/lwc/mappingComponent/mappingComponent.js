@@ -123,7 +123,7 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
         return this.modalType === 'MVEX__Listing__c';
     }
 
-    get saveButtonDsibale(){
+    get saveButtonDisabled(){
         const areAllFieldsSelectedListings = this.listingDropDownPairs.every(pair => 
             pair.selectedFirst && pair.selectedSecond
         );
@@ -787,8 +787,8 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
                 logicError = 'inquiryLogicError';
             }
 
-            if (!logicExpression) {
-                this[logicError] = null;
+            if (!logicExpression || logicExpression.trim() === '') {
+                this[logicError] = 'Custom logic expression cannot be empty.';
                 return;
             }
 
@@ -880,11 +880,13 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     checkConditionSyntax() {
         try {
             this.validateCustomLogic();
-            if (!this[this.isModalListing ? 'listingLogicError' : 'inquiryLogicError']) {
+            let currentError = this[this.isModalListing ? 'listingLogicError' : 'inquiryLogicError'];
+            if (!currentError) {
                 this.showToast('Success', 'Logical Condition is Correct', 'success');
                 this.isModalOpen = false;
                 this.isSaveButtonDisabled = false;
             } else {
+                this.showToast('Error', currentError, 'error');
                 this.isSaveButtonDisabled = true;
             }
         } catch (error) {

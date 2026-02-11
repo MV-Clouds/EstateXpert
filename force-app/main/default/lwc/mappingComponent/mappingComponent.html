@@ -18,6 +18,9 @@
                             Map Listing And Inquiry
                         </div>
                     </div>
+                    <div class="save-btn">
+                        <button disabled={saveButtonDisabled} onclick={handleAddPairClick}>Save All Changes</button>
+                    </div>
                 </div>
             </div>
 
@@ -27,7 +30,6 @@
                         <p><b>Condition Type</b>: {selectedConditionLabel} <template if:true={logicalConditionListing}>({logicalConditionListing})</template></p>
                     </div>
                     <div class="save-btn">
-                        <button disabled={saveButtonDsibale} onclick={handleAddPairClick}>Save Mapping</button>
                         <button onclick={handleModalOpen} class="btn display_css2">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
@@ -311,7 +313,7 @@
                                     <div class="condition-container-input">
                                         <lightning-input type="text" class="condition-input" label="Logical Expression"
                                             data-id="condition-input" value={logicalConditionListing} data-name="listing"
-                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2"
+                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2" message-when-value-missing=" "
                                             required></lightning-input>
                                         <template if:true={listingLogicError}>
                                             <div class="slds-text-color_error">{listingLogicError}</div>
@@ -343,7 +345,7 @@
                                     <div class="condition-container-input">
                                         <lightning-input type="text" class="condition-input" label="Logical Expression"
                                             data-id="condition-input-2" value={logicalConditionInquiry} data-name="inquiry"
-                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2"
+                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2" message-when-value-missing=" "
                                             required></lightning-input>
                                         <template if:true={inquiryLogicError}>
                                             <div class="slds-text-color_error">{inquiryLogicError}</div>

@@ -6,10 +6,16 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <apex:page html-style="height: 100%;" showHeader="false" sidebar="false" controller="WhatsappConfigController">
+    <apex:styleSheet value="{!URLFOR($Resource.MulishFontCss)}" />
     <html>
         <body>
             <style>
-                body{
+                * {
+                    font-family: 'Mulish';
+                    user-select: none;
+                }
+
+                body {
                     height: 100%;
                     width: 100%;
                     margin: 0;
@@ -45,18 +51,6 @@
                     gap: 8px;
                 }
 
-                .details_cls {
-                    padding: 0 42px;
-                    font-size: 16px;
-                    font-weight: 400;
-                    line-height: 24px;
-                    text-align: left;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                    color: #636363;
-                }
-
                 .header_block_css {
                     display: flex;
                     justify-content: flex-start;
@@ -81,180 +75,524 @@
                     padding: 1rem;
                     display: flex;
                     flex-direction: row;
+                    align-items: flex-start;
+                    justify-content: space-between;
                     height: 100%;
-                    gap: 1rem;
                     background-color: aliceblue;
                     background-repeat: no-repeat;
                     background-size: cover;
-                    background-position: unset;
+                    background-position: center;
                     background-image: url('/resource/MVEX__newImageandMediaBg');
                     border-radius: 8px;
+                    position: relative;
                 }
 
-                .sidebar {
-                    width: 30%;
-                    background-color: #ffffff;
-                    padding: 16px;
-                    border-radius: 8px;
-                    border: 1px solid #0176D3;
-                }
-
-                .sidebar ul {
-                    list-style: none;
-                    padding: 0;
-                }
-
-                .sidebar ul li {
-                    display: flex;
-                    padding: 10px;
-                    cursor: pointer;
-                    font-size: 18px;
-                    font-weight: 500;
-                    line-height: 25px;
-                    text-align: center;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 5px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    margin-left: unset !important;
-                }
-
-                .sidebar ul li img {
-                    margin-right: 10px;
-                    height: 35px;
-                    width: 35px;
-                }
-
-                .sidebar ul li.active {
-                    background: #eef6f9;
-                    border-radius: 8px;
-                }
-
-                .content {
-                    width: 80%;
-                    padding: 16px;
+                .config-card {
                     background: white;
-                    border-radius: 8px;
-                    border: 1px solid #0176D3;
-                    font-size: 16px;
-                    font-weight: 400;
-                    line-height: 18.75px;
-                    text-align: left;
+                    border-radius: 12px;
+                    padding: 2.5rem;
+                    width: 55%;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    z-index: 1;
                 }
 
-                .header {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    flex-direction: row;
-                    gap: 10px;
+                .background-image {
+                    position: fixed;
+                    bottom: 16px;
+                    right: 24px;
+                    height: auto;
+                    object-fit: contain;
+                    pointer-events: none;
                 }
 
-                .header h2 {
+                .page-title {
+                    font-size: 28px;
+                    font-weight: 500;
+                    color: #131314;
                     margin: 0;
                 }
 
-                .header button {
+                .page-subtitle {
+                    font-size: 16px;
+                    color: #636363;
+                    margin: 4px 0 0 0;
+                }
+
+                .page-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 16px;
+                }
+
+                .page-header-content {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .status-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 14px;
+                    background: #E0F2FE;
+                    border-radius: 16px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #0176D3;
+                    margin-bottom: 16px;
+                }
+
+                .status-dot {
+                    width: 8px;
+                    height: 8px;
+                    background: #0176D3;
+                    border-radius: 50%;
+                }
+
+                .input-group {
+                    margin-bottom: 1.5rem;
+                }
+
+                .input-label {
+                    display: block;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #131314;
+                    margin-bottom: 10px;
+                }
+
+                .input-field {
+                    width: 100%;
+                    padding: 14px 16px;
+                    font-size: 16px;
+                    border: 1px solid #D1D5DB;
+                    border-radius: 8px;
+                    box-sizing: border-box;
+                    font-family: 'Mulish';
+                }
+
+                .input-field:focus {
+                    outline: none;
+                    border-color: #0176D3;
+                    box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.1);
+                }
+
+                .info-box {
+                    display: flex;
+                    gap: 12px;
+                    padding: 16px;
+                    background: #EFF6FF;
+                    border-radius: 8px;
+                    margin-bottom: 1.5rem;
+                }
+
+                .info-icon {
+                    flex-shrink: 0;
+                    width: 20px;
+                    height: 20px;
+                    color: #0176D3;
+                }
+
+                .info-content {
+                    flex: 1;
+                }
+
+                .info-title {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #131314;
+                    margin: 0 0 4px 0;
+                }
+
+                .info-text {
+                    font-size: 14px;
+                    color: #636363;
+                    margin: 0;
+                    line-height: 1.5;
+                }
+
+                .connect-btn {
+                    width: 100%;
+                    padding: 14px 24px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    background: #0176D3;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                }
+
+                .connect-btn:hover {
+                    background: #014a86;
+                }
+
+                .account-box {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 16px;
+                    background: #F3F4F6;
+                    border: 1px solid #E5E7EB;
+                    border-radius: 8px;
+                    margin-bottom: 1rem;
+                }
+
+                .account-box-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    flex: 1;
+                }
+
+                .shield-icon {
+                    width: 40px;
+                    height: 40px;
+                    background: #0176D3;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+
+                .shield-icon svg {
+                    width: 24px;
+                    height: 24px;
+                    fill: white;
+                }
+
+                .account-info {
+                    flex: 1;
+                }
+
+                .account-id {
+                    font-size: 18px;
+                    font-weight: 500;
+                    color: #131314;
+                    margin: 0 0 4px 0;
+                }
+
+                .account-status {
+                    font-size: 14px;
+                    color: #10B981;
+                    margin: 0;
+                }
+
+                .copy-btn {
+                    padding: 8px 12px;
+                    background: white;
+                    border: 1px solid #D1D5DB;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .copy-btn:hover {
+                    background: #F9FAFB;
+                    border-color: #0176D3;
+                }
+
+                .copy-btn svg {
+                    width: 18px;
+                    height: 18px;
+                }
+
+                .deactivate-btn {
+                    width: 100%;
+                    padding: 12px 24px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    background: white;
+                    color: #DC2626;
+                    border: 1px solid #DC2626;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    margin-top: 1rem;
+                }
+
+                .deactivate-btn:hover {
+                    background: #FEF2F2;
+                }
+
+                .section-title {
+                    font-size: 12px;
+                    font-weight: 500;
+                    color: #131314;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin: 1.5rem 0 0.5rem 0;
+                }
+
+                .details-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                }
+
+                .detail-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+
+                .detail-label {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #636363;
+                }
+
+                .detail-value {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: #131314;
+                }
+
+                .guide-box {
+                    display: flex;
+                    gap: 16px;
+                    padding: 20px;
+                    background: rgba(1, 118, 211, 0.08);
+                    border-radius: 12px;
+                    margin-top: 1.5rem;
+                }
+
+                .guide-icon {
+                    width: 48px;
+                    height: 48px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+
+                .guide-icon svg {
+                    width: 24px;
+                    height: 24px;
+                    fill: #0176D3;
+                }
+
+                .guide-content {
+                    flex: 1;
+                }
+
+                .guide-title {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: #131314;
+                    margin: 0 0 8px 0;
+                }
+
+                .guide-text {
+                    font-size: 14px;
+                    color: #636363;
+                    margin: 0;
+                    line-height: 1.6;
+                }
+
+                .error-message-text {
+                    color: #DC2626;
+                    font-size: 14px;
+                    margin-top: 8px;
+                    display: block;
+                }
+
+                .whatsapp-icon {
+                    width: 52px;
+                    height: 52px;
+                    flex-shrink: 0;
+                }
+
+                /* Modal Overlay */
+                .modal-overlay {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: #00000033;
+                    z-index: 1000;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .modal-overlay.show {
+                    display: flex;
+                }
+
+                .modal-content {
+                    position: relative;
+                    background: white;
+                    border-radius: 8px;
+                    max-width: 480px;
+                    width: 90%;
+                    box-shadow: 0px 0px 35px 0px #00000042;
+                    overflow: hidden;
+                }
+
+                .modal-close-btn {
+                    position: absolute;
+                    right: -2rem;
+                    bottom: 0rem;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+                    background: transparent;
+                    border: none;
+                    padding: 0;
+                    z-index: 1;
+                }
+
+                .modal-close-btn svg {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                .modal-header {
+                    background-color: #0176D3;
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-top-left-radius: 8px;
+                    border-top-right-radius: 8px;
+                    text-align: center;
+                }
+
+                .modal-title {
+                    font-size: 21px;
+                    font-weight: 500;
+                    color: white;
+                    margin: 0;
+                }
+
+                .modal-body {
+                    background-color: aliceblue;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                    background-position: center;
+                    background-image: url('/resource/MVEX__newImageandMediaBg/');
+                    padding: 1.5rem;
+                    border-bottom-left-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                }
+
+                .modal-message {
+                    font-size: 16px;
+                    font-weight: 400;
+                    line-height: 26px;
+                    text-align: center;
+                    color: #0176d9;
+                    margin: 0 0 1rem 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 3rem;
+                }
+
+                .modal-footer {
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: center;
+                }
+
+                .modal-btn {
+                    padding: 0px 20px;
                     font-size: 14px;
                     font-weight: 400;
                     line-height: 34px;
                     text-align: center;
-                    padding: 0px 20px;
                     border-radius: 5px;
-                    border: 1px solid #0176D3;
+                    cursor: pointer;
+                    transition: all 0.2s;
                 }
 
-                .save-btn {
-                    background: #0176D3;
-                    color: white;
-                }
-
-                .deactivate-btn {
+                .modal-btn-cancel {
                     background: #FFFFFF;
+                    border: 1px solid #0176D3;
                     color: #0176D3;
                 }
 
-                .edit-btn {
-                    background: #0176D3;
-                    border: none;
+                .modal-btn-cancel:hover {
+                    opacity: 0.9;
+                }
+
+                .modal-btn-confirm {
+                    background: #B3261E;
+                    border: 1px solid #bf0a00;
                     color: white;
                 }
 
-                .tab-content {
-                    height: 100%;
+                .modal-btn-confirm:hover {
+                    opacity: 0.9;
                 }
 
-                .empty-state {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                .empty-state__content {
-                    display: flex;
-                    align-items: center;
-                    flex-direction: column;
-                    justify-content: center;
-                }
-
-                .empty-image {
-                    width: 100%;
-                }
-
-                .empty-state__content .empty-state__icon {
-                    width: 25%;
-                    height: 100%;
-                }
-
-                .empty-state__content .empty-state__message {
-                    color: #3a9bea;
-                    font-size: 25px;
-                    font-weight: 500;
-                    margin-top: 1rem;
-                    display: flex;
-                    justify-content: center;
-                }
-        
-                .field-section {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 16px;
-                    height: 100%;
-                }
-
-                .field-section .data_cls {
-                    display: flex;
-                    gap: 16px;
-                    width: 100%;
-                }
-
-                .field-section .data_cls strong {
-                    width: 20%;
-                    font-weight: 500;
-                }
-
-                .field-section .data_cls p {
-                    width: 80%;
-                    text-wrap: wrap;
-                    word-break: break-all;
-                }
-
-                .error-message-text{
-                    color: red;
-                    padding: 0.2rem 0;
-                    font-size: small !important;
-                }
-                
-                .input-app-id {
-                    flex-grow: 1;
-                }
-
-                .validate-button{
+                /* Loading Spinner */
+                .spinner-overlay {
                     display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(255, 255, 255, 0.9);
+                    z-index: 2000;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .spinner-overlay.show {
+                    display: flex;
+                }
+
+                .spinner-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 16px;
+                }
+
+                .spinner {
+                    width: 48px;
+                    height: 48px;
+                    border: 4px solid #E5E7EB;
+                    border-top: 4px solid #0176D3;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+
+                .spinner-text {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #636363;
+                }
+
+                @media (max-width: 1024px) {
+                    .background-image {
+                        display: none;
+                    }
+                    
+                    .config-card {
+                        max-width: 100%;
+                    }
                 }
             </style>
             
@@ -270,61 +608,148 @@
                                 </svg>
                             </div>
                             <div class="portal_mapping">
-                                Embedded Signup
-                            </div>
-                        </div>
-                        <div class="header">
-                            <div id="new-btn-div">
-                                <button class="save-btn" onclick="newIntegrationModal()" data-name="Instagram">New</button>
-                            </div>
-                            <div id="edit-btn-div" style="display:none">
-                                <button class="save-btn" onclick="newIntegrationModal()" data-name="Instagram">Edit</button>
-                                <button class="deactivate-btn" onclick="deactivateWhatsApp()">Deactivate</button>
+                                WhatsApp Integration
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Containers -->
+                <!-- Main Container -->
                 <div class="main_container">
-                    <div class="sidebar">
-                        <ul>
-                            <li class="Instagram active">
-                                <img src="/resource/MVEX__controlcenterimg/whatsapp.png" alt="insta" draggable="false"></img> Embedded Signup
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="content">
-                        <div class="tab-content">
-                            <div class="field-section">
-                                <div id="input-container-div">
-                                    <!-- <div class="input-app-id-div">
-                                        <div class="input-app-id">
-                                            <label>Enter Your Application Id</label>
-                                            <input type="text" id="app-id-input"></input>
-                                        </div>
-                                        <div id="validate-button" class="validate-button control-btn" onclick="validateAndSubmit()">Validate</div>
+                    <div class="config-card">
+                        
+                        <!-- Page Header -->
+                        <div class="page-header">
+                            <img src="/resource/MVEX__controlcenterimg/whatsapp.png" class="whatsapp-icon" alt="WhatsApp" />
+                            <div class="page-header-content">
+                                <h1 class="page-title">Embedded Sign-Up</h1>
+                                <p class="page-subtitle">Manage your WhatsApp Business integration</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Setup Form (shown when not configured) -->
+                        <div id="setup-form-div">
+                            <div class="input-group">
+                                <label class="input-label" for="app-id-input">Meta Application ID</label>
+                                <input type="text" 
+                                       id="app-id-input" 
+                                       class="input-field" 
+                                       placeholder="Enter your Meta Application ID" />
+                            </div>
+                            
+                            <div class="info-box">
+                                <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                                <div class="info-content">
+                                    <p class="info-title">How to find your Application ID:</p>
+                                    <p class="info-text">Go to Meta for Developers → My Apps → Select your app → Copy your Application ID</p>
+                                </div>
+                            </div>
+                            
+                            <button class="connect-btn" onclick="launchWhatsAppSignup()">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
+                                </svg>
+                                Connect WhatsApp Business
+                            </button>
+                            
+                            <span class="error-message-text" id="error-message"></span>
+                        </div>
+                        
+                        <!-- Configuration Details (shown when configured) -->
+                        <div id="config-details-div" style="display:none">
+                            <div class="status-badge">
+                                <span class="status-dot"></span>
+                                Active
+                            </div>
+                            
+                            <div class="input-label">WhatsApp Business Account ID</div>
+                            <div class="account-box">
+                                <div class="account-box-left">
+                                    <div class="shield-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                                        </svg>
                                     </div>
-                                    <div id="login-button" class="login-button control-btn" onclick="launchWhatsAppSignup()">Login</div>
-                                    <p class="error-message-text" id="error-message"></p> -->
-                                    <div class="empty-state">
-                                        <div class="empty-state__content">
-                                            <div class="empty-state__icon">
-                                                <img class="empty-image" src="/resource/MVEX__emptyState" alt="" draggable="false"></img>
-                                            </div>
-                                            <div class="empty-state__message">No Data Available to Show.</div>
-                                        </div>
+                                    <div class="account-info">
+                                        <p class="account-id" id="waba-id-display"></p>
+                                        <p class="account-status">Connected and verified</p>
                                     </div>
                                 </div>
-                                <div id="user-details-div" style="display:none">
-                                    <div class="data_cls">WhatsApp Business Account Id:<p id="waba-id"></p></div>
-                                    <div class="data_cls">Application Id:<p id="app-id"></p></div>
-                                    <div class="data_cls">Phone Number Id:<p id="phone-number-id"></p></div>
-                                    <div class="data_cls">Access Token:<p id="access-token"></p></div>
+                                <button class="copy-btn" onclick="copyToClipboard()" title="Copy ID">
+                                    <svg viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <button class="deactivate-btn" onclick="deactivateWhatsApp()">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                                Deactivate Integration
+                            </button>
+                            
+                            <div class="section-title">INTEGRATION DETAILS</div>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Application ID</span>
+                                    <span class="detail-value">{!appId}</span>                                </div
+>                                <div class="detail-item">
+                                    <span class="detail-label">Last Edited</span>
+                                    <span class="detail-value" id="last-edited">--</span>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Quick Setup Guide -->
+                        <div class="guide-box">
+                            <div class="guide-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                                </svg>
+                            </div>
+                            <div class="guide-content">
+                                <p class="guide-title">Quick Setup Guide</p>
+                                <p class="guide-text">Ensure you have access to your Meta Business Suite to retrieve your Account ID. Once connected, you can start messaging customers directly through WhatsApp Business API.</p>
+                            </div>
+                        </div>
+                        
                     </div>
+                    
+                    <!-- Background Image -->
+                    <img src="/resource/MVEX__featurepropertybg" class="background-image" alt="" />
+                </div>
+            </div>
+
+            <!-- Confirmation Modal -->
+            <div id="confirmation-modal" class="modal-overlay">
+                <div class="modal-content">
+                    <button class="modal-close-btn" onclick="closeConfirmationModal()">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="white" />
+                        </svg>
+                    </button>
+                    <div class="modal-header">
+                        <h3 class="modal-title">Deactivate Integration</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-message">Are you sure you want to deactivate WhatsApp integration? This will disconnect your WhatsApp Business Account and you will need to set it up again to continue using WhatsApp messaging.</p>
+                        <div class="modal-footer">
+                            <button class="modal-btn modal-btn-cancel" onclick="closeConfirmationModal()">No</button>
+                            <button class="modal-btn modal-btn-confirm" onclick="confirmDeactivation()">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="spinner-overlay">
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                    <div class="spinner-text">Loading...</div>
                 </div>
             </div>
             
@@ -336,21 +761,48 @@
                 let storedAppId = '{!appId}';
                 let storedAccessToken = '{!accessToken}';
                 let storedPhoneNumberId = '{!phoneNumberId}';
+                let storedLastModifiedDate = '{!lastModifiedDate}';
 
-                console.log(wabaId, storedAppId, storedAccessToken, storedPhoneNumberId);
-                
-                if(wabaId){
-                    document.getElementById("input-container-div").style.display = "none";
-                    document.getElementById("new-btn-div").style.display = "none";
-                    document.getElementById("user-details-div").style.display = "block";
-                    document.getElementById("edit-btn-div").style.display = "block";
+                // Utility functions for modal and spinner
+                function showSpinner(message = 'Loading...') {
+                    const spinner = document.getElementById('loading-spinner');
+                    const spinnerText = spinner.querySelector('.spinner-text');
+                    spinnerText.textContent = message;
+                    spinner.classList.add('show');
+                }
 
-                    document.getElementById('waba-id').textContent = wabaId;
-                    document.getElementById('app-id').textContent = storedAppId;
-                    document.getElementById('phone-number-id').textContent = storedPhoneNumberId;
-                    document.getElementById('access-token').textContent = 'Confidential Information - Hidden for Security';
+                function hideSpinner() {
+                    const spinner = document.getElementById('loading-spinner');
+                    spinner.classList.remove('show');
+                }
+
+                function showConfirmationModal() {
+                    const modal = document.getElementById('confirmation-modal');
+                    modal.classList.add('show');
+                }
+
+                function closeConfirmationModal() {
+                    const modal = document.getElementById('confirmation-modal');
+                    modal.classList.remove('show');
                 }
                 
+                // Show initial loading
+                showSpinner('Loading configuration...');
+                
+                if(wabaId){
+                    document.getElementById("setup-form-div").style.display = "none";
+                    document.getElementById("config-details-div").style.display = "block";
+                    document.getElementById('waba-id-display').textContent = wabaId;
+                    
+                    // Set the last modified date
+                    if(storedLastModifiedDate) {
+                        document.getElementById('last-edited').textContent = storedLastModifiedDate;
+                    }
+                }                
+                // Hide spinner after page loads
+                setTimeout(() => {
+                    hideSpinner();
+                }, 300);                
                 window.addEventListener('message', (event) => {
                     if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") {
                         return;
@@ -403,49 +855,48 @@
                 }
 
                 function validateAndSubmit(){
+                    showSpinner('Validating configuration...');
                     appId = document.getElementById("app-id-input").value;
                     fetch("https://graph.facebook.com/v22.0/" + appId + "?access_token="+ accessToken)
                         .then(response => response.json())
-                            .then(result => {
-                                if(result.error){
-                                    document.getElementById("error-message").textContent = "The Application Id is incorrect! Please Validate it.";
-                                    document.getElementById("validate-button").style.display = 'block';
-                                    document.getElementById("login-button").style.display = 'none';
-                                } else {
-                                    if(!phoneNumberId.length || !wabaId.length || !appId.length || !accessToken.length){
-                                        document.getElementById("error-message").textContent = "Could not log you in, please try again...";
-                                        return;
-                                    }
-                                    
-                                    Visualforce.remoting.Manager.invokeAction(
-                                        //Invoking controller action getcon
-                                        '{!$RemoteAction.WhatsappConfigController.saveFBLoginDetails}', accessToken, phoneNumberId, wabaId, appId,
-                                        function(result, event){
-                                            //We can access the records through the parameter result
-                                            //event.status determines if there is error or not 
-                                            if(event.status && result){
-                                                document.getElementById("input-container-div").style.display = "none";
-                                                document.getElementById("new-btn-div").style.display = "none";
-                                                document.getElementById("user-details-div").style.display = "block";
-                                                document.getElementById("edit-btn-div").style.display = "block";
-
-                                                document.getElementById('waba-id').textContent = result;
-                                                document.getElementById('app-id').textContent = appId;
-                                                document.getElementById('phone-number-id').textContent = phoneNumberId;
-                                                document.getElementById('access-token').textContent = 'Confidential Information - Hidden for Security';
-                                            } else {
-                                                document.getElementById("error-message").textContent = "There was some error, please try again...";
-                                            }
-                                        },
-                                        {
-                                            escape: true
-                                        }
-                                    );
+                        .then(result => {
+                            if(result.error){
+                                hideSpinner();
+                                document.getElementById("error-message").textContent = "The Application Id is incorrect! Please Validate it.";
+                            } else {
+                                if(!phoneNumberId.length || !wabaId.length || !appId.length || !accessToken.length){
+                                    hideSpinner();
+                                    document.getElementById("error-message").textContent = "Could not log you in, please try again...";
+                                    return;
                                 }
-                    })
-                    .catch(error => {
-                        document.getElementById("error-message").textContent = "Could not validate Application Id! Please try again.";
-                    });
+                                
+                                Visualforce.remoting.Manager.invokeAction(
+                                    //Invoking controller action
+                                    '{!$RemoteAction.WhatsappConfigController.saveFBLoginDetails}', accessToken, phoneNumberId, wabaId, appId,
+                                    function(result, event){
+                                        //We can access the records through the parameter result
+                                        //event.status determines if there is error or not 
+                                        if(event.status && result){
+                                            showSpinner('Saving configuration...');
+                                            // Reload the page to get fresh data including dates
+                                            setTimeout(() => {
+                                                window.location.reload();
+                                            }, 5000);
+                                        } else {
+                                            hideSpinner();
+                                            document.getElementById("error-message").textContent = "There was some error, please try again...";
+                                        }
+                                    },
+                                    {
+                                        escape: true
+                                    }
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            hideSpinner();
+                            document.getElementById("error-message").textContent = "Could not validate Application Id! Please try again.";
+                        });
                 }
             
                 const launchWhatsAppSignup = () => {
@@ -474,8 +925,59 @@
                     }
                 }
 
+                function copyToClipboard() {
+                    const wabaId = document.getElementById('waba-id-display').textContent;
+                    navigator.clipboard.writeText(wabaId).then(function() {
+                        // Show a brief success message
+                        const btn = event.target.closest('.copy-btn');
+                        const originalHTML = btn.innerHTML;
+                        btn.innerHTML = '<svg viewBox="0 0 20 20" fill="currentColor" style="width:18px;height:18px;"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>';
+                        setTimeout(() => {
+                            btn.innerHTML = originalHTML;
+                        }, 2000);
+                    });
+                }
+
+                function deactivateWhatsApp() {
+                    showConfirmationModal();
+                }
+
+                function confirmDeactivation() {
+                    closeConfirmationModal();
+                    showSpinner('Deactivating integration...');
+                    
+                    // Call the unlinkAccount method from the controller
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.WhatsappConfigController.unlinkAccount}',
+                        function(result, event){
+                            if(event.status && result){
+                                // Show success message before reloading
+                                const spinner = document.getElementById('loading-spinner');
+                                const spinnerText = spinner.querySelector('.spinner-text');
+                                const spinnerIcon = spinner.querySelector('.spinner');
+                                
+                                // Change to success state
+                                spinnerIcon.style.borderTopColor = '#2E844A';
+                                spinnerText.textContent = 'WhatsApp integration disconnected successfully!';
+                                
+                                // Wait 5 seconds to show success, then reload
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 5000);
+                            } else {
+                                hideSpinner();
+                                // Show error in the same UI area
+                                document.getElementById("error-message").textContent = "Error deactivating WhatsApp integration. Please try again.";
+                            }
+                        },
+                        {
+                            escape: true
+                        }
+                    );
+                }
+
                 function backToControlCenter() {
-                    window.location.href = '/lightning/n/MVEX__Control_Center';
+                    window.top.location.href = '/lightning/n/MVEX__Control_Center';
                 }
             </script>
         

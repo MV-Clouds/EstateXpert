@@ -5,139 +5,194 @@
 
     <template if:true={isDataLoaded}>
         <div class="smi_container">
+            <!-- Header -->
             <div class="main_header_cls">
-                <div class="sub_main_header_css">
-                    <div slot="title" class="header_block_css">
-                        <div class="svg_back_icon" onclick={backToControlCenter}>
-                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                                    fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                        <div class="portal_mapping">
-                            Lead Capture
-                        </div>
+                <div class="header_block_css">
+                    <div class="svg_back_icon" onclick={backToControlCenter}>
+                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                        </svg>
                     </div>
-                    <div class="header">
-                        <template if:true={isGoogle}>
-                            <template if:false={GoogleData.isValid}>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="Google">New</button>
-                            </template>
-                            <template if:true={GoogleData.isValid}>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="Google">Edit</button>
-                                <button class="save-btn" onclick={configureMapping}>Configure Mapping</button>
-                                <button class="deactivate-btn" onclick={handleDeactivateProcess}>Deactivate</button>
-                            </template>
-                        </template>
-                        <template if:true={isMeta}>
-                            <template if:false={MetaData.isValid}>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="Meta">New</button>
-                            </template>
-                            <template if:true={MetaData.isValid}>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="Meta">Edit</button>
-                                <button class="save-btn" onclick={configureMapping}>Configure Mapping</button>
-                                <button class="deactivate-btn" onclick={handleDeactivateProcess}>Deactivate</button>
-                            </template>
-                        </template>
+                    <div class="portal_mapping">Lead Capture</div>
+                    <div class="active_badge">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="10" cy="10" r="8" fill="#4BB543"/>
+                        </svg>
+                        <span>{activeIntegrationCount} Active</span>
                     </div>
                 </div>
             </div>
+
+            <!-- Integration Cards Grid -->
             <div class="main_container">
-                <!-- Sidebar with navigator -->
-                <div class="sidebar">
-                    <ul>
-                        <li class={MetaClass} onclick={handleMetaClick}>
-                            <img src="/resource/MVEX__controlcenterimg/meta.png" alt="Meta" draggable="false"> Meta Ads
-                        </li>
-                        <li class={GoogleClass} onclick={handleGoogleClick}>
-                            <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google" draggable="false"> Google Ads
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Main Content Area -->
-                <div class="content">
-                    <!-- Tab Specific Content -->
-                    <div class="tab-content">
-                        <template if:true={isGoogle}>
-                            <div class="field-section">
-                                <template if:true={GoogleData.isValid}>
-                                    <!-- <div class="data_cls"><strong>Google Ads Webhook Endpoint :</strong><p>{GoogleData.integrationData.Google_Ads_Endpoint__c}</p></div> -->
-                                    <div class="data_cls"><strong>Google Ads Lead Form Secret :</strong><p>{GoogleData.integrationData.MVEX__Google_lead_Form_Secret__c}</p></div>
-                                    <div class="data_cls"><strong>Created Date :</strong><p>{GoogleData.integrationData.CreatedDate}</p></div>
-                                    <div class="data_cls"><strong>Last Modified Date :</strong><p>{GoogleData.integrationData.LastModifiedDate}</p></div>
-                                </template>
-                                <template if:false={GoogleData.isValid}>
-                                    <div class="empty-state">
-                                        <div class="empty-state__content">
-                                            <div class="empty-state__icon">
-                                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                <div class="cards_grid">
+                    <!-- Row 1: Meta + Google -->
+                    <div class="cards_row">
+                        <!-- Meta Card -->
+                        <div class="integration_card">
+                            <div class="card_header">
+                                <div class="card_title_section">
+                                    <img src="/resource/MVEX__controlcenterimg/meta.png" alt="Meta" class="integration_icon" draggable="false">
+                                    <div class="title_status">
+                                        <h3>Meta Ads</h3>
+                                        <template if:true={MetaData.isValid}>
+                                            <div class="status_badge">
+                                                <span class="status_dot"></span>
+                                                <span>Active</span>
                                             </div>
-                                            <div class="empty-state__message">No Data Available to Show.</div>
-                                        </div>
+                                        </template>
+                                        <template if:false={MetaData.isValid}>
+                                            <div class="status_badge inactive">
+                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5"/>
+                                                    <line x1="3" y1="6" x2="9" y2="6" stroke="#999" stroke-width="1.5" stroke-linecap="round"/>
+                                                </svg>
+                                                <span>Not Connected</span>
+                                            </div>
+                                        </template>
                                     </div>
-                                </template>
+                                </div>
                             </div>
-                        </template>
-                        <template if:true={isMeta}>
-                            <div class="field-section">
-                                <template if:true={MetaData.isValid}>
-                                    <!-- <div class="data_cls"><strong>Meta Page Webhook Endpoint :</strong><p>{MetaData.integrationData.META_PAGE_ENDPOINT__c}</p></div> -->
-                                    <div class="status_container">
-                                        <div class="detail_grid">
-                                            <div class="grid-item"><strong>Linked App:</strong> <p>{appName}</p></div>
-                                            <div class="grid-item"><strong>Token Type:</strong> <p>{appType}</p></div>
-                                            <div class="grid-item"><strong>Access Expires:</strong> <p>{tokenExpires}</p></div>
+                            <p class="card_description">Capture leads from your Meta (Facebook & Instagram) ad campaigns automatically. Sync lead data directly into Salesforce with custom field mapping and automated lead assignment workflows.</p>
+                            
+                            <template if:true={MetaData.isValid}>
+                                <div class="card_footer">
+                                    <div class="info-div">
+                                        <div class="sync_info">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5"/>
+                                                <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <span>{MetaData.integrationData.relativeTime}</span>
                                         </div>
+                                        <a class="view_details_link" data-integration="Meta" onclick={toggleDetails}>
+                                            <template if:false={MetaData.showDetails}>View Details</template>
+                                            <template if:true={MetaData.showDetails}>Hide Details</template>
+                                        </a>
+                                    </div>
+                                </div>
 
-                                        <div class="data_cls status_row grid-item">
-                                            <strong><p>Token Verification Status :</p></strong>
+                                <template if:true={MetaData.showDetails}>
+                                    <div class="details_section">
+                                        <div class="detail_row">
+                                            <span class="detail_label">Linked App</span>
+                                            <span class="detail_value">{appName}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Token Type</span>
+                                            <span class="detail_value">{appType}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Access Expires</span>
+                                            <span class="detail_value">{tokenExpires}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Token Verification Status</span>
                                             <span class={statusClass}>{metaVerificationStatus}</span>
                                         </div>
-
-                                        <div class="data_cls status_row grid-item">
-                                            <strong><p>Permission Status :</p></strong>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Permission Status</span>
                                             <span class={reviewClass}>{appReviewStatus}</span>
                                         </div>
-
-                                        <div class="data_cls status_row grid-item">
-                                            <strong><p>Facebook API Version :</p></strong>
-                                            <span><p>{MetaData.integrationData.MVEX__FB_API_VERSION__c}</p></span>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Facebook API Version</span>
+                                            <span class="detail_value">{MetaData.integrationData.MVEX__FB_API_VERSION__c}</span>
                                         </div>
-
-                                        <!-- <div class="data_cls status_row grid-item">
-                                            <strong>Created Date :</strong>
-                                            <span><p>{MetaData.integrationData.CreatedDate}</p></span>
-                                        </div> -->
-
-                                        <div class="data_cls status_row grid-item">
-                                            <strong><p>Last Modified Date :</p></strong>
-                                            <span><p>{MetaData.integrationData.LastModifiedDate}</p></span>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Last Modified Date & Time</span>
+                                            <span class="detail_value">{MetaData.integrationData.LastModifiedDate}</span>
                                         </div>
-
+                                        <div class="card_actions">
+                                            <button class="action_btn primary" onclick={newIntegrationModal} data-name="Meta">Edit</button>
+                                            <button class="action_btn secondary" onclick={configureMapping} data-name="Meta">Configure Mapping</button>
+                                            <button class="action_btn outline" onclick={handleDeactivateClick} data-integration="Meta">Deactivate</button>
+                                        </div>
                                     </div>
-                                    <!-- <div class="data_cls"><strong>Meta Page Access Token :</strong><p>{MetaData.integrationData.MVEX__ACCESS_TOKEN__c}</p></div>
-                                    <div class="data_cls"><strong>Verify Token :</strong><p>{MetaData.integrationData.MVEX__VERIFY_TOKEN__c}</p></div>
-                                    <div class="data_cls"><strong>App ID :</strong><p>{MetaData.integrationData.MVEX__APP_ID__c}</p></div> -->
-                                    <!-- <div class="data_cls"><strong>App Secret :</strong><p>{MetaData.integrationData.APP_SECRET__c}</p></div> -->
-                                    <!-- <div class="data_cls"><strong>Facebook API Version :</strong><p>{MetaData.integrationData.MVEX__FB_API_VERSION__c}</p></div>
-                                    <div class="data_cls"><strong>Created Date :</strong><p>{MetaData.integrationData.CreatedDate}</p></div>
-                                    <div class="data_cls"><strong>Last Modified Date :</strong><p>{MetaData.integrationData.LastModifiedDate}</p></div> -->
                                 </template>
-                                <template if:false={MetaData.isValid}>
-                                    <div class="empty-state">
-                                        <div class="empty-state__content">
-                                            <div class="empty-state__icon">
-                                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                            </template>
+                            <template if:false={MetaData.isValid}>
+                                <div class="card_footer">
+                                    <button class="action_btn primary full_width" onclick={newIntegrationModal} data-name="Meta">Connect</button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Google Ads Card -->
+                        <div class="integration_card">
+                            <div class="card_header">
+                                <div class="card_title_section">
+                                    <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google" class="integration_icon" draggable="false">
+                                    <div class="title_status">
+                                        <h3>Google Ads</h3>
+                                        <template if:true={GoogleData.isValid}>
+                                            <div class="status_badge">
+                                                <span class="status_dot"></span>
+                                                <span>Active</span>
                                             </div>
-                                            <div class="empty-state__message">No Data Available to Show.</div>
+                                        </template>
+                                        <template if:false={GoogleData.isValid}>
+                                            <div class="status_badge inactive">
+                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5"/>
+                                                    <line x1="3" y1="6" x2="9" y2="6" stroke="#999" stroke-width="1.5" stroke-linecap="round"/>
+                                                </svg>
+                                                <span>Not Connected</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="card_description">Capture leads from Google Ads campaigns automatically. Connect your Lead Form Extensions to sync prospect data into Salesforce with custom field mapping and automated lead assignment workflows.</p>
+                            
+                            <template if:true={GoogleData.isValid}>
+                                <div class="card_footer">
+                                    <div class="info-div">
+                                        <div class="sync_info">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5"/>
+                                                <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <span>{GoogleData.integrationData.relativeTime}</span>
+                                        </div>
+                                        <a class="view_details_link" data-integration="Google" onclick={toggleDetails}>
+                                            <template if:false={GoogleData.showDetails}>View Details</template>
+                                            <template if:true={GoogleData.showDetails}>Hide Details</template>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <template if:true={GoogleData.showDetails}>
+                                    <div class="details_section">
+                                        <div class="detail_row">
+                                            <span class="detail_label">Google Ads Lead Form Secret</span>
+                                            <span class="detail_value">{GoogleData.integrationData.MVEX__Google_lead_Form_Secret__c}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Created Date & Time</span>
+                                            <span class="detail_value">{GoogleData.integrationData.CreatedDate}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Last Modified Date & Time</span>
+                                            <span class="detail_value">{GoogleData.integrationData.LastModifiedDate}</span>
+                                        </div>
+                                        <div class="card_actions">
+                                            <button class="action_btn primary" onclick={newIntegrationModal} data-name="GoogleAds">Edit</button>
+                                            <button class="action_btn secondary" onclick={configureMapping} data-name="GoogleAds">Configure Mapping</button>
+                                            <button class="action_btn outline" onclick={handleDeactivateClick} data-integration="Google">Deactivate</button>
                                         </div>
                                     </div>
                                 </template>
-                            </div>
-                        </template>
+                            </template>
+                            <template if:false={GoogleData.isValid}>
+                                <div class="card_footer">
+                                    <button class="action_btn primary full_width" onclick={newIntegrationModal} data-name="GoogleAds">Connect</button>
+                                </div>
+                            </template>
+                        </div>
                     </div>
+                    <!-- End Row 1 -->
                 </div>
             </div>
         </div>
@@ -151,6 +206,5 @@
         ></c-integration-pop-up>
     </template>
 
-    <c-message-popup onconfirmation={handleConfirmation}>
-    </c-message-popup>
+    <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
 </template>

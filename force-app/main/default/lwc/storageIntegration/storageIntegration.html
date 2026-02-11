@@ -5,92 +5,396 @@
 
     <template if:true={isDataLoaded}>
         <div class="smi_container">
+            <!-- Header -->
             <div class="main_header_cls">
-                <div class="sub_main_header_css">
-                    <div slot="title" class="header_block_css">
-                        <div class="svg_back_icon" onclick={backToControlCenter}>
-                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                                    fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                        <div class="portal_mapping">
-                            General Integration
-                        </div>
+                <div class="header_block_css">
+                    <div class="svg_back_icon" onclick={backToControlCenter}>
+                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                        </svg>
                     </div>
-                    <div class="header">
-                        <template if:true={isAWS}>
-                            <template if:false={awsData.isValid}>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="AWS">New</button>
-                            </template>
-                            <template if:true={awsData.isValid}>
-                                <button class="save-btn" onclick={awsWatermarkUploaderMethod} data-name="AWS">Set
-                                    Watermark</button>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="AWS">Edit</button>
-                                <button class="deactivate-btn" onclick={handleDeactivateClick}>Deactivate</button>
-                            </template>
-                        </template>
+                    <div class="portal_mapping">General Integration</div>
+                    <div class="active_badge">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="10" cy="10" r="8" fill="#4BB543" />
+                        </svg>
+                        <span>{activeIntegrationCount} Active</span>
                     </div>
                 </div>
             </div>
-            <div class="main_container">
-                <!-- Sidebar with navigator -->
-                <div class="sidebar">
-                    <ul>
-                        <template if:true={featureAvailability.Cloud_Storage_Integration}>
-                            <li class={awsClass} onclick={handleAWSClick}>
-                                <img src="/resource/MVEX__controlcenterimg/aws.png" alt="AWS" draggable="false"> AWS
-                            </li>
-                        </template>
-                        <template if:true={featureAvailability.Email_Integration}>
-                            <li class={gmailClass} onclick={handleGmailClick}>
-                                <img src="/resource/MVEX__controlcenterimg/gmail.png" alt="Gmail" draggable="false"> Gmail
-                            </li>
-                        </template>
-                        <template if:true={featureAvailability.Email_Integration}>
-                            <li class={outlookClass} onclick={handleOutlookClick}>
-                                <img src="/resource/MVEX__controlcenterimg/outlook.png" alt="Outlook" draggable="false"> Outlook
-                            </li>
-                        </template>
-                        <template if:true={featureAvailability.Social_Media_Integration}>
-                            <li class={instagramClass} onclick={handleInstagramClick}>
-                                <img src="/resource/MVEX__controlcenterimg/instagram.png" alt="Instagram" draggable="false"> Instagram
-                            </li>
-                        </template>
-                    </ul>
-                </div>
 
-                <!-- Main Content Area -->
-                <div class="content">
-                    <!-- Tab Specific Content -->
-                    <div class="tab-content">
-                        <template if:true={isAWS}>
-                            <div class="field-section">
-                                <template if:true={awsData.isValid}>
-                                    <div class="data_cls"><strong>Access Key :</strong><p>{displayedAccessKey}</p></div>
-                                    <div class="data_cls">
-                                        <strong>Secret Access Key :</strong>
-                                        <p>{displayedClientSecret}</p>
+            <!-- Integration Cards Grid -->
+            <div class="main_container">
+                <div class="cards_grid">
+                    <!-- Row 1: AWS + Gmail -->
+                    <div class="cards_row">
+                        <!-- AWS Card -->
+                        <template if:true={featureAvailability.Cloud_Storage_Integration}>
+                            <div class="integration_card">
+                                <div class="card_header">
+                                    <div class="card_title_section">
+                                        <img src="/resource/MVEX__controlcenterimg/aws.png" alt="AWS"
+                                            class="integration_icon" draggable="false">
+                                        <div class="title_status">
+                                            <h3>AWS</h3>
+                                            <template if:true={awsData.isValid}>
+                                                <div class="status_badge">
+                                                    <span class="status_dot"></span>
+                                                    <span>Active</span>
+                                                </div>
+                                            </template>
+                                            <template if:false={awsData.isValid}>
+                                                <div class="status_badge inactive">
+                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
+                                                        <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
+                                                            stroke-width="1.5" stroke-linecap="round" />
+                                                    </svg>
+                                                    <span>Not Connected</span>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
-                                    <div class="data_cls"><strong>S3 Bucket Name :</strong><p>{awsData.integrationData.MVEX__S3_Bucket_Name__c}</p></div>
-                                    <div class="data_cls"><strong>S3 Region Name :</strong><p>{awsData.integrationData.MVEX__S3_Region_Name__c}</p></div>
-                                    <div class="data_cls"><strong>Created Date:</strong><p>{awsData.integrationData.CreatedDate}</p></div>
-                                    <div class="data_cls"><strong>Last Modified Date:</strong><p>{awsData.integrationData.LastModifiedDate}</p></div>
+                                </div>
+                                <p class="card_description">Securely store listing images and videos in the cloud.
+                                    Agents can upload and access media files directly from listing record pages with
+                                    automatic backup and reliable storage.</p>
+
+                                <template if:true={awsData.isValid}>
+                                    <div class="card_footer">
+                                        <div class="info-div">
+                                            <div class="sync_info">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
+                                                    <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
+                                                        stroke-linecap="round" />
+                                                </svg>
+                                                <span>{awsData.integrationData.relativeTime}</span>
+                                            </div>
+                                            <a class="view_details_link" data-integration="AWS" onclick={toggleDetails}>
+                                                <template if:false={awsData.showDetails}>View Details</template>
+                                                <template if:true={awsData.showDetails}>Hide Details</template>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={awsData.showDetails}>
+                                        <div class="details_section">
+                                            <div class="detail_row">
+                                                <span class="detail_label">Bucket Name</span>
+                                                <span
+                                                    class="detail_value">{awsData.integrationData.MVEX__S3_Bucket_Name__c}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Region</span>
+                                                <span
+                                                    class="detail_value">{awsData.integrationData.MVEX__S3_Region_Name__c}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Created Date & Time</span>
+                                                <span class="detail_value">{awsData.integrationData.CreatedDate}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Last Modified Date & Time</span>
+                                                <span
+                                                    class="detail_value">{awsData.integrationData.LastModifiedDate}</span>
+                                            </div>
+                                            <div class="card_actions">
+                                                <button class="action_btn primary" onclick={newIntegrationModal}
+                                                    data-name="AWS">Edit</button>
+                                                <button class="action_btn secondary"
+                                                    onclick={awsWatermarkUploaderMethod}>Set Watermark</button>
+                                                <button class="action_btn outline" onclick={handleDeactivateClick}
+                                                    data-integration="AWS">Deactivate</button>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </template>
                                 <template if:false={awsData.isValid}>
-                                    <div class="empty-state">
-                                        <div class="empty-state__content">
-                                            <div class="empty-state__icon">
-                                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                            </div>
-                                            <div class="empty-state__message">No Data Available to Show.</div>
+                                    <div class="card_footer">
+                                        <button class="action_btn primary full_width" onclick={newIntegrationModal}
+                                            data-name="AWS">Connect</button>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <!-- Outlook Card -->
+                        <template if:true={featureAvailability.Email_Integration}>
+                            <div class="integration_card">
+                                <div class="card_header">
+                                    <div class="card_title_section">
+                                        <img src="/resource/MVEX__controlcenterimg/outlook.png" alt="Outlook"
+                                            class="integration_icon" draggable="false">
+                                        <div class="title_status">
+                                            <h3>Outlook</h3>
+                                            <template if:true={outlookData.isValid}>
+                                                <div class="status_badge">
+                                                    <span class="status_dot"></span>
+                                                    <span>Active</span>
+                                                </div>
+                                            </template>
+                                            <template if:false={outlookData.isValid}>
+                                                <div class="status_badge inactive">
+                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
+                                                        <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
+                                                            stroke-width="1.5" stroke-linecap="round" />
+                                                    </svg>
+                                                    <span>Not Connected</span>
+                                                </div>
+                                            </template>
                                         </div>
+                                    </div>
+                                </div>
+                                <p class="card_description">Send marketing emails through Microsoft Outlook directly
+                                    from Salesforce. Perfect for Microsoft 365 users to maintain professional email
+                                    infrastructure with full tracking and delivery confirmation.</p>
+
+                                <template if:true={outlookData.isValid}>
+                                    <div class="card_footer">
+                                        <div class="info-div">
+                                            <div class="sync_info">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
+                                                    <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
+                                                        stroke-linecap="round" />
+                                                </svg>
+                                                <span>{outlookData.integrationData.relativeTime}</span>
+                                            </div>
+                                            <a class="view_details_link" data-integration="Outlook"
+                                                onclick={toggleDetails}>
+                                                <template if:false={outlookData.showDetails}>View Details</template>
+                                                <template if:true={outlookData.showDetails}>Hide Details</template>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={outlookData.showDetails}>
+                                        <div class="details_section">
+                                            <div class="detail_row">
+                                                <span class="detail_label">Redirect URI</span>
+                                                <span
+                                                    class="detail_value">{outlookData.integrationData.MVEX__Redirect_URI__c}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Created Date & Time</span>
+                                                <span
+                                                    class="detail_value">{outlookData.integrationData.CreatedDate}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Last Modified Date & Time</span>
+                                                <span
+                                                    class="detail_value">{outlookData.integrationData.LastModifiedDate}</span>
+                                            </div>
+                                            <div class="card_actions">
+                                                <button class="action_btn primary" onclick={newIntegrationModal}
+                                                    data-name="Outlook">Edit</button>
+                                                <button class="action_btn outline" onclick={handleDeactivateClick}
+                                                    data-integration="Outlook">Deactivate</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template if:false={outlookData.isValid}>
+                                    <div class="card_footer">
+                                        <button class="action_btn primary full_width" onclick={newIntegrationModal}
+                                            data-name="Outlook">Connect</button>
                                     </div>
                                 </template>
                             </div>
                         </template>
                     </div>
+                    <!-- End Row 1 -->
+
+                    <!-- Row 2: Outlook + Instagram -->
+                    <div class="cards_row">
+                        <!-- Gmail Card -->
+                        <template if:true={featureAvailability.Email_Integration}>
+                            <div class="integration_card">
+                                <div class="card_header">
+                                    <div class="card_title_section">
+                                        <img src="/resource/MVEX__controlcenterimg/gmail.png" alt="Gmail"
+                                            class="integration_icon" draggable="false">
+                                        <div class="title_status">
+                                            <h3>Gmail</h3>
+                                            <template if:true={gmailData.isValid}>
+                                                <div class="status_badge">
+                                                    <span class="status_dot"></span>
+                                                    <span>Active</span>
+                                                </div>
+                                            </template>
+                                            <template if:false={gmailData.isValid}>
+                                                <div class="status_badge inactive">
+                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
+                                                        <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
+                                                            stroke-width="1.5" stroke-linecap="round" />
+                                                    </svg>
+                                                    <span>Not Connected</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card_description">Send professional marketing emails directly from Salesforce
+                                    using your Gmail account. Compose, personalize, and track campaigns to leads and
+                                    clients without switching platforms.</p>
+
+                                <template if:true={gmailData.isValid}>
+                                    <div class="card_footer">
+                                        <div class="info-div">
+                                            <div class="sync_info">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
+                                                    <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
+                                                        stroke-linecap="round" />
+                                                </svg>
+                                                <span>{gmailData.integrationData.relativeTime}</span>
+                                            </div>
+                                            <a class="view_details_link" data-integration="Gmail"
+                                                onclick={toggleDetails}>
+                                                <template if:false={gmailData.showDetails}>View Details</template>
+                                                <template if:true={gmailData.showDetails}>Hide Details</template>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={gmailData.showDetails}>
+                                        <div class="details_section">
+                                            <div class="detail_row">
+                                                <span class="detail_label">Redirect URI</span>
+                                                <span
+                                                    class="detail_value">{gmailData.integrationData.MVEX__Redirect_URI__c}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Created Date & Time</span>
+                                                <span
+                                                    class="detail_value">{gmailData.integrationData.CreatedDate}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Last Modified Date & Time</span>
+                                                <span
+                                                    class="detail_value">{gmailData.integrationData.LastModifiedDate}</span>
+                                            </div>
+                                            <div class="card_actions">
+                                                <button class="action_btn primary" onclick={newIntegrationModal}
+                                                    data-name="Gmail">Edit</button>
+                                                <button class="action_btn outline" onclick={handleDeactivateClick}
+                                                    data-integration="Gmail">Deactivate</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template if:false={gmailData.isValid}>
+                                    <div class="card_footer">
+                                        <button class="action_btn primary full_width" onclick={newIntegrationModal}
+                                            data-name="Gmail">Connect</button>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <!-- Instagram Card -->
+                        <template if:true={featureAvailability.Social_Media_Integration}>
+                            <div class="integration_card">
+                                <div class="card_header">
+                                    <div class="card_title_section">
+                                        <img src="/resource/MVEX__controlcenterimg/instagram.png" alt="Instagram"
+                                            class="integration_icon" draggable="false">
+                                        <div class="title_status">
+                                            <h3>Instagram</h3>
+                                            <template if:true={instagramData.isValid}>
+                                                <div class="status_badge">
+                                                    <span class="status_dot"></span>
+                                                    <span>Active</span>
+                                                </div>
+                                            </template>
+                                            <template if:false={instagramData.isValid}>
+                                                <div class="status_badge inactive">
+                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
+                                                        <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
+                                                            stroke-width="1.5" stroke-linecap="round" />
+                                                    </svg>
+                                                    <span>Not Connected</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card_description">Publish listing images directly to Instagram from each
+                                    listing record page. Upload property photos with custom captions and hashtags to
+                                    showcase properties instantly without switching platforms.</p>
+
+                                <template if:true={instagramData.isValid}>
+                                    <div class="card_footer">
+                                        <div class="info-div">
+                                            <div class="sync_info">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
+                                                    <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
+                                                        stroke-linecap="round" />
+                                                </svg>
+                                                <span>{instagramData.integrationData.relativeTime}</span>
+                                            </div>
+                                            <a class="view_details_link" data-integration="Instagram"
+                                                onclick={toggleDetails}>
+                                                <template if:false={instagramData.showDetails}>View Details</template>
+                                                <template if:true={instagramData.showDetails}>Hide Details</template>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={instagramData.showDetails}>
+                                        <div class="details_section">
+                                            <div class="detail_row">
+                                                <span class="detail_label">User ID</span>
+                                                <span
+                                                    class="detail_value">{instagramData.integrationData.MVEX__User_ID__c}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Redirect URI</span>
+                                                <span
+                                                    class="detail_value">{instagramData.integrationData.MVEX__Redirect_URI__c}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Created Date & Time</span>
+                                                <span
+                                                    class="detail_value">{instagramData.integrationData.CreatedDate}</span>
+                                            </div>
+                                            <div class="detail_row">
+                                                <span class="detail_label">Last Modified Date & Time</span>
+                                                <span
+                                                    class="detail_value">{instagramData.integrationData.LastModifiedDate}</span>
+                                            </div>
+                                            <div class="card_actions">
+                                                <button class="action_btn primary" onclick={newIntegrationModal}
+                                                    data-name="Instagram">Edit</button>
+                                                <button class="action_btn outline" onclick={handleDeactivateClick}
+                                                    data-integration="Instagram">Deactivate</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template if:false={instagramData.isValid}>
+                                    <div class="card_footer">
+                                        <button class="action_btn primary full_width" onclick={newIntegrationModal}
+                                            data-name="Instagram">Connect</button>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <!-- End Row 2 -->
                 </div>
             </div>
         </div>
@@ -101,13 +405,9 @@
     </template>
 
     <template if:true={showIntegrationModal}>
-        <c-integration-pop-up 
-            integrationname={integrationName}
-            integrationlabel={integrationLabel}
-            onclosemodal={handleModalSelect}
-        ></c-integration-pop-up>
+        <c-integration-pop-up integrationname={integrationName} integrationlabel={integrationLabel}
+            onclosemodal={handleModalSelect}></c-integration-pop-up>
     </template>
 
-    <c-message-popup onconfirmation={handleConfirmation}>
-    </c-message-popup>
+    <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
 </template>

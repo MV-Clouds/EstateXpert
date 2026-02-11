@@ -517,10 +517,12 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     handleDateChange(event) {
         // From date input field
         this.selectedDate = event.target.value;
+        this.loadEmailPreview();
     }
 
     handleTimeChange(event) {
         this.selectedTime = event.target.value;
+        this.loadEmailPreview();
     }
 
     handleCommunicationMethodChange(event) {
@@ -609,6 +611,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     }
 
     executeSchedule() {
+        console.log('selected date time: ', this.selectedDateTime);
         if (this.isWhatsAppSelected) {
             createShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, communicationMethod: this.selectedCommunicationMethod })
                 .then((result) => {
@@ -617,7 +620,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 })
                 .catch(error => this.handleApexError(error, 'Error creating showing.'));
         } else {
-            sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, communicationMethod: this.selectedCommunicationMethod })
+            sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, communicationMethod: this.selectedCommunicationMethod, isReschedule: false })
                 .then(() => this.handleApexSuccess('Email sent and showing scheduled successfully.'))
                 .catch(error => this.handleApexError(error, 'Error sending email and creating showing.'));
         }
@@ -630,7 +633,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     if (this.isWhatsAppSelected) {
                         this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Rescheduled'));
                     } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime })
+                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime,isReschedule: true })
                             .then(() => this.handleApexSuccess('Email sent and showing rescheduled successfully.'))
                             .catch(error => this.handleApexError(error, 'Error sending reschedule email.'));
                     }
@@ -648,7 +651,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     if (this.isWhatsAppSelected) {
                         this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Scheduled'));
                     } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null })
+                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null,isReschedule: false })
                             .then(() => this.handleApexSuccess('Confirmation email sent successfully.'))
                             .catch(error => this.handleApexError(error, 'Error sending confirmation email.'));
                     }
@@ -701,18 +704,19 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     }
 
     loadEmailPreview() {
-        if (!this.currentShowingId) {
-            this.previewEmailHtml = '<p>No showing selected to preview.</p>';
-            return;
-        }
-        
         this.isLoading = true;
         this.previewEmailHtml = ''; // Clear previous
         const isReschedule = (this.selectedAction === 'Reschedule');
 
+        console.log('loadEmailPreview', this.currentShowingId, this.currentContactId, this.recordId, this.selectedDate, this.selectedTime);
+        
         previewEmailTemplate({
-            showingId: this.currentShowingId,
-            isReschedule: isReschedule
+            showingId: this.currentShowingId || null,
+            isReschedule: isReschedule,
+            contactId: this.currentContactId || null,
+            listingId: this.recordId || null,
+            dateStr: this.selectedDate,
+            timeStr: this.selectedTime,
         })
         .then(result => {
             this.previewEmailHtml = result.htmlBody || '<p>No content.</p>';

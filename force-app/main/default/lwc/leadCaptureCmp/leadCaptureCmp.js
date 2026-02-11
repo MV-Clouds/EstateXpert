@@ -1,4 +1,4 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
@@ -7,40 +7,17 @@ import revokeGoogleAccess from '@salesforce/apex/IntegrationPopupController.revo
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
-    @api integrationType = 'Meta';
     @track isDataLoaded = false;
-    @track activeTab = 'Meta';
     @track showIntegrationModal = false;
     @track isSpinner = true;
-    @track integrationName = 'GoogleAds';
+    @track integrationName;
     @track integrationLabel;
-    @track GoogleData = {};
-    @track MetaData = {};
-    @track isClientSecretHidden = true;
-    CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
+    @track GoogleData = { isValid: false, integrationData: {}, showDetails: false };
+    @track MetaData = { isValid: false, integrationData: {}, showDetails: false };
     @track metaVerificationStatus = 'Checking...';
     @track appReviewStatus = 'Checking...';
     @track connectionDetails = {};
-
-    get isGoogle() {
-        return this.activeTab === 'Google';
-    }
-
-    get isMeta() {
-        return this.activeTab === 'Meta';
-    }
-
-    get GoogleClass() {
-        return this.activeTab === 'Google' ? 'active' : '';
-    }
-
-    get MetaClass() {
-        return this.activeTab === 'Meta' ? 'active' : '';
-    }
-
-    get displayedAccessToken() {
-        return this.CREDENTIAL_DISPLAY_TEXT;
-    }
+    integrationToDeactivate = null;
 
     get reviewClass() {
         return this.appReviewStatus === 'Verified' ? 'status-success' : 'status-warning';
@@ -48,6 +25,13 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     get statusClass() {
         return this.metaVerificationStatus === 'Connected' ? 'status-success' : 'status-error';
+    }
+
+    get activeIntegrationCount() {
+        let count = 0;
+        if (this.MetaData.isValid) count++;
+        if (this.GoogleData.isValid) count++;
+        return count;
     }
 
     // Helpers for UI display
@@ -67,14 +51,12 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
             .catch(error => {
                 console.log('Error loading style:', error);
             });
-        this.activeTab = this.integrationType;
-        this.integrationName = this.integrationType === 'Google' ? 'GoogleAds' : 'Meta';
         this.getSocialMediaDataToShow();
     }
 
     getSocialMediaDataToShow() {
         this.isSpinner = true;
-        getSocialMediaData({integrationName:this.integrationName})
+        getSocialMediaData({integrationName: ''})
             .then(data => {
                 console.log('data-->', data);
                 data.forEach(item => {
@@ -83,19 +65,19 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
                             item.integrationData.CreatedDate = this.formatDate(item.integrationData.CreatedDate);
                         }
                         if (item.integrationData && item.integrationData.LastModifiedDate) {
+                            item.integrationData.relativeTime = this.getRelativeTime(item.integrationData.LastModifiedDate);
                             item.integrationData.LastModifiedDate = this.formatDate(item.integrationData.LastModifiedDate);
                         }
-                        this.integrationName = 'GoogleAds';
-                        this.GoogleData = item;
+                        this.GoogleData = { ...item, showDetails: false };
                     } else if (item.integrationName === 'Meta') {
                         if (item.integrationData && item.integrationData.CreatedDate) {
                             item.integrationData.CreatedDate = this.formatDate(item.integrationData.CreatedDate);
                         }
                         if (item.integrationData && item.integrationData.LastModifiedDate) {
+                            item.integrationData.relativeTime = this.getRelativeTime(item.integrationData.LastModifiedDate);
                             item.integrationData.LastModifiedDate = this.formatDate(item.integrationData.LastModifiedDate);
                         }
-                        this.integrationName = 'Meta';
-                        this.MetaData = item;
+                        this.MetaData = { ...item, showDetails: false };
                         
                         // NEW LOGIC: Check status if token exists
                         if (item.isValid && item.integrationData.MVEX__ACCESS_TOKEN__c) {
@@ -197,25 +179,69 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
         return `${paddedDay}/${paddedMonth}/${year}, ${paddedHours}:${paddedMinutes}:${paddedSeconds} ${ampm}`;
     }
 
-    handleGoogleClick() {
-        this.activeTab = 'Google';
-        this.integrationName = 'GoogleAds';
-        this.getSocialMediaDataToShow();
+    getRelativeTime(dateStr) {
+        if (!dateStr) return '';
+        const now = new Date();
+        const past = new Date(dateStr);
+        const diffMs = now - past;
+        
+        const diffSeconds = Math.floor(diffMs / 1000);
+        const diffMinutes = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        const diffMonths = Math.floor(diffDays / 30);
+        const diffYears = Math.floor(diffDays / 365);
+        
+        if (diffSeconds < 60) {
+            return `Last synced ${diffSeconds} second${diffSeconds !== 1 ? 's' : ''} ago`;
+        } else if (diffMinutes < 60) {
+            return `Last synced ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+        } else if (diffHours < 24) {
+            return `Last synced ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+        } else if (diffDays < 30) {
+            return `Last synced ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+        } else if (diffMonths < 12) {
+            return `Last synced ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+        } else {
+            return `Last synced ${diffYears} year${diffYears !== 1 ? 's' : ''} ago`;
+        }
     }
 
-    handleMetaClick() {
-        this.activeTab = 'Meta';
-        this.integrationName = 'Meta';
-        this.getSocialMediaDataToShow();
+    toggleDetails(event) {
+        try {
+            const integration = event.currentTarget.dataset.integration;
+            
+            let shouldShow = false;
+            if (integration === 'Meta') {
+                shouldShow = !this.MetaData.showDetails;
+            } else if (integration === 'Google') {
+                shouldShow = !this.GoogleData.showDetails;
+            }
+            
+            // Close all cards first
+            this.MetaData = { ...this.MetaData, showDetails: false };
+            this.GoogleData = { ...this.GoogleData, showDetails: false };
+            
+            // Then set the selected card to its new state
+            if (integration === 'Meta') {
+                this.MetaData = { ...this.MetaData, showDetails: shouldShow };
+            } else if (integration === 'Google') {
+                this.GoogleData = { ...this.GoogleData, showDetails: shouldShow };
+            }
+        } catch (error) {
+            console.log('Error in toggleDetails:', error);
+        }
     }
 
-    handleDeactivateProcess() {
-        this.showMessagePopup('Warning', 'Do you want to deactive this?', `This will remove the integration and all associated data.`);
+    handleDeactivateClick(event) {
+        const integrationName = event.currentTarget.dataset.integration;
+        this.showMessagePopup('Warning', 'Are you sure you want to deactivate this?' , `This action will revoke access to ${integrationName} and you will need to reconfigure the integration if you want to use it again.`);
+        this.integrationToDeactivate = integrationName;
     }
 
     handleConfirmation(event){
-        if(event.detail === true){
-            switch (this.activeTab) {
+        if(event.detail === true && this.integrationToDeactivate){
+            switch (this.integrationToDeactivate) {
                 case 'Google':
                     this.deactivateGoogle();
                     break;
@@ -226,6 +252,7 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
                     this.showToast('Error', 'Deactivation not supported for this integration.', 'error');
                     break;
             }
+            this.integrationToDeactivate = null;
         }
     }
 
@@ -269,16 +296,14 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
         this.showIntegrationModal = true;
     }
 
-    toggleClientSecret() {
-        this.isClientSecretHidden = !this.isClientSecretHidden;
-    }
-
-   configureMapping() {
+   configureMapping(event) {
         try {
+            const integrationName = event.target.dataset.name;
+            const integrationType = integrationName === 'GoogleAds' ? 'Google' : 'Meta';
             let componentDef = {
                 componentDef: "MVEX:googleLeadFieldMapping",
                 attributes: {
-                    integrationType: this.activeTab // Pass 'Google' or 'Meta'
+                    integrationType: integrationType
                 }
             };
             let encodedComponentDef = btoa(JSON.stringify(componentDef));
@@ -292,28 +317,6 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
             console.log('Error in configureMapping:', error);
         }
     }
-
-    // configureMetaMapping() {
-    //     // Reuse the same component for Meta Ads
-    //     this.configureMapping(); // Meta context is handled by activeTab
-    // }
-
-    // configureMetaMapping() {
-    //     try {
-    //         let componentDef = {
-    //             componentDef: "MVEXP:metaLeadFieldMapping"
-    //         };
-    //         let encodedComponentDef = btoa(JSON.stringify(componentDef));
-    //         this[NavigationMixin.Navigate]({
-    //             type: 'standard__webPage',
-    //             attributes: {
-    //                 url: '/one/one.app#' + encodedComponentDef
-    //             }
-    //         });
-    //     } catch (error) {
-    //         console.log('Error in configureMetaMapping:', error);
-    //     }
-    // }
 
     backToControlCenter(event) {
         try {

@@ -10,16 +10,19 @@ import { errorDebugger } from 'c/globalProperties';
 
 export default class StorageIntegration extends NavigationMixin(LightningElement) {
     @track isDataLoaded = false;
-    @track activeTab = 'AWS';
     @track showIntegrationModal = false;
     @track isSpinner = true;
     @track integrationName;
     @track integrationLabel;
-    @track awsData;
+    @track awsData = { isValid: false, integrationData: {}, showDetails: false };
+    @track gmailData = { isValid: false, integrationData: {}, showDetails: false };
+    @track outlookData = { isValid: false, integrationData: {}, showDetails: false };
+    @track instagramData = { isValid: false, integrationData: {}, showDetails: false };
     @track facebookData;
-    @track isClientSecretHidden = true;
     @track isWaterMarkUploader = false;
     @track featureAvailability = {};
+    @track activeIntegrationCount = 0;
+    integrationToDeactivate = null;
     
     // Constants for credential placeholders
     CREDENTIAL_PLACEHOLDER = '••••••••••••••••';
@@ -42,47 +45,56 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     }
 
     /**
-    * Method Name: isAWS
-    * @description: Used to check if AWS tab is active.
-    * @returns {Boolean} - Returns true if AWS tab is active.
-    * Created Date: 27/12/2024
+    * Method Name: awsApiKeyMasked
+    * @description: Returns masked API key for AWS.
+    * @returns {String} - Masked API key
+    * Created Date: 10/02/2026
     * Created By: Karan Singh
     */
-    get isAWS() {
-        return this.activeTab === 'AWS';
+    get awsApiKeyMasked() {
+        if (this.awsData.integrationData && this.awsData.integrationData.MVEX__Access_Key__c) {
+            const key = this.awsData.integrationData.MVEX__Access_Key__c;
+            if (key.length > 8) {
+                return key.substring(0, 4) + '•'.repeat(12) + key.substring(key.length - 4);
+            }
+        }
+        return '';
     }
 
     /**
-    * Method Name: awsClass
-    * @description: Used to check if AWS tab is active.
-    * @returns {Boolean} - Returns true if AWS tab is active.
-    * Created Date: 27/12/2024
+    * Method Name: getRelativeTime
+    * @description: Calculates relative time from timestamp.
+    * @param {String} dateStr - Date string
+    * @returns {String} - Relative time string
+    * Created Date: 10/02/2026
     * Created By: Karan Singh
     */
-    get awsClass() {
-        return this.activeTab === 'AWS' ? 'active' : '';
-    }
-
-    /**
-    * Method Name: displayedAccessKey
-    * @description: Used to get access key with placeholder.
-    * @returns {String} - Returns placeholder for access key.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    get displayedAccessKey() {
-        return this.CREDENTIAL_DISPLAY_TEXT;
-    }
-
-    /**
-    * Method Name: displayedClientSecret
-    * @description: Used to get client secret with placeholder.
-    * @returns {String} - Returns placeholder for client secret.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    get displayedClientSecret() {
-        return this.CREDENTIAL_DISPLAY_TEXT;
+    getRelativeTime(dateStr) {
+        if (!dateStr) return '';
+        const now = new Date();
+        const past = new Date(dateStr);
+        const diffMs = now - past;
+        
+        const diffSeconds = Math.floor(diffMs / 1000);
+        const diffMinutes = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        const diffMonths = Math.floor(diffDays / 30);
+        const diffYears = Math.floor(diffDays / 365);
+        
+        if (diffSeconds < 60) {
+            return `Last synced ${diffSeconds} second${diffSeconds !== 1 ? 's' : ''} ago`;
+        } else if (diffMinutes < 60) {
+            return `Last synced ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+        } else if (diffHours < 24) {
+            return `Last synced ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+        } else if (diffDays < 30) {
+            return `Last synced ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+        } else if (diffMonths < 12) {
+            return `Last synced ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+        } else {
+            return `Last synced ${diffYears} year${diffYears !== 1 ? 's' : ''} ago`;
+        }
     }
 
     /**
@@ -111,17 +123,32 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             this.isSpinner = true;
             getIntegrationDetails()
             .then(data => {
+                let activeCount = 0;
                 data.forEach(item => {
+                    if (item.integrationData.CreatedDate) {
+                        item.integrationData.CreatedDate = this.formatDate(item.integrationData.CreatedDate);
+                    }
+                    if (item.integrationData.LastModifiedDate) {
+                        // Calculate relative time BEFORE formatting the date
+                        item.integrationData.relativeTime = this.getRelativeTime(item.integrationData.LastModifiedDate);
+                        item.integrationData.LastModifiedDate = this.formatDate(item.integrationData.LastModifiedDate);
+                    }
+                    
                     if (item.integrationName === 'AWS') {
-                        if (item.integrationData.CreatedDate) {
-                            item.integrationData.CreatedDate = this.formatDate(item.integrationData.CreatedDate);
-                        }
-                        if (item.integrationData.LastModifiedDate) {
-                            item.integrationData.LastModifiedDate = this.formatDate(item.integrationData.LastModifiedDate);
-                        }
-                        this.awsData = item;
+                        this.awsData = { ...item, showDetails: false };
+                        if (item.isValid) activeCount++;
+                    } else if (item.integrationName === 'Gmail') {
+                        this.gmailData = { ...item, showDetails: false };
+                        if (item.isValid) activeCount++;
+                    } else if (item.integrationName === 'Outlook') {
+                        this.outlookData = { ...item, showDetails: false };
+                        if (item.isValid) activeCount++;
+                    } else if (item.integrationName === 'Instagram') {
+                        this.instagramData = { ...item, showDetails: false };
+                        if (item.isValid) activeCount++;
                     }
                 });
+                this.activeIntegrationCount = activeCount;
                 this.isDataLoaded = true;
                 this.isSpinner = false;
             })
@@ -178,19 +205,31 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         }
     }
 
-    handleDeactivateClick() {
-        this.showMessagePopup('Warning', 'Are you sure you want to deactivate this?' , `This action will revoke access to ${this.activeTab} and you will need to reconfigure the integration if you want to use it again.`);
+    handleDeactivateClick(event) {
+        const integrationName = event.currentTarget.dataset.integration;
+        this.showMessagePopup('Warning', 'Are you sure you want to deactivate this?' , `This action will revoke access to ${integrationName} and you will need to reconfigure the integration if you want to use it again.`);
+        this.integrationToDeactivate = integrationName;
     }
 
     handleConfirmation(event) {
-        if(event.detail === true){
-            switch (this.activeTab) {
+        if(event.detail === true && this.integrationToDeactivate){
+            switch (this.integrationToDeactivate) {
                 case 'AWS':
                     this.deactivateAWS();
+                    break;
+                case 'Gmail':
+                    this.deactivateGmail();
+                    break;
+                case 'Outlook':
+                    this.deactivateOutlook();
+                    break;
+                case 'Instagram':
+                    this.deactivateInstagram();
                     break;
                 default:
                     break;
             }
+            this.integrationToDeactivate = null;
         }
     }
 
@@ -321,70 +360,136 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         this.isWaterMarkUploader = false;
     }
 
-    handleAWSClick(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:storageIntegration"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
+    /**
+    * Method Name: toggleDetails
+    * @description: Toggles the details view for an integration card.
+    * @param {Event} event - Click event
+    * Created Date: 10/02/2026
+    * Created By: Karan Singh
+    */
+    toggleDetails(event) {
+        try {
+            // Use currentTarget to get the element that has the onclick handler and data-integration attribute
+            const integration = event.currentTarget.dataset.integration;
+            
+            // Determine the new state for the clicked card
+            let shouldShow = false;
+            if (integration === 'AWS') {
+                shouldShow = !this.awsData.showDetails;
+            } else if (integration === 'Gmail') {
+                shouldShow = !this.gmailData.showDetails;
+            } else if (integration === 'Outlook') {
+                shouldShow = !this.outlookData.showDetails;
+            } else if (integration === 'Instagram') {
+                shouldShow = !this.instagramData.showDetails;
             }
-        });
+            
+            // Close all cards first to ensure only one is open
+            this.awsData = { ...this.awsData, showDetails: false };
+            this.gmailData = { ...this.gmailData, showDetails: false };
+            this.outlookData = { ...this.outlookData, showDetails: false };
+            this.instagramData = { ...this.instagramData, showDetails: false };
+            
+            // Then set the selected card to its new state
+            if (integration === 'AWS') {
+                this.awsData = { ...this.awsData, showDetails: shouldShow };
+            } else if (integration === 'Gmail') {
+                this.gmailData = { ...this.gmailData, showDetails: shouldShow };
+            } else if (integration === 'Outlook') {
+                this.outlookData = { ...this.outlookData, showDetails: shouldShow };
+            } else if (integration === 'Instagram') {
+                this.instagramData = { ...this.instagramData, showDetails: shouldShow };
+            }
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'toggleDetails', error, 'warn', 'Error occurred while toggling details');
+        }
     }
 
-    handleGmailClick(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:emailIntegration",
-            attributes: {
-                activeTab: 'Gmail'
-            }
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
+    /**
+    * Method Name: deactivateGmail
+    * @description: Used to deactivate Gmail integration.
+    * Created Date: 10/02/2026
+    * Created By: Karan Singh
+    */
+    deactivateGmail() {
+        try {
+            this.isSpinner = true;
+            revokeAWSAccess({ recordId: this.gmailData.integrationData.Id })
+            .then(data => {
+                if (data === 'success') {
+                    this.showToast('Success', 'Changes has been done successfully.', 'success');
+                    this.getSocialMediaDataToShow();
+                } else {
+                    this.showToast('Error', data, 'error');
+                }
+                this.isSpinner = false;
+            })
+            .catch(error => {
+                errorDebugger('StorageIntegration', 'deactivateGmail', error, 'warn', 'Error occurred while deactivating Gmail');
+                this.isSpinner = false;
+            });
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'deactivateGmail', error, 'warn', 'Error occurred while deactivating Gmail');
+            this.isSpinner = false;            
+        }
     }
 
-    handleOutlookClick(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:emailIntegration",
-            attributes: {
-                activeTab: 'Outlook'
-            }
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
+    /**
+    * Method Name: deactivateOutlook
+    * @description: Used to deactivate Outlook integration.
+    * Created Date: 10/02/2026
+    * Created By: Karan Singh
+    */
+    deactivateOutlook() {
+        try {
+            this.isSpinner = true;
+            revokeAWSAccess({ recordId: this.outlookData.integrationData.Id })
+            .then(data => {
+                if (data === 'success') {
+                    this.showToast('Success', 'Changes has been done successfully.', 'success');
+                    this.getSocialMediaDataToShow();
+                } else {
+                    this.showToast('Error', data, 'error');
+                }
+                this.isSpinner = false;
+            })
+            .catch(error => {
+                errorDebugger('StorageIntegration', 'deactivateOutlook', error, 'warn', 'Error occurred while deactivating Outlook');
+                this.isSpinner = false;
+            });
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'deactivateOutlook', error, 'warn', 'Error occurred while deactivating Outlook');
+            this.isSpinner = false;            
+        }
     }
 
-    handleInstagramClick(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:socialMediaIntegration"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
+    /**
+    * Method Name: deactivateInstagram
+    * @description: Used to deactivate Instagram integration.
+    * Created Date: 10/02/2026
+    * Created By: Karan Singh
+    */
+    deactivateInstagram() {
+        try {
+            this.isSpinner = true;
+            revokeAWSAccess({ recordId: this.instagramData.integrationData.Id })
+            .then(data => {
+                if (data === 'success') {
+                    this.showToast('Success', 'Changes has been done successfully.', 'success');
+                    this.getSocialMediaDataToShow();
+                } else {
+                    this.showToast('Error', data, 'error');
+                }
+                this.isSpinner = false;
+            })
+            .catch(error => {
+                errorDebugger('StorageIntegration', 'deactivateInstagram', error, 'warn', 'Error occurred while deactivating Instagram');
+                this.isSpinner = false;
+            });
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'deactivateInstagram', error, 'warn', 'Error occurred while deactivating Instagram');
+            this.isSpinner = false;            
+        }
     }
 
     showMessagePopup(Status, Title, Message) {

@@ -379,6 +379,7 @@ public with sharing class MarketingListCmpController {
             Boolean isUpdate = request.containsKey('isUpdate') ? (Boolean) request.get('isUpdate') : false;
             String broadcastGroupId = (String) request.get('broadcastGroupId');
             String phoneField = (String) request.get('phoneField');
+            String communicationType = (String) request.get('communicationType');
     
             // Basic validation
             if (String.isBlank(objectApiName) || 
@@ -398,6 +399,7 @@ public with sharing class MarketingListCmpController {
             broadcastGroup.Object_Name__c = objectApiName;
             broadcastGroup.List_View__c = listViewName;
             broadcastGroup.Phone_Field__c = phoneField;
+            broadcastGroup.Communication_Type__c = communicationType;
 
             Database.SaveResult insertResult = Database.insert(broadcastGroup, false, AccessLevel.USER_MODE);
             if (!insertResult.isSuccess()) {

@@ -94,7 +94,7 @@ public with sharing class BroadcastMessageController {
         try {
             List<Broadcast__c> broadcasts = [
                 SELECT Id, Name,Status__c, CreatedDate, Recipient_Count__c,
-                    Total_Sent__c, Total_Delivered__c, Total_Read__c
+                    Total_Sent__c, Total_Delivered__c, Total_Read__c,MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
                 FROM Broadcast__c 
                 ORDER BY CreatedDate DESC
             ];
@@ -164,7 +164,8 @@ public with sharing class BroadcastMessageController {
                     'MVEX__Total_Delivered__c' => delivered + read,
                     'MVEX__Total_Failed__c' => failed,
                     'MVEX__Total_Read__c' => read,
-                    'MVEX__Total_Replies__c' => replied
+                    'MVEX__Total_Replies__c' => replied,
+                    'MVEX__Template_Name__c' => b.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
                 });
             }
         } catch (Exception e) {
@@ -619,6 +620,7 @@ public with sharing class BroadcastMessageController {
             if (communicationType == 'Email' || communicationType == 'Both') {
                 queryFields += ', ' + emailField;
             }
+
             String query = 'SELECT ' + queryFields + ' FROM ' + objectName + ' WHERE ' + (communicationType == 'Email' ? emailField : phoneField) + ' IN :values';
             String escapedQuery = String.escapeSingleQuotes(query);
             List<SObject> matchedRecords = Database.query(escapedQuery, AccessLevel.USER_MODE);
@@ -643,12 +645,33 @@ public with sharing class BroadcastMessageController {
                 }
             }
 
+            // Step 2: Get phone numbers and statuses
+            Set<String> phoneNumbers = new Set<String>();
+            for (Broadcast_Group_Member__c member : members) {
+                phoneNumbers.add(member.Phone_Number__c);
+            }
+
+            if (phoneNumbers.isEmpty()) {
+                return new List<BroadcastMemberWrapper>();
+            }
+
+            // Step 3: Fetch chat statuses using phone numbers
+            Map<String, String> phoneToChatStatus = new Map<String, String>();
+            List<Chat__c> broadcastRelatedChats = [SELECT Phone__c, Message_Status__c FROM Chat__c WHERE WB_Broadcast__c = :broadcastId AND Phone__c IN :phoneNumbers WITH SECURITY_ENFORCED];
+
+            for (Chat__c chat : broadcastRelatedChats) {
+                // If there are multiple chats per phone, you can decide to pick the latest or first one — adjust as needed
+                if (!phoneToChatStatus.containsKey(chat.Phone__c)) {
+                    phoneToChatStatus.put(chat.Phone__c, chat.Message_Status__c);
+                }
+            }
+
             List<BroadcastMemberWrapper> result = new List<BroadcastMemberWrapper>();
             for (SObject record : matchedRecords) {
                 String value = communicationType == 'Email' ? (String)record.get(emailField) : (String)record.get(phoneField);
                 BroadcastMemberWrapper wrapper = new BroadcastMemberWrapper();
                 wrapper.record = record;
-                wrapper.status = valueToStatus.get(value);
+                wrapper.status = phoneToChatStatus.get(value);
                 wrapper.hasReplied = phoneToHasReply.containsKey(value) ? phoneToHasReply.get(value) : false;
                 result.add(wrapper);
             }

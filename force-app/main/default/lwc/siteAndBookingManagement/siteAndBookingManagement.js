@@ -620,7 +620,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 })
                 .catch(error => this.handleApexError(error, 'Error creating showing.'));
         } else {
-            sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, communicationMethod: this.selectedCommunicationMethod })
+            sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, communicationMethod: this.selectedCommunicationMethod, isReschedule: false })
                 .then(() => this.handleApexSuccess('Email sent and showing scheduled successfully.'))
                 .catch(error => this.handleApexError(error, 'Error sending email and creating showing.'));
         }
@@ -633,7 +633,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     if (this.isWhatsAppSelected) {
                         this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Rescheduled'));
                     } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime })
+                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime,isReschedule: true })
                             .then(() => this.handleApexSuccess('Email sent and showing rescheduled successfully.'))
                             .catch(error => this.handleApexError(error, 'Error sending reschedule email.'));
                     }
@@ -651,7 +651,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     if (this.isWhatsAppSelected) {
                         this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Scheduled'));
                     } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null })
+                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null,isReschedule: false })
                             .then(() => this.handleApexSuccess('Confirmation email sent successfully.'))
                             .catch(error => this.handleApexError(error, 'Error sending confirmation email.'));
                     }

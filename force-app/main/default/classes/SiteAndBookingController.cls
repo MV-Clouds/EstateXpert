@@ -57,10 +57,10 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled
-    public static void sendEmailsAndCreateShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String communicationMethod) {
+    public static void sendEmailsAndCreateShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String communicationMethod, Boolean isReschedule) {
         try {
             // Determine the appropriate email template based on whether it's a schedule or reschedule
-            String templateName = scheduleDateTime != null ? 'Showing_Confirmation' : 'RescheduleConfirmationEmail';
+            String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
             EmailTemplate template = [SELECT Id, Subject, HtmlValue, Body FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
 
             System.debug('scheduleDateTime: ' + scheduleDateTime);
@@ -315,7 +315,11 @@ public with sharing class SiteAndBookingController {
                     Integer minute = Integer.valueOf(timeParts[1]); // 57
                     
                     String gmtDateTimeStr = dateStr + ' ' + timeStr + ':00';
-                    scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
+                    // if(isReschedule){
+                    // scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
+                    // }else{
+                        scheduledDateTime = DateTime.valueOf(gmtDateTimeStr);
+                    //}
                 
             }
 

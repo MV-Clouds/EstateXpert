@@ -55,7 +55,7 @@
                                         <p class="support-text">Supports: JPG, PNG, HEIC, GIF, MP4, MOV</p>
                                         <input type="file" class="slds-file-selector__input slds-assistive-text"
                                             onchange={handleSelectedFiles}
-                                            accept="image/png, image/jpeg, image/jpg , video/mp4"
+                                            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime"
                                             id="file-upload-input-107" multiple
                                             aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
                                         <label class="slds-file-selector__body" for="file-upload-input-107"
@@ -93,7 +93,7 @@
                                 <div class="add-more-tile">
                                     <input type="file" class="slds-file-selector__input slds-assistive-text"
                                         onchange={handleSelectedFiles}
-                                        accept="image/png, image/jpeg, image/jpg , video/mp4"
+                                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime"
                                         id="file-upload-input-add" multiple
                                         aria-labelledby="file-selector-add-label" />
                                     <label class="add-more-label" for="file-upload-input-add" id="file-selector-add-label">
@@ -107,7 +107,7 @@
 
                 <div class="caption-input-selected">
                     <div class="caption-label-wrapper">
-                        <label for="caption"><lightning-icon icon-name='utility:edit' class="custom-icon-edit" alternative-text='edit' size='x-small' title='edit'></lightning-icon>Caption<abbr title="required" class="slds-required">*</abbr></label>
+                        <label for="caption"><lightning-icon icon-name='utility:edit' class="custom-icon-edit" alternative-text='edit' size='x-small' title='edit'></lightning-icon>Caption</label>
                     </div>
                     <textarea data-id="caption" placeholder="Write your caption here... Share your story!" maxlength="2200" class="caption-textarea"
                         value={caption} onchange={handleCaptionChange}></textarea>

@@ -33,6 +33,8 @@ export default class InstagramPostFromListing extends LightningElement {
     @track progressStyle = 'width: 0%';
     @track hasAWSCredentials = false;
     @track hasInstagramCredentials = false;
+    @track invalidVideoDuration = [];
+    @track invalidVideoSize = [];
 
     get isFileAvailable() {
         return this.selectedFileWithPreview.length > 0;
@@ -223,18 +225,43 @@ export default class InstagramPostFromListing extends LightningElement {
             const files = event.dataTransfer.files;
             this.isImageData = true;
             this.largeImageFiles = [];
+            this.invalidVideoDuration = [];
             const fileProcessingPromises = [];
             let invalidFileTypes = [];
+
+            // Check if adding files would exceed 10 file limit
+            const totalFilesAfter = this.selectedFileWithPreview.length + files.length;
+            if (totalFilesAfter > 10) {
+                this.showToast('Error', `Cannot add ${files.length} files. Maximum 10 files allowed.`, 'error');
+                return;
+            }
+
+            // It's a carousel if: there are already existing files, OR multiple files are being added together
+            const isCarousel = this.selectedFileWithPreview.length > 0 || files.length > 1;
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const isValidFileType = ['image/png', 'image/jpg', 'image/jpeg', 'video/mp4'].includes(file.type);
                 const fileSizeInKB = Math.floor(file.size / 1024);
                 const isAllowedSize = file.type === 'video/mp4'
-                    ? fileSizeInKB <= 30000
-                    : fileSizeInKB <= 3000;
+                    ? fileSizeInKB <= 25000  // Updated to 25MB for consistency
+                    : fileSizeInKB <= 8000;
 
-                if (isValidFileType && isAllowedSize) {
+                if (!isValidFileType) {
+                    invalidFileTypes.push(file.name);
+                    continue;
+                }
+
+                // For videos, validate duration with explicit carousel flag
+                if (file.type === 'video/mp4') {
+                    const validation = await this.validateVideo(file, isCarousel);
+                    if (!validation.isValid) {
+                        this.invalidVideoDuration.push(validation.errorMessage);
+                        continue;
+                    }
+                }
+
+                if (isAllowedSize) {
                     if (this.picaInstance && file.type !== 'video/mp4') {
                         const jpegFilePromise = this.convertToJpeg(file).then(jpegFile => {
                             this.selectedFilesToUpload.push(jpegFile);
@@ -258,8 +285,6 @@ export default class InstagramPostFromListing extends LightningElement {
                         });
                         fileProcessingPromises.push(thumbnailPromise);
                     }
-                } else if (!isValidFileType) {
-                    invalidFileTypes.push(file.name);
                 } else {
                     this.largeImageFiles.push(file.name);
                 }
@@ -270,6 +295,10 @@ export default class InstagramPostFromListing extends LightningElement {
 
             if (invalidFileTypes.length > 0) {
                 this.showToast('Error', `Invalid file types: ${invalidFileTypes.join(', ')}`, 'error');
+            }
+
+            if (this.invalidVideoDuration.length > 0) {
+                this.showToast('Error', `Video validation errors:\n${this.invalidVideoDuration.join('\n')}`, 'error');
             }
 
             if (this.largeImageFiles.length > 0) {
@@ -327,21 +356,169 @@ export default class InstagramPostFromListing extends LightningElement {
         this.caption = caption;
     }
 
+    /**
+     * Get video duration in seconds
+     * @param {File} file - Video file
+     * @returns {Promise<number>} Duration in seconds
+     */
+    getVideoDuration(file) {
+        return new Promise((resolve, reject) => {
+            try {
+                const video = document.createElement('video');
+                const objectUrl = URL.createObjectURL(file);
+                video.src = objectUrl;
+
+                video.addEventListener('loadedmetadata', () => {
+                    URL.revokeObjectURL(objectUrl);
+                    resolve(video.duration);
+                });
+
+                video.addEventListener('error', () => {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(new Error('Failed to load video metadata'));
+                });
+
+                // Set a timeout to handle cases where metadata never loads
+                setTimeout(() => {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(new Error('Video metadata timeout'));
+                }, 10000);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    /**
+     * Determine if current selection is a carousel (multiple files) or single video
+     * @returns {boolean} True if carousel, False if single video
+     */
+    isCarouselPost() {
+        const totalMedia = this.selectedFileWithPreview.length + this.selectedFilesToUpload.length;
+        return totalMedia > 1 || (totalMedia === 1 && this.selectedFilesToUpload.some(f => f.type !== 'video/mp4'));
+    }
+
+    /**
+     * Validate video based on carousel or single video rules
+     * @param {File} file - Video file to validate
+     * @param {boolean} isCarousel - Explicitly indicate if this is a carousel post (if null, auto-detect)
+     * @returns {Promise<Object>} Validation result { isValid, errorMessage, duration }
+     */
+    async validateVideo(file, isCarousel = null) {
+        try {
+            const duration = await this.getVideoDuration(file);
+            const fileSizeInMB = file.size / (1024 * 1024);
+            
+            let willBeCarousel;
+            if (isCarousel !== null) {
+                willBeCarousel = isCarousel;
+            } else {
+                willBeCarousel = this.selectedFileWithPreview.length > 0 || this.selectedFilesToUpload.length > 0;
+            }
+            
+            if (willBeCarousel) {
+                // Carousel rules: 60s max, 3s min, 25MB max
+                if (duration < 3) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration is too short (minimum 3 seconds for carousel)`,
+                        duration
+                    };
+                }
+                if (duration > 60) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration exceeds 60 seconds for carousel posts`,
+                        duration
+                    };
+                }
+                if (fileSizeInMB > 25) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video file size exceeds 25MB for carousel posts`,
+                        duration
+                    };
+                }
+            } else {
+                // Single video rules: 15 min (900s) max, 3s min, 25MB max
+                if (duration < 3) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration is too short (minimum 3 seconds)`,
+                        duration
+                    };
+                }
+                if (duration > 900) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration exceeds 15 minutes for single video posts`,
+                        duration
+                    };
+                }
+                if (fileSizeInMB > 25) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video file size exceeds 25MB`,
+                        duration
+                    };
+                }
+            }
+
+            return {
+                isValid: true,
+                duration
+            };
+        } catch (error) {
+            return {
+                isValid: false,
+                errorMessage: `${file.name}: Failed to validate video - ${error.message}`,
+                duration: 0
+            };
+        }
+    }
+
     async handleSelectedFiles(event) {
         try {
             if (event.target.files && event.target.files.length > 0) {
                 const files = event.target.files;
                 this.isImageData = true;
                 this.largeImageFiles = [];
+                this.invalidVideoDuration = [];
+                this.invalidVideoSize = [];
+
+                // Check if adding files would exceed 10 file limit
+                const totalFilesAfter = this.selectedFileWithPreview.length + files.length;
+                if (totalFilesAfter > 10) {
+                    this.showToast('Error', `Cannot add ${files.length} files. Maximum 10 files allowed.`, 'error');
+                    this.template.querySelector('.slds-file-selector__input').value = null;
+                    return;
+                }
+
+                // Determine if this will be a carousel post
+                // It's a carousel if: there are already existing files, OR multiple files are being added together
+                const isCarousel = this.selectedFileWithPreview.length > 0 || files.length > 1;
 
                 const fileProcessingPromises = [];
 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const fileType = file.type;
+                    const fileSizeInKB = Math.floor(file.size / 1024);
+                    const fileSizeInMB = file.size / (1024 * 1024);
+                    
+                    // Check basic file size limits
                     const isAllowedSize = fileType === 'video/mp4'
-                        ? Math.floor(file.size / 1024) <= 30000
-                        : Math.floor(file.size / 1024) <= 3000;
+                        ? fileSizeInKB <= 25000  // 25MB for videos
+                        : fileSizeInKB <= 8000;   // 8MB for images
+
+                    // For videos, validate duration with explicit carousel flag
+                    if (fileType === 'video/mp4') {
+                        const validation = await this.validateVideo(file, isCarousel);
+                        if (!validation.isValid) {
+                            this.invalidVideoDuration.push(validation.errorMessage);
+                            continue;
+                        }
+                    }
 
                     if (isAllowedSize) {
                         if (this.picaInstance && file.type !== 'video/mp4') {
@@ -374,6 +551,11 @@ export default class InstagramPostFromListing extends LightningElement {
 
                 const fileDataArray = await Promise.all(fileProcessingPromises);
                 this.selectedFileWithPreview = [...this.selectedFileWithPreview, ...fileDataArray];
+
+                // Show error messages for invalid files
+                if (this.invalidVideoDuration.length > 0) {
+                    this.showToast('Error', `Video validation errors:\n${this.invalidVideoDuration.join('\n')}`, 'error');
+                }
 
                 if (this.largeImageFiles.length > 0) {
                     this.showToast('Error', `File(s) too large: ${this.largeImageFiles.join(', ')}`, 'error');
@@ -500,11 +682,6 @@ export default class InstagramPostFromListing extends LightningElement {
     async handlePost() {
         const totalFiles = this.fileURLs.length + this.selectedFilesToUpload.length;
 
-        if (this.caption.trim() === '' && totalFiles === 0) {
-            this.showToast('Error', 'Please select a file to upload and enter a caption.', 'error');
-            return;
-        }
-
         if (totalFiles === 0) {
             this.showToast('Error', 'Please select a file to upload.', 'error');
             return;
@@ -514,12 +691,6 @@ export default class InstagramPostFromListing extends LightningElement {
             this.showToast('Error', 'You can upload maximum 10 files.', 'error');
             return;
         }
-
-        if (this.caption.trim() === '') {
-            this.showToast('Error', 'Please enter a caption.', 'error');
-            return;
-        }
-
 
         const isSuccess = await this.uploadToAWS();
 

@@ -18,26 +18,135 @@
                             Map Listing And Inquiry
                         </div>
                     </div>
+                    <div class="save-btn">
+                        <button disabled={saveButtonDisabled} onclick={handleAddPairClick}>Save All Changes</button>
+                    </div>
                 </div>
             </div>
 
             <div class="main_content_cls">
                 <div class="slds-m-around_medium navbar">
                     <div class="selected-condition">
-                        <p><b>Condition Type</b>: {selectedConditionLabel} <template if:true={logicalConditionListing}>({logicalConditionListing})</template></p>
+                        <!-- <p><b>Condition Type</b>: {selectedConditionLabel} <template if:true={showCondtionStringListing}>({logicalConditionListing})</template></p> -->
+                        <p><b>Condition Type</b>: {selectedConditionLabelinquiry} <template if:true={showCondtionStringInquiry}>({logicalConditionInquiry})</template></p>
                     </div>
-                    <div class="save-btn">
-                        <button disabled={saveButtonDsibale} onclick={handleAddPairClick}>Save Mapping</button>
+                    <!-- <div class="save-btn">
                         <button onclick={handleModalOpen} class="btn display_css2">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
                             </svg>
                             Add Custom Logic
                         </button>
-                    </div>
+                    </div> -->
                 </div>
 
                 <lightning-accordion allow-multiple-sections-open active-section-name={activeSections}>
+                    <lightning-accordion-section name="inquirySection" label="Inquiry Mapping(For Suggested Inquiries on Listing Record Page)">
+                        <div class="table-content">
+
+                            <template if:true={isInquirydropDownAvailable}>
+                                <table class="slds-table">
+                                    <thead>
+                                        <tr class="table_tr_cls">
+                                            <th scope="col" class="sno">
+                                                <div class="font_css">No.</div>
+                                            </th>
+                                            <th scope="col" class="inquiry-field">
+                                                <div class="font_css">Inquiry Field</div>
+                                            </th>
+                                            <th scope="col" class="condition">
+                                                <div class="font_css">Condition</div>
+                                            </th>
+                                            <th scope="col" class="listing-field">
+                                                <div class="font_css">Listing Field</div>
+                                            </th>
+                                            <th scope="col" class="actions">
+                                                <div class="font_css">Action</div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={inquiryDropDownPairsWithIndex} for:item="pair" for:index="index">
+                                            <tr key={pair.Id}>
+                                                <td data-label="S.No.">
+                                                    <div class="index-display">{pair.displayIndex}</div>
+                                                </td>
+                                                <td data-label="Status">
+                                                    <div class="flex-item">
+                                                        <lightning-combobox label={pair.firstlabel} options={pair.firstOptions}
+                                                            data-index={index} value={pair.selectedFirst}
+                                                            data-object={inquiryObject} onchange={handleFirstFieldChange} dropdown-alignment="auto"
+                                                            variant="label-hidden"></lightning-combobox>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Object Name">
+                                                    <div class="flex-item">
+                                                        <lightning-combobox label="Condition" options={pair.conditionsOptions}
+                                                            data-index={index} value={pair.selectedCondition}
+                                                            onchange={handleConditionChange} variant="label-hidden" dropdown-alignment="auto"
+                                                            data-object={inquiryObject}></lightning-combobox>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Template Type">
+                                                    <div class="flex-item">
+                                                        <lightning-combobox label={pair.secondlabel}
+                                                            options={pair.secondOptions} data-index={index}
+                                                            value={pair.selectedSecond} data-object={inquiryObject}  dropdown-alignment="auto"
+                                                            onchange={handleSecondFieldChange}
+                                                            variant="label-hidden"></lightning-combobox>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Actions">
+                                                    <div class="action-btn">
+                                                        <button class="delete-div" data-id={index} onclick={deletePair}
+                                                            data-object={inquiryObject}>
+                                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                                    stroke-linejoin="round" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </template>
+
+
+                        <template if:false={isInquirydropDownAvailable}>
+
+                            <div class="no-data-available">
+                                No Mapping Found
+                            </div>
+                        </template>
+
+                        </div>
+
+                        <div class="save-btn">
+                            <button onclick={addNewPairInquiry}>Add</button>
+                            <div class="header">
+                                <button class="add-btn btn display_css1" onclick={handleModalOpen}
+                                    data-object={inquiryObject}>
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                                    </svg>
+                                    Add Custom Logic
+                                </button>
+                            </div>
+                        </div>
+                    </lightning-accordion-section>
+                    
+
+                    <div class="selected-condition custom-heading">
+                        <!-- <p><b>Condition Type</b>: {selectedConditionLabelinquiry} <template if:true={showCondtionStringInquiry}>({logicalConditionInquiry})</template></p> -->
+                        <p><b>Condition Type</b>: {selectedConditionLabel} <template if:true={showCondtionStringListing}>({logicalConditionListing})</template></p>
+                    </div>
+
                     <lightning-accordion-section name="listingSection" label="Listing Mapping(For Suggested Listings on Inquiry Record Page)">
 
                         <template if:true={isListingdropDownAvaialble}>
@@ -140,112 +249,7 @@
                             </div>
                         </div>
                     </lightning-accordion-section>
-
-
-                    <div class="selected-condition custom-heading">
-                        <p><b>Condition Type</b>: {selectedConditionLabelinquiry} <template if:true={logicalConditionInquiry}>({logicalConditionInquiry})</template></p>
-                    </div>
-
-                    <lightning-accordion-section name="inquirySection" label="Inquiry Mapping(For Suggested Inquiries on Listing Record Page)">
-                        <div class="table-content">
-
-                            <template if:true={isInquirydropDownAvailable}>
-                                <table class="slds-table">
-                                    <thead>
-                                        <tr class="table_tr_cls">
-                                            <th scope="col" class="sno">
-                                                <div class="font_css">No.</div>
-                                            </th>
-                                            <th scope="col" class="inquiry-field">
-                                                <div class="font_css">Inquiry Field</div>
-                                            </th>
-                                            <th scope="col" class="condition">
-                                                <div class="font_css">Condition</div>
-                                            </th>
-                                            <th scope="col" class="listing-field">
-                                                <div class="font_css">Listing Field</div>
-                                            </th>
-                                            <th scope="col" class="actions">
-                                                <div class="font_css">Action</div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template for:each={inquiryDropDownPairsWithIndex} for:item="pair" for:index="index">
-                                            <tr key={pair.Id}>
-                                                <td data-label="S.No.">
-                                                    <div class="index-display">{pair.displayIndex}</div>
-                                                </td>
-                                                <td data-label="Status">
-                                                    <div class="flex-item">
-                                                        <lightning-combobox label={pair.firstlabel} options={pair.firstOptions}
-                                                            data-index={index} value={pair.selectedFirst}
-                                                            data-object={inquiryObject} onchange={handleFirstFieldChange} dropdown-alignment="auto"
-                                                            variant="label-hidden"></lightning-combobox>
-                                                    </div>
-                                                </td>
-                                                <td data-label="Object Name">
-                                                    <div class="flex-item">
-                                                        <lightning-combobox label="Condition" options={pair.conditionsOptions}
-                                                            data-index={index} value={pair.selectedCondition}
-                                                            onchange={handleConditionChange} variant="label-hidden" dropdown-alignment="auto"
-                                                            data-object={inquiryObject}></lightning-combobox>
-                                                    </div>
-                                                </td>
-                                                <td data-label="Template Type">
-                                                    <div class="flex-item">
-                                                        <lightning-combobox label={pair.secondlabel}
-                                                            options={pair.secondOptions} data-index={index}
-                                                            value={pair.selectedSecond} data-object={inquiryObject}  dropdown-alignment="auto"
-                                                            onchange={handleSecondFieldChange}
-                                                            variant="label-hidden"></lightning-combobox>
-                                                    </div>
-                                                </td>
-                                                <td data-label="Actions">
-                                                    <div class="action-btn">
-                                                        <button class="delete-div" data-id={index} onclick={deletePair}
-                                                            data-object={inquiryObject}>
-                                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path
-                                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                                    stroke-linejoin="round" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </template>
-
-
-                        <template if:false={isInquirydropDownAvailable}>
-
-                            <div class="no-data-available">
-                                No Mapping Found
-                            </div>
-                        </template>
-
-                        </div>
-
-                        <div class="save-btn">
-                            <button onclick={addNewPairInquiry}>Add</button>
-                            <div class="header">
-                                <button class="add-btn btn display_css1" onclick={handleModalOpen}
-                                    data-object={inquiryObject}>
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-                                    </svg>
-                                    Add Custom Logic
-                                </button>
-                            </div>
-                        </div>
-                    </lightning-accordion-section>
-
+                    
                 </lightning-accordion>
 
             </div>
@@ -311,7 +315,7 @@
                                     <div class="condition-container-input">
                                         <lightning-input type="text" class="condition-input" label="Logical Expression"
                                             data-id="condition-input" value={logicalConditionListing} data-name="listing"
-                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2"
+                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2" message-when-value-missing=" "
                                             required></lightning-input>
                                         <template if:true={listingLogicError}>
                                             <div class="slds-text-color_error">{listingLogicError}</div>
@@ -343,7 +347,7 @@
                                     <div class="condition-container-input">
                                         <lightning-input type="text" class="condition-input" label="Logical Expression"
                                             data-id="condition-input-2" value={logicalConditionInquiry} data-name="inquiry"
-                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2"
+                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2" message-when-value-missing=" "
                                             required></lightning-input>
                                         <template if:true={inquiryLogicError}>
                                             <div class="slds-text-color_error">{inquiryLogicError}</div>

@@ -1,6 +1,5 @@
 <template>
-    <div class="wrapper-instagram-post">
-         <template if:true={showSpinner}>
+    <template if:true={showSpinner}>
         <div class="overlay-spinner">
             <div class="upload-wrapper-spinner">
                 <img src="/resource/MVEX__Animationimg" alt="Loading..." draggable="false">
@@ -14,6 +13,8 @@
             </div>
         </div>
     </template>
+
+    <div class="wrapper-instagram-post">
 
         <div class="slds-modal__header blue-header">
             <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Instagram Post Uploader</h1>

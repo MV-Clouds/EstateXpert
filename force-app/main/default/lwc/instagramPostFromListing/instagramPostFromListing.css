@@ -10,17 +10,17 @@
 /* Spinner Css */
 
 .overlay-spinner {
-    position: absolute;
-    top: 0;
+    position: fixed;
+    top: 13%;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 70%;
     background: rgb(255 254 254 / 43%);
     backdrop-filter: blur(3px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 9999;
 }
 
 .upload-wrapper-spinner {

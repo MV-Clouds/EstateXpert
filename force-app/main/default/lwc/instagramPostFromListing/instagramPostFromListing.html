@@ -52,7 +52,7 @@
                                     </div>
                                     <div class="formbold-drop-file images_upcss">
                                         <p>Choose files or drag & drop here</p>
-                                        <p class="support-text">Supports: JPG, PNG, GIF, MP4 (Max 50MB each)</p>
+                                        <p class="support-text">Supports: JPG, PNG, HEIC, GIF, MP4, MOV</p>
                                         <input type="file" class="slds-file-selector__input slds-assistive-text"
                                             onchange={handleSelectedFiles}
                                             accept="image/png, image/jpeg, image/jpg , video/mp4"
@@ -65,19 +65,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="caption-input-empty">
-                            <div class="caption-label-wrapper">
-                                <label for="caption"><lightning-icon icon-name='utility:edit' class="custom-icon-edit" alternative-text='edit' size='x-small' title='edit'></lightning-icon>Caption<abbr title="required" class="slds-required">*</abbr></label>
-                            </div>
-                            <textarea data-id="caption" placeholder="Write your caption here... Share your story!" maxlength="2500" class="caption-textarea"
-                                value={caption} onchange={handleCaptionChange}></textarea>
-                        </div>
-
-                        <div class="submit-button-empty">
-                            <button onclick={handlePost} class="upload-button upload-button-disabled" disabled><lightning-icon icon-name='utility:upload' alternative-text='upload' size='x-small' title='upload'></lightning-icon>Upload Post</button>
-                            <p class="error-message">⊘ Please select an image or video to continue</p>
                         </div>
                     </div>
                 </template>
@@ -115,20 +102,37 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="caption-input-selected">
-                            <div class="caption-label-wrapper">
-                                <label for="caption"><lightning-icon icon-name='utility:edit' class="custom-icon-edit" alternative-text='edit' size='x-small' title='edit'></lightning-icon>Caption<abbr title="required" class="slds-required">*</abbr></label>
-                            </div>
-                            <textarea data-id="caption" placeholder="Write your caption here... Share your story!" maxlength="500" class="caption-textarea"
-                                value={caption} onchange={handleCaptionChange}></textarea>
-                        </div>
-
-                        <div class="submit-button-selected">
-                            <button onclick={handlePost} class="upload-button upload-button-enabled"><lightning-icon icon-name='utility:upload' class="custom-upload-icon" alternative-text='upload' size='x-small' title='upload'></lightning-icon>Upload Post</button>
-                        </div>
                     </div>
                 </template>
+
+                <div class="caption-input-selected">
+                    <div class="caption-label-wrapper">
+                        <label for="caption"><lightning-icon icon-name='utility:edit' class="custom-icon-edit" alternative-text='edit' size='x-small' title='edit'></lightning-icon>Caption<abbr title="required" class="slds-required">*</abbr></label>
+                    </div>
+                    <textarea data-id="caption" placeholder="Write your caption here... Share your story!" maxlength="2200" class="caption-textarea"
+                        value={caption} onchange={handleCaptionChange}></textarea>
+                </div>
+
+                <div class={submitContainerClass}>
+                    <button
+                        onclick={handlePost}
+                        class={uploadButtonClass}
+                        disabled={isUploadDisabled}
+                    >
+                        <lightning-icon
+                            icon-name="utility:upload"
+                            class="custom-upload-icon"
+                            alternative-text="upload"
+                            size="x-small"
+                            title="upload">
+                        </lightning-icon>
+                        Upload Post
+                    </button>
+
+                    <template if:false={isFileAvailable}>
+                        <p class="error-message">⊘ Please select an image or video to continue</p>
+                    </template>
+                </div>
 
             </template>
         </div>

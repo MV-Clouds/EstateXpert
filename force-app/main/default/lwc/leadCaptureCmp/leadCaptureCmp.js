@@ -2,7 +2,7 @@ import { LightningElement, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
-import getSocialMediaData from '@salesforce/apex/IntegrationPopupController.getGoogleData';
+import getGoogleData from '@salesforce/apex/IntegrationPopupController.getGoogleData';
 import revokeGoogleAccess from '@salesforce/apex/IntegrationPopupController.revokeGoogleAccess';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
@@ -56,9 +56,8 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     getSocialMediaDataToShow() {
         this.isSpinner = true;
-        getSocialMediaData({integrationName: ''})
+        getGoogleData()
             .then(data => {
-                console.log('data-->', data);
                 data.forEach(item => {
                     if (item.integrationName === 'GoogleAds') {
                         if (item.integrationData && item.integrationData.CreatedDate) {

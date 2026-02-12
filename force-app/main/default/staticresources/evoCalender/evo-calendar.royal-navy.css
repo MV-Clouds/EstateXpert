@@ -14,8 +14,7 @@
 /* Evo Calendar - Theme: Royal Navy */
 .royal-navy .calendar-sidebar {
     background-color: rgb(241 251 255);
-    -webkit-box-shadow: 5px 0 18px -3px #216583;
-    box-shadow: 5px 0 18px -3px #216583;
+    box-shadow: 5px 0 18px -3px rgba(0, 0, 0, .15);
     color: black;
 }
 .royal-navy.sidebar-hide .calendar-sidebar {
@@ -132,9 +131,9 @@
 /* .royal-navy .event-container {
     border-radius: 30px;
 } */
-.royal-navy .event-container:hover {
+/* .royal-navy .event-container:hover {
     background-color: #fff;
-}
+} */
 .royal-navy .event-container > .event-info > p {
     color: black;
 }

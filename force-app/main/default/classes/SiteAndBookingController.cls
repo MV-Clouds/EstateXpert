@@ -265,7 +265,8 @@ public with sharing class SiteAndBookingController {
             List<Showing__c> showings = [
                 SELECT Id, Status__c, Scheduled_Date__c, Reschedule_Date__c, Buyer__r.Name, Listing__r.Name
                 FROM Showing__c
-                WHERE (Scheduled_Date__c >= :todayStart OR Reschedule_Date__c >= :todayStart)
+                WHERE (Scheduled_Date__c >= :todayStart OR Reschedule_Date__c >= :todayStart) AND
+                Status__c IN ('Waiting For Confirmation', 'Scheduled', 'Rescheduled')
                 WITH USER_MODE
             ];
             
@@ -273,9 +274,9 @@ public with sharing class SiteAndBookingController {
             for (Showing__c showing : showings) {
                 Map<String, Object> showingMap = new Map<String, Object>();
                 showingMap.put('Id', showing.Id);
-                showingMap.put('Status__c', showing.Status__c);
-                showingMap.put('Scheduled_Date__c', showing.Scheduled_Date__c);
-                showingMap.put('Reschedule_Date__c', showing.Reschedule_Date__c);
+                showingMap.put('MVEX__Status__c', showing.Status__c);
+                showingMap.put('MVEX__Scheduled_Date__c', showing.Scheduled_Date__c);
+                showingMap.put('MVEX__Reschedule_Date__c', showing.Reschedule_Date__c);
                 showingMap.put('ContactName', showing.Buyer__r.Name);
                 showingMap.put('ListingName', showing.Listing__r.Name);
                 formattedShowings.add(showingMap);
@@ -315,11 +316,7 @@ public with sharing class SiteAndBookingController {
                     Integer minute = Integer.valueOf(timeParts[1]); // 57
                     
                     String gmtDateTimeStr = dateStr + ' ' + timeStr + ':00';
-                    // if(isReschedule){
-                    // scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
-                    // }else{
-                        scheduledDateTime = DateTime.valueOf(gmtDateTimeStr);
-                    //}
+                    scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
                 
             }
 

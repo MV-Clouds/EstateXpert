@@ -615,7 +615,7 @@ export function initializeSummerNote(self, docGeniusLogoSvg, editorSelector) {
       // ['custom_clearFormatting', ['truncate','clear']],
       ['custom_clearFormatting', ['clear']],
       ['custom_view', ['codeview', 'help']],
-      ['custom_title', ['titleBtn']],
+      //['custom_title', ['titleBtn']],
     ]
 
     // remove page backer for header and footer editor.

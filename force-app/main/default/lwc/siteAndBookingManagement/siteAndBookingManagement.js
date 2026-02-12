@@ -304,7 +304,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                             <div class="event-desc-line">Listing: ${showing.ListingName}</div>
                         </div>`,
                     type: 'event',
-                    color: showing.MVEX__Status__c === 'Waiting For Confirmation' ? 'rgb(2 118 211);' : showing.MVEX__Status__c === 'Scheduled' ? '#4CAF50' : showing.MVEX__Status__c === 'Rescheduled' ? 'rgb(255 180 180 / 40%)' : showing.MVEX__Status__c === 'Completed' ? 'rgb(2 118 211 / 40%)' : 'rgb(2 118 211 / 40%)'
+                    color: showing.MVEX__Status__c === 'Waiting For Confirmation' ? 'rgb(2 118 211);' : showing.MVEX__Status__c === 'Scheduled' ? '#4CAF50' : showing.MVEX__Status__c === 'Rescheduled' ? 'rgb(255 180 180 / 40%)' : 'rgb(2 118 211 / 40%)'
                 }));
             })
             .catch(error => {
@@ -351,7 +351,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 }
             });
 
-            window.jQuery(calendarEl).on('click', '.showing-link', this.handleShowingLinkClick.bind(this));
+            // window.jQuery(calendarEl).on('click', '.showing-link', this.handleShowingLinkClick.bind(this));
             this.scheduleCalendarInitialized = true;
         } catch (error) {
             console.error('Error initializing Schedule Calendar:', error);
@@ -551,7 +551,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         this.isLoading = true;
         this.loadPropertyData();
         this.loadAllShowings();
-        this.showToast('Success', 'Data refreshed successfully', 'success');
+        this.showToast('Success', 'Successfully refreshed Showing records!', 'success');
     }
 
     // --- SAVE & EXECUTION LOGIC ---

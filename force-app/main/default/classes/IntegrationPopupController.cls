@@ -352,7 +352,7 @@ public with sharing class IntegrationPopupController {
             AWS_Config__c awsCredential = AWS_Config__c.getOrgDefaults();
             GmailConfig__c gmailCredential = GmailConfig__c.getOrgDefaults();
             OutlookConfig__c outlookCredential = OutlookConfig__c.getOrgDefaults();
-            Google_Credentials__c googleCredential = Google_Credentials__c.getOrgDefaults();
+            IG_Configuration__c instagramCredential = IG_Configuration__c.getOrgDefaults();
 
             // Outlook Integration
             FieldWrapperData outlookWrapper = new FieldWrapperData();
@@ -373,6 +373,13 @@ public with sharing class IntegrationPopupController {
             awsWrapper.integrationData = awsCredential;
             awsWrapper.isValid = awsCredential.AWS_Access_Key__c != null && awsCredential.AWS_Secret_Access_Key__c != null && awsCredential.S3_Bucket_Name__c != null && awsCredential.S3_Region_Name__c != null;
             wrapperList.add(awsWrapper);
+
+
+            FieldWrapperData instagramWrapper = new FieldWrapperData();
+            instagramWrapper.integrationName = 'Instagram';
+            instagramWrapper.isValid = instagramCredential.ClientId__c != null && instagramCredential.ClientSecret__c != null;
+            instagramWrapper.integrationData = instagramCredential;
+            wrapperList.add(instagramWrapper);
 
             return wrapperList;
 
@@ -408,11 +415,11 @@ public with sharing class IntegrationPopupController {
             HttpResponse res = http.send(req);
             
             // Check the response
-            if (res.getStatusCode() == 200) {
-                status = deleteGmailConfig(recordId);
-            } else {
-                status = res.getBody();
+            if (res.getStatusCode() != 200) {
+                ErrorHandler.insertErrordata(null, 'IntegrationPopupController', 'revokeGmailAccess', res.getBody());
             }
+
+            status = deleteGmailConfig(recordId);
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeGmailAccess', 'Error while revoking gmail access.');
             status = e.getMessage();

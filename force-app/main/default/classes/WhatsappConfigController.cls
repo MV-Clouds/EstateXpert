@@ -7,11 +7,12 @@ public without sharing class WhatsappConfigController {
     public static String clientId {get; set;}
     public static String configurationId {get; set;}
     public static String clientSecret {get; set;}
+    public static String lastModifiedDate {get; set;}
 
     public WhatsappConfigController() {
         List<WBConnect_Configuration__mdt> metaList = [
             SELECT MasterLabel, MVEX__Application_Id__c, Business_Account_Id__c, MVEX__Phone_Number_Id__c, 
-            MVEX__Access_Token__c
+            MVEX__Access_Token__c, SystemModstamp, MVEX__API_Version__c
             FROM WBConnect_Configuration__mdt WITH USER_MODE
         ];
 
@@ -20,11 +21,13 @@ public without sharing class WhatsappConfigController {
             businessAccountId = metaList[0].Business_Account_Id__c;
             phoneNumberId = metaList[0].MVEX__Phone_Number_Id__c;
             accessToken = metaList[0].MVEX__Access_Token__c;
+            lastModifiedDate = metaList[0].SystemModstamp != null ? metaList[0].SystemModstamp.format('MM/dd/yyyy, hh:mm:ss a') : '';
         } else {
             appId = '';
             businessAccountId = '';
             phoneNumberId = '';
             accessToken = '';
+            lastModifiedDate = '';
         }
 
         List<EmbeddedSignUpConfig__c> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM EmbeddedSignUpConfig__c WITH USER_MODE];
@@ -35,7 +38,7 @@ public without sharing class WhatsappConfigController {
         }
     }
 
-    @AuraEnabled
+    @RemoteAction
     public static Boolean unlinkAccount() {
         try {
             Boolean isSuccess = saveMetaData('', '', '', '');
@@ -45,7 +48,7 @@ public without sharing class WhatsappConfigController {
             return false;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'WhatsappConfigController', 'unlinkAccount', e.getMessage());
-            throw new AuraHandledException('Error unlinking account: ' + e.getMessage());
+            return false;
         }
     }
 

@@ -257,10 +257,10 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     deactivateGoogle() {
         this.isSpinner = true;
-        revokeGoogleAccess({ recordId: this.GoogleData.integrationData.Id, integrationType: this.activeTab })
+        revokeGoogleAccess({ recordId: this.GoogleData.integrationData.Id, integrationType: 'Google' })
             .then(data => {
                 if (data === 'success') {
-                    this.showToast('Success', 'Changes has been done successfully.', 'success');
+                    this.showToast('Success', 'Google integration deactivated successfully.', 'success');
                     this.getSocialMediaDataToShow();
                 } else {
                     this.showToast('Error', data, 'error');
@@ -271,7 +271,7 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     deactivateMeta() {
         this.isSpinner = true;
-        revokeGoogleAccess({ recordId: this.MetaData.integrationData.Id, integrationType: this.activeTab })
+        revokeGoogleAccess({ recordId: this.MetaData.integrationData.Id, integrationType: 'Meta' })
             .then(data => {
                 if (data === 'success') {
                     this.showToast('Success', 'Meta integration deactivated successfully.', 'success');

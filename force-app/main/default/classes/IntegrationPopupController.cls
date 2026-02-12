@@ -301,26 +301,24 @@ public with sharing class IntegrationPopupController {
     * @description : Method to get social media data.
     */
     @AuraEnabled
-    public static List<FieldWrapperData> getGoogleData(String integrationName) {
+    public static List<FieldWrapperData> getGoogleData() {
         List<FieldWrapperData> wrapperList = new List<FieldWrapperData>();
 
         try {
-            if(integrationName == 'GoogleAds'){
-                GoogleLeadConfig__c googleAdsCredential = GoogleLeadConfig__c.getOrgDefaults();
-    
-                FieldWrapperData googleAdsWrapper = new FieldWrapperData();
-                googleAdsWrapper.integrationName = 'GoogleAds';
-                googleAdsWrapper.isValid = googleAdsCredential.Google_lead_Form_Secret__c != null && googleAdsCredential.Google_Ads_Endpoint__c != null;
-                googleAdsWrapper.integrationData = googleAdsCredential;
-                wrapperList.add(googleAdsWrapper);
-            } else {
-                MetaLeadConfig__c metaPageCredential = MetaLeadConfig__c.getOrgDefaults();
-                FieldWrapperData metaWrapper = new FieldWrapperData();
-                metaWrapper.integrationName = 'Meta';
-                metaWrapper.isValid = metaPageCredential.ACCESS_TOKEN__c != null && metaPageCredential.APP_SECRET__c != null;
-                metaWrapper.integrationData = metaPageCredential;
-                wrapperList.add(metaWrapper);
-            }
+            GoogleLeadConfig__c googleAdsCredential = GoogleLeadConfig__c.getOrgDefaults();
+            MetaLeadConfig__c metaPageCredential = MetaLeadConfig__c.getOrgDefaults();
+
+            FieldWrapperData googleAdsWrapper = new FieldWrapperData();
+            googleAdsWrapper.integrationName = 'GoogleAds';
+            googleAdsWrapper.isValid = googleAdsCredential.Google_lead_Form_Secret__c != null && googleAdsCredential.Google_Ads_Endpoint__c != null;
+            googleAdsWrapper.integrationData = googleAdsCredential;
+            wrapperList.add(googleAdsWrapper);
+
+            FieldWrapperData metaWrapper = new FieldWrapperData();
+            metaWrapper.integrationName = 'Meta';
+            metaWrapper.isValid = metaPageCredential.ACCESS_TOKEN__c != null && metaPageCredential.APP_SECRET__c != null;
+            metaWrapper.integrationData = metaPageCredential;
+            wrapperList.add(metaWrapper);
 
             return wrapperList;
 

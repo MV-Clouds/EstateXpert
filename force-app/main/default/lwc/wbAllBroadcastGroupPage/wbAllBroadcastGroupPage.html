@@ -2,201 +2,216 @@
     <template if:true={isLoading}>
         <c-spinner-component></c-spinner-component>
     </template>
-    
-    <div class="wrapper">
-        <div class="main_header_cls">
-            <div slot="title" class="header_block_css">
-                Multi-Channel Group
-            </div>
-            <div class="header">
-                <button class="btn" onclick={handleNewGroupClick}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-                    </svg>
-                    New Group
-                </button>
-            </div>
-        </div>
-
-
-        <div class="main_content_cls">
-            <div class="filterdiv slds-m-around_medium">
-                <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
-                    type="search" placeholder="Search by Name" onchange={handleSearch}></lightning-input>
+    <template if:true={isAccessible}>
+        <div class="wrapper">
+            <div class="main_header_cls">
+                <div slot="title" class="header_block_css">
+                    Multi-Channel Group
+                </div>
+                <div class="header">
+                    <button class="btn" onclick={handleNewGroupClick}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                        </svg>
+                        New Group
+                    </button>
+                </div>
             </div>
 
-            <!-- Custom Table -->
-            <template if:true={paginatedData.length}>
-                <div class="table-content">
-                    <table class="slds-table">
-                        <thead>
-                            <tr class="table_tr_cls">
-                                <th scope="col" class="sno">
-                                    <div>No.</div>
-                                </th>
-                                <th scope="col" class="name">
-                                    <div>Group Name</div>
-                                </th>
-                                <th scope="col" class="recipient-count">
-                                    <div>Count of Members</div>
-                                </th>
-                                <th scope="col" class="status">
-                                    <div>Communication Type</div>
-                                </th>
-                                <th scope="col" class="status">
-                                    <div>Description</div>
-                                </th>
-                                <th scope="col" class="total-sent">
-                                    <div>Actions</div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={paginatedData} for:item="row" for:index="index">
-                                <tr key={row.Id}>
-                                    <td data-label="S.No.">
-                                        <div>{row.index}</div>
-                                    </td>
-                                    <td data-label="Name" class="truncate_css">
-                                        <div>{row.Name}</div>
-                                    </td>
-                                    <td data-label="Count of Members">
-                                        <div>{row.MVEX__Count_of_Members__c}</div>
-                                    </td>
-                                    <td data-label="Description" class="truncate_css">
-                                        <div>{row.MVEX__Communication_Type__c}</div>
-                                    </td>
-                                    <td data-label="Description" class="truncate_css">
-                                        <div>{row.MVEX__Description__c}</div>
-                                    </td>
-                                    <td data-label="Actions">
-                                        <div class="action-btn">
-                                            <button class="action-div" data-id={row.Id} data-communication-type={row.MVEX__Communication_Type__c}
-                                                onclick={handleEditGroup}>
-                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                        stroke="#212529" stroke-width="1.25"
-                                                        stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                            </button>
-                                            <button class="delete-div" data-id={row.Id}
-                                                onclick={handleDeleteGroup}>
-                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                        stroke="#212529" stroke-width="1.25"
-                                                        stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
+
+            <div class="main_content_cls">
+                <div class="filterdiv slds-m-around_medium">
+                    <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
+                        type="search" placeholder="Search by Name" onchange={handleSearch}></lightning-input>
+                </div>
+
+                <!-- Custom Table -->
+                <template if:true={paginatedData.length}>
+                    <div class="table-content">
+                        <table class="slds-table">
+                            <thead>
+                                <tr class="table_tr_cls">
+                                    <th scope="col" class="sno">
+                                        <div>No.</div>
+                                    </th>
+                                    <th scope="col" class="name">
+                                        <div>Group Name</div>
+                                    </th>
+                                    <th scope="col" class="recipient-count">
+                                        <div>Count of Members</div>
+                                    </th>
+                                    <th scope="col" class="status">
+                                        <div>Communication Type</div>
+                                    </th>
+                                    <th scope="col" class="status">
+                                        <div>Description</div>
+                                    </th>
+                                    <th scope="col" class="total-sent">
+                                        <div>Actions</div>
+                                    </th>
                                 </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
+                            </thead>
+                            <tbody>
+                                <template for:each={paginatedData} for:item="row" for:index="index">
+                                    <tr key={row.Id}>
+                                        <td data-label="S.No.">
+                                            <div>{row.index}</div>
+                                        </td>
+                                        <td data-label="Name" class="truncate_css">
+                                            <div>{row.Name}</div>
+                                        </td>
+                                        <td data-label="Count of Members">
+                                            <div>{row.MVEX__Count_of_Members__c}</div>
+                                        </td>
+                                        <td data-label="Description" class="truncate_css">
+                                            <div>{row.MVEX__Communication_Type__c}</div>
+                                        </td>
+                                        <td data-label="Description" class="truncate_css">
+                                            <div>{row.MVEX__Description__c}</div>
+                                        </td>
+                                        <td data-label="Actions">
+                                            <div class="action-btn">
+                                                <button class="action-div" data-id={row.Id} data-communication-type={row.MVEX__Communication_Type__c}
+                                                    onclick={handleEditGroup}>
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                            stroke="#212529" stroke-width="1.25"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </button>
+                                                <button class="delete-div" data-id={row.Id}
+                                                    onclick={handleDeleteGroup}>
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                            stroke="#212529" stroke-width="1.25"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
 
-            <!-- No Records Message -->
-            <template if:true={showNoRecordsMessage}>
-                <div class="no-records-message">
-                    <div class="empty-state">
-                        <div class="empty-state__content">
-                            <div class="empty-state__icon">
-                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                <!-- No Records Message -->
+                <template if:true={showNoRecordsMessage}>
+                    <div class="no-records-message">
+                        <div class="empty-state">
+                            <div class="empty-state__content">
+                                <div class="empty-state__icon">
+                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                </div>
+                                <div class="empty-state__message">No Data Available to Show.</div>
                             </div>
-                            <div class="empty-state__message">No Data Available to Show.</div>
                         </div>
                     </div>
-                </div>
-            </template>
+                </template>
 
-            <template if:true={paginatedData.length}>
-                <div class="pagination-container">
-                    <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                            fill="#fff">
-                            <path
-                                d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                        </svg>
-                        Previous
-                    </button>
+                <template if:true={paginatedData.length}>
+                    <div class="pagination-container">
+                        <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                fill="#fff">
+                                <path
+                                    d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                            </svg>
+                            Previous
+                        </button>
 
-                    <template for:each={pageNumbers} for:item="page">
-                        <template if:false={page.isEllipsis}>
-                            <button key={page.number} data-id={page.number} class={page.className}
-                                onclick={handlePageChange}>
-                                {page.number}
-                            </button>
+                        <template for:each={pageNumbers} for:item="page">
+                            <template if:false={page.isEllipsis}>
+                                <button key={page.number} data-id={page.number} class={page.className}
+                                    onclick={handlePageChange}>
+                                    {page.number}
+                                </button>
+                            </template>
+                            <template if:true={page.isEllipsis}>
+                                <span key={page.number} class="pagination-ellipsis">...</span>
+                            </template>
                         </template>
-                        <template if:true={page.isEllipsis}>
-                            <span key={page.number} class="pagination-ellipsis">...</span>
-                        </template>
-                    </template>
 
-                    <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
-                        Next
-                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                            fill="#fff">
-                            <path
-                                d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                        </svg>
-                    </button>
-                </div>
-            </template>
+                        <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                fill="#fff">
+                                <path
+                                    d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+
         </div>
 
-    </div>
+        <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
 
-    <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
+        <!-- Popup for Communication Type -->
+        <template if:true={showCommunicationPopup}>
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
 
-    <!-- Popup for Communication Type -->
-    <template if:true={showCommunicationPopup}>
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-            <div class="slds-modal__container">
+                    <!-- Close Button -->
+                    <div class="slds-modal__close closs_icon_css" onclick={handlePopupClose}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                        </svg>
+                    </div>
 
-                <!-- Close Button -->
-                <div class="slds-modal__close closs_icon_css" onclick={handlePopupClose}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                        fill="white" />
-                    </svg>
-                </div>
+                    <div class="slds-modal__header blue-header">
+                        <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Select Communication Type</h1>
+                    </div>
 
-                <div class="slds-modal__header blue-header">
-                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Select Communication Type</h1>
-                </div>
-
-                <div class="slds-modal__content slds-p-around_medium popup_content_cls">
-                    <div class="popUpBody">
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="communicationType" value="Email" checked={isEmailChecked} onchange={handleCommunicationTypeChange} />
-                                <span>Email <span class="option-description">(Send marketing messages via email)</span></span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="communicationType" value="WhatsApp" checked={isWhatsAppChecked} onchange={handleCommunicationTypeChange} />
-                                <span>WhatsApp <span class="option-description">(Send marketing messages via WhatsApp)</span></span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="communicationType" value="Both" checked={isBothChecked} onchange={handleCommunicationTypeChange} />
-                                <span>Both <span class="option-description">(Send marketing messages via both Email and WhatsApp)</span></span>
-                            </label>
+                    <div class="slds-modal__content slds-p-around_medium popup_content_cls">
+                        <div class="popUpBody">
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="communicationType" value="Email" checked={isEmailChecked} onchange={handleCommunicationTypeChange} />
+                                    <span>Email <span class="option-description">(Send marketing messages via email)</span></span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="communicationType" value="WhatsApp" checked={isWhatsAppChecked} onchange={handleCommunicationTypeChange} />
+                                    <span>WhatsApp <span class="option-description">(Send marketing messages via WhatsApp)</span></span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="communicationType" value="Both" checked={isBothChecked} onchange={handleCommunicationTypeChange} />
+                                    <span>Both <span class="option-description">(Send marketing messages via both Email and WhatsApp)</span></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="popUpFooter slds-text-align--center">
+                            <button class="cancel_btn_css slds-m-left_x-small" onclick={handlePopupClose}>Cancel</button>
+                            <button class="save_btn_css slds-m-left_x-small" onclick={handlePopupContinue}>Continue</button>
                         </div>
                     </div>
-                    <div class="popUpFooter slds-text-align--center">
-                        <button class="cancel_btn_css slds-m-left_x-small" onclick={handlePopupClose}>Cancel</button>
-                        <button class="save_btn_css slds-m-left_x-small" onclick={handlePopupContinue}>Continue</button>
-                    </div>
-                </div>
 
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </template>
+    <template if:false={isAccessible}>
+        <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
+            <div class="restricted-access">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        fill="currentColor" />
+                </svg>
+                <h1>Access Restricted</h1>
+                <p>You don't have permission to access this page. Please contact your administrator for further
+                    assistance.</p>
             </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
     </template>
 </template>

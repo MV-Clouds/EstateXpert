@@ -43,7 +43,7 @@ private class ShowOffersDetailControllerTest {
             MVEX__Seller_Contact__c = sellerContact.Id,
             MVEX__Offer_made_by__c = 'Buyer',
             MVEX__Offer_Amount__c = 480000,
-            MVEX__Status__c = 'Pending',
+            MVEX__Status__c = 'Draft',
             MVEX__Offer_Date__c = Date.today().addDays(-10),
             MVEX__Offer_Expiration_Date__c = Date.today().addDays(-3),
             MVEX__Description__c = 'First offer on the property'
@@ -54,7 +54,7 @@ private class ShowOffersDetailControllerTest {
         firstOffer.MVEX__First_Offer_Id__c = firstOffer.Id;
         update firstOffer;
         
-        // Create first counter offer
+        // Create first Countered
         MVEX__Offer__c counterOffer1 = new MVEX__Offer__c(
             MVEX__Listing__c = testListing.Id,
             MVEX__Listing_Type__c = 'Sale',
@@ -63,16 +63,16 @@ private class ShowOffersDetailControllerTest {
             MVEX__Seller_Contact__c = sellerContact.Id,
             MVEX__Offer_made_by__c = 'Seller',
             MVEX__Offer_Amount__c = 495000,
-            MVEX__Status__c = 'Counter Offer',
+            MVEX__Status__c = 'Countered',
             MVEX__Offer_Date__c = Date.today().addDays(-8),
             MVEX__Offer_Expiration_Date__c = Date.today().addDays(-1),
-            MVEX__Description__c = 'Seller counter offer',
+            MVEX__Description__c = 'Seller Countered',
             MVEX__Counter_Offer_for__c = firstOffer.Id,
             MVEX__First_Offer_Id__c = firstOffer.Id
         );
         insert counterOffer1;
         
-        // Create second counter offer
+        // Create second Countered
         MVEX__Offer__c counterOffer2 = new MVEX__Offer__c(
             MVEX__Listing__c = testListing.Id,
             MVEX__Listing_Type__c = 'Sale',
@@ -120,17 +120,17 @@ private class ShowOffersDetailControllerTest {
         System.assertEquals('Buyer', response.offers[0].offerMadeBy, 'First offer made by Buyer');
         System.assertEquals(480000, response.offers[0].offerAmount, 'First offer amount should be 480000');
         
-        // Verify counter offers are in sequence
+        // Verify Countereds are in sequence
         System.assertEquals(2, response.offers[1].sequenceNumber, 'Second offer should have sequence 2');
         System.assertEquals(3, response.offers[2].sequenceNumber, 'Third offer should have sequence 3');
     }
     
     /**
-     * @description Test retrieval of offer timeline from middle offer (counter offer)
+     * @description Test retrieval of offer timeline from middle offer (Countered)
      */
     @isTest
     static void testGetOfferTimelineFromCounterOffer() {
-        // Get a counter offer (not the first one)
+        // Get a Countered (not the first one)
         MVEX__Offer__c counterOffer = [
             SELECT Id 
             FROM MVEX__Offer__c 
@@ -218,7 +218,8 @@ private class ShowOffersDetailControllerTest {
             MVEX__Listing__c = listing.Id,
             MVEX__Buyer_Contact__c = buyer.Id,
             MVEX__Offer_Amount__c = 450000,
-            MVEX__Offer_Date__c = Date.today()
+            MVEX__Offer_Date__c = Date.today(),
+            MVEX__Offer_made_by__c = 'Buyer'
             // Intentionally not setting MVEX__First_Offer_Id__c
         );
         insert orphanOffer;

@@ -168,7 +168,7 @@
     align-items: center;
 }
 
-.custom-modal .custom-modal-content {
+.custom-modal-content {
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
 }

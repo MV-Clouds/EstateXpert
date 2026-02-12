@@ -508,9 +508,9 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
             const allNotEmptyInquiries = this.inquiryDropDownPairs.every(pair => 
                 pair.selectedFirst != '' && pair.selectedSecond != '' && pair.selectedCondition != ''
             );
-
     
             const allNotEmpty = allNotEmptyListings && allNotEmptyInquiries;
+            this.validateCustomLogic();
             this.isSaveButtonDisabled = !allNotEmpty;
         } catch (error) {
             errorDebugger('MappingComponent', 'updateSaveButtonState', error, 'warn', 'Error in updateSaveButtonState');

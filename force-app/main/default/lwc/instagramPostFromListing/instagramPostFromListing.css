@@ -631,11 +631,6 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.image-preview-item-selected:hover {
-    transform: scale(1.02);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
 .image-preview-item-selected.dragging {
     opacity: 0.5;
     border: 2px solid #0176D3;
@@ -659,16 +654,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    opacity: 0;
+    opacity: 1;
     display: flex;
     justify-content: flex-end;
-    /* align-items: center; */
-    transition: opacity 0.3s ease;
-}
-
-.image-preview-item-selected:hover .overlay-selected {
-    opacity: 1;
 }
 
 .cancel-button-selected {

@@ -1,4 +1,4 @@
-public with sharing class ContactTriggerHandler {
+public without sharing class ContactTriggerHandler {
     public class Condition {
         @AuraEnabled
         public String Lead_Field { get; set; }
@@ -16,7 +16,7 @@ public with sharing class ContactTriggerHandler {
         try {
             List<Lead_Assignment_Setting__c> allRules = [
                 SELECT Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c, Do_Not_Reassign_Owner__c
-                FROM Lead_Assignment_Setting__c WITH USER_MODE
+                FROM Lead_Assignment_Setting__c
                 ORDER BY User_Order__c ASC
             ];
 
@@ -53,7 +53,7 @@ public with sharing class ContactTriggerHandler {
             }
 
             User sysAdmin = null;
-            List<User> sysAdmins = [SELECT Id FROM User WHERE Profile.Name = 'System Administrator' AND IsActive = TRUE WITH USER_MODE LIMIT 1];
+            List<User> sysAdmins = [SELECT Id FROM User WHERE Profile.Name = 'System Administrator' AND IsActive = TRUE LIMIT 1];
             if (!sysAdmins.isEmpty()) {
                 sysAdmin = sysAdmins[0];
             }
@@ -305,6 +305,10 @@ public with sharing class ContactTriggerHandler {
 
     public static void notifyOwner(List<Contact> newLeads, Map<Id, Contact> oldLeadMap) {
         try {
+            if (oldLeadMap == null) {
+                sendSocialMediaNotifications(newLeads);
+            }
+
             Set<Id> ownerIdsToNotify = new Set<Id>();
             Map<Id, String> ownerIdToLeadName = new Map<Id, String>();
             Map<Id, Id> ownerIdToLeadId = new Map<Id, Id>();
@@ -336,13 +340,13 @@ public with sharing class ContactTriggerHandler {
                 return;
             }
 
-            Map<Id, User> userMap = new Map<Id, User>([SELECT Id, Email FROM User WHERE Id IN :ownerIdsToNotify AND Email != null WITH USER_MODE]);
+            Map<Id, User> userMap = new Map<Id, User>([SELECT Id, Email FROM User WHERE Id IN :ownerIdsToNotify AND Email != null]);
 
             if (!Schema.sObjectType.CustomNotificationType.isAccessible()) {
                 return;
             }
 
-            List<CustomNotificationType> cnTypes = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'LeadAssignmentRule' WITH USER_MODE LIMIT 1];
+            List<CustomNotificationType> cnTypes = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'LeadAssignmentRule' LIMIT 1];
 
             if (cnTypes.isEmpty()) {
                 return;
@@ -350,7 +354,7 @@ public with sharing class ContactTriggerHandler {
 
             CustomNotificationType cnType = cnTypes[0];
 
-            List<EmailTemplate> templates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Assigned_Notification' WITH USER_MODE LIMIT 1];
+            List<EmailTemplate> templates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Assigned_Notification' LIMIT 1];
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
             for (Id ownerId : ownerIdsToNotify) {
                 String leadName = ownerIdToLeadName.get(ownerId);
@@ -364,7 +368,6 @@ public with sharing class ContactTriggerHandler {
                 customNotification.send(new Set<String>{ownerId});
 
                 if (userMap.containsKey(ownerId)) {
-                    // Query the email template by name
                     if (!templates.isEmpty()) {
                         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                         mail.setTargetObjectId(ownerId);
@@ -386,6 +389,76 @@ public with sharing class ContactTriggerHandler {
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'LeadAssignmentHandler', 'notifyOwner', 'Error during notifyOwner');
+        }
+    }
+
+    private static void sendSocialMediaNotifications(List<Contact> leads) {
+        try {
+            MVEX__Lead_Notification__c config = MVEX__Lead_Notification__c.getOrgDefaults();
+            if (config == null || !config.MVEX__Notification_Enable__c || String.isBlank(config.MVEX__Email_Addresses__c)) {
+                return;
+            }
+            
+            List<Contact> buyerSocialLeads = new List<Contact>();
+            Set<String> validSources = new Set<String>{'Instagram', 'Facebook'};
+            
+            for (Contact con : leads) {
+                if (con.LeadSource != null && validSources.contains(con.LeadSource) && 
+                    con.MVEX__Contact_Type__c == 'Buyer') {
+                    buyerSocialLeads.add(con);
+                }
+            }
+
+            if (buyerSocialLeads.isEmpty()) return;
+
+            List<String> emailList = new List<String>();
+            for (String email : config.MVEX__Email_Addresses__c.split(';')) {
+                if (String.isNotBlank(email)) emailList.add(email.trim());
+            }
+            if (emailList.isEmpty()) return;
+
+            // Fetch Template
+            List<EmailTemplate> templates = [SELECT Id, Subject FROM EmailTemplate WHERE DeveloperName = 'Social_Media_Lead_Notification' LIMIT 1];
+            if (templates.isEmpty()) return;
+
+            // Requirement: Use Org-Wide Email Address for Guest User context
+            Id orgWideEmailId = null;
+            List<OrgWideEmailAddress> owea = [SELECT Id FROM OrgWideEmailAddress WHERE DisplayName = 'GuestUserMail' LIMIT 1];
+            if (!owea.isEmpty()) {
+                orgWideEmailId = owea[0].Id;
+            }
+
+            List<Messaging.SingleEmailMessage> emailQueue = new List<Messaging.SingleEmailMessage>();
+            
+            for (Contact con : buyerSocialLeads) {
+                // Messaging.SingleEmailMessage renderedEmail = Messaging.renderStoredEmailTemplate(templates[0].Id, null, con.Id);
+                for (String email : emailList) {
+                    Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+                    mail.setToAddresses(new List<String>{email});
+                    mail.setTargetObjectId(con.Id);
+                    // mail.setWhatId(con.Id);
+                    mail.setTemplateId(templates[0].Id);
+                    mail.setSaveAsActivity(false);
+                    
+                    if (orgWideEmailId != null) {
+                        mail.setOrgWideEmailAddressId(orgWideEmailId);
+                    }
+                    
+                    emailQueue.add(mail);
+                }
+            }
+
+            system.debug('emailQueue:'+emailQueue);
+            if (!emailQueue.isEmpty()) {
+                Messaging.SendEmailResult[] results = Messaging.sendEmail(emailQueue, false);
+                for (Messaging.SendEmailResult result : results) {
+                    if (!result.isSuccess()) {
+                        System.debug('notifyOwner: Email sending failed: ' + result.getErrors()[0].getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'LeadAssignmentHandler', 'sendSocialMediaNotifications', 'Failed to send social template email');
         }
     }
 }

@@ -1,4 +1,12 @@
 <template>
+    <!-- Lightning Spinner for initial loading and upload -->
+    <template if:true={isLoading}>
+        <div class="loading-spinner">
+        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+        </div>
+    </template>
+
+    <!-- Custom Progress Spinner for upload -->
     <template if:true={showSpinner}>
         <div class="overlay-spinner">
             <div class="upload-wrapper-spinner">
@@ -53,10 +61,10 @@
                                     </div>
                                     <div class="formbold-drop-file images_upcss">
                                         <p>Choose files or drag & drop here</p>
-                                        <p class="support-text">Supports: JPG, PNG, HEIC, GIF, MP4, MOV</p>
+                                        <p class="support-text">Supports: JPG, PNG, WEBP, MP4, MOV</p>
                                         <input type="file" class="slds-file-selector__input slds-assistive-text"
                                             onchange={handleSelectedFiles}
-                                            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime"
+                                            accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
                                             id="file-upload-input-107" multiple
                                             aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
                                         <label class="slds-file-selector__body" for="file-upload-input-107"
@@ -94,7 +102,7 @@
                                 <div class="add-more-tile">
                                     <input type="file" class="slds-file-selector__input slds-assistive-text"
                                         onchange={handleSelectedFiles}
-                                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime"
+                                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
                                         id="file-upload-input-add" multiple
                                         aria-labelledby="file-selector-add-label" />
                                     <label class="add-more-label" for="file-upload-input-add" id="file-selector-add-label">

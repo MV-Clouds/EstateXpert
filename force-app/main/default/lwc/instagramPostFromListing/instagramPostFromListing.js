@@ -18,6 +18,7 @@ export default class InstagramPostFromListing extends LightningElement {
     @track confData;
     @track s3;
     @track showSpinner = false;
+    @track isLoading = true;
     @track selectedFilesToUpload = [];
     @track fileURLs = [];
     @track awsObjectKeysToPreserve = [];
@@ -152,7 +153,6 @@ export default class InstagramPostFromListing extends LightningElement {
         try {
             getS3ConfigSettings()
                 .then(result => {
-                    this.showSpinner = false;
                     console.log('result--> ', result);
                     if (result.status) {
                         this.confData = result.awsConfigData;
@@ -163,15 +163,16 @@ export default class InstagramPostFromListing extends LightningElement {
                         this.hasAWSCredentials = false;
                         console.log('AWS credentials not configured');
                     }
+                    this.isLoading = false;
                 }).catch(error => {
-                    this.showSpinner = false;
                     this.hasAWSCredentials = false;
                     console.log('error in apex -> ', error.stack);
+                    this.isLoading = false;
                 });
         } catch (error) {
-            this.showSpinner = false;
             this.hasAWSCredentials = false;
             console.log('error in getS3ConfigDataAsync -> ', error.stack);
+            this.isLoading = false;
         }
     }
 
@@ -183,14 +184,17 @@ export default class InstagramPostFromListing extends LightningElement {
                     if (!result) {
                         console.log('Instagram credentials not configured');
                     }
+                    this.isLoading = false;
                 })
                 .catch(error => {
                     this.hasInstagramCredentials = false;
                     console.log('error checking Instagram credentials -> ', error);
+                    this.isLoading = false;
                 });
         } catch (error) {
             this.hasInstagramCredentials = false;
             console.log('error in checkInstagramCredentials -> ', error.stack);
+            this.isLoading = false;
         }
     }
 
@@ -706,11 +710,13 @@ export default class InstagramPostFromListing extends LightningElement {
                         this.showToast('Error', result.message, 'error');
                     }
                     this.showSpinner = false;
+                    this.isLoading = false;
                 })
                 .catch(error => {
                     console.error('Error posting to Instagram:', error);
                     this.showToast('Error', 'Failed to post to Instagram.', 'error');
                     this.showSpinner = false;
+                    this.isLoading = false;
                 });
         }
         else {
@@ -736,6 +742,7 @@ export default class InstagramPostFromListing extends LightningElement {
         if (this.selectedFilesToUpload.length > 0) {
             this.initializeAwsSdk(this.confData);
             this.showSpinner = true;
+            this.isLoading = true;
             this.progressText = 'Uploading...';
             this.progressStyle = 'width: 0%';
 

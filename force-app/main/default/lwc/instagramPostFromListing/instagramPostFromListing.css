@@ -9,6 +9,20 @@
 
 /* Spinner Css */
 
+.loading-spinner{
+   
+    position: absolute;
+    top: 167px;
+    /* left: 0; */
+    width: 100%;
+    height: 62%;
+    background: rgb(255 254 254 / 43%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
 .overlay-spinner {
     position: fixed;
     top: 13%;
@@ -472,14 +486,14 @@
 
 .images_upcss p {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
     color: #333;
 }
 
 .images_upcss p:first-child {
     color: #333;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .support-text {
@@ -516,8 +530,8 @@
 }
 
 .caption-label-wrapper label {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 500;
     color: #333;
 }
 
@@ -588,7 +602,7 @@
 
 .selected-images-header h3 {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     color: #333;
     margin: 0;
 }

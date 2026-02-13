@@ -256,9 +256,9 @@ public with sharing class InstagramPostController {
         
             if (listingRecord != null && listingRecord.Property__c != null) {
                 List<Property_File__c> propertyFiles = [
-                    SELECT Name, BaseUrl__c 
+                    SELECT Name, BaseUrl__c,Size__c,ExternalLink__c
                     FROM Property_File__c 
-                    WHERE Property__c = :listingRecord.Property__c AND IsDeleted = false WITH USER_MODE
+                    WHERE Property__c = :listingRecord.Property__c AND IsDeleted = false AND Size__c != null  WITH USER_MODE
                 ];
         
                 for (Property_File__c file : propertyFiles) {

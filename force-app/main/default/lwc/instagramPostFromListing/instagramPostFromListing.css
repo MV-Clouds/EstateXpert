@@ -662,8 +662,8 @@
     background: rgba(0, 0, 0, 0.5);
     opacity: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-end;
+    /* align-items: center; */
     transition: opacity 0.3s ease;
 }
 
@@ -675,9 +675,9 @@
     background: rgba(255, 255, 255, 0.9);
     border: none;
     color: #d32f2f;
-    font-size: 20px;
-    width: 32px;
-    height: 32px;
+    width: 20px;
+    height: 20px;
+    margin: 0.3rem;
     border-radius: 50%;
     cursor: pointer;
     outline: none;
@@ -717,10 +717,18 @@
     cursor: pointer;
 }
 
-.plus-icon {
+/* .plus-icon {
     font-size: 32px;
     color: #0176D3;
     font-weight: 300;
+} */
+
+.add-icon{
+    --sds-c-icon-color-foreground-default: #0176D3;
+}
+
+.close-icon{
+    --sds-c-icon-color-foreground-default: #d32f2f;
 }
 
 .caption-input-selected {
@@ -731,8 +739,8 @@
 }
 
 .submit-button-selected {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    gap: 0.5rem;
 }
 
 .upload-button-enabled {

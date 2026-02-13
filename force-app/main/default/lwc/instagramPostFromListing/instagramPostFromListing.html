@@ -95,7 +95,7 @@
                                             draggable="true" data-index={index} />
                                         <div class="overlay-selected">
                                             <div class="cancel-button-selected" data-name={file.name}
-                                                onclick={handleRemoveFile}>✕</div>
+                                                onclick={handleRemoveFile}><lightning-icon icon-name='utility:close' alternative-text='close' class="close-icon" size='x-small' title='close'></lightning-icon></div>
                                         </div>
                                     </div>
                                 </template>
@@ -106,7 +106,7 @@
                                         id="file-upload-input-add" multiple
                                         aria-labelledby="file-selector-add-label" />
                                     <label class="add-more-label" for="file-upload-input-add" id="file-selector-add-label">
-                                        <span class="plus-icon">+</span>
+                                        <lightning-icon icon-name='utility:add' class="add-icon" alternative-text='add' size='small' title='add'></lightning-icon>
                                     </label>
                                 </div>
                             </div>
@@ -140,6 +140,11 @@
 
                     <template if:false={isFileAvailable}>
                         <p class="error-message">⊘ Please select an image or video to continue</p>
+                    </template>
+
+
+                    <template if:false={isUploadDisabled}>
+                         <p class="error-message">ℹ️ Listing image that were uploaded via AWS are supported.</p>
                     </template>
                 </div>
 

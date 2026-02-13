@@ -2,7 +2,7 @@ import { LightningElement, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
-import getSocialMediaData from '@salesforce/apex/IntegrationPopupController.getGoogleData';
+import getGoogleData from '@salesforce/apex/IntegrationPopupController.getGoogleData';
 import revokeGoogleAccess from '@salesforce/apex/IntegrationPopupController.revokeGoogleAccess';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
@@ -56,9 +56,8 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     getSocialMediaDataToShow() {
         this.isSpinner = true;
-        getSocialMediaData({integrationName: ''})
+        getGoogleData()
             .then(data => {
-                console.log('data-->', data);
                 data.forEach(item => {
                     if (item.integrationName === 'GoogleAds') {
                         if (item.integrationData && item.integrationData.CreatedDate) {
@@ -258,10 +257,10 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     deactivateGoogle() {
         this.isSpinner = true;
-        revokeGoogleAccess({ recordId: this.GoogleData.integrationData.Id, integrationType: this.activeTab })
+        revokeGoogleAccess({ recordId: this.GoogleData.integrationData.Id, integrationType: 'Google' })
             .then(data => {
                 if (data === 'success') {
-                    this.showToast('Success', 'Changes has been done successfully.', 'success');
+                    this.showToast('Success', 'Google integration deactivated successfully.', 'success');
                     this.getSocialMediaDataToShow();
                 } else {
                     this.showToast('Error', data, 'error');
@@ -272,7 +271,7 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
 
     deactivateMeta() {
         this.isSpinner = true;
-        revokeGoogleAccess({ recordId: this.MetaData.integrationData.Id, integrationType: this.activeTab })
+        revokeGoogleAccess({ recordId: this.MetaData.integrationData.Id, integrationType: 'Meta' })
             .then(data => {
                 if (data === 'success') {
                     this.showToast('Success', 'Meta integration deactivated successfully.', 'success');

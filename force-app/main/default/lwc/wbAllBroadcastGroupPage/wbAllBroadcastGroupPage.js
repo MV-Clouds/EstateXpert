@@ -1,6 +1,8 @@
 import { LightningElement, track } from 'lwc';
 import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastGroups';
 import deleteBroadcastGroup from '@salesforce/apex/BroadcastMessageController.deleteBroadcastGroup';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
@@ -16,6 +18,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     @track isLoading = true;
     @track showCommunicationPopup = false;
     @track selectedCommunicationType = 'Email';
+    @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
 
     broadcastGroupId = null;
@@ -116,12 +119,31 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
                 .catch(error => {
                     console.log('Error occurring during loading external css', error);
                 });
+
+            await this.getAccessible();
+            if (!this.isAccessible) {
+                this.isLoading = false;
+                return;
+            }
             
             // Check WhatsApp configuration and load groups
             await this.checkBusinessAccountConfig();
             this.loadBroadcastGroups();
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
+        }
+    }
+
+    async getAccessible() {
+        try {
+            const data = await getMetadataRecords();
+            const broadcastFeature = data.find(
+                item => item.DeveloperName === 'Whatsapp_Broadcast_Group'
+            );
+            this.isAccessible = broadcastFeature ? Boolean(broadcastFeature.MVEX__isAvailable__c) : false;
+        } catch (error) {
+            console.error('Error fetching accessible fields', error);
+            this.isAccessible = false;
         }
     }
 

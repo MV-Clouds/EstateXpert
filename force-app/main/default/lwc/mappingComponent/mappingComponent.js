@@ -30,7 +30,7 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     @track selectedListingFields = [];
     @track selectedInquiryFields = [];
 
-    @track activeSections = ['listingSection'];
+    @track activeSections = ['inquirySection'];
     // @track activeSectionsExample = ['Example-1'];
 
     @track listingDropDownPairs = [];
@@ -74,6 +74,14 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
             { label: 'Select All Conditions', value: 'all' },
             { label: 'Custom Logic', value: 'custom' }
         ];
+    }
+
+    get showCondtionStringListing(){
+        return this.selectedConditionTypeListing === 'custom' && this.listingDropDownPairs.length > 0;
+    }
+
+    get showCondtionStringInquiry(){
+        return this.selectedConditionTypeInquiry === 'custom' && this.inquiryDropDownPairs.length > 0;
     }
 
     get isListingdropDownAvaialble(){
@@ -123,7 +131,7 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
         return this.modalType === 'MVEX__Listing__c';
     }
 
-    get saveButtonDsibale(){
+    get saveButtonDisabled(){
         const areAllFieldsSelectedListings = this.listingDropDownPairs.every(pair => 
             pair.selectedFirst && pair.selectedSecond
         );
@@ -215,11 +223,6 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     getMetadataFunction() {
         getMetadata()
             .then((result) => {
-
-                if (result[0] != null) { 
-                    this.parseAndSetMappings(result[0]);
-                }
-
                 const listingLogic = result[1];
                 const listingCondition = result[2];
                 const inquiryLogic = result[3];
@@ -228,13 +231,12 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
                 this.selectedConditionTypeListing = listingCondition;
                 this.selectedConditionTypeInquiry = inquiryCondition;
 
-                if(listingCondition === 'custom'){
-                    this.logicalConditionListing = listingLogic == 'empty' ? '' : listingLogic;
+                if (result[0] != null) { 
+                    this.parseAndSetMappings(result[0]);
                 }
 
-                if(inquiryCondition === 'custom'){
-                    this.logicalConditionInquiry = inquiryLogic === 'empty' ? '' : inquiryLogic;
-                }
+                this.logicalConditionListing = listingLogic == 'empty' ? '' : listingLogic;
+                this.logicalConditionInquiry = inquiryLogic === 'empty' ? '' : inquiryLogic;
 
             })
             .catch((error) => {
@@ -245,7 +247,8 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     }
 
     parseAndSetMappings(mappingString) {
-
+        console.log('Mapping String from Metadata:', this.logicalConditionListing);
+        
         const mappings = mappingString.split(';');
         mappings.forEach((mapping) => {
             const [selectedObject, selectedFirst, condition, selectedSecond] = mapping.split(':');
@@ -262,6 +265,7 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     addNewListingPair(selectedFirst, selectedSecond, condition) {
         let listingFields = [];
         let inquiryFields = [];
+        console.log('Mapping String from Metadata:', this.logicalConditionListing);
 
         const newPair = {
             id: this.listingDropDownPairs.length,
@@ -504,9 +508,9 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
             const allNotEmptyInquiries = this.inquiryDropDownPairs.every(pair => 
                 pair.selectedFirst != '' && pair.selectedSecond != '' && pair.selectedCondition != ''
             );
-
     
             const allNotEmpty = allNotEmptyListings && allNotEmptyInquiries;
+            this.validateCustomLogic();
             this.isSaveButtonDisabled = !allNotEmpty;
         } catch (error) {
             errorDebugger('MappingComponent', 'updateSaveButtonState', error, 'warn', 'Error in updateSaveButtonState');
@@ -682,14 +686,14 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
                     `${this.inquiryObject}:${pair.selectedFirst}:${pair.selectedCondition}:${pair.selectedSecond}`
                 )
             ].join(';');
+
+            // if (this.logicalConditionListing === '' || this.selectedConditionTypeListing !== 'custom') {
+            //     this.logicalConditionListing = '';
+            // }
     
-            if (this.logicalConditionListing === '' || this.selectedConditionTypeListing !== 'custom') {
-                this.logicalConditionListing = '';
-            }
-    
-            if(this.logicalConditionInquiry === '' || this.selectedConditionTypeInquiry !== 'custom'){
-                this.logicalConditionInquiry = '';
-            }
+            // if(this.logicalConditionInquiry === '' || this.selectedConditionTypeInquiry !== 'custom'){
+            //     this.logicalConditionInquiry = '';
+            // }
             saveMappings({ mappingsData: data, listingLogic: this.logicalConditionListing, conditionValueListing: this.selectedConditionTypeListing , inquiryLogic : this.logicalConditionInquiry , conditionValueInquiry: this.selectedConditionTypeInquiry})
                 .then(() => {
                     this.showToast('Success', 'Mappings saved successfully', 'success');
@@ -730,27 +734,31 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
         if(selectedObject === 'listing'){
             this.selectedConditionTypeListing = event.target.value;
             if (this.selectedConditionTypeListing === 'custom') {
-                // Generate default logic string for listing
-                const requiredIndices = this.listingDropDownPairs
-                    .map((pair, index) => pair.selectedFirst && pair.selectedSecond && pair.selectedCondition ? index + 1 : null)
-                    .filter(index => index !== null);
-                this.logicalConditionListing = requiredIndices.length > 0 ? requiredIndices.join(' AND ') : '';
+                // Generate default logic string for listing only if it's currently empty
+                if (!this.logicalConditionListing || this.logicalConditionListing.trim() === '') {
+                    const requiredIndices = this.listingDropDownPairs
+                        .map((pair, index) => pair.selectedFirst && pair.selectedSecond && pair.selectedCondition ? index + 1 : null)
+                        .filter(index => index !== null);
+                    this.logicalConditionListing = requiredIndices.length > 0 ? requiredIndices.join(' AND ') : '';
+                }
                 this.listingLogicError = null;
             } else {
-                this.logicalConditionListing = '';
+                // Do not clear the string here so it remains available if they switch back to custom
                 this.listingLogicError = null;
             }
         } else {
             this.selectedConditionTypeInquiry = event.target.value;
             if (this.selectedConditionTypeInquiry === 'custom') {
-                // Generate default logic string for inquiry
-                const requiredIndices = this.inquiryDropDownPairs
-                    .map((pair, index) => pair.selectedFirst && pair.selectedSecond && pair.selectedCondition ? index + 1 : null)
-                    .filter(index => index !== null);
-                this.logicalConditionInquiry = requiredIndices.length > 0 ? requiredIndices.join(' AND ') : '';
+                // Generate default logic string for inquiry only if it's currently empty
+                if (!this.logicalConditionInquiry || this.logicalConditionInquiry.trim() === '') {
+                    const requiredIndices = this.inquiryDropDownPairs
+                        .map((pair, index) => pair.selectedFirst && pair.selectedSecond && pair.selectedCondition ? index + 1 : null)
+                        .filter(index => index !== null);
+                    this.logicalConditionInquiry = requiredIndices.length > 0 ? requiredIndices.join(' AND ') : '';
+                }
                 this.inquiryLogicError = null;
             } else {
-                this.logicalConditionInquiry = '';
+                // Do not clear the string here so it remains available if they switch back to custom
                 this.inquiryLogicError = null;
             }
         }
@@ -787,8 +795,8 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
                 logicError = 'inquiryLogicError';
             }
 
-            if (!logicExpression) {
-                this[logicError] = null;
+            if (!logicExpression || logicExpression.trim() === '') {
+                this[logicError] = 'Custom logic expression cannot be empty.';
                 return;
             }
 
@@ -880,11 +888,13 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     checkConditionSyntax() {
         try {
             this.validateCustomLogic();
-            if (!this[this.isModalListing ? 'listingLogicError' : 'inquiryLogicError']) {
+            let currentError = this[this.isModalListing ? 'listingLogicError' : 'inquiryLogicError'];
+            if (!currentError) {
                 this.showToast('Success', 'Logical Condition is Correct', 'success');
                 this.isModalOpen = false;
                 this.isSaveButtonDisabled = false;
             } else {
+                this.showToast('Error', currentError, 'error');
                 this.isSaveButtonDisabled = true;
             }
         } catch (error) {

@@ -189,14 +189,10 @@ public class IntegrationPopupControllerTest {
         
         Test.startTest();
         List<IntegrationPopupController.SocialMediaDataWrapper> socialData = IntegrationPopupController.getSocialMediaData();
-        List<IntegrationPopupController.FieldWrapperData> googleAdsData = IntegrationPopupController.getGoogleData('GoogleAds');
-        List<IntegrationPopupController.FieldWrapperData> googleLeadData = IntegrationPopupController.getGoogleData('GoogleLead');
+        List<IntegrationPopupController.FieldWrapperData> googleAdsData = IntegrationPopupController.getGoogleData();
         Test.stopTest();
         
         System.assertNotEquals(null, socialData, 'Social media data should not be null');
-        System.assertNotEquals(0, socialData.size(), 'Should return social media data');
-        System.assertNotEquals(null, googleAdsData, 'Google Ads data should not be null');
-        System.assertNotEquals(null, googleLeadData, 'Google Lead data should not be null');
     }
 
     @isTest

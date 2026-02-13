@@ -4,6 +4,9 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeAWSAccess';
+import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
+import revokeOutlookAccess from '@salesforce/apex/IntegrationPopupController.revokeOutlookAccess';
+import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
@@ -18,15 +21,10 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track gmailData = { isValid: false, integrationData: {}, showDetails: false };
     @track outlookData = { isValid: false, integrationData: {}, showDetails: false };
     @track instagramData = { isValid: false, integrationData: {}, showDetails: false };
-    @track facebookData;
     @track isWaterMarkUploader = false;
     @track featureAvailability = {};
     @track activeIntegrationCount = 0;
     integrationToDeactivate = null;
-    
-    // Constants for credential placeholders
-    CREDENTIAL_PLACEHOLDER = '••••••••••••••••';
-    CREDENTIAL_DISPLAY_TEXT = 'Confidential Information - Hidden for Security';
 
     @wire(getMetadataRecords)
     metadataRecords({ error, data }) {
@@ -36,29 +34,12 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 return acc;
             }, {});
             setTimeout(() => {
-                this.isLoading = false;
+                this.isSpinner = false;
             }, 1000);
         } else if (error) {
             console.error("Error fetching metadata records:", error);
-            this.isLoading = false;
+            this.isSpinner = false;
         }
-    }
-
-    /**
-    * Method Name: awsApiKeyMasked
-    * @description: Returns masked API key for AWS.
-    * @returns {String} - Masked API key
-    * Created Date: 10/02/2026
-    * Created By: Karan Singh
-    */
-    get awsApiKeyMasked() {
-        if (this.awsData.integrationData && this.awsData.integrationData.MVEX__Access_Key__c) {
-            const key = this.awsData.integrationData.MVEX__Access_Key__c;
-            if (key.length > 8) {
-                return key.substring(0, 4) + '•'.repeat(12) + key.substring(key.length - 4);
-            }
-        }
-        return '';
     }
 
     /**
@@ -338,20 +319,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         }
     }
 
-    /**
-    * Method Name: toggleClientSecret
-    * @description: Used to toggle client secret.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    toggleClientSecret() {
-        try {
-            this.isClientSecretHidden = !this.isClientSecretHidden;
-        } catch (error) {
-            errorDebugger('StorageIntegration', 'toggleClientSecret', error, 'warn', 'Error occurred while toggling the client secret');
-        }
-    }
-
     awsWatermarkUploaderMethod() {
         this.isWaterMarkUploader = true;
     }
@@ -414,7 +381,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     deactivateGmail() {
         try {
             this.isSpinner = true;
-            revokeAWSAccess({ recordId: this.gmailData.integrationData.Id })
+            revokeGmailAccess({ refreshToken: this.gmailData.integrationData.MVEX__Refresh_Token__c, recordId: this.gmailData.integrationData.Id })
             .then(data => {
                 if (data === 'success') {
                     this.showToast('Success', 'Changes has been done successfully.', 'success');
@@ -443,7 +410,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     deactivateOutlook() {
         try {
             this.isSpinner = true;
-            revokeAWSAccess({ recordId: this.outlookData.integrationData.Id })
+            revokeOutlookAccess({ refreshToken: this.outlookData.integrationData.MVEX__Refresh_Token__c, recordId: this.outlookData.integrationData.Id })
             .then(data => {
                 if (data === 'success') {
                     this.showToast('Success', 'Changes has been done successfully.', 'success');
@@ -472,7 +439,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     deactivateInstagram() {
         try {
             this.isSpinner = true;
-            revokeAWSAccess({ recordId: this.instagramData.integrationData.Id })
+            revokeInstagramAccess({ recordId: this.instagramData.integrationData.Id })
             .then(data => {
                 if (data === 'success') {
                     this.showToast('Success', 'Changes has been done successfully.', 'success');

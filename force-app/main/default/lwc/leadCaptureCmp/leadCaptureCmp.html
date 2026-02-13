@@ -92,10 +92,10 @@
                                             <span class="detail_label">Token Verification Status</span>
                                             <span class={statusClass}>{metaVerificationStatus}</span>
                                         </div>
-                                        <div class="detail_row">
+                                        <!-- <div class="detail_row">
                                             <span class="detail_label">Permission Status</span>
                                             <span class={reviewClass}>{appReviewStatus}</span>
-                                        </div>
+                                        </div> -->
                                         <div class="detail_row">
                                             <span class="detail_label">Facebook API Version</span>
                                             <span class="detail_value">{MetaData.integrationData.MVEX__FB_API_VERSION__c}</span>
@@ -187,7 +187,7 @@
                             </template>
                             <template if:false={GoogleData.isValid}>
                                 <div class="card_footer">
-                                    <button class="action_btn primary full_width" onclick={newIntegrationModal} data-name="GoogleAds">Connect</button>
+                                    <button class="action_btn primary full_width" onclick={newIntegrationModal} data-name="Google">Connect</button>
                                 </div>
                             </template>
                         </div>

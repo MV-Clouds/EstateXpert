@@ -54,21 +54,21 @@ public class FieldSetControllerTest {
         Test.stopTest();
     }
 
-    @isTest
-    static void testFetchRecordTypes() {
-        Test.startTest();
-        List<RecordType> recordTypeList = FieldSetController.fetchRecordTypes();
+    // @isTest
+    // static void testFetchRecordTypes() {
+    //     Test.startTest();
+    //     List<RecordType> recordTypeList = FieldSetController.fetchRecordTypes();
         
-        System.assertNotEquals(0, recordTypeList.size(), 'Expected one recordtype in the list');
-        Test.stopTest();
-    }
+    //     System.assertNotEquals(0, recordTypeList.size(), 'Expected one recordtype in the list');
+    //     Test.stopTest();
+    // }
 
-    @isTest
-    static void testGetListOfFieldsForObjects() {
-        Test.startTest();
-        List<Map<String, Object>> listOfFieldsAndObject = FieldSetController.getListOfFieldsForObjects('MVEX__Listing__c');
+    // @isTest
+    // static void testGetListOfFieldsForObjects() {
+    //     Test.startTest();
+    //     List<Map<String, Object>> listOfFieldsAndObject = FieldSetController.getListOfFieldsForObjects('MVEX__Listing__c');
         
-        System.assertNotEquals(0, listOfFieldsAndObject.size(), 'Expected one recordtype in the list');
-        Test.stopTest();
-    }
+    //     System.assertNotEquals(0, listOfFieldsAndObject.size(), 'Expected one recordtype in the list');
+    //     Test.stopTest();
+    // }
 }

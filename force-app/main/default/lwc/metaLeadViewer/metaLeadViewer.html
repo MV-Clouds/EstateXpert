@@ -46,15 +46,9 @@
     </div>
 
     <template if:true={isModalOpen}>
-        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_large">
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
             <div class="slds-modal__container slds-is-relative">
                 
-                <!-- <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="white" />
-                    </svg>
-                </div> -->
-
                 <template if:true={isLoading}>
                     <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
                 </template>
@@ -63,13 +57,13 @@
                     <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Sync Meta Lead Data to Contact</h1>
                 </div>
 
-                <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small background_css" id="modal-content-id-1">
+                <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small background_css slds-p-bottom_none" id="modal-content-id-1">
                     
                     <div class="tableContainer">
                         <div class="table-content" style="background: white;">
                             <div class="slds-grid slds-wrap slds-gutters header-row">
-                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-p-left_medium slds-text-align_center">Meta Lead Data</div>
-                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-text-align_center">Target Contact Field</div>
+                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-p-left_medium slds-text-align_center header-title">Meta Lead Data</div>
+                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-text-align_center header-title">Target Contact Field</div>
                             </div>
 
                             <template for:each={mappingRows} for:item="row" for:index="index">
@@ -81,26 +75,19 @@
                                     </div>
                                     
                                     <div class="slds-col slds-size_1-of-2 slds-grid slds-grid_vertical-align-center">
-                                        <div class="slds-col slds-size_11-of-12">
-                                            <lightning-combobox
-                                                name="contactField"
-                                                variant="label-hidden"
+                                        <div class="slds-col slds-size_12-of-12">
+                                            
+                                            <c-custom-combobox
                                                 value={row.selectedField}
                                                 placeholder="Select field to map..."
                                                 options={contactFieldOptions}
-                                                onchange={handleMappingChange}
-                                                data-index={index}>
-                                            </lightning-combobox>
-                                        </div>
-                                        
-                                        <div class="slds-col slds-size_2-of-12 slds-p-left_small">
-                                            <template if:true={row.hasMapping}>
-                                                <button class="delete-div slds-button slds-button_icon" title="Clear Mapping" onclick={clearMapping} data-index={index}>
-                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                                        <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    </svg>
-                                                </button>
-                                            </template>
+                                                onselect={handleMappingChange}
+                                                data-index={index}
+                                                searchable="true"
+                                                multiselect="false"
+                                                show-clear-button="true">
+                                            </c-custom-combobox>
+                                            
                                         </div>
                                     </div>
                                 </div>

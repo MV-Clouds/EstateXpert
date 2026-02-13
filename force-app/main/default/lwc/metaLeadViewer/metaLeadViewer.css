@@ -17,7 +17,6 @@
 }
 
 .header-container h2 {
-    font-weight: 700;
     color: #0176D3;
 }
 
@@ -30,17 +29,23 @@
     border-top-right-radius: 8px !important;
 }
 
+.header-title{
+    color: white;
+}
+
 .background_css {
     background-color: aliceblue;
 }
 
 .header-row{
-    padding: 0.5rem;
+    padding: 0.7rem;
     border-bottom: 1px solid rgb(192, 192, 192);
     position: sticky;
     top: 0;
     background: white;
     z-index: 100;
+    background: #0076d3;
+    color: white;
 }
 
 .closs_icon_css {
@@ -120,6 +125,15 @@
 .sync-row {
     transition: background-color 0.3s ease;
     border-radius: 4px;
+    padding: 0.4rem 0.5rem;
+}
+
+.sync-row:hover {
+    background-color: rgba(242, 247, 251, 0.737);
+}
+
+.sync-row:nth-child(odd) {
+    background: aliceblue;
 }
 
 /* Dynamic Active State requested */
@@ -165,28 +179,6 @@
 
 .custom-data-table tr:hover {
     background-color: #f4f6f9;
-}
-
-/* Shared Delete Icon / Revert Picklist Icon */
-.delete-div {
-    padding: 5px;
-    border: 1px solid;
-    border-radius: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background-color: white;
-    height: 32px;
-    width: 32px;
-}
-
-.delete-div:hover svg {
-    fill: #ff0707a8;
-}
-
-.delete-div:hover svg path {
-    fill: #ff0707a8;
 }
 
 /* Empty State Handling */

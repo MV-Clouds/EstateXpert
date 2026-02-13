@@ -5,12 +5,11 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
-// Field Imports
 import CONTACT_OBJECT from '@salesforce/schema/Contact';
 import JSON_FIELD from '@salesforce/schema/Contact.Meta_Raw_JSON__c';
 import FORM_NAME_FIELD from '@salesforce/schema/Contact.Meta_Form_Name__c';
 
-const BASE_ROW_CLASS = 'slds-grid slds-wrap slds-gutters slds-border_bottom slds-p-around_small slds-grid_vertical-align-center sync-row';
+const BASE_ROW_CLASS = 'slds-grid slds-wrap slds-gutters slds-grid_vertical-align-center sync-row';
 
 export default class MetaLeadViewer extends LightningElement {
     @api recordId;
@@ -22,7 +21,6 @@ export default class MetaLeadViewer extends LightningElement {
     isModalOpen = false;
     isLoading = false;
 
-    // Getters
     get hasData() {
         return this.parsedData && this.parsedData.length > 0;
     }
@@ -99,15 +97,12 @@ export default class MetaLeadViewer extends LightningElement {
         }
     }
 
-    // --- Modal Logic ---
-
     openModal() {
-        // Deep copy parsed data, add tracking properties for UI highlighting and clear button
         this.mappingRows = this.parsedData.map(row => ({
             ...row,
             selectedField: null,
             hasMapping: false,
-            cssClass: BASE_ROW_CLASS // Base styling
+            cssClass: BASE_ROW_CLASS 
         }));
         this.isModalOpen = true;
     }
@@ -119,13 +114,12 @@ export default class MetaLeadViewer extends LightningElement {
 
     handleMappingChange(event) {
         const index = event.target.dataset.index;
-        const selectedApiName = event.detail.value;
+        
+        // When the custom combobox is cleared, event.detail becomes an empty array []
+        // This line gracefully handles both selection and clearing.
+        const selectedApiName = (event.detail && event.detail.length > 0) ? event.detail[0] : null;
+        
         this.updateMappingRowState(index, selectedApiName);
-    }
-
-    clearMapping(event) {
-        const index = event.currentTarget.dataset.index;
-        this.updateMappingRowState(index, null);
     }
 
     updateMappingRowState(index, fieldValue) {
@@ -133,10 +127,9 @@ export default class MetaLeadViewer extends LightningElement {
         row.selectedField = fieldValue;
         row.hasMapping = !!fieldValue;
         
-        // Append highlight-yellow class if it has a mapping
+        // Applies the yellow highlight when an option is mapped
         row.cssClass = row.hasMapping ? `${BASE_ROW_CLASS} highlight-yellow` : BASE_ROW_CLASS;
         
-        // Ensure UI Reactivity by updating the array
         this.mappingRows[index] = row;
         this.mappingRows = [...this.mappingRows];
     }

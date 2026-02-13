@@ -338,7 +338,7 @@ public with sharing class MarketingListCmpController {
     public static String getListViewId() {
         try {
             String objectName = 'Contact';
-            String developerName = 'All_Contacts';
+            String developerName = 'EX_Contacts';
             // Validate inputs
             if (String.isBlank(objectName) || String.isBlank(developerName)) {
                 throw new AuraHandledException('Object name and developer name must not be blank');

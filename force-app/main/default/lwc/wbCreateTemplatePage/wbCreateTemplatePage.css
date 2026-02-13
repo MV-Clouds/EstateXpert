@@ -25,6 +25,7 @@
 }
 
 .templatePreviewmain1 {
+    background-color: aliceblue;
     height: fit-content;
     width: 21rem;
     background-image: url('/resource/MVEX__newImageandMediaBg');
@@ -60,6 +61,7 @@
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;
@@ -117,6 +119,7 @@ label {
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;
@@ -358,6 +361,7 @@ textarea {
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;
@@ -1023,6 +1027,7 @@ textarea {
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;

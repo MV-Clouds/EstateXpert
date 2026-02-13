@@ -19,6 +19,7 @@
 }
 
 .main_header_cls {
+    background-color: aliceblue;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: bottom;
@@ -70,6 +71,7 @@
     width: 100%;
     padding: 1rem;
     box-sizing: border-box;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;
@@ -422,6 +424,7 @@ label {
 }
 
 .modalbody {
+    background-color: aliceblue;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -646,6 +649,7 @@ label {
     position: relative;
     height: 30rem;
     width: 35rem;
+    background-color: aliceblue;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: right;
@@ -746,7 +750,7 @@ label {
 .custom-card {
     max-width: 600px;
     margin: auto;
-    background-color: linear-gradient(135deg, #F0F8FF 0%, #E6F0FA 100%);
+    background-color: aliceblue;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: bottom;
@@ -873,11 +877,11 @@ label {
     width: 100%;
     transition: transform 0.4s ease, box-shadow 0.4s ease;
     border: 1px solid #bfdbfe;
-    background-color: linear-gradient(160deg, #ffffff, #dbeafe);
+    background-color: aliceblue;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-image: url('/resource/MVEX__newImageandMediaBg/');
 }
 
 .restricted-access svg {

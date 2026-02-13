@@ -279,6 +279,7 @@
 
 /* Custom Pagination Container */
 .custom-pagination-wrapper {
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;
@@ -290,6 +291,7 @@
 
 /* Keep original pagination-container for backward compatibility */
 .pagination-container {
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;

@@ -118,6 +118,7 @@
     padding: 0;
     border-radius: 8px !important;
     width: 60rem;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     width: 100%;
     display: flex;

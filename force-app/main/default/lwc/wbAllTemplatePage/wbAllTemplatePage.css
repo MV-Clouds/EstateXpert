@@ -11,6 +11,7 @@
 }
 
 .template-preview {
+    background-color: aliceblue;
     padding: 0;
     border-radius: 8px !important;
     width: 100%;

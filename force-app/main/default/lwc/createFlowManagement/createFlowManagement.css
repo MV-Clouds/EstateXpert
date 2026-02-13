@@ -20,6 +20,7 @@
 .main{
     padding: 1%;
     padding-bottom: unset;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
     background-repeat: no-repeat;
     background-size: cover;

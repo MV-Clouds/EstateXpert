@@ -120,6 +120,7 @@ span {
     padding: 0;
     border-radius: 5px;
     overflow: hidden;
+    background-color: aliceblue;
     background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 

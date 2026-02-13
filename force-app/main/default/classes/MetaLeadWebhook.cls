@@ -112,7 +112,7 @@ global without sharing class MetaLeadWebhook {
     }
     
     private static void createSalesforceContact(Map<String, Object> leadData, String formName) {
-        if (leadData.containsKey('id')) {
+        if (leadData.containsKey('id') || String.isNotBlank(leadId)) {
             Contact newContact = new Contact();
             
             // --- 1. Store Full JSON ---
@@ -135,11 +135,11 @@ global without sharing class MetaLeadWebhook {
             newContact.MVEX__Contact_Type__c = 'Buyer';
 
             // --- 4. Process Field Mappings ---
-            MetaLeadFieldMapping__mdt mappingRecord = [SELECT MVEX__New_Field_Mapping__c FROM MetaLeadFieldMapping__mdt LIMIT 1];
+            List<MetaLeadFieldMapping__mdt> mappingRecords = [SELECT MVEX__New_Field_Mapping__c FROM MetaLeadFieldMapping__mdt LIMIT 1];
             // Deserialize the JSON string into a list of mappings
             List<FieldMapping> fieldMappings = new List<FieldMapping>();
-            if (mappingRecord != null && String.isNotBlank(mappingRecord.MVEX__New_Field_Mapping__c)) {
-                fieldMappings = (List<FieldMapping>) JSON.deserialize(mappingRecord.MVEX__New_Field_Mapping__c, List<FieldMapping>.class);
+            if (!mappingRecords.isEmpty() && String.isNotBlank(mappingRecords[0].MVEX__New_Field_Mapping__c)) {
+                fieldMappings = (List<FieldMapping>) JSON.deserialize(mappingRecords[0].MVEX__New_Field_Mapping__c, List<FieldMapping>.class);
             }
             
             // Create a map for easier lookup
@@ -162,8 +162,13 @@ global without sharing class MetaLeadWebhook {
                     }
                 }
             }
+
+            // --- 5. Required Field Fallback ---
+            if (String.isBlank(newContact.LastName)) {
+                newContact.LastName = 'Meta Lead ' + leadId;
+            }
             
-            // --- 5. Insert ---
+            // --- 6. Insert ---
             try {
                 insert newContact;
             } catch (Exception e) {

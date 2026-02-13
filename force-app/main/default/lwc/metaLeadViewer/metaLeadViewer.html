@@ -1,8 +1,19 @@
 <template>
     <div class="main-card">
+        <div class="header-container slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+            <h2 class="slds-text-heading_medium slds-truncate">Meta Lead Responses</h2>
+            <lightning-button 
+                label="Sync Data" 
+                variant="brand" 
+                icon-name="utility:sync" 
+                onclick={openModal} 
+                disabled={isSyncDisabled}>
+            </lightning-button>
+        </div>
+
         <div class="data-table-container">
-            <template if:true={parsedData}>
-                <table class="custom-data-table">
+            <template if:true={hasData}>
+                <table class="custom-data-table slds-table">
                     <thead>
                         <tr>
                             <th class="header-cell">Field / Question</th>
@@ -24,11 +35,75 @@
                 </table>
             </template>
             
-            <template if:false={parsedData}>
-                <div class="no_prop">
-                    <p>No Meta responses on this record.</p>
+            <template if:false={hasData}>
+                <div class="no_prop empty-state">
+                    <div class="empty-state__content">
+                        <div class="empty-state__message">No Meta responses on this record.</div>
+                    </div>
                 </div>
             </template>
         </div>
     </div>
+
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container slds-is-relative">
+                
+                <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </template>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Sync Meta Lead Data to Contact</h1>
+                </div>
+
+                <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small background_css slds-p-bottom_none" id="modal-content-id-1">
+                    
+                    <div class="tableContainer">
+                        <div class="table-content" style="background: white;">
+                            <div class="slds-grid slds-wrap slds-gutters header-row">
+                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-p-left_medium slds-text-align_center header-title">Meta Lead Data</div>
+                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-text-align_center header-title">Target Contact Field</div>
+                            </div>
+
+                            <template for:each={mappingRows} for:item="row" for:index="index">
+                                <div key={row.key} class={row.cssClass}>
+                                    
+                                    <div class="slds-col slds-size_1-of-2 slds-p-left_medium">
+                                        <div class="slds-text-heading_small">{row.key}</div>
+                                        <div class="slds-text-color_weak slds-truncate" title={row.value}>Value: {row.value}</div>
+                                    </div>
+                                    
+                                    <div class="slds-col slds-size_1-of-2 slds-grid slds-grid_vertical-align-center">
+                                        <div class="slds-col slds-size_12-of-12">
+                                            
+                                            <c-custom-combobox
+                                                value={row.selectedField}
+                                                placeholder="Select field to map..."
+                                                options={contactFieldOptions}
+                                                onselect={handleMappingChange}
+                                                data-index={index}
+                                                searchable="true"
+                                                multiselect="false"
+                                                show-clear-button="true">
+                                            </c-custom-combobox>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-modal__footer background_css" style="border-top: none;">
+                    <div class="footerbtns">
+                        <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeModal}>Cancel</button>
+                        <button class="save_btn_css" onclick={handleSaveSync} disabled={isLoading}>Save Sync</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
 </template>

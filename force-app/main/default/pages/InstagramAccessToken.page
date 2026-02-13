@@ -1,57 +1,135 @@
 <apex:page controller="InstagramController" action="{!getRefreshToken}">
     <apex:form >
-        <apex:pageMessages />
+        <!-- <apex:pageMessages /> -->
         <apex:outputPanel id="mainPanel" layout="block" style="width:100%; height:100vh; display:flex; justify-content:center; align-items:center; text-align:center;">
             
-            <!-- Spinner Panel for Waiting Message -->
-            <apex:outputPanel id="spinnerPanel" rendered="{!NOT(isRecordCreated)}" layout="block" styleClass="viewClass">
-                <apex:image url="{!URLFOR($Resource.templateBuilderLogo)}" width="200" height="50"/>
-                <apex:outputPanel styleClass="spinner-container">
-                    <apex:outputText value="Please wait, processing..." style="font-size:20px; color:blue;"/>
-                    <apex:outputPanel styleClass="spinner" />
+            <!-- Processing Authorization Panel -->
+            <apex:outputPanel id="spinnerPanel" rendered="{!NOT(isRecordCreated) && NOT(hasError)}" layout="block" styleClass="card">
+                <apex:outputPanel styleClass="card-content">
+                    <apex:image url="{!URLFOR($Resource.estatexpertlogo)}" width="200" height="50" styleClass="logo"/>
+                    <h1 style="font-size:24px; font-weight:600; color:#1a1a1a; margin:20px 0 8px 0;">Processing Authorization</h1>
+                    <p style="font-size:16px; color:#666666; margin-bottom:32px;">Please wait while we verify your credentials...</p>
+                    <apex:outputPanel styleClass="spinner-container">
+                        <apex:outputPanel styleClass="spinner" />
+                    </apex:outputPanel>
                 </apex:outputPanel>
             </apex:outputPanel>
             
             <!-- Success Panel for Successful Authorization -->
-            <apex:outputPanel id="successPanel" rendered="{!isRecordCreated}" layout="block" styleClass="viewClass">
-                <apex:image url="{!URLFOR($Resource.templateBuilderLogo)}" width="200" height="50"/>
-                <apex:outputText value="Authorization done successfully!" style="font-size:24px; color:rgb(0, 109, 40);"/>
+            <apex:outputPanel id="successPanel" rendered="{!isRecordCreated}" layout="block" styleClass="card">
+                <apex:outputPanel styleClass="card-content">
+                    <apex:image url="{!URLFOR($Resource.estatexpertlogo)}" width="200" height="50" styleClass="logo"/>
+                    <div style="width:60px; height:60px; background:#4CAF50; border-radius:50%; display:flex; justify-content:center; align-items:center; margin:20px 0 16px 0;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <h1 style="font-size:24px; font-weight:600; color:#1a1a1a; margin:0 0 8px 0; margin-bottom:0;">Authorization Successful</h1>
+                    <p style="font-size:16px; color:#666666; margin-bottom:8px;">Your credentials have been verified successfully.</p>
+                </apex:outputPanel>
                 <script>
                     setTimeout(function() {
                         window.close();
-                    }, 1000);
+                    }, 2000);
                 </script>
+            </apex:outputPanel>
+            
+            <!-- Error Panel for Authorization Failed -->
+            <apex:outputPanel id="errorPanel" rendered="{!hasError}" layout="block" styleClass="card">
+                <apex:outputPanel styleClass="card-content">
+                    <apex:image url="{!URLFOR($Resource.estatexpertlogo)}" width="200" height="50" styleClass="logo"/>
+                    <div style="width:60px; height:60px; background:#CD1C18; border-radius:50%; display:flex; justify-content:center; align-items:center; margin:20px 0 16px 0;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h1 style="font-size:24px; font-weight:600; color:#1a1a1a; margin:0 0 8px 0; margin-bottom:0;">Authorization Failed</h1>
+                    <p style="font-size:16px; color:#666666; margin-bottom:24px;">We encountered an issue while processing your request.</p>
+                    
+                    <div style="background:#fafafa; border-radius:8px; padding:20px; width:100%; text-align:left;">
+                        <h3 style="font-size:16px; font-weight:600; color:#333333;">Error Details:</h3>
+                        <p style="font-size:15px; color:#CD1C18; margin:8px 0 0 0;">{!errorMessage}</p>
+                    </div>                    
+                </apex:outputPanel>
             </apex:outputPanel>
 
         </apex:outputPanel>
     </apex:form>
 
     <style>
-        .viewClass {
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('/resource/MVEX__newImageandMediaBg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            width: 90%;
+            max-width: 480px;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+        }
+        
+        .card-content {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
+            padding: 48px 32px;
         }
+        
+        .logo {
+            margin-bottom: 15px;
+            height: auto;
+        }
+        
         .spinner-container {
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            margin: 16px 0;
         }
+        
         .spinner {
-            margin-top: 20px;
-            border: 4px solid rgba(0, 0, 255, 0.2);
-            border-left-color: blue;
+            border: 3px solid rgba(33, 150, 243, 0.1);
+            border-left-color: #2196F3;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+            width: 48px;
+            height: 48px;
+            animation: spin 0.8s linear infinite;
         }
+        
         @keyframes spin {
-            100% {
-                transform: rotate(360deg);
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        li {
+            margin-bottom: 12px;
+        }
+        
+        @media (max-width: 600px) {
+            .card-content {
+                padding: 32px 20px;
+            }
+            
+            h1 {
+                font-size: 22px !important;
             }
         }
     </style>

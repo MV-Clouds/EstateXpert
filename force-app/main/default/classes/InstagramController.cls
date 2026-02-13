@@ -1,17 +1,23 @@
 public without sharing class InstagramController {
 
-    public Boolean isRecordCreated { get; set; }
+      public Boolean isRecordCreated { get; set; }
+    public Boolean hasError { get; set; }
+    public String errorMessage { get; set; }
     
     public InstagramController() {
         isRecordCreated = false;
+        hasError = false;
+        errorMessage = '';
     }
 
-    public PageReference getRefreshToken() {
+     public PageReference getRefreshToken() {
         try {
             String authCode = ApexPages.currentPage().getParameters().get('code');
     
             if (authCode == null) {
-                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Authorization code not found.'));
+                hasError = true;
+                errorMessage = 'Authorization code not found. The authentication token has expired or is invalid.';
+                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, errorMessage));
                 return null;
             }
     
@@ -44,21 +50,26 @@ public without sharing class InstagramController {
                 String longTermToken = getLongLivedAccessToken(accessToken, clientSecret);
                 Boolean status = getUserId(accessToken, longTermToken);
     
-                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM, 'Authorization successful.'));
-    
                 if (status) {
                     isRecordCreated = true;
+                } else {
+                    hasError = true;
+                    errorMessage = 'Failed to retrieve user information.';
                 }
             } else {
-                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Failed to get access token: ' + res.getBody()));
+                hasError = true;
+                errorMessage = 'Failed to get access token. Please verify your credentials.';
+                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, errorMessage + ': ' + res.getBody()));
             }
             
         } catch (Exception e) {
+            hasError = true;
+            errorMessage = 'An unexpected error occurred. Please try again.';
             ErrorHandler.insertErrorData(e, 'InstagramController', 'getRefreshToken', 'Error while getting refresh token.');
         }
         
         return null;
-    }  
+    }
 
     @RemoteAction
     public static String getLongLivedAccessToken(String shortLivedToken, String clientSecret) { 

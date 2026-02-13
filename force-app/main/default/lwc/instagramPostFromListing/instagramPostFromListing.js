@@ -1,8 +1,8 @@
-import { LightningElement , track , wire } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getS3ConfigSettings from "@salesforce/apex/ImageAndMediaController.getS3ConfigSettings";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import { loadStyle , loadScript} from 'lightning/platformResourceLoader';
+import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import picaLib from '@salesforce/resourceUrl/imageConverter';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import NoUploadImage from "@salesforce/resourceUrl/NoUploadImage";
@@ -18,6 +18,7 @@ export default class InstagramPostFromListing extends LightningElement {
     @track confData;
     @track s3;
     @track showSpinner = false;
+    @track isLoading = true;
     @track selectedFilesToUpload = [];
     @track fileURLs = [];
     @track awsObjectKeysToPreserve = [];
@@ -33,6 +34,8 @@ export default class InstagramPostFromListing extends LightningElement {
     @track progressStyle = 'width: 0%';
     @track hasAWSCredentials = false;
     @track hasInstagramCredentials = false;
+    @track invalidVideoDuration = [];
+    @track invalidVideoSize = [];
 
     get isFileAvailable() {
         return this.selectedFileWithPreview.length > 0;
@@ -53,6 +56,22 @@ export default class InstagramPostFromListing extends LightningElement {
         return '';
     }
 
+    get isUploadDisabled() {
+        return !this.isFileAvailable;
+    }
+
+    get uploadButtonClass() {
+        return this.isFileAvailable
+            ? 'upload-button upload-button-enabled'
+            : 'upload-button upload-button-disabled';
+    }
+
+    get submitContainerClass() {
+        return this.isFileAvailable
+            ? 'submit-button-selected'
+            : 'submit-button-empty';
+    }
+
     @wire(CurrentPageReference)
     setCurrentPageReference(pageRef) {
         if (pageRef && pageRef.state && pageRef.state.recordId) {
@@ -68,8 +87,8 @@ export default class InstagramPostFromListing extends LightningElement {
     * Date: 24/10/2024
     * Created By: Rachit Shah
     * Last modified by : Rachit Shah
-    */    
-    connectedCallback() {        
+    */
+    connectedCallback() {
         loadStyle(this, MulishFontCss)
             .then(() => {
                 console.log('Css loaded successfully');
@@ -86,7 +105,7 @@ export default class InstagramPostFromListing extends LightningElement {
     renderedCallback() {
         try {
             if (this.isAwsSdkInitialized) {
-                Promise.all([loadScript(this, AWS_SDK) , loadScript(this, picaLib)])
+                Promise.all([loadScript(this, AWS_SDK), loadScript(this, picaLib)])
                     .then(() => {
                         console.log('Script loaded successfully');
                         this.picaInstance = window.pica();
@@ -102,7 +121,7 @@ export default class InstagramPostFromListing extends LightningElement {
         }
     }
 
-    fetchPropertyMediaUrls(){
+    fetchPropertyMediaUrls() {
         if (this.listingId) {
             getPropertyMediaUrls({ listingId: this.listingId })
                 .then(result => {
@@ -119,7 +138,7 @@ export default class InstagramPostFromListing extends LightningElement {
                             };
                             this.awsObjectKeysToPreserve.push(key);
                             this.fileURLs.push(fileUrl);
-                            this.selectedFileWithPreview.push(jpegFile);                            
+                            this.selectedFileWithPreview.push(jpegFile);
                         }
                     }
                 })
@@ -134,7 +153,6 @@ export default class InstagramPostFromListing extends LightningElement {
         try {
             getS3ConfigSettings()
                 .then(result => {
-                    this.showSpinner = false;
                     console.log('result--> ', result);
                     if (result.status) {
                         this.confData = result.awsConfigData;
@@ -145,15 +163,16 @@ export default class InstagramPostFromListing extends LightningElement {
                         this.hasAWSCredentials = false;
                         console.log('AWS credentials not configured');
                     }
+                    this.isLoading = false;
                 }).catch(error => {
-                    this.showSpinner = false;
                     this.hasAWSCredentials = false;
                     console.log('error in apex -> ', error.stack);
+                    this.isLoading = false;
                 });
         } catch (error) {
-            this.showSpinner = false;
             this.hasAWSCredentials = false;
             console.log('error in getS3ConfigDataAsync -> ', error.stack);
+            this.isLoading = false;
         }
     }
 
@@ -165,14 +184,17 @@ export default class InstagramPostFromListing extends LightningElement {
                     if (!result) {
                         console.log('Instagram credentials not configured');
                     }
+                    this.isLoading = false;
                 })
                 .catch(error => {
                     this.hasInstagramCredentials = false;
                     console.log('error checking Instagram credentials -> ', error);
+                    this.isLoading = false;
                 });
         } catch (error) {
             this.hasInstagramCredentials = false;
             console.log('error in checkInstagramCredentials -> ', error.stack);
+            this.isLoading = false;
         }
     }
 
@@ -207,18 +229,43 @@ export default class InstagramPostFromListing extends LightningElement {
             const files = event.dataTransfer.files;
             this.isImageData = true;
             this.largeImageFiles = [];
+            this.invalidVideoDuration = [];
             const fileProcessingPromises = [];
             let invalidFileTypes = [];
-    
+
+            // Check if adding files would exceed 10 file limit
+            const totalFilesAfter = this.selectedFileWithPreview.length + files.length;
+            if (totalFilesAfter > 10) {
+                this.showToast('Error', `Cannot add ${files.length} files. Maximum 10 files allowed.`, 'error');
+                return;
+            }
+
+            // It's a carousel if: there are already existing files, OR multiple files are being added together
+            const isCarousel = this.selectedFileWithPreview.length > 0 || files.length > 1;
+
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const isValidFileType = ['image/png', 'image/jpg', 'image/jpeg', 'video/mp4'].includes(file.type);
                 const fileSizeInKB = Math.floor(file.size / 1024);
-                const isAllowedSize = file.type === 'video/mp4' 
-                    ? fileSizeInKB <= 30000 
-                    : fileSizeInKB <= 3000;
-    
-                if (isValidFileType && isAllowedSize) {
+                const isAllowedSize = file.type === 'video/mp4'
+                    ? fileSizeInKB <= 25000  // Updated to 25MB for consistency
+                    : fileSizeInKB <= 8000;
+
+                if (!isValidFileType) {
+                    invalidFileTypes.push(file.name);
+                    continue;
+                }
+
+                // For videos, validate duration with explicit carousel flag
+                if (file.type === 'video/mp4') {
+                    const validation = await this.validateVideo(file, isCarousel);
+                    if (!validation.isValid) {
+                        this.invalidVideoDuration.push(validation.errorMessage);
+                        continue;
+                    }
+                }
+
+                if (isAllowedSize) {
                     if (this.picaInstance && file.type !== 'video/mp4') {
                         const jpegFilePromise = this.convertToJpeg(file).then(jpegFile => {
                             this.selectedFilesToUpload.push(jpegFile);
@@ -242,35 +289,37 @@ export default class InstagramPostFromListing extends LightningElement {
                         });
                         fileProcessingPromises.push(thumbnailPromise);
                     }
-                } else if (!isValidFileType) {
-                    invalidFileTypes.push(file.name);
                 } else {
                     this.largeImageFiles.push(file.name);
                 }
             }
-    
+
             const fileDataArray = await Promise.all(fileProcessingPromises);
             this.selectedFileWithPreview = [...this.selectedFileWithPreview, ...fileDataArray];
-    
+
             if (invalidFileTypes.length > 0) {
                 this.showToast('Error', `Invalid file types: ${invalidFileTypes.join(', ')}`, 'error');
             }
-    
+
+            if (this.invalidVideoDuration.length > 0) {
+                this.showToast('Error', `Video validation errors:\n${this.invalidVideoDuration.join('\n')}`, 'error');
+            }
+
             if (this.largeImageFiles.length > 0) {
                 this.showToast('Error', `File(s) too large: ${this.largeImageFiles.join(', ')}`, 'error');
             }
-    
+
             console.log('selectedFileWithPreview:', this.selectedFileWithPreview);
             console.log('selectedFilesToUpload:', this.selectedFilesToUpload);
-    
+
         } catch (error) {
             console.error('Error in file drop handling:', error.stack);
         }
-    }    
+    }
 
     async convertToJpeg(file) {
 
-        try{
+        try {
             const img = await this.loadImage(file);
             const size = Math.min(img.width, img.height);
             const canvas = document.createElement('canvas');
@@ -278,11 +327,11 @@ export default class InstagramPostFromListing extends LightningElement {
             canvas.width = size;
             canvas.height = size;
 
-        const x = (img.width - size) / 2;
-        const y = (img.height - size) / 2;
-        ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
+            const x = (img.width - size) / 2;
+            const y = (img.height - size) / 2;
+            ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
 
-        const jpegBlob = await this.picaInstance.toBlob(canvas, 'image/jpeg', 0.90);
+            const jpegBlob = await this.picaInstance.toBlob(canvas, 'image/jpeg', 0.90);
             return new File([jpegBlob], file.name.replace(/\.[^/.]+$/, ".jpeg"), { type: 'image/jpeg' });
         } catch (error) {
             console.log('error in convertToJpeg -> ', error.stack);
@@ -311,22 +360,170 @@ export default class InstagramPostFromListing extends LightningElement {
         this.caption = caption;
     }
 
+    /**
+     * Get video duration in seconds
+     * @param {File} file - Video file
+     * @returns {Promise<number>} Duration in seconds
+     */
+    getVideoDuration(file) {
+        return new Promise((resolve, reject) => {
+            try {
+                const video = document.createElement('video');
+                const objectUrl = URL.createObjectURL(file);
+                video.src = objectUrl;
+
+                video.addEventListener('loadedmetadata', () => {
+                    URL.revokeObjectURL(objectUrl);
+                    resolve(video.duration);
+                });
+
+                video.addEventListener('error', () => {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(new Error('Failed to load video metadata'));
+                });
+
+                // Set a timeout to handle cases where metadata never loads
+                setTimeout(() => {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(new Error('Video metadata timeout'));
+                }, 10000);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    /**
+     * Determine if current selection is a carousel (multiple files) or single video
+     * @returns {boolean} True if carousel, False if single video
+     */
+    isCarouselPost() {
+        const totalMedia = this.selectedFileWithPreview.length + this.selectedFilesToUpload.length;
+        return totalMedia > 1 || (totalMedia === 1 && this.selectedFilesToUpload.some(f => f.type !== 'video/mp4'));
+    }
+
+    /**
+     * Validate video based on carousel or single video rules
+     * @param {File} file - Video file to validate
+     * @param {boolean} isCarousel - Explicitly indicate if this is a carousel post (if null, auto-detect)
+     * @returns {Promise<Object>} Validation result { isValid, errorMessage, duration }
+     */
+    async validateVideo(file, isCarousel = null) {
+        try {
+            const duration = await this.getVideoDuration(file);
+            const fileSizeInMB = file.size / (1024 * 1024);
+            
+            let willBeCarousel;
+            if (isCarousel !== null) {
+                willBeCarousel = isCarousel;
+            } else {
+                willBeCarousel = this.selectedFileWithPreview.length > 0 || this.selectedFilesToUpload.length > 0;
+            }
+            
+            if (willBeCarousel) {
+                // Carousel rules: 60s max, 3s min, 25MB max
+                if (duration < 3) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration is too short (minimum 3 seconds for carousel)`,
+                        duration
+                    };
+                }
+                if (duration > 60) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration exceeds 60 seconds for carousel posts`,
+                        duration
+                    };
+                }
+                if (fileSizeInMB > 25) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video file size exceeds 25MB for carousel posts`,
+                        duration
+                    };
+                }
+            } else {
+                // Single video rules: 15 min (900s) max, 3s min, 25MB max
+                if (duration < 3) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration is too short (minimum 3 seconds)`,
+                        duration
+                    };
+                }
+                if (duration > 900) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video duration exceeds 15 minutes for single video posts`,
+                        duration
+                    };
+                }
+                if (fileSizeInMB > 25) {
+                    return {
+                        isValid: false,
+                        errorMessage: `${file.name}: Video file size exceeds 25MB`,
+                        duration
+                    };
+                }
+            }
+
+            return {
+                isValid: true,
+                duration
+            };
+        } catch (error) {
+            return {
+                isValid: false,
+                errorMessage: `${file.name}: Failed to validate video - ${error.message}`,
+                duration: 0
+            };
+        }
+    }
+
     async handleSelectedFiles(event) {
         try {
             if (event.target.files && event.target.files.length > 0) {
                 const files = event.target.files;
                 this.isImageData = true;
                 this.largeImageFiles = [];
-    
+                this.invalidVideoDuration = [];
+                this.invalidVideoSize = [];
+
+                // Check if adding files would exceed 10 file limit
+                const totalFilesAfter = this.selectedFileWithPreview.length + files.length;
+                if (totalFilesAfter > 10) {
+                    this.showToast('Error', `Cannot add ${files.length} files. Maximum 10 files allowed.`, 'error');
+                    this.template.querySelector('.slds-file-selector__input').value = null;
+                    return;
+                }
+
+                // Determine if this will be a carousel post
+                // It's a carousel if: there are already existing files, OR multiple files are being added together
+                const isCarousel = this.selectedFileWithPreview.length > 0 || files.length > 1;
+
                 const fileProcessingPromises = [];
-    
+
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const fileType = file.type;
-                    const isAllowedSize = fileType === 'video/mp4' 
-                        ? Math.floor(file.size / 1024) <= 30000 
-                        : Math.floor(file.size / 1024) <= 3000;
-    
+                    const fileSizeInKB = Math.floor(file.size / 1024);
+                    const fileSizeInMB = file.size / (1024 * 1024);
+                    
+                    // Check basic file size limits
+                    const isAllowedSize = fileType === 'video/mp4'
+                        ? fileSizeInKB <= 25000  // 25MB for videos
+                        : fileSizeInKB <= 8000;   // 8MB for images
+
+                    // For videos, validate duration with explicit carousel flag
+                    if (fileType === 'video/mp4') {
+                        const validation = await this.validateVideo(file, isCarousel);
+                        if (!validation.isValid) {
+                            this.invalidVideoDuration.push(validation.errorMessage);
+                            continue;
+                        }
+                    }
+
                     if (isAllowedSize) {
                         if (this.picaInstance && file.type !== 'video/mp4') {
                             const jpegFilePromise = this.convertToJpeg(file).then(jpegFile => {
@@ -355,25 +552,30 @@ export default class InstagramPostFromListing extends LightningElement {
                         this.largeImageFiles.push(file.name);
                     }
                 }
-    
+
                 const fileDataArray = await Promise.all(fileProcessingPromises);
                 this.selectedFileWithPreview = [...this.selectedFileWithPreview, ...fileDataArray];
-    
+
+                // Show error messages for invalid files
+                if (this.invalidVideoDuration.length > 0) {
+                    this.showToast('Error', `Video validation errors:\n${this.invalidVideoDuration.join('\n')}`, 'error');
+                }
+
                 if (this.largeImageFiles.length > 0) {
                     this.showToast('Error', `File(s) too large: ${this.largeImageFiles.join(', ')}`, 'error');
                 }
             }
-    
+
             this.template.querySelector('.slds-file-selector__input').value = null;
-    
+
             console.log('selectedFileWithPreview:', this.selectedFileWithPreview);
             console.log('selectedFilesToUpload:', this.selectedFilesToUpload);
-    
+
         } catch (error) {
             console.error('Error in file upload:', error.stack);
         }
-    }    
-    
+    }
+
 
     createThumbnail(file) {
         return new Promise((resolve, reject) => {
@@ -381,25 +583,25 @@ export default class InstagramPostFromListing extends LightningElement {
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-    
+
                 video.src = URL.createObjectURL(file);
-                
+
                 video.addEventListener('loadeddata', () => {
                     video.currentTime = 1;
-                    
+
                     video.addEventListener('seeked', () => {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
-    
+
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
+
                         const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
                         console.log('canvas.toDataURL-->', thumbnailDataUrl);
-    
+
                         resolve(thumbnailDataUrl);
                     });
                 });
-    
+
                 video.onerror = () => {
                     reject('Error loading video file');
                 };
@@ -409,7 +611,7 @@ export default class InstagramPostFromListing extends LightningElement {
         });
     }
 
-    handleDragStart(event){
+    handleDragStart(event) {
         const index = event.target.dataset.index;
         event.dataTransfer.setData('index', index);
 
@@ -438,13 +640,13 @@ export default class InstagramPostFromListing extends LightningElement {
     }
 
 
-    handleDropImages(event){
+    handleDropImages(event) {
         event.preventDefault();
 
         const draggedIndex = parseInt(event.dataTransfer.getData('index'), 10);
         const droppedIndex = parseInt(event.target.closest('.dropableimage').dataset.index, 10);
 
-        if(draggedIndex !== droppedIndex){
+        if (draggedIndex !== droppedIndex) {
             const draggedFile = this.selectedFileWithPreview.splice(draggedIndex, 1)[0];
             this.selectedFileWithPreview.splice(droppedIndex, 0, draggedFile);
 
@@ -463,51 +665,40 @@ export default class InstagramPostFromListing extends LightningElement {
         event.target.classList.add('drag-over');
     }
 
-    handleRemoveFile(event){
+    handleRemoveFile(event) {
 
-        console.log('fileURLs BEFORE ==> ' , this.fileURLs.length);
-        
+        console.log('fileURLs BEFORE ==> ', this.fileURLs.length);
+
         const fileNameToRemove = event.currentTarget.dataset.name;
 
         const selectedFileURL = this.selectedFileWithPreview.find(file => file.name === fileNameToRemove);
 
-        if(selectedFileURL){
+        if (selectedFileURL) {
             this.fileURLs = this.fileURLs.filter(file => file !== selectedFileURL.preview);
         }
 
         this.selectedFileWithPreview = this.selectedFileWithPreview.filter(file => file.name !== fileNameToRemove);
         this.selectedFilesToUpload = this.selectedFilesToUpload.filter(file => file.name !== fileNameToRemove);
-        
-        console.log('fileURLs AFTER ==> ' , this.fileURLs.length);
+
+        console.log('fileURLs AFTER ==> ', this.fileURLs.length);
     }
 
-    async handlePost(){
+    async handlePost() {
         const totalFiles = this.fileURLs.length + this.selectedFilesToUpload.length;
 
-        if(this.caption.trim() === '' && totalFiles === 0){
-            this.showToast('Error', 'Please select a file to upload and enter a caption.', 'error');
-            return;
-        }
-
-        if(totalFiles === 0){
+        if (totalFiles === 0) {
             this.showToast('Error', 'Please select a file to upload.', 'error');
             return;
         }
 
-        if(totalFiles > 10){
+        if (totalFiles > 10) {
             this.showToast('Error', 'You can upload maximum 10 files.', 'error');
             return;
         }
 
-        if(this.caption.trim() === ''){
-            this.showToast('Error', 'Please enter a caption.', 'error');
-            return;
-        }
-
-
         const isSuccess = await this.uploadToAWS();
 
-        if(isSuccess){
+        if (isSuccess) {
             postToInstagram({ mediaUrls: this.fileURLs, caption: this.caption, awsObjectKeys: this.awsObjectKeys, awsObjectKeysToPreserve: this.awsObjectKeysToPreserve })
                 .then(result => {
                     console.log('Post to Instagram result -> ', result);
@@ -519,21 +710,23 @@ export default class InstagramPostFromListing extends LightningElement {
                         this.showToast('Error', result.message, 'error');
                     }
                     this.showSpinner = false;
+                    this.isLoading = false;
                 })
                 .catch(error => {
                     console.error('Error posting to Instagram:', error);
                     this.showToast('Error', 'Failed to post to Instagram.', 'error');
                     this.showSpinner = false;
-                });        
+                    this.isLoading = false;
+                });
         }
-        else{
+        else {
             this.showToast('Error', 'Error during uploading files', 'error');
         }
 
-        
+
     }
 
-    clearFiles(){
+    clearFiles() {
         this.selectedFilesToUpload = [];
         this.selectedFileWithPreview = [];
         this.allFilesData = [];
@@ -543,46 +736,47 @@ export default class InstagramPostFromListing extends LightningElement {
         this.awsObjectKeysToPreserve = [];
     }
 
-    async uploadToAWS(){
+    async uploadToAWS() {
         console.log('uploadToAWS-->');
 
-        if(this.selectedFilesToUpload.length > 0 ){
+        if (this.selectedFilesToUpload.length > 0) {
             this.initializeAwsSdk(this.confData);
             this.showSpinner = true;
+            this.isLoading = true;
             this.progressText = 'Uploading...';
             this.progressStyle = 'width: 0%';
-    
+
             try {
                 const totalFiles = this.selectedFilesToUpload.length;
                 const percentagePerFile = 100 / totalFiles;
                 const fileProgressArray = new Array(totalFiles).fill(0);
-                    
+
                 const uploadPromises = this.selectedFilesToUpload
                     .filter(file => file.size > 0)
                     .map((file, index) =>
                         this.uploadFileToS3(file, percentagePerFile, index, fileProgressArray)
-                );
-    
+                    );
+
                 const results = await Promise.all(uploadPromises);
 
                 this.selectedFileWithPreview.forEach(file => {
                     const result = results.find(res => res.key === file.name);
                     console.log('JSON-->', JSON.stringify(result));
-                    
-                    
+
+
                     if (result) {
                         file.preview = result.Location;
                     }
                 });
-    
+
                 this.fileURLs = this.selectedFileWithPreview.map(file => file.preview);
                 this.awsObjectKeys = results.map(result => result.key);
-                
+
                 return true;
             } catch (error) {
                 console.error("Error during AWS upload:", error);
                 console.log('Error Stack-->', error.stack);
-                
+
                 return false;
             } finally {
                 setTimeout(() => {
@@ -590,10 +784,10 @@ export default class InstagramPostFromListing extends LightningElement {
                 }, 1000);
             }
         }
-        else{
+        else {
             return true;
         }
-        
+
     }
     uploadFileToS3(file, percentagePerFile, index, fileProgressArray) {
         return new Promise((resolve, reject) => {
@@ -604,15 +798,15 @@ export default class InstagramPostFromListing extends LightningElement {
                     Body: file,
                     ACL: "public-read"
                 };
-    
+
                 this.s3.upload(params)
                     .on('httpUploadProgress', (progress) => {
                         const fileProgress = (progress.loaded / progress.total) * percentagePerFile;
                         fileProgressArray[index] = fileProgress;
-    
+
                         const cumulativeProgress = fileProgressArray.reduce((acc, curr) => acc + curr, 0);
                         this.uploadProgress = Math.min(100, Math.round(cumulativeProgress));
-    
+
                         this.progressText = `Uploading: ${this.uploadProgress}%`;
                         this.progressStyle = `width: ${this.uploadProgress}%`;
                     })
@@ -634,8 +828,8 @@ export default class InstagramPostFromListing extends LightningElement {
             }
         });
     }
-    
-    
+
+
     showToast(title, message, variant) {
         if (typeof window !== 'undefined') {
             const event = new ShowToastEvent({
@@ -647,7 +841,7 @@ export default class InstagramPostFromListing extends LightningElement {
         }
     }
 
-    closeAction(){
+    closeAction() {
         this.dispatchEvent(new CloseActionScreenEvent());
     }
 

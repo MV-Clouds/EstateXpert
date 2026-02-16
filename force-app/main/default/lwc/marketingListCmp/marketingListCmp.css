@@ -958,18 +958,37 @@ input[type=checkbox]::before {
 
 .modal-body .custom-modal-body {
     display: flex;
-    min-height: 400px;
+    min-height: 550px;
     width: 100%;
-    padding: 12px;
     overflow: auto;
     scrollbar-width: none;
-    max-height: 470px;
     position: relative;
 }
 
 .send-template-modal-container {
     width: 70%;
     min-width: 60rem;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+
+.send-template-modal-container .slds-modal__header {
+    flex-shrink: 0;
+}
+
+.send-template-modal-container .modal-body {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.send-template-modal-container .custom-modal-body {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .fieldmapping_css {
@@ -1094,11 +1113,14 @@ input[type=checkbox]::before {
     gap: 30px;
 }
 
+/* ==================== PAGE STYLES - OVERRIDE ==================== */
 .secondPage {
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    height: 100%;
+    padding: 1.5rem;
+    overflow: hidden;
 }
 
 .lastPage {
@@ -1181,6 +1203,371 @@ c-template-preview {
     justify-content: center;
     border-left: 1px solid #cabcbf;
     padding-bottom: 0.5rem;
+}
+
+/* ==================== NEW TEMPLATE SELECTION UI ==================== */
+
+.firstPage {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+    padding: 1rem 0;
+}
+
+.template-list-container {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+
+.no-template-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.no-template-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-template-icon svg {
+    width: 50px;
+    height: 50px;
+    color: #0074da;
+    background-color: #e2f2ff;
+    border-radius: 50%;
+    padding: 0.5rem;
+}
+
+.no-template-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0;
+}
+
+.no-template-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    max-width: 300px;
+    line-height: 1.4;
+}
+
+.templates-available-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+    min-height: 0;
+    padding: 1rem;
+}
+
+.available-templates-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    padding: 0 1rem;
+}
+
+.templates-scroll-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+    max-height: 300px;
+    padding: 0 0.75rem;
+    padding-right: 0.25rem;
+}
+
+.templates-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.templates-scroll-container::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.templates-scroll-container::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.templates-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+.template-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.template-item:hover {
+    background: #f9fafb;
+    border-color: #0176D3;
+    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.1);
+}
+
+.template-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.template-item-icon svg {
+    width: 24px;
+    height: 24px;
+    color: #0074da;
+}
+
+.template-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.template-item-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.template-item-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: #0176D3;
+}
+
+.template-item-arrow svg {
+    width: 20px;
+    height: 20px;
+}
+
+.template-selector-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+}
+
+.template-selector-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.template-combobox {
+    width: 100%;
+}
+
+.selected-contacts-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+    min-height: 0;
+}
+
+.contacts-table-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.contacts-table-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px 8px 0px 0px;
+    box-shadow: 0px 4px 10px 0px #28282840;
+}
+
+.contacts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    overflow: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    display: table;
+    table-layout: fixed;
+}
+
+.contacts-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 97;
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.contacts-table thead tr {
+    position: sticky;
+    top: 0;
+    display: table-row;
+    width: 100%;
+}
+
+.contacts-table thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 500;
+    display: table-cell;
+}
+
+.contacts-table tbody {
+    overflow-y: auto;
+    display: block;
+    width: 100%;
+    max-height: 280px;
+}
+
+.contacts-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    height: 45px;
+}
+
+.contacts-table tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.contacts-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.contacts-table td {
+    padding: 0.5rem;
+    color: #585858;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    height: 45px;
+    display: table-cell;
+}
+
+/* Preview Section */
+.preview-section-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.3rem;
+}
+
+.template-preview-label {
+        font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+    margin: 0;
+}
+
+.preview-box-container {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 1.5rem 3rem;
+    border: 1px solid rgb(201 201 201 / 54%);
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-box {
+    /* flex: 1; */
+    /* background: #BEF2D1; */
+    background: #D3F6E0;
+    color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.preview-box c-template-preview {
+    width: 100%;
+    max-width: 330px;
+}
+
+.preview-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 8px;
+    color: #6b7280;
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
+}
+
+.popUpFooter {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    /* border-top: 1px solid #e5e7eb;
+    background: #fff; */
+    flex-shrink: 0;
+}
+
+.send-template-modal-container .popUpFooter {
+    position: sticky;
+    bottom: 0;
+}
+
+/* Last Page Styles */
+.lastPage {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 @keyframes pulse {

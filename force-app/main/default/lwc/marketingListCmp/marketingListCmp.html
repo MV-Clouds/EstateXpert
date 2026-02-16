@@ -280,11 +280,11 @@
                                         </div>
                                     </div>
                                 </template>
-                                <templete if:true={showTile}>
+                                <template if:true={showTile}>
                                     <c-marketing-list-tile-view onvalueselected={handleContactSelect}
                                         contactsdata={processedContactData} pagesize={pageSize}>
                                     </c-marketing-list-tile-view>
-                                </templete>
+                                </template>
                             </div>
                         </template>
                     </div>
@@ -367,48 +367,114 @@
 
                 <div class="modal-body">
                     <div class="custom-modal-body" id="modal-content-id-1">
-                        <template if:true={popUpSecondPage}>
-                            <div class="secondPage">
-                                <div class="popUpBody">
-                                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small inner-body-grid">
-                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                                            <lightning-combobox name="template" label="Select Template"
-                                                options={templateOptions} onchange={handleInputChange}
-                                                value={selectedTemplate} required
-                                                message-when-value-missing="Template is required"
-                                                class="slds-m-bottom_medium">
-                                            </lightning-combobox>
-                                        </div>
+                        <!-- First Page: Template List Selection -->
+                        <template if:true={popUpFirstPage}>
+                            <div class="firstPage">
+                                <div class="template-list-container">
+                                    <div class="no-template-selected">
+                                        <div class="no-template-icon">
+                                            <svg class="w-10 h-10 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 10.5h.01m-4.01 0h.01M8 10.5h.01M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-6.6a1 1 0 0 0-.69.275l-2.866 2.723A.5.5 0 0 1 8 18.635V17a1 1 0 0 0-1-1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>
+                                            </svg>
 
-                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
-                                            <template if:true={selectedTemplate}>
-                                                <div class="preview-container">
-                                                    <p class="slds-text-title_caps slds-m-bottom_small">Template Preview</p>
-                                                    <template if:true={selectedTemplate}>
-                                                        <c-template-preview 
-                                                            template-id={selectedTemplate} 
-                                                            record-id={previewRecordId}
-                                                            object-api-name={selectedObject}>
-                                                        </c-template-preview>
-                                                    </template>
-                                                </div>
-                                            </template>
-                                            <template if:false={selectedTemplate}>
-                                                <div class="slds-text-body_small slds-text-color_weak no-text">
-                                                    Please select a template to preview.
-                                                </div>
-                                            </template>
                                         </div>
+                                        <h3 class="no-template-title">No Template Selected</h3>
+                                        <p class="no-template-subtitle">Choose a WhatsApp template from the list below to preview and send to your selected contacts</p>
                                     </div>
                                 </div>
-                                <div class="popUpFooter slds-text-align--center">
-                                    <lightning-button variant="brand" label="Send" onclick={handleSendOnPopup}
-                                        class="slds-m-left_x-small"></lightning-button>
-                                    <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
-                                        class="slds-m-left_x-small"></lightning-button>
+
+                                <div class="templates-available-section">
+                                    <p class="available-templates-label">Available Templates</p>
+                                    <div class="templates-scroll-container">
+                                        <template for:each={templateOptions} for:item="template" for:index="index">
+                                            <div key={template.value} class="template-item" onclick={handleTemplateSelection} data-template-id={template.value}>
+                                                <div class="template-item-icon">
+                                                   <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3v4a1 1 0 0 1-1 1H5m4 8h6m-6-4h6m4-8v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Z"/>
+                                                    </svg>
+
+                                                </div>
+                                                <div class="template-item-content">
+                                                    <p class="template-item-name">{template.label}</p>
+                                                </div>
+                                                <div class="template-item-arrow">
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M7.5 16.25L13.75 10L7.5 3.75" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         </template>
+
+                        <!-- Second Page: Template Selection with Contact List and Preview -->
+                        <template if:true={popUpSecondPage}>
+                            <div class="secondPage">
+                                <div class="template-selector-section">
+                                    <div class="template-selector-wrapper">
+                                        <lightning-combobox name="template" label="Select Template"
+                                            options={templateOptions} onchange={handleInputChange}
+                                            value={selectedTemplate} required
+                                            message-when-value-missing="Template is required"
+                                            class="template-combobox">
+                                        </lightning-combobox>
+                                    </div>
+
+                                    <div class="selected-contacts-section">
+                                        <p class="contacts-table-label">Selected Contacts</p>
+                                        <div class="contacts-table-wrapper">
+                                            <table class="contacts-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Phone</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template for:each={selectedContactList} for:item="contact" for:index="index">
+                                                        <tr key={contact.Id}>
+                                                            <td>{contact.Name}</td>
+                                                            <td>{contact.Phone}</td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="preview-section-right">
+                                    <p class="template-preview-label">Template Preview</p>
+                                    <div class="preview-box-container">
+                                        <template if:true={selectedTemplate}>
+                                            <div class="preview-box">
+                                                <c-template-preview 
+                                                    template-id={selectedTemplate} 
+                                                    record-id={previewRecordId}
+                                                    object-api-name={selectedObject}>
+                                                </c-template-preview>
+                                            </div>
+                                        </template>
+                                        <template if:false={selectedTemplate}>
+                                            <div class="preview-placeholder">
+                                                Please select a template to preview.
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="popUpFooter slds-text-align--center">
+                                <lightning-button variant="brand" label="Send" onclick={handleSendOnPopup}
+                                    class="slds-m-left_x-small"></lightning-button>
+                                <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
+                                    class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                        </template>
+
+                        <!-- Third Page: Schedule DateTime -->
                         <template if:true={popUpLastPage}>
                             <div class="lastPage">
                                 <div

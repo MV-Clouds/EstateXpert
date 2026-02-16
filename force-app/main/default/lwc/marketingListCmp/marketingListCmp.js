@@ -1497,8 +1497,8 @@ openConfigureSettings(){
     // Handle send message button click
     handleSendMessage() {
         this.showTemplate = true;
-        this.popUpFirstPage = false; // Changed to false to skip UI group details
-        this.popUpSecondPage = true; // Directly show template selection
+        this.popUpFirstPage = true; // Show template list first
+        this.popUpSecondPage = false;
         this.popUpLastPage = false;
         this.popupHeader = 'Choose Template';
         this.broadcastGroupName = '';
@@ -1506,6 +1506,16 @@ openConfigureSettings(){
         this.selectedTemplate = '';
         this.selectedDateTime = '';
         this.updateTemplateOptions();
+    }
+
+    // Handle template selection from first page
+    handleTemplateSelection(event) {
+        const templateId = event.currentTarget.dataset.templateId;
+        this.selectedTemplate = templateId;
+        this.popUpFirstPage = false;
+        this.popUpSecondPage = true;
+        this.popUpLastPage = false;
+        this.popupHeader = 'Choose Template';
     }
 
     // Handle closing the template modal
@@ -1520,6 +1530,7 @@ openConfigureSettings(){
         this.selectedTemplate = '';
         this.selectedDateTime = '';
         this.broadcastGroupId = null;
+      
     }
 
     // New helper to auto-create group in background
@@ -1642,6 +1653,7 @@ openConfigureSettings(){
                 if (result === 'Success') {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseTemplate();
+                      this.selectedContactList = [];
                 } else {
                     this.showToast('Error', `Broadcast failed: ${result}`, 'error');
                 }

@@ -1516,7 +1516,6 @@ c-template-preview {
     /* flex: 1; */
     /* background: #BEF2D1; */
     background: #D3F6E0;
-    color: white;
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -1580,4 +1579,97 @@ c-template-preview {
     50% {
         transform: scale(1.15);
     }
+}
+
+/* Main modal overlay when schedule modal is open */
+.modal-overlay {
+    filter: brightness(0.7);
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+/* Main modal backdrop */
+.main-modal-backdrop {
+    z-index: 9000;
+}
+
+/* Schedule modal backdrop - higher z-index */
+.schedule-modal-backdrop {
+    z-index: 9100;
+    background-color: rgba(0, 0, 0, 0.6); /* Darker backdrop for schedule modal */
+}
+
+/* Schedule modal */
+.schedule-modal {
+    z-index: 9200; /* Higher than backdrop */
+}
+
+.schedule-modal .slds-modal__container {
+    width: 400px;
+    max-width: 90%;
+    min-width: 320px;
+    margin: 0 auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Schedule modal header */
+.schedule-modal-header {
+    background-color: #0176D3;
+    color: white;
+    padding: 1rem;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+
+.schedule-modal-header h2 {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Schedule modal content */
+.schedule-modal-content {
+    padding: 1.5rem;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.timezone-note {
+    font-size: 0.8125rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    background-color: rgb(226 242 255);
+    padding: 0.5rem;
+    border-radius: 5px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.timezone-note svg{
+color: #0074da;
+}
+
+.main-line{
+    font-size: 14px;
+}
+
+.next-line{
+font-size: 12px;
+}
+
+/* Schedule modal footer */
+.schedule-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-top: 1px solid #dddbda;
+    background-color: #f3f2f2;
+    border-bottom-left-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
 }

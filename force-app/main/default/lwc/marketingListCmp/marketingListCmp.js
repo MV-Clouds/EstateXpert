@@ -1674,9 +1674,8 @@ openConfigureSettings(){
             return;
         }
 
-        this.popUpSecondPage = false;
+        this.popUpSecondPage = true;
         this.popUpLastPage = true;
-        this.popupHeader = 'Select Date and Time';
     }
 
     // Handle previous button on last page

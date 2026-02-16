@@ -61,7 +61,7 @@ public with sharing class GoogleLeadFieldMappingController {
             String fieldName = integrationType == 'Meta' ? 'MVEX__New_Field_Mapping__c' : 'MVEX__Field_Mappings__c';
 
             Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = metadataType + '.' + devName;
+            mdata.fullName = metadataType + '.MVEX__' + devName;
             mdata.label = masterLabel;
             
             Metadata.CustomMetadataValue instance = new Metadata.CustomMetadataValue();

@@ -67,11 +67,11 @@ global without sharing class MetaLeadWebhook {
     // API Call to get Lead Field Data
     public static Map<String, Object> fetchLeadData(String leadgenId) {
         String url = 'https://graph.facebook.com/' + fbApiVersion + '/' + leadgenId + 
-                     '?fields=field_data,platform,created_time&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8');
+                     '?fields=field_data,platform,created_time,campaign_id,campaign_name&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8');
         return makeGetRequest(url);
     }
 
-    // New API Call to get Form Name
+    // API Call to get Form Name
     public static String fetchFormName(String formId) {
         try{
             if(String.isBlank(formId)) return '';
@@ -133,6 +133,13 @@ global without sharing class MetaLeadWebhook {
             newContact.MVEX__MetaFormId__c = formId;
             newContact.MVEX__Meta_Form_Name__c = formName; // Store the fetched name
             newContact.MVEX__Contact_Type__c = 'Buyer';
+
+            if (leadData.containsKey('campaign_id')) {
+                newContact.MVEX__MetaCampaignId__c = (String) leadData.get('campaign_id');
+            }
+            if (leadData.containsKey('campaign_name')) {
+                newContact.MVEX__Meta_Campaign_Name__c = (String) leadData.get('campaign_name');
+            }
 
             // --- 4. Process Field Mappings ---
             List<MetaLeadFieldMapping__mdt> mappingRecords = [SELECT MVEX__New_Field_Mapping__c FROM MetaLeadFieldMapping__mdt LIMIT 1];

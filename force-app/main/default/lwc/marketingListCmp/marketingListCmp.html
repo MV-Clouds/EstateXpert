@@ -430,6 +430,7 @@
                                                     <tr>
                                                         <th>Name</th>
                                                         <th>Phone</th>
+                                                        <th>Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -437,6 +438,18 @@
                                                         <tr key={contact.Id}>
                                                             <td>{contact.Name}</td>
                                                             <td>{contact.Phone}</td>
+                                                             <td>
+                                                                <lightning-button-icon 
+                                                                    icon-name="utility:delete" 
+                                                                    alternative-text="Remove" 
+                                                                    title="Remove" 
+                                                                    variant="bare" 
+                                                                    size="small"
+                                                                    onclick={handleRemoveContact}
+                                                                    data-id={contact.Id}
+                                                                    data-index={index}>
+                                                                </lightning-button-icon>
+                                                            </td>
                                                         </tr>
                                                     </template>
                                                 </tbody>

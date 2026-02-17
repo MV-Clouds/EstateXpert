@@ -1374,6 +1374,7 @@ c-template-preview {
     flex-direction: column;
     gap: 1.5rem;
     overflow-y: auto;
+    padding: 0.5rem;
 }
 
 .template-selector-wrapper {
@@ -1408,7 +1409,7 @@ c-template-preview {
     display: flex;
     flex-direction: column;
     border-radius: 8px 8px 0px 0px;
-    box-shadow: 0px 4px 10px 0px #28282840;
+    box-shadow: 0px 4px 10px 0px #28282814;
 }
 
 .contacts-table {

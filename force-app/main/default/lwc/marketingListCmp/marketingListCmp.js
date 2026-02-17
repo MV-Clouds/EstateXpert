@@ -1653,7 +1653,7 @@ openConfigureSettings(){
                 if (result === 'Success') {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseTemplate();
-                      this.selectedContactList = [];
+                    this.clearSelectedContacts();
                 } else {
                     this.showToast('Error', `Broadcast failed: ${result}`, 'error');
                 }
@@ -1692,6 +1692,66 @@ openConfigureSettings(){
         }
     }
 
+    handleRemoveContact(event) {
+        const contactId = event.currentTarget.dataset.id;
+        
+        // Create a new array without the removed contact
+        const updatedList = this.selectedContactList.filter(
+            contact => contact.Id !== contactId
+        );
+        
+        this.selectedContactList = [...updatedList];
+            // Update the isChecked property in processedContactData
+        this.processedContactData = this.processedContactData.map(contact => {
+            if (contact.Id === contactId) {
+                return { ...contact, isChecked: false };
+            }
+            return contact;
+        });
+        
+        // Update the isChecked property in unchangedProcessContact
+        this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
+            if (contact.Id === contactId) {
+                return { ...contact, isChecked: false };
+            }
+            return contact;
+        });
+        
+        // Update the shown data (current page)
+        this.updateShownData();
+        
+        // Update total selected count
+        this.totalSelected = this.selectedContactList.length;
+        this.isContactSelected = this.selectedContactList.length <= 0;
+    }
+
+    /**
+ * Method Name : clearSelectedContacts
+ * @description : Clear all selected contacts and update checkboxes
+ */
+clearSelectedContacts() {
+    // Clear the selected contacts list
+    this.selectedContactList = [];
+    
+    // Set isChecked to false for all contacts in processedContactData
+    this.processedContactData = this.processedContactData.map(contact => {
+        return { ...contact, isChecked: false };
+    });
+    
+    // Set isChecked to false for all contacts in unchangedProcessContact
+    this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
+        return { ...contact, isChecked: false };
+    });
+    
+    // Update the shown data (current page)
+    this.updateShownData();
+    
+    // Update total selected count
+    this.totalSelected = 0;
+    this.isContactSelected = true;
+    
+}
+
     // Handle schedule and send button on last page
     async handleSchedule() {
         if (!this.selectedDateTime) {
@@ -1726,6 +1786,7 @@ openConfigureSettings(){
                 if (result === 'Success') {
                     this.showToast('Success', 'Broadcast scheduled successfully', 'success');
                     this.handleCloseTemplate();
+                     this.clearSelectedContacts();
                 } else {
                     this.showToast('Error', `Scheduling failed: ${result}`, 'error');
                 }

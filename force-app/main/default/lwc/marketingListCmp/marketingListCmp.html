@@ -366,51 +366,9 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="custom-modal-body" id="modal-content-id-1">
-                        <!-- First Page: Template List Selection -->
+                    <div class="custom-modal-body" id="modal-content-id-1">                       
+                        <!-- First Page: Template Selection with Contact List and Preview -->
                         <template if:true={popUpFirstPage}>
-                            <div class="firstPage">
-                                <div class="template-list-container">
-                                    <div class="no-template-selected">
-                                        <div class="no-template-icon">
-                                            <svg class="w-10 h-10 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 10.5h.01m-4.01 0h.01M8 10.5h.01M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-6.6a1 1 0 0 0-.69.275l-2.866 2.723A.5.5 0 0 1 8 18.635V17a1 1 0 0 0-1-1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>
-                                            </svg>
-
-                                        </div>
-                                        <h3 class="no-template-title">No Template Selected</h3>
-                                        <p class="no-template-subtitle">Choose a WhatsApp template from the list below to preview and send to your selected contacts</p>
-                                    </div>
-                                </div>
-
-                                <div class="templates-available-section">
-                                    <p class="available-templates-label">Available Templates</p>
-                                    <div class="templates-scroll-container">
-                                        <template for:each={templateOptions} for:item="template" for:index="index">
-                                            <div key={template.value} class="template-item" onclick={handleTemplateSelection} data-template-id={template.value}>
-                                                <div class="template-item-icon">
-                                                   <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3v4a1 1 0 0 1-1 1H5m4 8h6m-6-4h6m4-8v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Z"/>
-                                                    </svg>
-
-                                                </div>
-                                                <div class="template-item-content">
-                                                    <p class="template-item-name">{template.label}</p>
-                                                </div>
-                                                <div class="template-item-arrow">
-                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M7.5 16.25L13.75 10L7.5 3.75" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Second Page: Template Selection with Contact List and Preview -->
-                        <template if:true={popUpSecondPage}>
                             <div class="secondPage">
                                 <div class="template-selector-section">
                                     <div class="template-selector-wrapper">
@@ -422,44 +380,7 @@
                                         </lightning-combobox>
                                     </div>
 
-                                    <div class="selected-contacts-section">
-                                        <p class="contacts-table-label">Selected Contacts</p>
-                                        <div class="contacts-table-wrapper">
-                                            <table class="contacts-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Name</th>
-                                                        <th>Phone</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <template for:each={selectedContactList} for:item="contact" for:index="index">
-                                                        <tr key={contact.Id}>
-                                                            <td>{contact.Name}</td>
-                                                            <td>{contact.Phone}</td>
-                                                             <td>
-                                                                <lightning-button-icon 
-                                                                    icon-name="utility:delete" 
-                                                                    alternative-text="Remove" 
-                                                                    title="Remove" 
-                                                                    variant="bare" 
-                                                                    size="small"
-                                                                    onclick={handleRemoveContact}
-                                                                    data-id={contact.Id}
-                                                                    data-index={index}>
-                                                                </lightning-button-icon>
-                                                            </td>
-                                                        </tr>
-                                                    </template>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="preview-section-right">
-                                    <p class="template-preview-label">Template Preview</p>
+                                    <div class="template-prev">
                                     <div class="preview-box-container">
                                         <template if:true={selectedTemplate}>
                                             <div class="preview-box">
@@ -476,6 +397,66 @@
                                             </div>
                                         </template>
                                     </div>
+                                    </div>
+                                </div>
+
+                                <div class="preview-section-right">
+                                    <lightning-input 
+                                        type="search"
+                                        label="Search contacts"
+                                        variant="label-hidden"
+                                        placeholder="Search by name or phone"
+                                        onchange={handleSearch}
+                                        data-id="search-input"
+                                        class="contact-search">
+                                    </lightning-input>
+
+                                    <div class="selected-contacts-section">
+                                        <!-- <p class="contacts-table-label">Selected Contacts</p> -->
+                                        <div class="contacts-table-wrapper">
+                                            <table class="contacts-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Phone</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template if:true={filteredSelectedContacts.length}>
+                                                        <template for:each={filteredSelectedContacts} for:item="contact" for:index="index">
+                                                            <tr key={contact.Id}>
+                                                                <td>{contact.Name}</td>
+                                                                <td>{contact.Phone}</td>
+                                                                <td>
+                                                                    <lightning-button-icon 
+                                                                        icon-name="utility:delete" 
+                                                                        alternative-text="Remove" 
+                                                                        title="Remove" 
+                                                                        variant="bare" 
+                                                                        size="small"
+                                                                        onclick={handleRemoveContact}
+                                                                        data-id={contact.Id}
+                                                                        data-index={index}>
+                                                                    </lightning-button-icon>
+                                                                </td>
+                                                            </tr>
+                                                        </template>
+                                                    </template>
+                                                    <template if:false={filteredSelectedContacts.length}>
+                                                        <tr>
+                                                            <td colspan="3" class="no-results-cell">
+                                                                <div class="no-results-container">
+                                                                    <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
+                                                                    <span>No matching contacts found</span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -486,24 +467,6 @@
                                     class="slds-m-left_x-small"></lightning-button>
                             </div>
                         </template>
-
-                        <!-- Third Page: Schedule DateTime -->
-                        <!-- <template if:true={popUpLastPage}>
-                            <div class="lastPage">
-                                <div
-                                    class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium">
-                                    <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime}
-                                        onchange={handleInputChange} class="slds-align_absolute-center" required
-                                        message-when-value-missing="Date and time are required"></lightning-input>
-                                </div>
-                                <div class="popUpFooter slds-text-align_center slds-p-bottom_large">
-                                    <lightning-button variant="brand-outline" onclick={handlePreviousLastPage}
-                                        label="Previous" class="slds-m-left_x-small"></lightning-button>
-                                    <lightning-button variant="brand" label="Schedule and Send" onclick={handleSchedule}
-                                        class="slds-m-left_x-small"></lightning-button>
-                                </div>
-                            </div>
-                        </template> -->
                     </div>
                 </div>
             </div>
@@ -511,9 +474,8 @@
          <!-- Backdrop for main modal -->
     <div class="slds-backdrop slds-backdrop_open main-modal-backdrop"></div>
 
-    <!-- Schedule Modal - Only shown when popUpLastPage is true -->
+    <!-- Schedule Modal -->
     <template if:true={popUpLastPage}>
-        <!-- Schedule Modal Backdrop (higher z-index) -->
         <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handleBackdropClick}></div>
         
         <!-- Schedule Modal Content -->
@@ -521,11 +483,6 @@
             class="slds-modal slds-fade-in-open schedule-modal"
             aria-describedby="modal-content-id-2">
             <div class="slds-modal__container schedule-modal-container">
-                <!-- <div class="slds-modal__close close-icon-css" onclick={handlePreviousLastPage}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
-                    </svg>
-                </div> -->
 
                 <div class="slds-modal__header schedule-modal-header">
                     <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date & Time</h2>

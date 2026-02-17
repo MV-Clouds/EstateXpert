@@ -29,6 +29,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track fields = [];
     @track processedContactData = [];
     @track unchangedProcessContact = [];
+    @track filteredSelectedContacts = [];
+    allSelectedContacts = [];
     @track sortField = '';
     @track sortOrder = 'asc';
     @track totalSelected = 0;
@@ -69,7 +71,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track listViewId = '';
 
     @track popUpFirstPage = true;
-    @track popUpSecondPage = false;
     @track popUpLastPage = false;
     @track popupHeader = 'Create Broadcast Group';
     @track templateOptions = [];
@@ -80,6 +81,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
     selectedTemplate = '';
+    allSelectedContact =[];
 
     /**
     * Method Name : totalPages
@@ -1029,6 +1031,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     updateSelectedProperties() {
         this.selectedContactList = this.processedContactData.filter(con => con.isChecked);
+        this.allSelectedContacts = [...this.selectedContactList]; 
+    this.filteredSelectedContacts = [...this.selectedContactList]; 
         this.totalSelected = this.selectedContactList.length;
         this.isContactSelected = this.selectedContactList.length <= 0;
     }
@@ -1471,6 +1475,7 @@ openConfigureSettings(){
             label: template.MVEX__Template_Name__c,
             value: template.Id
         }));
+        this.selectedTemplate = this.templateOptions[0].value;
     }
 
     handleInputChange(event) {
@@ -1498,7 +1503,6 @@ openConfigureSettings(){
     handleSendMessage() {
         this.showTemplate = true;
         this.popUpFirstPage = true; // Show template list first
-        this.popUpSecondPage = false;
         this.popUpLastPage = false;
         this.popupHeader = 'Choose Template';
         this.broadcastGroupName = '';
@@ -1508,21 +1512,10 @@ openConfigureSettings(){
         this.updateTemplateOptions();
     }
 
-    // Handle template selection from first page
-    handleTemplateSelection(event) {
-        const templateId = event.currentTarget.dataset.templateId;
-        this.selectedTemplate = templateId;
-        this.popUpFirstPage = false;
-        this.popUpSecondPage = true;
-        this.popUpLastPage = false;
-        this.popupHeader = 'Choose Template';
-    }
-
     // Handle closing the template modal
     handleCloseTemplate() {
         this.showTemplate = false;
         this.popUpFirstPage = true;
-        this.popUpSecondPage = false;
         this.popUpLastPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.broadcastGroupName = '';
@@ -1530,7 +1523,8 @@ openConfigureSettings(){
         this.selectedTemplate = '';
         this.selectedDateTime = '';
         this.broadcastGroupId = null;
-      
+        this.filteredSelectedContacts = [...this.allSelectedContacts];
+
     }
 
     // New helper to auto-create group in background
@@ -1578,7 +1572,6 @@ openConfigureSettings(){
 
         if(this.tempBroadcastGroupName == this.broadcastGroupName){
             this.popUpFirstPage = false;
-            this.popUpSecondPage = true;
             this.popupHeader = 'Choose Template';
             return;
         }
@@ -1605,7 +1598,6 @@ openConfigureSettings(){
                 this.broadcastGroupId = result; // Assuming Apex returns the created Broadcast Group ID
                 this.showToast('Success', 'Broadcast group created successfully', 'success');
                 this.popUpFirstPage = false;
-                this.popUpSecondPage = true;
                 this.popupHeader = 'Choose Template';
                 this.tempBroadcastGroupName = this.broadcastGroupName;
                 this.updateTemplateOptions();
@@ -1622,7 +1614,6 @@ openConfigureSettings(){
     // Handle previous button on second page
     handlePreviousOnPopup() {
         this.popUpFirstPage = true;
-        this.popUpSecondPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.selectedTemplate = '';
     }
@@ -1674,13 +1665,11 @@ openConfigureSettings(){
             return;
         }
 
-        this.popUpSecondPage = true;
         this.popUpLastPage = true;
     }
 
     // Handle previous button on last page
     handlePreviousLastPage() {
-        this.popUpSecondPage = true;
         this.popUpLastPage = false;
         this.popupHeader = 'Choose Template';
     }
@@ -1692,16 +1681,51 @@ openConfigureSettings(){
         }
     }
 
+    handleSearch(event) {
+        console.log('event ', event);
+        
+        const searchKey = event.detail.value?.toLowerCase() || '';
+        console.log('searchKey', searchKey);
+        
+        if (!searchKey) {
+            // If search is empty, show all selected contacts
+            this.filteredSelectedContacts = [...this.allSelectedContacts];
+        } else {
+            // Filter from the master list of all selected contacts
+            this.filteredSelectedContacts = this.allSelectedContacts.filter(contact =>
+                (contact.Name && contact.Name.toLowerCase().includes(searchKey)) ||
+                (contact.Phone && contact.Phone.toLowerCase().includes(searchKey))
+            );
+        }
+        
+        console.log('filteredSelectedContacts', this.filteredSelectedContacts);
+
+    }
+
     handleRemoveContact(event) {
         const contactId = event.currentTarget.dataset.id;
         
-        // Create a new array without the removed contact
-        const updatedList = this.selectedContactList.filter(
+        // Remove from master list
+        this.allSelectedContacts = this.allSelectedContacts.filter(
             contact => contact.Id !== contactId
         );
         
-        this.selectedContactList = [...updatedList];
-            // Update the isChecked property in processedContactData
+        // Update display list (apply current search filter if any)
+        const searchInput = this.template.querySelector('lightning-input[data-id="search-input"]');
+        const currentSearchKey = searchInput?.value?.toLowerCase() || '';
+        
+        if (currentSearchKey) {
+            this.filteredSelectedContacts = this.allSelectedContacts.filter(contact =>
+                (contact.Name && contact.Name.toLowerCase().includes(currentSearchKey)) ||
+                (contact.Phone && contact.Phone.toLowerCase().includes(currentSearchKey))
+            );
+        } else {
+            this.filteredSelectedContacts = [...this.allSelectedContacts];
+        }
+        
+        this.selectedContactList = [...this.allSelectedContacts];
+
+        // Update the isChecked property in processedContactData
         this.processedContactData = this.processedContactData.map(contact => {
             if (contact.Id === contactId) {
                 return { ...contact, isChecked: false };
@@ -1726,31 +1750,32 @@ openConfigureSettings(){
     }
 
     /**
- * Method Name : clearSelectedContacts
- * @description : Clear all selected contacts and update checkboxes
- */
-clearSelectedContacts() {
-    // Clear the selected contacts list
-    this.selectedContactList = [];
-    
-    // Set isChecked to false for all contacts in processedContactData
-    this.processedContactData = this.processedContactData.map(contact => {
-        return { ...contact, isChecked: false };
-    });
-    
-    // Set isChecked to false for all contacts in unchangedProcessContact
-    this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
-        return { ...contact, isChecked: false };
-    });
-    
-    // Update the shown data (current page)
-    this.updateShownData();
-    
-    // Update total selected count
-    this.totalSelected = 0;
-    this.isContactSelected = true;
-    
-}
+     * Method Name : clearSelectedContacts
+     * @description : Clear all selected contacts and update checkboxes
+     */
+    clearSelectedContacts() {
+        // Clear all lists
+        this.selectedContactList = [];
+        this.allSelectedContacts = [];
+        this.filteredSelectedContacts = [];
+        
+        // Set isChecked to false for all contacts in processedContactData
+        this.processedContactData = this.processedContactData.map(contact => {
+            return { ...contact, isChecked: false };
+        });
+        
+        // Set isChecked to false for all contacts in unchangedProcessContact
+        this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
+            return { ...contact, isChecked: false };
+        });
+        
+        // Update the shown data (current page)
+        this.updateShownData();
+        
+        // Update total selected count
+        this.totalSelected = 0;
+        this.isContactSelected = true;
+    }
 
     // Handle schedule and send button on last page
     async handleSchedule() {

@@ -25,7 +25,8 @@
                         <button class="btn mapping-btn" onclick={openConfigureSettings}>Configure Settings
                         </button>
                         <template if:true={isConfigOpen}>
-                            <c-record-config-body-cmp feature-name="Inquiry Manager" onclose={handleCloseModal}></c-record-config-body-cmp>
+                            <c-record-config-body-cmp feature-name="Inquiry Manager"
+                                onclose={handleCloseModal}></c-record-config-body-cmp>
                         </template>
 
                         <template if:true={hasBusinessAccountConfigured}>
@@ -76,36 +77,37 @@
                                     <template for:each={mappings} for:item="mapping">
 
 
-                                        <div  key={mapping.id} class="parent-div">
-                                            <div class={mappingClass} onclick={handleMappingClick} data-id={mapping.id} data-name="mapping-box">
+                                        <div key={mapping.id} class="parent-div">
+                                            <div class={mappingClass} onclick={handleMappingClick} data-id={mapping.id}
+                                                data-name="mapping-box">
                                                 <span class="mapping-id">{mapping.id}</span>
-    
-                                                <div class="mapping-data" >
+
+                                                <div class="mapping-data">
                                                     {mapping.label} <br>
                                                     {mapping.displayOperator} " {mapping.valueField} "
-    
+
                                                 </div>
                                             </div>
 
                                             <div class="delete-div" title="Delete" data-id={mapping.id}
-                                            onclick={handleDeleteMapping} data-name="delete">
-                                            <!-- <lightning-icon icon-name="utility:delete"  data-id={mapping.id} alternative-text="delete" size="small"></lightning-icon> -->
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg" data-id={mapping.id}>
-                                                <path d="M3 6H5H21" stroke="#A30D11" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                <path
-                                                    d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
-                                                    stroke="#A30D11" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                                <path d="M10 11V17" stroke="#A30D11" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M14 11V17" stroke="#A30D11" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                            </svg>
+                                                onclick={handleDeleteMapping} data-name="delete">
+                                                <!-- <lightning-icon icon-name="utility:delete"  data-id={mapping.id} alternative-text="delete" size="small"></lightning-icon> -->
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg" data-id={mapping.id}>
+                                                    <path d="M3 6H5H21" stroke="#A30D11" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path
+                                                        d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
+                                                        stroke="#A30D11" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M10 11V17" stroke="#A30D11" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path d="M14 11V17" stroke="#A30D11" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
 
-                                            <span class="slds-assistive-text">Delete</span>
-                                        </div>
+                                                <span class="slds-assistive-text">Delete</span>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
@@ -138,32 +140,46 @@
                                                 </div>
 
                                                 <div class="slds-form_element slds-m-top_medium">
-
-                                                    <label>Value<span class="red">*</span></label>
-                                                    <template if:true={inquiryFieldObject.isPrimary}>
-                                                        <lightning-input type={inquiryFieldObject.MVEX__Data_Type__c}
-                                                            value={selectedListingField} data-field="MVEX__Value__c"
-                                                            onchange={handleListingFieldChange}
-                                                            variant="label-hidden"></lightning-input>
-                                                    </template>
-                                                    <template if:true={inquiryFieldObject.isPicklist}>
-                                                        <lightning-combobox value={selectedListingField}
-                                                            data-field="MVEX__Value__c"
-                                                            options={inquiryFieldObject.picklistValues}
-                                                            onchange={handleListingFieldChange}
-                                                            variant="label-hidden"></lightning-combobox>
-                                                    </template>
-                                                    <template if:true={inquiryFieldObject.isReference}>
-                                                        <lightning-record-picker value={selectedListingField}
-                                                            label="Reference" data-field="MVEX__Value__c"
-                                                            object-api-name={inquiryFieldObject.objectApiName}
-                                                            onchange={handleRefChange}
-                                                            
-                                                            variant="label-hidden"></lightning-record-picker>
-                                                    </template>
-
-
+                                                    <lightning-input type="checkbox" label="Use Constant"
+                                                        checked={isConstant} onchange={handleUseConstantChange}>
+                                                    </lightning-input>
                                                 </div>
+
+                                                <template if:true={isConstant}>
+                                                    <div class="slds-form_element slds-m-top_medium">
+                                                        <label>Value<span class="red">*</span></label>
+                                                        <template if:true={inquiryFieldObject.isPrimary}>
+                                                            <lightning-input
+                                                                type={inquiryFieldObject.MVEX__Data_Type__c}
+                                                                value={selectedListingField} data-field="MVEX__Value__c"
+                                                                onchange={handleListingFieldChange}
+                                                                variant="label-hidden"></lightning-input>
+                                                        </template>
+                                                        <template if:true={inquiryFieldObject.isPicklist}>
+                                                            <lightning-combobox value={selectedListingField}
+                                                                data-field="MVEX__Value__c"
+                                                                options={inquiryFieldObject.picklistValues}
+                                                                onchange={handleListingFieldChange}
+                                                                variant="label-hidden"></lightning-combobox>
+                                                        </template>
+                                                        <template if:true={inquiryFieldObject.isReference}>
+                                                            <lightning-record-picker value={selectedListingField}
+                                                                label="Reference" data-field="MVEX__Value__c"
+                                                                object-api-name={inquiryFieldObject.objectApiName}
+                                                                onchange={handleRefChange}
+                                                                variant="label-hidden"></lightning-record-picker>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <template if:false={isConstant}>
+                                                    <div class="slds-form_element slds-m-top_medium">
+                                                        <lightning-combobox name="listingField" label="Listing Field"
+                                                            value={selectedListingField} options={listingFieldOptions}
+                                                            onchange={handleListingFieldChange} required>
+                                                        </lightning-combobox>
+                                                    </div>
+                                                </template>
                                             </div>
                                             <div class="condition-div-footer">
                                                 <button class="btn modal-btn-white"
@@ -354,7 +370,8 @@
                                 </div>
                             </template>
                         </div>
-                        <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC} width="0%" height="0%"></iframe>
+                        <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC} width="0%"
+                            height="0%"></iframe>
                     </template>
 
                     <div class="footer-btns">
@@ -376,7 +393,8 @@
 
 
     <template if:true={showTemplate}>
-        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_small">
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_small">
             <div class="slds-modal__container send-template-modal-container">
                 <div class="slds-modal__close closs_icon_css" onclick={handleCloseTemplate}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -405,19 +423,20 @@
                                             </lightning-combobox>
                                         </div>
 
-                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
+                                        <div
+                                            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
                                             <template if:true={selectedTemplate}>
                                                 <div class="preview-container">
-                                                    <p class="slds-text-title_caps slds-m-bottom_small">Template Preview</p>
-                                                    <c-template-preview 
-                                                        template-id={selectedTemplate} 
-                                                        record-id={previewRecordId}
-                                                        object-api-name={selectedObject}>
+                                                    <p class="slds-text-title_caps slds-m-bottom_small">Template Preview
+                                                    </p>
+                                                    <c-template-preview template-id={selectedTemplate}
+                                                        record-id={previewRecordId} object-api-name={selectedObject}>
                                                     </c-template-preview>
                                                 </div>
                                             </template>
                                             <template if:false={selectedTemplate}>
-                                                <div class="slds-text-body_small slds-text-color_weak no-text slds-align_absolute-center" style="height: 100%;">
+                                                <div class="slds-text-body_small slds-text-color_weak no-text slds-align_absolute-center"
+                                                    style="height: 100%;">
                                                     Please select a template to preview.
                                                 </div>
                                             </template>

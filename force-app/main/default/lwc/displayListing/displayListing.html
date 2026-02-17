@@ -53,7 +53,8 @@
                     <div class="btn-container">
                         <button class="btn mapping-btn" onclick={openConfigureSettings}>Configure Settings</button>
                         <template if:true={isConfigOpen}>
-                            <c-record-config-body-cmp feature-name="Listing_Configuration" onclose={handleCloseModal}></c-record-config-body-cmp>
+                            <c-record-config-body-cmp feature-name="Listing_Configuration"
+                                onclose={handleCloseModal}></c-record-config-body-cmp>
                         </template>
                     </div>
 
@@ -94,47 +95,49 @@
                                     <div class="slds-m-top_medium">
 
 
-                                        <template for:each={mappings} for:item="mapping" >
+                                        <template for:each={mappings} for:item="mapping">
 
 
                                             <div key={mapping.id} class="parent-div">
-                                                <div class={mappingClass} onclick={handleMappingClick} data-name="mapping-box" data-id={mapping.id} >
+                                                <div class={mappingClass} onclick={handleMappingClick}
+                                                    data-name="mapping-box" data-id={mapping.id}>
                                                     <span class="mapping-id">{mapping.id}</span>
-    
-                                                    <div class="mapping-data" data-id={mapping.id} >
+
+                                                    <div class="mapping-data" data-id={mapping.id}>
                                                         {mapping.label} <br>
                                                         {mapping.displayOperator} " {mapping.valueField} "
-    
+
                                                     </div>
                                                 </div>
-    
+
                                                 <div class="delete-div" title="Delete" data-id={mapping.id}
-                                                onclick={handleDeleteMapping} data-name="delete">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg" data-id={mapping.id}>
-                                                    <path d="M3 6H5H21" stroke="#A30D11" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round" />
-                                                    <path
-                                                        d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
-                                                        stroke="#A30D11" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round" />
-                                                    <path d="M10 11V17" stroke="#A30D11" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round" />
-                                                    <path d="M14 11V17" stroke="#A30D11" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-    
-                                                <span class="slds-assistive-text">Delete</span>
+                                                    onclick={handleDeleteMapping} data-name="delete">
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg" data-id={mapping.id}>
+                                                        <path d="M3 6H5H21" stroke="#A30D11" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                        <path
+                                                            d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
+                                                            stroke="#A30D11" stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
+                                                        <path d="M10 11V17" stroke="#A30D11" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                        <path d="M14 11V17" stroke="#A30D11" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+
+                                                    <span class="slds-assistive-text">Delete</span>
+                                                </div>
                                             </div>
-                                            </div>
-                                            
+
                                         </template>
                                     </div>
 
                                 </div>
                                 <div class="filter-footer">
                                     <div class="slds-m-top_medium add-condtion">
-                                        <button class="btn modal-btn-blue" onclick={addCondition} disabled={isRealatedList}>Add Condition</button>
+                                        <button class="btn modal-btn-blue" onclick={addCondition}
+                                            disabled={isRealatedList}>Add Condition</button>
                                         <template if:true={isAddConditionModalVisible}>
                                             <div class="condition-div">
                                                 <div class="filter-header">
@@ -142,7 +145,7 @@
                                                 </div>
                                                 <div class="condition-div-body">
                                                     <div class="slds-form_element">
-                                                        <lightning-combobox name="inquiryField" label="Inquiry Field"
+                                                        <lightning-combobox name="listingField" label="Listing Field"
                                                             value={listingFieldObject.MVEX__Field_Name__c}
                                                             options={listingpicklistOptions}
                                                             onchange={handleInquiryFieldChange} required>
@@ -158,26 +161,44 @@
                                                     </div>
 
                                                     <div class="slds-form_element slds-m-top_medium">
+                                                        <lightning-input type="checkbox" label="Use Constant Value"
+                                                            checked={isConstant}
+                                                            onchange={handleUseConstantChange}></lightning-input>
+                                                    </div>
+
+                                                    <div class="slds-form_element slds-m-top_medium">
                                                         <label>Value<span class="red">*</span></label>
-                                                        <template if:true={listingFieldObject.isPrimary}>
-                                                            <lightning-input type={listingFieldObject.MVEX__Data_Type__c}
-                                                                value={selectedInquiryValue} data-field="MVEX__Value__c"
-                                                                onchange={handleListingFieldChange}
-                                                                variant="label-hidden"></lightning-input>
+                                                        <template if:true={isConstant}>
+                                                            <template if:true={listingFieldObject.isPrimary}>
+                                                                <lightning-input
+                                                                    type={listingFieldObject.MVEX__Data_Type__c}
+                                                                    value={selectedInquiryValue}
+                                                                    data-field="MVEX__Value__c"
+                                                                    onchange={handleListingFieldChange}
+                                                                    variant="label-hidden"></lightning-input>
+                                                            </template>
+                                                            <template if:true={listingFieldObject.isPicklist}>
+                                                                <lightning-combobox value={selectedInquiryValue}
+                                                                    data-field="MVEX__Value__c"
+                                                                    options={listingFieldObject.picklistValues}
+                                                                    onchange={handleListingFieldChange}
+                                                                    variant="label-hidden"></lightning-combobox>
+                                                            </template>
+                                                            <template if:true={listingFieldObject.isReference}>
+                                                                <lightning-record-picker value={selectedInquiryValue}
+                                                                    label="Reference" data-field="MVEX__Value__c"
+                                                                    object-api-name={listingFieldObject.objectApiName}
+                                                                    onchange={handleRefChange}
+                                                                    variant="label-hidden"></lightning-record-picker>
+                                                            </template>
                                                         </template>
-                                                        <template if:true={listingFieldObject.isPicklist}>
+                                                        <template if:false={isConstant}>
                                                             <lightning-combobox value={selectedInquiryValue}
                                                                 data-field="MVEX__Value__c"
-                                                                options={listingFieldObject.picklistValues}
+                                                                options={inquiryFieldOptions}
                                                                 onchange={handleListingFieldChange}
-                                                                variant="label-hidden"></lightning-combobox>
-                                                        </template>
-                                                        <template if:true={listingFieldObject.isReference}>
-                                                            <lightning-record-picker value={selectedInquiryValue}
-                                                                label="Reference" data-field="MVEX__Value__c"
-                                                                object-api-name={listingFieldObject.objectApiName}
-                                                                onchange={handleRefChange}
-                                                                variant="label-hidden"></lightning-record-picker>
+                                                                variant="label-hidden"
+                                                                placeholder="Select Inquiry Field"></lightning-combobox>
                                                         </template>
                                                     </div>
                                                 </div>
@@ -221,7 +242,8 @@
                                     <template for:each={property.displayFields} for:item="field">
                                         <td key={field.key} class="slds-truncate">
                                             <template if:true={field.isImage}>
-                                                <img src={property.media_url} alt="Property image" class="listing-image" draggable="false"/>
+                                                <img src={property.media_url} alt="Property image" class="listing-image"
+                                                    draggable="false" />
                                             </template>
                                             <template if:true={field.isAction}>
                                                 <button class="view-more-button slds-truncate" data-id={property.id}
@@ -271,18 +293,21 @@
                                     <div class="card-body details">
                                         <h5 class="card-title"><b>{property.name}</b></h5>
                                         <div class="card-text">
-                                            <img src={location_icon} height="18px" width="18px" draggable="false"/>
-                                            <p class="slds-m-left_xx-small">{property.mvex__city__c}, {property.mvex__state__c},
+                                            <img src={location_icon} height="18px" width="18px" draggable="false" />
+                                            <p class="slds-m-left_xx-small">{property.mvex__city__c},
+                                                {property.mvex__state__c},
                                                 {property.mvex__postalcode__c}</p>
                                         </div>
                                         <div class="room_details">
                                             <lightning-layout-item class="bedroom">
-                                                <img src={bedroom_icon} height="24px" width="20px" draggable="false"/>
-                                                <h1 class="slds-m-left_xx-small">{property.mvex__bedrooms__c} Bedrooms</h1>
+                                                <img src={bedroom_icon} height="24px" width="20px" draggable="false" />
+                                                <h1 class="slds-m-left_xx-small">{property.mvex__bedrooms__c} Bedrooms
+                                                </h1>
                                             </lightning-layout-item>
                                             <lightning-layout-item class="bathroom" alignment-bump="left">
-                                                <img src={bathroom_icon} class="bathroom_icon" draggable="false"/>
-                                                <h1 class="slds-m-left_xx-small">{property.mvex__bathrooms__c} Bathrooms</h1>
+                                                <img src={bathroom_icon} class="bathroom_icon" draggable="false" />
+                                                <h1 class="slds-m-left_xx-small">{property.mvex__bathrooms__c} Bathrooms
+                                                </h1>
                                             </lightning-layout-item>
                                         </div>
                                     </div>

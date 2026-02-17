@@ -4,7 +4,9 @@
 }
 
 .main-card {
-    min-height: 100%;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
 }
 
 .filter-search-container {
@@ -192,7 +194,7 @@ button:disabled {
     color: black;
 }
 
-.delete-div{
+.delete-div {
     position: absolute;
     top: 0;
     right: 0;
@@ -202,7 +204,7 @@ button:disabled {
     height: 100%;
 }
 
-.parent-div{
+.parent-div {
     position: relative;
 }
 
@@ -564,7 +566,7 @@ span {
     gap: 1rem;
 }
 
-.modal-body{
+.modal-body {
     background-color: aliceblue;
     background-repeat: no-repeat;
     background-size: cover;
@@ -754,9 +756,9 @@ span {
     position: absolute;
     z-index: -999999;
     visibility: hidden;
-  }
+}
 
-.bcTableDiv{
+.bcTableDiv {
     border-radius: 0px;
     width: 60%;
 }
@@ -770,11 +772,11 @@ span {
     width: 2rem;
 }
 
-.bcTableDiv .checkbox-cell{
+.bcTableDiv .checkbox-cell {
     margin: 0px 14px;
 }
 
-.rightDivBc{
+.rightDivBc {
     width: 38%;
     padding: 1.5rem;
     margin: 0.5rem;
@@ -787,13 +789,13 @@ span {
     right: 0px;
 }
 
-.rightDivBc .headerDivBc{
+.rightDivBc .headerDivBc {
     font-size: 1.2rem;
     margin: 1rem;
     text-align: center;
 }
 
-.rightDivBc .rightDivBc-body{
+.rightDivBc .rightDivBc-body {
     padding: 1rem;
 }
 
@@ -803,14 +805,14 @@ span {
     gap: 30px;
 }
 
-.secondPage{
+.secondPage {
     display: flex;
     width: 100%;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.lastPage{
+.lastPage {
     display: flex;
     width: 100%;
     flex-direction: column;
@@ -848,28 +850,29 @@ span {
 }
 
 .preview-container {
-    background-color: #dcf8c6; /* WhatsApp background-like color */
+    background-color: #dcf8c6;
+    /* WhatsApp background-like color */
     border-radius: 8px;
     max-height: 400px;
     overflow-y: auto;
     padding: 10px;
 }
 
-.popUpBody{
+.popUpBody {
     flex-grow: 1;
     margin-bottom: 0.5rem;
 }
 
-.inner-body-grid{
+.inner-body-grid {
     height: 100%;
 }
 
-.no-text{
+.no-text {
     font-size: large;
     color: #0076d3;
 }
 
-.right-section-preview{
+.right-section-preview {
     height: 100%;
     display: flex;
     align-items: center;

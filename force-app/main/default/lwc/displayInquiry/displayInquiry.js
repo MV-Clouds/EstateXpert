@@ -449,8 +449,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     value = inquiry.name;
                 }
 
-                // Convert value to string for display if it exists
-                const displayValue = value !== null && value !== undefined ? String(value) : '';
+                // Convert value to string for display if it exists, else default to '-'
+                const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
+                const displayValue = hasRealValue ? String(value) : '-';
 
                 console.log(`Field: ${key}, Value: ${value}, DisplayValue: ${displayValue}`);
 
@@ -458,7 +459,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     key,
                     value: displayValue,
                     rawValue: value, // Keep original value for type checking
-                    hasValue: value !== null && value !== undefined && String(value).trim() !== '',
+                    hasValue: true, // Always true to display either the value or the hyphen
                     isNameField: key === 'name',
                     isCurrency: col.type === 'currency'
                 };
@@ -634,11 +635,20 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             // Ensure condition type is valid
                             this.selectedConditionType = config.conditionType || 'All Condition Are Met';
 
-                            // Map old 'condtiontype' for backward compatibility if needed, or just use selectedConditionType
-                            this.condtiontype = (config.conditionType === 'Custom Logic Is Met') ? 'custom' :
-                                (config.conditionType === 'Any Condition Is Met') ? 'any' :
-                                    (config.conditionType === 'All Condition Are Met') ? 'all' :
-                                        config.conditionType;
+                            // Map old 'condtiontype' for backward compatibility if needed
+                            if (config.conditionType === 'Custom Logic Is Met') {
+                                this.condtiontype = 'custom';
+                            } else if (config.conditionType === 'Any Condition Is Met') {
+                                this.condtiontype = 'any';
+                            } else if (config.conditionType === 'All Condition Are Met') {
+                                this.condtiontype = 'all';
+                            } else if (config.conditionType === 'Related List') {
+                                this.condtiontype = 'related';
+                            } else if (config.conditionType === 'None') {
+                                this.condtiontype = 'none';
+                            } else {
+                                this.condtiontype = config.conditionType;
+                            }
 
                         } catch (e) {
                             console.error('Error parsing filter config', e);
@@ -904,10 +914,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     applyFiltersData(listing) {
         try {
-            this.pagedFilteredInquiryData = this.totalinquiry.map(inquiry => ({
-                ...inquiry,
-                isSelected: false // Add isSelected field initialized to false
-            }));
+            this.pagedFilteredInquiryData = this.totalinquiry;
 
             // Mappings are already objects now, no need to parse from strings
             // But we might need to resolve dynamic values if they are field references
@@ -934,83 +941,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             });
 
 
-            console.log('applyFiltersData: mappings', JSON.stringify(this.mappings));
-            console.log('applyFiltersData: logicalExpression', this.logicalExpression);
-            console.log('applyFiltersData: condtiontype', this.condtiontype);
-
-
             if (this.condtiontype === 'custom') {
+                this.selectedConditionType = 'Custom Logic Is Met';
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
                 }
-
-                // ... (Validation logic remains mostly same, just ensure it uses mappings.length)
-                const mappinglength = this.mappings.length;
-                // ... (Regex validation and parenthesis check - keeping existing logic)
-                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
-                if (!regex.test(this.logicalExpression) && mappinglength > 1) { // specific check if multiple
-                    // logic ...
-                }
-
-
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    let filterResults = {}; // Map id to result
-
-                    this.mappings.forEach((mapping) => {
-                        let fieldValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.resolvedValue;
-
-                        // Ensure values are defined
-                        fieldValue = fieldValue !== undefined && fieldValue !== null ? fieldValue : '';
-                        filterValue = filterValue !== undefined && filterValue !== null ? filterValue : '';
-
-                        let result = false;
-                        switch (mapping.operator) {
-                            case 'lessThan':
-                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
-                                break;
-                            case 'greaterThan':
-                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
-                                break;
-                            case 'equalTo':
-                                result = String(fieldValue) === String(filterValue);
-                                break;
-                            case 'contains':
-                                result = String(fieldValue).includes(String(filterValue));
-                                break;
-                            case 'notEqualTo':
-                                result = String(fieldValue) !== String(filterValue);
-                                break;
-                            case 'notContains':
-                                result = !String(fieldValue).includes(String(filterValue));
-                                break;
-                            default:
-                                result = false;
-                        }
-                        filterResults[mapping.id] = result;
-                    });
-
-                    // Transform AND/OR to &&/|| for eval
-                    const evalExpression = this.logicalExpression
-                        .replace(/\bAND\b/gi, '&&')
-                        .replace(/\bOR\b/gi, '||');
-
-                    try {
-                        // Replace numbers with true/false from filterResults
-                        // We need to be careful not to replace digits inside other numbers if IDs get large, but mostly they are 1, 2, 3...
-                        // Better to tokenize or use a safe replacement strategy.
-                        // For now assuming IDs are distinct enough or using a replace function
-                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                        return evaluationResult;
-                    } catch (e) {
-                        console.error('Error evaluating expression', e);
-                        return false;
-                    }
-                });
-
-                this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                this.totalRecords = this.pagedFilteredInquiryData.length;
-                this.currentPage = 1;
+                this.applyModalFilters();
 
             } else if (this.condtiontype === 'any') {
                 this.selectedConditionType = 'Any Condition Is Met';
@@ -1019,6 +955,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             } else if (this.condtiontype === 'all') {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
+                this.applyModalFilters();
+            } else if (this.condtiontype === 'related') {
+                this.selectedConditionType = 'Related List';
+                this.applyModalFilters();
+            } else if (this.condtiontype === 'none') {
+                this.selectedConditionType = 'None';
                 this.applyModalFilters();
             }
         } catch (error) {
@@ -1333,12 +1275,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Date: 25/07/2024
     * Created By: Rachit Shah
     */
-    /**
-    * Method Name: applyModalFilters
-    * @description: this method is used to apply filter data and save configuration
-    * Date: 17/02/2026
-    * Created By: Refactoring Agent
-    */
     applyModalFilters() {
         try {
 
@@ -1405,10 +1341,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             case 'notEqualTo':
                                 inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
                                 return inquiryValue !== filterValue;
                             case 'notContains':
                                 inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
                                 return !inquiryValue.includes(filterValue);
                             default:
                                 return false;
@@ -1418,144 +1356,120 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             } else if (this.selectedConditionType === 'Any Condition Is Met') {
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
                     return this.mappings.some(mapping => {
-                        let fieldValue = inquiry[mapping.field.toLowerCase()];
+                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                        let filterValue = mapping.valueField;
 
                         switch (mapping.operator) {
-                            case 'equalTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue === mapping.valueField;
                             case 'greaterThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                return parseFloat(fieldValue) > parseFloat(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(inquiryValue) > parseFloat(filterValue);
                             case 'lessThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                return parseFloat(fieldValue) < parseFloat(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(inquiryValue) < parseFloat(filterValue);
+                            case 'equalTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return inquiryValue === filterValue;
                             case 'contains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue && fieldValue.includes(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return inquiryValue.includes(filterValue);
                             case 'notEqualTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue !== mapping.valueField;
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
+                                return inquiryValue !== filterValue;
                             case 'notContains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue && !fieldValue.includes(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
+                                return !inquiryValue.includes(filterValue);
                             default:
                                 return false;
                         }
                     });
                 });
-            } else if (this.selectedConditionType === 'Related List') {
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    return inquiry.mvex__listing__c === this.recordId;
-                });
-            } else if (this.selectedConditionType === 'None') {
-                this.pagedFilteredInquiryData = this.totalinquiry;
-            } else {
-                const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
+            } else if (this.selectedConditionType === 'Custom Logic Is Met') {
+                if (this.logicalExpression) {
+                    const openParenCount = (this.logicalExpression.match(/\(/g) || []).length;
+                    const closeParenCount = (this.logicalExpression.match(/\)/g) || []).length;
 
-                if (this.logicalExpression.trim() === '') {
-                    inputElement.setCustomValidity('Expression cannot be empty');
-                    inputElement.reportValidity();
-                    return;
-                }
-
-                const mappinglength = this.mappings.length;
-                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
-
-                if (!regex.test(this.logicalExpression)) {
-                    inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
-                    inputElement.reportValidity();
-                    return;
-                }
-
-                const numbers = this.logicalExpression.match(/\d+/g);
-                if (numbers) {
-                    const numberSet = new Set(numbers.map(Number));
-                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
-
-                    if (invalidIndex) {
-                        inputElement.setCustomValidity(`Condition uses invalid index. Use indices from 1 to ${mappinglength}.`);
-                        inputElement.reportValidity();
-                        return;
-                    }
-
-                    if (numberSet.size !== mappinglength) {
-                        inputElement.setCustomValidity('Condition must include all indices.');
-                        inputElement.reportValidity();
-                        return;
-                    }
-
-                    // Basic syntax check for balanced parentheses
-                    let openParens = 0;
-                    for (let char of this.logicalExpression) {
-                        if (char === '(') openParens++;
-                        if (char === ')') openParens--;
-                        if (openParens < 0) {
+                    if (openParenCount !== closeParenCount) {
+                        const inputElement = this.template.querySelector('.logical-expression-input');
+                        if (inputElement) {
                             inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
                             inputElement.reportValidity();
                             return;
                         }
+                    } else {
+                        const inputElement = this.template.querySelector('.logical-expression-input');
+                        if (inputElement) {
+                            inputElement.setCustomValidity('');
+                            inputElement.reportValidity();
+                        }
                     }
-                    if (openParens !== 0) {
-                        inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                        inputElement.reportValidity();
-                        return;
-                    }
-                } else {
-                    inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
-                    inputElement.reportValidity();
-                    return;
-                }
 
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    let filterResults = [];
+                    this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
+                        let filterResults = {};
+                        this.mappings.forEach(mapping => {
+                            let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                            let filterValue = mapping.valueField;
 
-                    this.mappings.forEach((mapping, index) => {
-                        let fieldValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
+                            let result = false;
+                            switch (mapping.operator) {
+                                case 'greaterThan':
+                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                    filterValue = filterValue !== undefined ? filterValue : 0;
+                                    result = parseFloat(inquiryValue) > parseFloat(filterValue);
+                                    break;
+                                case 'lessThan':
+                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                    filterValue = filterValue !== undefined ? filterValue : 0;
+                                    result = parseFloat(inquiryValue) < parseFloat(filterValue);
+                                    break;
+                                case 'equalTo':
+                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                    filterValue = filterValue !== undefined ? filterValue : '';
+                                    result = inquiryValue === filterValue;
+                                    break;
+                                case 'contains':
+                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                    filterValue = filterValue !== undefined ? filterValue : '';
+                                    result = inquiryValue.includes(filterValue);
+                                    break;
+                                case 'notEqualTo':
+                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                    filterValue = filterValue !== undefined ? filterValue : '';
+                                    if (!inquiryValue) { result = false; }
+                                    else { result = inquiryValue !== filterValue; }
+                                    break;
+                                case 'notContains':
+                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                    filterValue = filterValue !== undefined ? filterValue : '';
+                                    if (!inquiryValue) { result = false; }
+                                    else { result = !inquiryValue.includes(filterValue); }
+                                    break;
+                                default:
+                                    result = false;
+                            }
+                            filterResults[mapping.id] = result;
+                        });
 
-                        switch (mapping.operator) {
-                            case 'lessThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
-                                break;
-                            case 'greaterThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) > parseFloat(filterValue);
-                                break;
-                            case 'equalTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = String(fieldValue) === String(filterValue);
-                                break;
-                            case 'contains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = String(fieldValue).includes(String(filterValue));
-                                break;
-                            case 'notEqualTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = String(fieldValue) !== String(filterValue);
-                                break;
-                            case 'notContains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = !String(fieldValue).includes(String(filterValue));
-                                break;
-                            default:
-                                filterResults[index + 1] = false;
+                        const evalExpression = this.logicalExpression
+                            .replace(/\bAND\b/gi, '&&')
+                            .replace(/\bOR\b/gi, '||');
+                        try {
+                            return eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
+                        } catch (e) {
+                            console.error('Error evaluating expression', e);
+                            return false;
                         }
                     });
-
-                    const evalExpression = this.logicalExpression
-                        .replace(/\bAND\b/gi, '&&')
-                        .replace(/\bOR\b/gi, '||');
-                    const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                    return evaluationResult;
-                });
+                }
+            } else if (this.selectedConditionType === 'Related List' || this.selectedConditionType === 'None') {
+                this.pagedFilteredInquiryData = [...this.totalinquiry];
             }
 
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
@@ -1820,6 +1734,40 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             }));
         }
     }
+
+    handleMappingClick(event) {
+        const nameAttribute = event.currentTarget.dataset.name;
+
+        if (nameAttribute && nameAttribute !== 'delete') {
+            const previouslySelected = this.template.querySelector('.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected');
+            }
+
+            event.currentTarget.classList.add('selected');
+
+            const mappingId = event.currentTarget.dataset.id;
+            this.isAddConditionModalVisible = true;
+
+            const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
+            if (currentMapping) {
+                this.selectedMappingId = currentMapping.id;
+                this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
+                this.selectedConditionOperator = currentMapping.operator;
+                this.isConstant = currentMapping.type === 'constant';
+                this.selectedListingField = currentMapping.valueField;
+
+                // Trigger field change logic to populate metadata
+                this.handleInquiryFieldChange({ detail: { value: currentMapping.field } });
+
+                // Re-apply values after metadata update
+                this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
+                this.selectedConditionOperator = currentMapping.operator;
+                this.selectedListingField = currentMapping.valueField;
+            }
+        }
+    }
+
 
     /**
     * Method Name : disconnectedCallback

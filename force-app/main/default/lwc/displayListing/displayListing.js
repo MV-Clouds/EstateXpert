@@ -402,6 +402,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 this.condtiontype = 'any';
                             } else if (config.conditionType === 'All Condition Are Met') {
                                 this.condtiontype = 'all';
+                            } else if (config.conditionType === 'Related List') {
+                                this.condtiontype = 'related';
+                            } else if (config.conditionType === 'None') {
+                                this.condtiontype = 'none';
                             } else {
                                 this.condtiontype = '';
                             }
@@ -505,10 +509,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             const row = { ...listing };
             row.displayFields = cols.map(col => {
                 const fieldValue = listing[col.fieldName.toLowerCase()];
+                // Check if value exists, otherwise default to '-'
+                const hasRealValue = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
                 return {
                     key: col.fieldName,
-                    value: fieldValue,
-                    hasValue: fieldValue !== null && fieldValue !== undefined && fieldValue !== '',
+                    value: hasRealValue ? fieldValue : '-',
+                    hasValue: true, // Always true to display either the value or the hyphen
                     isNameField: col.fieldName === 'name',
                     isCurrency: col.type === 'currency',
                     isImage: col.type === 'image' || col.fieldName === 'media_url',
@@ -615,8 +621,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         try {
             this.pagedFilteredListingData = this.totalListing;
 
-            // Mappings are already objects now, no need to parse from strings
-            // But we might need to resolve dynamic values if they are field references
+            // Mappings are already objects now
             this.mappings = this.mappings.map(mapping => {
                 let resolvedValue = mapping.valueField;
                 let displayValue = mapping.displayValue || mapping.valueField;
@@ -639,110 +644,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 };
             });
 
-            console.log('applyFiltersData: mappings', JSON.stringify(this.mappings));
-            console.log('applyFiltersData: logicalExpression', this.logicalExpression);
-            console.log('applyFiltersData: condtiontype', this.condtiontype);
-
-
             if (this.condtiontype === 'custom') {
+                this.selectedConditionType = 'Custom Logic Is Met';
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
                 }
-
-                const mappinglength = this.mappings.length;
-                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
-
-                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
-                    // Check if simple numbers without operators when length > 1 (which regex handles mostly)
-                    // But keeping original validation logic flow somewhat
-                }
-
-                // ... reuse existing validation logic mostly ...
-                if (!regex.test(this.logicalExpression) && mappinglength > 1) { // Basic check
-                    // Allow single number if length is 1
-                }
-
-                // Simpler validation aligned with displayInquiry
-                if (!regex.test(this.logicalExpression) && mappinglength > 1 && !/^\d+$/.test(this.logicalExpression)) {
-                    this.showToast('Error', 'Invalid condition syntax in custom logic. Use numbers, AND, OR, spaces, and parentheses only.', 'error');
-                    // ... reset
-                    return;
-                }
-
-                // ... check indices ...
-                const numbers = this.logicalExpression.match(/\d+/g);
-                if (numbers) {
-                    const numberSet = new Set(numbers.map(Number));
-                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
-                    if (invalidIndex) {
-                        this.showToast('Error', `Condition uses invalid index. Use indices from 1 to ${mappinglength}.`, 'error');
-                        return;
-                    }
-                    if (numberSet.size !== mappinglength) {
-                        this.showToast('Error', 'Condition must include all indices.', 'error');
-                        return;
-                    }
-                }
-
-
-                this.pagedFilteredListingData = this.totalListing.filter(listing => {
-                    let filterResults = {};
-
-                    this.mappings.forEach((mapping) => {
-                        let fieldValue = listing[mapping.field.toLowerCase()];
-                        let filterValue = mapping.resolvedValue;
-
-                        // Ensure values are defined
-                        fieldValue = fieldValue !== undefined && fieldValue !== null ? fieldValue : '';
-                        filterValue = filterValue !== undefined && filterValue !== null ? filterValue : '';
-
-                        let result = false;
-                        switch (mapping.operator) {
-                            case 'lessThan':
-                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
-                                break;
-                            case 'greaterThan':
-                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) > parseFloat(filterValue);
-                                break;
-                            case 'equalTo':
-                                result = String(fieldValue) === String(filterValue);
-                                break;
-                            case 'contains':
-                                result = String(fieldValue).includes(String(filterValue));
-                                break;
-                            case 'notEqualTo':
-                                result = String(fieldValue) !== String(filterValue);
-                                break;
-                            case 'notContains':
-                                result = !String(fieldValue).includes(String(filterValue));
-                                break;
-                            default:
-                                result = false;
-                        }
-                        filterResults[mapping.id] = result;
-                    });
-
-                    // Transform AND/OR to &&/|| for eval
-                    const evalExpression = this.logicalExpression
-                        .replace(/\bAND\b/gi, '&&')
-                        .replace(/\bOR\b/gi, '||');
-
-                    try {
-                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                        return evaluationResult;
-                    } catch (e) {
-                        console.error('Error evaluating expression', e);
-                        return false;
-                    }
-                });
-
-                console.log('applyFiltersData: filtered listings count', this.pagedFilteredListingData.length);
-
-                this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
-                this.totalRecords = this.pagedFilteredListingData.length;
-                this.currentPage = 1;
-                this.updateMapMarkers();
-
+                this.applyModalFilters();
             } else if (this.condtiontype === 'any') {
                 this.selectedConditionType = 'Any Condition Is Met';
                 this.logicalExpression = '';
@@ -750,6 +657,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             } else if (this.condtiontype === 'all') {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
+                this.applyModalFilters();
+            } else if (this.condtiontype === 'related') {
+                this.selectedConditionType = 'Related List';
+                this.applyModalFilters();
+            } else if (this.condtiontype === 'none') {
+                this.selectedConditionType = 'None';
                 this.applyModalFilters();
             }
         } catch (error) {
@@ -808,36 +721,15 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
             if (currentMapping) {
                 this.selectedMappingId = currentMapping.id;
-                const selectedField = this.listingFieldOptions.find(field => field.value === currentMapping.field);
+                this.isConstant = currentMapping.type === 'constant';
 
-                if (selectedField) {
-                    const fieldType = selectedField.type;
+                // Trigger field change logic to populate metadata
+                this.handleInquiryFieldChange({ detail: { value: currentMapping.field } });
 
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
-                    const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
-                    const referenceFieldTypes = ['REFERENCE'];
-
-                    this.listingFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
-                    this.listingFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
-                    this.listingFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-                    this.listingFieldObject.MVEX__Data_Type__c = fieldType;
-
-                    if (fieldType === 'REFERENCE') {
-                        this.listingFieldObject.objectApiName = selectedField.referenceTo;
-                    } else {
-                        if (this.listingFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
-                            this.listingFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
-                                return { label: picklistValue, value: picklistValue };
-                            });
-                        } else {
-                            this.listingFieldObject.picklistValues = null;
-                        }
-                    }
-
-                    this.listingFieldObject.MVEX__Field_Name__c = currentMapping.field;
-                    this.selectedConditionOperator = currentMapping.operator;
-                    this.selectedInquiryValue = currentMapping.valueField;
-                }
+                // Re-apply values after metadata update
+                this.listingFieldObject.MVEX__Field_Name__c = currentMapping.field;
+                this.selectedConditionOperator = currentMapping.operator;
+                this.selectedInquiryValue = currentMapping.valueField;
             }
         }
     }
@@ -1135,16 +1027,15 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     errorDebugger('DisplayListing', 'saveConfiguration', error, 'warn', 'Error saving configuration');
                 });
 
-
             if (this.mappings.length === 0) {
                 this.pagedFilteredListingData = [...this.totalListing];
-                // this.listingData = this.pagedFilteredListingData;
                 this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
                 this.totalRecords = this.pagedFilteredListingData.length;
                 this.currentPage = 1;
                 this.logicalExpression = '';
                 this.hideModalBox();
                 this.isLoading = false;
+                this.updateMapMarkers();
                 return;
             }
 
@@ -1174,10 +1065,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                             case 'notEqualTo':
                                 listingValue = listingValue !== undefined ? listingValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!listingValue) return false;
                                 return listingValue !== filterValue;
                             case 'notContains':
                                 listingValue = listingValue !== undefined ? listingValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!listingValue) return false;
                                 return !listingValue.includes(filterValue);
                             default:
                                 return false;
@@ -1189,64 +1082,77 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 this.pagedFilteredListingData = this.totalListing.filter(listing => {
                     return this.mappings.some(mapping => {
                         let fieldValue = listing[mapping.field.toLowerCase()];
+                        let filterValue = mapping.valueField;
 
                         switch (mapping.operator) {
-                            case 'equalTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue === mapping.valueField;
                             case 'greaterThan':
                                 fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                return parseFloat(fieldValue) > parseFloat(mapping.valueField);
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(fieldValue) > parseFloat(filterValue);
                             case 'lessThan':
                                 fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                return parseFloat(fieldValue) < parseFloat(mapping.valueField);
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(fieldValue) < parseFloat(filterValue);
+                            case 'equalTo':
+                                fieldValue = fieldValue !== undefined ? fieldValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return fieldValue === filterValue;
                             case 'contains':
                                 fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue && fieldValue.includes(mapping.valueField);
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return fieldValue.includes(filterValue);
                             case 'notEqualTo':
                                 fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue !== mapping.valueField;
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!fieldValue) return false;
+                                return fieldValue !== filterValue;
                             case 'notContains':
                                 fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue && !fieldValue.includes(mapping.valueField);
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!fieldValue) return false;
+                                return !fieldValue.includes(filterValue);
                             default:
                                 return false;
                         }
                     });
                 });
             }
-            else if (this.selectedConditionType === 'Related List') {
-                this.pagedFilteredListingData = this.totalListing
-                    .filter(listing => {
-                        return listing.mvex__inquiries__r && listing.mvex__inquiries__r.some(inquiry => inquiry.Id === this.recordId);
-                    })
-                    .map(property => {
-                        return {
-                            ...property,
-                            media_url: property.media_url ? property.media_url : NoImageFound,
-                            mvex__listing_type__c: property.mvex__listing_type__c ? property.mvex__listing_type__c : 'Sale',
-                        };
-                    });
+            else if (this.selectedConditionType === 'Related List' || this.selectedConditionType === 'None') {
+                if (this.selectedConditionType === 'Related List') {
+                    this.pagedFilteredListingData = this.totalListing
+                        .filter(listing => {
+                            return listing.mvex__inquiries__r && listing.mvex__inquiries__r.some(inquiry => inquiry.Id === this.recordId);
+                        })
+                        .map(property => {
+                            return {
+                                ...property,
+                                media_url: property.media_url ? property.media_url : NoImageFound,
+                                mvex__listing_type__c: property.mvex__listing_type__c ? property.mvex__listing_type__c : 'Sale',
+                            };
+                        });
+                } else {
+                    this.pagedFilteredListingData = [...this.totalListing];
+                }
             }
-            else if (this.selectedConditionType === 'None') {
-                this.pagedFilteredListingData = this.totalListing;
-            }
-            else {
+            else if (this.selectedConditionType === 'Custom Logic Is Met') {
                 const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
 
                 if (this.logicalExpression.trim() === '') {
-                    inputElement.setCustomValidity('Expression cannot be empty');
-                    inputElement.reportValidity();
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Expression cannot be empty');
+                        inputElement.reportValidity();
+                    }
                     return;
                 }
 
                 const mappinglength = this.mappings.length;
-
                 const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
 
-                if (!regex.test(this.logicalExpression)) {
-                    inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
-                    inputElement.reportValidity();
+                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
+                        inputElement.reportValidity();
+                    }
                     return;
                 }
 
@@ -1256,14 +1162,18 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
 
                     if (invalidIndex) {
-                        inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
-                        inputElement.reportValidity();
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
+                            inputElement.reportValidity();
+                        }
                         return;
                     }
 
                     if (numberSet.size !== mappinglength) {
-                        inputElement.setCustomValidity('Condition must include all indices.');
-                        inputElement.reportValidity();
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition must include all indices.');
+                            inputElement.reportValidity();
+                        }
                         return;
                     }
 
@@ -1273,22 +1183,30 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                         if (char === '(') openParens++;
                         if (char === ')') openParens--;
                         if (openParens < 0) {
-                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                            inputElement.reportValidity();
+                            if (inputElement) {
+                                inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                                inputElement.reportValidity();
+                            }
                             return;
                         }
                     }
                     if (openParens !== 0) {
-                        inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                        inputElement.reportValidity();
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                            inputElement.reportValidity();
+                        }
                         return;
                     }
 
-                    inputElement.setCustomValidity('');
-                    inputElement.reportValidity();
+                    if (inputElement) {
+                        inputElement.setCustomValidity('');
+                        inputElement.reportValidity();
+                    }
                 } else {
-                    inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
-                    inputElement.reportValidity();
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
+                        inputElement.reportValidity();
+                    }
                     return;
                 }
 
@@ -1323,23 +1241,30 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                             case 'notEqualTo':
                                 fieldValue = fieldValue !== undefined ? fieldValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = fieldValue !== filterValue;
+                                if (!fieldValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = fieldValue !== filterValue;
                                 break;
                             case 'notContains':
                                 fieldValue = fieldValue !== undefined ? fieldValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = fieldValue && !fieldValue.includes(filterValue);
+                                if (!fieldValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = fieldValue && !fieldValue.includes(filterValue);
                                 break;
                             default:
-                                return false;
+                                filterResults[index + 1] = false;
                         }
                     });
 
                     const evalExpression = this.logicalExpression
                         .replace(/\bAND\b/gi, '&&')
                         .replace(/\bOR\b/gi, '||');
-                    const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                    return evaluationResult;
+                    try {
+                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
+                        return evaluationResult;
+                    } catch (e) {
+                        console.error('Error in eval', e);
+                        return false;
+                    }
                 });
             }
 
@@ -1350,6 +1275,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             this.hideModalBox();
             this.searchTerm = '';
             this.isLoading = false;
+            this.updateMapMarkers();
         } catch (error) {
             errorDebugger('DisplayListing', 'applyModalFilters', error, 'warn', 'Error in applyModalFilters');
         }

@@ -483,6 +483,13 @@
             class="slds-modal slds-fade-in-open schedule-modal"
             aria-describedby="modal-content-id-2">
             <div class="slds-modal__container schedule-modal-container">
+                <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
 
                 <div class="slds-modal__header schedule-modal-header">
                     <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date & Time</h2>
@@ -511,10 +518,9 @@
                         </lightning-input>
                         
                     </div>
-                </div>
 
-                <div class="slds-modal__footer schedule-modal-footer">
-                    <lightning-button variant="neutral" 
+                    <div class="schedule-modal-footer slds-text-align--center">
+                                <lightning-button variant="neutral" 
                         label="Cancel" 
                         onclick={handlePreviousLastPage}>
                     </lightning-button>
@@ -522,7 +528,9 @@
                         label="Confirm & Send" 
                         onclick={handleSchedule}>
                     </lightning-button>
+                            </div>
                 </div>
+
             </div>
         </section>
     </template>

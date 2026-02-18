@@ -1475,6 +1475,10 @@ c-template-preview {
     padding: 1.5rem;
     max-height: calc(100vh - 200px);
     overflow-y: auto;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .timezone-note {
@@ -1503,12 +1507,18 @@ font-size: 12px;
 
 /* Schedule modal footer */
 .schedule-modal-footer {
-    display: flex;
-    justify-content: flex-end;
+        display: flex;
+    justify-content: center;
     gap: 0.75rem;
-    padding: 1rem;
-    border-top: 1px solid #dddbda;
-    background-color: #f3f2f2;
+    padding-top: 1rem;
+    /* border-top: 1px solid #dddbda; */
+    /* background-color: #f3f2f2; */
     border-bottom-left-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
+}
+
+.schedule-close-icon{
+    left: 2rem;
+    top: 0rem;
+    background: none;
 }

@@ -8,6 +8,7 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import CONTACT_OBJECT from '@salesforce/schema/Contact';
 import JSON_FIELD from '@salesforce/schema/Contact.Meta_Raw_JSON__c';
 import FORM_NAME_FIELD from '@salesforce/schema/Contact.Meta_Form_Name__c';
+import CAMPAIGN_NAME_FIELD from '@salesforce/schema/Contact.Meta_Campaign_Name__c'; 
 
 const BASE_ROW_CLASS = 'slds-grid slds-wrap slds-gutters slds-grid_vertical-align-center sync-row';
 
@@ -50,31 +51,30 @@ export default class MetaLeadViewer extends LightningElement {
         }
     }
 
-    @wire(getRecord, { recordId: '$recordId', fields: [JSON_FIELD, FORM_NAME_FIELD] })
+    @wire(getRecord, { recordId: '$recordId', fields: [JSON_FIELD, FORM_NAME_FIELD,CAMPAIGN_NAME_FIELD] })
     wiredContact({ error, data }) {
         if (data) {
             const jsonString = getFieldValue(data, JSON_FIELD);
             const formName = getFieldValue(data, FORM_NAME_FIELD);
+            const campaignName = getFieldValue(data, CAMPAIGN_NAME_FIELD);
             
             this.parsedData = []; 
             
             if (jsonString) {
-                this.processJSON(jsonString, formName);
+                this.processJSON(jsonString, formName,campaignName);
             }
         } else if (error) {
             this.showToast('Error loading record data', error.body?.message || 'Unknown error', 'error');
         }
     }
 
-    processJSON(jsonString, formName) {
+    processJSON(jsonString, formName, campaignName) {
         try {
             const rawData = JSON.parse(jsonString);
             let tableRows = [];
 
-            if (formName) {
-                tableRows.push({ key: 'Form Name', value: formName });
-            }
-
+            if (formName) {tableRows.push({ key: 'Form Name', value: formName});}
+            if (campaignName) {tableRows.push({ key: 'Campaign Name', value: campaignName});}
             if (rawData.platform) tableRows.push({ key: 'Platform', value: rawData.platform.toUpperCase() });
             if (rawData.id) tableRows.push({ key: 'Lead ID', value: rawData.id });
             if (rawData.created_time) tableRows.push({ key: 'Created Time', value: rawData.created_time });
@@ -101,31 +101,121 @@ export default class MetaLeadViewer extends LightningElement {
         this.mappingRows = this.parsedData.map(row => ({
             ...row,
             selectedField: null,
+            displayValue: '',
             hasMapping: false,
-            cssClass: BASE_ROW_CLASS 
+            cssClass: BASE_ROW_CLASS,
+            isDropdownOpen: false,
+            searchTerm: '',
+            filteredOptions: this.contactFieldOptions
         }));
         this.isModalOpen = true;
+        // Add click listener to close dropdowns when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', this.handleDocumentClick.bind(this));
+        }, 0);
     }
 
     closeModal() {
         this.isModalOpen = false;
         this.mappingRows = [];
+        // Remove document click listener
+        document.removeEventListener('click', this.handleDocumentClick.bind(this));
     }
 
-    handleMappingChange(event) {
-        const index = event.target.dataset.index;
-        
-        // When the custom combobox is cleared, event.detail becomes an empty array []
-        // This line gracefully handles both selection and clearing.
-        const selectedApiName = (event.detail && event.detail.length > 0) ? event.detail[0] : null;
-        
-        this.updateMappingRowState(index, selectedApiName);
+    handleComboboxClick(event) {
+        event.stopPropagation();
+        const index = parseInt(event.currentTarget.dataset.index);
+        // Always open the dropdown when clicking the input wrapper
+        this.openDropdown(index);
     }
 
-    updateMappingRowState(index, fieldValue) {
+    handleDropdownClick(event) {
+        // Prevent clicks inside the dropdown from closing it
+        event.stopPropagation();
+    }
+
+    openDropdown(index) {
+        this.mappingRows = this.mappingRows.map((row, i) => ({
+            ...row,
+            isDropdownOpen: i === index ? true : false
+        }));
+        
+        // Focus the search input after the dropdown is rendered
+        setTimeout(() => {
+            const searchInput = this.template.querySelector(`input.combobox-search-input[data-index="${index}"]`);
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }, 0);
+    }
+
+    closeAllDropdowns() {
+        this.mappingRows = this.mappingRows.map(row => ({
+            ...row,
+            isDropdownOpen: false
+        }));
+    }
+
+    handleSearchInput(event) {
+        event.stopPropagation();
+        const index = parseInt(event.target.dataset.index);
+        const searchTerm = event.target.value.toLowerCase();
+        
+        let row = { ...this.mappingRows[index] };
+        row.searchTerm = searchTerm;
+        
+        // Filter options based on search term
+        if (searchTerm) {
+            row.filteredOptions = this.contactFieldOptions.filter(option => 
+                option.label.toLowerCase().includes(searchTerm)
+            );
+        } else {
+            row.filteredOptions = this.contactFieldOptions;
+        }
+        
+        this.mappingRows[index] = row;
+        this.mappingRows = [...this.mappingRows];
+    }
+
+    handleOptionSelect(event) {
+        event.stopPropagation();
+        const index = parseInt(event.currentTarget.dataset.index);
+        const value = event.currentTarget.dataset.value;
+        const label = event.currentTarget.dataset.label;
+        
+        this.updateMappingRowState(index, value, label);
+        this.closeAllDropdowns();
+    }
+
+    handleClearSelection(event) {
+        event.stopPropagation();
+        const index = parseInt(event.currentTarget.dataset.index);
+        this.updateMappingRowState(index, null, '');
+    }
+
+    handleDocumentClick(event) {
+        // Close all dropdowns when clicking outside
+        const comboboxContainers = this.template.querySelectorAll('.custom-combobox-container');
+        let clickedInside = false;
+        
+        comboboxContainers.forEach(container => {
+            if (container.contains(event.target)) {
+                clickedInside = true;
+            }
+        });
+        
+        if (!clickedInside) {
+            this.closeAllDropdowns();
+        }
+    }
+
+    updateMappingRowState(index, fieldValue, displayLabel = '') {
         let row = { ...this.mappingRows[index] };
         row.selectedField = fieldValue;
+        row.displayValue = displayLabel;
         row.hasMapping = !!fieldValue;
+        row.searchTerm = '';
+        row.filteredOptions = this.contactFieldOptions;
         
         // Applies the yellow highlight when an option is mapped
         row.cssClass = row.hasMapping ? `${BASE_ROW_CLASS} highlight-yellow` : BASE_ROW_CLASS;

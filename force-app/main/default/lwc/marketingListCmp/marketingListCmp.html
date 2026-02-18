@@ -280,11 +280,11 @@
                                         </div>
                                     </div>
                                 </template>
-                                <templete if:true={showTile}>
+                                <template if:true={showTile}>
                                     <c-marketing-list-tile-view onvalueselected={handleContactSelect}
                                         contactsdata={processedContactData} pagesize={pageSize}>
                                     </c-marketing-list-tile-view>
-                                </templete>
+                                </template>
                             </div>
                         </template>
                     </div>
@@ -366,69 +366,173 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="custom-modal-body" id="modal-content-id-1">
-                        <template if:true={popUpSecondPage}>
+                    <div class="custom-modal-body" id="modal-content-id-1">                       
+                        <!-- First Page: Template Selection with Contact List and Preview -->
+                        <template if:true={popUpFirstPage}>
                             <div class="secondPage">
-                                <div class="popUpBody">
-                                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small inner-body-grid">
-                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                                            <lightning-combobox name="template" label="Select Template"
-                                                options={templateOptions} onchange={handleInputChange}
-                                                value={selectedTemplate} required
-                                                message-when-value-missing="Template is required"
-                                                class="slds-m-bottom_medium">
-                                            </lightning-combobox>
-                                        </div>
+                                <div class="template-selector-section">
+                                    <div class="template-selector-wrapper">
+                                        <lightning-combobox name="template" label="Select Template"
+                                            options={templateOptions} onchange={handleInputChange}
+                                            value={selectedTemplate} required
+                                            message-when-value-missing="Template is required"
+                                            class="template-combobox">
+                                        </lightning-combobox>
+                                    </div>
 
-                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
-                                            <template if:true={selectedTemplate}>
-                                                <div class="preview-container">
-                                                    <p class="slds-text-title_caps slds-m-bottom_small">Template Preview</p>
-                                                    <template if:true={selectedTemplate}>
-                                                        <c-template-preview 
-                                                            template-id={selectedTemplate} 
-                                                            record-id={previewRecordId}
-                                                            object-api-name={selectedObject}>
-                                                        </c-template-preview>
+                                    <div class="template-prev">
+                                    <div class="preview-box-container">
+                                        <template if:true={selectedTemplate}>
+                                            <div class="preview-box">
+                                                <c-template-preview 
+                                                    template-id={selectedTemplate} 
+                                                    record-id={previewRecordId}
+                                                    object-api-name={selectedObject}>
+                                                </c-template-preview>
+                                            </div>
+                                        </template>
+                                        <template if:false={selectedTemplate}>
+                                            <div class="preview-placeholder">
+                                                Please select a template to preview.
+                                            </div>
+                                        </template>
+                                    </div>
+                                    </div>
+                                </div>
+
+                                <div class="preview-section-right">
+                                    <lightning-input 
+                                        type="search"
+                                        label="Search contacts"
+                                        variant="label-hidden"
+                                        placeholder="Search by name or phone"
+                                        onchange={handleSearch}
+                                        data-id="search-input"
+                                        class="contact-search">
+                                    </lightning-input>
+
+                                    <div class="selected-contacts-section">
+                                        <!-- <p class="contacts-table-label">Selected Contacts</p> -->
+                                        <div class="contacts-table-wrapper">
+                                            <table class="contacts-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Phone</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template if:true={filteredSelectedContacts.length}>
+                                                        <template for:each={filteredSelectedContacts} for:item="contact" for:index="index">
+                                                            <tr key={contact.Id}>
+                                                                <td>{contact.Name}</td>
+                                                                <td>{contact.Phone}</td>
+                                                                <td>
+                                                                    <lightning-button-icon 
+                                                                        icon-name="utility:delete" 
+                                                                        alternative-text="Remove" 
+                                                                        title="Remove" 
+                                                                        variant="bare" 
+                                                                        size="small"
+                                                                        onclick={handleRemoveContact}
+                                                                        data-id={contact.Id}
+                                                                        data-index={index}>
+                                                                    </lightning-button-icon>
+                                                                </td>
+                                                            </tr>
+                                                        </template>
                                                     </template>
-                                                </div>
-                                            </template>
-                                            <template if:false={selectedTemplate}>
-                                                <div class="slds-text-body_small slds-text-color_weak no-text">
-                                                    Please select a template to preview.
-                                                </div>
-                                            </template>
+                                                    <template if:false={filteredSelectedContacts.length}>
+                                                        <tr>
+                                                            <td colspan="3" class="no-results-cell">
+                                                                <div class="no-results-container">
+                                                                    <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
+                                                                    <span>No matching contacts found</span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="popUpFooter slds-text-align--center">
-                                    <lightning-button variant="brand" label="Send" onclick={handleSendOnPopup}
-                                        class="slds-m-left_x-small"></lightning-button>
-                                    <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
-                                        class="slds-m-left_x-small"></lightning-button>
-                                </div>
                             </div>
-                        </template>
-                        <template if:true={popUpLastPage}>
-                            <div class="lastPage">
-                                <div
-                                    class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium">
-                                    <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime}
-                                        onchange={handleInputChange} class="slds-align_absolute-center" required
-                                        message-when-value-missing="Date and time are required"></lightning-input>
-                                </div>
-                                <div class="popUpFooter slds-text-align_center slds-p-bottom_large">
-                                    <lightning-button variant="brand-outline" onclick={handlePreviousLastPage}
-                                        label="Previous" class="slds-m-left_x-small"></lightning-button>
-                                    <lightning-button variant="brand" label="Schedule and Send" onclick={handleSchedule}
-                                        class="slds-m-left_x-small"></lightning-button>
-                                </div>
+
+                            <div class="popUpFooter slds-text-align--center">
+                                <lightning-button variant="brand" label="Send" onclick={handleSendOnPopup}
+                                    class="slds-m-left_x-small"></lightning-button>
+                                <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
+                                    class="slds-m-left_x-small"></lightning-button>
                             </div>
                         </template>
                     </div>
                 </div>
             </div>
         </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
+         <!-- Backdrop for main modal -->
+    <div class="slds-backdrop slds-backdrop_open main-modal-backdrop"></div>
+
+    <!-- Schedule Modal -->
+    <template if:true={popUpLastPage}>
+        <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handleBackdropClick}></div>
+        
+        <!-- Schedule Modal Content -->
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="datetime-modal-heading"
+            class="slds-modal slds-fade-in-open schedule-modal"
+            aria-describedby="modal-content-id-2">
+            <div class="slds-modal__container schedule-modal-container">
+                <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header schedule-modal-header">
+                    <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date & Time</h2>
+                </div>
+
+                <div class="slds-modal__content schedule-modal-content" id="modal-content-id-2">
+                    <div class="datetime-selection-wrapper">
+                        
+                        <div class="timezone-note">
+                            <svg class="w-6 h-6 text-gray-800 dark:text-white cal-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+                                </svg>
+                                <div class="schedule-message">
+                                    <p class="main-line">Schedule your message</p>
+                                    <p class="next-line">Choose when to send the template.</p>
+                                </div>
+                        </div>
+                        <lightning-input type="datetime-local" 
+                            name="scheduleDateTime" 
+                            label="Select Date and Time"
+                            value={selectedDateTime}
+                            onchange={handleDateTimeChange}
+                            required
+                            message-when-value-missing="Please select a date and time"
+                            variant="label-stacked">
+                        </lightning-input>
+                        
+                    </div>
+
+                    <div class="schedule-modal-footer slds-text-align--center">
+                                <lightning-button variant="neutral" 
+                        label="Cancel" 
+                        onclick={handlePreviousLastPage}>
+                    </lightning-button>
+                    <lightning-button variant="brand" 
+                        label="Confirm & Send" 
+                        onclick={handleSchedule}>
+                    </lightning-button>
+                            </div>
+                </div>
+
+            </div>
+        </section>
+    </template>
     </template>
 </template>

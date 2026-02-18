@@ -830,7 +830,7 @@ get tableColumns() {
 
             event.currentTarget.classList.add('selected');
 
-            const mappingId = event.target.dataset.id;
+            const mappingId = event.currentTarget.dataset.id;
             this.isAddConditionModalVisible = true;
 
             const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
@@ -840,30 +840,33 @@ get tableColumns() {
                 const selectedField = this.listingFieldOptions.find(field => field.value === currentMapping.field);
 
                 if (selectedField) {
-                    const fieldType = selectedField.type;
+                    const fieldType = (selectedField.type || '').toUpperCase();
 
                     const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
                     const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                     const referenceFieldTypes = ['REFERENCE'];
 
-                    this.listingFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
-                    this.listingFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
-                    this.listingFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-                    this.listingFieldObject.MVEX__Data_Type__c = fieldType;
+                    // Update the object using a spread to ensure LWC detects the state change
+                    this.listingFieldObject = {
+                        ...this.listingFieldObject,
+                        MVEX__Field_Name__c: currentMapping.field,
+                        MVEX__Data_Type__c: fieldType,
+                        isPrimary: primaryFieldTypes.includes(fieldType),
+                        isPicklist: picklistFieldTypes.includes(fieldType),
+                        isReference: referenceFieldTypes.includes(fieldType)
+                    };
 
                     if (fieldType === 'REFERENCE') {
                         this.listingFieldObject.objectApiName = selectedField.referenceTo;
+                    } else if (this.listingFieldObject.isPicklist && selectedField.picklistValues) {
+                        this.listingFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
+                            return { label: picklistValue, value: picklistValue };
+                        });
                     } else {
-                        if (this.listingFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
-                            this.listingFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
-                                return { label: picklistValue, value: picklistValue };
-                            });
-                        } else {
-                            this.listingFieldObject.picklistValues = null;
-                        }
+                        this.listingFieldObject.picklistValues = null;
                     }
 
-                    this.listingFieldObject.MVEX__Field_Name__c = currentMapping.field;
+                    // Sync the operator and value to the inputs
                     this.selectedConditionOperator = currentMapping.operator;
                     this.selectedInquiryValue = currentMapping.valueField;
                 }

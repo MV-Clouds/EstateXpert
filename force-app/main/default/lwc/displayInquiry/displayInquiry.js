@@ -1160,40 +1160,42 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             event.currentTarget.classList.add('selected');
 
-            const mappingId = event.target.dataset.id;
+            const mappingId = event.currentTarget.dataset.id;
             this.isAddConditionModalVisible = true;
 
             const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
 
             if (currentMapping) {
                 this.selectedMappingId = currentMapping.id;
+                
                 const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
 
                 if (selectedField) {
-                    const fieldType = selectedField.type;
+                    const fieldType = (selectedField.type || '').toUpperCase();
 
                     const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
                     const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                     const referenceFieldTypes = ['REFERENCE'];
 
-                    this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
+                    // Update UI state based on field type
+                    this.inquiryFieldObject = {
+                        ...this.inquiryFieldObject,
+                        MVEX__Field_Name__c: currentMapping.field,
+                        MVEX__Data_Type__c: fieldType,
+                        isPrimary: primaryFieldTypes.includes(fieldType),
+                        isPicklist: picklistFieldTypes.includes(fieldType),
+                        isReference: referenceFieldTypes.includes(fieldType)
+                    };
 
                     if (fieldType === 'REFERENCE') {
                         this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
-                    } else {
-                        if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
-                            this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
-                                return { label: picklistValue, value: picklistValue };
-                            });
-                        } else {
-                            this.inquiryFieldObject.picklistValues = null;
-                        }
+                    } else if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues) {
+                        this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(val => ({
+                            label: val,
+                            value: val
+                        }));
                     }
 
-                    this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
                     this.selectedConditionOperator = currentMapping.operator;
                     this.selectedListingField = currentMapping.valueField;
                 }

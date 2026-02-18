@@ -269,10 +269,10 @@ button:disabled {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.2s ease;
 }
-
+/* 
 .mapping-btn:hover {
     background-color: #005fb2;
-}
+} */
 
 .custom__footer {
     display: flex;
@@ -294,10 +294,10 @@ button:disabled {
     color: #0176D3;
 }
 
-.btn:not(:disabled):hover {
+/* .btn:not(:disabled):hover {
     background-color: #0066b9;
     color: white;
-}
+} */
 
 
 .pagination-button {

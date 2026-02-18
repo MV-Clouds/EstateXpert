@@ -13,6 +13,7 @@ import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
 import { errorDebugger } from 'c/globalProperties';
 import emptyState from '@salesforce/resourceUrl/emptyState';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -72,6 +73,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track visiblePages = 5;
     @track divElement;
     @track NoDataImageUrl = emptyState;
+    @track hideFilterButton = false;
 
     @track listingColumns = [];
     @track isConfigOpen = false;
@@ -343,6 +345,23 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 errorDebugger('DisplayListing', 'loadStyle:connectedCallback', error, 'warn', 'Error while loading css and fetching data');
             });
         window?.globalThis?.addEventListener('click', this.handleClickOutside);
+        this.checkHideFilterButton();
+    }
+
+    checkHideFilterButton() {
+        getMetadataRecords()
+            .then(result => {
+
+                console.log('Metadata records fetched for DisplayListing:', JSON.stringify(result));
+                
+                const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
+                if (feature && feature.MVEX__isAvailable__c) {
+                    this.hideFilterButton = true;
+                }
+            })
+            .catch(error => {
+                errorDebugger('DisplayListing', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
+            });
     }
 
     /**
@@ -1099,7 +1118,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
             // Save Configuration Logic
             const config = {
-                conditionType: this.selectedConditionType,
+                conditionType: 'Related List',
                 logic: this.logicalExpression,
                 mappings: this.mappings
             };

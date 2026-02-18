@@ -958,9 +958,9 @@ input[type=checkbox]::before {
 
 .modal-body .custom-modal-body {
     display: flex;
-    min-height: 550px;
+    min-height: 580px;
     width: 100%;
-    overflow: auto;
+    overflow: hidden;
     scrollbar-width: none;
     position: relative;
 }
@@ -977,7 +977,7 @@ input[type=checkbox]::before {
 }
 
 .send-template-modal-container .modal-body {
-    overflow: hidden;
+    overflow: auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -1388,10 +1388,11 @@ c-template-preview {
     display: flex;
     justify-content: center;
     gap: 0.75rem;
-    padding: 1.5rem;
+    padding: 2rem;
     /* border-top: 1px solid #e5e7eb;
     background: #fff; */
     flex-shrink: 0;
+    padding-top: 0;
 }
 
 .send-template-modal-container .popUpFooter {

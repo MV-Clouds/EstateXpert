@@ -21,6 +21,7 @@ import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasB
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
     @api recordId;
+    @track data;
     @track addModal = false;
     @track spinnerShow = true;
     @track showList = true;
@@ -1641,10 +1642,11 @@ openConfigureSettings(){
             timeOfMessage: ''
         })
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseTemplate();
                     this.clearSelectedContacts();
+                    this.navigateToBroadcastComponent(result);
                 } else {
                     this.showToast('Error', `Broadcast failed: ${result}`, 'error');
                 }
@@ -1657,6 +1659,26 @@ openConfigureSettings(){
                 this.spinnerShow = false;
             });
     }
+
+    navigateToBroadcastComponent(broadcastId) {
+            let componentDef = {
+                componentDef: "MVEX:broadcastReportComp",
+                attributes: {
+                    recordId: broadcastId
+                }
+            };
+
+            let encodedComponentDef = btoa(JSON.stringify(componentDef));
+    
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedComponentDef
+                }
+            });
+}
+
+
 
     // Handle schedule button on second page
     handleSchedulePopup() {

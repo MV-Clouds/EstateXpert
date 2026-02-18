@@ -175,6 +175,93 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
+    public static Map<String, Object> getBroadcastRecord(Id broadcastId) {
+        Map<String, Object> result = new Map<String, Object>();
+        try {
+            // Query single broadcast
+            Broadcast__c broadcast = [
+                SELECT Id, Name, Status__c, CreatedDate, Recipient_Count__c,
+                    Total_Sent__c, Total_Delivered__c, Total_Read__c,
+                    MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
+                FROM Broadcast__c 
+                WHERE Id = :broadcastId
+                LIMIT 1
+            ];
+
+            Set<String> allPhones = new Set<String>();
+            List<String> broadcastPhones = new List<String>();
+
+            // Collect phones for this broadcast
+            List<Chat__c> chats = [
+                SELECT Phone__c FROM Chat__c 
+                WHERE WB_Broadcast__c = :broadcast.Id 
+                AND Type_of_Message__c = 'Outbound Messages'
+                LIMIT 50000
+            ];
+            
+            for (Chat__c c : chats) {
+                broadcastPhones.add(c.Phone__c);
+                allPhones.add(c.Phone__c);
+            }
+
+            // Latest status per phone
+            Map<String, String> phoneStatus = new Map<String, String>();
+            for (Chat__c c : [
+                SELECT Phone__c, Message_Status__c 
+                FROM Chat__c 
+                WHERE Phone__c IN :allPhones 
+                AND Type_of_Message__c = 'Outbound Messages'
+                ORDER BY LastModifiedDate DESC
+            ]) {
+                if (!phoneStatus.containsKey(c.Phone__c)) {
+                    phoneStatus.put(c.Phone__c, c.Message_Status__c);
+                }
+            }
+
+            // Replies
+            Map<String, Integer> phoneReplies = new Map<String, Integer>();
+            for (AggregateResult ar : [
+                SELECT Phone__c, COUNT(Id) cnt
+                FROM Chat__c 
+                WHERE Phone__c IN :allPhones
+                AND Type_of_Message__c = 'Inbound Messages'
+                GROUP BY Phone__c
+            ]) {
+                phoneReplies.put((String)ar.get('Phone__c'), (Integer)ar.get('cnt'));
+            }
+
+            Integer sent = 0, delivered = 0, read = 0, replied = 0, failed = 0;
+            for (String phone : broadcastPhones) {
+                String st = phoneStatus.get(phone);
+                if (st == 'Sent') sent++;
+                else if (st == 'Delivered') delivered++;
+                else if (st == 'Seen') read++;
+                else if (st == 'failed') failed++;
+                
+                if (phoneReplies.containsKey(phone)) {
+                    replied += phoneReplies.get(phone);
+                }
+            }
+
+            result.put('Id', broadcast.Id);
+            result.put('Name', broadcast.Name);
+            result.put('MVEX__Status__c', broadcast.Status__c);
+            result.put('MVEX__Recipient_Count__c', broadcast.Recipient_Count__c);
+            result.put('MVEX__Total_Sent__c', sent + delivered + read);
+            result.put('MVEX__Total_Delivered__c', delivered + read);
+            result.put('MVEX__Total_Failed__c', failed);
+            result.put('MVEX__Total_Read__c', read);
+            result.put('MVEX__Total_Replies__c', replied);
+            result.put('MVEX__Template_Name__c', broadcast.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c);
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastRecsWithReplies', e.getMessage());
+            throw new AuraHandledException('Error fetching broadcast data: ' + e.getMessage());
+        }
+        return result;
+    }
+
+    @AuraEnabled
     public static Map<String, List<WhatsappTemplate__c>> getTemplatesByObject() {
         Map<String, List<WhatsappTemplate__c>> objectTemplateMap = new Map<String, List<WhatsappTemplate__c>>();
         try {
@@ -419,7 +506,8 @@ public with sharing class BroadcastMessageController {
                 String jobName = 'BroadcastSchedule_' + System.currentTimeMillis();
                 System.schedule(jobName, cronExpression, batchSchedular);
             }
-            return 'Success';
+            // return 'Success';
+            return broadcast.Id;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'createChatRecods', e.getMessage());
             return 'Error: ' + e.getMessage();

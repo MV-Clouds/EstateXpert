@@ -1,14 +1,15 @@
 import { LightningElement, api, track } from 'lwc';
 import getBroadcastGroupsWithStats from '@salesforce/apex/BroadcastMessageController.getBroadcastGroupsWithStats';
 import getBroadcastMembersByGroupId from '@salesforce/apex/BroadcastMessageController.getBroadcastMembersByGroupId';
+import getBroadcastRecord from '@salesforce/apex/BroadcastMessageController.getBroadcastRecord';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class BroadcastReportComp extends NavigationMixin(LightningElement) {
     @api recordId;
-    @api record;
-    @api templateName;
+    // @api record;
+    @track record;
     @track paginatedData = [];
     @track filteredData = [];
     @track currentPage = 1;
@@ -27,7 +28,10 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
 
     connectedCallback() {
         loadStyle(this, MulishFontCss);
+        console.log('broadcastReportComp recordId', this.recordId);
+        console.log('broadcastReportComp record', this.record);
         this.loadBroadcastGroups();
+        this.loadBroadcastGroupsWithBroadcastId();
     }
 
     get showNoRecordsMessage() {
@@ -44,6 +48,10 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
 
     get recipientCount() {
         return this.record?.MVEX__Recipient_Count__c || '0';
+    }
+
+    get templateName(){
+        return this.record?.MVEX__Template_Name__c || '-';
     }
 
     get groupName() {
@@ -207,9 +215,13 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
 
     loadBroadcastGroups() {
         this.isLoading = true;
+        console.log('broadcastReportComp recordId 2', this.recordId);
+        
         getBroadcastGroupsWithStats({broadcastId: this.recordId})
             .then(result => {
                 this.data = result;
+                console.log('result', result);
+                
                 this.filteredData = [...this.data];
                 this.updateShownData();
             })
@@ -220,6 +232,22 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
                 this.isLoading = false;
             });
     }   
+
+     loadBroadcastGroupsWithBroadcastId() {
+        getBroadcastRecord({broadcastId: this.recordId})
+            .then(result => {
+                console.log('result--> ',result);
+                this.record = result;
+                console.log('this.data in report--> ',this.record);               
+
+            })
+            .catch(() => {
+                this.showToast('Error', 'Failed to load broadcast groups', 'error');
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
+    }
 
     updateShownData() {
         try {

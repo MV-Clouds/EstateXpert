@@ -3,7 +3,6 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import getContactsForInquiries from '@salesforce/apex/PropertySearchController.getContactsForInquiries';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getMetadata from '@salesforce/apex/DynamicMappingCmp.getMetadata';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import sendEmail from '@salesforce/apex/PropertySearchController.sendEmail';
@@ -20,6 +19,8 @@ import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmp
 import { errorDebugger } from 'c/globalProperties';
 import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
+import emptyState from '@salesforce/resourceUrl/emptyState';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -137,6 +138,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track hasBusinessAccountConfigured = false;
     @track listingFieldOptions = [];
     @track isConstant = false;
+    @track NoDataImageUrl = emptyState;
+    @track hideFilterButton = false;
 
     /**
     * Method Name : isCustomLogicSelected
@@ -429,6 +432,23 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.loadListViewId();
         this.loadAllTemplates();
         this.getListingFields();
+        this.checkHideFilterButton();
+    }
+
+    checkHideFilterButton() {
+        getMetadataRecords()
+            .then(result => {
+                console.log('Metadata records fetched successfully:', JSON.stringify(result));
+                const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
+                if (feature && feature.MVEX__isAvailable__c) {
+                    this.hideFilterButton = true;
+                    console.log('Map_Listing_And_Inquiry feature is enabled. Hiding filter button.');
+                    
+                }
+            })
+            .catch(error => {
+                errorDebugger('displayInquiry', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
+            });
     }
 
     processInquiryData(inquiries) {
@@ -1067,57 +1087,57 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * * Date: 16/10/2024
     * Created By:Rachit Shah
     */
-    handleMappingClick(event) {
-        const nameAttribute = event.currentTarget.dataset.name;
+    // handleMappingClick(event) {
+    //     const nameAttribute = event.currentTarget.dataset.name;
 
-        if (nameAttribute && nameAttribute !== 'delete') {
-            const previouslySelected = this.template.querySelector('.selected');
-            if (previouslySelected) {
-                previouslySelected.classList.remove('selected');
-            }
+    //     if (nameAttribute && nameAttribute !== 'delete') {
+    //         const previouslySelected = this.template.querySelector('.selected');
+    //         if (previouslySelected) {
+    //             previouslySelected.classList.remove('selected');
+    //         }
 
-            event.currentTarget.classList.add('selected');
+    //         event.currentTarget.classList.add('selected');
 
-            const mappingId = event.currentTarget.dataset.id;
-            this.isAddConditionModalVisible = true;
+    //         const mappingId = event.currentTarget.dataset.id;
+    //         this.isAddConditionModalVisible = true;
 
-            const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
+    //         const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
 
-            if (currentMapping) {
-                this.selectedMappingId = currentMapping.id;
-                const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
+    //         if (currentMapping) {
+    //             this.selectedMappingId = currentMapping.id;
+    //             const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
 
-                if (selectedField) {
-                    const fieldType = selectedField.type;
+    //             if (selectedField) {
+    //                 const fieldType = selectedField.type;
 
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
-                    const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
-                    const referenceFieldTypes = ['REFERENCE'];
+    //                 const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
+    //                 const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
+    //                 const referenceFieldTypes = ['REFERENCE'];
 
-                    this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
+    //                 this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
 
-                    if (fieldType === 'REFERENCE') {
-                        this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
-                    } else {
-                        if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
-                            this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
-                                return { label: picklistValue, value: picklistValue };
-                            });
-                        } else {
-                            this.inquiryFieldObject.picklistValues = null;
-                        }
-                    }
+    //                 if (fieldType === 'REFERENCE') {
+    //                     this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
+    //                 } else {
+    //                     if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
+    //                         this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
+    //                             return { label: picklistValue, value: picklistValue };
+    //                         });
+    //                     } else {
+    //                         this.inquiryFieldObject.picklistValues = null;
+    //                     }
+    //                 }
 
-                    this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
-                    this.selectedConditionOperator = currentMapping.operator;
-                    this.selectedListingField = currentMapping.valueField;
-                }
-            }
-        }
-    }
+    //                 this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
+    //                 this.selectedConditionOperator = currentMapping.operator;
+    //                 this.selectedListingField = currentMapping.valueField;
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
     * Method Name: handleSearch
@@ -1280,7 +1300,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             // Save Configuration Logic
             const config = {
-                conditionType: this.selectedConditionType,
+                conditionType: 'Related List',
                 logic: this.logicalExpression,
                 mappings: this.mappings
             };
@@ -1392,84 +1412,142 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     });
                 });
             } else if (this.selectedConditionType === 'Custom Logic Is Met') {
-                if (this.logicalExpression) {
-                    const openParenCount = (this.logicalExpression.match(/\(/g) || []).length;
-                    const closeParenCount = (this.logicalExpression.match(/\)/g) || []).length;
+                const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
 
-                    if (openParenCount !== closeParenCount) {
-                        const inputElement = this.template.querySelector('.logical-expression-input');
+                if (this.logicalExpression.trim() === '') {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Expression cannot be empty');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
+
+                const mappinglength = this.mappings.length;
+                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
+
+                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
+
+                const numbers = this.logicalExpression.match(/\d+/g);
+                if (numbers) {
+                    const numberSet = new Set(numbers.map(Number));
+                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
+
+                    if (invalidIndex) {
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
+                            inputElement.reportValidity();
+                        }
+                        return;
+                    }
+
+                    if (numberSet.size !== mappinglength) {
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition must include all indices.');
+                            inputElement.reportValidity();
+                        }
+                        return;
+                    }
+
+                    // Basic syntax check for balanced parentheses
+                    let openParens = 0;
+                    for (let char of this.logicalExpression) {
+                        if (char === '(') openParens++;
+                        if (char === ')') openParens--;
+                        if (openParens < 0) {
+                            if (inputElement) {
+                                inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                                inputElement.reportValidity();
+                            }
+                            return;
+                        }
+                    }
+                    if (openParens !== 0) {
                         if (inputElement) {
                             inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
                             inputElement.reportValidity();
-                            return;
                         }
-                    } else {
-                        const inputElement = this.template.querySelector('.logical-expression-input');
-                        if (inputElement) {
-                            inputElement.setCustomValidity('');
-                            inputElement.reportValidity();
-                        }
+                        return;
                     }
 
-                    this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                        let filterResults = {};
-                        this.mappings.forEach(mapping => {
-                            let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                            let filterValue = mapping.valueField;
+                    if (inputElement) {
+                        inputElement.setCustomValidity('');
+                        inputElement.reportValidity();
+                    }
+                } else {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
 
-                            let result = false;
-                            switch (mapping.operator) {
-                                case 'greaterThan':
-                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                    filterValue = filterValue !== undefined ? filterValue : 0;
-                                    result = parseFloat(inquiryValue) > parseFloat(filterValue);
-                                    break;
-                                case 'lessThan':
-                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                    filterValue = filterValue !== undefined ? filterValue : 0;
-                                    result = parseFloat(inquiryValue) < parseFloat(filterValue);
-                                    break;
-                                case 'equalTo':
-                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                    filterValue = filterValue !== undefined ? filterValue : '';
-                                    result = inquiryValue === filterValue;
-                                    break;
-                                case 'contains':
-                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                    filterValue = filterValue !== undefined ? filterValue : '';
-                                    result = inquiryValue.includes(filterValue);
-                                    break;
-                                case 'notEqualTo':
-                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                    filterValue = filterValue !== undefined ? filterValue : '';
-                                    if (!inquiryValue) { result = false; }
-                                    else { result = inquiryValue !== filterValue; }
-                                    break;
-                                case 'notContains':
-                                    inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                    filterValue = filterValue !== undefined ? filterValue : '';
-                                    if (!inquiryValue) { result = false; }
-                                    else { result = !inquiryValue.includes(filterValue); }
-                                    break;
-                                default:
-                                    result = false;
-                            }
-                            filterResults[mapping.id] = result;
-                        });
+                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
+                    let filterResults = [];
+                    this.mappings.forEach((mapping, index) => {
+                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                        let filterValue = mapping.valueField;
 
-                        const evalExpression = this.logicalExpression
-                            .replace(/\bAND\b/gi, '&&')
-                            .replace(/\bOR\b/gi, '||');
-                        try {
-                            return eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                        } catch (e) {
-                            console.error('Error evaluating expression', e);
-                            return false;
+                        switch (mapping.operator) {
+                            case 'lessThan':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                filterResults[index + 1] = parseFloat(inquiryValue) < parseFloat(filterValue);
+                                break;
+                            case 'greaterThan':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                filterResults[index + 1] = parseFloat(inquiryValue) > parseFloat(filterValue);
+                                break;
+                            case 'equalTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                filterResults[index + 1] = inquiryValue === filterValue;
+                                break;
+                            case 'contains':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                filterResults[index + 1] = inquiryValue && inquiryValue.includes(filterValue);
+                                break;
+                            case 'notEqualTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = inquiryValue !== filterValue;
+                                break;
+                            case 'notContains':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = inquiryValue && !inquiryValue.includes(filterValue);
+                                break;
+                            default:
+                                filterResults[index + 1] = false;
                         }
                     });
-                }
+
+                    const evalExpression = this.logicalExpression
+                        .replace(/\bAND\b/gi, '&&')
+                        .replace(/\bOR\b/gi, '||');
+                    try {
+                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
+                        return evaluationResult;
+                    } catch (e) {
+                        console.error('Error in eval', e);
+                        return false;
+                    }
+                });
             } else if (this.selectedConditionType === 'Related List' || this.selectedConditionType === 'None') {
-                this.pagedFilteredInquiryData = [...this.totalinquiry];
+                if (this.selectedConditionType === 'Related List') {
+                    this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => inquiry.mvex__listing__c === this.recordId);
+                } else {
+                    this.pagedFilteredInquiryData = [...this.totalinquiry];
+                }
             }
 
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;

@@ -1492,7 +1492,7 @@ openConfigureSettings(){
                 this.selectedTemplate = value;
                 this.handleRefreshClick();
                 break;
-            case 'dateTime':
+            case 'scheduleDateTime':
                 this.selectedDateTime = value;
                 break;
             default:
@@ -1830,7 +1830,7 @@ openConfigureSettings(){
             timeOfMessage: this.selectedDateTime
         })
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast scheduled successfully', 'success');
                     this.handleCloseTemplate();
                      this.clearSelectedContacts();

@@ -3,7 +3,6 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import getContactsForInquiries from '@salesforce/apex/PropertySearchController.getContactsForInquiries';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getMetadata from '@salesforce/apex/DynamicMappingCmp.getMetadata';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import sendEmail from '@salesforce/apex/PropertySearchController.sendEmail';
@@ -19,6 +18,9 @@ import createChatRecods from '@salesforce/apex/BroadcastMessageController.create
 import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmpController.processBroadcastMessageWithObject';
 import { errorDebugger } from 'c/globalProperties';
 import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
+import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
+import emptyState from '@salesforce/resourceUrl/emptyState';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -99,7 +101,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track vfGeneratePageSRC;
 
     @track inquiryColumns = [];
-   @track defaultColumns = [
+    @track defaultColumns = [
         { label: 'Listing Type', fieldName: 'mvex__listing_type__c', type: 'text' },
         { label: 'City', fieldName: 'mvex__city__c', type: 'text' },
         { label: 'Min Bedrooms', fieldName: 'mvex__bedrooms_min__c', type: 'number' },
@@ -134,6 +136,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track spinnerShow = false;
     @track isConfigOpen = false;
     @track hasBusinessAccountConfigured = false;
+    @track listingFieldOptions = [];
+    @track isConstant = false;
+    @track NoDataImageUrl = emptyState;
+    @track hideFilterButton = false;
 
     /**
     * Method Name : isCustomLogicSelected
@@ -324,10 +330,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         // Calculate start and end indices for current page
         const startIndex = (this.currentPage - 1) * this.pageSize;
         const endIndex = startIndex + this.pageSize;
-        
+
         // Slice the data for current page
         const pagedData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
-        
+
         return this.processInquiryData(pagedData);
     }
 
@@ -415,45 +421,65 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 errorDebugger('displayInquiry', 'loadStyle:connectedCallback', error, 'warn', 'Error while loading css');
             });
         this.getInquiryFields();
-        this.fetchInquiryConfiguration(); // This will call fetchInquiries after config is loaded
-        this.fetchMetadataRecords();
+        this.fetchInquiryConfiguration();
+        this.fetchFilterConfiguration();
         window?.globalThis?.addEventListener('click', this.handleClickOutside);
 
         this.loadQuickTemplates();
         this.loadMessageOptions();
         this.vfPageMessageHandler();
         this.loadListViewId();
+        this.loadListViewId();
         this.loadAllTemplates();
+        this.getListingFields();
+        this.checkHideFilterButton();
+    }
+
+    checkHideFilterButton() {
+        getMetadataRecords()
+            .then(result => {
+                console.log('Metadata records fetched successfully:', JSON.stringify(result));
+                const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
+                if (feature && feature.MVEX__isAvailable__c) {
+                    this.hideFilterButton = true;
+                    console.log('Map_Listing_And_Inquiry feature is enabled. Hiding filter button.');
+                    
+                }
+            })
+            .catch(error => {
+                errorDebugger('displayInquiry', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
+            });
     }
 
     processInquiryData(inquiries) {
         console.log('inquiries', inquiries);
-        
+
         const cols = this.tableColumns;
         console.log('tableColumns', cols);
-        
+
         return (inquiries || []).map(inquiry => {
             const row = { ...inquiry };
             row.displayFields = cols.map(col => {
                 // Ensure fieldName is lowercase to match inquiry data keys
                 const key = (col.fieldName || '').toLowerCase();
                 let value = inquiry[key];
-                
+
                 // Handle special cases for field mapping
                 if (!value && key === 'name' && inquiry.name) {
                     value = inquiry.name;
                 }
-                
-                // Convert value to string for display if it exists
-                const displayValue = value !== null && value !== undefined ? String(value) : '';
-                
+
+                // Convert value to string for display if it exists, else default to '-'
+                const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
+                const displayValue = hasRealValue ? String(value) : '-';
+
                 console.log(`Field: ${key}, Value: ${value}, DisplayValue: ${displayValue}`);
-                
+
                 return {
                     key,
                     value: displayValue,
                     rawValue: value, // Keep original value for type checking
-                    hasValue: value !== null && value !== undefined && String(value).trim() !== '',
+                    hasValue: true, // Always true to display either the value or the hyphen
                     isNameField: key === 'name',
                     isCurrency: col.type === 'currency'
                 };
@@ -609,27 +635,52 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Date: 29/07/2024
     * Created By:Rachit Shah
     */
-    fetchMetadataRecords() {
+    /**
+    * Method Name : fetchFilterConfiguration
+    * @description : method to fetch filter configuration from Custom Object
+    * Date: 17/02/2026
+    * Created By: Refactoring Agent
+    */
+    fetchFilterConfiguration() {
         this.isLoading = true;
-        getMetadata()
+        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', featureName: 'Inquiry_Filter_Config' })
             .then((result) => {
-                if (result && result.length > 0) {
-                    let allFilters = result[0] ? result[0].split(';') : [];
-                    const inquiryLogic = result[3];
-                    const inquiryCondition = result[4];
+                if (result && result.metadataRecords && result.metadataRecords.length > 0) {
+                    const jsonConfig = result.metadataRecords[0];
+                    if (jsonConfig) {
+                        try {
+                            const config = JSON.parse(jsonConfig);
+                            this.mappings = config.mappings || [];
+                            this.logicalExpression = config.logic || '';
+                            // Ensure condition type is valid
+                            this.selectedConditionType = config.conditionType || 'All Condition Are Met';
 
-                    this.filters = allFilters.filter(filter => filter.includes('MVEX__Inquiry__c'));
+                            // Map old 'condtiontype' for backward compatibility if needed
+                            if (config.conditionType === 'Custom Logic Is Met') {
+                                this.condtiontype = 'custom';
+                            } else if (config.conditionType === 'Any Condition Is Met') {
+                                this.condtiontype = 'any';
+                            } else if (config.conditionType === 'All Condition Are Met') {
+                                this.condtiontype = 'all';
+                            } else if (config.conditionType === 'Related List') {
+                                this.condtiontype = 'related';
+                            } else if (config.conditionType === 'None') {
+                                this.condtiontype = 'none';
+                            } else {
+                                this.condtiontype = config.conditionType;
+                            }
 
-                    this.logicalExpression = inquiryLogic === 'empty' ? '' : inquiryLogic;
-                    this.condtiontype = inquiryCondition;
+                        } catch (e) {
+                            console.error('Error parsing filter config', e);
+                        }
+                    }
                 }
-
                 this.fetchListings();
                 this.isLoading = false;
             })
             .catch(error => {
-                errorDebugger('displayInquiry', 'fetchMetadataRecords', error, 'warn', 'Error fetching metadata');
-                this.showToast('Error', 'Error fetching metadata', 'error');
+                errorDebugger('displayInquiry', 'fetchFilterConfiguration', error, 'warn', 'Error fetching filter configuration');
+                this.showToast('Error', 'Error fetching filter configuration', 'error');
                 this.isLoading = false;
             });
     }
@@ -669,6 +720,24 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             })
             .catch(error => {
                 errorDebugger('displayInquiry', 'getInquiryFields', error, 'warn', 'Error fetching inquiry fields');
+            });
+    }
+
+    /**
+    * Method Name : getListingFields
+    * @description : method to get all listing fields
+    * * Date: 17/02/2026
+    * Created By: Refactoring Agent
+    */
+    getListingFields() {
+        getFieldMap({ objectName: 'MVEX__Listing__c' })
+            .then(result => {
+                this.listingFieldOptions = result.fields.map(field => {
+                    return { label: field.label, value: field.value };
+                }).sort((a, b) => a.label.localeCompare(b.label));
+            })
+            .catch(error => {
+                errorDebugger('displayInquiry', 'getListingFields', error, 'warn', 'Error fetching listing fields');
             });
     }
 
@@ -857,185 +926,48 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * * Date: 20/08/2024
     * Created By:Rachit Shah
     */
+    /**
+    * Method Name : applyFiltersData
+    * @description : method to apply filter initially
+    * * Date: 20/08/2024
+    * Created By:Rachit Shah
+    */
     applyFiltersData(listing) {
         try {
-            this.pagedFilteredInquiryData = this.totalinquiry.map(inquiry => ({
-                ...inquiry,
-                isSelected: false // Add isSelected field initialized to false
-            }));
+            this.pagedFilteredInquiryData = this.totalinquiry;
 
-            this.mappings = this.filters.map((mappingStr, index) => {
-                let [object, field, operator, valueField] = mappingStr.split(':');
-                let fieldLabel = '';
-                field = field.toLowerCase();
-                valueField = valueField.toLowerCase();
+            // Mappings are already objects now, no need to parse from strings
+            // But we might need to resolve dynamic values if they are field references
+            this.mappings = this.mappings.map(mapping => {
+                let resolvedValue = mapping.valueField;
+                let displayValue = mapping.displayValue || mapping.valueField;
 
-                if (object === 'MVEX__Inquiry__c') {
-                    fieldLabel = this.getValueFromLabel(field);
-                    return {
-                        id: index + 1,
-                        field: field,
-                        operator: operator,
-                        displayOperator: this.displayOperator(operator),
-                        valueField: listing[valueField] ? listing[valueField] : '',
-                        label: fieldLabel
-                    };
+                if (mapping.type !== 'constant') {
+                    // It's a field reference to the Listing object
+                    const fieldName = mapping.valueField ? mapping.valueField.toLowerCase() : '';
+                    resolvedValue = listing[fieldName] !== undefined ? listing[fieldName] : '';
+                    // Try to find label for display if not set
+                    if (!mapping.displayValue) {
+                        const listingOption = this.listingFieldOptions.find(opt => opt.value === mapping.valueField);
+                        displayValue = listingOption ? listingOption.label : mapping.valueField;
+                    }
                 }
-                return null;
-            }).filter(mapping => mapping !== null);
 
-            console.log('applyFiltersData: mappings', JSON.stringify(this.mappings));
-            console.log('applyFiltersData: logicalExpression', this.logicalExpression);
-            console.log('applyFiltersData: condtiontype', this.condtiontype);
-
-            const parsedFilters = this.filters.map(filter => {
-                const [object, field, operator, valueField] = filter.split(':');
-                return { object, field: field.toLowerCase(), operator, valueField: valueField.toLowerCase() };
+                return {
+                    ...mapping,
+                    resolvedValue: resolvedValue,
+                    displayValue: displayValue
+                };
             });
 
+
             if (this.condtiontype === 'custom') {
+                this.selectedConditionType = 'Custom Logic Is Met';
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
-                    this.logicalExpression = parsedFilters.map((_, index) => index + 1).join(' AND ');
+                    this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
                 }
+                this.applyModalFilters();
 
-                // Validate logical expression
-                const mappinglength = this.mappings.length;
-                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
-
-                if (!regex.test(this.logicalExpression)) {
-                    this.showToast('Error', 'Invalid condition syntax in custom logic. Use numbers, AND, OR, spaces, and parentheses only.', 'error');
-                    this.pagedFilteredInquiryData = this.totalinquiry;
-                    this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                    this.totalRecords = this.pagedFilteredInquiryData.length;
-                    this.currentPage = 1;
-                    return;
-                }
-
-                const numbers = this.logicalExpression.match(/\d+/g);
-                if (numbers) {
-                    const numberSet = new Set(numbers.map(Number));
-                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
-
-                    if (invalidIndex) {
-                        this.showToast('Error', `Condition uses invalid index. Use indices from 1 to ${mappinglength}.`, 'error');
-                        this.pagedFilteredInquiryData = this.totalinquiry;
-                        this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                        this.totalRecords = this.pagedFilteredInquiryData.length;
-                        this.currentPage = 1;
-                        return;
-                    }
-
-                    if (numberSet.size !== mappinglength) {
-                        this.showToast('Error', 'Condition must include all indices.', 'error');
-                        this.pagedFilteredInquiryData = this.totalinquiry;
-                        this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                        this.totalRecords = this.pagedFilteredInquiryData.length;
-                        this.currentPage = 1;
-                        return;
-                    }
-
-                    // Basic syntax check for balanced parentheses
-                    let openParens = 0;
-                    for (let char of this.logicalExpression) {
-                        if (char === '(') openParens++;
-                        if (char === ')') openParens--;
-                        if (openParens < 0) {
-                            this.showToast('Error', 'Unbalanced parentheses in custom logic expression.', 'error');
-                            this.pagedFilteredInquiryData = this.totalinquiry;
-                            this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                            this.totalRecords = this.pagedFilteredInquiryData.length;
-                            this.currentPage = 1;
-                            return;
-                        }
-                    }
-                    if (openParens !== 0) {
-                        this.showToast('Error', 'Unbalanced parentheses in custom logic expression.', 'error');
-                        this.pagedFilteredInquiryData = this.totalinquiry;
-                        this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                        this.totalRecords = this.pagedFilteredInquiryData.length;
-                        this.currentPage = 1;
-                        return;
-                    }
-                } else {
-                    this.showToast('Error', 'Condition syntax is correct but contains no indices.', 'error');
-                    this.pagedFilteredInquiryData = this.totalinquiry;
-                    this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                    this.totalRecords = this.pagedFilteredInquiryData.length;
-                    this.currentPage = 1;
-                    return;
-                }
-
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    let filterResults = [];
-
-                    parsedFilters.forEach((filter, index) => {
-                        let fieldValue, filterValue;
-
-                        if (filter.object === 'MVEX__Inquiry__c') {
-                            // Validate field existence
-                            if (!(filter.field in inquiry)) {
-                                console.warn(`applyFiltersData: Field ${filter.field} not found in inquiry`, inquiry);
-                                filterResults[index + 1] = false;
-                                return;
-                            }
-                            if (!(filter.valueField in listing)) {
-                                console.warn(`applyFiltersData: Value field ${filter.valueField} not found in listing`, listing);
-                                filterResults[index + 1] = false;
-                                return;
-                            }
-
-                            fieldValue = inquiry[filter.field];
-                            filterValue = listing[filter.valueField];
-
-                            // Ensure values are defined
-                            fieldValue = fieldValue !== undefined && fieldValue !== null ? fieldValue : '';
-                            filterValue = filterValue !== undefined && fieldValue !== null ? filterValue : '';
-
-                            switch (filter.operator) {
-                                case 'lessThan':
-                                    filterResults[index + 1] = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
-                                    break;
-                                case 'greaterThan':
-                                    filterResults[index + 1] = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) > parseFloat(filterValue);
-                                    break;
-                                case 'equalTo':
-                                    filterResults[index + 1] = String(fieldValue) === String(filterValue);
-                                    break;
-                                case 'contains':
-                                    filterResults[index + 1] = String(fieldValue).includes(String(filterValue));
-                                    break;
-                                case 'notEqualTo':
-                                    filterResults[index + 1] = String(fieldValue) !== String(filterValue);
-                                    break;
-                                case 'notContains':
-                                    filterResults[index + 1] = !String(fieldValue).includes(String(filterValue));
-                                    break;
-                                default:
-                                    filterResults[index + 1] = false;
-                            }
-                        } else {
-                            filterResults[index + 1] = false;
-                        }
-                    });
-
-                    console.log(`applyFiltersData: filterResults for inquiry ${inquiry.id}`, filterResults);
-
-                    // Transform AND/OR to &&/|| for eval
-                    const evalExpression = this.logicalExpression
-                        .replace(/\bAND\b/gi, '&&')
-                        .replace(/\bOR\b/gi, '||');
-                    console.log(`applyFiltersData: evalExpression for inquiry ${inquiry.id}`, evalExpression);
-                    const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                    console.log(`applyFiltersData: evaluationResult for inquiry ${inquiry.id}`, evaluationResult);
-
-                    return evaluationResult;
-                });
-
-                console.log('applyFiltersData: filtered inquiries count', this.pagedFilteredInquiryData.length);
-
-                this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                this.totalRecords = this.pagedFilteredInquiryData.length;
-                this.currentPage = 1;
             } else if (this.condtiontype === 'any') {
                 this.selectedConditionType = 'Any Condition Is Met';
                 this.logicalExpression = '';
@@ -1043,6 +975,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             } else if (this.condtiontype === 'all') {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
+                this.applyModalFilters();
+            } else if (this.condtiontype === 'related') {
+                this.selectedConditionType = 'Related List';
+                this.applyModalFilters();
+            } else if (this.condtiontype === 'none') {
+                this.selectedConditionType = 'None';
                 this.applyModalFilters();
             }
         } catch (error) {
@@ -1149,59 +1087,57 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * * Date: 16/10/2024
     * Created By:Rachit Shah
     */
-    handleMappingClick(event) {
-        const nameAttribute = event.currentTarget.dataset.name;
+    // handleMappingClick(event) {
+    //     const nameAttribute = event.currentTarget.dataset.name;
 
-        if (nameAttribute && nameAttribute !== 'delete') {
-            const previouslySelected = this.template.querySelector('.selected');
-            if (previouslySelected) {
-                previouslySelected.classList.remove('selected');
-            }
+    //     if (nameAttribute && nameAttribute !== 'delete') {
+    //         const previouslySelected = this.template.querySelector('.selected');
+    //         if (previouslySelected) {
+    //             previouslySelected.classList.remove('selected');
+    //         }
 
-            event.currentTarget.classList.add('selected');
+    //         event.currentTarget.classList.add('selected');
 
-            const mappingId = event.currentTarget.dataset.id;
-            this.isAddConditionModalVisible = true;
+    //         const mappingId = event.currentTarget.dataset.id;
+    //         this.isAddConditionModalVisible = true;
 
-            const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
+    //         const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
 
-            if (currentMapping) {
-                this.selectedMappingId = currentMapping.id;
-                
-                const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
+    //         if (currentMapping) {
+    //             this.selectedMappingId = currentMapping.id;
+    //             const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
 
-                if (selectedField) {
-                    const fieldType = (selectedField.type || '').toUpperCase();
+    //             if (selectedField) {
+    //                 const fieldType = selectedField.type;
 
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
-                    const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
-                    const referenceFieldTypes = ['REFERENCE'];
+    //                 const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
+    //                 const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
+    //                 const referenceFieldTypes = ['REFERENCE'];
 
-                    // Update UI state based on field type
-                    this.inquiryFieldObject = {
-                        ...this.inquiryFieldObject,
-                        MVEX__Field_Name__c: currentMapping.field,
-                        MVEX__Data_Type__c: fieldType,
-                        isPrimary: primaryFieldTypes.includes(fieldType),
-                        isPicklist: picklistFieldTypes.includes(fieldType),
-                        isReference: referenceFieldTypes.includes(fieldType)
-                    };
+    //                 this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
 
-                    if (fieldType === 'REFERENCE') {
-                        this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
-                    } else if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues) {
-                        this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(val => ({
-                            label: val,
-                            value: val
-                        }));
-                    }
+    //                 if (fieldType === 'REFERENCE') {
+    //                     this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
+    //                 } else {
+    //                     if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
+    //                         this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
+    //                             return { label: picklistValue, value: picklistValue };
+    //                         });
+    //                     } else {
+    //                         this.inquiryFieldObject.picklistValues = null;
+    //                     }
+    //                 }
 
-                    this.selectedConditionOperator = currentMapping.operator;
-                    this.selectedListingField = currentMapping.valueField;
-                }
-            }
-        }
-    }
+    //                 this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
+    //                 this.selectedConditionOperator = currentMapping.operator;
+    //                 this.selectedListingField = currentMapping.valueField;
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
     * Method Name: handleSearch
@@ -1361,6 +1297,31 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     applyModalFilters() {
         try {
+
+            // Save Configuration Logic
+            const config = {
+                conditionType: 'Related List',
+                logic: this.logicalExpression,
+                mappings: this.mappings
+            };
+
+            saveMappings({
+                objectApiName: 'MVEX__Inquiry__c',
+                featureName: 'Inquiry_Filter_Config',
+                checklistData: JSON.stringify(config),
+                totalPages: 0
+            })
+                .then(result => {
+                    if (result === 'Success') {
+                        // Configuration saved
+                    } else {
+                        this.showToast('Error', 'Failed to save configuration', 'error');
+                    }
+                })
+                .catch(error => {
+                    errorDebugger('displayInquiry', 'saveConfiguration', error, 'warn', 'Error saving configuration');
+                });
+
             if (this.mappings.length === 0) {
                 this.pagedFilteredInquiryData = [...this.totalinquiry];
                 this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
@@ -1400,10 +1361,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             case 'notEqualTo':
                                 inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
                                 return inquiryValue !== filterValue;
                             case 'notContains':
                                 inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
                                 return !inquiryValue.includes(filterValue);
                             default:
                                 return false;
@@ -1413,53 +1376,60 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             } else if (this.selectedConditionType === 'Any Condition Is Met') {
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
                     return this.mappings.some(mapping => {
-                        let fieldValue = inquiry[mapping.field.toLowerCase()];
+                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                        let filterValue = mapping.valueField;
 
                         switch (mapping.operator) {
-                            case 'equalTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue === mapping.valueField;
                             case 'greaterThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                return parseFloat(fieldValue) > parseFloat(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(inquiryValue) > parseFloat(filterValue);
                             case 'lessThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                return parseFloat(fieldValue) < parseFloat(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(inquiryValue) < parseFloat(filterValue);
+                            case 'equalTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return inquiryValue === filterValue;
                             case 'contains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue && fieldValue.includes(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return inquiryValue.includes(filterValue);
                             case 'notEqualTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue !== mapping.valueField;
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
+                                return inquiryValue !== filterValue;
                             case 'notContains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                return fieldValue && !fieldValue.includes(mapping.valueField);
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
+                                return !inquiryValue.includes(filterValue);
                             default:
                                 return false;
                         }
                     });
                 });
-            } else if (this.selectedConditionType === 'Related List') {
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    return inquiry.mvex__listing__c === this.recordId;
-                });
-            } else if (this.selectedConditionType === 'None') {
-                this.pagedFilteredInquiryData = this.totalinquiry;
-            } else {
+            } else if (this.selectedConditionType === 'Custom Logic Is Met') {
                 const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
 
                 if (this.logicalExpression.trim() === '') {
-                    inputElement.setCustomValidity('Expression cannot be empty');
-                    inputElement.reportValidity();
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Expression cannot be empty');
+                        inputElement.reportValidity();
+                    }
                     return;
                 }
 
                 const mappinglength = this.mappings.length;
                 const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
 
-                if (!regex.test(this.logicalExpression)) {
-                    inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
-                    inputElement.reportValidity();
+                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
+                        inputElement.reportValidity();
+                    }
                     return;
                 }
 
@@ -1469,14 +1439,18 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
 
                     if (invalidIndex) {
-                        inputElement.setCustomValidity(`Condition uses invalid index. Use indices from 1 to ${mappinglength}.`);
-                        inputElement.reportValidity();
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
+                            inputElement.reportValidity();
+                        }
                         return;
                     }
 
                     if (numberSet.size !== mappinglength) {
-                        inputElement.setCustomValidity('Condition must include all indices.');
-                        inputElement.reportValidity();
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition must include all indices.');
+                            inputElement.reportValidity();
+                        }
                         return;
                     }
 
@@ -1486,59 +1460,71 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         if (char === '(') openParens++;
                         if (char === ')') openParens--;
                         if (openParens < 0) {
-                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                            inputElement.reportValidity();
+                            if (inputElement) {
+                                inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                                inputElement.reportValidity();
+                            }
                             return;
                         }
                     }
                     if (openParens !== 0) {
-                        inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                        inputElement.reportValidity();
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                            inputElement.reportValidity();
+                        }
                         return;
                     }
+
+                    if (inputElement) {
+                        inputElement.setCustomValidity('');
+                        inputElement.reportValidity();
+                    }
                 } else {
-                    inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
-                    inputElement.reportValidity();
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
+                        inputElement.reportValidity();
+                    }
                     return;
                 }
 
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
                     let filterResults = [];
-
                     this.mappings.forEach((mapping, index) => {
-                        let fieldValue = inquiry[mapping.field.toLowerCase()];
+                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
                         let filterValue = mapping.valueField;
 
                         switch (mapping.operator) {
                             case 'lessThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
                                 filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
+                                filterResults[index + 1] = parseFloat(inquiryValue) < parseFloat(filterValue);
                                 break;
                             case 'greaterThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
                                 filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) > parseFloat(filterValue);
+                                filterResults[index + 1] = parseFloat(inquiryValue) > parseFloat(filterValue);
                                 break;
                             case 'equalTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = String(fieldValue) === String(filterValue);
+                                filterResults[index + 1] = inquiryValue === filterValue;
                                 break;
                             case 'contains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = String(fieldValue).includes(String(filterValue));
+                                filterResults[index + 1] = inquiryValue && inquiryValue.includes(filterValue);
                                 break;
                             case 'notEqualTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = String(fieldValue) !== String(filterValue);
+                                if (!inquiryValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = inquiryValue !== filterValue;
                                 break;
                             case 'notContains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
                                 filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = !String(fieldValue).includes(String(filterValue));
+                                if (!inquiryValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = inquiryValue && !inquiryValue.includes(filterValue);
                                 break;
                             default:
                                 filterResults[index + 1] = false;
@@ -1548,9 +1534,20 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     const evalExpression = this.logicalExpression
                         .replace(/\bAND\b/gi, '&&')
                         .replace(/\bOR\b/gi, '||');
-                    const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                    return evaluationResult;
+                    try {
+                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
+                        return evaluationResult;
+                    } catch (e) {
+                        console.error('Error in eval', e);
+                        return false;
+                    }
                 });
+            } else if (this.selectedConditionType === 'Related List' || this.selectedConditionType === 'None') {
+                if (this.selectedConditionType === 'Related List') {
+                    this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => inquiry.mvex__listing__c === this.recordId);
+                } else {
+                    this.pagedFilteredInquiryData = [...this.totalinquiry];
+                }
             }
 
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
@@ -1591,6 +1588,17 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.sendMethod = '';
         this.selectedTemplate = '';
         this.selectedListingTemplate = '';
+    }
+
+    /**
+    * Method Name : handleUseConstantChange
+    * @description : method to handle constant checkbox change
+    * * Date: 17/02/2026
+    * Created By: Refactoring Agent
+    */
+    handleUseConstantChange(event) {
+        this.isConstant = event.target.checked;
+        this.selectedListingField = '';
     }
 
     /**
@@ -1696,6 +1704,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
+
+
     /**
     * Method Name : saveCondition
     * @description : method to save condition
@@ -1703,34 +1713,44 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By:Rachit Shah
     */
     saveCondition() {
-        if (this.inquiryFieldObject.MVEX__Field_Name__c && this.selectedListingField && this.selectedConditionOperator) {
-            let displaylabel = this.getValueFromLabel(this.inquiryFieldObject.MVEX__Field_Name__c);
+        // Validate required fields based on constant selection
+        const isFieldValid = this.inquiryFieldObject.MVEX__Field_Name__c;
+        const isOperatorValid = this.selectedConditionOperator;
+        const isValueValid = this.selectedListingField; // This holds either constant value or listing field name
 
-            if (!this.selectedMappingId) {
-                this.mappings.push({
-                    id: this.mappings.length + 1,
-                    field: this.inquiryFieldObject.MVEX__Field_Name__c,
-                    operator: this.selectedConditionOperator,
-                    displayOperator: this.displayOperator(this.selectedConditionOperator),
-                    valueField: this.selectedListingField ? this.selectedListingField : '',
-                    label: displaylabel,
-                });
-            } else {
-                this.mappings = this.mappings.map(mapping => {
-                    if (mapping.id === this.selectedMappingId) {
-                        return {
-                            ...mapping,
-                            field: this.inquiryFieldObject.MVEX__Field_Name__c,
-                            operator: this.selectedConditionOperator,
-                            displayOperator: this.displayOperator(this.selectedConditionOperator),
-                            valueField: this.selectedListingField ? this.selectedListingField : '',
-                            label: displaylabel,
-                        };
-                    }
-                    return mapping;
-                });
+        if (isFieldValid && isOperatorValid && isValueValid) {
+            let label = this.getValueFromLabel(this.inquiryFieldObject.MVEX__Field_Name__c);
+            let displayOperator = this.displayOperator(this.selectedConditionOperator);
+
+            // Determine display value
+            let displayValue = this.selectedListingField;
+            if (!this.isConstant) {
+                // If using a field mapping, try to find the label of the listing field
+                const listingOption = this.listingFieldOptions.find(opt => opt.value === this.selectedListingField);
+                displayValue = listingOption ? listingOption.label : this.selectedListingField;
+            } else if (this.inquiryFieldObject.isPicklist && this.inquiryFieldObject.picklistValues) {
+                const picklistOption = this.inquiryFieldObject.picklistValues.find(opt => opt.value === this.selectedListingField);
+                displayValue = picklistOption ? picklistOption.label : this.selectedListingField;
             }
 
+            const newMapping = {
+                id: this.selectedMappingId ? this.selectedMappingId : this.mappings.length + 1,
+                field: this.inquiryFieldObject.MVEX__Field_Name__c,
+                operator: this.selectedConditionOperator,
+                displayOperator: displayOperator,
+                valueField: this.selectedListingField,
+                type: this.isConstant ? 'constant' : 'field',
+                label: label,
+                displayValue: displayValue
+            };
+
+            if (this.selectedMappingId) {
+                this.mappings = this.mappings.map(mapping =>
+                    mapping.id === this.selectedMappingId ? newMapping : mapping
+                );
+            } else {
+                this.mappings.push(newMapping);
+            }
             this.closeAddConditionModal();
         } else {
             this.showToast('Error', 'Select all required fields', 'error');
@@ -1792,6 +1812,40 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             }));
         }
     }
+
+    handleMappingClick(event) {
+        const nameAttribute = event.currentTarget.dataset.name;
+
+        if (nameAttribute && nameAttribute !== 'delete') {
+            const previouslySelected = this.template.querySelector('.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected');
+            }
+
+            event.currentTarget.classList.add('selected');
+
+            const mappingId = event.currentTarget.dataset.id;
+            this.isAddConditionModalVisible = true;
+
+            const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
+            if (currentMapping) {
+                this.selectedMappingId = currentMapping.id;
+                this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
+                this.selectedConditionOperator = currentMapping.operator;
+                this.isConstant = currentMapping.type === 'constant';
+                this.selectedListingField = currentMapping.valueField;
+
+                // Trigger field change logic to populate metadata
+                this.handleInquiryFieldChange({ detail: { value: currentMapping.field } });
+
+                // Re-apply values after metadata update
+                this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
+                this.selectedConditionOperator = currentMapping.operator;
+                this.selectedListingField = currentMapping.valueField;
+            }
+        }
+    }
+
 
     /**
     * Method Name : disconnectedCallback

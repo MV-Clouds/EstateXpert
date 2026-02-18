@@ -50,7 +50,7 @@
             <div class="slds-modal__container slds-is-relative">
                 
                 <template if:true={isLoading}>
-                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                    <c-spinner-component></c-spinner-component>
                 </template>
 
                 <div class="slds-modal__header blue-header">
@@ -62,8 +62,8 @@
                     <div class="tableContainer">
                         <div class="table-content" style="background: white;">
                             <div class="slds-grid slds-wrap slds-gutters header-row">
-                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-p-left_medium slds-text-align_center header-title">Meta Lead Data</div>
-                                <div class="slds-col slds-size_1-of-2 slds-text-title_caps slds-text-align_center header-title">Target Contact Field</div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-left_medium slds-text-align_center header-title">Meta Lead Data</div>
+                                <div class="slds-col slds-size_1-of-2 slds-text-align_center header-title">Target Contact Field</div>
                             </div>
 
                             <template for:each={mappingRows} for:item="row" for:index="index">
@@ -77,16 +77,70 @@
                                     <div class="slds-col slds-size_1-of-2 slds-grid slds-grid_vertical-align-center">
                                         <div class="slds-col slds-size_12-of-12">
                                             
-                                            <c-custom-combobox
-                                                value={row.selectedField}
-                                                placeholder="Select field to map..."
-                                                options={contactFieldOptions}
-                                                onselect={handleMappingChange}
-                                                data-index={index}
-                                                searchable="true"
-                                                multiselect="false"
-                                                show-clear-button="true">
-                                            </c-custom-combobox>
+                                            <!-- Custom Searchable Combobox -->
+                                            <div class="custom-combobox-container">
+                                                <div class="combobox-input-wrapper" data-index={index} onclick={handleComboboxClick}>
+                                                    <input 
+                                                        type="text" 
+                                                        class="combobox-input"
+                                                        placeholder="Select field to map..."
+                                                        value={row.displayValue}
+                                                        readonly
+                                                    />
+                                                    <lightning-icon 
+                                                        icon-name="utility:down" 
+                                                        size="x-small" 
+                                                        class="combobox-icon">
+                                                    </lightning-icon>
+                                                    <template if:true={row.selectedField}>
+                                                        <lightning-icon 
+                                                            icon-name="utility:close" 
+                                                            size="x-small" 
+                                                            class="combobox-clear-icon"
+                                                            data-index={index}
+                                                            onclick={handleClearSelection}>
+                                                        </lightning-icon>
+                                                    </template>
+                                                </div>
+                                                
+                                                <template if:true={row.isDropdownOpen}>
+                                                    <div class="combobox-dropdown" onclick={handleDropdownClick}>
+                                                        <div class="combobox-search-wrapper">
+                                                            <lightning-icon 
+                                                                icon-name="utility:search" 
+                                                                size="x-small" 
+                                                                class="search-icon">
+                                                            </lightning-icon>
+                                                            <input 
+                                                                type="text" 
+                                                                class="combobox-search-input"
+                                                                placeholder="Search fields..."
+                                                                value={row.searchTerm}
+                                                                data-index={index}
+                                                                oninput={handleSearchInput}
+                                                            />
+                                                        </div>
+                                                        <div class="combobox-options">
+                                                            <template if:true={row.filteredOptions}>
+                                                                <template for:each={row.filteredOptions} for:item="option">
+                                                                    <div 
+                                                                        key={option.value} 
+                                                                        class="combobox-option"
+                                                                        data-index={index}
+                                                                        data-value={option.value}
+                                                                        data-label={option.label}
+                                                                        onclick={handleOptionSelect}>
+                                                                        {option.label}
+                                                                    </div>
+                                                                </template>
+                                                            </template>
+                                                            <template if:false={row.filteredOptions}>
+                                                                <div class="combobox-no-results">No matching fields found</div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
                                             
                                         </div>
                                     </div>

@@ -8,11 +8,11 @@ import mapCss_V1 from '@salesforce/resourceUrl/mapCss_V1';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getMetadata from '@salesforce/apex/DynamicMappingCmp.getMetadata';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
 import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
 import { errorDebugger } from 'c/globalProperties';
+import emptyState from '@salesforce/resourceUrl/emptyState';
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -71,6 +71,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track isConstant = false;
     @track visiblePages = 5;
     @track divElement;
+    @track NoDataImageUrl = emptyState;
 
     @track listingColumns = [];
     @track isConfigOpen = false;
@@ -645,23 +646,115 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             });
 
             if (this.condtiontype === 'custom') {
-                this.selectedConditionType = 'Custom Logic Is Met';
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
                 }
-                this.applyModalFilters();
-            } else if (this.condtiontype === 'any') {
+
+                const mappinglength = this.mappings.length;
+                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
+
+                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
+                    // Check if simple numbers without operators when length > 1 (which regex handles mostly)
+                    // But keeping original validation logic flow somewhat
+                }
+
+                // ... reuse existing validation logic mostly ...
+                if (!regex.test(this.logicalExpression) && mappinglength > 1) { // Basic check
+                    // Allow single number if length is 1
+                }
+
+                // Simpler validation aligned with displayInquiry
+                if (!regex.test(this.logicalExpression) && mappinglength > 1 && !/^\d+$/.test(this.logicalExpression)) {
+                    this.showToast('Error', 'Invalid condition syntax in custom logic. Use numbers, AND, OR, spaces, and parentheses only.', 'error');
+                    // ... reset
+                    return;
+                }
+
+                // ... check indices ...
+                const numbers = this.logicalExpression.match(/\d+/g);
+                if (numbers) {
+                    const numberSet = new Set(numbers.map(Number));
+                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
+                    if (invalidIndex) {
+                        this.showToast('Error', `Condition uses invalid index. Use indices from 1 to ${mappinglength}.`, 'error');
+                        return;
+                    }
+                    if (numberSet.size !== mappinglength) {
+                        this.showToast('Error', 'Condition must include all indices.', 'error');
+                        return;
+                    }
+                }
+
+
+                this.pagedFilteredListingData = this.totalListing.filter(listing => {
+                    let filterResults = {};
+
+                    this.mappings.forEach((mapping) => {
+                        let fieldValue = listing[mapping.field.toLowerCase()];
+                        let filterValue = mapping.resolvedValue;
+
+                        // Ensure values are defined
+                        fieldValue = fieldValue !== undefined && fieldValue !== null ? fieldValue : '';
+                        filterValue = filterValue !== undefined && filterValue !== null ? filterValue : '';
+
+                        let result = false;
+                        switch (mapping.operator) {
+                            case 'lessThan':
+                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
+                                break;
+                            case 'greaterThan':
+                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) > parseFloat(filterValue);
+                                break;
+                            case 'equalTo':
+                                result = String(fieldValue) === String(filterValue);
+                                break;
+                            case 'contains':
+                                result = String(fieldValue).includes(String(filterValue));
+                                break;
+                            case 'notEqualTo':
+                                result = String(fieldValue) !== String(filterValue);
+                                break;
+                            case 'notContains':
+                                result = !String(fieldValue).includes(String(filterValue));
+                                break;
+                            default:
+                                result = false;
+                        }
+                        filterResults[mapping.id] = result;
+                    });
+
+                    // Transform AND/OR to &&/|| for eval
+                    const evalExpression = this.logicalExpression
+                        .replace(/\bAND\b/gi, '&&')
+                        .replace(/\bOR\b/gi, '||');
+
+                    try {
+                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
+                        return evaluationResult;
+                    } catch (e) {
+                        console.error('Error evaluating expression', e);
+                        return false;
+                    }
+                });
+
+                console.log('applyFiltersData: filtered listings count', this.pagedFilteredListingData.length);
+
+                this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+                this.totalRecords = this.pagedFilteredListingData.length;
+                this.currentPage = 1;
+                this.updateMapMarkers();
+            } else if (this.conditionType === 'any') {
                 this.selectedConditionType = 'Any Condition Is Met';
                 this.logicalExpression = '';
                 this.applyModalFilters();
-            } else if (this.condtiontype === 'all') {
+            } else if (this.conditionType === 'all') {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
                 this.applyModalFilters();
-            } else if (this.condtiontype === 'related') {
+            } else if (this.conditionType === 'related') {
                 this.selectedConditionType = 'Related List';
                 this.applyModalFilters();
-            } else if (this.condtiontype === 'none') {
+            } else if (this.conditionType === 'none') {
                 this.selectedConditionType = 'None';
                 this.applyModalFilters();
             }
@@ -919,6 +1012,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     handleDeleteMapping(event) {
+        event.stopPropagation();
         const mappingIdToDelete = event.currentTarget.dataset.id;
         this.mappings = this.mappings
             .filter(mapping => mapping.id !== parseInt(mappingIdToDelete, 10))

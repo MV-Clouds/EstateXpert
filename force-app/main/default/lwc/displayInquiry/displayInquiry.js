@@ -3,7 +3,6 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import getContactsForInquiries from '@salesforce/apex/PropertySearchController.getContactsForInquiries';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getMetadata from '@salesforce/apex/DynamicMappingCmp.getMetadata';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import sendEmail from '@salesforce/apex/PropertySearchController.sendEmail';
@@ -20,6 +19,7 @@ import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmp
 import { errorDebugger } from 'c/globalProperties';
 import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
+import emptyState from '@salesforce/resourceUrl/emptyState';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -137,6 +137,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track hasBusinessAccountConfigured = false;
     @track listingFieldOptions = [];
     @track isConstant = false;
+    @track NoDataImageUrl = emptyState;
 
     /**
     * Method Name : isCustomLogicSelected
@@ -1067,57 +1068,57 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * * Date: 16/10/2024
     * Created By:Rachit Shah
     */
-    handleMappingClick(event) {
-        const nameAttribute = event.currentTarget.dataset.name;
+    // handleMappingClick(event) {
+    //     const nameAttribute = event.currentTarget.dataset.name;
 
-        if (nameAttribute && nameAttribute !== 'delete') {
-            const previouslySelected = this.template.querySelector('.selected');
-            if (previouslySelected) {
-                previouslySelected.classList.remove('selected');
-            }
+    //     if (nameAttribute && nameAttribute !== 'delete') {
+    //         const previouslySelected = this.template.querySelector('.selected');
+    //         if (previouslySelected) {
+    //             previouslySelected.classList.remove('selected');
+    //         }
 
-            event.currentTarget.classList.add('selected');
+    //         event.currentTarget.classList.add('selected');
 
-            const mappingId = event.currentTarget.dataset.id;
-            this.isAddConditionModalVisible = true;
+    //         const mappingId = event.currentTarget.dataset.id;
+    //         this.isAddConditionModalVisible = true;
 
-            const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
+    //         const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
 
-            if (currentMapping) {
-                this.selectedMappingId = currentMapping.id;
-                const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
+    //         if (currentMapping) {
+    //             this.selectedMappingId = currentMapping.id;
+    //             const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
 
-                if (selectedField) {
-                    const fieldType = selectedField.type;
+    //             if (selectedField) {
+    //                 const fieldType = selectedField.type;
 
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
-                    const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
-                    const referenceFieldTypes = ['REFERENCE'];
+    //                 const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
+    //                 const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
+    //                 const referenceFieldTypes = ['REFERENCE'];
 
-                    this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-                    this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
+    //                 this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
+    //                 this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
 
-                    if (fieldType === 'REFERENCE') {
-                        this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
-                    } else {
-                        if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
-                            this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
-                                return { label: picklistValue, value: picklistValue };
-                            });
-                        } else {
-                            this.inquiryFieldObject.picklistValues = null;
-                        }
-                    }
+    //                 if (fieldType === 'REFERENCE') {
+    //                     this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
+    //                 } else {
+    //                     if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
+    //                         this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
+    //                             return { label: picklistValue, value: picklistValue };
+    //                         });
+    //                     } else {
+    //                         this.inquiryFieldObject.picklistValues = null;
+    //                     }
+    //                 }
 
-                    this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
-                    this.selectedConditionOperator = currentMapping.operator;
-                    this.selectedListingField = currentMapping.valueField;
-                }
-            }
-        }
-    }
+    //                 this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
+    //                 this.selectedConditionOperator = currentMapping.operator;
+    //                 this.selectedListingField = currentMapping.valueField;
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
     * Method Name: handleSearch

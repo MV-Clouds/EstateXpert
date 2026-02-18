@@ -6,9 +6,9 @@
 .main-template-preview-div{
     display: flex;
     align-items: start;
-    max-height: var(--max-height-of-the-preview-div , 20rem);
+    /* max-height: var(--max-height-of-the-preview-div , 20rem); */
     width: 100%;
-    overflow-y: auto;
+    /* overflow-y: auto; */
     flex-direction: column;
     overflow-wrap: break-word;
 }

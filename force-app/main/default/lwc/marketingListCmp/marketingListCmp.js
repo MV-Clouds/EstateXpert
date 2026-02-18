@@ -21,6 +21,7 @@ import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasB
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
     @api recordId;
+    @track data;
     @track addModal = false;
     @track spinnerShow = true;
     @track showList = true;
@@ -29,6 +30,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track fields = [];
     @track processedContactData = [];
     @track unchangedProcessContact = [];
+    @track filteredSelectedContacts = [];
+    allSelectedContacts = [];
     @track sortField = '';
     @track sortOrder = 'asc';
     @track totalSelected = 0;
@@ -69,7 +72,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track listViewId = '';
 
     @track popUpFirstPage = true;
-    @track popUpSecondPage = false;
     @track popUpLastPage = false;
     @track popupHeader = 'Create Broadcast Group';
     @track templateOptions = [];
@@ -80,6 +82,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
     selectedTemplate = '';
+    allSelectedContact =[];
 
     /**
     * Method Name : totalPages
@@ -1029,6 +1032,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     updateSelectedProperties() {
         this.selectedContactList = this.processedContactData.filter(con => con.isChecked);
+        this.allSelectedContacts = [...this.selectedContactList]; 
+    this.filteredSelectedContacts = [...this.selectedContactList]; 
         this.totalSelected = this.selectedContactList.length;
         this.isContactSelected = this.selectedContactList.length <= 0;
     }
@@ -1471,6 +1476,7 @@ openConfigureSettings(){
             label: template.MVEX__Template_Name__c,
             value: template.Id
         }));
+        this.selectedTemplate = this.templateOptions[0].value;
     }
 
     handleInputChange(event) {
@@ -1497,8 +1503,7 @@ openConfigureSettings(){
     // Handle send message button click
     handleSendMessage() {
         this.showTemplate = true;
-        this.popUpFirstPage = false; // Changed to false to skip UI group details
-        this.popUpSecondPage = true; // Directly show template selection
+        this.popUpFirstPage = true; // Show template list first
         this.popUpLastPage = false;
         this.popupHeader = 'Choose Template';
         this.broadcastGroupName = '';
@@ -1512,7 +1517,6 @@ openConfigureSettings(){
     handleCloseTemplate() {
         this.showTemplate = false;
         this.popUpFirstPage = true;
-        this.popUpSecondPage = false;
         this.popUpLastPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.broadcastGroupName = '';
@@ -1520,6 +1524,8 @@ openConfigureSettings(){
         this.selectedTemplate = '';
         this.selectedDateTime = '';
         this.broadcastGroupId = null;
+        this.filteredSelectedContacts = [...this.allSelectedContacts];
+
     }
 
     // New helper to auto-create group in background
@@ -1567,7 +1573,6 @@ openConfigureSettings(){
 
         if(this.tempBroadcastGroupName == this.broadcastGroupName){
             this.popUpFirstPage = false;
-            this.popUpSecondPage = true;
             this.popupHeader = 'Choose Template';
             return;
         }
@@ -1594,7 +1599,6 @@ openConfigureSettings(){
                 this.broadcastGroupId = result; // Assuming Apex returns the created Broadcast Group ID
                 this.showToast('Success', 'Broadcast group created successfully', 'success');
                 this.popUpFirstPage = false;
-                this.popUpSecondPage = true;
                 this.popupHeader = 'Choose Template';
                 this.tempBroadcastGroupName = this.broadcastGroupName;
                 this.updateTemplateOptions();
@@ -1611,7 +1615,6 @@ openConfigureSettings(){
     // Handle previous button on second page
     handlePreviousOnPopup() {
         this.popUpFirstPage = true;
-        this.popUpSecondPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.selectedTemplate = '';
     }
@@ -1639,9 +1642,11 @@ openConfigureSettings(){
             timeOfMessage: ''
         })
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseTemplate();
+                    this.clearSelectedContacts();
+                    this.navigateToBroadcastComponent(result);
                 } else {
                     this.showToast('Error', `Broadcast failed: ${result}`, 'error');
                 }
@@ -1655,6 +1660,26 @@ openConfigureSettings(){
             });
     }
 
+    navigateToBroadcastComponent(broadcastId) {
+            let componentDef = {
+                componentDef: "MVEX:broadcastReportComp",
+                attributes: {
+                    recordId: broadcastId
+                }
+            };
+
+            let encodedComponentDef = btoa(JSON.stringify(componentDef));
+    
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedComponentDef
+                }
+            });
+}
+
+
+
     // Handle schedule button on second page
     handleSchedulePopup() {
         if (!this.selectedTemplate) {
@@ -1662,14 +1687,11 @@ openConfigureSettings(){
             return;
         }
 
-        this.popUpSecondPage = false;
         this.popUpLastPage = true;
-        this.popupHeader = 'Select Date and Time';
     }
 
     // Handle previous button on last page
     handlePreviousLastPage() {
-        this.popUpSecondPage = true;
         this.popUpLastPage = false;
         this.popupHeader = 'Choose Template';
     }
@@ -1679,6 +1701,102 @@ openConfigureSettings(){
         if (childComponent && this.selectedTemplate) {
             childComponent.refreshComponent(this.selectedTemplate);
         }
+    }
+
+    handleSearch(event) {
+        console.log('event ', event);
+        
+        const searchKey = event.detail.value?.toLowerCase() || '';
+        console.log('searchKey', searchKey);
+        
+        if (!searchKey) {
+            // If search is empty, show all selected contacts
+            this.filteredSelectedContacts = [...this.allSelectedContacts];
+        } else {
+            // Filter from the master list of all selected contacts
+            this.filteredSelectedContacts = this.allSelectedContacts.filter(contact =>
+                (contact.Name && contact.Name.toLowerCase().includes(searchKey)) ||
+                (contact.Phone && contact.Phone.toLowerCase().includes(searchKey))
+            );
+        }
+        
+        console.log('filteredSelectedContacts', this.filteredSelectedContacts);
+
+    }
+
+    handleRemoveContact(event) {
+        const contactId = event.currentTarget.dataset.id;
+        
+        // Remove from master list
+        this.allSelectedContacts = this.allSelectedContacts.filter(
+            contact => contact.Id !== contactId
+        );
+        
+        // Update display list (apply current search filter if any)
+        const searchInput = this.template.querySelector('lightning-input[data-id="search-input"]');
+        const currentSearchKey = searchInput?.value?.toLowerCase() || '';
+        
+        if (currentSearchKey) {
+            this.filteredSelectedContacts = this.allSelectedContacts.filter(contact =>
+                (contact.Name && contact.Name.toLowerCase().includes(currentSearchKey)) ||
+                (contact.Phone && contact.Phone.toLowerCase().includes(currentSearchKey))
+            );
+        } else {
+            this.filteredSelectedContacts = [...this.allSelectedContacts];
+        }
+        
+        this.selectedContactList = [...this.allSelectedContacts];
+
+        // Update the isChecked property in processedContactData
+        this.processedContactData = this.processedContactData.map(contact => {
+            if (contact.Id === contactId) {
+                return { ...contact, isChecked: false };
+            }
+            return contact;
+        });
+        
+        // Update the isChecked property in unchangedProcessContact
+        this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
+            if (contact.Id === contactId) {
+                return { ...contact, isChecked: false };
+            }
+            return contact;
+        });
+        
+        // Update the shown data (current page)
+        this.updateShownData();
+        
+        // Update total selected count
+        this.totalSelected = this.selectedContactList.length;
+        this.isContactSelected = this.selectedContactList.length <= 0;
+    }
+
+    /**
+     * Method Name : clearSelectedContacts
+     * @description : Clear all selected contacts and update checkboxes
+     */
+    clearSelectedContacts() {
+        // Clear all lists
+        this.selectedContactList = [];
+        this.allSelectedContacts = [];
+        this.filteredSelectedContacts = [];
+        
+        // Set isChecked to false for all contacts in processedContactData
+        this.processedContactData = this.processedContactData.map(contact => {
+            return { ...contact, isChecked: false };
+        });
+        
+        // Set isChecked to false for all contacts in unchangedProcessContact
+        this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
+            return { ...contact, isChecked: false };
+        });
+        
+        // Update the shown data (current page)
+        this.updateShownData();
+        
+        // Update total selected count
+        this.totalSelected = 0;
+        this.isContactSelected = true;
     }
 
     // Handle schedule and send button on last page
@@ -1715,6 +1833,7 @@ openConfigureSettings(){
                 if (result === 'Success') {
                     this.showToast('Success', 'Broadcast scheduled successfully', 'success');
                     this.handleCloseTemplate();
+                     this.clearSelectedContacts();
                 } else {
                     this.showToast('Error', `Scheduling failed: ${result}`, 'error');
                 }

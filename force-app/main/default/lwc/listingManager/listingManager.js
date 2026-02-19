@@ -22,7 +22,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @track unchangedProcessListings = [];    
     @track shownProcessedListingData = [];
     @track propertyMediaUrls = [];
-    @track sortField = '';
+    @track sortField = 'Name';
     @track sortOrder = 'asc';
     @track totalSelected=0;
     @track selectedProperties;
@@ -287,6 +287,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             }
             loadStyle(this, designcss);
             this.getAccessible();
+
         }catch(error){
             errorDebugger('ListingManager', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
         }
@@ -441,6 +442,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 };
             });
             this.unchangedProcessListings = this.processedListingData;
+            this.sortData();
             this.updateShownData();
             this.spinnerShow = false;
         } catch (error) {

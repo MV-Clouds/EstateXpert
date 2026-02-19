@@ -123,6 +123,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track popUpFirstPage = true;
     @track popUpSecondPage = false;
     @track popUpLastPage = false;
+    @track popUpConfirmPage = false;
     @track popupHeader = 'Create Broadcast Group';
     @track broadcastGroupName = '';
     @track tempBroadcastGroupName = '';
@@ -140,6 +141,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track isConstant = false;
     @track NoDataImageUrl = emptyState;
     @track hideFilterButton = false;
+    @track filteredGroupMembers = [];
+
+    get modalContainerClass() {
+        return this.popUpSecondPage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
+    }
 
     /**
     * Method Name : isCustomLogicSelected
@@ -1992,21 +1998,25 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     }
 
                     this.broadcastContactList = records.map(record => ({
+                        Id: record.ContactId, // Using ContactId as unique Id
                         InquiryId: record.InquiryId,
                         InquiryName: record.InquiryName,
                         ContactId: record.ContactId,
-                        ContactName: record.ContactName,
-                        Phone: record.Phone
+                        Name: record.ContactName,
+                        Phone: record.Phone,
+                        GroupName: record.InquiryName // For display in 3rd column
                     }));
+                    this.filteredGroupMembers = [...this.broadcastContactList];
 
                     this.showTemplate = true;
-                    this.popUpFirstPage = false; // Skip UI group details
-                    this.popUpSecondPage = true; // Show template selection directly
+                    this.popUpFirstPage = false; 
+                    this.popUpSecondPage = true; 
+                    this.popUpConfirmPage = false;
                     this.popUpLastPage = false;
-                    this.popupHeader = 'Choose Template';
+                    this.popupHeader = 'Send Message';
                     this.broadcastGroupName = '';
                     this.messageText = '';
-                    this.selectedTemplate = '';
+                    this.selectedTemplate = this.templateOptions.length > 0 ? this.templateOptions[0].value : '';
                     this.selectedDateTime = '';
                     this.broadcastGroupId = null;
                     this.updateTemplateOptions();
@@ -2023,6 +2033,71 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.showToast('Error', 'Error opening send message modal', 'error');
             this.isLoading = false;
         }
+    }
+
+    handleSearchMembers(event) {
+        const searchTerm = event.target.value.toLowerCase();
+        if (!searchTerm) {
+            this.filteredGroupMembers = [...this.broadcastContactList];
+            return;
+        }
+        this.filteredGroupMembers = this.broadcastContactList.filter(member => 
+            (member.Name && member.Name.toLowerCase().includes(searchTerm)) ||
+            (member.Phone && member.Phone.includes(searchTerm)) ||
+            (member.GroupName && member.GroupName.toLowerCase().includes(searchTerm))
+        );
+    }
+
+    handleRemoveMember(event) {
+        try {
+            const memberId = event.target.dataset.id;
+            const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
+            
+            if (memberToRemove) {
+                const inquiryId = memberToRemove.InquiryId;
+
+                // 1. Update Inquiry Selection state in main table
+                this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
+                    if (inquiry.id === inquiryId) {
+                        return { ...inquiry, isSelected: false };
+                    }
+                    return inquiry;
+                });
+
+                // 2. Remove from global selected list
+                this.sendMailInquiryDataList = this.sendMailInquiryDataList.filter(inq => inq.id !== inquiryId);
+
+                // 3. Remove from broadcast modal list
+                this.broadcastContactList = this.broadcastContactList.filter(m => m.Id !== memberId);
+                this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
+
+                // 4. Update check-all state
+                this.checkAll = this.pagedFilteredInquiryData.length > 0 && 
+                               this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
+
+                // 5. If no members left, close the modal
+                if (this.broadcastContactList.length === 0) {
+                    this.handleCloseTemplate();
+                    this.showToast('Info', 'All selected inquiries have been removed.', 'info');
+                }
+            }
+        } catch (error) {
+            errorDebugger('displayInquiry', 'handleRemoveMember', error, 'warn', 'Error removing member');
+        }
+    }
+
+    clearSelectedInquiryWithCheckboxFalse(){
+        this.selectedInquiry = null;
+        this.selectedInquiryList = [];
+        this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
+            return { ...inquiry, isSelected: false };
+        });
+        this.sendMailInquiryDataList = [];
+        this.broadcastContactList = [];
+        this.filteredGroupMembers = [];
+        this.broadcastGroupId = null;
+
+        this.checkAll = false;
     }
 
     // Add this getter for the preview component
@@ -2031,59 +2106,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             return this.broadcastContactList[0].ContactId;
         }
         return null;
-    }
-
-    // Handle send message button click - Modified to skip first screen
-    handleSendMessage() {
-        try {
-            if (this.sendMailInquiryDataList.length === 0) {
-                this.showToast('Error', 'Please select at least one inquiry', 'error');
-                return;
-            }
-
-            this.isLoading = true;
-            const inquiryIds = this.sendMailInquiryDataList.map(inquiry => inquiry.id);
-
-            getContactsForInquiries({ inquiryIds })
-                .then(records => {
-                    if (records.length === 0) {
-                        this.showToast('Error', 'No contacts found for the selected inquiries', 'error');
-                        this.isLoading = false;
-                        return;
-                    }
-
-                    this.broadcastContactList = records.map(record => ({
-                        InquiryId: record.InquiryId,
-                        InquiryName: record.InquiryName,
-                        ContactId: record.ContactId,
-                        ContactName: record.ContactName,
-                        Phone: record.Phone
-                    }));
-
-                    this.showTemplate = true;
-                    this.popUpFirstPage = false; // Skip UI group details
-                    this.popUpSecondPage = true; // Show template selection directly
-                    this.popUpLastPage = false;
-                    this.popupHeader = 'Choose Template';
-                    this.broadcastGroupName = '';
-                    this.messageText = '';
-                    this.selectedTemplate = '';
-                    this.selectedDateTime = '';
-                    this.broadcastGroupId = null;
-                    this.updateTemplateOptions();
-                })
-                .catch(error => {
-                    errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Failed to fetch records');
-                    this.showToast('Error', 'Failed to fetch records', 'error');
-                })
-                .finally(() => {
-                    this.isLoading = false;
-                });
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Error opening send message modal');
-            this.showToast('Error', 'Error opening send message modal', 'error');
-            this.isLoading = false;
-        }
     }
 
     async createBroadcastGroupBackground() {
@@ -2122,6 +2144,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.showTemplate = false;
         this.popUpFirstPage = true;
         this.popUpSecondPage = false;
+        this.popUpConfirmPage = false;
         this.popUpLastPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.broadcastGroupName = '';
@@ -2193,6 +2216,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.popUpSecondPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.selectedTemplate = '';
+        this.popUpConfirmPage = false;
+    }
+
+    handleConfirmPopup() {
+        this.popUpConfirmPage = true;
     }
 
     // Handle send button on second page
@@ -2218,9 +2246,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             timeOfMessage: ''
         })
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseTemplate();
+                    this.clearSelectedInquiryWithCheckboxFalse();
+                    this.navigateToBroadcastComponent(result);
                 } else {
                     this.showToast('Error', `Broadcast failed: ${result}`, 'error');
                 }
@@ -2234,6 +2264,24 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             });
     }
 
+        navigateToBroadcastComponent(broadcastId) {
+            let componentDef = {
+                componentDef: "MVEX:broadcastReportComp",
+                attributes: {
+                    recordId: broadcastId
+                }
+            };
+
+            let encodedComponentDef = btoa(JSON.stringify(componentDef));
+    
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedComponentDef
+                }
+            });
+}
+
     // Handle schedule button on second page
     handleSchedulePopup() {
         if (!this.selectedTemplate) {
@@ -2241,7 +2289,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             return;
         }
 
-        this.popUpSecondPage = false;
+        this.popUpSecondPage = true;
         this.popUpLastPage = true;
         this.popupHeader = 'Select Date and Time';
     }
@@ -2250,6 +2298,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handlePreviousLastPage() {
         this.popUpSecondPage = true;
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
     }
 
@@ -2284,9 +2333,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             timeOfMessage: this.selectedDateTime
         })
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast scheduled successfully', 'success');
                     this.handleCloseTemplate();
+                    this.clearSelectedInquiryWithCheckboxFalse();
                 } else {
                     this.showToast('Error', `Scheduling failed: ${result}`, 'error');
                 }

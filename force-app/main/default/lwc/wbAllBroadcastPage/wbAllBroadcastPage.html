@@ -242,8 +242,9 @@
 
 
                     <template if:true={showPopup}>
+                        <!-- Use wider modal container when on second page (like marketingListCmp) -->
                         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
-                            <div class="slds-modal__container">
+                            <div class={modalContainerClass}>
 
                                 <!-- Close Button -->
                                 <div class="slds-modal__close closs_icon_css" onclick={handleCloseOnPopup}>
@@ -258,10 +259,11 @@
                                     <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{popupHeader}</h1>
                                 </div>
 
-                                <div class="slds-modal__content slds-p-around_medium popup_content_cls">
-                                    <template if:true={popUpFirstPage}>
+                                <!-- Page 1: Group Selection (unchanged) -->
+                                <template if:true={popUpFirstPage}>
+                                    <div class="slds-modal__content slds-p-around_medium popup_content_cls">
                                         <div class="popUpBody">
-                                            <!-- Header Section: Search and Create New Group Button -->
+                                            <!-- Header Section: Search -->
                                             <div class="slds-m-bottom_medium">
                                                 <div class="slds-grid slds-gutters">
                                                     <div class="slds-col slds-size_8-of-12">
@@ -276,7 +278,7 @@
                                             <div class="box-container">
                                                 <template if:true={filteredGroups.length}>
                                                     <template for:each={filteredGroups} for:item="group">
-                                                        <div key={group.Id} class="">
+                                                        <div key={group.Id}>
                                                             <div class="box-data">
                                                                 <div>
                                                                     <lightning-input type="checkbox" label="Select"
@@ -284,7 +286,7 @@
                                                                         onchange={handleGroupSelection} checked={group.IsChecked}>
                                                                     </lightning-input>
                                                                 </div>
-                                                                <div class="">
+                                                                <div>
                                                                     <h3 class="slds-text-heading_small">{group.Name}</h3>
                                                                     <p>Members: {group.MVEX__Count_of_Members__c}</p>
                                                                     <p>Object of Group Members: {group.MVEX__Object_Name__c}</p>
@@ -312,60 +314,207 @@
                                                 </div>
                                             </template>
                                         </div>
-                                    </template>
-                                    <template if:true={popUpSecondpage}>
-                                        <div class="popUpBody">
-                                                <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small inner-body-grid">
-                                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                    </div>
+                                </template>
+
+                                <!-- Page 2: Template Selection + Contact List (matching marketingListCmp UI) -->
+                                <template if:true={popUpSecondpage}>
+                                    <div class="modal-body">
+                                        <div class="custom-modal-body" id="modal-content-id-1">
+                                            <div class="secondPage">
+                                                <!-- Left Column: Template Selector + Preview -->
+                                                <div class="template-selector-section">
+                                                    <div class="template-selector-wrapper">
                                                         <lightning-combobox name="template" label="Select Template"
                                                             options={templateOptions} onchange={handleInputChange}
                                                             value={selectedTemplate} required
                                                             message-when-value-missing="Template is required"
-                                                            class="slds-m-bottom_medium">
+                                                            class="template-combobox">
                                                         </lightning-combobox>
                                                     </div>
 
-                                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 right-section-preview">
-                                                        <template if:true={selectedTemplate}>
-                                                            <div class="preview-container">
-                                                                <p class="slds-text-title_caps slds-m-bottom_small">Template Preview</p>
-                                                                <template if:true={selectedTemplate}>
+                                                    <div class="template-prev">
+                                                        <div class="preview-box-container">
+                                                            <template if:true={selectedTemplate}>
+                                                                <div class="preview-box">
                                                                     <c-template-preview 
                                                                         template-id={selectedTemplate} 
                                                                         object-api-name={selectedObjectName}>
                                                                     </c-template-preview>
-                                                                </template>
-                                                            </div>
-                                                        </template>
-                                                        <template if:false={selectedTemplate}>
-                                                            <div class="slds-text-body_small slds-text-color_weak no-text">
-                                                                Please select a template to preview.
-                                                            </div>
-                                                        </template>
+                                                                </div>
+                                                            </template>
+                                                            <template if:false={selectedTemplate}>
+                                                                <div class="preview-placeholder">
+                                                                    Please select a template to preview.
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Right Column: Contact List -->
+                                                <div class="preview-section-right">
+                                                    <lightning-input 
+                                                        type="search"
+                                                        label="Search contacts"
+                                                        variant="label-hidden"
+                                                        placeholder="Search by name or phone"
+                                                        onchange={handleSearchMembers}
+                                                        data-id="member-search-input"
+                                                        class="contact-search">
+                                                    </lightning-input>
+
+                                                    <div class="selected-contacts-section">
+                                                        <div class="contacts-table-wrapper">
+                                                            <table class="contacts-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Phone</th>
+                                                                        <th>Group</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <template if:true={filteredGroupMembers.length}>
+                                                                        <template for:each={filteredGroupMembers} for:item="member" for:index="index">
+                                                                            <tr key={member.Id}>
+                                                                                <td>{member.Name}</td>
+                                                                                <td>{member.Phone}</td>
+                                                                                <td>{member.GroupName}</td>
+                                                                            </tr>
+                                                                        </template>
+                                                                    </template>
+                                                                    <template if:false={filteredGroupMembers.length}>
+                                                                        <tr>
+                                                                            <td colspan="3" class="no-results-cell">
+                                                                                <div class="no-results-container">
+                                                                                    <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
+                                                                                    <span>No matching contacts found</span>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </template>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        <div class="popUpFooter slds-text-align--center">
-                                            <button class="save_btn_css slds-m-left_x-small" onclick={handlePreviousOnPopup}>Previous</button>
-                                            <button class="save_btn_css slds-m-left_x-small" onclick={handleSendOnPopup}>Send</button>
-                                            <button class="save_btn_css slds-m-left_x-small" onclick={handleSchedulePopup}>Schedule</button>
-                                        </div>
-                                    </template>
-                                    <template if:true={popUpLastPage}>
-                                        <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_medium lastPage-grid">
-                                            <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime} onchange={handleInputChange} class="slds-align_absolute-center"></lightning-input>
-                                        </div>
 
-                                        <div class="popUpFooter slds-text-align_center">
-                                            <button class="save_btn_css slds-m-left_x-small" onclick={handlePreviousLastpage}>Previous</button>
-                                            <button class="save_btn_css slds-m-left_x-small" onclick={handleSchedule}>Schedule and Send</button>
+                                            <div class="popUpFooter slds-text-align--center">
+                                                <button class="cancel_btn_css slds-m-left_x-small" onclick={handlePreviousOnPopup}>Previous</button>
+                                                <lightning-button variant="brand" label="Send" onclick={handleConfirmPopup}
+                                                    class="slds-m-left_x-small"></lightning-button>
+                                                <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
+                                                    class="slds-m-left_x-small"></lightning-button>
+                                            </div>
                                         </div>
-                                    </template>
-                                </div>
+                                    </div>
+                                </template>
 
                             </div>
                         </section>
-                        <div class="slds-backdrop slds-backdrop_open"></div>
+
+                        <!-- Backdrop for main modal -->
+                        <div class="slds-backdrop slds-backdrop_open main-modal-backdrop"></div>
+
+                        <!-- Schedule Modal (overlay on top of main modal, same as marketingListCmp) -->
+                        <template if:true={popUpLastPage}>
+                            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handlePreviousLastPage}></div>
+                            
+                            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="datetime-modal-heading"
+                                class="slds-modal slds-fade-in-open schedule-modal"
+                                aria-describedby="modal-content-id-2">
+                                <div class="slds-modal__container schedule-modal-container">
+                                    <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                fill="white" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="slds-modal__header schedule-modal-header">
+                                        <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date &amp; Time</h2>
+                                    </div>
+
+                                    <div class="slds-modal__content schedule-modal-content" id="modal-content-id-2">
+                                        <div class="datetime-selection-wrapper">
+                                            <div class="timezone-note">
+                                                <svg class="w-6 h-6 text-gray-800 dark:text-white cal-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+                                                </svg>
+                                                <div class="schedule-message">
+                                                    <p class="main-line">Schedule your message</p>
+                                                    <p class="next-line">Choose when to send the template.</p>
+                                                </div>
+                                            </div>
+                                            <lightning-input type="datetime-local" 
+                                                name="scheduleDateTime" 
+                                                label="Select Date and Time"
+                                                value={selectedDateTime}
+                                                onchange={handleInputChange}
+                                                required
+                                                message-when-value-missing="Please select a date and time"
+                                                variant="label-stacked">
+                                            </lightning-input>
+                                        </div>
+
+                                        <div class="schedule-modal-footer slds-text-align--center">
+                                            <lightning-button variant="neutral" 
+                                                label="Cancel" 
+                                                onclick={handlePreviousLastPage}>
+                                            </lightning-button>
+                                            <lightning-button variant="brand" 
+                                                label="Confirm &amp; Send" 
+                                                onclick={handleSchedule}>
+                                            </lightning-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </template>
+
+                        <div class="slds-backdrop slds-backdrop_open main-modal-backdrop"></div>
+
+                        <template if:true={popUpConfirmPage}>
+                            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handleBackdropClick}></div>
+                            
+                            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="confirm-modal-heading"
+                                class="slds-modal slds-fade-in-open confirm-modal"
+                                aria-describedby="modal-content-id-3">
+                                <div class="slds-modal__container schedule-modal-container">
+                                    <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                fill="white" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="slds-modal__header schedule-modal-header">
+                                        <h2 class="slds-modal__title" id="confirm-modal-heading">Are you sure?</h2>
+                                    </div>
+
+                                    <div class="slds-modal__content schedule-modal-content" id="modal-content-id-3">
+                                        <p>Are you sure you want to send this template to the selected contacts?</p>
+                                        
+
+                                        <div class="schedule-modal-footer slds-text-align--center">
+                                                    <lightning-button variant="neutral" 
+                                            label="Cancel" 
+                                            onclick={handlePreviousLastPage}>
+                                        </lightning-button>
+                                        <lightning-button variant="brand" 
+                                            label="Confirm & Send" 
+                                            onclick={handleSendOnPopup}>
+                                        </lightning-button>
+                                                </div>
+                                    </div>
+
+                                </div>
+                            </section>
+                        </template>
                     </template>
                 </div>
             </template>

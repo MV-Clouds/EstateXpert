@@ -73,6 +73,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     @track popUpFirstPage = true;
     @track popUpLastPage = false;
+    @track popUpConfirmPage = false;
     @track popupHeader = 'Create Broadcast Group';
     @track templateOptions = [];
     @track selectedDateTime = '';
@@ -1492,7 +1493,7 @@ openConfigureSettings(){
                 this.selectedTemplate = value;
                 this.handleRefreshClick();
                 break;
-            case 'dateTime':
+            case 'scheduleDateTime':
                 this.selectedDateTime = value;
                 break;
             default:
@@ -1505,6 +1506,7 @@ openConfigureSettings(){
         this.showTemplate = true;
         this.popUpFirstPage = true; // Show template list first
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
         this.broadcastGroupName = '';
         this.messageText = '';
@@ -1518,6 +1520,7 @@ openConfigureSettings(){
         this.showTemplate = false;
         this.popUpFirstPage = true;
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.broadcastGroupName = '';
         this.messageText = '';
@@ -1617,8 +1620,12 @@ openConfigureSettings(){
         this.popUpFirstPage = true;
         this.popupHeader = 'Create Broadcast Group';
         this.selectedTemplate = '';
+        this.popUpConfirmPage = false;
     }
 
+    handleConfirmPopup() {
+        this.popUpConfirmPage = true;
+    }
     // Handle send button on second page
     async handleSendOnPopup() {
         if (!this.selectedTemplate) {
@@ -1693,6 +1700,7 @@ openConfigureSettings(){
     // Handle previous button on last page
     handlePreviousLastPage() {
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
     }
 
@@ -1830,7 +1838,7 @@ openConfigureSettings(){
             timeOfMessage: this.selectedDateTime
         })
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast scheduled successfully', 'success');
                     this.handleCloseTemplate();
                      this.clearSelectedContacts();

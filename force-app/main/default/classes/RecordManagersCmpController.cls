@@ -15,6 +15,10 @@ public with sharing class RecordManagersCmpController {
     private static String getStoredFeatureName(String objectApiName, String featureName) {
         if (featureName == 'Listing_Configuration' && objectApiName == 'MVEX__Listing__c') {
             return 'Listing_Configuration';
+        } else if (featureName == 'Listing_Filter_Config' && objectApiName == 'MVEX__Listing__c') {
+            return 'Listing_Filter_Config';
+        } else if (featureName == 'Inquiry_Filter_Config' && objectApiName == 'MVEX__Inquiry__c') {
+            return 'Inquiry_Filter_Config';
         } else if (objectApiName == 'MVEX__Listing__c') {
             return 'Listing Manager'; 
         } else if (objectApiName == 'MVEX__Inquiry__c') {
@@ -170,7 +174,7 @@ public with sharing class RecordManagersCmpController {
      * @description : Save mappings using standard DML on Custom Object (No Metadata Deploy needed).
      */
     @AuraEnabled
-    public static void saveMappings(String checklistData, Integer totalPages, String objectApiName, String featureName) {
+    public static String saveMappings(String checklistData, Integer totalPages, String objectApiName, String featureName) {
         try {
             String storedFeatureName = getStoredFeatureName(objectApiName, featureName);
 
@@ -204,6 +208,8 @@ public with sharing class RecordManagersCmpController {
                 Schema.sObjectType.MVEX__Configuration_Settings__c.isCreateable()) {
                 upsert settingToSave;
             }
+
+            return 'Success';
 
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'saveMappings', e.getStackTraceString());

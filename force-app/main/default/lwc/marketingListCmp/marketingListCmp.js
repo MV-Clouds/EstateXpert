@@ -73,6 +73,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     @track popUpFirstPage = true;
     @track popUpLastPage = false;
+    @track popUpConfirmPage = false;
     @track popupHeader = 'Create Broadcast Group';
     @track templateOptions = [];
     @track selectedDateTime = '';
@@ -1505,6 +1506,7 @@ openConfigureSettings(){
         this.showTemplate = true;
         this.popUpFirstPage = true; // Show template list first
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
         this.broadcastGroupName = '';
         this.messageText = '';
@@ -1518,6 +1520,7 @@ openConfigureSettings(){
         this.showTemplate = false;
         this.popUpFirstPage = true;
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.broadcastGroupName = '';
         this.messageText = '';
@@ -1617,8 +1620,12 @@ openConfigureSettings(){
         this.popUpFirstPage = true;
         this.popupHeader = 'Create Broadcast Group';
         this.selectedTemplate = '';
+        this.popUpConfirmPage = false;
     }
 
+    handleConfirmPopup() {
+        this.popUpConfirmPage = true;
+    }
     // Handle send button on second page
     async handleSendOnPopup() {
         if (!this.selectedTemplate) {

@@ -213,7 +213,7 @@ public with sharing class RecordManagersCmpController {
 
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'saveMappings', e.getStackTraceString());
-            throw new AuraHandledException('Error saving settings: ' + e.getMessage());
+            return e.getMessage();
         }
     }
 

@@ -36,12 +36,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track logicalExpression = '';
     @track inquiryRecord = {};
     @track totalListing = [];
-    @track condtiontype = '';
+    @track conditiontype = '';
     @track selectedMappingId = null;
 
     @track isShowModal = false;
 
-    @track selectedConditionType = 'Custom Logic Is Met';
+    @track selectedConditionType = 'Related List';
     @track mappings = [];
 
     @track isAddConditionModalVisible = false;
@@ -351,8 +351,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     checkHideFilterButton() {
         getMetadataRecords()
             .then(result => {
-
-                console.log('Metadata records fetched for DisplayListing:', JSON.stringify(result));
                 
                 const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
                 if (feature && feature.MVEX__isAvailable__c) {
@@ -417,25 +415,27 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                         if (config.conditionType) {
                             this.selectedConditionType = config.conditionType;
                             if (config.conditionType === 'Custom Logic Is Met') {
-                                this.condtiontype = 'custom';
+                                this.conditiontype = 'custom';
                             } else if (config.conditionType === 'Any Condition Is Met') {
-                                this.condtiontype = 'any';
+                                this.conditiontype = 'any';
                             } else if (config.conditionType === 'All Condition Are Met') {
-                                this.condtiontype = 'all';
+                                this.conditiontype = 'all';
                             } else if (config.conditionType === 'Related List') {
-                                this.condtiontype = 'related';
+                                this.conditiontype = 'related';
                             } else if (config.conditionType === 'None') {
-                                this.condtiontype = 'none';
+                                this.conditiontype = 'none';
                             } else {
-                                this.condtiontype = '';
+                                this.conditiontype = 'related';
                             }
                         }
                     } catch (e) {
                         console.error('Error parsing filter configuration:', e);
-                        // Fallback or empty
                         this.mappings = [];
-                        this.condtiontype = '';
+                        this.conditiontype = 'related';
                     }
+                } else {
+                    // Default to related if no configuration is found
+                    this.conditiontype = 'related';
                 }
                 this.fetchListings();
                 this.isLoading = false;
@@ -664,7 +664,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 };
             });
 
-            if (this.condtiontype === 'custom') {
+            if (this.conditiontype === 'custom') {
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
                 }
@@ -673,23 +673,13 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
 
                 if (!regex.test(this.logicalExpression) && mappinglength > 1) {
-                    // Check if simple numbers without operators when length > 1 (which regex handles mostly)
-                    // But keeping original validation logic flow somewhat
                 }
 
-                // ... reuse existing validation logic mostly ...
-                if (!regex.test(this.logicalExpression) && mappinglength > 1) { // Basic check
-                    // Allow single number if length is 1
-                }
-
-                // Simpler validation aligned with displayInquiry
                 if (!regex.test(this.logicalExpression) && mappinglength > 1 && !/^\d+$/.test(this.logicalExpression)) {
                     this.showToast('Error', 'Invalid condition syntax in custom logic. Use numbers, AND, OR, spaces, and parentheses only.', 'error');
-                    // ... reset
                     return;
                 }
 
-                // ... check indices ...
                 const numbers = this.logicalExpression.match(/\d+/g);
                 if (numbers) {
                     const numberSet = new Set(numbers.map(Number));
@@ -742,7 +732,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                         filterResults[mapping.id] = result;
                     });
 
-                    // Transform AND/OR to &&/|| for eval
                     const evalExpression = this.logicalExpression
                         .replace(/\bAND\b/gi, '&&')
                         .replace(/\bOR\b/gi, '||');
@@ -755,28 +744,29 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                         return false;
                     }
                 });
-
-                console.log('applyFiltersData: filtered listings count', this.pagedFilteredListingData.length);
-
-                this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
-                this.totalRecords = this.pagedFilteredListingData.length;
-                this.currentPage = 1;
-                this.updateMapMarkers();
-            } else if (this.conditionType === 'any') {
+            } else if (this.conditiontype === 'any') {
                 this.selectedConditionType = 'Any Condition Is Met';
                 this.logicalExpression = '';
                 this.applyModalFilters();
-            } else if (this.conditionType === 'all') {
+            } else if (this.conditiontype === 'all') {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
                 this.applyModalFilters();
-            } else if (this.conditionType === 'related') {
+            } else if (this.conditiontype === 'related') {
                 this.selectedConditionType = 'Related List';
-                this.applyModalFilters();
-            } else if (this.conditionType === 'none') {
+                this.pagedFilteredListingData = this.totalListing.filter(listing => {
+                    return listing.mvex__inquiries__r && listing.mvex__inquiries__r.some(inq => inq.Id === this.recordId);
+                });
+            } else if (this.conditiontype === 'none') {
                 this.selectedConditionType = 'None';
-                this.applyModalFilters();
+                this.pagedFilteredListingData = [...this.totalListing];
             }
+
+            this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+            this.totalRecords = this.pagedFilteredListingData.length;
+            this.currentPage = 1;
+            this.updateMapMarkers();
+
         } catch (error) {
             errorDebugger('DisplayListing', 'applyFiltersData', error, 'warn', 'Error in applyFiltersData');
             this.showToast('Error', 'Error applying filters', 'error');
@@ -1133,7 +1123,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     if (result === 'Success') {
                         console.log('Configuration saved successfully');
                     } else {
-                        this.showToast('Error', 'Failed to save configuration', 'error');
+                        this.showToast('Error', 'Failed to save configuration: '+result, 'error');
                     }
                 })
                 .catch(error => {

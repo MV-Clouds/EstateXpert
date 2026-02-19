@@ -188,12 +188,12 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
 
     /**
     * Method Name: handleClick
-    * @description: Used to open portalMappingLandingPage LWC component.
+    * @description: Used to navigate to portalMappingLandingPage by firing custom event.
     * Date: 04/06/2024
+    * Updated: 17/02/2026
     * Created By: Karan Singh
-    * Last Update Date : 06/06/2024
-    * Updated By : Karan Singh
-    * Change Description : Removed the if else condition and passing the values directly to another LWC component.
+    * Updated By: Karan Singh
+    * Change Description: Changed to fire custom event for control center navigation.
     */
     handleClick(event) {
         try {
@@ -204,26 +204,22 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
             let portalStatus = event.currentTarget.dataset.portalstatus;
             let portalGen = event.currentTarget.dataset.portalgen;
 
-            let componentDef = {
-                componentDef: "MVEX:portalMappingLandingPage",
-                attributes: {
+            // Fire custom event for control center to handle navigation
+            const navigateEvent = new CustomEvent('portalnavigate', {
+                detail: {
                     portalId: portalId,
                     portalGen: portalGen,
                     portalName: portalName,
                     portalIconUrl: portalIconURL,
                     portalStatus: portalStatus,
                     isXMLForPF: this.isXMLForPF
-                }
-            };
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
+                },
+                bubbles: true,
+                composed: true
             });
+            this.dispatchEvent(navigateEvent);
         } catch (error) {
-            errorDebugger('PortalMappingComponent', 'handleClick', error, 'warn', 'Failed to navigate to portalMappingLandingPage LWC component in handleClick method');
+            errorDebugger('PortalMappingComponent', 'handleClick', error, 'warn', 'Failed to navigate to portalMappingLandingPage in handleClick method');
         }
     }
 

@@ -60,6 +60,16 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
     }
 
     /**
+    * Method Name: isButtonsDisabled
+    * @description: Returns true if no changes have been made to disable save and revert buttons.
+    * Created Date: 17/02/2026
+    * Created By: Karan Singh
+    */
+    get isButtonsDisabled() {
+        return !this.isDataChanged;
+    }
+
+    /**
     * Method Name: getListingFields
     * @description: Used to get all custom metadata, blocked fields and Listing object fields values.
     * Created Date: 04/06/2024
@@ -165,7 +175,7 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
                 });
             });
     
-            this.originalMappingData = this.finalList;
+            this.originalMappingData = JSON.parse(JSON.stringify(this.finalList));
             this.isSpinner = false;
         } catch (error) {
             errorDebugger('PortalMappingLandingPage', 'processFieldWrapperData', error, 'warn', 'Error occurred while processing field wrapper data');
@@ -371,15 +381,16 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
     * Method Name: revertTheChanges
     * @description: Used to revert back to the previous changes.
     * Created Date: 04/06/2024
-    * Last Updated Date: 23/12/2024
+    * Last Updated Date: 17/02/2026
     * Created By: Karan Singh
     * Last Updated By: Karan Singh
     */
     revertTheChanges() {
         try {
             if (this.isDataChanged) {
-                this.finalList = this.originalMappingData;
-                this.isDataChanged = false;   
+                this.finalList = JSON.parse(JSON.stringify(this.originalMappingData));
+                this.isDataChanged = false;
+                this.showToast('Success', 'Changes reverted successfully', 'success');
             }
         } catch (error) {
             errorDebugger('PortalMappingLandingPage', 'revertTheChanges', error, 'warn', 'Error occurred while reverting back to the previous changes');

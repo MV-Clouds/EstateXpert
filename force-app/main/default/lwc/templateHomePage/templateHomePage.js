@@ -343,14 +343,31 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                 ...template,
                 rowIndex: index + 1,
                 isActive: template.MVEX__Template_Status__c,
-                CreatedDateformatted: this.formatDate(template.CreatedDate),
-                LastModifiedDateformatted: this.formatDate(template.LastModifiedDate)
+                MVEX__Template_Name__c: this.handleEmptyValue(template.MVEX__Template_Name__c),
+                MVEX__Object_Name__c: this.handleEmptyValue(template.MVEX__Object_Name__c),
+                MVEX__Template_pattern__c: this.handleEmptyValue(template.MVEX__Template_pattern__c),
+                MVEX__Subject__c: this.handleEmptyValue(template.MVEX__Subject__c),
+                MVEX__Description__c: this.handleEmptyValue(template.MVEX__Description__c),
+                CreatedDateformatted: this.formatDate(template.CreatedDate) || '-',
+                LastModifiedDateformatted: this.formatDate(template.LastModifiedDate) || '-'
             }));
             this.filteredTemplates = [...this.templates];
             this.applyFilters();
         } catch (error) {
             console.log('Error in processTemplates ==> ', error.stack);
         }
+    }
+
+    /**
+    * Method Name: handleEmptyValue
+    * @param {Any} value : value to check
+    * @return {String} : returns the value or '-' if empty
+    * @description: helper method to replace null/undefined/empty values with '-'
+    * Created Date: 18/02/2026
+    * Created By: Karan Singh
+    */
+    handleEmptyValue(value) {
+        return (value !== null && value !== undefined && value !== '' && value !== 'null') ? value : '-';
     }
 
 
@@ -366,6 +383,8 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     */
     formatDate(dateStr) {
         try {
+            if (!dateStr) return '-';
+            
             let formatdate = new Date(dateStr);
             formatdate.setDate(formatdate.getDate());
 
@@ -379,7 +398,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             return `${paddedDay}/${paddedMonth}/${year}`;
         } catch (error) {
             console.log('Error in formatDate ==> ', error.stack);
-            return '';
+            return '-';
         }
     }
 

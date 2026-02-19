@@ -61,11 +61,11 @@ input[type=number]::-webkit-outer-spin-button {
   border: 1px solid #02afff;
   overflow: hidden;
   position: relative;
-  background-color: aliceblue;
-  background-repeat: no-repeat;
+  background-color: #f5f7fa;
+  /* background-repeat: no-repeat;
   background-size: cover;
   background-position: unset;
-  background-image: url('/resource/MVEX__newImageandMediaBg') !important;
+  background-image: url('/resource/MVEX__newImageandMediaBg') !important; */
 }
 
 /* ---- TAB SECTION CSS --- START ---- */

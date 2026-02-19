@@ -6,12 +6,11 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
     <template if:true={isTemplateVisible}>
         <div class="main">
-            <template if:true={isLoading}>
-                <c-spinner-component></c-spinner-component>
-            </template>
-
             <div class="main_header_cls">
                 <div class="sub_main_header_css">
                     <div slot="title" class="header_block_css">
@@ -24,7 +23,7 @@
                             </svg>
                         </div>
                         <div class="portal_mapping">
-                            Message Template
+                            Message Templates
                         </div>
                     </div>
                     <div class="header">
@@ -46,8 +45,9 @@
                             type="search" placeholder="Search Name" onchange={handleChange}></lightning-input>
                     </div>
                     <div class="filter-icon-container" onclick={toggleFilterVisibility}>
-                        <img src="/resource/MVEX__filterIcon" alt="filter" class="filter-icon">
+                        <lightning-icon icon-name={filterIconName} alternative-text="Filter" size="x-small"></lightning-icon>
                     </div>
+                    <div if:true={showFilters} class="filter-backdrop" onclick={toggleFilterVisibility}></div>
                     <div if:true={showFilters} class="filter-dropdown-box">
                         <div class="filter-section">
                             <label class="filter-label">Category</label>
@@ -129,7 +129,7 @@
                                             <div class="action-btn">
                                                 <button class="action-div" data-id={record.id}
                                                     onclick={previewTemplate}>
-                                                    <svg width="14" height="14" fill="#000000"
+                                                    <svg width="15" height="15" fill="#000000"
                                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
                                                         enable-background="new 0 0 52 52" xml:space="preserve">
                                                         <path
@@ -142,7 +142,7 @@
                                                 </button>
                                                 <button class="action-div" data-id={record.id}
                                                     onclick={editTemplate}>
-                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
@@ -152,7 +152,7 @@
                                                 </button>
                                                 <button class="delete-div" data-id={record.id}
                                                     onclick={deleteTemplate}>
-                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"

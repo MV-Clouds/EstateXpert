@@ -1204,6 +1204,82 @@ span {
 .schedule-modal-footer {
     display: flex;
     justify-content: center;
+    gap: 0.5rem;
+    color: #6b7280;
+}
+
+/* Schedule Modal Styles */
+.main-modal-backdrop {
+    z-index: 9000;
+}
+
+.schedule-modal-backdrop {
+    z-index: 9100;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.schedule-modal {
+    z-index: 9200;
+}
+
+.schedule-modal .slds-modal__container {
+    width: 400px;
+    max-width: 90%;
+    min-width: 320px;
+    margin: 0 auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.schedule-modal-header {
+    background-color: #0176D3;
+    color: white;
+    padding: 1rem;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+
+.schedule-modal-header h2 {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.schedule-modal-content {
+    padding: 1.5rem;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+}
+
+.timezone-note {
+    font-size: 0.8125rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    background-color: rgb(226 242 255);
+    padding: 0.5rem;
+    border-radius: 5px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.timezone-note svg {
+    color: #0074da;
+}
+
+.main-line { font-size: 14px; }
+.next-line { font-size: 12px; }
+
+.schedule-modal-footer {
+    display: flex;
+    justify-content: center;
     gap: 0.75rem;
     padding-top: 1rem;
     border-bottom-left-radius: 0.25rem;

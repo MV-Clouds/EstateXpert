@@ -399,7 +399,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     handleSearchChange1(event) {
       try{
-        this.isCustomLogicEnabled = false;
+        
           const index = event.currentTarget.dataset.id;
           this.filterFields[index].searchTerm = event.target.value;
           if (this.filterFields[index].searchTerm.length > 50) {
@@ -495,7 +495,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     selectOption1(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const value = event.currentTarget.dataset.id;
             const index = event.currentTarget.dataset.index;
         
@@ -541,7 +541,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     removeOptionMethod(event){
-        this.isCustomLogicEnabled = false;
+        
         this.removeOption1(event);
         this.applyFilters();
     }
@@ -651,7 +651,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     addTheString(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             const value = this.filterFields[index].searchTerm.trim();
             
@@ -680,13 +680,14 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMinValueChange(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
     
             if (isNaN(value)) {
                 value = null;
             }
+            
     
             // Clear any existing debounce timer
             if (this.debounceTimeout) {
@@ -697,6 +698,12 @@ export default class ListingManagerFilterCmp extends LightningElement {
             this.debounceTimeout = setTimeout(() => {
                 this.filterFields[index].minValue = value;
     
+                if (value < 0) {
+                this.filterFields[index].message =
+                    'Filters are not applied for negative values';
+                return; 
+            }
+            
                 if (
                     this.filterFields[index].isMin === true ||
                     value <= this.filterFields[index].maxValue ||
@@ -722,7 +729,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMaxValueChange(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
     
@@ -739,6 +746,12 @@ export default class ListingManagerFilterCmp extends LightningElement {
             this.debounceTimeout = setTimeout(() => {
                 this.filterFields[index].maxValue = value;
     
+                if (value < 0) {
+                this.filterFields[index].message =
+                    'Filters are not applied for negative values';
+                return; 
+            }
+            
                 if (
                     this.filterFields[index].isMax === true ||
                     value === 0 ||
@@ -764,7 +777,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     incrementMinValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].minValue, 10);
     
@@ -805,7 +818,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     decrementMinValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].minValue, 10);
     
@@ -848,7 +861,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     incrementMaxValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].maxValue, 10);
     
@@ -890,7 +903,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     decrementMaxValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].maxValue, 10);
     
@@ -933,7 +946,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     checkboxFieldChange(event){
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             this.filterFields[index].fieldChecked = !this.filterFields[index].fieldChecked;
             this.applyFilters();
@@ -950,7 +963,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     handleMinDate(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             const newValue = event.target.value;
             this.filterFields[index].minDate = newValue;
@@ -977,7 +990,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMaxDate(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             const newValue = event.target.value;
             this.filterFields[index].maxDate = newValue;
@@ -1004,7 +1017,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     clearSearch(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             if (index > -1 && index < this.filterFields.length) {
                 this.filterFields.splice(index, 1);

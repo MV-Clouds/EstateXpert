@@ -1700,6 +1700,7 @@ openConfigureSettings(){
     // Handle previous button on last page
     handlePreviousLastPage() {
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
     }
 

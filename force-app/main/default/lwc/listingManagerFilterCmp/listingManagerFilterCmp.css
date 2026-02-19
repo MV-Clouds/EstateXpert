@@ -78,6 +78,7 @@
 .combobox .pill-section {
     position: relative;
     padding: 0;
+    padding-top: 0.3rem;
     padding-right: 3.75rem;
     height: fit-content;
     overflow: hidden;
@@ -127,10 +128,10 @@
 
 .combobox .input-delete-cover{
     display: flex;
+    gap: 0.5rem;
 }
 
 .combobox .input-delete-cover .delete-icon-cover{
-    margin-left: 0.5rem;
     display: flex;
     justify-content: center;
     align-items: center;

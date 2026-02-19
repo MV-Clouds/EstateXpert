@@ -36,6 +36,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @track visiblePages = 5;
     @track fieldsModal = false;
     @track isAccessible = false;
+    @track listingLoading = false;
     isConfigOpen = false;
 
     /**
@@ -580,6 +581,15 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         this.processedListingData = event.detail;
         this.updateShownData();
         this.updateSelectedProperties();
+    }
+
+    /**
+    * Method Name : handleLoading
+    * @description : handle the loading event from the filter cmp
+    * Date: 19/02/2026
+    */
+    handleLoading(event){
+        this.listingLoading = event.detail;
     }
 
     /**

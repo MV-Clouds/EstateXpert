@@ -48,6 +48,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */  
     initializeStaticFields() {
         this.isLoading = true;
+        this.dispatchEvent(new CustomEvent('loading', { detail: true }));
         getStaticFields()
             .then(result => {
                 this.staticFields = JSON.parse(result);
@@ -57,6 +58,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 console.log('this.filterFields',JSON.stringify(this.filterFields));
                 
                 this.isLoading = false;
+                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             })
             .catch(error => {
                 errorDebugger('ListingManagerFilterCmp', 'initializeStaticFields', error, 'warn', 'Error in initializeStaticFields');
@@ -85,6 +87,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */    
     loadPicklistValues(field) {
+        this.dispatchEvent(new CustomEvent('loading', { detail: true }));
         getPicklistValues({apiName:field.apiName,objectName:field.objectApiName})
         .then(result => {
             this.staticFields = this.staticFields.map(f => {
@@ -99,9 +102,11 @@ export default class ListingManagerFilterCmp extends LightningElement {
             });
             this.filterFields = [...this.staticFields];
             this.updateFilterIndices();
+            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         })
         .catch(error => {
             errorDebugger('ListingManagerFilterCmp', 'loadPicklistValues', error, 'warn', 'Error in loadPicklistValues');
+            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         });
     }
 
@@ -337,20 +342,24 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
             console.log('Final Query:', finalQuery); // Debug the final query string
             this.isLoading = true;
+            this.dispatchEvent(new CustomEvent('loading', { detail: true }));
             getFilteredListings({ filterConditions: finalQuery })
                 .then(result => {
                     this.filteredListings = result;
                     this.setFilteredListings();
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                 })
                 .catch(error => {
                     errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                 });
 
         } catch(error) {
             errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
             this.isLoading = false;
+            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         }
     }
 

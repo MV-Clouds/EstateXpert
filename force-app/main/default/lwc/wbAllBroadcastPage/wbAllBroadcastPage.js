@@ -10,6 +10,7 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getBroadcastRecsWithReplies from '@salesforce/apex/BroadcastMessageController.getBroadcastRecsWithReplies';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
+import getBroadcastMembersByGroupId from '@salesforce/apex/BroadcastMessageController.getBroadcastMembersByGroupId';
 
 export default class WbAllBroadcastPage extends NavigationMixin(LightningElement) {
     @track data = [];
@@ -33,6 +34,10 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track popUpLastPage = false;
     @track popupHeader = 'Choose Broadcast Groups';
 
+    // Group members (contacts) list properties
+    @track groupMembers = [];
+    @track filteredGroupMembers = [];
+
     @track selectedListValue = 'Broadcast';
     @track isBroadCastSelected = true;
     @track isTemplateVisible = false;
@@ -48,6 +53,10 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     get showNoRecordsMessage() {
         return this.filteredData.length === 0;
+    }
+
+    get modalContainerClass() {
+        return this.popUpSecondpage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
     }
 
     get totalItems() {
@@ -233,7 +242,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             label: template.MVEX__Template_Name__c,
             value: template.Id
         }));
-
+        this.selectedTemplate = this.templateOptions[0].value;
         
     }
 
@@ -415,13 +424,79 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 return;
             }
 
+            // Fetch group members and show the contact list page
+            this.loadGroupMembers();
+        } catch (error) {
+            this.showToast('Error!', 'Error proceeding to next step', 'error');
+        }
+    }
+
+    /**
+     * Method Name : loadGroupMembers
+     * @description : Fetch members for all selected broadcast groups and display them
+     * Date: 18/02/2026
+     */
+    async loadGroupMembers() {
+        this.isLoading = true;
+        try {
+            let allMembers = [];
+            const seenIds = new Set();
+
+            for (const group of this.selectedGroupIds) {
+                const result = await getBroadcastMembersByGroupId({ 
+                    groupId: group.Id, 
+                    objectName: group.ObjName, 
+                    broadcastId: null 
+                });
+                if (result && result.length > 0) {
+                    for (const wrapper of result) {
+                        const record = wrapper.record;
+                        const uniqueKey = record.Id;
+                        if (!seenIds.has(uniqueKey)) {
+                            seenIds.add(uniqueKey);
+                            allMembers.push({
+                                Id: record.Id,
+                                Name: record.Name || '—',
+                                Phone: record.Phone || record.MobilePhone || '—',
+                                GroupName: group.Name
+                            });
+                        }
+                    }
+                }
+            }
+
+            this.groupMembers = allMembers;
+            this.filteredGroupMembers = [...this.groupMembers];
+
+            // Update template options and go to the combined second page
             this.updateTemplateOptions();
-    
-            this.popupHeader = 'Choose Template';
             this.popUpFirstPage = false;
             this.popUpSecondpage = true;
+            this.popUpLastPage = false;
+            this.popupHeader = 'Send Template';
         } catch (error) {
-            this.showToast('Error!', 'Please select template', 'error');
+            console.error('Error loading group members:', error);
+            this.showToast('Error', 'Failed to load group members', 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    /**
+     * Method Name : handleSearchMembers
+     * @description : Search/filter group members by name, phone or group name
+     * Date: 18/02/2026
+     */
+    handleSearchMembers(event) {
+        const searchKey = event.detail.value?.toLowerCase() || '';
+        if (!searchKey) {
+            this.filteredGroupMembers = [...this.groupMembers];
+        } else {
+            this.filteredGroupMembers = this.groupMembers.filter(member =>
+                (member.Name && member.Name.toLowerCase().includes(searchKey)) ||
+                (member.Phone && member.Phone.toLowerCase().includes(searchKey)) ||
+                (member.GroupName && member.GroupName.toLowerCase().includes(searchKey))
+            );
         }
     }
 
@@ -434,6 +509,9 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             break;
             case 'dateTime':
                 this.selectedDateTime = value;                
+            break;
+            case 'scheduleDateTime':
+                this.selectedDateTime = value;
             break;
         }
     }
@@ -451,12 +529,16 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         this.popUpFirstPage = true;
         this.popUpSecondpage = false;
         this.popUpLastPage = false;
-        this.popupHeader = 'Select Groups';
+        this.popupHeader = 'Choose Broadcast Groups';
     
         // Reset the selected values
         this.selectedGroupIds = [];
         this.selectedTemplate = '';
         this.selectedDateTime = '';
+
+        // Reset group members
+        this.groupMembers = [];
+        this.filteredGroupMembers = [];
     
         // Reset the filteredGroups and update IsChecked property
         this.filteredGroups = this.broadcastGroups.map(group => ({
@@ -473,25 +555,17 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     }
 
     handleSchedulePopup(){
-
         if(this.selectedTemplate === '' || this.selectedTemplate === null){
             this.showToast('Error!', 'Please select template', 'error');
             return;
         }
 
-        this.popupHeader = 'Select Date and Time'
-
-        this.popUpFirstPage = false;
-        this.popUpSecondpage = false;
+        // Show schedule as overlay modal on top of the current page
         this.popUpLastPage = true;
     }
 
-    handlePreviousLastpage(){
-        this.popupHeader = 'Choose Template';
-        this.popUpFirstPage = false;
-        this.popUpSecondpage = true;
+    handlePreviousLastPage(){
         this.popUpLastPage = false;
-
     }
 
     handleSchedule(){
@@ -513,7 +587,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
         createChatRecods({templateId: this.selectedTemplate, groupIds: grpIdList, isScheduled: true, timeOfMessage: this.selectedDateTime})
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseOnPopup();
                 } else {
@@ -561,7 +635,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
         createChatRecods({templateId: this.selectedTemplate, groupIds: grpIdList, isScheduled: false, timeOfMessage: ''})
             .then(result => {
-                if (result === 'Success') {
+                if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseOnPopup();
                 } else {

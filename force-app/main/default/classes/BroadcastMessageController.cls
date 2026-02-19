@@ -713,44 +713,44 @@ public with sharing class BroadcastMessageController {
             String escapedQuery = String.escapeSingleQuotes(query);
             List<SObject> matchedRecords = Database.query(escapedQuery, AccessLevel.USER_MODE);
 
-            // Get broadcast creation date for reply filtering
-            Broadcast__c broadcast = [SELECT CreatedDate FROM Broadcast__c WHERE Id = :broadcastId WITH USER_MODE LIMIT 1];
-            
-            // Get reply counts for each phone number
+            // Get broadcast creation date for reply filtering (only when broadcastId is provided)
             Map<String, Boolean> phoneToHasReply = new Map<String, Boolean>();
-            if (!values.isEmpty()) {
-                List<Chat__c> replyMessages = [
-                    SELECT Phone__c
-                    FROM Chat__c 
-                    WHERE Phone__c IN :values
-                    AND Type_of_Message__c = 'Inbound Messages'
-                    AND CreatedDate >= :broadcast.CreatedDate
-                    WITH USER_MODE
-                ];
-
-                for (Chat__c reply : replyMessages) {
-                    phoneToHasReply.put(reply.Phone__c, true);
-                }
-            }
-
-            // Step 2: Get phone numbers and statuses
-            Set<String> phoneNumbers = new Set<String>();
-            for (Broadcast_Group_Member__c member : members) {
-                phoneNumbers.add(member.Phone_Number__c);
-            }
-
-            if (phoneNumbers.isEmpty()) {
-                return new List<BroadcastMemberWrapper>();
-            }
-
-            // Step 3: Fetch chat statuses using phone numbers
             Map<String, String> phoneToChatStatus = new Map<String, String>();
-            List<Chat__c> broadcastRelatedChats = [SELECT Phone__c, Message_Status__c FROM Chat__c WHERE WB_Broadcast__c = :broadcastId AND Phone__c IN :phoneNumbers WITH SECURITY_ENFORCED];
 
-            for (Chat__c chat : broadcastRelatedChats) {
-                // If there are multiple chats per phone, you can decide to pick the latest or first one — adjust as needed
-                if (!phoneToChatStatus.containsKey(chat.Phone__c)) {
-                    phoneToChatStatus.put(chat.Phone__c, chat.Message_Status__c);
+            if (String.isNotBlank(broadcastId)) {
+                Broadcast__c broadcast = [SELECT CreatedDate FROM Broadcast__c WHERE Id = :broadcastId WITH USER_MODE LIMIT 1];
+                
+                // Get reply counts for each phone number
+                if (!values.isEmpty()) {
+                    List<Chat__c> replyMessages = [
+                        SELECT Phone__c
+                        FROM Chat__c 
+                        WHERE Phone__c IN :values
+                        AND Type_of_Message__c = 'Inbound Messages'
+                        AND CreatedDate >= :broadcast.CreatedDate
+                        WITH USER_MODE
+                    ];
+
+                    for (Chat__c reply : replyMessages) {
+                        phoneToHasReply.put(reply.Phone__c, true);
+                    }
+                }
+
+                // Step 2: Get phone numbers and statuses
+                Set<String> phoneNumbers = new Set<String>();
+                for (Broadcast_Group_Member__c member : members) {
+                    phoneNumbers.add(member.Phone_Number__c);
+                }
+
+                if (!phoneNumbers.isEmpty()) {
+                    // Step 3: Fetch chat statuses using phone numbers
+                    List<Chat__c> broadcastRelatedChats = [SELECT Phone__c, Message_Status__c FROM Chat__c WHERE WB_Broadcast__c = :broadcastId AND Phone__c IN :phoneNumbers WITH SECURITY_ENFORCED];
+
+                    for (Chat__c chat : broadcastRelatedChats) {
+                        if (!phoneToChatStatus.containsKey(chat.Phone__c)) {
+                            phoneToChatStatus.put(chat.Phone__c, chat.Message_Status__c);
+                        }
+                    }
                 }
             }
 

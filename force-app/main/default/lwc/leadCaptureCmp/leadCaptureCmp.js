@@ -299,19 +299,16 @@ export default class LeadCaptureCmp extends NavigationMixin(LightningElement) {
         try {
             const integrationName = event.target.dataset.name;
             const integrationType = integrationName === 'GoogleAds' ? 'Google' : 'Meta';
-            let componentDef = {
-                componentDef: "MVEX:googleLeadFieldMapping",
-                attributes: {
+            
+            // Fire custom event for control center to handle navigation
+            const navigateEvent = new CustomEvent('leadcapturenavigate', {
+                detail: {
                     integrationType: integrationType
-                }
-            };
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
+                },
+                bubbles: true,
+                composed: true
             });
+            this.dispatchEvent(navigateEvent);
         } catch (error) {
             console.log('Error in configureMapping:', error);
         }

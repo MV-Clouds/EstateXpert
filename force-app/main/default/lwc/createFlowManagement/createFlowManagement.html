@@ -1,16 +1,66 @@
 <template>
-
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
     <template if:false={showLicenseError}>
         <div class="main-container">
-            <template if:true={isLoading}>
-                <c-spinner-component></c-spinner-component>
-            </template>
-
-            <div class="slds-theme_default main">
-                <template if:false={isEdit}>
-                    <div class="heading">
-                        <p class="txt">Create Flow</p>
+            <!-- Header Section -->
+            <div class="main_header_cls">
+                <div class="sub_main_header_css">
+                    <div class="header_block_css">
+                        <div class="svg_back_icon" onclick={handleDiscard}>
+                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                    fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div class="portal_mapping">
+                            <template if:false={isEdit}>Create Flow</template>
+                            <template if:true={isEdit}>
+                                <div class="flow-info-header">
+                                    <span class="flow-name-header">{flowName}</span>
+                                    <!-- <div class="formatted-text1">
+                                        <span class="segment one">{status}</span>
+                                        <span class="dot">•</span>
+                                        <span class="segment two">{formatDate}</span>
+                                    </div> -->
+                                </div>
+                            </template>
+                        </div>
                     </div>
+                    <div class="header-actions">
+                        <template if:false={isEdit}>
+                            <button class="btn" onclick={handleCreate} disabled={isCreateDisabled}>
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                                </svg>
+                                Create
+                            </button>
+                        </template>
+                        <template if:true={isEdit}>
+                            <template if:true={isSaveEnabled}>
+                                <button class="btn" onclick={onSaveClick}>Save</button>
+                            </template>
+                            <template if:true={isPublishedEnabled}>
+                                <button class="btn" onclick={onPublishClick} disabled={disablePublish}>Publish</button>
+                            </template>
+                            <template if:true={isDeleteEnabled}>
+                                <button class="btn btn-delete" onclick={onDeleteClick}>Delete</button>
+                            </template>
+                            <template if:true={isDeprecateEnabled}>
+                                <button class="btn" onclick={onDeprecateClick}>Deprecate</button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Section -->
+            <template if:false={isEdit}>
+                <div class="content-wrapper">
                     <div class="divcontainer2">
                         <div class="createFlowDiv">
                             <div class="slds-box slds-theme_default templateContent3">
@@ -81,138 +131,87 @@
                             </div>
                         </div>
                         <div class="flowPreviewDiv">
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template if:true={isEdit}>
+                <div class="content-wrapper">
+                    <div class="edit-content">
+                        <div class="editor-header">
+                            <p class="editor-heading">Editor</p>
+                            <button class="btn" onclick={onRunClick}>Run</button>
+                        </div>
+                        <div class="editor-container">
+                            <div class="editor" lwc:dom="manual"></div>
+                        </div>
+                    </div>
 
+                    <div class="preview-content">
+                        <div class="preview-header">
+                            <p class="preview-heading-text">Preview</p>
+                        </div>
+                        <div class="preview-container">
+                            <c-wb-flow-preview flowname={flowName} jsonstringdata={jsonString}></c-wb-flow-preview>
                         </div>
                     </div>
-                    <div class="slds-box slds-theme_default templatebtn">
-                        <div class="footer-btn">
-                            <lightning-button variant="brand-outline" onclick={handleDiscard} label="Discard"
-                                class="slds-m-left_x-small"></lightning-button>
-                            <p class="footer-desp">When utilising template flow JSON, you are responsible for
-                                customising the experience to suit your use case, adhering to applicable laws and
-                                complying with WhatsApp Business Messaging Policy.</p>
+                </div>
+            </template>
+            <template if:true={showPublishPopup}>
+                <div class="backdrop" onclick={closePublishPopup}></div>
+                <div class="popup">
+                    <div class="popup-content">
+                        <div class="left-section">
+                            <img src={publishImageUrl} alt="Illustration" />
                         </div>
-                        <lightning-button variant="brand" label="Create" onclick={handleCreate}
-                            class="slds-m-left_x-small" disabled={isCreateDisabled}></lightning-button>
-                    </div>
-                </template>
-                <template if:true={isEdit}>
-                    <div class="divcontainer2">
-                        <div class="createFlowDiv">
-                            <div class="name-header">
-                                <div class="flow-info">
-                                    <div class="puzzle">
-                                        <img src={flowIconUrl} alt="puzzle icon">
-                                    </div>
-                                    <div class="name-section slds-m-left--x-small">
-                                        <p class="flow-name">&nbsp; {flowName}</p>
-                                        <div class="status-date">
-                                            <div class="formatted-text1">
-                                                <span class="segment one">{status}</span>
-                                                <span class="dot">•</span>
-                                                <span class="segment two">{formatDate}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="cancel_btn_css slds-m-horizontal--xx-small"
-                                        onclick={onBackClick}>Back</button>
-                                    <template if:true={isSaveEnabled}>
-                                        <button class="cancel_btn_css slds-m-horizontal--xx-small"
-                                            onclick={onSaveClick}>Save</button>
-                                    </template>
-                                    <template if:true={isPublishedEnabled}>
-                                        <button class="cancel_btn_css slds-m-horizontal--xx-small" onclick={onPublishClick}
-                                            disabled={disablePublish}>Publish</button>
-                                    </template>
-                                    <template if:true={isDeleteEnabled}>
-                                        <button class="cancel_btn_css slds-m-horizontal--xx-small"
-                                            onclick={onDeleteClick}>Delete</button>
-                                    </template>
-                                    <template if:true={isDeprecateEnabled}>
-                                        <button class="cancel_btn_css slds-m-horizontal--xx-small"
-                                            onclick={onDeprecateClick}>Deprecate</button>
-                                    </template>
-                                </div>
+                        <div class="right-section">
+                            <h2>You're about to publish this flow</h2>
+                            <p>After this flow has been published, you can:</p>
+                            <ul>
+                                <li>📤 Attach it to a message template to start engaging with your audience.
+                                </li>
+                                <li>✏️ Edit the content of the flow JSON and publish a new version.</li>
+                            </ul>
+                            <div class="button-group">
+                                <button class="cancel" onclick={closePublishPopup}>Cancel</button>
+                                <button class="publish" onclick={handlePublish}>Publish</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
 
-                            <div class="flow-content">
-                                <div class="edit-content">
-                                    <div class="editor-div slds-p-around--x-small">
-                                        <p class="editor-heading slds-p-around--small slds-text-heading--medium">
-                                            Editor</p>
-                                        <button class="cancel_btn_css" onclick={onRunClick}>Run</button>
-                                    </div>
-                                    <div class="editor-container">
-                                        <div class="editor" lwc:dom="manual"></div>
-                                    </div>
-                                </div>
-                                <div class="previewFlow">
-                                    <c-wb-flow-preview flowname={flowName}
-                                        jsonstringdata={jsonString}></c-wb-flow-preview>
+            <template if:true={showDeletePopup}>
+                <div class="edit-backdrop" onclick={closeDeletePopup}></div>
+                <div class="edit-popup">
+                    <div class="edit-popup-content">
+                        <h2 class="edit-popup-title">Are you sure you want to delete this flow?</h2>
+                        <p class="edit-popup-text">
+                            Once deleted, you won't be able to access this flow again. This cannot be undone.
+                        </p>
+                        <div class="edit-button-group">
+                            <button class="edit-cancel-button" onclick={closeDeletePopup}>Cancel</button>
+                            <button class="edit-delete-button" onclick={handleDelete}>Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
 
-                                </div>
-                            </div>
+            <template if:true={showDeprecatePopup}>
+                <div class="edit-backdrop" onclick={closeDeprecatePopup}></div>
+                <div class="edit-popup">
+                    <div class="edit-popup-content">
+                        <h2 class="edit-popup-title">Are you sure you want to deprecate this flow?</h2>
+                        <p class="edit-popup-text">
+                            Once deprecated, you won't be able to revert. This cannot be undone.
+                        </p>
+                        <div class="edit-button-group">
+                            <button class="edit-cancel-button" onclick={closeDeprecatePopup}>Cancel</button>
+                            <button class="edit-delete-button" onclick={handleDeprecate}>Deprecate</button>
                         </div>
                     </div>
-                </template>
-                <template if:true={showPublishPopup}>
-                    <div class="backdrop" onclick={closePublishPopup}></div>
-                    <div class="popup">
-                        <div class="popup-content">
-                            <div class="left-section">
-                                <img src={publishImageUrl} alt="Illustration" />
-                            </div>
-                            <div class="right-section">
-                                <h2>You're about to publish this flow</h2>
-                                <p>After this flow has been published, you can:</p>
-                                <ul>
-                                    <li>📤 Attach it to a message template to start engaging with your audience.
-                                    </li>
-                                    <li>✏️ Edit the content of the flow JSON and publish a new version.</li>
-                                </ul>
-                                <div class="button-group">
-                                    <button class="cancel" onclick={closePublishPopup}>Cancel</button>
-                                    <button class="publish" onclick={handlePublish}>Publish</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <template if:true={showDeletePopup}>
-                    <div class="edit-backdrop" onclick={closeDeletePopup}></div>
-                    <div class="edit-popup">
-                        <div class="edit-popup-content">
-                            <h2 class="edit-popup-title">Are you sure you want to delete this flow?</h2>
-                            <p class="edit-popup-text">
-                                Once deleted, you won't be able to access this flow again. This cannot be undone.
-                            </p>
-                            <div class="edit-button-group">
-                                <button class="edit-cancel-button" onclick={closeDeletePopup}>Cancel</button>
-                                <button class="edit-delete-button" onclick={handleDelete}>Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <template if:true={showDeprecatePopup}>
-                    <div class="edit-backdrop" onclick={closeDeprecatePopup}></div>
-                    <div class="edit-popup">
-                        <div class="edit-popup-content">
-                            <h2 class="edit-popup-title">Are you sure you want to deprecate this flow?</h2>
-                            <p class="edit-popup-text">
-                                Once deprecated, you won't be able to revert. This cannot be undone.
-                            </p>
-                            <div class="edit-button-group">
-                                <button class="edit-cancel-button" onclick={closeDeprecatePopup}>Cancel</button>
-                                <button class="edit-delete-button" onclick={handleDeprecate}>Deprecate</button>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
+                </div>
+            </template>
         </div>
     </template>
 </template>

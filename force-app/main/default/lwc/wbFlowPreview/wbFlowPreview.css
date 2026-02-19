@@ -2,8 +2,8 @@
     box-shadow: 2px 2px 10px rgba(0,0,0, 0.1);
     background-color: transparent;
     height: calc(100vh - 220px);
-    width: fit-content;
-    margin-right: 1rem;
+    width: 100%;
+    /* margin-right: 1rem; */
     border-radius: 5px;
 }
 

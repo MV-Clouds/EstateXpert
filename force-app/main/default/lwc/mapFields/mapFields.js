@@ -23,6 +23,9 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     @track showConfirmationModal = false;
     @track isScroll = false;
     @track isDirectAccess = false;
+    @track hasChanges = false;
+    @track originalDropDownPairs = [];
+    @track originalCheckboxValue = false;
 
     /**
     * Method Name: delButtonClass
@@ -59,6 +62,16 @@ export default class MapFields extends NavigationMixin(LightningElement) {
 
     get isDropDownpairAvailable(){
         return this.dropDownPairs.length > 0;
+    }
+
+    /**
+    * Method Name: isRevertDisabled
+    * @description: Disable revert button when no changes exist
+    * Date: 18/02/2026
+    * Created By: Karan Singh
+    */
+    get isRevertDisabled() {
+        return !this.hasChanges;
     }
 
     /**
@@ -247,6 +260,8 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                     this.isLoading = false;
                 });
                 this.isLoading = false;
+                // Store original state after loading
+                this.storeOriginalState();
             }
         } catch (error) {
             errorDebugger('MapFields', 'parseAndSetMappings', error, 'warn', 'Error in parseAndSetMappings');
@@ -310,6 +325,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             this.dropDownPairs[index].selectedProperty = '';
             this.updateListingOptionsAfterIndex(index);
             this.filterAndUpdateListingOptions();
+            this.checkForChanges();
         } catch (error) {
             errorDebugger('MapFields', 'handleSourceFieldChange', error, 'warn', 'Error in handleSourceFieldChange');
         }
@@ -355,6 +371,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 this.savebutton = false;
             }
             this.filterAndUpdatePropertyOptions();
+            this.checkForChanges();
         } catch (error) {
             errorDebugger('MapFields', 'handleDestinationFieldChange', error, 'warn', 'Error in handleDestinationFieldChange');
         }
@@ -464,6 +481,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 this.savebutton = false;
             }
             this.isScroll = true;
+            this.checkForChanges();
         } catch (error) {
             errorDebugger('MapFields', 'addNewPair', error, 'warn', 'Error in addNewPair');
         }
@@ -486,6 +504,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             if (isListingValid && isPropertyValid) {
                 this.savebutton = false;
             }
+            this.checkForChanges();
         } catch (error) {
             errorDebugger('MapFields', 'deletePair', error, 'warn', 'Error in deletePair');
         }
@@ -504,6 +523,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             this.checkboxValue = false;
         }
         this.savebutton = false;
+        this.checkForChanges();
     }
 
     /**
@@ -542,6 +562,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 .then(() => {
                     this.showToast('Success', 'Mappings saved successfully', 'success');
                     this.savebutton = true;
+                    this.storeOriginalState();
                 })
                 .catch(error => {
                     errorDebugger('MapFields', 'saveMappingsToMetadata', error, 'warn', 'Error in saveMappingsToMetadata');
@@ -642,6 +663,72 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             });
         } catch (error) {
             errorDebugger('MapFields', 'backToControlCenter', error, 'warn', 'Error in backToControlCenter');
+        }
+    }
+
+    /**
+    * Method Name: storeOriginalState
+    * @description: Store the original state for revert functionality
+    * Date: 18/02/2026
+    * Created By: Karan Singh
+    */
+    storeOriginalState() {
+        try {
+            this.originalDropDownPairs = JSON.parse(JSON.stringify(this.dropDownPairs));
+            this.originalCheckboxValue = this.checkboxValue;
+            this.hasChanges = false;
+        } catch (error) {
+            errorDebugger('MapFields', 'storeOriginalState', error, 'warn', 'Error in storeOriginalState');
+        }
+    }
+
+    /**
+    * Method Name: checkForChanges
+    * @description: Check if any changes have been made from original state
+    * Date: 18/02/2026
+    * Created By: Karan Singh
+    */
+    checkForChanges() {
+        try {
+            const currentState = JSON.stringify({
+                pairs: this.dropDownPairs.map(pair => ({
+                    selectedListing: pair.selectedListing,
+                    selectedProperty: pair.selectedProperty
+                })),
+                checkbox: this.checkboxValue
+            });
+            
+            const originalState = JSON.stringify({
+                pairs: this.originalDropDownPairs.map(pair => ({
+                    selectedListing: pair.selectedListing,
+                    selectedProperty: pair.selectedProperty
+                })),
+                checkbox: this.originalCheckboxValue
+            });
+            
+            this.hasChanges = currentState !== originalState;
+        } catch (error) {
+            errorDebugger('MapFields', 'checkForChanges', error, 'warn', 'Error in checkForChanges');
+        }
+    }
+
+    /**
+    * Method Name: revertChanges
+    * @description: Revert all changes back to original state
+    * Date: 18/02/2026
+    * Created By: Karan Singh
+    */
+    revertChanges() {
+        try {
+            this.dropDownPairs = JSON.parse(JSON.stringify(this.originalDropDownPairs));
+            this.checkboxValue = this.originalCheckboxValue;
+            this.hasChanges = false;
+            this.savebutton = true;
+            this.filterAndUpdateListingOptions();
+            this.filterAndUpdatePropertyOptions();
+            this.showToast('Success', 'Changes have been reverted', 'success');
+        } catch (error) {
+            errorDebugger('MapFields', 'revertChanges', error, 'warn', 'Error in revertChanges');
         }
     }
 

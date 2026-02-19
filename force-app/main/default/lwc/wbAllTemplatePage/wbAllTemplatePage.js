@@ -58,6 +58,10 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         return this.isFilterVisible ? 'combobox-container visible' : 'combobox-container hidden';
     }
 
+    get filterIconName() {
+        return this.showFilters ? 'utility:close' : 'utility:filter';
+    }
+
     connectedCallback(){
         try {
             loadStyle(this, MulishFontCss)
@@ -158,7 +162,11 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                             ...record,
                             id: record.Id,
                             serialNumber: index + 1, 
-                            LastModifiedDate: this.formatDate(record.LastModifiedDate),
+                            MVEX__Template_Name__c: this.handleEmptyValue(record.MVEX__Template_Name__c),
+                            MVEX__Template_Category__c: this.handleEmptyValue(record.MVEX__Template_Category__c),
+                            LanguageLabel: this.handleEmptyValue(record.LanguageLabel),
+                            MVEX__Status__c: this.handleEmptyValue(record.MVEX__Status__c),
+                            LastModifiedDate: this.formatDate(record.LastModifiedDate) || '-',
                             isButtonDisabled,
                             cssClass: isButtonDisabled ? 'action edit disabled' : 'action edit'
                         };
@@ -226,9 +234,21 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             console.error('Error while handling changes in the filter.',error);
         }
     }
+
+    /**
+    * Method Name: handleEmptyValue
+    * @param {Any} value : value to check
+    * @return {String} : returns the value or '-' if empty
+    * @description: helper method to replace null/undefined/empty values with '-'
+    * Created Date: 18/02/2026
+    * Created By: Karan Singh
+    */
+    handleEmptyValue(value) {
+        return (value !== null && value !== undefined && value !== '' && value !== 'null') ? value : '-';
+    }
   
     formatDate(dateString) {
-        if (!dateString) return '';
+        if (!dateString) return '-';
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         return new Date(dateString).toLocaleDateString(undefined, options);
     }

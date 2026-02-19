@@ -4,209 +4,324 @@
     </template>
     <div class="mainContainer">
         <div class="subContainer">
-            <div class="main_header">
-                <h1>Control Center</h1>
-            </div>
-            <div class="tiles">
-                <div class="tiles-section" if:true={isGeneralSectionAvailable}>
-                    <div class="tiles-section-header">General</div>
-                    <div class="tile-flex">
-                        <div class="tile" onclick={mapListingAndPropertyMethod}
-                            if:true={featureAvailability.Map_Listing_And_Property}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/portalfieldmapping.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Map Listing and Property</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Map Listing and Property" modal allows user to map fields
-                                    between Listing and Property objects to automatically create
-                                    Property records with corresponding valuThe "Map Listing and
-                                    Property" modal streamlines data synchronization between
-                                    Listing and Property records by allowing users to define field
-                                    correspondences. This automation ensures that relevant
-                                    information is consistently transferred between the two object
-                                    types, eliminating manual data entry and reducing errors.
-                                </p>
-                                <span class="helptext">The "Map Listing and Property" modal streamlines data
-                                    synchronization between Listing and Property records by
-                                    allowing users to define field correspondences. This
-                                    automation ensures that relevant information is consistently
-                                    transferred between the two object types, eliminating manual
-                                    data entry and reducing errors.</span>
-                            </div>
-                        </div>
-                        <div class="tile" onclick={mapListingAndInquiryMethod}
-                            if:true={featureAvailability.Map_Listing_And_Inquiry}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/mappingIn.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Map Listing and Inquiry</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Map Listing and Inquiry" modal simplifies inquiry
-                                    management by automatically linking inquiries to their
-                                    corresponding listings, improving communication and customer
-                                    service.
-                                </p>
-                                <span class="helptext">The "Map Listing and Inquiry" modal simplifies inquiry
-                                    management by automatically linking inquiries to their
-                                    corresponding listings, improving communication and customer
-                                    service.</span>
-                            </div>
-                        </div>
-                        <div class="tile" onclick={leadAssignmentRule}
-                            if:true={featureAvailability.Lead_Assignment_Rule}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/leadAssignment.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Lead Assignment Rule</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Lead Assignment Rule" modal allows users to configure
-                                    lead assignment rules, enabling automatic distribution of
-                                    leads based on custom criteria.
-                                </p>
-                                <span class="helptext">Use this section to set up and manage how incoming leads are
-                                    assigned to users or teams according to your business
-                                    rules.</span>
-                            </div>
-                        </div>
-                        <div class="tile" onclick={objectConfigurationMethod}
-                            if:true={featureAvailability.Object_Config}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/settings.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Object Config</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Object Config" allows you to configure which objects and fields should be available when creating groups of members or sending email and WhatsApp messages from broadcast or campaign features, ensuring precise control over your marketing data structure.
-                                </p>
-                                <span class="helptext">The "Object Config" allows you to configure which objects and fields should be available when creating groups of members or sending email and WhatsApp messages from broadcast or campaign features, ensuring precise control over your marketing data structure.</span>
-                            </div>
-                        </div>
-                        <div class="tile" onclick={templateBuilderMethod}
-                            if:true={featureAvailability.Template_Builder}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/templatebuilder.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Template Builder</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Template Builder" modal empowers businesses to create
-                                    personalized templates for marketing campaigns and listings,
-                                    enhancing brand consistency and optimizing engagement.
-                                </p>
-                                <span class="helptext">The "Template Builder" modal empowers businesses to create
-                                    personalized templates for marketing campaigns and listings,
-                                    enhancing brand consistency and optimizing engagement.</span>
-                            </div>
-                        </div>
+            <!-- Breadcrumb Navigation - Only shown when component is open -->
+            <template if:true={isChildComponentView}>
+                <div class="breadcrumb-navigation">
+                    <div class="breadcrumb-container">
+                        <span class="breadcrumb-item clickable" onclick={goToControlCenter}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Control Center
+                        </span>
+                        <svg class="breadcrumb-separator" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        
+                        <!-- Show parent if nested navigation -->
+                        <template if:true={hasParentComponent}>
+                            <span class="breadcrumb-item clickable" onclick={goToParentComponent}>
+                                {parentComponentTitle}
+                            </span>
+                            <svg class="breadcrumb-separator" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </template>
+                        
+                        <span class="breadcrumb-item active">{selectedComponentTitle}</span>
                     </div>
                 </div>
-                <div class="tiles-section" if:true={isIntegrationSectionAvailable}>
-                    <div class="tiles-section-header">Integration</div>
-                    <div class="tile-flex">
-                        <div class="tile" onclick={generalIntegrationMethod}
-                            if:true={featureAvailability.General_Integrations}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/storage.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Integration Hub</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Integration Hub" modal simplifies storage, email, outlook, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience.
-                                </p>
-                                <span class="helptext">The "Integration Hub" modal simplifies storage, email, outlook, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience.</span>
-                            </div>
-                        </div>
-                        <div class="tile" onclick={portalIntegrationMethod}
-                            if:true={featureAvailability.Portal_Integration}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/onboarding.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Portal Integration</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Portal Integration" modal streamlines the process of
-                                    distributing listings to multiple real estate portals
-                                    worldwide, expanding visibility and reaching a broader
-                                    audience.
-                                </p>
-                                <span class="helptext">The "Portal Integration" modal streamlines the process of
-                                    distributing listings to multiple real estate portals
-                                    worldwide, expanding visibility and reaching a broader
-                                    audience.</span>
-                            </div>
-                        </div>
-                        <div class="tile" onclick={leadCaptureMethod} if:true={featureAvailability.Lead_Capture}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/leadcapture.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
-                            </div>
-                            <h1 class="tile-title">Lead Capture</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "Lead Capture" integrates with Meta Ads and Google Ads to automatically capture leads from your advertising accounts directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly into your CRM for immediate follow-up.
-                                </p>
-                                <span class="helptext">The "Lead Capture" integrates with Meta Ads and Google Ads to automatically capture leads from your advertising accounts directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly into your CRM for immediate follow-up.</span>
-                            </div>
+            </template>
+            
+            <!-- Modern Split Layout -->
+            <div class={layoutClass}>
+                <!-- Left Sidebar Info Panel -->
+                <div class="sidebar-info">
+                    <div class="sidebar-header">
+                        <div class="logo-area">
+                            <div class="logo-circle"></div>
+                            <h2 class="sidebar-title">Control Center</h2>
                         </div>
                     </div>
+                    
+                    <!-- Feature Description while component is open -->
+                    <template if:true={isChildComponentView}>
+                        <div class="feature-description active">
+                            <div class="description-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3 class="description-title">{selectedComponentTitle}</h3>
+                            <p class="description-text">{selectedComponentDescription}</p>
+                        </div>
+                    </template>
+                    
+                    <!-- Feature Description Area (shown when on control center) -->
+                    <template if:true={isControlCenterView}>
+                        <div class="feature-description">
+                            <div class="description-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3 class="description-title">Hover over a feature</h3>
+                            <p class="description-text">Hover over any feature card to see detailed information here</p>
+                        </div>
+                    </template>
                 </div>
-                <div class="tiles-section" if:true={isWhatsappSectionAvailable}>
-                    <div class="tiles-section-header">WhatsApp</div>
-                    <div class="tile-flex">
-                        <div class="tile" onclick={whatsappEmbeddedSignuprMethod}
-                            if:true={featureAvailability.Whatsapp_Embedded_Signup}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/whatsapp.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
+
+                <!-- Main Content Area -->
+                <div class="main-content">
+                    <!-- Control Center View -->
+                    <template if:true={isControlCenterView}>
+                    <div class="control-center-content">
+                    <!-- General Section -->
+                    <template if:true={isGeneralSectionAvailable}>
+                        <div class="section-group">
+                            <div class="section-header">
+                                <div class="section-icon general-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <h2 class="section-title">General Features</h2>
                             </div>
-                            <h1 class="tile-title">WhatsApp Integration</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "WhatsApp Integration" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.
-                                </p>
-                                <span class="helptext">The "WhatsApp Integration" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.</span>
+                            <div class="features-grid">
+                                <template if:true={featureAvailability.Map_Listing_And_Property}>
+                                    <div class="feature-card" onclick={mapListingAndPropertyMethod} 
+                                         data-title="Map Listing & Property"
+                                         data-desc="The &quot;Map Listing and Property&quot; modal streamlines data synchronization between Listing and Property records by allowing users to define field correspondences. This automation ensures that relevant information is consistently transferred between the two object types, eliminating manual data entry and reducing errors."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/portalfieldmapping.png" 
+                                             alt="mapping" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Map Listing & Property</h3>
+                                            <p class="card-description">Automate field synchronization</p>
+                                            <span class="card-tag">Automation</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={featureAvailability.Lead_Assignment_Rule}>
+                                    <div class="feature-card" onclick={leadAssignmentRule}
+                                         data-title="Lead Assignment Rules"
+                                         data-desc="The &quot;Lead Assignment Rule&quot; modal allows users to configure lead assignment rules, enabling automatic distribution of leads based on custom criteria. Set up intelligent routing to ensure leads reach the right team members efficiently."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/leadAssignment.png" 
+                                             alt="leads" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Lead Assignment</h3>
+                                            <p class="card-description">Intelligent distribution rules</p>
+                                            <span class="card-tag">Distribution</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={featureAvailability.Template_Builder}>
+                                    <div class="feature-card" onclick={templateBuilderMethod}
+                                         data-title="Template Builder"
+                                         data-desc="The &quot;Template Builder&quot; modal empowers businesses to create
+                                    personalized templates for marketing campaigns and listings,
+                                    enhancing brand consistency and optimizing engagement."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/templatebuilder.png" 
+                                             alt="templates" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Template Builder</h3>
+                                            <p class="card-description">Design personalized templates</p>
+                                            <span class="card-tag">Design</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={featureAvailability.Object_Config}>
+                                    <div class="feature-card" onclick={objectConfigurationMethod}
+                                         data-title="Object Configuration"
+                                         data-desc="The &quot;Object Config&quot; allows you to configure which objects and fields should be available when creating groups of members or sending email and WhatsApp messages from broadcast or campaign features, ensuring precise control over your marketing data structure."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/settings.png" 
+                                             alt="config" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Object Configuration</h3>
+                                            <p class="card-description">Configure objects & fields</p>
+                                            <span class="card-tag">Config</span>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
-                        <div class="tile" onclick={whatsappTemplateBuilderMethod}
-                            if:true={featureAvailability.Whatsapp_Template_Builder}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/whatsappTemplate.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
+                    </template>
+
+                    <!-- Integration Section -->
+                    <template if:true={isIntegrationSectionAvailable}>
+                        <div class="section-group">
+                            <div class="section-header">
+                                <div class="section-icon integration-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <h2 class="section-title">Integration Hub</h2>
                             </div>
-                            <h1 class="tile-title">WhatsApp Template Builder</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "WhatsApp Template Builder" enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication.
-                                </p>
-                                <span class="helptext">The "WhatsApp Template Builder" enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication.</span>
+                            <div class="features-grid">
+                                <template if:true={featureAvailability.General_Integrations}>
+                                    <div class="feature-card" onclick={generalIntegrationMethod}
+                                         data-title="Integration Hub"
+                                         data-desc="The &quot;Integration Hub&quot; modal simplifies storage, email, outlook, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/storage.png" 
+                                             alt="integration" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Integration Hub</h3>
+                                            <p class="card-description">Connect multiple services</p>
+                                            <span class="card-tag integration">Connect</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={featureAvailability.Portal_Integration}>
+                                    <div class="feature-card" onclick={portalIntegrationMethod}
+                                         data-title="Portal Integration"
+                                         data-desc="The &quot;Portal Integration&quot; modal streamlines the process of
+                                    distributing listings to multiple real estate portals
+                                    worldwide, expanding visibility and reaching a broader
+                                    audience."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/onboarding.png" 
+                                             alt="portals" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Portal Integration</h3>
+                                            <p class="card-description">Worldwide portal distribution</p>
+                                            <span class="card-tag integration">Global</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={featureAvailability.Lead_Capture}>
+                                    <div class="feature-card" onclick={leadCaptureMethod}
+                                         data-title="Lead Capture"
+                                         data-desc="The &quot;Lead Capture&quot; integrates with Meta Ads and Google Ads to automatically capture leads from your advertising accounts directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly into your CRM for immediate follow-up."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/leadcapture.png" 
+                                             alt="capture" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Lead Capture</h3>
+                                            <p class="card-description">Meta & Google Ads integration</p>
+                                            <span class="card-tag integration">Ads</span>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
-                        <div class="tile" onclick={whatsappFlowBuilderMethod}
-                            if:true={featureAvailability.Whatsapp_Flow_Builder}>
-                            <div class="tile-icon">
-                                <img src="/resource/MVEX__controlcenterimg/planning.png" alt="field mapping"
-                                    class="tile-icon-img" draggable="false" />
+                    </template>
+
+                    <!-- WhatsApp Section -->
+                    <template if:true={isWhatsappSectionAvailable}>
+                        <div class="section-group">
+                            <div class="section-header">
+                                <div class="section-icon whatsapp-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <h2 class="section-title">WhatsApp Business</h2>
                             </div>
-                            <h1 class="tile-title">WhatsApp Flow Builder</h1>
-                            <div class="tile-description-wrapper">
-                                <p class="tile-description">
-                                    The "WhatsApp Flow Builder" allows you to create interactive flows based on button actions from templates. Define what happens when users click template buttons and build proper wizard forms to guide users through multi-step processes seamlessly.
-                                </p>
-                                <span class="helptext">The "WhatsApp Flow Builder" allows you to create interactive flows based on button actions from templates. Define what happens when users click template buttons and build proper wizard forms to guide users through multi-step processes seamlessly.</span>
+                            <div class="features-grid">
+                                <template if:true={featureAvailability.Whatsapp_Embedded_Signup}>
+                                    <div class="feature-card" onclick={whatsappEmbeddedSignuprMethod}
+                                         data-title="WhatsApp Business API"
+                                         data-desc="The &quot;WhatsApp Business&quot; connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/whatsapp.png" 
+                                             alt="whatsapp" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">WhatsApp Business</h3>
+                                            <p class="card-description">API messaging integration</p>
+                                            <span class="card-tag whatsapp">Chat</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={featureAvailability.Whatsapp_Template_Builder}>
+                                    <div class="feature-card" onclick={whatsappTemplateBuilderMethod}
+                                         data-title="WhatsApp Templates"
+                                         data-desc="The &quot;Message Templates&quot; enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/whatsappTemplate.png" 
+                                             alt="template" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Message Templates</h3>
+                                            <p class="card-description">Reusable templates</p>
+                                            <span class="card-tag whatsapp">Templates</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={featureAvailability.Whatsapp_Flow_Builder}>
+                                    <div class="feature-card" onclick={whatsappFlowBuilderMethod}
+                                         data-title="WhatsApp Flow Builder"
+                                         data-desc="The &quot;Flow Builder&quot; allows you to create interactive flows based on button actions from templates. Define what happens when users click template buttons and build proper wizard forms to guide users through multi-step processes seamlessly."
+                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/planning.png" 
+                                             alt="flows" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Flow Builder</h3>
+                                            <p class="card-description">Interactive flows</p>
+                                            <span class="card-tag whatsapp">Automation</span>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
+                    </template>
                     </div>
+                    </template>
+
+                    <!-- Child Component View (for in-place components + portal mapping + lead capture) -->
+                    <template if:true={isChildComponentView}>
+                        <div class="child-component-container">
+                            <template if:true={isMapFieldsComponent}>
+                                <c-map-fields></c-map-fields>
+                            </template>
+                            <template if:true={isLeadAssignmentRuleComponent}>
+                                <c-lead-assignment-rule></c-lead-assignment-rule>
+                            </template>
+                            <template if:true={isStorageIntegrationComponent}>
+                                <c-storage-integration></c-storage-integration>
+                            </template>
+                            <template if:true={isLeadCaptureCmpComponent}>
+                                <c-lead-capture-cmp onleadcapturenavigate={handleLeadCaptureNavigation}></c-lead-capture-cmp>
+                            </template>
+                            <template if:true={isObjectConfigCompComponent}>
+                                <c-object-config-comp></c-object-config-comp>
+                            </template>
+                            <template if:true={isPortalMappingComponent}>
+                                <c-portal-mapping-component onportalnavigate={handlePortalNavigation}></c-portal-mapping-component>
+                            </template>
+                            <template if:true={isPortalMappingLandingPageComponent}>
+                                <c-portal-mapping-landing-page
+                                    portal-id={portalId}
+                                    portal-gen={portalGen}
+                                    portal-name={portalName}
+                                    portal-icon-url={portalIconUrl}
+                                    portal-status={portalStatus}
+                                    is-x-m-l-for-p-f={isXMLForPF}>
+                                </c-portal-mapping-landing-page>
+                            </template>
+                            <template if:true={isGoogleLeadFieldMappingComponent}>
+                                <c-google-lead-field-mapping
+                                    integration-type={integrationType}>
+                                </c-google-lead-field-mapping>
+                            </template>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>

@@ -23,7 +23,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track currentPage = 1;
     @track searchTerm = '';
     @track isLoading = false;
-    @track pageSize = 2;
+    @track pageSize = 9;
     @track bathroom_icon = propertyIcons + '/PropertyIcons/Bathroom.png';
     @track bedroom_icon = propertyIcons + '/PropertyIcons/Bedroom.png';
     @track location_icon = location_icon;

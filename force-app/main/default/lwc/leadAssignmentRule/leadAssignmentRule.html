@@ -3,7 +3,7 @@
         <c-spinner-component></c-spinner-component>
     </template>
     <div class="wrapper">
-        <div class="main-header">
+        <!-- <div class="main-header">
             <div slot="title" class="header-block">
                 <div class="svg-back-icon" onclick={backToControlCenter}>
                     <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,15 +16,15 @@
                     Lead Assignment Rule
                 </div>
             </div>
+        </div> -->
+
+        <div class="rules-container">
             <div class="header-new-btn">
                 <template if:true={hasUnsavedChanges}>
                     <button class="save-rule-cls" onclick={saveOrderChanges}>Save Order</button>
                 </template>
                 <button class="save-rule-cls" onclick={openNewRulePopup}>New Rule</button>
             </div>
-        </div>
-
-        <div class="rules-container">
             <template if:true={isRulesAvailable}>
                 <div class="rules-list" ondragover={handleDragOver} ondrop={handleDrop}>
                     <template for:each={userGroups} for:item="group" for:index="index">

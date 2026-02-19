@@ -4,13 +4,13 @@
 }
 
 .main_div_portal_mapping_container {
-    padding-bottom: 1rem;
-    height: calc(100% + 1.5rem);
-    margin-top: -0.8rem;
-    width: calc(100% + 1.5rem);
-    margin-left: -0.8rem;
+    /* padding-bottom: 1rem; */
+    height: 100%;
+    /* margin-top: -0.8rem; */
+    width: 100%;
+    /* margin-left: -0.8rem; */
     background-color: #ffffff;
-    padding: 1rem;
+    /* padding: 1rem; */
     display: flex;
     flex-direction: column;
     overflow: auto;
@@ -31,16 +31,17 @@
 }
 
 .main_body {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
+    background-color: #f5f7fa;
+    /* background-repeat: no-repeat;
     background-size: cover;
     background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-image: url('/resource/MVEX__newImageandMediaBg'); */
     border-radius: 8px;
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 25px;
+    height: 100%;
 }
 
 .header_block_css {
@@ -165,6 +166,7 @@
     display: grid;
     grid-template-columns: calc(50% - 1rem) calc(50% - 1rem);
     gap: 1rem;
+    padding-bottom: 1rem;
 }
 
 .small-logo {
@@ -508,4 +510,9 @@
     color: #555;
     font-size: 16px;
     line-height: 1.5;
+}
+
+/* Hide back button when used in control center (breadcrumb handles navigation) */
+.svg_back_icon {
+    display: none;
 }

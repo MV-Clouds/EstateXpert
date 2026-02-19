@@ -1,6 +1,6 @@
 <template>
     <div class="main_div_portal_mapping_landing_container">
-        <div class="main_header">
+        <!-- <div class="main_header">
             <div class="main_sub_header">
                 <div class="svg_back_icon" onclick={handleBack}>
                     <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -11,13 +11,13 @@
                     {portalNameToShow}
                 </div>
             </div>
-            <div class="action">
-                <button class="btn_in_blue" onclick={handleSave}>Save</button>
-                <button class="btn_in_white" onclick={revertTheChanges}>Cancel</button>
-                <button class="btn_in_white" onclick={viewListOfPortals}>View Listings</button>
-            </div>
-        </div>
+        </div> -->
         <div class="field-mapping-container">
+            <div class="action">
+                <button class="btn-save" onclick={handleSave} disabled={isButtonsDisabled}>Save</button>
+                <button class="btn-revert" onclick={revertTheChanges} disabled={isButtonsDisabled}>Revert Changes</button>
+                <button class="btn-view" onclick={viewListOfPortals}>View Listings</button>
+            </div>
             <template if:true={isRecordAvailable}>
                 <div class="tableContainer">
                     <div class="portalMapping_header-row">

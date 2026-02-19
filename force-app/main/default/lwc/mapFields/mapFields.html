@@ -4,7 +4,7 @@
             <c-spinner-component></c-spinner-component>
         </template>
         <div class="wrapper">
-            <div class="main_header_cls">
+            <!-- <div class="main_header_cls">
                 <div slot="title" class="header_block_css">
                     <div class="svg_back_icon" onclick={backToControlCenter}>
                         <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,7 +17,7 @@
                         Map Listing And Property
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="main_content_cls">
                 <div class="slds-m-around_medium navbar">
@@ -35,6 +35,7 @@
                     <div class="save-btn">
                         <button disabled={isAutoSyncEnabled} onclick={addNewPair}>Add</button>
                         <button disabled={savebutton} onclick={handleAddPairClick}>Save Mapping</button>
+                        <button disabled={isRevertDisabled} onclick={revertChanges}>Revert Changes</button>
                     </div>
                 </div>
 

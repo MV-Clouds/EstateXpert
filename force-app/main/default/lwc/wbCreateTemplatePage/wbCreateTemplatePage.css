@@ -25,14 +25,11 @@
 }
 
 .templatePreviewmain1 {
-    background-color: aliceblue;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     height: fit-content;
     width: 21rem;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    border-radius: 8px;
 }
 
 .divcontainer {
@@ -43,6 +40,7 @@
 .templatetxt2 {
     font-weight: 500;
     font-size: 23px;
+    color: #0f1419;
 }
 
 .createtempdiv2 {
@@ -57,20 +55,18 @@
 }
 
 .templateContent3 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
-    background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .tempHead {
     font-size: 21px;
     font-weight: 500;
+    color: #0f1419;
 }
 
 .nameLan {
@@ -109,21 +105,18 @@
 label {
     font-size: 15px;
     font-weight: 500;
-    color: #1a1a1aed;
+    color: #0f1419;
     margin-bottom: 0.2rem;
 }
 
 .templateContent4 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
-    background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .content-inputs {
@@ -171,7 +164,7 @@ label {
     margin: 0 5px;
     margin-left: 0;
     font-size: medium;
-    color: black;
+    color: #0f1419;
     font-weight: 500;
 }
 
@@ -270,17 +263,19 @@ textarea {
 
 
 .add-variable {
-    border-radius: 5px;
+    border-radius: 8px;
     border: 1px solid #80808087;
     padding: 1rem;
-    background-color: #F5F5F5;
+    background: linear-gradient(135deg, #fafbfc 0%, #f5f5f5 100%);
     margin-bottom: 1.5rem;
     margin-top: 1.2rem;
+    box-shadow: rgba(50, 50, 93, 0.15) 0px 1px 3px -1px, rgba(0, 0, 0, 0.2) 0px 1px 2px -1px;
 }
 
 .body-title {
     font-size: 21px;
     font-weight: 500;
+    color: #0f1419;
 }
 
 .descp2 {
@@ -294,6 +289,7 @@ textarea {
     font-size: 20px;
     margin-top: 1rem;
     font-weight: 500;
+    color: #0f1419;
 }
 
 .char-count {
@@ -356,23 +352,20 @@ textarea {
 }
 
 .templateContent5 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
-    background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .seg-btn {
     margin: 0 5px;
     margin-left: 0;
     font-size: large;
-    color: black;
+    color: #0f1419;
     font-weight: 500;
 }
 
@@ -397,21 +390,22 @@ textarea {
 
 .createbtn {
     display: flex;
-    border-radius: 5px;
+    border-radius: 8px;
     border: 1px solid #80808038;
     padding: 1rem;
-    background-color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
     margin-bottom: 0.3rem;
     gap: 1rem;
     position: relative;
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.3), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .consent {
     display: flex;
-    border-radius: 5px;
+    border-radius: 8px;
     padding: 0.5rem;
-    background-color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    box-shadow: rgba(50, 50, 93, 0.15) 0px 1px 3px -1px, rgba(0, 0, 0, 0.2) 0px 1px 2px -1px;
 }
 
 .true-btn {
@@ -567,17 +561,19 @@ textarea {
 
 .uploadlabel {
     font-size: larger;
+    font-weight: 500;
+    color: #0f1419;
 }
 
 .quicktext {
     display: flex;
-    border-radius: 5px;
+    border-radius: 8px;
     padding: 1rem;
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
     gap: 1rem;
     position: relative;
     margin-bottom: 0.5rem;
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.3), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .remove-btn {
@@ -736,7 +732,8 @@ textarea {
 
 .main-container {
     overflow: auto;
-    background-color: #ffffff;
+    /* background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%); */
+    background: #f5f7fa;
     padding: 1rem;
     padding-bottom: 1rem;
     height: calc(100% + 1.5rem);
@@ -923,19 +920,23 @@ textarea {
 }
 
 .authContent1 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .authContent2 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .radio-group {
@@ -1010,11 +1011,13 @@ textarea {
 }
 
 .authContent3 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .authButtons {
@@ -1022,16 +1025,13 @@ textarea {
 }
 
 .authContent4 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
-    background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .toggle {
@@ -1040,11 +1040,13 @@ textarea {
 }
 
 .authContent5 {
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
 }
 
 .appbtn {
@@ -1078,6 +1080,7 @@ textarea {
 .flow-name {
     font-size: 15px;
     font-weight: 500;
+    color: #0f1419;
 }
 
 .slds-modal__container {
@@ -1160,13 +1163,14 @@ textarea {
 }
 
 .main_header_cls {
-    background-color: aliceblue;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-left: 4px solid #0176D3;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 16px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .details_cls {
@@ -1198,7 +1202,7 @@ textarea {
     line-height: 40.16px;
     text-align: left;
     gap: 15px;
-    color: #131314;
+    color: #0f1419;
 }
 
 .svg_back_icon {

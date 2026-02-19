@@ -123,6 +123,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track popUpFirstPage = true;
     @track popUpSecondPage = false;
     @track popUpLastPage = false;
+    @track popUpConfirmPage = false;
     @track popupHeader = 'Create Broadcast Group';
     @track broadcastGroupName = '';
     @track tempBroadcastGroupName = '';
@@ -2010,6 +2011,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.showTemplate = true;
                     this.popUpFirstPage = false; 
                     this.popUpSecondPage = true; 
+                    this.popUpConfirmPage = false;
                     this.popUpLastPage = false;
                     this.popupHeader = 'Send Message';
                     this.broadcastGroupName = '';
@@ -2084,6 +2086,20 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
+    clearSelectedInquiryWithCheckboxFalse(){
+        this.selectedInquiry = null;
+        this.selectedInquiryList = [];
+        this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
+            return { ...inquiry, isSelected: false };
+        });
+        this.sendMailInquiryDataList = [];
+        this.broadcastContactList = [];
+        this.filteredGroupMembers = [];
+        this.broadcastGroupId = null;
+
+        this.checkAll = false;
+    }
+
     // Add this getter for the preview component
     get previewRecordId() {
         if (this.broadcastContactList && this.broadcastContactList.length > 0) {
@@ -2128,6 +2144,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.showTemplate = false;
         this.popUpFirstPage = true;
         this.popUpSecondPage = false;
+        this.popUpConfirmPage = false;
         this.popUpLastPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.broadcastGroupName = '';
@@ -2199,6 +2216,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.popUpSecondPage = false;
         this.popupHeader = 'Create Broadcast Group';
         this.selectedTemplate = '';
+        this.popUpConfirmPage = false;
+    }
+
+    handleConfirmPopup() {
+        this.popUpConfirmPage = true;
     }
 
     // Handle send button on second page
@@ -2227,6 +2249,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseTemplate();
+                    this.clearSelectedInquiryWithCheckboxFalse();
+                    this.navigateToBroadcastComponent(result);
                 } else {
                     this.showToast('Error', `Broadcast failed: ${result}`, 'error');
                 }
@@ -2239,6 +2263,24 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.spinnerShow = false;
             });
     }
+
+        navigateToBroadcastComponent(broadcastId) {
+            let componentDef = {
+                componentDef: "MVEX:broadcastReportComp",
+                attributes: {
+                    recordId: broadcastId
+                }
+            };
+
+            let encodedComponentDef = btoa(JSON.stringify(componentDef));
+    
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedComponentDef
+                }
+            });
+}
 
     // Handle schedule button on second page
     handleSchedulePopup() {
@@ -2256,6 +2298,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handlePreviousLastPage() {
         this.popUpSecondPage = true;
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
     }
 
@@ -2293,6 +2336,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (result) {
                     this.showToast('Success', 'Broadcast scheduled successfully', 'success');
                     this.handleCloseTemplate();
+                    this.clearSelectedInquiryWithCheckboxFalse();
                 } else {
                     this.showToast('Error', `Scheduling failed: ${result}`, 'error');
                 }

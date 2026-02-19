@@ -1038,13 +1038,28 @@ span {
     transform: translate(-50%, -50%);
 }
 
+.confirm-modal {
+    z-index: 9200; /* Higher than backdrop */
+}
+
+.confirm-modal .slds-modal__container {
+    width: 480px;
+    max-width: 90%;
+    min-width: 320px;
+    margin: 0 auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 /* Schedule modal header */
 .schedule-modal-header {
     background-color: #0176D3;
     color: white;
     padding: 1rem;
-    border-top-left-radius: 0.25rem;
-    border-top-right-radius: 0.25rem;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
 }
 
 .schedule-modal-header h2 {

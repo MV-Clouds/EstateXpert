@@ -32,6 +32,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track popUpFirstPage = true;
     @track popUpSecondpage = false;
     @track popUpLastPage = false;
+    @track popUpConfirmPage = false;
     @track popupHeader = 'Choose Broadcast Groups';
 
     // Group members (contacts) list properties
@@ -529,6 +530,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         this.popUpFirstPage = true;
         this.popUpSecondpage = false;
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Broadcast Groups';
     
         // Reset the selected values
@@ -551,6 +553,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         this.popupHeader = 'Choose Broadcast Groups';
         this.selectedTemplate = '';
         this.popUpFirstPage = true;
+        this.popUpConfirmPage = false;
         this.popUpSecondpage = false;
     }
 
@@ -566,6 +569,11 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     handlePreviousLastPage(){
         this.popUpLastPage = false;
+        this.popUpConfirmPage = false;
+    }
+
+    handleConfirmPopup(){
+        this.popUpConfirmPage = true;
     }
 
     handleSchedule(){
@@ -638,6 +646,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseOnPopup();
+                    this.navigateToBroadcastComponent(result);
                 } else {
                     this.showToast('Error', `Broadcast sent failed - ${result}`, 'error');
                 }
@@ -649,6 +658,24 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 this.isLoading = false;
             });
     }
+
+        navigateToBroadcastComponent(broadcastId) {
+            let componentDef = {
+                componentDef: "MVEX:broadcastReportComp",
+                attributes: {
+                    recordId: broadcastId
+                }
+            };
+
+            let encodedComponentDef = btoa(JSON.stringify(componentDef));
+    
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedComponentDef
+                }
+            });
+}
     
     handleNameClick(event) {
 

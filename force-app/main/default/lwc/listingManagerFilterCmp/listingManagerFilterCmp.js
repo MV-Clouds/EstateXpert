@@ -79,8 +79,10 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 this.applyFilters();
                 console.log('this.filterFields',JSON.stringify(this.filterFields));
                 
-                this.isLoading = false;
-                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                 setTimeout(() => {
+                    this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                 },300);
             })
             .catch(error => {
                 errorDebugger('ListingManagerFilterCmp', 'initializeStaticFields', error, 'warn', 'Error in initializeStaticFields');
@@ -130,7 +132,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */    
     loadPicklistValues(field) {
-        this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+        // this.dispatchEvent(new CustomEvent('loading', { detail: true }));
         getPicklistValues({apiName:field.apiName,objectName:field.objectApiName})
         .then(result => {
             this.staticFields = this.staticFields.map(f => {
@@ -146,7 +148,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
             this.filterFields = [...this.staticFields];
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.updateFilterIndices();
-            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+            // this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         })
         .catch(error => {
             errorDebugger('ListingManagerFilterCmp', 'loadPicklistValues', error, 'warn', 'Error in loadPicklistValues');

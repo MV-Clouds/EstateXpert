@@ -106,7 +106,8 @@
                     <div class="innerDiv1">
                         <div class="filterDiv">
                             <c-listing-manager-filter-cmp onvalueselected={handleFilteredListings}
-                                onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}>
+                                onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}
+                                onloading={handleLoading}>
                             </c-listing-manager-filter-cmp>
                         </div>
                         <div class="filterWrap" onclick={wrapFilter}>
@@ -118,6 +119,9 @@
                     </div>
                     <template if:false={fieldsModal}>
                         <div class="innerDiv2">
+                            <template if:true={listingSpinnerLoading}>
+                                <c-spinner-component is-absolute="true"></c-spinner-component>
+                            </template>
                             <template if:true={showList}>
                                 <template if:false={showSection}>
                                     <div class="tableDiv" id="tableDiv">

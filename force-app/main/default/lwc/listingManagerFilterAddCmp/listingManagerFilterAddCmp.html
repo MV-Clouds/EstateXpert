@@ -28,32 +28,38 @@
                         <template if:true={showOptions1}>
                             <div class="slds-dropdown slds-dropdown_length-5" onmousedown={handlePreventDefault}>
                                 <ul class="slds-listbox slds-listbox_vertical ul-div">
-                                    <template for:each={filteredOptions1} for:item="option">
-                                            <template if:false={option.showRightIcon}>
-                                                <li key={option.value} data-id={option.value} onclick={changeFields} class="slds-listbox__item">
-                                                    <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
-                                                        <span class="slds-media__body">
-                                                            <span class="slds-truncate" title={option.label}>{option.label}</span>
-                                                        </span>
-                                                    </div>
-                                                </li>
-                                            </template>
-                                            <template if:true={option.showRightIcon}>
-                                                <li key={option.value} data-id={option.value} onclick={changeTheCheckboxValue} class="slds-listbox__item">
-                                                    <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
-                                                        <span class="slds-media__body">
-                                                            <span class="slds-truncate" title={option.label}>{option.label}</span>
-                                                        </span>
-                                                        <span class="slds-media__figure slds-media__figure_reverse">
-                                                            <lightning-icon icon-name="utility:chevronright" alternative-text="Lookup Field" size="x-small"></lightning-icon>
-                                                        </span>
-                                                    </div>
-                                                </li>
-                                            </template>
+                                    <template if:true={filteredOptions1.length}>
+                                        <template for:each={filteredOptions1} for:item="option">
+                                                <template if:false={option.showRightIcon}>
+                                                    <li key={option.value} data-id={option.value} onclick={changeFields} class="slds-listbox__item">
+                                                        <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
+                                                            <span class="slds-media__body">
+                                                                <span class="slds-truncate" title={option.label}>{option.label}</span>
+                                                            </span>
+                                                        </div>
+                                                    </li>
+                                                </template>
+                                                <template if:true={option.showRightIcon}>
+                                                    <li key={option.value} data-id={option.value} onclick={changeTheCheckboxValue} class="slds-listbox__item">
+                                                        <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
+                                                            <span class="slds-media__body">
+                                                                <span class="slds-truncate" title={option.label}>{option.label}</span>
+                                                            </span>
+                                                            <span class="slds-media__figure slds-media__figure_reverse">
+                                                                <lightning-icon icon-name="utility:chevronright" alternative-text="Lookup Field" size="x-small"></lightning-icon>
+                                                            </span>
+                                                        </div>
+                                                    </li>
+                                                </template>
+                                        </template>
+                                    </template>
+                                    <template if:false={filteredOptions1.length}>
+                                        <div class="not-found">No data found</div>
                                     </template>
                                 </ul>
                             </div>
                         </template>
+                        
                     </div>
                 </div>
             </div>

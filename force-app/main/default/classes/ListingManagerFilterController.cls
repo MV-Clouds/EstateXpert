@@ -158,17 +158,84 @@ public with sharing class ListingManagerFilterController {
 
     /**
     * Method Name : getStaticFields
-    * @description : get the static fields from the custom metadata.
+    * @description : get the static fields from the custom object.
     * @return String of JSON data.
     */
-    @AuraEnabled
-    public static String getStaticFields() {
+    @AuraEnabled(cacheable=true)
+    public static String getStaticFields(
+        String objectApiName,
+        String featureName
+    ) {
         try {
-            ListingManagerFilterConfig__mdt filterConfig = [SELECT StaticFields__c FROM ListingManagerFilterConfig__mdt WITH USER_MODE LIMIT 1];
-            return filterConfig.StaticFields__c;
+            MVEX__Configuration_Settings__c config = [
+                SELECT MVEX__Fields_Data__c
+                FROM MVEX__Configuration_Settings__c
+                WHERE MVEX__Object_API_Name__c = :objectApiName
+                AND MVEX__Feature_Name__c = :featureName
+                LIMIT 1
+            ];
+
+            return config.MVEX__Fields_Data__c;
+
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'ListingManagerFilterController', 'getStaticFields', e.getMessage());
-            return null;
+            return null; 
+        }
+    }
+
+     /**
+    * Method Name : saveStaticFields
+    * @description : save the static fields to the custom object.
+    * @return void.
+    */
+    @AuraEnabled
+    public static void saveStaticFields(
+        String objectApiName,
+        String featureName,
+        String fieldsJson
+    ) {
+        try {
+            if (String.isBlank(objectApiName) || 
+                String.isBlank(featureName) || 
+                String.isBlank(fieldsJson)) {
+                throw new AuraHandledException('Required values are missing.');
+            }
+
+            // Try to find existing config
+            MVEX__Configuration_Settings__c config;
+
+            List<MVEX__Configuration_Settings__c> existingConfigs = [
+                SELECT Id
+                FROM MVEX__Configuration_Settings__c
+                WHERE MVEX__Object_API_Name__c = :objectApiName
+                AND MVEX__Feature_Name__c = :featureName
+                LIMIT 1
+            ];
+
+            if (!existingConfigs.isEmpty()) {
+                config = existingConfigs[0];
+            } else {
+                config = new MVEX__Configuration_Settings__c();
+                config.MVEX__Object_API_Name__c = objectApiName;
+                config.MVEX__Feature_Name__c = featureName;
+
+                // Meaningful, deterministic Name
+                config.Name = objectApiName + '_' + featureName;
+            }
+
+            // User-provided JSON
+            config.MVEX__Fields_Data__c = fieldsJson;
+
+            upsert config;
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(
+                e,
+                'ListingManagerFilterController',
+                'saveStaticFields',
+                e.getMessage()
+            );
+            throw new AuraHandledException('Unable to save configuration.');
         }
     }
 }

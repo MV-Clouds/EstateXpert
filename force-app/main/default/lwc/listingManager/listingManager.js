@@ -22,7 +22,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @track unchangedProcessListings = [];    
     @track shownProcessedListingData = [];
     @track propertyMediaUrls = [];
-    @track sortField = '';
+    @track sortField = 'Name';
     @track sortOrder = 'asc';
     @track totalSelected=0;
     @track selectedProperties;
@@ -36,6 +36,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @track visiblePages = 5;
     @track fieldsModal = false;
     @track isAccessible = false;
+    @track listingLoading = false;
     isConfigOpen = false;
 
     /**
@@ -208,7 +209,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     get sortDescription() {
         try{
-            if(this.sortField !== '' && this.showTile == false && this.showMap === false){
+            if(this.sortField !== ''){
                 const orderDisplayName = this.sortOrder === 'asc' ? 'Ascending' : 'Descending';
                 
                 let field = null;
@@ -287,6 +288,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             }
             loadStyle(this, designcss);
             this.getAccessible();
+
         }catch(error){
             errorDebugger('ListingManager', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
         }
@@ -441,6 +443,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 };
             });
             this.unchangedProcessListings = this.processedListingData;
+            this.sortData();
             this.updateShownData();
             this.spinnerShow = false;
         } catch (error) {
@@ -503,7 +506,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     handleFilteredListings(event){
         try{
-            this.sortField = '';
+            this.sortField = 'Name';
             this.sortOrder = 'asc';
 
             const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
@@ -522,6 +525,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             );
 
             this.currentPage = 1;
+            this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
         }catch(error){
@@ -538,7 +542,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     handleReset(event){
         try{
             if(event.detail.filterlistings == true){
-                this.sortField = '';
+                this.sortField = 'Name';
                 this.sortOrder = 'asc';
                 const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
                 allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
@@ -550,6 +554,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 this.listingData = this.unchangedListingData;
                 this.currentPage = 1;
 
+                this.sortData();
                 this.updateShownData();
                 this.updateSelectedProperties();
             }
@@ -578,6 +583,18 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         this.processedListingData = event.detail;
         this.updateShownData();
         this.updateSelectedProperties();
+    }
+
+    get listingSpinnerLoading(){
+        return !this.spinnerShow && this.listingLoading;
+    }
+    /**
+    * Method Name : handleLoading
+    * @description : handle the loading event from the filter cmp
+    * Date: 19/02/2026
+    */
+    handleLoading(event){
+        this.listingLoading = event.detail;
     }
 
     /**

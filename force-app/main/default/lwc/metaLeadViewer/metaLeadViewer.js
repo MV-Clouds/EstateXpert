@@ -73,15 +73,21 @@ export default class MetaLeadViewer extends LightningElement {
             const rawData = JSON.parse(jsonString);
             let tableRows = [];
 
-            if (formName) {tableRows.push({ key: 'Form Name', value: formName});}
-            if (campaignName) {tableRows.push({ key: 'Campaign Name', value: campaignName});}
+            if (formName) tableRows.push({ key: 'Form Name', value: this.formatValue(formName) });
+            if (campaignName) tableRows.push({ key: 'Campaign Name', value: this.formatValue(campaignName) });
             if (rawData.platform) tableRows.push({ key: 'Platform', value: rawData.platform.toUpperCase() });
             if (rawData.id) tableRows.push({ key: 'Lead ID', value: rawData.id });
-            if (rawData.created_time) tableRows.push({ key: 'Created Time', value: rawData.created_time });
+            
+            if (rawData.created_time) {
+                tableRows.push({ key: 'Created Time', value: this.formatValue(rawData.created_time) });
+            }
 
             if (rawData.field_data && Array.isArray(rawData.field_data)) {
                 rawData.field_data.forEach(field => {
-                    let answer = field.values && field.values.length > 0 ? field.values[0] : '';
+                    let rawAnswer = field.values && field.values.length > 0 ? field.values[0] : '';
+                    
+                    let answer = this.formatValue(rawAnswer);
+
                     let question = field.name.replace(/_/g, ' ');
                     question = question.charAt(0).toUpperCase() + question.slice(1);
 
@@ -95,6 +101,39 @@ export default class MetaLeadViewer extends LightningElement {
             console.error('Error parsing JSON', e);
             this.parsedData = [];
         }
+    }
+
+    /**
+     * Helper to handle Underscore replacement and Date formatting
+     */
+    formatValue(val) {
+        if (!val) return '';
+
+        const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+        
+        if (typeof val === 'string' && dateRegex.test(val)) {
+            try {
+                const dateObj = new Date(val);
+                if (!isNaN(dateObj.getTime())) {
+                    return new Intl.DateTimeFormat(navigator.language, {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    }).format(dateObj);
+                }
+            } catch (e) {
+                console.warn('Date formatting failed for: ', val);
+            }
+        }
+        if (typeof val === 'string') {
+            return val.replace(/_/g, ' ');
+        }
+
+        return val;
     }
 
     openModal() {

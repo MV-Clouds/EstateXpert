@@ -1,5 +1,6 @@
 import { LightningElement,track} from 'lwc';
 import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
+import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
 import getPicklistValues from '@salesforce/apex/ListingManagerFilterController.getPicklistValues';
 import getFilteredListings from '@salesforce/apex/ListingManagerFilterController.getFilteredListings';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -61,7 +62,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     initializeStaticFields() {
         this.isLoading = true;
         this.dispatchEvent(new CustomEvent('loading', { detail: true }));
-        getStaticFields()
+        getStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters'})
             .then(result => {
                 this.staticFields = JSON.parse(result);
                 this.filterFields = this.filterFields.concat(this.staticFields);
@@ -74,7 +75,25 @@ export default class ListingManagerFilterCmp extends LightningElement {
             })
             .catch(error => {
                 errorDebugger('ListingManagerFilterCmp', 'initializeStaticFields', error, 'warn', 'Error in initializeStaticFields');
+                this.isLoading = false;
+                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             });
+    }
+
+    saveFilterPermanent(){
+        saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters', fieldsJson: JSON.stringify(this.filterFields)})
+        .then(() => {
+             this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Success',
+                message: 'Fields saved successfully.',
+                variant: 'success'
+            })
+        );
+        })  
+         .catch(error => {
+            errorDebugger('ListingManagerFilterCmp', 'saveFilterPermanent', error, 'warn', 'Error in saveFilterPermanent');
+        });      
     }
 
     /**

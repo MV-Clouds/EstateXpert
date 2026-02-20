@@ -11,6 +11,13 @@
     background-color:#0376D3 ;
 }
 
+.header-buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .filter-header .filter-text{
     margin-left: 1rem;
     color: white;
@@ -18,7 +25,7 @@
     font-weight: 500;
 } 
 
-.filter-header .reset-text{
+/* .filter-header .reset-text{
     margin-right: 0.3rem;
     color: white;
     font-size: 14px;
@@ -26,6 +33,18 @@
     padding: 0.4rem;
     background: #0376D3;
     font-weight: 500;
+} */
+
+.filter-header .reset-text{
+    margin-right: 0.3rem;
+    color: #060606;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0.2rem;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    background: #f0f3f6;
+    border-radius: 5px;
 }
 
 .filter-outer{

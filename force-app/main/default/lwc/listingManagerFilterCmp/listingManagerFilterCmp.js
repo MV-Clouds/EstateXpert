@@ -15,6 +15,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     @track valueFromChild = [];
     @track isAddButtonDisabled = true;
     @track filterFields =[];
+    originalFilterFields;
     @track filteredListings;
     @track staticFields=[];
     @track isLoading = false;
@@ -37,6 +38,12 @@ export default class ListingManagerFilterCmp extends LightningElement {
         return isEmpty;
 
     }
+
+      get isFilterChanged() {
+        return JSON.stringify(this.filterFields) !== 
+               JSON.stringify(this.originalFilterFields);
+    }
+
 
     /**
     * Method Name: connectedCallback
@@ -66,8 +73,10 @@ export default class ListingManagerFilterCmp extends LightningElement {
             .then(result => {
                 this.staticFields = JSON.parse(result);
                 this.filterFields = this.filterFields.concat(this.staticFields);
+                this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
                 this.setPicklistValue();
                 this.updateFilterIndices();
+                this.applyFilters();
                 console.log('this.filterFields',JSON.stringify(this.filterFields));
                 
                 this.isLoading = false;
@@ -83,6 +92,9 @@ export default class ListingManagerFilterCmp extends LightningElement {
     saveFilterPermanent(){
         saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters', fieldsJson: JSON.stringify(this.filterFields)})
         .then(() => {
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+            this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
+
              this.dispatchEvent(
             new ShowToastEvent({
                 title: 'Success',
@@ -132,6 +144,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 return f;
             });
             this.filterFields = [...this.staticFields];
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.updateFilterIndices();
             this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         })
@@ -1066,44 +1079,92 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Date: 14/06/2024
     * Created By: Vyom Soni
     */
-    handleReset() {
-        try {
-            this.staticFields.forEach(field => {
-                if (field.picklistValue) {
-                    field.picklistValue.forEach(picklist => {
-                        picklist.showRightIcon = false;
-                    });
-                }
-                if (field.unchangePicklistValue) {
-                    field.unchangePicklistValue.forEach(picklist => {
-                        picklist.showRightIcon = false;
-                    });
-                }
-            });
-            this.filterFields = this.staticFields.map(field => {
-                return {
-                    ...field,
-                    selectedOptions: null,
-                    picklistValue: field.picklistValue,
-                    minValue: null,
-                    maxValue: null,
-                    minDate: null,
-                    maxDate: null,
-                    fieldChecked: null,
-                    message: null,
-                    searchTerm: null
-                };
-            });
-            this.isCustomLogicEnabled = false;
-            this.customLogicExpression = '';
-            this.customLogicError = null;
-            this.setFilteredListingsReset();
+    // handleReset() {
+    //     try {
+    //         this.staticFields.forEach(field => {
+    //             if (field.picklistValue) {
+    //                 field.picklistValue.forEach(picklist => {
+    //                     picklist.showRightIcon = false;
+    //                 });
+    //             }
+    //             if (field.unchangePicklistValue) {
+    //                 field.unchangePicklistValue.forEach(picklist => {
+    //                     picklist.showRightIcon = false;
+    //                 });
+    //             }
+    //         });
+    //         this.filterFields = this.staticFields.map(field => {
+    //             return {
+    //                 ...field,
+    //                 selectedOptions: null,
+    //                 picklistValue: field.picklistValue,
+    //                 minValue: null,
+    //                 maxValue: null,
+    //                 minDate: null,
+    //                 maxDate: null,
+    //                 fieldChecked: null,
+    //                 message: null,
+    //                 searchTerm: null
+    //             };
+    //         });
+    //         this.isCustomLogicEnabled = false;
+    //         this.customLogicExpression = '';
+    //         this.customLogicError = null;
+    //         this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
 
-            this.updateFilterIndices();
-        } catch (error) {
-            errorDebugger('ListingManagerFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
-        }
+    //         this.setFilteredListingsReset();
+
+    //         this.updateFilterIndices();
+    //     } catch (error) {
+    //         errorDebugger('ListingManagerFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
+    //     }
+    // }
+
+    handleReset() {
+    try {
+        // Reset using staticFields which now contains the saved state
+        this.filterFields = this.staticFields.map(field => {
+            // Create a deep copy of each field to avoid reference issues
+            const resetField = JSON.parse(JSON.stringify(field));
+            
+            // Reset all filter values
+            resetField.selectedOptions = null;
+            resetField.minValue = null;
+            resetField.maxValue = null;
+            resetField.minDate = null;
+            resetField.maxDate = null;
+            resetField.fieldChecked = null;
+            resetField.message = null;
+            resetField.searchTerm = null;
+            
+            // Reset picklist icons
+            if (resetField.picklistValue) {
+                resetField.picklistValue.forEach(picklist => {
+                    picklist.showRightIcon = false;
+                });
+            }
+            if (resetField.unchangePicklistValue) {
+                resetField.unchangePicklistValue.forEach(picklist => {
+                    picklist.showRightIcon = false;
+                });
+            }
+            
+            return resetField;
+        });
+        
+        this.isCustomLogicEnabled = false;
+        this.customLogicExpression = '';
+        this.customLogicError = null;
+        
+        // Update originalFilterFields to match reset state
+        this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+        
+        this.setFilteredListingsReset();
+        this.updateFilterIndices();
+    } catch (error) {
+        errorDebugger('ListingManagerFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
     }
+}
     /**
     * Method Name: handleClose
     * @description: handle the close event of modal.

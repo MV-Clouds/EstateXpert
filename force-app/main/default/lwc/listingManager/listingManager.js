@@ -506,7 +506,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     handleFilteredListings(event){
         try{
-            this.sortField = '';
+            this.sortField = 'Name';
             this.sortOrder = 'asc';
 
             const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
@@ -525,6 +525,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             );
 
             this.currentPage = 1;
+            this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
         }catch(error){

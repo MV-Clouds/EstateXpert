@@ -2,9 +2,14 @@
 
     <div class="filter-header">
         <div class="filter-text">Filters</div>
-        <template if:true={filterFields.length}>
-            <div class="reset-text" onclick={handleReset}>Reset All</div>
-        </template>
+        <div class="header-buttons">
+            <template if:true={filterFields.length}>
+                <div class="reset-text" onclick={handleReset}>Reset All</div>
+            </template>
+            <template if:true={isFilterChanged}>
+            <div class="reset-text" onclick={saveFilterPermanent}>Save Filter</div>
+            </template>
+        </div>
         
     </div>
     <div class="slds-var-p-around_small filter-outer">
@@ -822,11 +827,11 @@
                     </svg>
                     Add More Filter
                 </div>
-                <template if:true={filterFields.length}>
+                <!-- <template if:true={filterFields.length}>
                     <div class="save-btn-cover" onclick={saveFilterPermanent}>
                     Save Default
                     </div>
-                </template>
+                </template> -->
                
             </div>
         </div>

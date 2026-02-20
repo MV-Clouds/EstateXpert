@@ -209,7 +209,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     get sortDescription() {
         try{
-            if(this.sortField !== '' && this.showTile == false && this.showMap === false){
+            if(this.sortField !== ''){
                 const orderDisplayName = this.sortOrder === 'asc' ? 'Ascending' : 'Descending';
                 
                 let field = null;
@@ -541,7 +541,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     handleReset(event){
         try{
             if(event.detail.filterlistings == true){
-                this.sortField = '';
+                this.sortField = 'Name';
                 this.sortOrder = 'asc';
                 const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
                 allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
@@ -553,6 +553,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 this.listingData = this.unchangedListingData;
                 this.currentPage = 1;
 
+                this.sortData();
                 this.updateShownData();
                 this.updateSelectedProperties();
             }
@@ -583,6 +584,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         this.updateSelectedProperties();
     }
 
+    get listingSpinnerLoading(){
+        return !this.spinnerShow && this.listingLoading;
+    }
     /**
     * Method Name : handleLoading
     * @description : handle the loading event from the filter cmp

@@ -119,7 +119,7 @@
                     </div>
                     <template if:false={fieldsModal}>
                         <div class="innerDiv2">
-                            <template if:true={listingLoading}>
+                            <template if:true={listingSpinnerLoading}>
                                 <c-spinner-component is-absolute="true"></c-spinner-component>
                             </template>
                             <template if:true={showList}>

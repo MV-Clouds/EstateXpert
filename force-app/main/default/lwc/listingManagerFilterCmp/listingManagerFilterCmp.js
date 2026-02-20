@@ -25,6 +25,18 @@ export default class ListingManagerFilterCmp extends LightningElement {
     @track customLogicExpression = '';
     @track customLogicError = null;
 
+    get isApplyDisabled() {
+        const isEmpty = !this.customLogicExpression || !this.customLogicExpression.trim();
+
+        // When button is disabled due to empty expression, clear error
+        if (isEmpty && this.customLogicError) {
+            this.customLogicError = null;
+        }
+
+        return isEmpty;
+
+    }
+
     /**
     * Method Name: connectedCallback
     * @description: set the get static fields, set listing record wrapper, set offre records.
@@ -1283,6 +1295,19 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
             // Extract unique indices from the custom logic expression
             const usedIndices = [...new Set(this.customLogicExpression.match(/\d+/g) || [])];
+            const erroredIndices = [];
+
+            usedIndices.forEach(idx => {
+                const field = this.filterFields[parseInt(idx, 10) - 1]; // 1-based → 0-based
+                if (field?.message) {
+                    erroredIndices.push(idx);
+                }
+            });
+
+            if (erroredIndices.length > 0) {
+                this.customLogicError = `Fix errors in filters: ${erroredIndices.join(', ')} before applying custom logic.`;
+                return;
+            }
 
             // If no filters have selected values, expression should be empty
             if (requiredIndices.length === 0 && usedIndices.length > 0) {
@@ -1291,16 +1316,16 @@ export default class ListingManagerFilterCmp extends LightningElement {
             }
 
             // Check if all required indices are included
-            const missingIndices = requiredIndices.filter(index => !usedIndices.includes(index));
-            if (missingIndices.length > 0) {
-                this.customLogicError = `Custom logic must include all filters with selected values. Missing indices: ${missingIndices.join(', ')}.`;
-                return;
-            }
+            // const missingIndices = requiredIndices.filter(index => !usedIndices.includes(index));
+            // if (missingIndices.length > 0) {
+            //     this.customLogicError = `Custom logic must include all filters with selected values. Missing indices: ${missingIndices.join(', ')}.`;
+            //     return;
+            // }
 
             // Check if any used indices correspond to filters without selected values
             const invalidIndices = usedIndices.filter(index => !requiredIndices.includes(index));
             if (invalidIndices.length > 0) {
-                this.customLogicError = `Custom logic includes indices without selected values: ${invalidIndices.join(', ')}.`;
+                this.customLogicError = `Custom logic includes indices without have values: ${invalidIndices.join(', ')}.`;
                 return;
             }
 

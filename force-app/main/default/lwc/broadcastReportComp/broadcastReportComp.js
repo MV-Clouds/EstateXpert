@@ -302,16 +302,11 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
             this.paginatedGrpData = []; 
         } else if (this.broadcastReport) {
             // If on broadcastReport, go back to main page
-            let componentDef = {
-                componentDef: "MVEX:wbAllBroadcastPage",
-            };
-
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
             this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
+                type: "standard__navItemPage",
                 attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
+                    apiName: "MVEX__WhatsApp_Broadcast",
+                },
             });
         }
     }

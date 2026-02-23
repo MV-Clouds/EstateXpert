@@ -13,7 +13,8 @@
         
     </div>
     <div class="slds-var-p-around_small filter-outer">
-        <template if:false={modalValue}>
+        <div class="filter-content">
+            <template if:false={modalValue}>
             <template if:true={filterFields.length}>
                 <template for:each={filterFields} for:item="option" for:index="index">
                     <template if:true={option.picklist}>
@@ -780,6 +781,7 @@
                 </div>
             </template>
         </template>
+        </div>
        <div class="filter-footer">
             <template if:true={filterFields.length}>
                 <div class="custom-logic-section">

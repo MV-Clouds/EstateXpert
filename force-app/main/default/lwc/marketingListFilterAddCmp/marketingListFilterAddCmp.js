@@ -181,7 +181,9 @@ export default class MarketingListFilterAddCmp extends LightningElement {
                 break;
             case 'EMAIL':
                 options = [
-                    { label: 'Equals', value: 'equals' }
+                    { label: 'Equals', value: 'equals' },
+                    { label: 'Contains', value: 'contains' },
+                    { label: 'Starts With', value: 'startswith' }
                 ];
                 break;
             case 'PHONE':

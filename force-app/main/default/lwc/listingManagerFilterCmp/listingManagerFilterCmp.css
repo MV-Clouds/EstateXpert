@@ -48,13 +48,19 @@
 }
 
 .filter-outer{
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.filter-content {
+    flex: 1;
+    overflow-y: auto;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
-    width: 100%;
-    height: 100%;
-    padding-bottom: 3rem;
+    padding-right: 0.3rem;
 }
 
 .combobox{
@@ -240,6 +246,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    padding-bottom: 1.5rem;
 }
 
 .field-add-btn .add-btn-cover{
@@ -392,11 +399,13 @@
 
 /* footer css */
 
-
 .filter-footer{
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+    border-top: 1px solid #e5e5e5;
+    flex-shrink: 0;
+    padding: 0.5rem 0;
 }
 
 .field-add-btn {
@@ -490,7 +499,7 @@
 
 .custom-logic-section {
     /* padding: 0.5rem; */
-    margin: -0.3rem 0.5rem 0.5rem 0.5rem;
+    margin: -0.3rem 0.5rem 0rem 0.5rem;
 }
 
 .custom-logic-section .input-section{

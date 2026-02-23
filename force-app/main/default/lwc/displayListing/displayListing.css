@@ -4,9 +4,13 @@
 }
 
 .main-card {
-    min-height: 500px;
+    min-height: 550px;
     display: flex;
     flex-direction: column;
+    background: #f5f7fa;
+    padding: 1rem 1rem 0rem 1rem;
+    border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .filter-search-container {
@@ -15,7 +19,8 @@
     align-items: center;
     background-color: white;
     border-radius: 8px;
-    padding: 16px 0px;
+    padding: 1rem;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .search-bar lightning-input {
@@ -63,7 +68,6 @@
     height: auto;
     border: 1px solid #d8d8d8;
     border-radius: 8px;
-    margin: 0 0 10% 0;
     transition: box-shadow 0.3s ease;
 }
 
@@ -96,7 +100,7 @@
 
 .property_type {
     background-color: #dbfaff;
-    border-radius: 5px 0 0 0;
+    border-radius: 5px 0 16px 0;
     position: absolute;
     color: black;
     left: 0;
@@ -167,7 +171,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 1rem;
     margin-bottom: 1rem;
     gap: 4px;
 }
@@ -193,6 +196,9 @@
     background-color: #fff;
     font-size: 14px;
     overflow: scroll;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .custom-data-table tr:nth-child(odd) {
@@ -207,6 +213,8 @@
     background: #0176D3;
     color: white;
     text-align: center;
+    position: sticky;
+    top: 0;
 }
 
 .property-image img {
@@ -423,11 +431,21 @@ button:disabled {
 }
 
 .data-table-container {
-    margin-top: 12px;
+    margin-top: 16px;
     max-width: 100%;
     overflow: auto;
     border-radius: 8px;
     flex: 1;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    margin-bottom: 1rem;
+    position: relative;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
 }
 
 .listing-image {
@@ -631,7 +649,7 @@ span {
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
     box-shadow: 0px 2px 7px #0000002b;
-    z-index: 1;
+    z-index: 2;
     position: sticky;
     top: 0;
 }
@@ -655,7 +673,7 @@ span {
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
     box-shadow: 0px -1px 7px #0000002b;
-    z-index: 1;
+    z-index: 2;
 }
 
 .filter-div .filter-footer .custtom__footer {
@@ -732,6 +750,7 @@ span {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     width: 98% !important;
+    margin: 1rem;
 }
 
 .custtom__footer {
@@ -781,6 +800,10 @@ span {
     .custom-grid {
         grid-template-columns: repeat(1, 1fr);
     }
+
+    .search-bar lightning-input {
+        width: 220px;
+    }
 }
 
 
@@ -801,6 +824,10 @@ span {
     .view-buttons {
         margin-top: 10px;
     }
+
+    .search-bar lightning-input {
+        width: 250px;
+    }
 }
 
 .no-prop {
@@ -813,5 +840,6 @@ span {
 }
 
 .no-data-img {
-    width: 30%;
+    max-width: 22%;
+    min-width: 12rem;
 }

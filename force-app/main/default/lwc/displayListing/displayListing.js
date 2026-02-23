@@ -77,6 +77,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
     @track listingColumns = [];
     @track isConfigOpen = false;
+    @track modalFilteredListingData = []; // New variable to store popup-filtered data
+
     @track defaultColumns = [
         { label: 'Image', fieldName: 'media_url', type: 'image' },
         { label: 'Name', fieldName: 'name', type: 'text' },
@@ -84,8 +86,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         { label: 'City', fieldName: 'mvex__city__c', type: 'text' },
         { label: 'Bedrooms', fieldName: 'mvex__bedrooms__c', type: 'number' },
         { label: 'Bathrooms', fieldName: 'mvex__bathrooms__c', type: 'number' },
-        { label: 'Price', fieldName: 'mvex__listing_price__c', type: 'currency' },
-        { label: 'Actions', fieldName: 'actions', type: 'action' }
+        { label: 'Price', fieldName: 'mvex__listing_price__c', type: 'currency' }
     ];
 
     conditionOptions = [
@@ -468,7 +469,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 type: this.getColumnType(field.fieldType),
                                 format: field.format
                             })),
-                            { label: 'Actions', fieldName: 'actions', type: 'action' }
+                            // { label: 'Actions', fieldName: 'actions', type: 'action' }
                         ];
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                     } catch (e) {
@@ -567,6 +568,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 let inquiry = {};
                 if (this.objectName === 'MVEX__Inquiry__c') {
                     this.totalListing = this.convertKeysToLowercase(data.listings);
+                    this.modalFilteredListingData = [...this.totalListing];
                     inquiry = data.inquiries[0];
                     this.inquiryRecord = inquiry;
                     this.propertyMediaUrls = result.medias;
@@ -762,6 +764,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 this.pagedFilteredListingData = [...this.totalListing];
             }
 
+            this.modalFilteredListingData = [...this.pagedFilteredListingData];
+
             this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
             this.totalRecords = this.pagedFilteredListingData.length;
             this.currentPage = 1;
@@ -885,7 +889,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     applyFilters() {
         try {
 
-            this.pagedFilteredListingData = this.totalListing.filter(listing => {
+            this.pagedFilteredListingData = this.modalFilteredListingData.filter(listing => {
                 const searchListing = listing.name.toLowerCase().includes(this.searchTerm);
                 return searchListing;
             });
@@ -1132,6 +1136,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
             if (this.mappings.length === 0) {
                 this.pagedFilteredListingData = [...this.totalListing];
+                this.modalFilteredListingData = [...this.pagedFilteredListingData];
                 this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
                 this.totalRecords = this.pagedFilteredListingData.length;
                 this.currentPage = 1;
@@ -1371,6 +1376,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 });
             }
 
+            this.modalFilteredListingData = [...this.pagedFilteredListingData];
             // this.listingData = this.pagedFilteredListingData;
             this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
             this.totalRecords = this.pagedFilteredListingData.length;

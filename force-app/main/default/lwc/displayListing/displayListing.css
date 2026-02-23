@@ -198,6 +198,7 @@
     overflow: scroll;
     position: absolute;
     top: 0;
+    left: 0;
 }
 
 .custom-data-table tr:nth-child(odd) {
@@ -799,6 +800,10 @@ span {
     .custom-grid {
         grid-template-columns: repeat(1, 1fr);
     }
+
+    .search-bar lightning-input {
+        width: 220px;
+    }
 }
 
 
@@ -818,6 +823,10 @@ span {
 
     .view-buttons {
         margin-top: 10px;
+    }
+
+    .search-bar lightning-input {
+        width: 250px;
     }
 }
 

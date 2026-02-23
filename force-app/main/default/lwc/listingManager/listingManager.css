@@ -262,7 +262,7 @@ span {
 .main .body .innerDiv1 {
     background-color: transparent;
     display: flex;
-    width: 22%;
+    width: 25%;
     flex: 1 1 auto;
     border-radius: 0.5rem;
 }
@@ -315,6 +315,7 @@ span {
     overflow: hidden;
     border-radius: 0.5rem;
     border: 1px solid #afd3e5c2;
+    position: relative;
 }
 
 .expanded2 {

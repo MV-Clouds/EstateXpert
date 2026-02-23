@@ -11,6 +11,13 @@
     background-color:#0376D3 ;
 }
 
+.header-buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .filter-header .filter-text{
     margin-left: 1rem;
     color: white;
@@ -18,7 +25,7 @@
     font-weight: 500;
 } 
 
-.filter-header .reset-text{
+/* .filter-header .reset-text{
     margin-right: 0.3rem;
     color: white;
     font-size: 14px;
@@ -26,6 +33,18 @@
     padding: 0.4rem;
     background: #0376D3;
     font-weight: 500;
+} */
+
+.filter-header .reset-text{
+    margin-right: 0.3rem;
+    color: #060606;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0.2rem;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    background: #f0f3f6;
+    border-radius: 5px;
 }
 
 .filter-outer{
@@ -78,6 +97,7 @@
 .combobox .pill-section {
     position: relative;
     padding: 0;
+    padding-top: 0.3rem;
     padding-right: 3.75rem;
     height: fit-content;
     overflow: hidden;
@@ -127,10 +147,10 @@
 
 .combobox .input-delete-cover{
     display: flex;
+    gap: 0.5rem;
 }
 
 .combobox .input-delete-cover .delete-icon-cover{
-    margin-left: 0.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -243,6 +263,19 @@
 
 .field-add-btn .add-btn-cover svg path{
     fill: #0176D3;
+}
+
+.field-add-btn .save-btn-cover{
+    border: 1px solid #747474;
+    border-radius: 0.3rem;
+    margin: 1rem;
+    cursor: pointer;
+    height: 2rem;
+    padding: 0rem 0.4rem 0rem 0.4rem;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #0176D3;
 }
 
 .advanced-checkbox{
@@ -483,4 +516,10 @@
 
 .filter-index {
     color: #333;
+}
+
+.no-filter{
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
 }

@@ -35,46 +35,6 @@
             
             <!-- Modern Split Layout -->
             <div class={layoutClass}>
-                <!-- Left Sidebar Info Panel -->
-                <div class="sidebar-info">
-                    <div class="sidebar-header">
-                        <div class="logo-area">
-                            <div class="logo-circle"></div>
-                            <h2 class="sidebar-title">Control Center</h2>
-                        </div>
-                    </div>
-                    
-                    <!-- Feature Description while component is open -->
-                    <template if:true={isChildComponentView}>
-                        <div class="feature-description active">
-                            <div class="description-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <h3 class="description-title">{selectedComponentTitle}</h3>
-                            <p class="description-text">{selectedComponentDescription}</p>
-                        </div>
-                    </template>
-                    
-                    <!-- Feature Description Area (shown when on control center) -->
-                    <template if:true={isControlCenterView}>
-                        <div class="feature-description">
-                            <div class="description-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <h3 class="description-title">Hover over a feature</h3>
-                            <p class="description-text">Hover over any feature card to see detailed information here</p>
-                        </div>
-                    </template>
-                </div>
-
                 <!-- Main Content Area -->
                 <div class="main-content">
                     <!-- Control Center View -->
@@ -320,6 +280,46 @@
                                     integration-type={integrationType}>
                                 </c-google-lead-field-mapping>
                             </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Right Sidebar Info Panel -->
+                <div class="sidebar-info">
+                    <div class="sidebar-header">
+                        <div class="logo-area">
+                            <div class="logo-circle"></div>
+                            <h2 class="sidebar-title">Control Center</h2>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Description while component is open -->
+                    <template if:true={isChildComponentView}>
+                        <div class="feature-description active">
+                            <div class="description-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3 class="description-title">{selectedComponentTitle}</h3>
+                            <p class="description-text">{selectedComponentDescription}</p>
+                        </div>
+                    </template>
+                    
+                    <!-- Feature Description Area (shown when on control center) -->
+                    <template if:true={isControlCenterView}>
+                        <div class="feature-description">
+                            <div class="description-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3 class="description-title">Hover over a feature</h3>
+                            <p class="description-text">Hover over any feature card to see detailed information here</p>
                         </div>
                     </template>
                 </div>

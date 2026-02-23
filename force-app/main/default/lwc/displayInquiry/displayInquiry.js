@@ -142,6 +142,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track NoDataImageUrl = emptyState;
     @track hideFilterButton = false;
     @track filteredGroupMembers = [];
+    @track pagedFilteredInquiryData = [];
+    @track modalFilteredInquiryData = [];
+    @track sendMailInquiryDataList = [];
 
     get modalContainerClass() {
         return this.popUpSecondPage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
@@ -932,12 +935,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * * Date: 20/08/2024
     * Created By:Rachit Shah
     */
-    /**
-    * Method Name : applyFiltersData
-    * @description : method to apply filter initially
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
     applyFiltersData(listing) {
         try {
             this.pagedFilteredInquiryData = this.totalinquiry;
@@ -1171,7 +1168,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     applyFilters() {
         try {
-            this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
+            this.pagedFilteredInquiryData = this.modalFilteredInquiryData.filter(inquiry => {
                 const searchInquiry = inquiry.name.toLowerCase().includes(this.searchTerm);
                 return searchInquiry;
             });
@@ -1330,6 +1327,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             if (this.mappings.length === 0) {
                 this.pagedFilteredInquiryData = [...this.totalinquiry];
+                this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Update popup filtered data
                 this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
                 this.totalRecords = this.pagedFilteredInquiryData.length;
                 this.currentPage = 1;
@@ -1555,6 +1553,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.pagedFilteredInquiryData = [...this.totalinquiry];
                 }
             }
+
+            this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Store latest popup filters to state
 
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
             this.totalRecords = this.pagedFilteredInquiryData.length;

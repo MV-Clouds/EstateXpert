@@ -1,5 +1,6 @@
 import { LightningElement,track} from 'lwc';
 import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
+import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
 import getPicklistValues from '@salesforce/apex/ListingManagerFilterController.getPicklistValues';
 import getFilteredListings from '@salesforce/apex/ListingManagerFilterController.getFilteredListings';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -14,6 +15,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     @track valueFromChild = [];
     @track isAddButtonDisabled = true;
     @track filterFields =[];
+    originalFilterFields;
     @track filteredListings;
     @track staticFields=[];
     @track isLoading = false;
@@ -24,6 +26,24 @@ export default class ListingManagerFilterCmp extends LightningElement {
     @track isCustomLogicEnabled = false;
     @track customLogicExpression = '';
     @track customLogicError = null;
+
+    get isApplyDisabled() {
+        const isEmpty = !this.customLogicExpression || !this.customLogicExpression.trim();
+
+        // When button is disabled due to empty expression, clear error
+        if (isEmpty && this.customLogicError) {
+            this.customLogicError = null;
+        }
+
+        return isEmpty;
+
+    }
+
+      get isFilterChanged() {
+        return JSON.stringify(this.filterFields) !== 
+               JSON.stringify(this.originalFilterFields);
+    }
+
 
     /**
     * Method Name: connectedCallback
@@ -48,19 +68,46 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */  
     initializeStaticFields() {
         this.isLoading = true;
-        getStaticFields()
+        this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+        getStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters'})
             .then(result => {
                 this.staticFields = JSON.parse(result);
                 this.filterFields = this.filterFields.concat(this.staticFields);
+                this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
                 this.setPicklistValue();
                 this.updateFilterIndices();
+                this.applyFilters();
                 console.log('this.filterFields',JSON.stringify(this.filterFields));
                 
-                this.isLoading = false;
+                 setTimeout(() => {
+                    this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                 },300);
             })
             .catch(error => {
                 errorDebugger('ListingManagerFilterCmp', 'initializeStaticFields', error, 'warn', 'Error in initializeStaticFields');
+                this.isLoading = false;
+                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             });
+    }
+
+    saveFilterPermanent(){
+        saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters', fieldsJson: JSON.stringify(this.filterFields)})
+        .then(() => {
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+            this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
+
+             this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Success',
+                message: 'Fields saved successfully.',
+                variant: 'success'
+            })
+        );
+        })  
+         .catch(error => {
+            errorDebugger('ListingManagerFilterCmp', 'saveFilterPermanent', error, 'warn', 'Error in saveFilterPermanent');
+        });      
     }
 
     /**
@@ -85,6 +132,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */    
     loadPicklistValues(field) {
+        // this.dispatchEvent(new CustomEvent('loading', { detail: true }));
         getPicklistValues({apiName:field.apiName,objectName:field.objectApiName})
         .then(result => {
             this.staticFields = this.staticFields.map(f => {
@@ -98,10 +146,13 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 return f;
             });
             this.filterFields = [...this.staticFields];
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.updateFilterIndices();
+            // this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         })
         .catch(error => {
             errorDebugger('ListingManagerFilterCmp', 'loadPicklistValues', error, 'warn', 'Error in loadPicklistValues');
+            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         });
     }
 
@@ -337,20 +388,24 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
             console.log('Final Query:', finalQuery); // Debug the final query string
             this.isLoading = true;
+            this.dispatchEvent(new CustomEvent('loading', { detail: true }));
             getFilteredListings({ filterConditions: finalQuery })
                 .then(result => {
                     this.filteredListings = result;
                     this.setFilteredListings();
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                 })
                 .catch(error => {
                     errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                 });
 
         } catch(error) {
             errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
             this.isLoading = false;
+            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
         }
     }
 
@@ -390,7 +445,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     handleSearchChange1(event) {
       try{
-        this.isCustomLogicEnabled = false;
+        
           const index = event.currentTarget.dataset.id;
           this.filterFields[index].searchTerm = event.target.value;
           if (this.filterFields[index].searchTerm.length > 50) {
@@ -486,7 +541,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     selectOption1(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const value = event.currentTarget.dataset.id;
             const index = event.currentTarget.dataset.index;
         
@@ -532,7 +587,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     removeOptionMethod(event){
-        this.isCustomLogicEnabled = false;
+        
         this.removeOption1(event);
         this.applyFilters();
     }
@@ -642,7 +697,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     addTheString(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             const value = this.filterFields[index].searchTerm.trim();
             
@@ -671,13 +726,14 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMinValueChange(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
     
             if (isNaN(value)) {
                 value = null;
             }
+            
     
             // Clear any existing debounce timer
             if (this.debounceTimeout) {
@@ -688,6 +744,12 @@ export default class ListingManagerFilterCmp extends LightningElement {
             this.debounceTimeout = setTimeout(() => {
                 this.filterFields[index].minValue = value;
     
+                if (value < 0) {
+                this.filterFields[index].message =
+                    'Filters are not applied for negative values';
+                return; 
+            }
+            
                 if (
                     this.filterFields[index].isMin === true ||
                     value <= this.filterFields[index].maxValue ||
@@ -713,7 +775,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMaxValueChange(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
     
@@ -730,6 +792,12 @@ export default class ListingManagerFilterCmp extends LightningElement {
             this.debounceTimeout = setTimeout(() => {
                 this.filterFields[index].maxValue = value;
     
+                if (value < 0) {
+                this.filterFields[index].message =
+                    'Filters are not applied for negative values';
+                return; 
+            }
+            
                 if (
                     this.filterFields[index].isMax === true ||
                     value === 0 ||
@@ -755,7 +823,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     incrementMinValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].minValue, 10);
     
@@ -796,7 +864,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     decrementMinValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].minValue, 10);
     
@@ -839,7 +907,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     incrementMaxValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].maxValue, 10);
     
@@ -881,7 +949,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     decrementMaxValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].maxValue, 10);
     
@@ -924,7 +992,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     checkboxFieldChange(event){
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.index;
             this.filterFields[index].fieldChecked = !this.filterFields[index].fieldChecked;
             this.applyFilters();
@@ -941,7 +1009,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     handleMinDate(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             const newValue = event.target.value;
             this.filterFields[index].minDate = newValue;
@@ -968,7 +1036,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMaxDate(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             const newValue = event.target.value;
             this.filterFields[index].maxDate = newValue;
@@ -995,7 +1063,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     clearSearch(event) {
         try{
-            this.isCustomLogicEnabled = false;
+            
             const index = event.currentTarget.dataset.id;
             if (index > -1 && index < this.filterFields.length) {
                 this.filterFields.splice(index, 1);
@@ -1013,44 +1081,92 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Date: 14/06/2024
     * Created By: Vyom Soni
     */
-    handleReset() {
-        try {
-            this.staticFields.forEach(field => {
-                if (field.picklistValue) {
-                    field.picklistValue.forEach(picklist => {
-                        picklist.showRightIcon = false;
-                    });
-                }
-                if (field.unchangePicklistValue) {
-                    field.unchangePicklistValue.forEach(picklist => {
-                        picklist.showRightIcon = false;
-                    });
-                }
-            });
-            this.filterFields = this.staticFields.map(field => {
-                return {
-                    ...field,
-                    selectedOptions: null,
-                    picklistValue: field.picklistValue,
-                    minValue: null,
-                    maxValue: null,
-                    minDate: null,
-                    maxDate: null,
-                    fieldChecked: null,
-                    message: null,
-                    searchTerm: null
-                };
-            });
-            this.isCustomLogicEnabled = false;
-            this.customLogicExpression = '';
-            this.customLogicError = null;
-            this.setFilteredListingsReset();
+    // handleReset() {
+    //     try {
+    //         this.staticFields.forEach(field => {
+    //             if (field.picklistValue) {
+    //                 field.picklistValue.forEach(picklist => {
+    //                     picklist.showRightIcon = false;
+    //                 });
+    //             }
+    //             if (field.unchangePicklistValue) {
+    //                 field.unchangePicklistValue.forEach(picklist => {
+    //                     picklist.showRightIcon = false;
+    //                 });
+    //             }
+    //         });
+    //         this.filterFields = this.staticFields.map(field => {
+    //             return {
+    //                 ...field,
+    //                 selectedOptions: null,
+    //                 picklistValue: field.picklistValue,
+    //                 minValue: null,
+    //                 maxValue: null,
+    //                 minDate: null,
+    //                 maxDate: null,
+    //                 fieldChecked: null,
+    //                 message: null,
+    //                 searchTerm: null
+    //             };
+    //         });
+    //         this.isCustomLogicEnabled = false;
+    //         this.customLogicExpression = '';
+    //         this.customLogicError = null;
+    //         this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
 
-            this.updateFilterIndices();
-        } catch (error) {
-            errorDebugger('ListingManagerFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
-        }
+    //         this.setFilteredListingsReset();
+
+    //         this.updateFilterIndices();
+    //     } catch (error) {
+    //         errorDebugger('ListingManagerFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
+    //     }
+    // }
+
+    handleReset() {
+    try {
+        // Reset using staticFields which now contains the saved state
+        this.filterFields = this.staticFields.map(field => {
+            // Create a deep copy of each field to avoid reference issues
+            const resetField = JSON.parse(JSON.stringify(field));
+            
+            // Reset all filter values
+            resetField.selectedOptions = null;
+            resetField.minValue = null;
+            resetField.maxValue = null;
+            resetField.minDate = null;
+            resetField.maxDate = null;
+            resetField.fieldChecked = null;
+            resetField.message = null;
+            resetField.searchTerm = null;
+            
+            // Reset picklist icons
+            if (resetField.picklistValue) {
+                resetField.picklistValue.forEach(picklist => {
+                    picklist.showRightIcon = false;
+                });
+            }
+            if (resetField.unchangePicklistValue) {
+                resetField.unchangePicklistValue.forEach(picklist => {
+                    picklist.showRightIcon = false;
+                });
+            }
+            
+            return resetField;
+        });
+        
+        this.isCustomLogicEnabled = false;
+        this.customLogicExpression = '';
+        this.customLogicError = null;
+        
+        // Update originalFilterFields to match reset state
+        this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+        
+        this.setFilteredListingsReset();
+        this.updateFilterIndices();
+    } catch (error) {
+        errorDebugger('ListingManagerFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
     }
+}
     /**
     * Method Name: handleClose
     * @description: handle the close event of modal.
@@ -1261,6 +1377,19 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
             // Extract unique indices from the custom logic expression
             const usedIndices = [...new Set(this.customLogicExpression.match(/\d+/g) || [])];
+            const erroredIndices = [];
+
+            usedIndices.forEach(idx => {
+                const field = this.filterFields[parseInt(idx, 10) - 1]; // 1-based → 0-based
+                if (field?.message) {
+                    erroredIndices.push(idx);
+                }
+            });
+
+            if (erroredIndices.length > 0) {
+                this.customLogicError = `Fix errors in filters: ${erroredIndices.join(', ')} before applying custom logic.`;
+                return;
+            }
 
             // If no filters have selected values, expression should be empty
             if (requiredIndices.length === 0 && usedIndices.length > 0) {
@@ -1269,16 +1398,16 @@ export default class ListingManagerFilterCmp extends LightningElement {
             }
 
             // Check if all required indices are included
-            const missingIndices = requiredIndices.filter(index => !usedIndices.includes(index));
-            if (missingIndices.length > 0) {
-                this.customLogicError = `Custom logic must include all filters with selected values. Missing indices: ${missingIndices.join(', ')}.`;
-                return;
-            }
+            // const missingIndices = requiredIndices.filter(index => !usedIndices.includes(index));
+            // if (missingIndices.length > 0) {
+            //     this.customLogicError = `Custom logic must include all filters with selected values. Missing indices: ${missingIndices.join(', ')}.`;
+            //     return;
+            // }
 
             // Check if any used indices correspond to filters without selected values
             const invalidIndices = usedIndices.filter(index => !requiredIndices.includes(index));
             if (invalidIndices.length > 0) {
-                this.customLogicError = `Custom logic includes indices without selected values: ${invalidIndices.join(', ')}.`;
+                this.customLogicError = `Custom logic includes indices without have values: ${invalidIndices.join(', ')}.`;
                 return;
             }
 

@@ -84,6 +84,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track hasBusinessAccountConfigured = false;
     selectedTemplate = '';
     allSelectedContact =[];
+    @track listingLoading = false;
 
     /**
     * Method Name : totalPages
@@ -288,6 +289,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
+    get listingSpinnerLoading(){
+        return !this.spinnerShow && this.listingLoading;
+    }
+
     /**
     * Method Name : totalContacts
     * @description : set the total filtered contacts.
@@ -365,6 +370,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         });
         this.checkBusinessAccountConfig();
         this.getAccessible();
+    }
+
+    handleLoading(event){
+        this.listingLoading = event.detail;
     }
 
     /**

@@ -207,22 +207,6 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     }
 
     /*
-    * Method Name: renderedCallback
-    * @description: Set dynamic width for progress bars
-    * Date: 24/02/2026
-    * Created By: Karan Singh
-    */
-    renderedCallback() {
-        const progressBars = this.template.querySelectorAll('.modern-progress-fill');
-        progressBars.forEach(bar => {
-            const percentage = bar.dataset.progress;
-            if (percentage !== undefined) {
-                bar.style.width = `${percentage}%`;
-            }
-        });
-    }
-
-    /*
     * Method Name: getAccessible
     * @description: Method to check if user has access to Marketing Campaign feature
     * Date: 03/02/2026
@@ -291,7 +275,8 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                 canDelete: campaign.MVEX__Status__c === 'Pending' || campaign.MVEX__Status__c === 'Failed' ? false : true,
                 canEdit : campaign.MVEX__Status__c === 'Pending' || campaign.MVEX__Status__c === 'In Progress' ? false : true, 
                 IsCampaignTemplate: campaign.MVEX__Is_Marketing_Campaign_Template__c ? 'Yes' : 'No',
-                progressPercentage: progressPercentage
+                progressPercentage: progressPercentage,
+                progressWidth: `width: ${progressPercentage}%`
             };
         });
 

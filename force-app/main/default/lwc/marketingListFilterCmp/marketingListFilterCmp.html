@@ -77,11 +77,13 @@
                                                         </div>
                                                     </template>
                                                 </div>
-                                                <div class="delete-icon-cover" >
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>                                                
-                                                </div>
+                                                <template if:false={option.isMandatory}>
+                                                    <div class="delete-icon-cover" >
+                                                        <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
+                                                        </svg>                                                
+                                                    </div>
+                                                </template>
                                             </div>
                                         </div>
                                     </div>
@@ -93,18 +95,20 @@
                                                         <span class="slds-pill">
                                                             <span class="slds-pill__label"
                                                                 title="Burlington Textiles Corp of America">{option2.label}</span>
-                                                            <span class="slds-icon_container slds-pill__remove" title="Remove">
-                                                                <button
-                                                                    class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
-                                                                    title="Remove" data-index={index} onclick={removeOptionMethod} data-id={option2.value}>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                                        viewBox="0 0 520 520" fill="#fff">
-                                                                        <path
-                                                                            d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
-                                                                    </svg>
-                                                                    <span class="slds-assistive-text">Remove</span>
-                                                                </button>
-                                                            </span>
+                                                            <!-- <template if:false={option.isMandatory}> -->
+                                                                <span class="slds-icon_container slds-pill__remove" title="Remove">
+                                                                    <button
+                                                                        class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
+                                                                        title="Remove" data-index={index} onclick={removeOptionMethod} data-id={option2.value}>
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                                            viewBox="0 0 520 520" fill="#fff">
+                                                                            <path
+                                                                                d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
+                                                                        </svg>
+                                                                        <span class="slds-assistive-text">Remove</span>
+                                                                    </button>
+                                                                </span>
+                                                            <!-- </template> -->
                                                         </span>
                                                     </li>
                                                 </template>
@@ -166,18 +170,20 @@
                                                         <span class="slds-pill">
                                                             <span class="slds-pill__label"
                                                                 title="Burlington Textiles Corp of America">{option2.label}</span>
-                                                            <span class="slds-icon_container slds-pill__remove" title="Remove">
-                                                                <button
-                                                                    class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
-                                                                    title="Remove" data-index={index} onclick={removeOptionMethodString} data-id={option2.value}>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                                        viewBox="0 0 520 520" fill="#fff">
-                                                                        <path
-                                                                            d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
-                                                                    </svg>
-                                                                    <span class="slds-assistive-text">Remove</span>
-                                                                </button>
-                                                            </span>
+                                                            <template if:false={option.isMandatory}>
+                                                                <span class="slds-icon_container slds-pill__remove" title="Remove">
+                                                                    <button
+                                                                        class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
+                                                                        title="Remove" data-index={index} onclick={removeOptionMethodString} data-id={option2.value}>
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                                            viewBox="0 0 520 520" fill="#fff">
+                                                                            <path
+                                                                                d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
+                                                                        </svg>
+                                                                        <span class="slds-assistive-text">Remove</span>
+                                                                    </button>
+                                                                </span>
+                                                            </template>
                                                         </span>
                                                     </li>
                                                 </template>

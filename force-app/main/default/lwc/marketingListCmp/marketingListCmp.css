@@ -321,6 +321,7 @@ span {
     border-radius: 8px;
     height: 100%;
     overflow: hidden;
+    position: relative;
 }
 
 

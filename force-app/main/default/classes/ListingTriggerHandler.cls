@@ -11,6 +11,10 @@ public with sharing class ListingTriggerHandler {
     private static final string CLASS_NAME = 'ListingTriggerHandler';
     public static Boolean isFirstTime = true;
 
+    // Added for Test Coverage to bypass metadata query
+    @TestVisible
+    private static Mapping_Metadata__mdt mockMetadata;
+
     public ListingTriggerHandler(List<Listing__c> newList, List<Listing__c> oldList, Map<Id, Listing__c> newMap, Map<Id, Listing__c> oldMap, Boolean isInsert, Boolean isUpdate, Boolean isDelete, Boolean isUndelete) {
         this.recordNewList = newList;
         this.recordOldList = oldList;
@@ -34,7 +38,13 @@ public with sharing class ListingTriggerHandler {
     public void handleListingAfterInsert() {
         try {
             //Get mapping from the metadata record
-            Mapping_Metadata__mdt metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            Mapping_Metadata__mdt metaData;
+            if(Test.isRunningTest() && mockMetadata != null) {
+                metaData = mockMetadata;
+            } else {
+                metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            }
+            
             Map<String, String> fieldMappings = new Map<String, String>();
             
             if(metaData.Mapping_String__c != null){
@@ -244,7 +254,13 @@ public with sharing class ListingTriggerHandler {
 
     public void handleListingAfterUpdate() {
         try {
-            Mapping_Metadata__mdt metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            Mapping_Metadata__mdt metaData;
+            if(Test.isRunningTest() && mockMetadata != null) {
+                metaData = mockMetadata;
+            } else {
+                metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            }
+            
             Map<String, String> fieldMappings = new Map<String, String>();
 
             if(metaData.Mapping_String__c !=  null){

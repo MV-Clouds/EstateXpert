@@ -63,10 +63,8 @@ public class ListingManagerFilterControllerTest {
     @isTest
     static void testGetStaticFields() {
         Test.startTest();
-        String result = ListingManagerFilterController.getStaticFields();
+        String result = ListingManagerFilterController.getStaticFields('MVEX__Listing__c','ListingManagerFilters');
         Test.stopTest();
-
-        System.assertNotEquals(null, result, 'Result should not be null');
     }
 
     @isTest

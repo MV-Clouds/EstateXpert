@@ -1,10 +1,12 @@
 import { LightningElement,track} from 'lwc';
-import getStaticFields from '@salesforce/apex/MarketingListFilterController.getStaticFields';
+import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
+import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
 import getPicklistValues from '@salesforce/apex/MarketingListFilterController.getPicklistValues';
 import getFilteredContacts from '@salesforce/apex/MarketingListFilterController.getFilteredContacts';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
+import { errorDebugger } from 'c/globalProperties';
 
 export default class MarketingListFilterCmp extends LightningElement {
     @track addModal = false;
@@ -13,6 +15,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     @track valueFromChild = [];
     @track isAddButtonDisabled = true;
     @track filterFields =[];
+    originalFilterFields;
     @track filteredContacts =[];
     @track staticFields=[];
     @track isLoading = false;
@@ -24,6 +27,11 @@ export default class MarketingListFilterCmp extends LightningElement {
     @track customLogicExpression = '';
     @track customLogicError = null;
 
+    get isFilterChanged() {
+        return JSON.stringify(this.filterFields) !== 
+               JSON.stringify(this.originalFilterFields);
+    }
+
     /**
     * Method Name: connectedCallback
     * @description: set the get static fields, set contact record wrapper, set Inquiry records.
@@ -31,15 +39,11 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */   
     connectedCallback(){
-        loadStyle(this, MulishFontCss)
-        .then(() => {
-            console.log('Styles loaded successfully');
-        })
-        .catch(error => {
-            console.error('Error loading styles', error);
-        });
-        this.screenWidth = window?.globalThis?.innerWidth;
-        window?.globalThis?.addEventListener('resize', this.handleResize);
+        loadStyle(this, MulishFontCss);
+        if (!import.meta.env.SSR) {
+            window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
+        }
+        this.updateScreenWidth();
         this.initializeStaticFields();
     }
 
@@ -51,19 +55,46 @@ export default class MarketingListFilterCmp extends LightningElement {
     */  
     initializeStaticFields() {
         this.isLoading = true;
-        getStaticFields()
+        this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+        getStaticFields({objectApiName: 'Marketing Contact', featureName: 'MarketingManagerFilter'})
             .then(result => {
                 this.staticFields = JSON.parse(result);
                 this.filterFields = this.filterFields.concat(this.staticFields);
+                this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
                 this.setPicklistValue();
                 this.updateFilterIndices();
                 this.applyFilters();
-                this.isLoading = false;
+                console.log('this.filterFields',JSON.stringify(this.filterFields));
+                
+                 setTimeout(() => {
+                    this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                 },300);
             })
             .catch(error => {
-                console.error('Error loading static fields from metadata', error);
+                errorDebugger('MarketingListFilterCmp', 'initializeStaticFields', error, 'warn', 'Error in initializeStaticFields');
                 this.isLoading = false;
+                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             });
+    }
+
+    saveFilterPermanent(){
+        saveStaticFields({objectApiName: 'Marketing Contact', featureName: 'MarketingManagerFilter', fieldsJson: JSON.stringify(this.filterFields)})
+        .then(() => {
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+            this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
+
+             this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Success',
+                message: 'Fields saved successfully.',
+                variant: 'success'
+            })
+        );
+        })  
+         .catch(error => {
+            errorDebugger('MarketingListFilterCmp', 'saveFilterPermanent', error, 'warn', 'Error in saveFilterPermanent');
+        });      
     }
 
     /**
@@ -73,15 +104,11 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */    
     setPicklistValue(){
-        try{
-            this.staticFields.forEach(field => {
-                if (field.picklist) {
-                    this.loadPicklistValues(field);
-                    }
-            });
-        }catch(error){
-            console.log('Error setPicklistValue->'+error);
-        }
+        this.staticFields.forEach(field => {
+            if (field.picklist) {
+                this.loadPicklistValues(field);
+                }
+        });
     }
 
     /**
@@ -104,10 +131,11 @@ export default class MarketingListFilterCmp extends LightningElement {
                 return f;
             });
             this.filterFields = [...this.staticFields];
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.updateFilterIndices();
         })
         .catch(error => {
-            console.error('Error loading picklist values', error);
+            errorDebugger('MarketingListFilterCmp', 'loadPicklistValues', error, 'warn', 'Error in loadPicklistValues');
         });
     }
 
@@ -121,7 +149,6 @@ export default class MarketingListFilterCmp extends LightningElement {
         try{
             // Get the value from the event detail and store it in a property
             this.valueFromChild = event.detail;
-            console.log('this.valueFromChild'+JSON.stringify(this.valueFromChild));
             this.valueFromChild = this.valueFromChild.map(field => {
                 return {
                     label: field.label,
@@ -163,7 +190,6 @@ export default class MarketingListFilterCmp extends LightningElement {
                     field.label === newField.label &&
                     field.objectApiName === newField.objectApiName &&
                     field.type === newField.type &&
-                    field.prevApiName === newField.prevApiName &&
                     field.isNot === newField.isNot
                 );
                 if (!isFieldPresent) {
@@ -178,27 +204,22 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             });
             this.updateFilterIndices();
-        }catch(e){
-            console.error('Error handleValueSelected ->'+e);
+            console.log('this.filterFields',JSON.stringify(this.filterFields));
+        }catch(error){
+            errorDebugger('MarketingListFilterCmp', 'handleValueSelected', error, 'warn', 'Error in handleValueSelected');
         }
     }
 
     /**
-    * Method Name : handleResize
-    * @description : call when component is resize.
+    * Method Name : updateScreenWidth
+    * @description : update the width variable.
     * * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    handleResize = () => {
-        this.screenWidth = window?.globalThis?.innerWidth;
+    updateScreenWidth =()=> {
+        this.screenWidth = window.innerWidth;
     }
 
-    /**
-    * Method Name: applyFilters
-    * @description: apply the filters on the contacts.
-    * Date: 14/06/2024
-    * Created By: Vyom Soni
-    */
     applyFilters() {
         try {
             console.time('MethodTime');
@@ -278,6 +299,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             filterData.inquiryFilters = inquiryFilters;
 
             this.isLoading = true;
+            this.dispatchEvent(new CustomEvent('loading', { detail: true }));
             getFilteredContacts({ filterData: JSON.stringify(filterData) })
                 .then(result => {
                     // Process records in JavaScript
@@ -332,9 +354,12 @@ export default class MarketingListFilterCmp extends LightningElement {
                     this.filteredContacts = contacts.filter(c => finalContactIds.has(c.Id));
                     this.setFilteredContacts();
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                 })
                 .catch(error => {
+                    errorDebugger('MarketingListFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters');
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                     this.dispatchEvent(
                         new ShowToastEvent({
                             title: 'Error Applying Filters',
@@ -345,7 +370,9 @@ export default class MarketingListFilterCmp extends LightningElement {
                 });
             console.timeEnd('MethodTime');
         } catch (error) {
+            errorDebugger('MarketingListFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters');
             this.isLoading = false;
+            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Error Applying Filters',
@@ -551,15 +578,11 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     setFilteredContacts() {
-        try {
-            const filtercontacts = this.filteredContacts;
-            const customEvent = new CustomEvent('valueselected', {
-                detail: { filtercontacts }
-            });
-            this.dispatchEvent(customEvent);
-        } catch (e) {
-            console.error('Error setFilter ->' + e);
-        }
+        const filtercontacts = this.filteredContacts;
+        const customEvent = new CustomEvent('valueselected', {
+            detail: { filtercontacts }
+        });
+        this.dispatchEvent(customEvent);
     }
 
     setFilteredContactsReset() {
@@ -1225,7 +1248,7 @@ export default class MarketingListFilterCmp extends LightningElement {
 
             this.updateFilterIndices();
         }catch(error){
-            console.log('Error handleReset->'+error);
+            errorDebugger('MarketingListFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
         }
     }
 
@@ -1305,7 +1328,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     }
 
     disconnectedCallback() {
-        window?.globalThis?.removeEventListener('resize', this.handleResize);
+        window?.globalThis?.removeEventListener('resize', this.updateScreenWidth);
     }
 
     // Add this method to update displayIndex for filterFields

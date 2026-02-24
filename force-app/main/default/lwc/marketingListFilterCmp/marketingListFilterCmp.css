@@ -384,3 +384,99 @@
 .advanced-checkbox{
     display: flex;
 }
+
+/* Modal Styles */
+.slds-modal__header {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.custom-modal-header {
+    background-color: #0376D3;
+    color: white;
+    border: none;
+}
+
+.custom-modal-header h2 {
+    color: white;
+    margin: 0;
+}
+
+.modal-header-button {
+    background: transparent;
+    top: -1.9rem;
+    right: -1.8rem;
+    position: absolute;
+    border: none;
+    cursor: pointer;
+}
+
+.custom-close-button {
+    background: transparent;
+    top: -1.9rem;
+    right: -1.8rem;
+    position: absolute;
+    border: none;
+    cursor: pointer;
+}
+
+.custom-modal-header svg {
+    width: 1.5rem;
+}
+
+.modal-body{
+    height: 17rem;
+}
+
+.add-modal .custom-modal-body {
+    background-color: aliceblue;
+    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-position: bottom;
+    position: relative;
+}
+
+.add-modal .custom-modal-body .custom-modal{
+    position: absolute;
+    bottom: 1rem;
+    width: 96%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    justify-content: end;
+    gap: 1rem;
+}
+
+
+.custom-modal-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    line-height: normal;
+}
+
+.no-filter {
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+}
+
+@media only screen and (max-width: 900px) {
+    .filter-outer {
+        padding-bottom: 1rem;
+    }
+    
+    .custom-modal-header {
+        padding: 0.8rem;
+    }
+    
+    .custom-modal-header h2 {
+        font-size: 1rem;
+    }
+    
+    .custom-modal-button {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.8rem;
+        margin-right: 1rem;
+        line-height: normal;
+    }
+}

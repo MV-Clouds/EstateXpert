@@ -90,6 +90,16 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     }
 
     /**
+    * Method Name : filterIconName
+    * @description : Return the filter icon name based on modal state
+    * Date: 24/02/2026
+    * Created By:Karan Singh
+    */
+    get filterIconName() {
+        return this.isFilterModalOpen ? 'utility:close' : 'utility:filter';
+    }
+
+    /**
     * Method Name : startIndex
     * @description : set the start Index.
     * * Date: 20/08/2024
@@ -183,6 +193,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By: Rachit Shah
     */
     connectedCallback() {
+        this.isLoading = true;
         Promise.all([
             loadStyle(this, MulishFontCss)
         ])
@@ -456,6 +467,17 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     handleModalClose() {
         this.isModalOpen = false;
+    }
+
+    /*
+    * Method Name: handleRefresh
+    * @description: Method to refresh campaign data
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    handleRefresh() {
+        this.isLoading = true;
+        this.loadCampaigns();
     }
 
     /*

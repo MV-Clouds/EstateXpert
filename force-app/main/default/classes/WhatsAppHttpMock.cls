@@ -6,23 +6,12 @@
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @IsTest
-global class WhatsAppHttpMock{
-    // global HTTPResponse respond(HTTPRequest req) {
-    //     HttpResponse res = new HttpResponse();
-    //     res.setHeader('Content-Type', 'application/json');
-	// 	System.debug('endpoint:- '+ req.getEndpoint());
-    //     // Simulate a valid WhatsApp media download response
-    //     if (req.getEndpoint().contains('graph.facebook.com')) {
-    //         res.setStatusCode(200);
-    //         res.setBody('{"url": "https://media-server.com/path-to-media"}');
-    //     } else if (req.getEndpoint().contains('media-server.com')) {
-    //         res.setStatusCode(200);
-    //         res.setBodyAsBlob(Blob.valueOf('mock-binary-data'));
-    //     } else {
-    //         res.setStatusCode(404);
-    //         res.setBody('{"error": "Invalid endpoint"}');
-    //     }
-
-    //     return res;
-    // }
+global class WhatsAppHttpMock implements HttpCalloutMock {
+    global HTTPResponse respond(HTTPRequest req) {
+        HttpResponse res = new HttpResponse();
+        res.setHeader('Content-Type', 'application/json');
+        res.setBody('{"messaging_product": "whatsapp", "contacts": [{"input": "1234567890", "wa_id": "1234567890"}], "messages": [{"id": "wamid.HBgLMTIzNDU2Nzg5MBUUCAsMDAwMDAwMDAwMDAwAA=="}]}');
+        res.setStatusCode(200);
+        return res;
+    }
 }

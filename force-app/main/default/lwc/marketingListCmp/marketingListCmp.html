@@ -113,7 +113,7 @@
                             <div class="filterDiv">
                                 <c-marketing-list-filter-cmp class="marketing-list-cmp"
                                     onvalueselected={handleFilteredContacts} onmodalvaluechange={handlAddModalChange}
-                                    onvaluereset={handleReset}>
+                                    onvaluereset={handleReset} onloading={handleLoading}>
                                 </c-marketing-list-filter-cmp>
                             </div>
                             <div class="filterWrap" onclick={wrapFilter}>
@@ -126,6 +126,9 @@
                         </div>
                         <template if:false={fieldsModal}>
                             <div class="innerDiv2">
+                            <template if:true={listingSpinnerLoading}>
+                                <c-spinner-component is-absolute="true"></c-spinner-component>
+                            </template>
                                 <template if:true={showList}>
                                     <template if:false={showSection}>
                                         <div class="tableDiv" id="tableDiv">

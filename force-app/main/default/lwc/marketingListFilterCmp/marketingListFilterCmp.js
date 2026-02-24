@@ -1,10 +1,12 @@
 import { LightningElement,track} from 'lwc';
-import getStaticFields from '@salesforce/apex/MarketingListFilterController.getStaticFields';
+import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
+import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
 import getPicklistValues from '@salesforce/apex/MarketingListFilterController.getPicklistValues';
 import getFilteredContacts from '@salesforce/apex/MarketingListFilterController.getFilteredContacts';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
+import { errorDebugger } from 'c/globalProperties';
 
 export default class MarketingListFilterCmp extends LightningElement {
     @track addModal = false;
@@ -13,6 +15,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     @track valueFromChild = [];
     @track isAddButtonDisabled = true;
     @track filterFields =[];
+    originalFilterFields;
     @track filteredContacts =[];
     @track staticFields=[];
     @track isLoading = false;
@@ -23,6 +26,41 @@ export default class MarketingListFilterCmp extends LightningElement {
     @track isCustomLogicEnabled = false;
     @track customLogicExpression = '';
     @track customLogicError = null;
+    
+    // Mandatory field for Contact Type as Buyer
+    mandatoryContactTypeField = {
+        label: 'Contact Type',
+        apiName: 'MVEX__Contact_Type__c',
+        type: 'MULTIPICKLIST',
+        objectApiName: 'Contact',
+        operatorName: 'includes',
+        isNot: false,
+        picklist: true,
+        selectedOptions: [{ label: 'Buyer', value: 'Buyer' }],
+        picklistValue: [],
+        unchangePicklistValue: [],
+        searchTerm: '',
+        isFocused: false,
+        isMandatory: true,
+        displayIndex: 1
+    };
+
+    get isFilterChanged() {
+        return JSON.stringify(this.filterFields) !== 
+               JSON.stringify(this.originalFilterFields);
+    }
+
+    get isApplyDisabled() {
+        const isEmpty = !this.customLogicExpression || !this.customLogicExpression.trim();
+
+        // When button is disabled due to empty expression, clear error
+        if (isEmpty && this.customLogicError) {
+            this.customLogicError = null;
+        }
+
+        return isEmpty;
+
+    }
 
     /**
     * Method Name: connectedCallback
@@ -31,39 +69,81 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */   
     connectedCallback(){
-        loadStyle(this, MulishFontCss)
-        .then(() => {
-            console.log('Styles loaded successfully');
-        })
-        .catch(error => {
-            console.error('Error loading styles', error);
-        });
-        this.screenWidth = window?.globalThis?.innerWidth;
-        window?.globalThis?.addEventListener('resize', this.handleResize);
+        loadStyle(this, MulishFontCss);
+        if (!import.meta.env.SSR) {
+            window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
+        }
+        this.updateScreenWidth();
         this.initializeStaticFields();
     }
 
     /**
     * Method Name: initializeStaticFields
-    * @description: get the static fields from custom metadata.
+    * @description: get the static fields from custom metadata. Always include mandatory Contact Type field.
     * Date: 25/06/2024
     * Created By: Vyom Soni
     */  
     initializeStaticFields() {
         this.isLoading = true;
-        getStaticFields()
+        this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+        getStaticFields({objectApiName: 'Marketing Contact', featureName: 'MarketingManagerFilter'})
             .then(result => {
-                this.staticFields = JSON.parse(result);
-                this.filterFields = this.filterFields.concat(this.staticFields);
-                this.setPicklistValue();
+                this.staticFields = result ? JSON.parse(result) : [];
+                // Always add mandatory Contact Type field at the beginning, regardless of configuration
+                this.filterFields = [JSON.parse(JSON.stringify(this.mandatoryContactTypeField))];
+                // Add configured static fields if any exist
+                if (this.staticFields && this.staticFields.length > 0) {
+                    this.filterFields = this.filterFields.concat(this.staticFields);
+                }
+                // Load picklist values for the mandatory Contact Type field
+                this.loadMandatoryFieldPicklistValues();
+                this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+                // Only load picklist values for static fields if they exist
+                if (this.staticFields && this.staticFields.length > 0) {
+                    this.setPicklistValue();
+                }
+                this.updateFilterIndices();
+                this.applyFilters();
+                console.log('this.filterFields',JSON.stringify(this.filterFields));
+                
+                 setTimeout(() => {
+                    this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                 },300);
+            })
+            .catch(error => {
+                errorDebugger('MarketingListFilterCmp', 'initializeStaticFields', error, 'warn', 'Error in initializeStaticFields');
+                // Even on error, ensure mandatory Contact Type field is visible
+                this.staticFields = [];
+                this.filterFields = [JSON.parse(JSON.stringify(this.mandatoryContactTypeField))];
+                this.loadMandatoryFieldPicklistValues();
+                this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
                 this.updateFilterIndices();
                 this.applyFilters();
                 this.isLoading = false;
-            })
-            .catch(error => {
-                console.error('Error loading static fields from metadata', error);
-                this.isLoading = false;
+                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             });
+    }
+
+    saveFilterPermanent(){
+        const fieldsToSave = this.filterFields.filter(field => !field.isMandatory);
+        
+        saveStaticFields({objectApiName: 'Marketing Contact', featureName: 'MarketingManagerFilter', fieldsJson: JSON.stringify(fieldsToSave)})
+        .then(() => {
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+            this.staticFields = JSON.parse(JSON.stringify(fieldsToSave));
+
+             this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Success',
+                message: 'Fields saved successfully.',
+                variant: 'success'
+            })
+        );
+        })  
+         .catch(error => {
+            errorDebugger('MarketingListFilterCmp', 'saveFilterPermanent', error, 'warn', 'Error in saveFilterPermanent');
+        });      
     }
 
     /**
@@ -73,15 +153,11 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */    
     setPicklistValue(){
-        try{
-            this.staticFields.forEach(field => {
-                if (field.picklist) {
-                    this.loadPicklistValues(field);
-                    }
-            });
-        }catch(error){
-            console.log('Error setPicklistValue->'+error);
-        }
+        this.staticFields.forEach(field => {
+            if (field.picklist) {
+                this.loadPicklistValues(field);
+                }
+        });
     }
 
     /**
@@ -103,15 +179,49 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
                 return f;
             });
-            this.filterFields = [...this.staticFields];
+            // Preserve the mandatory field at index 0
+            const mandatoryField = this.filterFields[0];
+            this.filterFields = [mandatoryField, ...this.staticFields];
+            this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.updateFilterIndices();
         })
         .catch(error => {
-            console.error('Error loading picklist values', error);
+            errorDebugger('MarketingListFilterCmp', 'loadPicklistValues', error, 'warn', 'Error in loadPicklistValues');
         });
     }
 
-      /**
+    /**
+    * Method Name: loadMandatoryFieldPicklistValues
+    * @description: Load picklist values for the mandatory Contact Type field.
+    * Date: 25/06/2024
+    * Created By: Kajal
+    */
+    loadMandatoryFieldPicklistValues() {
+        getPicklistValues({apiName: 'MVEX__Contact_Type__c', objectName: 'Contact'})
+        .then(result => {
+            // Update the mandatory field with all picklist values
+            if (this.filterFields.length > 0 && this.filterFields[0].isMandatory) {
+                const mandatoryField = this.filterFields[0];
+                const picklistValuesWithIcon = result.map(option => ({
+                    ...option,
+                    showRightIcon: option.value === 'Buyer' // Mark Buyer as selected
+                }));
+                
+                mandatoryField.picklistValue = picklistValuesWithIcon;
+                mandatoryField.unchangePicklistValue = picklistValuesWithIcon;
+                mandatoryField.selectedOptions = [{ label: 'Buyer', value: 'Buyer' }];
+                
+                this.filterFields = [...this.filterFields];
+                this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+                this.updateFilterIndices();
+            }
+        })
+        .catch(error => {
+            errorDebugger('MarketingListFilterCmp', 'loadMandatoryFieldPicklistValues', error, 'warn', 'Error in loadMandatoryFieldPicklistValues');
+        });
+    }
+
+    /**
     * Method Name: handleValueSelected
     * @description: this method is set the field from the child field-add cmp .
     * Date: 25/06/2024
@@ -121,7 +231,6 @@ export default class MarketingListFilterCmp extends LightningElement {
         try{
             // Get the value from the event detail and store it in a property
             this.valueFromChild = event.detail;
-            console.log('this.valueFromChild'+JSON.stringify(this.valueFromChild));
             this.valueFromChild = this.valueFromChild.map(field => {
                 return {
                     label: field.label,
@@ -163,7 +272,6 @@ export default class MarketingListFilterCmp extends LightningElement {
                     field.label === newField.label &&
                     field.objectApiName === newField.objectApiName &&
                     field.type === newField.type &&
-                    field.prevApiName === newField.prevApiName &&
                     field.isNot === newField.isNot
                 );
                 if (!isFieldPresent) {
@@ -178,27 +286,22 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             });
             this.updateFilterIndices();
-        }catch(e){
-            console.error('Error handleValueSelected ->'+e);
+            console.log('this.filterFields',JSON.stringify(this.filterFields));
+        }catch(error){
+            errorDebugger('MarketingListFilterCmp', 'handleValueSelected', error, 'warn', 'Error in handleValueSelected');
         }
     }
 
     /**
-    * Method Name : handleResize
-    * @description : call when component is resize.
+    * Method Name : updateScreenWidth
+    * @description : update the width variable.
     * * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    handleResize = () => {
-        this.screenWidth = window?.globalThis?.innerWidth;
+    updateScreenWidth =()=> {
+        this.screenWidth = window.innerWidth;
     }
 
-    /**
-    * Method Name: applyFilters
-    * @description: apply the filters on the contacts.
-    * Date: 14/06/2024
-    * Created By: Vyom Soni
-    */
     applyFilters() {
         try {
             console.time('MethodTime');
@@ -278,6 +381,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             filterData.inquiryFilters = inquiryFilters;
 
             this.isLoading = true;
+            this.dispatchEvent(new CustomEvent('loading', { detail: true }));
             getFilteredContacts({ filterData: JSON.stringify(filterData) })
                 .then(result => {
                     // Process records in JavaScript
@@ -332,9 +436,12 @@ export default class MarketingListFilterCmp extends LightningElement {
                     this.filteredContacts = contacts.filter(c => finalContactIds.has(c.Id));
                     this.setFilteredContacts();
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                 })
                 .catch(error => {
+                    errorDebugger('MarketingListFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters');
                     this.isLoading = false;
+                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                     this.dispatchEvent(
                         new ShowToastEvent({
                             title: 'Error Applying Filters',
@@ -345,7 +452,9 @@ export default class MarketingListFilterCmp extends LightningElement {
                 });
             console.timeEnd('MethodTime');
         } catch (error) {
+            errorDebugger('MarketingListFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters');
             this.isLoading = false;
+            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Error Applying Filters',
@@ -369,6 +478,20 @@ export default class MarketingListFilterCmp extends LightningElement {
                 return filter.isNot 
                     ? !filter.values.includes(String(fieldValue))
                     : filter.values.includes(String(fieldValue));
+            case 'includes':
+                const fieldValueString = String(fieldValue);
+                let fieldValueArray;
+                
+                if (fieldValueString.includes(';')) {
+                    fieldValueArray = fieldValueString.split(';').map(v => v.trim());
+                } else {
+                    fieldValueArray = [fieldValueString];
+                }
+                
+                const hasMatch = filter.values.some(filterVal => 
+                    fieldValueArray.includes(filterVal)
+                );
+                return filter.isNot ? !hasMatch : hasMatch;
             case 'contains':
                 return filter.isNot
                     ? !filter.values.some(val => String(fieldValue).toLowerCase().includes(val.toLowerCase()))
@@ -551,15 +674,11 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     setFilteredContacts() {
-        try {
-            const filtercontacts = this.filteredContacts;
-            const customEvent = new CustomEvent('valueselected', {
-                detail: { filtercontacts }
-            });
-            this.dispatchEvent(customEvent);
-        } catch (e) {
-            console.error('Error setFilter ->' + e);
-        }
+        const filtercontacts = this.filteredContacts;
+        const customEvent = new CustomEvent('valueselected', {
+            detail: { filtercontacts }
+        });
+        this.dispatchEvent(customEvent);
     }
 
     setFilteredContactsReset() {
@@ -578,7 +697,6 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     handleSearchChange1(event) {
         try{
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.id;
             this.filterFields[index].searchTerm = event.target.value;
             if (this.filterFields[index].searchTerm.length > 50) {
@@ -680,7 +798,6 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     selectOption1(event) {
         try{
-            this.isCustomLogicEnabled = false;
             const value = event.currentTarget.dataset.id;
             const index = event.currentTarget.dataset.index;
 
@@ -730,7 +847,6 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     removeOptionMethod(event){
-        this.isCustomLogicEnabled = false;
         this.removeOption1(event);
         this.applyFilters();
     }
@@ -841,7 +957,6 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     addTheString(event) {
         try{
-            this.isCustomLogicEnabled = false;
             var index = event.currentTarget.dataset.id;;
             var value = this.filterFields[index].searchTerm.trim();;
           
@@ -877,7 +992,6 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     handleMinValueChange(event) {
         try {
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
 
@@ -916,7 +1030,6 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     handleMaxValueChange(event) {
         try {
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
 
@@ -951,7 +1064,6 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     incrementMinValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].minValue, 10);
 
@@ -986,7 +1098,6 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     decrementMinValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].minValue, 10);
 
@@ -1023,7 +1134,6 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     incrementMaxValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].maxValue, 10);
 
@@ -1059,7 +1169,6 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     decrementMaxValue(event) {
         try {
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.index;
             let currentValue = parseInt(this.filterFields[index].maxValue, 10);
 
@@ -1095,7 +1204,6 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     checkboxFieldChange(event){
         try{
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.index;
             this.filterFields[index].fieldChecked = !this.filterFields[index].fieldChecked;
             this.applyFilters();
@@ -1112,7 +1220,6 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     handleMinDate(event) {
         try{
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.id;
             const newValue = event.target.value;
             this.filterFields[index].minDate = newValue;
@@ -1140,7 +1247,6 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     handleMaxDate(event) {
         try{
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.id;
             const newValue = event.target.value;
             this.filterFields[index].maxDate = newValue;
@@ -1169,8 +1275,18 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     clearSearch(event) {
         try{
-            this.isCustomLogicEnabled = false;
             const index = event.currentTarget.dataset.id;
+            // Check if the field is mandatory and prevent deletion
+            if (this.filterFields[index] && this.filterFields[index].isMandatory) {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Cannot Delete',
+                        message: 'This is a mandatory filter field and cannot be deleted.',
+                        variant: 'warning'
+                    })
+                );
+                return;
+            }
             if (index > -1 && index < this.filterFields.length) {
                 this.filterFields.splice(index, 1);
             }
@@ -1184,48 +1300,24 @@ export default class MarketingListFilterCmp extends LightningElement {
     //handel reset
     /**
     * Method Name: handleReset
-    * @description: Remove the all except static fields.
+    * @description: Reset filterFields to the last saved state (originalFilterFields).
     * Date: 25/06/2024
     * Created By: Vyom Soni
     */
     handleReset(){
         try{
-            this.staticFields.forEach(field => {
-                if (field.picklistValue) {
-                field.picklistValue.forEach(picklist => {
-                    picklist.showRightIcon = false;
-                });
-                }
-                if (field.unchangePicklistValue) {
-                field.unchangePicklistValue.forEach(picklist => {
-                    picklist.showRightIcon = false;
-                });
-                }
-            });
+            // Reset to the original filter fields (as they were when last saved or initialized)
+            this.filterFields = JSON.parse(JSON.stringify(this.originalFilterFields));
             
-            this.filterFields = this.staticFields;
-            this.filterFields = this.staticFields.map(field => {
-                return {
-                    ...field, // Spread the existing field properties
-                    selectedOptions: null,
-                    picklistValue:field.picklistValue,
-                    minValue: null,
-                    maxValue: null,
-                    minDate: null,
-                    maxDate: null,
-                    fieldChecked: null,
-                    message:null,
-                    searchTerm:null
-                };
-            });
+            // Reset custom logic
             this.isCustomLogicEnabled = false;
             this.customLogicExpression = '';
             this.customLogicError = null;
+            
             this.setFilteredContactsReset();
-
             this.updateFilterIndices();
         }catch(error){
-            console.log('Error handleReset->'+error);
+            errorDebugger('MarketingListFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
         }
     }
 
@@ -1305,7 +1397,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     }
 
     disconnectedCallback() {
-        window?.globalThis?.removeEventListener('resize', this.handleResize);
+        window?.globalThis?.removeEventListener('resize', this.updateScreenWidth);
     }
 
     // Add this method to update displayIndex for filterFields
@@ -1379,13 +1471,14 @@ export default class MarketingListFilterCmp extends LightningElement {
     handleCustomLogicChange(event) {
         try {
             this.customLogicExpression = event.target.value;
-            this.validateCustomLogic();
+            // this.validateCustomLogic();
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'handleCustomLogicChange', error, 'warn', 'Error in handleCustomLogicChange');
         }
     }
 
-     validateCustomLogic() {
+    
+    validateCustomLogic() {
         try {
             if (!this.customLogicExpression) {
                 this.customLogicError = null;
@@ -1436,6 +1529,19 @@ export default class MarketingListFilterCmp extends LightningElement {
 
             // Extract unique indices from the custom logic expression
             const usedIndices = [...new Set(this.customLogicExpression.match(/\d+/g) || [])];
+            const erroredIndices = [];
+
+            usedIndices.forEach(idx => {
+                const field = this.filterFields[parseInt(idx, 10) - 1]; // 1-based → 0-based
+                if (field?.message) {
+                    erroredIndices.push(idx);
+                }
+            });
+
+            if (erroredIndices.length > 0) {
+                this.customLogicError = `Fix errors in filters: ${erroredIndices.join(', ')} before applying custom logic.`;
+                return;
+            }
 
             // If no filters have selected values, expression should be empty
             if (requiredIndices.length === 0 && usedIndices.length > 0) {
@@ -1444,16 +1550,16 @@ export default class MarketingListFilterCmp extends LightningElement {
             }
 
             // Check if all required indices are included
-            const missingIndices = requiredIndices.filter(index => !usedIndices.includes(index));
-            if (missingIndices.length > 0) {
-                this.customLogicError = `Custom logic must include all filters with selected values. Missing indices: ${missingIndices.join(', ')}.`;
-                return;
-            }
+            // const missingIndices = requiredIndices.filter(index => !usedIndices.includes(index));
+            // if (missingIndices.length > 0) {
+            //     this.customLogicError = `Custom logic must include all filters with selected values. Missing indices: ${missingIndices.join(', ')}.`;
+            //     return;
+            // }
 
             // Check if any used indices correspond to filters without selected values
             const invalidIndices = usedIndices.filter(index => !requiredIndices.includes(index));
             if (invalidIndices.length > 0) {
-                this.customLogicError = `Custom logic includes indices without selected values: ${invalidIndices.join(', ')}.`;
+                this.customLogicError = `Custom logic includes indices without have values: ${invalidIndices.join(', ')}.`;
                 return;
             }
 
@@ -1483,6 +1589,7 @@ export default class MarketingListFilterCmp extends LightningElement {
 
             this.customLogicError = null;
         } catch (error) {
+            console.log('Error in validateCustomLogic:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'validateCustomLogic', error, 'warn', 'Error in validateCustomLogic');
             this.customLogicError = 'Error validating custom logic expression.';
         }

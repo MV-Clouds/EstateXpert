@@ -32,7 +32,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track unchangedProcessContact = [];
     @track filteredSelectedContacts = [];
     allSelectedContacts = [];
-    @track sortField = '';
+    @track sortField = 'Name';
     @track sortOrder = 'asc';
     @track totalSelected = 0;
     @track isPrevDisabled = true;
@@ -84,6 +84,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track hasBusinessAccountConfigured = false;
     selectedTemplate = '';
     allSelectedContact =[];
+    @track listingLoading = false;
 
     /**
     * Method Name : totalPages
@@ -262,7 +263,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     get sortDescription() {
         try {
-            if (this.sortField != '' && this.showTile == false) {
+            if (this.sortField != '') {
                 const orderDisplayName = this.sortOrder === 'asc' ? 'Ascending' : 'Descending';
 
                 let field = null;
@@ -286,6 +287,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             console.log('Error sortDescription->' + error);
             return null;
         }
+    }
+
+    get listingSpinnerLoading(){
+        return !this.spinnerShow && this.listingLoading;
     }
 
     /**
@@ -365,6 +370,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         });
         this.checkBusinessAccountConfig();
         this.getAccessible();
+    }
+
+    handleLoading(event){
+        this.listingLoading = event.detail;
     }
 
     /**
@@ -623,6 +632,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 };
             });
             this.unchangedProcessContact = this.processedContactData;
+            this.sortData();
             this.updateShownData();
             this.spinnerShow = false;
         } catch (error) {
@@ -752,7 +762,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     handleFilteredContacts(event) {
         try {
-            this.sortField = '';
+            this.sortField = 'Name';
             this.sortOrder = 'asc';
 
             // Reset all icons to remove rotation classes
@@ -772,6 +782,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
             // Reset current page and update view
             this.currentPage = 1;
+            this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
         } catch (e) {
@@ -782,7 +793,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     handleReset(event) {
         try {
             if (event.detail.filtercontacts == true) {
-                this.sortField = '';
+                this.sortField = 'Name';
                 this.sortOrder = 'asc';
 
                 // Reset all icons to remove rotation classes
@@ -795,6 +806,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.unchangedProcessContact = this.unchangedProcessContact.map(resetCheckedFlag);
                 this.processedContactData = this.unchangedProcessContact;
                 this.currentPage = 1;
+                this.sortData();
                 this.updateShownData();
                 this.updateSelectedProperties();
             }
@@ -938,7 +950,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     selectAllCheckbox(event) {
         try {
             const isChecked = event.target.checked;
-            this.sortField = '';
+            this.sortField = 'Name';
             this.sortOrder = 'asc';
             const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
             allHeaders.forEach(icon => {

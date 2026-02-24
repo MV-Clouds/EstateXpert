@@ -73,6 +73,20 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     @track broadcastGroupOptions = [];
     @track selectedBroadcastGroups = [];
 
+    // Button state management
+    @track isButtonsDisabled = true;
+
+    // Original state tracking for revert functionality
+    @track originalSelectedPrimaryRecipients = [];
+    @track originalSelectedCCRecipients = [];
+    @track originalSelectedBCCRecipients = [];
+    @track originalSelectedBroadcastGroups = [];
+    @track originalEmails = [];
+    @track originalEmailsWithTemplate = [];
+    @track originalSpecificDate = '';
+    @track originalStartDateOption = 'specificDate';
+    @track originalSelectedContactDateField = '';
+    @track originalEmailCampaignName = '';
 
     @track startDateOptions = [
         { label: 'Sending emails on specific dates', value: 'specificDate' },
@@ -422,6 +436,11 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     this.isLoading = false;
                     this.updateFilteredLists();
                     this.updateExactDates();
+                    // Reset button state when loading existing data
+                    this.isButtonsDisabled = true;
+                    
+                    // Store original state for revert functionality
+                    this.storeOriginalState();
                 })
                 .catch(error => {
                     console.error('Error in loading campaign data ==> ', error);
@@ -449,6 +468,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         } else {
             this.selectedBroadcastGroups = this.selectedBroadcastGroups.filter(id => id !== groupId);
         }
+        
+        this.checkForChanges();
     }
 
 
@@ -662,6 +683,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     handleSpecificDateChange(event){
         this.specificDate = event.target.value;
         this.updateExactDates();
+        this.checkForChanges();
     }
 
     /*
@@ -979,6 +1001,26 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             !(selectedPrimaryIds.has(contact.value) || selectedCCIds.has(contact.value) || selectedBCCIds.has(contact.value))
         );
     
+        this.checkForChanges();
+    }
+
+    /*
+    * Method Name: checkForChanges
+    * @description: Method to enable/disable Save and Revert buttons based on changes
+    * Date: 19/11/2025
+    * Created By: Gemini
+    */
+    checkForChanges() {
+        // Enable buttons if any changes have been made
+        const hasChanges = this.selectedPrimaryRecipients.length > 0 || 
+                          this.selectedCCRecipients.length > 0 || 
+                          this.selectedBCCRecipients.length > 0 ||
+                          this.selectedBroadcastGroups.length > 0 ||
+                          this.emails.length > 0 ||
+                          this.specificDate !== '' ||
+                          this.selectedContactDateField !== '';
+        
+        this.isButtonsDisabled = !hasChanges;
     }
 
     /*
@@ -1003,6 +1045,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         this.selectedContactDateField = selectedValue;
         this.isDateFieldDropdownVisible = false;
         this.isFieldSelected = true; 
+        this.checkForChanges();
     }
 
     /*
@@ -1038,7 +1081,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Created By: Rachit Shah
     */
     handleRemove() {
-        this.isFieldSelected = false; 
+        this.isFieldSelected = false;
+        this.checkForChanges();
     }
 
     /*
@@ -1079,11 +1123,14 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             email.exactDate = '';
             return email;
         });
+        
+        this.checkForChanges();
     }
 
     handleContactDateFieldChange(event) {
         console.log('event.detail.value ==> ' , event.detail.value);
         this.selectedContactDateField = event.detail.value;
+        this.checkForChanges();
     }
     
     /*
@@ -1097,6 +1144,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
 
         this.emails = [...this.emails, { id: newId, name:'', template: '', subject: '', daysAfterStartDate: 0, timeToSend: '', exactDate: this.specificDate, disabled: false, isListingSelectionDisabled : true ,selectedListingId : ''}];
         this.emailsWithTemplate = [...this.emailsWithTemplate, { id: newId, name:'', template: '', subject: '', daysAfterStartDate: 0, timeToSend: '', exactDate: this.specificDate, disabled: false, isListingSelectionDisabled:true ,selectedListingId : ''}];
+        this.checkForChanges();
         }
 
     /*
@@ -1111,6 +1159,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             this.deletedEmailList.push(emailId);
             this.emails = this.emails.filter(email => email.id != emailId);
             this.emailsWithTemplate = this.emailsWithTemplate.filter(email => email.id != emailId);
+            this.checkForChanges();
         } catch (error) {
             console.log('error => ' , error);
         }
@@ -1178,7 +1227,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
 
         console.log('this.emailsWithTemplate ==> ' , JSON.stringify(this.emailsWithTemplate));
 
-        
+        this.checkForChanges();
     }
 
     
@@ -1220,6 +1269,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         });
 
         console.log('this.emailsWithTemplate ==> ' , JSON.stringify(this.emailsWithTemplate));
+        this.checkForChanges();
 
         
     }
@@ -1250,6 +1300,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         });
 
         this.updateExactDates();
+        this.checkForChanges();
     }
 
 
@@ -1298,6 +1349,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             }
             return email;
         });
+        
+        this.checkForChanges();
     }
 
 
@@ -1381,6 +1434,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 }
                 return email;
             });
+            
+            this.checkForChanges();
 
         } catch (error) {
             console.log('error ==>', error);
@@ -1435,6 +1490,108 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     */
     handleCancel() {
         this.navigateToDisplayCampaigns();
+    }
+
+    /*
+    * Method Name: storeOriginalState
+    * @description: Store original form state for revert functionality
+    * Date: 25/01/2025
+    * Created By: Karan Singh
+    */
+    storeOriginalState() {
+        // Deep clone arrays and objects to prevent reference issues
+        this.originalSelectedPrimaryRecipients = JSON.parse(JSON.stringify(this.selectedPrimaryRecipients));
+        this.originalSelectedCCRecipients = JSON.parse(JSON.stringify(this.selectedCCRecipients));
+        this.originalSelectedBCCRecipients = JSON.parse(JSON.stringify(this.selectedBCCRecipients));
+        this.originalSelectedBroadcastGroups = [...this.selectedBroadcastGroups];
+        this.originalEmails = JSON.parse(JSON.stringify(this.emails));
+        this.originalEmailsWithTemplate = JSON.parse(JSON.stringify(this.emailsWithTemplate));
+        this.originalSpecificDate = this.specificDate;
+        this.originalStartDateOption = this.startDateOption;
+        this.originalSelectedContactDateField = this.selectedContactDateField;
+        this.originalEmailCampaignName = this.emailCampaignName;
+    }
+
+    /*
+    * Method Name: handleRevert
+    * @description: Revert form to original loaded state
+    * Date: 25/01/2025
+    * Created By: Karan Singh
+    */
+    handleRevert() {
+        // Restore all original values
+        this.selectedPrimaryRecipients = JSON.parse(JSON.stringify(this.originalSelectedPrimaryRecipients));
+        this.selectedCCRecipients = JSON.parse(JSON.stringify(this.originalSelectedCCRecipients));
+        this.selectedBCCRecipients = JSON.parse(JSON.stringify(this.originalSelectedBCCRecipients));
+        this.selectedBroadcastGroups = [...this.originalSelectedBroadcastGroups];
+        this.emails = JSON.parse(JSON.stringify(this.originalEmails));
+        this.emailsWithTemplate = JSON.parse(JSON.stringify(this.originalEmailsWithTemplate));
+        this.specificDate = this.originalSpecificDate;
+        this.startDateOption = this.originalStartDateOption;
+        this.selectedContactDateField = this.originalSelectedContactDateField;
+        this.emailCampaignName = this.originalEmailCampaignName;
+        
+        // Reset button state
+        this.isButtonsDisabled = true;
+        
+        // Update filtered lists to reflect reverted state
+        this.updateFilteredLists();
+        
+        // Clear all validation errors from input fields
+        this.clearValidationErrors();
+        
+        // Show success message
+        this.showToast('Success', 'Changes have been reverted', 'success');
+    }
+
+    /*
+    * Method Name: clearValidationErrors
+    * @description: Clear all validation errors from input fields
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    clearValidationErrors() {
+        try {
+            // Use setTimeout to ensure DOM updates complete before clearing errors
+            setTimeout(() => {
+                // Clear errors from lightning-input fields
+                const inputFields = this.template.querySelectorAll('lightning-input');
+                inputFields.forEach(field => {
+                    try {
+                        // Reset the field's validity state
+                        field.setCustomValidity('');
+                        // Force revalidation
+                        field.reportValidity();
+                    } catch (e) {
+                        console.error('Error clearing input field:', e);
+                    }
+                });
+                
+                // Clear errors from lightning-combobox fields
+                const comboboxFields = this.template.querySelectorAll('lightning-combobox');
+                comboboxFields.forEach(field => {
+                    try {
+                        field.setCustomValidity('');
+                        field.reportValidity();
+                    } catch (e) {
+                        console.error('Error clearing combobox field:', e);
+                    }
+                });
+                
+                // Clear errors from lightning-record-picker fields
+                const recordPickers = this.template.querySelectorAll('lightning-record-picker');
+                recordPickers.forEach(field => {
+                    try {
+                        field.setCustomValidity('');
+                        field.reportValidity();
+                    } catch (e) {
+                        console.error('Error clearing record picker:', e);
+                    }
+                });
+            }, 100);
+        } catch (error) {
+            console.error('Error clearing validation errors:', error);
+        }
     }
 
     /*

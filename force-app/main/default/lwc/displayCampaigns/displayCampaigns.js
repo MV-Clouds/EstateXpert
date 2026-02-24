@@ -90,6 +90,16 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     }
 
     /**
+    * Method Name : filterIconName
+    * @description : Return the filter icon name based on modal state
+    * Date: 24/02/2026
+    * Created By:Karan Singh
+    */
+    get filterIconName() {
+        return this.isFilterModalOpen ? 'utility:close' : 'utility:filter';
+    }
+
+    /**
     * Method Name : startIndex
     * @description : set the start Index.
     * * Date: 20/08/2024
@@ -183,6 +193,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By: Rachit Shah
     */
     connectedCallback() {
+        this.isLoading = true;
         Promise.all([
             loadStyle(this, MulishFontCss)
         ])
@@ -253,7 +264,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             const total = campaign.MVEX__Total_Emails__c - campaign.MVEX__Failed_Emails__c;
             const remaining = campaign.MVEX__Remaining_Emails__c;
             const completed = total - remaining;
-            const progressPercentage = total > 0 ? `${(completed / total) * 100}` : '0';
+            const progressPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
     
             return {
                 ...campaign,
@@ -265,6 +276,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                 canEdit : campaign.MVEX__Status__c === 'Pending' || campaign.MVEX__Status__c === 'In Progress' ? false : true, 
                 IsCampaignTemplate: campaign.MVEX__Is_Marketing_Campaign_Template__c ? 'Yes' : 'No',
                 progressPercentage: progressPercentage,
+                progressWidth: `width: ${progressPercentage}%`
             };
         });
 
@@ -456,6 +468,17 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     handleModalClose() {
         this.isModalOpen = false;
+    }
+
+    /*
+    * Method Name: handleRefresh
+    * @description: Method to refresh campaign data
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    handleRefresh() {
+        this.isLoading = true;
+        this.loadCampaigns();
     }
 
     /*

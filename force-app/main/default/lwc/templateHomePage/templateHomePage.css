@@ -368,7 +368,7 @@
     /* box-shadow: 0 4px 16px rgba(1, 118, 211, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08); */
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     position: relative;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .sub_main_header_css {

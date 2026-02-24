@@ -116,7 +116,12 @@
                                         <div>{campaign.MVEX__Failed_Emails__c}</div>
                                     </td>
                                     <td data-label="Progress bar" class="progress-container">
-                                        <lightning-progress-bar value={campaign.progressPercentage} size="large" variant="circular"></lightning-progress-bar>
+                                        <div class="modern-progress-wrapper">
+                                            <div class="modern-progress-bar">
+                                                <div class="modern-progress-fill" data-progress={campaign.progressPercentage}></div>
+                                                <span class="modern-progress-text">{campaign.progressPercentage}%</span>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td data-label="Start Date">
                                         <div>{campaign.StartDateformatted}</div>

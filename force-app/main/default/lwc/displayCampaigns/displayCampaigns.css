@@ -718,7 +718,7 @@ span {
 .restricted-access h1 {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     font-size: 2.25rem;
-    font-weight: 900;
+    font-weight: 500;
     color: #1e3a8a;
     margin-bottom: 20px;
 }
@@ -740,4 +740,165 @@ span {
     50% {
         transform: scale(1.15);
     }
+}
+
+/* Circular Progress Styles */
+.progress-container {
+    position: relative;
+}
+
+.modern-progress-wrapper {
+    width: 100%;
+    max-width: 180px;
+    margin: 0 auto;
+}
+
+.modern-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 28px;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modern-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #0176D3 0%, #1a8fe8 100%);
+    border-radius: 14px;
+    transition: width 1.2s ease-out;
+    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.3);
+}
+
+.modern-progress-fill[data-progress="0"] { background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%); }
+.modern-progress-fill[data-progress="1"],
+.modern-progress-fill[data-progress="2"],
+.modern-progress-fill[data-progress="3"],
+.modern-progress-fill[data-progress="4"],
+.modern-progress-fill[data-progress="5"],
+.modern-progress-fill[data-progress="6"],
+.modern-progress-fill[data-progress="7"],
+.modern-progress-fill[data-progress="8"],
+.modern-progress-fill[data-progress="9"],
+.modern-progress-fill[data-progress="10"],
+.modern-progress-fill[data-progress="11"],
+.modern-progress-fill[data-progress="12"],
+.modern-progress-fill[data-progress="13"],
+.modern-progress-fill[data-progress="14"],
+.modern-progress-fill[data-progress="15"],
+.modern-progress-fill[data-progress="16"],
+.modern-progress-fill[data-progress="17"],
+.modern-progress-fill[data-progress="18"],
+.modern-progress-fill[data-progress="19"],
+.modern-progress-fill[data-progress="20"],
+.modern-progress-fill[data-progress="21"],
+.modern-progress-fill[data-progress="22"],
+.modern-progress-fill[data-progress="23"],
+.modern-progress-fill[data-progress="24"],
+.modern-progress-fill[data-progress="25"],
+.modern-progress-fill[data-progress="26"],
+.modern-progress-fill[data-progress="27"],
+.modern-progress-fill[data-progress="28"],
+.modern-progress-fill[data-progress="29"],
+.modern-progress-fill[data-progress="30"],
+.modern-progress-fill[data-progress="31"],
+.modern-progress-fill[data-progress="32"],
+.modern-progress-fill[data-progress="33"],
+.modern-progress-fill[data-progress="34"],
+.modern-progress-fill[data-progress="35"],
+.modern-progress-fill[data-progress="36"],
+.modern-progress-fill[data-progress="37"],
+.modern-progress-fill[data-progress="38"],
+.modern-progress-fill[data-progress="39"],
+.modern-progress-fill[data-progress="40"],
+.modern-progress-fill[data-progress="41"],
+.modern-progress-fill[data-progress="42"],
+.modern-progress-fill[data-progress="43"],
+.modern-progress-fill[data-progress="44"],
+.modern-progress-fill[data-progress="45"],
+.modern-progress-fill[data-progress="46"],
+.modern-progress-fill[data-progress="47"],
+.modern-progress-fill[data-progress="48"],
+.modern-progress-fill[data-progress="49"] {
+    background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.modern-progress-fill[data-progress="50"],
+.modern-progress-fill[data-progress="51"],
+.modern-progress-fill[data-progress="52"],
+.modern-progress-fill[data-progress="53"],
+.modern-progress-fill[data-progress="54"],
+.modern-progress-fill[data-progress="55"],
+.modern-progress-fill[data-progress="56"],
+.modern-progress-fill[data-progress="57"],
+.modern-progress-fill[data-progress="58"],
+.modern-progress-fill[data-progress="59"],
+.modern-progress-fill[data-progress="60"],
+.modern-progress-fill[data-progress="61"],
+.modern-progress-fill[data-progress="62"],
+.modern-progress-fill[data-progress="63"],
+.modern-progress-fill[data-progress="64"],
+.modern-progress-fill[data-progress="65"],
+.modern-progress-fill[data-progress="66"],
+.modern-progress-fill[data-progress="67"],
+.modern-progress-fill[data-progress="68"],
+.modern-progress-fill[data-progress="69"],
+.modern-progress-fill[data-progress="70"],
+.modern-progress-fill[data-progress="71"],
+.modern-progress-fill[data-progress="72"],
+.modern-progress-fill[data-progress="73"],
+.modern-progress-fill[data-progress="74"],
+.modern-progress-fill[data-progress="75"],
+.modern-progress-fill[data-progress="76"],
+.modern-progress-fill[data-progress="77"],
+.modern-progress-fill[data-progress="78"],
+.modern-progress-fill[data-progress="79"] {
+    background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+}
+
+.modern-progress-fill[data-progress="80"],
+.modern-progress-fill[data-progress="81"],
+.modern-progress-fill[data-progress="82"],
+.modern-progress-fill[data-progress="83"],
+.modern-progress-fill[data-progress="84"],
+.modern-progress-fill[data-progress="85"],
+.modern-progress-fill[data-progress="86"],
+.modern-progress-fill[data-progress="87"],
+.modern-progress-fill[data-progress="88"],
+.modern-progress-fill[data-progress="89"],
+.modern-progress-fill[data-progress="90"],
+.modern-progress-fill[data-progress="91"],
+.modern-progress-fill[data-progress="92"],
+.modern-progress-fill[data-progress="93"],
+.modern-progress-fill[data-progress="94"],
+.modern-progress-fill[data-progress="95"],
+.modern-progress-fill[data-progress="96"],
+.modern-progress-fill[data-progress="97"],
+.modern-progress-fill[data-progress="98"],
+.modern-progress-fill[data-progress="99"],
+.modern-progress-fill[data-progress="100"] {
+    background: linear-gradient(90deg, #0176D3 0%, #1a8fe8 100%);
+}
+
+.modern-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+    letter-spacing: 0.5px;
+}
+
+.modern-progress-bar:hover .modern-progress-fill {
+    box-shadow: 0 3px 10px rgba(1, 118, 211, 0.5);
+    transform: scaleY(1.05);
+    transition: all 0.3s ease;
 }

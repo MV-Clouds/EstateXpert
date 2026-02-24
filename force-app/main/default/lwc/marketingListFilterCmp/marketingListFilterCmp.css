@@ -246,6 +246,38 @@
     display: block;
 }
 
+.error-message{
+    font-size: 0.7rem;
+    color: red;
+    position: absolute;
+    bottom: -1rem;
+}   
+
+.combobox .input-delete-cover .min-max-input-cover .error-message{
+    bottom: -0.5rem;
+}
+
+.custom-logic-section {
+    /* padding: 0.5rem; */
+    margin: -0.3rem 0.5rem 0rem 0.5rem;
+}
+
+.custom-logic-section .input-section{
+    display: flex;
+    gap: 8px;
+}
+
+.custom-logic-section .slds-form-element {
+    margin-top: 0.5rem;
+}
+
+.custom-logic-section .error-message {
+    color: #d4504c;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    position: static;
+}
+
 .date-time-div{
     /* padding: 0rem 1rem 0rem 0rem; */
     display: flex;

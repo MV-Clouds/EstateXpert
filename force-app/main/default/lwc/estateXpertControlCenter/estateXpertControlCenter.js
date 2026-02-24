@@ -400,7 +400,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         this[NavigationMixin.Navigate]({
             type: "standard__webPage",
             attributes: {
-                url: '/apex/facebookSDK'
+                url: '/apex/MVEX__facebookSDK'
             }
         });
     }

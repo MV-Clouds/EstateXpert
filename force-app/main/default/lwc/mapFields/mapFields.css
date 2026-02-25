@@ -609,60 +609,68 @@
 }
 
 .full-page-container {
-    padding: 1rem;
     height: calc(100% + 1.5rem);
     margin-top: -0.8rem;
     width: calc(100% + 1.5rem);
     margin-left: -0.8rem;
+    background-color: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
 }
 
 .invalid-access {
-    padding: 48px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    max-width: 500px;
+    max-width: 600px;
     width: 100%;
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-    border: 1px solid #fbbf24;
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 1px solid #e0e0e0;
 }
 
 .invalid-access svg {
     width: 80px;
     height: 80px;
-    margin: 0 auto 28px;
+    margin: 0 auto 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-radius: 50%;
     fill: #f59e0b;
-    animation: pulse 1.8s ease-in-out infinite;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
 }
 
 .invalid-access h1 {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    font-size: 2.25rem;
-    font-weight: 900;
-    color: #92400e;
-    margin-bottom: 20px;
+    font-size: 28px;
+    font-weight: 500;
+    color: #0f1419;
+    margin-bottom: 1rem;
+    letter-spacing: 0.3px;
 }
 
 .invalid-access p {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    font-size: 1.25rem;
-    color: #78350f;
+    font-size: 18px;
+    color: #636363;
     line-height: 1.6;
 }
 
-@keyframes pulse {
-
-    0%,
-    100% {
-        transform: scale(1);
+@media (max-width: 768px) {
+    .invalid-access {
+        padding: 2rem 1.5rem;
     }
-
-    50% {
-        transform: scale(1.15);
+    
+    .invalid-access h1 {
+        font-size: 24px;
+    }
+    
+    .invalid-access p {
+        font-size: 16px;
+    }
+    
+    .invalid-access svg {
+        width: 64px;
+        height: 64px;
     }
 }

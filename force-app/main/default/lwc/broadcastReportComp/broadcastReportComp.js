@@ -162,11 +162,12 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map(group => ({
+            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((group, index) => ({
                 ...group,
                 isExpanded: this.expandedRows[group.Id] || false,
                 members: this.groupMembersData[group.Id] || [],
-                accordionKey: `${group.Id}-accordion`
+                accordionKey: `${group.Id}-accordion`,
+                rowClass: index % 2 === 0 ? 'parent-row even-row' : 'parent-row odd-row'
             }));
         } catch (error) {
             this.showToast('Error', 'Error updating shown data', 'error');

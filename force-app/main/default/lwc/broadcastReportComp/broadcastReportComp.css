@@ -149,9 +149,12 @@
     z-index: 98;
 }
 
-.table-content tbody tr.parent-row:nth-child(4n+1),
-.table-content tbody tr.parent-row:nth-child(4n+2) {
+.table-content tbody tr.even-row {
     background-color: aliceblue;
+}
+
+.table-content tbody tr.odd-row {
+    background-color: white;
 }
 
 .table-content tbody tr.parent-row:hover td {

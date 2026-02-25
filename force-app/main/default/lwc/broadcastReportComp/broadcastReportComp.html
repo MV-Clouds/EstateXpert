@@ -58,7 +58,7 @@
                         <tbody>
                             <template for:each={paginatedData} for:item="row" for:index="index">
                                 <!-- Parent Row -->
-                                <tr key={row.Id} class="parent-row">
+                                <tr key={row.Id} class={row.rowClass}>
                                     <td data-label="" class="expand-cell">
                                         <template if:true={row.MVEX__Count_of_Members__c}>
                                             <div class="action-icon-container" data-record-id={row.Id} data-object-name={row.MVEX__Object_Name__c} onclick={handleNameClick}>

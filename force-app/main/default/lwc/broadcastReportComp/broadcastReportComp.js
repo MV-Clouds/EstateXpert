@@ -1,10 +1,11 @@
 import { LightningElement, api, track } from 'lwc';
 import getBroadcastGroupsWithStats from '@salesforce/apex/BroadcastMessageController.getBroadcastGroupsWithStats';
-import getBroadcastMembersByGroupId from '@salesforce/apex/BroadcastMessageController.getBroadcastMembersByGroupId';
+import getAllBroadcastMembers from '@salesforce/apex/BroadcastMessageController.getAllBroadcastMembers';
 import getBroadcastRecord from '@salesforce/apex/BroadcastMessageController.getBroadcastRecord';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { NavigationMixin } from 'lightning/navigation';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class BroadcastReportComp extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -15,16 +16,9 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
     @track currentPage = 1;
     @track pageSize = 15;
     @track visiblePages = 5;
-    @track broadcastReport=true;
-    @track broadcastGroupReport=false;
     @track isLoading = false;
-    @track groupData;
-    @track paginatedGrpData = [];
-    @track filteredGrpData = [];
-    @track currentGrpPage = 1;
-    @track pageGrpSize = 15;
-    @track visibleGrpPages = 5;
-    @track selectedGroupObject = '';
+    @track expandedRows = {};
+    @track groupMembersData = {};
 
     connectedCallback() {
         loadStyle(this, MulishFontCss);
@@ -52,16 +46,6 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
 
     get templateName(){
         return this.record?.MVEX__Template_Name__c || '-';
-    }
-
-    get groupName() {
-        const group = this.data?.find(item => item.Id === this.selectedGroupId);
-        return group?.Name || '—';
-    }
-    
-    get memberCount() {
-        const group = this.data?.find(item => item.Id === this.selectedGroupId);
-        return group?.MVEX__Count_of_Members__c?.toString() || '0';
     }    
 
     get totalItems() {
@@ -135,100 +119,25 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
         return this.currentPage === Math.ceil(this.totalItems / this.pageSize);
     }
 
-    // ------ Group Member --- 
-
-    get showNoGroupMember() {
-        return this.filteredGrpData.length === 0;
-    }
-
-    get totalGrpItems() {
-        return this.filteredGrpData.length;
-    }
-    
-    get totalGrpPages() {
-        return Math.ceil(this.totalGrpItems / this.pageGrpSize);
-    }
-    
-    get pageGrpNumbers() {
-        try {
-            const totalPages = this.totalGrpPages;
-            const currentPage = this.currentGrpPage;
-            const visiblePages = this.visibleGrpPages;
-
-            let pages = [];
-
-            if (totalPages <= visiblePages) {
-                for (let i = 1; i <= totalPages; i++) {
-                    pages.push({
-                        number: i,
-                        isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
-                    });
-                }
-            } else {
-                pages.push({
-                    number: 1,
-                    isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
-                });
-
-                if (currentPage > 3) {
-                    pages.push({ isEllipsis: true });
-                }
-
-                let start = Math.max(2, currentPage - 1);
-                let end = Math.min(currentPage + 1, totalPages - 1);
-
-                for (let i = start; i <= end; i++) {
-                    pages.push({
-                        number: i,
-                        isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
-                    });
-                }
-
-                if (currentPage < totalPages - 2) {
-                    pages.push({ isEllipsis: true });
-                }
-
-                pages.push({
-                    number: totalPages,
-                    isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
-                });
-            }
-            return pages;
-        } catch (error) {
-            this.showToast('Error', 'Error in pageGrpNumbers->' + error, 'error');
-            return null;
-        }
-    }
-    
-    get isFirstGrpPage() {
-        return this.currentGrpPage === 1;
-    }
-    
-    get isLastGrpPage() {
-        return this.currentGrpPage === Math.ceil(this.totalGrpItems / this.pageGrpSize);
-    }
-
-
     loadBroadcastGroups() {
         this.isLoading = true;
         console.log('broadcastReportComp recordId 2', this.recordId);
         
         getBroadcastGroupsWithStats({broadcastId: this.recordId})
             .then(result => {
-                this.data = result;
+                this.data = result.map((group, index) => ({
+                    ...group,
+                    index: index + 1
+                }));
                 console.log('result', result);
                 
                 this.filteredData = [...this.data];
-                this.updateShownData();
+                
+                // Load all group members data upfront
+                this.loadAllGroupMembers();
             })
             .catch(() => {
                 this.showToast('Error', 'Failed to load broadcast groups', 'error');
-            })
-            .finally(() => {
                 this.isLoading = false;
             });
     }   
@@ -253,7 +162,12 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.paginatedData = this.filteredData.slice(startIndex, endIndex);
+            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map(group => ({
+                ...group,
+                isExpanded: this.expandedRows[group.Id] || false,
+                members: this.groupMembersData[group.Id] || [],
+                accordionKey: `${group.Id}-accordion`
+            }));
         } catch (error) {
             this.showToast('Error', 'Error updating shown data', 'error');
         }
@@ -294,103 +208,97 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
     } 
 
     handleBack() {
-        if (this.broadcastGroupReport) {
-            // If on broadcastGroupReport, go back to broadcastReport
-            this.broadcastGroupReport = false;
-            this.broadcastReport = true;
-            this.groupData = null; 
-            this.paginatedGrpData = []; 
-        } else if (this.broadcastReport) {
-            // If on broadcastReport, go back to main page
-            this[NavigationMixin.Navigate]({
-                type: "standard__navItemPage",
-                attributes: {
-                    apiName: "MVEX__WhatsApp_Broadcast",
-                },
-            });
-        }
-    }
-
-    handleNameClick(event){
-        this.broadcastGroupReport=true;
-        this.broadcastReport=false;
-        this.selectedGroupId = event.target.dataset.recordId;  
-        this.selectedGroupObject = event.target.dataset.objectName;               
-        this.fetchGroupMembers();
-    }
-
-    fetchGroupMembers() {
-        this.isLoading = true;
-        getBroadcastMembersByGroupId({
-            groupId: this.selectedGroupId,
-            objectName: this.selectedGroupObject,
-            broadcastId: this.recordId
-        })
-        .then(result => {
-            this.groupData = result.map((item, index) => ({
-                id: item.record.Id,
-                name: item.record.Name || 'Not Specified',
-                phone: item.record.Phone || item.record.MobilePhone || '',
-                status: item.status || '',
-                hasReplied: item.hasReplied || false,
-                repliedText: item.hasReplied ? 'Yes' : 'No',
-                repliedClass: item.hasReplied ? 'replied-yes' : 'replied-no',
-                index: index + 1
-            }));
-            
-            this.filteredGrpData = [...this.groupData];
-            this.updateGroupData();
-        })
-        .catch(() => {
-            this.showToast('Error', 'Failed to load broadcast members', 'error');
-        })
-        .finally(() => {
-            this.isLoading = false;
+        this[NavigationMixin.Navigate]({
+            type: "standard__navItemPage",
+            attributes: {
+                apiName: "MVEX__WhatsApp_Broadcast",
+            },
         });
     }
 
-    updateGroupData() {
-        try {
-            const startIndex = (this.currentGrpPage - 1) * this.pageGrpSize;
-            const endIndex = Math.min(startIndex + this.pageGrpSize, this.totalGrpItems);
-            this.paginatedGrpData = this.filteredGrpData.slice(startIndex, endIndex);
-            
-        } catch (error) {
-            this.showToast('Error', 'Error updating shown data', 'error');
-        }
+    loadAllGroupMembers() {
+        // Fetch all members for all groups in a single Apex call
+        getAllBroadcastMembers({ broadcastId: this.recordId })
+            .then(result => {
+                console.log('getAllBroadcastMembers result:', result);
+                
+                // Result is a Map<String, List<BroadcastMemberWrapper>>
+                // Process the map to format member data
+                const membersData = {};
+                
+                // Check if result is valid
+                if (result) {
+                    for (const groupId in result) {
+                        if (result.hasOwnProperty(groupId)) {
+                            const membersList = result[groupId];
+                            console.log(`Processing group ${groupId} with ${membersList.length} members`);
+                            
+                            const members = membersList.map((item, index) => ({
+                                id: item.record.Id,
+                                name: item.record.Name || 'Not Specified',
+                                phone: item.record.Phone || item.record.MobilePhone || '',
+                                status: item.status || '',
+                                hasReplied: item.hasReplied || false,
+                                repliedText: item.hasReplied ? 'Yes' : 'No',
+                                repliedClass: item.hasReplied ? 'replied-yes' : 'replied-no',
+                                index: index + 1
+                            }));
+                            
+                            membersData[groupId] = members;
+                        }
+                    }
+                }
+                
+                this.groupMembersData = membersData;
+                console.log('Updated groupMembersData:', this.groupMembersData);
+                
+                // Update display to include the loaded member data
+                this.updateShownData();
+            })
+            .catch((error) => {
+                console.error('Error loading group members:', error);
+                this.showToast('Error', 'Failed to load group members', 'error');
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
     }
 
-    handleGrpPrevious() {
-        try{
-            if (this.currentGrpPage > 1) {
-                this.currentGrpPage--;
-                this.updateGroupData();
-            }
-        }catch(error){
-            this.showToast('Error', 'Error navigating to previous page', 'error');
+    handleNameClick(event){
+        // Use currentTarget to get the element with data attributes, not the clicked child element
+        const groupId = event.currentTarget.dataset.recordId;  
+        
+        console.log('Clicked groupId:', groupId);
+        console.log('Current expandedRows:', this.expandedRows);
+        console.log('Available members for this group:', this.groupMembersData[groupId]);
+        
+        // Just toggle accordion state - data is already loaded
+        if (this.expandedRows[groupId]) {
+            // Collapse
+            this.expandedRows = { ...this.expandedRows, [groupId]: false };
+        } else {
+            // Expand
+            this.expandedRows = { ...this.expandedRows, [groupId]: true };
         }
-    }
-    
-    handleGrpNext() {
-        try{
-            if (this.currentGrpPage < this.totalGrpPages) {
-                this.currentGrpPage++;
-                this.updateGroupData();
-            }
-        }catch(error){
-            this.showToast('Error', 'Error navigating pages', 'error');
-        }
+        this.updateShownData();
     }
 
-    handleGrpPageChange(event) {
-        try{
-            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
-            if (selectedPage !== this.currentGrpPage) {
-                this.currentGrpPage = selectedPage;
-                this.updateGroupData();
-            }
-        }catch(error){
-            this.showToast('Error', 'Error navigating pages', 'error');
-        }
+    getStatusClass(status) {
+        const statusMap = {
+            'Sent': 'Sent',
+            'Delivered': 'Delivered',
+            'Seen': 'Seen',
+            'Failed': 'Failed'
+        };
+        return statusMap[status] || '';
     } 
+
+    showToast(title, message, variant) {
+        const event = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+        });
+        this.dispatchEvent(event);
+    }
 }

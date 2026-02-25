@@ -3,11 +3,6 @@
         <template if:true={hasBusinessAccountConfigured}>
             <template if:true={isTemplateVisible}>
                 <div class="wrapper">
-                    <!-- Spinner -->
-                    <template if:true={isLoading}>
-                        <c-spinner-component></c-spinner-component>
-                    </template>
-
                     <!-- <h1 class="slds-text-align_center heading">Recent Broadcasts</h1> -->
                     <div class="main_header_cls">
                         <div class="sub_main_header_css">
@@ -26,10 +21,14 @@
                     </div>
 
                     <div class="main_content_cls">
-                        <div class="filterparent">
-                            <div class="filterdiv">
-                                <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" type="search"
-                                    placeholder="Search by Name" onchange={handleSearch}></lightning-input>
+                        <div class="slds-m-around_medium navbar">
+                            <div class="search-input">
+                                <lightning-input type="search" onchange={handleSearch} placeholder="Search by Name..." class="input-broadcast" variant="label-hidden"></lightning-input>
+                            </div>
+                            <div class="icon-button-container">
+                                <div class="refresh-icon-container" onclick={handleRefresh}>
+                                    <lightning-icon icon-name="utility:refresh" alternative-text="Refresh" size="x-small"></lightning-icon>
+                                </div>
                             </div>
                         </div>
 
@@ -45,7 +44,7 @@
                                             <th data-id="Name" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name" role="button" tabindex="0">
                                                     <span class="slds-truncate" title="Name">Name</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                         <svg data-index="Name" class="listing-manager-icon"
@@ -74,7 +73,7 @@
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header status"
                                                 scope="col">
                                                 <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                    <span class="slds-truncate" title="Status">Status</span>
+                                                    <span class="slds-truncate status_cls" title="Status">Status</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                         <svg data-index="MVEX__Status__c" class="listing-manager-icon"
                                                             viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
@@ -140,20 +139,34 @@
                                                     </span>
                                                 </div>
                                             </th>
-                                            <!-- <th data-id="MVEX__Total_Replies__c" onclick={sortClick} aria-sort="none"
-                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-replies"
+                                            <th data-id="progressPercentage" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header progress"
                                                 scope="col">
                                                 <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                    <span class="slds-truncate" title="Total Replies">Total Replies</span>
+                                                    <span class="slds-truncate progress_cls" title="Progress">Progress</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="MVEX__Total_Replies__c" class="listing-manager-icon"
+                                                        <svg data-index="progressPercentage" class="listing-manager-icon"
                                                             viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
                                                     </span>
                                                 </div>
-                                            </th> -->
+                                            </th>
+                                            <th data-id="CreatedDate" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header created-date"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Created Date">Created Date</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="CreatedDate" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -163,13 +176,13 @@
                                                     <div>{row.index}</div>
                                                 </td>
                                                 <td data-label="Name" class="truncate_css">
-                                                    <div><a href="javascript:void(0);" class="clickable-name" data-record-id={row.Id} onclick={handleNameClick}>{row.Name}</a></div>
+                                                    <div><a href="javascript:void(0);" class="clickable_css" data-record-id={row.Id} onclick={handleNameClick}>{row.Name}</a></div>
                                                 </td>
                                                 <td data-label="Recipient Count">
                                                     <div>{row.MVEX__Recipient_Count__c}</div>
                                                 </td>
                                                 <td data-label="Status">
-                                                    <div>{row.MVEX__Status__c}</div>
+                                                    <div class={row.statusClass}>{row.MVEX__Status__c}</div>
                                                 </td>
                                                 <td data-label="Total Sent">
                                                     <div>{row.MVEX__Total_Sent__c}</div>
@@ -183,9 +196,17 @@
                                                 <td data-label="Total Failed">
                                                     <div>{row.MVEX__Total_Failed__c}</div>
                                                 </td>
-                                                <!-- <td data-label="Total Replies">
-                                                    <div>{row.MVEX__Total_Replies__c}</div>
-                                                </td> -->
+                                                <td data-label="Progress" class="progress-container">
+                                                    <div class="modern-progress-wrapper">
+                                                        <div class="modern-progress-bar">
+                                                            <div class="modern-progress-fill" data-progress={row.progressPercentage} style={row.progressWidth}></div>
+                                                            <span class="modern-progress-text">{row.progressPercentage}%</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Created Date">
+                                                    <div>{row.CreatedDateformatted}</div>
+                                                </td>
                                             </tr>
                                         </template>
                                     </tbody>
@@ -193,16 +214,10 @@
                             </div>
                         </template>
 
-                        <!-- No Records Message -->
-                        <template if:true={showNoRecordsMessage}>
-                            <div class="no-records-message">
-                                <div class="empty-state">
-                                    <div class="empty-state__content">
-                                        <div class="empty-state__icon">
-                                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                        </div>
-                                        <div class="empty-state__message">No Data Available to Show.</div>
-                                    </div>
+                        <template if:false={paginatedData.length}>
+                            <div class="no-data-container">
+                                <div class="no-data-message">
+                                    No Broadcast Found
                                 </div>
                             </div>
                         </template>
@@ -582,5 +597,10 @@
                     assistance.</p>
             </div>
         </div>
+    </template>
+
+    <!-- Spinner -->
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
     </template>
 </template>

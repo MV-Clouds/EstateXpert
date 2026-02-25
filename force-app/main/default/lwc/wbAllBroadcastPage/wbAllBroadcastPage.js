@@ -273,13 +273,12 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     loadBroadcastGroups() {
         getBroadcastRecsWithReplies()
             .then(result => {
-                this.data = result.map((item, index) => ({
-                    ...item,
-                    index : index + 1,
-                }));                 
-    
-                this.filteredData = [...this.data];
+                this.processTemplates(result);
                 this.updateShownData();
+                // Update sort icons to show default sort indicator
+                setTimeout(() => {
+                    this.updateSortIcons();
+                }, 100);
             })
             .catch(() => {
                 this.showToast('Error', 'Failed to load broadcast groups', 'error');
@@ -287,6 +286,89 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             .finally(() => {
                 this.isLoading = false;
             });
+    }
+
+    /*
+    * Method Name: processTemplates
+    * @description: Method to add custom columns including progress bar and status class
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    processTemplates(data) {
+        this.data = data.map((broadcast, index) => {
+            const total = broadcast.MVEX__Recipient_Count__c || 0;
+            const sent = broadcast.MVEX__Total_Sent__c || 0;
+            const delivered = broadcast.MVEX__Total_Delivered__c || 0;
+            const read = broadcast.MVEX__Total_Read__c || 0;
+            const failed = broadcast.MVEX__Total_Failed__c || 0;
+            
+            // Calculate progress percentage based on sent/delivered/read vs total recipients
+            const completed = sent + delivered + read;
+            const progressPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+            return {
+                ...broadcast,
+                index: index + 1,
+                CreatedDateformatted: this.formatDate(broadcast.CreatedDate),
+                statusClass: this.getStatusClass(broadcast.MVEX__Status__c),
+                progressPercentage: progressPercentage,
+                progressWidth: `width: ${progressPercentage}%`
+            };
+        });
+
+        // Data already sorted by Apex SOQL (ORDER BY CreatedDate DESC)
+        // Just set UI indicators to show the sort arrow
+        this.sortField = 'CreatedDate';
+        this.sortOrder = 'desc';
+        this.filteredData = [...this.data];
+    }
+
+    /*
+    * Method Name: getStatusClass
+    * @description: Method to give dynamic class to the status pill
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    getStatusClass(status) {
+        switch (status) {
+            case 'Pending':
+                return 'pending-class';
+            case 'Completed':
+                return 'completed-class';
+            default:
+                return 'pending-class';
+        }
+    }
+
+    /*
+    * Method Name: formatDate
+    * @description: Method to customize date string to DD/MM/YYYY format
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    formatDate(dateStr) {
+        if (!dateStr) return '—';
+        let formatdate = new Date(dateStr);
+        formatdate.setDate(formatdate.getDate());
+        let formattedDate = new Date(formatdate.getFullYear(), formatdate.getMonth(), formatdate.getDate(), 0, 0, 0);
+        const day = formattedDate.getDate();
+        const month = formattedDate.getMonth() + 1;
+        const year = formattedDate.getFullYear();
+        const paddedDay = day < 10 ? `0${day}` : day;
+        const paddedMonth = month < 10 ? `0${month}` : month;
+        const formattedDateStr = `${paddedDay}/${paddedMonth}/${year}`;
+        return formattedDateStr;
+    }
+
+    /*
+    * Method Name: handleRefresh
+    * @description: Method to refresh the broadcast data
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    handleRefresh() {
+        this.isLoading = true;
+        this.loadBroadcastGroups();
     }
     
     updateShownData() {
@@ -304,17 +386,26 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     handleSearch(event) {
         try {
-            if(event.detail.value.trim().toLowerCase() != null) {
+            const searchKey = event.detail.value.trim().toLowerCase();
+            if(searchKey !== '') {
                 this.filteredData = this.data.filter(item => 
                     item.Name &&
-                    item.Name.toLowerCase().includes(event.detail.value.trim().toLowerCase())
+                    item.Name.toLowerCase().includes(searchKey)
                 );
-                if (this.sortField) {
-                    this.sortData();
-                } else {
-                    this.updateShownData();
-                }
+            } else {
+                this.filteredData = [...this.data];
             }
+            this.currentPage = 1;
+            // Apply sorting (will use default sort if no sort field is set)
+            if (this.sortField) {
+                this.sortData();
+            } else {
+                // Apply default sort by CreatedDate descending
+                this.sortField = 'CreatedDate';
+                this.sortOrder = 'desc';
+                this.sortData();
+            }
+            this.updateShownData();
         } catch (error) {
             this.showToast('Error', 'Error searching', 'error');
         }
@@ -360,7 +451,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         getBroadcastGroups()
             .then(result => {
                 this.broadcastGroups = result;
-                this.filteredGroups = [...this.broadcastGroups.filter(item => item.MVEX__Communication_Type__c != 'Email')];
+                this.filteredGroups = [...this.broadcastGroups];
             })
             .catch(() => {
                 this.showToast('Error', 'Error fetching broadcast groups', 'error');
@@ -779,6 +870,18 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                     aValue = aValue.toString().toLowerCase();
                     bValue = bValue.toString().toLowerCase();
                     let compare = aValue.localeCompare(bValue);
+                    return this.sortOrder === 'asc' ? compare : -compare;
+                } else if (this.sortField === 'CreatedDate') {
+                    // Handle date sorting
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+                    let compare = aDate.getTime() - bDate.getTime();
+                    return this.sortOrder === 'asc' ? compare : -compare;
+                } else if (this.sortField === 'progressPercentage') {
+                    // Handle progress percentage sorting
+                    aValue = Number(aValue) || 0;
+                    bValue = Number(bValue) || 0;
+                    let compare = aValue - bValue;
                     return this.sortOrder === 'asc' ? compare : -compare;
                 } else if (this.sortField.includes('__c')) {
                     // Handle numeric fields

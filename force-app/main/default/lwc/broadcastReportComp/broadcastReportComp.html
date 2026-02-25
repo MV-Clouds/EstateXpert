@@ -1,260 +1,165 @@
 <template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
     <div class="wrapper">
-        <template if:true={isLoading}>
-            <c-spinner-component></c-spinner-component>
-        </template>
-
         <div class="main_header_cls">
-            <div class="svg_back_icon" onclick={handleBack}>
-                <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                        fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                </svg>
-            </div>
-            <div class="portal_mapping">
-                Broadcast Report
+            <div class="sub_main_header_css">
+                <div class="header_block_css">
+                    <div class="svg_back_icon" onclick={handleBack}>
+                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div class="broadcast-title">{name} ({recipientCount})</div>
+                </div>
+                <div class="header-right-info">
+                    <span class="info-badge status-badge"><strong>Status:</strong> {status}</span>
+                    <span class="info-badge template-badge"><strong>Template:</strong> {templateName}</span>
+                </div>
             </div>
         </div>
         
-        <template if:true={broadcastReport}>
-            <template if:true={record}>
-                <div class="slds-grid slds-wrap slds-gutters report-tabs">
-                    <div class="slds-col slds-size_3-of-12">
-                        <div class="info-box">
-                            <p class="label">Name</p>
-                            <p class="value">{name}</p>
-                        </div>
-                    </div>
-                    <div class="slds-col slds-size_2-of-12">
-                        <div class="info-box">
-                            <p class="label">Status</p>
-                            <p class="value">{status}</p>
-                        </div>
-                    </div>
-
-                    <div class="slds-col slds-size_2-of-12">
-                        <div class="info-box">
-                            <p class="label">Recipient Count</p>
-                            <p class="value">{recipientCount}</p>
-                        </div>
-                    </div>
-                    <div class="slds-col slds-size_3-of-12">
-                        <div class="info-box">
-                            <p class="label">Template Sent</p>
-                            <p class="value">{templateName}</p>
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="main-container-dt">
-                    <!-- Custom Table -->
-                    <template if:true={paginatedData.length}>
-                        <div class="table-content">
-                            <table class="slds-table">
-                                <thead>
-                                    <tr class="table_tr_cls">
-                                        <th scope="col" class="sno">
-                                            <div>No.</div>
-                                        </th>
-                                        <th scope="col" class="groupname">
-                                            <div>Group Name</div>
-                                        </th>
-                                        <th scope="col" class="member-count">
-                                            <div>Member Count</div>
-                                        </th>
-                                        <th scope="col" class="sent">
-                                            <div>Sent</div>
-                                        </th>
-                                        <th scope="col" class="delivered">
-                                            <div>Delivered</div>
-                                        </th>
-                                        <th scope="col" class="read">
-                                            <div>Read</div>
-                                        </th>
-                                        <th scope="col" class="failed">
-                                            <div>Failed</div>
-                                        </th>
-                                        <!-- <th scope="col" class="replied">
-                                            <div>Replied</div>
-                                        </th> -->
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={paginatedData} for:item="row" for:index="index">
-                                        <tr key={row.Id}>
-                                            <td data-label="S.No.">
-                                                <div>{row.index}</div>
-                                            </td>
-                                            <td data-label="Group Name" class="truncate_css">
-                                                <div><a href="javascript:void(0);" class="clickable-name" data-record-id={row.Id} data-object-name={row.MVEX__Object_Name__c} onclick={handleNameClick}>{row.Name}</a></div>
-                                            </td>
-                                            <td data-label="Member Count">
-                                                <div>{row.MVEX__Count_of_Members__c}</div>
-                                            </td>
-                                            <td data-label="Sent">
-                                                <div>{row.MVEX__Total_Sent__c}</div>
-                                            </td>
-                                            <td data-label="Delivered">
-                                                <div>{row.MVEX__Total_Delivered__c}</div>
-                                            </td>
-                                            <td data-label="Read">
-                                                <div>{row.MVEX__Total_Read__c}</div>
-                                            </td>
-                                            <td data-label="Failed">
-                                                <div>{row.MVEX__Total_Failed__c}</div>
-                                            </td>
-                                            <!-- <td data-label="Replied">
-                                                <div>{row.MVEX__Total_Replied__c}</div>
-                                            </td> -->
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </template>
-        
-                    <!-- No Records Message -->
-                    <template if:true={showNoRecordsMessage}>
-                        <div class="no-records-message">
-                            <div class="empty-state">
-                                <div class="empty-state__content">
-                                    <div class="empty-state__icon">
-                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                    </div>
-                                    <div class="empty-state__message">No Data Available to Show.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-        
-                <template if:true={paginatedData.length}>
-                    <div class="pagination-container">
-                        <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                            </svg>
-                            Previous
-                        </button>
-        
-                        <template for:each={pageNumbers} for:item="page">
-                            <template if:false={page.isEllipsis}>
-                                <button key={page.number} data-id={page.number} class={page.className}
-                                    onclick={handlePageChange}>
-                                    {page.number}
-                                </button>
-                            </template>
-                            <template if:true={page.isEllipsis}>
-                                <span key={page.number} class="pagination-ellipsis">...</span>
-                            </template>
-                        </template>
-        
-                        <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
-                            Next
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                            </svg>
-                        </button>
-                    </div>
-                </template>
-        
-            </template>    
-        </template>
-        
-        <template if:true={broadcastGroupReport}>
-            <div class="slds-grid slds-wrap slds-gutters report-tabs">
-                <div class="slds-col slds-size_3-of-12">
-                    <div class="info-box">
-                        <p class="label">Group Name</p>
-                        <p class="value">{groupName}</p>
-                    </div>
-                </div>
-                <div class="slds-col slds-size_3-of-12">
-                    <div class="info-box">
-                        <p class="label">Member Count</p>
-                        <p class="value">{memberCount}</p>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="main-container-dt">
-                <!-- Custom Table -->
-                <template if:true={paginatedGrpData.length}>
-                    <div class="table-content">
-                        <table class="slds-table">
-                            <thead>
-                                <tr class="table_tr_cls">
-                                    <th scope="col" class="sno">
-                                        <div>No.</div>
-                                    </th>
-                                    <th scope="col" class="groupmember">
-                                        <div>Group Member</div>
-                                    </th>
-                                    <th scope="col" class="phone">
-                                        <div>Phone</div>
-                                    </th>
-                                    <th scope="col" class="messagestatus">
-                                        <div>Message Status</div>
-                                    </th>
-                                    <th scope="col" class="replied-column">
-                                        <div>Replied</div>
-                                    </th>
+        <div class="main_content_cls">
+            <!-- Custom Table -->
+            <template if:true={paginatedData.length}>
+                <div class="table-content">
+                    <table class="slds-table">
+                        <thead>
+                            <tr class="table_tr_cls">
+                                <th scope="col" class="expand-col">
+                                    <div></div>
+                                </th>
+                                <th scope="col" class="sno">
+                                    <div>No.</div>
+                                </th>
+                                <th scope="col" class="groupname">
+                                    <div>Group Name</div>
+                                </th>
+                                <th scope="col" class="member-count">
+                                    <div>Member Count</div>
+                                </th>
+                                <th scope="col" class="sent">
+                                    <div>Sent</div>
+                                </th>
+                                <th scope="col" class="delivered">
+                                    <div>Delivered</div>
+                                </th>
+                                <th scope="col" class="read">
+                                    <div>Read</div>
+                                </th>
+                                <th scope="col" class="failed">
+                                    <div>Failed</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={paginatedData} for:item="row" for:index="index">
+                                <!-- Parent Row -->
+                                <tr key={row.Id} class="parent-row">
+                                    <td data-label="" class="expand-cell">
+                                        <template if:true={row.MVEX__Count_of_Members__c}>
+                                            <div class="action-icon-container" data-record-id={row.Id} data-object-name={row.MVEX__Object_Name__c} onclick={handleNameClick}>
+                                                <svg class="action-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <template if:true={row.isExpanded}>
+                                                        <path d="M7 10l5 5 5-5z" fill="currentColor"/>
+                                                    </template>
+                                                    <template if:false={row.isExpanded}>
+                                                        <path d="M10 17l5-5-5-5z" fill="currentColor"/>
+                                                    </template>
+                                                </svg>
+                                            </div>
+                                        </template>
+                                    </td>
+                                    <td data-label="S.No.">
+                                        <div>{row.index}</div>
+                                    </td>
+                                    <td data-label="Group Name" class="truncate_css">
+                                        <div>{row.Name}</div>
+                                    </td>
+                                    <td data-label="Member Count">
+                                        <div>{row.MVEX__Count_of_Members__c}</div>
+                                    </td>
+                                    <td data-label="Sent">
+                                        <div>{row.MVEX__Total_Sent__c}</div>
+                                    </td>
+                                    <td data-label="Delivered">
+                                        <div>{row.MVEX__Total_Delivered__c}</div>
+                                    </td>
+                                    <td data-label="Read">
+                                        <div>{row.MVEX__Total_Read__c}</div>
+                                    </td>
+                                    <td data-label="Failed">
+                                        <div>{row.MVEX__Total_Failed__c}</div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <template for:each={paginatedGrpData} for:item="row" for:index="index">
-                                    <tr key={row.Id}>
-                                        <td data-label="S.No.">
-                                            <div>{row.index}</div>
-                                        </td>
-                                        <td data-label="Group Member" class="truncate_css">
-                                            <div><a href="javascript:void(0);" class="clickable-name" data-record-id={row.Id}>{row.name}</a></div>
-                                        </td>
-                                        <td data-label="Phone">
-                                            <div>{row.phone}</div>
-                                        </td>
-                                        <td data-label="Message Status">
-                                            <div><p class={row.status}>{row.status}</p></div>
-                                        </td>
-                                        <td data-label="Replied">
-                                            <div><p class={row.repliedClass}>{row.repliedText}</p></div>
+                                
+                                <!-- Accordion Content Row -->
+                                <template if:true={row.isExpanded}>
+                                    <tr key={row.accordionKey} class="accordion-row">
+                                        <td colspan="8">
+                                            <div class="accordion-content">
+                                                <table class="nested-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="nested-sno">No.</th>
+                                                            <th class="nested-member">Group Member</th>
+                                                            <th class="nested-phone">Phone</th>
+                                                            <th class="nested-status">Message Status</th>
+                                                            <th class="nested-replied">Replied</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <template for:each={row.members} for:item="member">
+                                                            <tr key={member.id}>
+                                                                <td>{member.index}</td>
+                                                                <td>{member.name}</td>
+                                                                <td>{member.phone}</td>
+                                                                <td><p class={member.status}>{member.status}</p></td>
+                                                                <td><p class={member.repliedClass}>{member.repliedText}</p></td>
+                                                            </tr>
+                                                        </template>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </td>
                                     </tr>
                                 </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </template> 
-    
-                <!-- No Records Message -->
-                <template if:true={showNoGroupMember}>
-                    <div class="no-records-message">
-                        <div class="empty-state">
-                            <div class="empty-state__content">
-                                <div class="empty-state__icon">
-                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                </div>
-                                <div class="empty-state__message">No Data Available to Show.</div>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- No Records Message -->
+            <template if:true={showNoRecordsMessage}>
+                <div class="no-records-message">
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-state__icon">
+                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
                             </div>
+                            <div class="empty-state__message">No Data Available to Show.</div>
                         </div>
                     </div>
-                </template>
-            </div>
-    
-            <template if:true={paginatedGrpData.length}>
+                </div>
+            </template>
+
+            <template if:true={paginatedData.length}>
                 <div class="pagination-container">
-                    <button class="pagination-button" disabled={isFirstGrpPage} onclick={handleGrpPrevious}>
+                    <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
                             <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
                         </svg>
                         Previous
                     </button>
-    
-                    <template for:each={pageGrpNumbers} for:item="page">
+
+                    <template for:each={pageNumbers} for:item="page">
                         <template if:false={page.isEllipsis}>
                             <button key={page.number} data-id={page.number} class={page.className}
-                                onclick={handleGrpPageChange}>
+                                onclick={handlePageChange}>
                                 {page.number}
                             </button>
                         </template>
@@ -262,15 +167,15 @@
                             <span key={page.number} class="pagination-ellipsis">...</span>
                         </template>
                     </template>
-    
-                    <button class="pagination-button" disabled={isLastGrpPage} onclick={handleGrpNext}>
+
+                    <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
                         Next
                         <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
                             <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                         </svg>
                     </button>
                 </div>
-            </template>  
-        </template>
+            </template>
+        </div>
     </div>
 </template>

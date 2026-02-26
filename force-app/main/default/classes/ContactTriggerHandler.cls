@@ -436,6 +436,7 @@ public without sharing class ContactTriggerHandler {
                     Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                     mail.setToAddresses(new List<String>{email});
                     mail.setTargetObjectId(con.Id);
+                    mail.setTreatTargetObjectAsRecipient(false); 
                     // mail.setWhatId(con.Id);
                     mail.setTemplateId(templates[0].Id);
                     mail.setSaveAsActivity(false);

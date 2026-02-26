@@ -65,7 +65,7 @@ global class PostInstallScript implements InstallHandler {
         } catch (Exception e) {
             // Log error or send email to admin if needed
             System.debug('Error in PostInstallScript: ' + e.getMessage());
-            ErrorHandler.insertErrorData(e, 'PostInstallScript', 'createDefaultConfigRecords', 'Error while creating  record.');
+            ErrorHandler.insertErrorData(e, 'PostInstallScript', 'createDefaultConfigRecords', 'Error while updating or creating PortalListing__c record.');
         }
     }
 

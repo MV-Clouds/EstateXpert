@@ -116,7 +116,6 @@ global without sharing class MetaLeadWebhook {
             Contact newContact = new Contact();
             
             // --- 1. Store Full JSON ---
-            // This stores the exact response in the Long Text Area field
             try {
                 newContact.MVEX__Meta_Raw_JSON__c = JSON.serializePretty(leadData);
             } catch(Exception e) {

@@ -63,11 +63,11 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     get totalItems() {
         return this.filteredData.length;
     }
-    
+
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
     }
-    
+
     get pageNumbers() {
         try {
             const totalPages = this.totalPages;
@@ -122,11 +122,11 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             return null;
         }
     }
-    
+
     get isFirstPage() {
         return this.currentPage === 1;
     }
-    
+
     get isLastPage() {
         return this.currentPage === Math.ceil(this.totalItems / this.pageSize);
     }
@@ -134,40 +134,33 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     get isNextDisabled() {
         return this.selectedGroupIds.length === 0;
     }
-    
-    async connectedCallback(){
+
+    async connectedCallback() {
         try {
             loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('External Css Loaded');
-            })
-            .catch(error => {
-                console.log('Error occuring during loading external css', error);
-            });
-            
             await this.getAccessible();
             if (!this.isAccessible) {
                 this.isLoading = false;
                 return;
             }
-            
+
             await this.checkBusinessAccountConfig();
             if (!this.hasBusinessAccountConfigured) {
                 this.isLoading = false;
                 return;
             }
-            
+
             this.isTemplateVisible = true;
             this.loadBroadcastGroups();
             this.subscribeToPlatformEvent();
             this.loadAllTemplates();
-            
+
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
         }
     }
 
-    disconnectedCallback(){
+    disconnectedCallback() {
         this.unsubscribeFromPlatformEvent();
     }
 
@@ -212,7 +205,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         getTemplatesByObject()
             .then(result => {
                 // Convert the Apex Map to JavaScript Map
-                this.templateMap = new Map(Object.entries(result));                
+                this.templateMap = new Map(Object.entries(result));
                 this.updateTemplateOptions(); // Update options based on selected object
             })
             .catch(error => {
@@ -244,22 +237,22 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             value: template.Id
         }));
         this.selectedTemplate = this.templateOptions[0].value;
-        
+
     }
 
     subscribeToPlatformEvent() {
         subscribe(this.channelName, -1, (message) => {
-            
-            if(message.data.payload.MVEX__IsChanged__c === true){
+
+            if (message.data.payload.MVEX__IsChanged__c === true) {
                 this.loadBroadcastGroups();
-            }            
+            }
         })
-        .then((response) => {
-            this.subscription = response;
-        })
-        .catch(() => {
-            this.showToast('Error', 'Failed to subscribe to platform event.', 'error');
-        });
+            .then((response) => {
+                this.subscription = response;
+            })
+            .catch(() => {
+                this.showToast('Error', 'Failed to subscribe to platform event.', 'error');
+            });
     }
 
     // Method to unsubscribe from the Platform Event
@@ -273,13 +266,12 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     loadBroadcastGroups() {
         getBroadcastRecsWithReplies()
             .then(result => {
-                this.data = result.map((item, index) => ({
-                    ...item,
-                    index : index + 1,
-                }));                 
-    
-                this.filteredData = [...this.data];
+                this.processTemplates(result);
                 this.updateShownData();
+                // Update sort icons to show default sort indicator
+                setTimeout(() => {
+                    this.updateSortIcons();
+                }, 100);
             })
             .catch(() => {
                 this.showToast('Error', 'Failed to load broadcast groups', 'error');
@@ -288,7 +280,90 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 this.isLoading = false;
             });
     }
-    
+
+    /*
+    * Method Name: processTemplates
+    * @description: Method to add custom columns including progress bar and status class
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    processTemplates(data) {
+        this.data = data.map((broadcast, index) => {
+            const total = broadcast.MVEX__Recipient_Count__c || 0;
+            const sent = broadcast.MVEX__Total_Sent__c || 0;
+            const delivered = broadcast.MVEX__Total_Delivered__c || 0;
+            const read = broadcast.MVEX__Total_Read__c || 0;
+            const failed = broadcast.MVEX__Total_Failed__c || 0;
+
+            // Calculate progress percentage based on sent/delivered/read vs total recipients
+            const completed = sent + delivered + read;
+            const progressPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            return {
+                ...broadcast,
+                index: index + 1,
+                CreatedDateformatted: this.formatDate(broadcast.CreatedDate),
+                statusClass: this.getStatusClass(broadcast.MVEX__Status__c),
+                progressPercentage: progressPercentage,
+                progressWidth: `width: ${progressPercentage}%`
+            };
+        });
+
+        // Data already sorted by Apex SOQL (ORDER BY CreatedDate DESC)
+        // Just set UI indicators to show the sort arrow
+        this.sortField = 'CreatedDate';
+        this.sortOrder = 'desc';
+        this.filteredData = [...this.data];
+    }
+
+    /*
+    * Method Name: getStatusClass
+    * @description: Method to give dynamic class to the status pill
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    getStatusClass(status) {
+        switch (status) {
+            case 'Pending':
+                return 'pending-class';
+            case 'Completed':
+                return 'completed-class';
+            default:
+                return 'pending-class';
+        }
+    }
+
+    /*
+    * Method Name: formatDate
+    * @description: Method to customize date string to DD/MM/YYYY format
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    formatDate(dateStr) {
+        if (!dateStr) return '—';
+        let formatdate = new Date(dateStr);
+        formatdate.setDate(formatdate.getDate());
+        let formattedDate = new Date(formatdate.getFullYear(), formatdate.getMonth(), formatdate.getDate(), 0, 0, 0);
+        const day = formattedDate.getDate();
+        const month = formattedDate.getMonth() + 1;
+        const year = formattedDate.getFullYear();
+        const paddedDay = day < 10 ? `0${day}` : day;
+        const paddedMonth = month < 10 ? `0${month}` : month;
+        const formattedDateStr = `${paddedDay}/${paddedMonth}/${year}`;
+        return formattedDateStr;
+    }
+
+    /*
+    * Method Name: handleRefresh
+    * @description: Method to refresh the broadcast data
+    * Date: 24/02/2026
+    * Created By: Karan Singh
+    */
+    handleRefresh() {
+        this.isLoading = true;
+        this.loadBroadcastGroups();
+    }
+
     updateShownData() {
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
@@ -304,63 +379,72 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     handleSearch(event) {
         try {
-            if(event.detail.value.trim().toLowerCase() != null) {
-                this.filteredData = this.data.filter(item => 
+            const searchKey = event.detail.value.trim().toLowerCase();
+            if (searchKey !== '') {
+                this.filteredData = this.data.filter(item =>
                     item.Name &&
-                    item.Name.toLowerCase().includes(event.detail.value.trim().toLowerCase())
+                    item.Name.toLowerCase().includes(searchKey)
                 );
-                if (this.sortField) {
-                    this.sortData();
-                } else {
-                    this.updateShownData();
-                }
+            } else {
+                this.filteredData = [...this.data];
             }
+            this.currentPage = 1;
+            // Apply sorting (will use default sort if no sort field is set)
+            if (this.sortField) {
+                this.sortData();
+            } else {
+                // Apply default sort by CreatedDate descending
+                this.sortField = 'CreatedDate';
+                this.sortOrder = 'desc';
+                this.sortData();
+            }
+            this.updateShownData();
         } catch (error) {
             this.showToast('Error', 'Error searching', 'error');
         }
     }
-    
+
     handlePrevious() {
-        try{
+        try {
             if (this.currentPage > 1) {
                 this.currentPage--;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             this.showToast('Error', 'Error navigating to previous page', 'error');
         }
     }
-    
+
     handleNext() {
-        try{
+        try {
             if (this.currentPage < this.totalPages) {
                 this.currentPage++;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             this.showToast('Error', 'Error navigating pages', 'error');
         }
     }
-    
+
     handlePageChange(event) {
-        try{
+        try {
             const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
             if (selectedPage !== this.currentPage) {
                 this.currentPage = selectedPage;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             this.showToast('Error', 'Error navigating pages', 'error');
         }
-    } 
-    newBroadcast(){
+    }
+    newBroadcast() {
         this.showPopup = true;
         this.isLoading = true;
 
         getBroadcastGroups()
             .then(result => {
                 this.broadcastGroups = result;
-                this.filteredGroups = [...this.broadcastGroups.filter(item => item.MVEX__Communication_Type__c != 'Email')];
+                this.filteredGroups = [...this.broadcastGroups];
             })
             .catch(() => {
                 this.showToast('Error', 'Error fetching broadcast groups', 'error');
@@ -372,12 +456,12 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     handleSearchPopup(event) {
         const searchValue = event.target.value.trim().toLowerCase();
-    
+
         // Filter the broadcast groups based on the search value
         this.filteredGroups = this.broadcastGroups.filter(group =>
             group.Name.toLowerCase().includes(searchValue)
         );
-    
+
         // Ensure the IsChecked property is updated for filtered groups
         this.filteredGroups = this.filteredGroups.map(group => ({
             ...group,
@@ -389,22 +473,22 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         try {
             const groupId = event.target.dataset.id;
             const selectedGroup = this.broadcastGroups.find(group => group.Id === groupId);
-    
+
             if (event.target.checked) {
                 // Add group ID to selected list if checked
                 if (!this.selectedGroupIds.some(group => group.Id === groupId)) {
                     this.selectedGroupIds = [
                         ...this.selectedGroupIds,
-                        { Id: groupId, ObjName: selectedGroup.MVEX__Object_Name__c,Name:selectedGroup.Name } // Store both Id and Name
+                        { Id: groupId, ObjName: selectedGroup.MVEX__Object_Name__c, Name: selectedGroup.Name } // Store both Id and Name
                     ];
                 }
             } else {
                 // Remove group ID if unchecked
                 this.selectedGroupIds = this.selectedGroupIds.filter(group => group.Id !== groupId);
             }
-    
+
             this.selectedObjectName = this.selectedGroupIds[0]?.ObjName || '';
-    
+
             // Update filteredGroups to reflect selection
             this.filteredGroups = this.filteredGroups.map(group => ({
                 ...group,
@@ -419,8 +503,8 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         try {
             const firstObjName = this.selectedGroupIds[0]?.ObjName;
             const allSameObjName = this.selectedGroupIds.every(group => group.ObjName === firstObjName);
-            
-            if(!allSameObjName){
+
+            if (!allSameObjName) {
                 this.showToast('Error!', 'Please select groups with the same object name', 'error');
                 return;
             }
@@ -444,10 +528,10 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             const seenIds = new Set();
 
             for (const group of this.selectedGroupIds) {
-                const result = await getBroadcastMembersByGroupId({ 
-                    groupId: group.Id, 
-                    objectName: group.ObjName, 
-                    broadcastId: null 
+                const result = await getBroadcastMembersByGroupId({
+                    groupId: group.Id,
+                    objectName: group.ObjName,
+                    broadcastId: null
                 });
                 if (result && result.length > 0) {
                     for (const wrapper of result) {
@@ -501,19 +585,19 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         }
     }
 
-    handleInputChange(event){
+    handleInputChange(event) {
         const { name, value } = event.target;
-        switch(name) {
+        switch (name) {
             case 'template':
                 this.selectedTemplate = value;
                 this.handleRefreshClick();
-            break;
+                break;
             case 'dateTime':
-                this.selectedDateTime = value;                
-            break;
+                this.selectedDateTime = value;
+                break;
             case 'scheduleDateTime':
                 this.selectedDateTime = value;
-            break;
+                break;
         }
     }
 
@@ -532,7 +616,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         this.popUpLastPage = false;
         this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Broadcast Groups';
-    
+
         // Reset the selected values
         this.selectedGroupIds = [];
         this.selectedTemplate = '';
@@ -541,7 +625,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         // Reset group members
         this.groupMembers = [];
         this.filteredGroupMembers = [];
-    
+
         // Reset the filteredGroups and update IsChecked property
         this.filteredGroups = this.broadcastGroups.map(group => ({
             ...group,
@@ -549,7 +633,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         }));
     }
 
-    handlePreviousOnPopup(){
+    handlePreviousOnPopup() {
         this.popupHeader = 'Choose Broadcast Groups';
         this.selectedTemplate = '';
         this.popUpFirstPage = true;
@@ -557,8 +641,8 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         this.popUpSecondpage = false;
     }
 
-    handleSchedulePopup(){
-        if(this.selectedTemplate === '' || this.selectedTemplate === null){
+    handleSchedulePopup() {
+        if (this.selectedTemplate === '' || this.selectedTemplate === null) {
             this.showToast('Error!', 'Please select template', 'error');
             return;
         }
@@ -567,21 +651,21 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         this.popUpLastPage = true;
     }
 
-    handlePreviousLastPage(){
+    handlePreviousLastPage() {
         this.popUpLastPage = false;
         this.popUpConfirmPage = false;
     }
 
-    handleConfirmPopup(){
+    handleConfirmPopup() {
         this.popUpConfirmPage = true;
     }
 
-    handleSchedule(){
+    handleSchedule() {
 
-        if(this.selectedDateTime === '' || this.selectedDateTime === null){
+        if (this.selectedDateTime === '' || this.selectedDateTime === null) {
             this.showToast('Error!', 'Please select date and time', 'error');
             return;
-        }     
+        }
 
         const selectedTime = new Date(this.selectedDateTime);
         const now = new Date();
@@ -589,11 +673,11 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         if (selectedTime < now) {
             this.showToast('Error!', 'Selected date and time cannot be in the past', 'error');
             return;
-        }   
+        }
 
         let grpIdList = this.selectedGroupIds.map(record => record.Id);
 
-        createChatRecods({templateId: this.selectedTemplate, groupIds: grpIdList, isScheduled: true, timeOfMessage: this.selectedDateTime})
+        createChatRecods({ templateId: this.selectedTemplate, groupIds: grpIdList, isScheduled: true, timeOfMessage: this.selectedDateTime })
             .then(result => {
                 if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
@@ -608,7 +692,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             .finally(() => {
                 this.isLoading = false;
             });
-        
+
     }
 
     /*
@@ -627,13 +711,13 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 },
             });
         } catch (error) {
-            console.log('error--> ',error);
+            console.log('error--> ', error);
         }
     }
 
-    handleSendOnPopup(){
+    handleSendOnPopup() {
 
-        if(this.selectedTemplate === '' || this.selectedTemplate === null){
+        if (this.selectedTemplate === '' || this.selectedTemplate === null) {
             this.showToast('Error!', 'Please select template', 'error');
             return;
         }
@@ -641,7 +725,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         this.isLoading = true;
         let grpIdList = this.selectedGroupIds.map(record => record.Id);
 
-        createChatRecods({templateId: this.selectedTemplate, groupIds: grpIdList, isScheduled: false, timeOfMessage: ''})
+        createChatRecods({ templateId: this.selectedTemplate, groupIds: grpIdList, isScheduled: false, timeOfMessage: '' })
             .then(result => {
                 if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
@@ -659,32 +743,29 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             });
     }
 
-        navigateToBroadcastComponent(broadcastId) {
-            let componentDef = {
-                componentDef: "MVEX:broadcastReportComp",
-                attributes: {
-                    recordId: broadcastId
-                }
-            };
+    navigateToBroadcastComponent(broadcastId) {
+        let componentDef = {
+            componentDef: "MVEX:broadcastReportComp",
+            attributes: {
+                recordId: broadcastId
+            }
+        };
 
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-    
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
-            });
-}
-    
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/one/one.app#' + encodedComponentDef
+            }
+        });
+    }
+
     handleNameClick(event) {
-
         try {
             this.selectedRecordId = event.target.dataset.recordId;
 
-            const record = this.data.find(item => item.Id === this.selectedRecordId); 
-            console.log('record--> ',JSON.stringify(record));
-            
+            const record = this.data.find(item => item.Id === this.selectedRecordId);
 
             let componentDef = {
                 componentDef: "MVEX:broadcastReportComp",
@@ -698,7 +779,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             let jsonString = JSON.stringify(componentDef);
             // Modern approach: convert to UTF-8 bytes then base64
             let encodedComponentDef = btoa(new TextEncoder().encode(jsonString).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-    
+
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
                 attributes: {
@@ -706,13 +787,12 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 }
             });
         } catch (error) {
-            console.log('error stack--> ',error.stack);
-            
+            console.log('error stack--> ', error.stack);
         }
     }
-    
-    showToast(title ,message, status){
-        this.dispatchEvent(new ShowToastEvent({title: title, message: message, variant: status}));
+
+    showToast(title, message, status) {
+        this.dispatchEvent(new ShowToastEvent({ title: title, message: message, variant: status }));
     }
 
     sortClick(event) {
@@ -737,7 +817,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     naturalSort(a, b) {
         const aValue = a.toString().toLowerCase();
         const bValue = b.toString().toLowerCase();
-        
+
         // Split string into parts of numbers and non-numbers
         const re = /(\d+)|(\D+)/g;
         const aParts = aValue.match(re) || [];
@@ -779,6 +859,18 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                     aValue = aValue.toString().toLowerCase();
                     bValue = bValue.toString().toLowerCase();
                     let compare = aValue.localeCompare(bValue);
+                    return this.sortOrder === 'asc' ? compare : -compare;
+                } else if (this.sortField === 'CreatedDate') {
+                    // Handle date sorting
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+                    let compare = aDate.getTime() - bDate.getTime();
+                    return this.sortOrder === 'asc' ? compare : -compare;
+                } else if (this.sortField === 'progressPercentage') {
+                    // Handle progress percentage sorting
+                    aValue = Number(aValue) || 0;
+                    bValue = Number(bValue) || 0;
+                    let compare = aValue - bValue;
                     return this.sortOrder === 'asc' ? compare : -compare;
                 } else if (this.sortField.includes('__c')) {
                     // Handle numeric fields

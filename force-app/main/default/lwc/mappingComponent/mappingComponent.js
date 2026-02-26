@@ -146,6 +146,7 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
     }
     
     connectedCallback() {
+        loadStyle(this, MulishFontCss);
         // Check if accessed directly via URL
         if (typeof window !== 'undefined') {
             const currentUrl = window.location.href;
@@ -157,7 +158,6 @@ export default class MappingComponent extends NavigationMixin(LightningElement) 
         }
         
         this.isLoading = true;
-        loadStyle(this, MulishFontCss);
         getObjectFields({ objectName: 'MVEX__Listing__c' })
             .then((data) => {
 

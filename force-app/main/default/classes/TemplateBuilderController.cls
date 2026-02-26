@@ -508,7 +508,7 @@ public with sharing class TemplateBuilderController {
             if(listing.size() > 0){
                 templateRecord.listingName = listing[0].Name;
             }
-            List<Template__c> templates = [SELECT Id, Template_Name__c FROM Template__c WHERE Object_API_Name__c = 'Listing__c' AND Template_Status__c = true WITH USER_MODE ORDER BY Template_Name__c ASC];
+            List<Template__c> templates = [SELECT Id, Template_Name__c FROM Template__c WHERE Object_API_Name__c = 'MVEX__Listing__c' AND Template_Status__c = true WITH USER_MODE ORDER BY Template_Name__c ASC];
             templateRecord.templates = templates;
             
         } catch (Exception e) {

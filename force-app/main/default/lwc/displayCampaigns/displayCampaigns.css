@@ -768,13 +768,13 @@ span {
     top: 0;
     left: 0;
     height: 100%;
-    background: linear-gradient(90deg, #0176D3 0%, #1a8fe8 100%);
+    background: linear-gradient(90deg, #4da3ff 0%, #0176D3 100%);
     border-radius: 14px;
     transition: width 1.2s ease-out;
     box-shadow: 0 2px 6px rgba(1, 118, 211, 0.3);
 }
 
-.modern-progress-fill[data-progress="0"] { background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%); }
+.modern-progress-fill[data-progress="0"] { background: #c0392b; }
 .modern-progress-fill[data-progress="1"],
 .modern-progress-fill[data-progress="2"],
 .modern-progress-fill[data-progress="3"],
@@ -824,7 +824,7 @@ span {
 .modern-progress-fill[data-progress="47"],
 .modern-progress-fill[data-progress="48"],
 .modern-progress-fill[data-progress="49"] {
-    background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+    background: #c0392b;
 }
 
 .modern-progress-fill[data-progress="50"],
@@ -857,7 +857,7 @@ span {
 .modern-progress-fill[data-progress="77"],
 .modern-progress-fill[data-progress="78"],
 .modern-progress-fill[data-progress="79"] {
-    background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+    background: #e67e22;
 }
 
 .modern-progress-fill[data-progress="80"],
@@ -881,7 +881,7 @@ span {
 .modern-progress-fill[data-progress="98"],
 .modern-progress-fill[data-progress="99"],
 .modern-progress-fill[data-progress="100"] {
-    background: linear-gradient(90deg, #0176D3 0%, #1a8fe8 100%);
+    background: #0176D3;
 }
 
 .modern-progress-text {

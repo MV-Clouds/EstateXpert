@@ -55,7 +55,7 @@ public with sharing class BroadcastMessageController {
     public static List<Broadcast_Group__c> getBroadcastGroups() {
         List<Broadcast_Group__c> broadcastGroups = new List<Broadcast_Group__c>();
         try {
-            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WHERE Communication_Type__c = 'WhatsApp' WITH USER_MODE ORDER BY LastModifiedDate DESC];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastGroups', e.getMessage());
         }
@@ -159,6 +159,7 @@ public with sharing class BroadcastMessageController {
                     'Id' => b.Id,
                     'Name' => b.Name,
                     'MVEX__Status__c' => b.Status__c,
+                    'CreatedDate' => b.CreatedDate,
                     'MVEX__Recipient_Count__c' => b.Recipient_Count__c,
                     'MVEX__Total_Sent__c' => sent + delivered + read,
                     'MVEX__Total_Delivered__c' => delivered + read,
@@ -785,5 +786,163 @@ public with sharing class BroadcastMessageController {
             sessionId = 'Error: ' + e.getMessage();
         }
         return sessionId;
+    }
+
+    @AuraEnabled
+    public static Map<String, List<BroadcastMemberWrapper>> getAllBroadcastMembers(String broadcastId) {
+        Map<String, List<BroadcastMemberWrapper>> groupMembersMap = new Map<String, List<BroadcastMemberWrapper>>();
+        
+        try {
+            // Get broadcast and group IDs
+            Broadcast__c broadcast = [
+                SELECT Broadcast_Group_IDs__c, CreatedDate
+                FROM Broadcast__c 
+                WHERE Id = :broadcastId 
+                WITH USER_MODE 
+                LIMIT 1
+            ];
+
+            if (String.isBlank(broadcast.Broadcast_Group_IDs__c)) {
+                return groupMembersMap;
+            }
+
+            List<String> groupIds = broadcast.Broadcast_Group_IDs__c.split(',');
+            
+            // Get all groups
+            Map<Id, Broadcast_Group__c> groupsMap = new Map<Id, Broadcast_Group__c>([
+                SELECT Id, Object_Name__c, Communication_Type__c
+                FROM Broadcast_Group__c 
+                WHERE Id IN :groupIds 
+                WITH USER_MODE
+            ]);
+
+            // Get all group members for these groups
+            List<Broadcast_Group_Member__c> allMembers = [
+                SELECT Broadcast_Group_ID__c, Phone_Number__c, Email__c, Status__c 
+                FROM Broadcast_Group_Member__c 
+                WHERE Broadcast_Group_ID__c IN :groupIds 
+                AND (Phone_Number__c != null OR Email__c != null) 
+                WITH USER_MODE
+            ];
+
+            // Organize members by group
+            Map<Id, List<Broadcast_Group_Member__c>> groupToMembersMap = new Map<Id, List<Broadcast_Group_Member__c>>();
+            Set<String> allPhones = new Set<String>();
+            Set<String> allEmails = new Set<String>();
+            
+            for (Broadcast_Group_Member__c member : allMembers) {
+                if (!groupToMembersMap.containsKey(member.Broadcast_Group_ID__c)) {
+                    groupToMembersMap.put(member.Broadcast_Group_ID__c, new List<Broadcast_Group_Member__c>());
+                }
+                groupToMembersMap.get(member.Broadcast_Group_ID__c).add(member);
+                
+                if (String.isNotBlank(member.Phone_Number__c)) {
+                    allPhones.add(member.Phone_Number__c);
+                }
+                if (String.isNotBlank(member.Email__c)) {
+                    allEmails.add(member.Email__c);
+                }
+            }
+
+            // Get reply status for all phones
+            Map<String, Boolean> phoneToHasReply = new Map<String, Boolean>();
+            if (!allPhones.isEmpty()) {
+                List<Chat__c> replyMessages = [
+                    SELECT Phone__c
+                    FROM Chat__c 
+                    WHERE Phone__c IN :allPhones
+                    AND Type_of_Message__c = 'Inbound Messages'
+                    AND CreatedDate >= :broadcast.CreatedDate
+                    WITH USER_MODE
+                ];
+
+                for (Chat__c reply : replyMessages) {
+                    phoneToHasReply.put(reply.Phone__c, true);
+                }
+            }
+
+            // Get chat status for all phones
+            Map<String, String> phoneToChatStatus = new Map<String, String>();
+            if (!allPhones.isEmpty()) {
+                List<Chat__c> broadcastChats = [
+                    SELECT Phone__c, Message_Status__c 
+                    FROM Chat__c 
+                    WHERE WB_Broadcast__c = :broadcastId 
+                    AND Phone__c IN :allPhones 
+                    WITH SECURITY_ENFORCED
+                ];
+
+                for (Chat__c chat : broadcastChats) {
+                    if (!phoneToChatStatus.containsKey(chat.Phone__c)) {
+                        phoneToChatStatus.put(chat.Phone__c, chat.Message_Status__c);
+                    }
+                }
+            }
+
+            // Get object configs
+            Map<String, Object> fullConfig = getObjectConfigs();
+            Map<String, Object> configMap = (Map<String, Object>) fullConfig.get('configMap');
+
+            // Process each group
+            for (Id groupId : groupsMap.keySet()) {
+                List<BroadcastMemberWrapper> memberWrappers = new List<BroadcastMemberWrapper>();
+                Broadcast_Group__c brodcastGroup = groupsMap.get(groupId);
+                List<Broadcast_Group_Member__c> groupMembers = groupToMembersMap.get(groupId);
+                
+                if (groupMembers == null || groupMembers.isEmpty()) {
+                    groupMembersMap.put(groupId, memberWrappers);
+                    continue;
+                }
+
+                String objectName = brodcastGroup.Object_Name__c;
+                String communicationType = brodcastGroup.Communication_Type__c != null ? brodcastGroup.Communication_Type__c : 'Phone';
+                
+                Map<String, String> objectConfig = (Map<String, String>) configMap.get(objectName);
+                String phoneField = objectConfig.get('phoneField');
+                String emailField = objectConfig.get('emailField');
+
+                // Collect values for this group
+                Set<String> values = new Set<String>();
+                for (Broadcast_Group_Member__c member : groupMembers) {
+                    String value = communicationType == 'Email' ? member.Email__c : member.Phone_Number__c;
+                    if (String.isNotBlank(value)) {
+                        values.add(value);
+                    }
+                }
+
+                if (values.isEmpty()) {
+                    groupMembersMap.put(groupId, memberWrappers);
+                    continue;
+                }
+
+                // Query records
+                String queryFields = 'Id, Name, ' + phoneField;
+                if (communicationType == 'Email' || communicationType == 'Both') {
+                    queryFields += ', ' + emailField;
+                }
+
+                String query = 'SELECT ' + queryFields + ' FROM ' + objectName + ' WHERE ' + 
+                              (communicationType == 'Email' ? emailField : phoneField) + ' IN :values';
+                String escapedQuery = String.escapeSingleQuotes(query);
+                List<SObject> matchedRecords = Database.query(escapedQuery, AccessLevel.USER_MODE);
+
+                // Build wrappers
+                for (SObject record : matchedRecords) {
+                    String value = communicationType == 'Email' ? (String)record.get(emailField) : (String)record.get(phoneField);
+                    BroadcastMemberWrapper wrapper = new BroadcastMemberWrapper();
+                    wrapper.record = record;
+                    wrapper.status = phoneToChatStatus.get(value);
+                    wrapper.hasReplied = phoneToHasReply.containsKey(value) ? phoneToHasReply.get(value) : false;
+                    memberWrappers.add(wrapper);
+                }
+
+                groupMembersMap.put(groupId, memberWrappers);
+            }
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getAllBroadcastMembers', e.getMessage());
+        }
+        
+        return groupMembersMap;
     }
 }

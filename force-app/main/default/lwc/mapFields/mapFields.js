@@ -81,6 +81,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     * Created By: Vyom Soni
     */
     connectedCallback() {
+        loadStyle(this, MulishFontCss);
         // Check if accessed directly via URL
         if (typeof window !== 'undefined') {
             const currentUrl = window.location.href;
@@ -92,7 +93,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
         }
         
         loadStyle(this, externalCss);
-        loadStyle(this, MulishFontCss);
         this.getMappingMetadata();
     }
     

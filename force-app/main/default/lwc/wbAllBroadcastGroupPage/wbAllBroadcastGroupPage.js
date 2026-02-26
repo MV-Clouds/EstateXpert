@@ -18,13 +18,24 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     @track isLoading = true;
     @track showCommunicationPopup = false;
     @track selectedCommunicationType = 'Email';
+    @track selectedCommunicationTypeFilter = '';
     @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
 
     broadcastGroupId = null;
+    searchTerm = '';
 
     get showNoRecordsMessage() {
         return this.filteredData.length === 0;
+    }
+
+    get communicationTypeOptions() {
+        return [
+            { label: 'All Types', value: '' },
+            { label: 'Email', value: 'Email' },
+            { label: 'WhatsApp', value: 'WhatsApp' },
+            { label: 'Both', value: 'Both' }
+        ];
     }
 
     get totalItems() {
@@ -178,17 +189,54 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
 
     handleSearch(event) {
         try {
-            const searchTerm = event.detail.value.toLowerCase();
-            this.filteredData = this.data
-                .filter((item) => (item.Name?.toLowerCase() ?? '').includes(searchTerm))
-                .map((item, index) => ({
-                    ...item,
-                    index: index + 1 // Re-indexing based on filtered results
-                }));
-            this.currentPage = 1; // Reset to first page on search
-            this.updateShownData();
+            this.searchTerm = event.detail.value.toLowerCase();
+            this.applyFilters();
         } catch (error) {
             this.showToast('Error', 'Error searching records', 'error');
+        }
+    }
+
+    handleCommunicationTypeFilter(event) {
+        try {
+            this.selectedCommunicationTypeFilter = event.detail.value;
+            this.applyFilters();
+        } catch (error) {
+            this.showToast('Error', 'Error filtering records', 'error');
+        }
+    }
+
+    handleRefresh() {
+        try {
+            this.searchTerm = '';
+            this.selectedCommunicationTypeFilter = '';
+            this.currentPage = 1;
+            
+            // Clear search input
+            const searchInput = this.template.querySelector('lightning-input[name="searchInput"]');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            
+            this.loadBroadcastGroups();
+        } catch (error) {
+            this.showToast('Error', 'Error refreshing data', 'error');
+        }
+    }
+
+    applyFilters() {
+        try {
+            this.filteredData = this.data.filter((item) => {
+                const matchesSearch = !this.searchTerm || (item.Name?.toLowerCase() ?? '').includes(this.searchTerm);
+                const matchesType = !this.selectedCommunicationTypeFilter || item.MVEX__Communication_Type__c === this.selectedCommunicationTypeFilter;
+                return matchesSearch && matchesType;
+            }).map((item, index) => ({
+                ...item,
+                index: index + 1 // Re-indexing based on filtered results
+            }));
+            this.currentPage = 1; // Reset to first page on filter
+            this.updateShownData();
+        } catch (error) {
+            this.showToast('Error', 'Error applying filters', 'error');
         }
     }
     
@@ -262,15 +310,6 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     handlePopupClose() {
         this.showCommunicationPopup = false;
         this.selectedCommunicationType = 'Email'; // Reset to default
-    }
-
-    backToControlCenter() {
-        this[NavigationMixin.Navigate]({
-            type: "standard__navItemPage",
-            attributes: {
-                apiName: "MVEX__Control_Center",
-            },
-        });
     }
 
     showToast(title, message, variant) {

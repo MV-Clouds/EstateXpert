@@ -5,17 +5,21 @@
     <template if:true={isAccessible}>
         <div class="wrapper">
             <div class="main_header_cls">
-                <div slot="title" class="header_block_css">
-                    Multi-Channel Group
-                </div>
-                <div class="header">
-                    <button class="btn" onclick={handleNewGroupClick}>
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-                        </svg>
-                        New Group
-                    </button>
+                <div class="sub_main_header_css">
+                    <div class="header_block_css">
+                        <div class="portal_mapping">
+                            Multi-Channel Group
+                        </div>
+                    </div>
+                    <div class="header">
+                        <button class="btn" onclick={handleNewGroupClick}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                            </svg>
+                            New Group
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -24,6 +28,17 @@
                 <div class="filterdiv slds-m-around_medium">
                     <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
                         type="search" placeholder="Search by Name" onchange={handleSearch}></lightning-input>
+                    <lightning-combobox
+                        variant="label-hidden"
+                        class="filter-combobox"
+                        value={selectedCommunicationTypeFilter}
+                        placeholder="Filter by Type"
+                        options={communicationTypeOptions}
+                        onchange={handleCommunicationTypeFilter}>
+                    </lightning-combobox>
+                    <button class="refresh-btn" onclick={handleRefresh} title="Refresh">
+                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh" size="x-small"></lightning-icon>
+                    </button>
                 </div>
 
                 <!-- Custom Table -->

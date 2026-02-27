@@ -1,67 +1,44 @@
 <template>
-    <div class="cover-div">
-        <div class="inner-div">
-            <template if:false={showSection}>
-                <div class="mainDiv">
-                    <div class="tile-items">
+    <div class="tile-view-container">
+        <template if:false={showSection}>
+            <div class="mainDiv">
+                <div class="tile-items">
                         <template for:each={shownProcessedContactData} for:item="con" for:index="index">
                             <div class="tile-item" key={con.Id}>
-                                <div class="content-div">
-                                    <div class="content">
-                                        <div class="lable">Full Name :-</div>
-                                        <div class="value">{con.Name}</div>
-                                    </div>
-                                    <template for:each={con.cardViewFields} for:item="item" for:index="index1">
-                                        <div class="content" key={item.value}>
-                                            <div class="lable">{item.fieldName} :-</div>
-                                            <div class="value">{item.value}</div>
-                                        </div>
-                                        <!-- <div class="content">
-                                                <div class="lable">Email :-</div>
-                                                <div class="value">{con.Email}</div>
-                                            </div>
-                                            <div class="content">
-                                                <div class="lable">Lead Source :-</div>
-                                                <div class="value">{con.LeadSource}</div>
-                                            </div> -->
-                                    </template>
-                                </div>
-                                <div class="input-div">
-                                    <!-- <div class="checkbox">
-                                                <input
-                                                data-id={index}
-                                                type="checkbox"
-                                                checked={con.isChecked}
-                                                value={con.isChecked}
-                                                onchange={checkBoxValueChange}/>
-                                            </div> -->
+                                <div class="checkbox-wrapper">
                                     <label class="custom-checkbox custom-checkbox-body">
                                         <input data-id={index} type="checkbox" checked={con.isChecked} value={con.isChecked}
                                             onchange={checkBoxValueChange} />
                                         <span class="checkmark"></span>
                                     </label>
-                                    <div class="share-div">
-                                        <svg xmlns="http://www.w3.org/2000/svg" data-id={con.Id} onclick={redirectToRecord}
-                                            height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                            <path data-id={con.Id} onclick={redirectToRecord}
-                                                d="M485 300h-30c-8 0-15 7-15 15v110c0 8-7 15-15 15H95c-8 0-15-7-15-15V215c0-8 7-15 15-15h40c8 0 15-7 15-15v-30c0-8-7-15-15-15H60a40 40 0 0 0-40 40v280a40 40 0 0 0 40 40h400a40 40 0 0 0 40-40V315c0-8-7-15-15-15zM340 140c-100 0-191 89-199 194-1 8 6 16 15 16h30c8 0 14-6 15-13 7-75 71-137 149-137h16c9 0 13 11 7 17l-55 56c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l136-135c6-6 6-15 0-21L361 24c-6-6-15-6-21 0l-21 21c-6 6-7 15-1 21l56 56c6 6 2 17-7 17l-27 1z" />
-                                        </svg>
+                                </div>
+                                <div class="contact-content">
+                                    <div class="contact-header">
+                                        <a class="contact-name" data-id={con.Id} onclick={redirectToRecord}>{con.Name}</a>
+                                    </div>
+                                    <div class="contact-fields">
+                                        <template for:each={con.cardViewFields} for:item="item" for:index="index1">
+                                            <div class="field-row" key={item.value}>
+                                                <span class="field-label">{item.fieldName}</span>
+                                                <span class="field-value">{item.value}</span>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
                         </template>
-                    </div>
                 </div>
-            </template>
-            <template if:true={showSection}>
-                <div class="noresult">
-                    <div class="noresult-class">
-                        <p class="tag1">No Result found yet...</p>
-                        <p class="tag2">We did not find any result for your search</p>
-                    </div>
+            </div>
+        </template>
+        <template if:true={showSection}>
+            <div class="noresult">
+                <div class="noresult-class">
+                    <p class="tag1">No Result found yet...</p>
+                    <p class="tag2">We did not find any result for your search</p>
                 </div>
-            </template>
-            <div class="paginationDiv slds-p-around_medium">
+            </div>
+        </template>
+        <div class="paginationDiv">
                 <div class="btnCover">
                     <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
@@ -89,7 +66,6 @@
                                 d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                         </svg>
                     </button>
-                </div>
             </div>
         </div>
     </div>

@@ -10,6 +10,7 @@ import { errorDebugger } from 'c/globalProperties';
 
 export default class MarketingListFilterCmp extends LightningElement {
     @track addModal = false;
+    @track saveConfirmationModal = false;
     @track contacts = [];
     // dyanamic fields selctor variables
     @track valueFromChild = [];
@@ -48,6 +49,14 @@ export default class MarketingListFilterCmp extends LightningElement {
     get isFilterChanged() {
         return JSON.stringify(this.filterFields) !== 
                JSON.stringify(this.originalFilterFields);
+    }
+
+    get customLogicToggleClass() {
+        return this.isCustomLogicEnabled ? 'custom-logic-toggle active' : 'custom-logic-toggle';
+    }
+
+    get showCustomLogicFooter() {
+        return this.isCustomLogicEnabled && this.filterFields.length > 0;
     }
 
     get isApplyDisabled() {
@@ -126,6 +135,19 @@ export default class MarketingListFilterCmp extends LightningElement {
     }
 
     saveFilterPermanent(){
+        this.saveConfirmationModal = true;
+    }
+
+    handleConfirmSave(){
+        this.saveConfirmationModal = false;
+        this.performSaveFilter();
+    }
+
+    handleCancelSave(){
+        this.saveConfirmationModal = false;
+    }
+
+    performSaveFilter(){
         const fieldsToSave = this.filterFields.filter(field => !field.isMandatory);
         
         saveStaticFields({objectApiName: 'Marketing Contact', featureName: 'MarketingManagerFilter', fieldsJson: JSON.stringify(fieldsToSave)})
@@ -142,7 +164,7 @@ export default class MarketingListFilterCmp extends LightningElement {
         );
         })  
          .catch(error => {
-            errorDebugger('MarketingListFilterCmp', 'saveFilterPermanent', error, 'warn', 'Error in saveFilterPermanent');
+            errorDebugger('MarketingListFilterCmp', 'performSaveFilter', error, 'warn', 'Error in performSaveFilter');
         });      
     }
 
@@ -1428,13 +1450,15 @@ export default class MarketingListFilterCmp extends LightningElement {
 
     /**
      * Method Name: handleCustomLogicToggle
-     * @description: Handle the custom logic checkbox toggle and set default logic string
+     * @description: Handle the custom logic toggle button and set default logic string
      * Date: 14/06/2024
      * Created By: Vyom Soni
      */
     handleCustomLogicToggle(event) {
         try {
-            this.isCustomLogicEnabled = event.target.checked;
+            // Toggle the state
+            this.isCustomLogicEnabled = !this.isCustomLogicEnabled;
+            
             if (this.isCustomLogicEnabled) {
                 // Generate default logic string based on filters with selected values
                 const requiredIndices = [];
@@ -1464,7 +1488,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             }
         } catch (error) {
             console.log('Error in handleCustomLogicToggle:', error.stack);
-            errorDebugger('ListingManagerFilterCmp', 'handleCustomLogicToggle', error, 'warn', 'Error in handleCustomLogicToggle');
+            errorDebugger('MarketingListFilterCmp', 'handleCustomLogicToggle', error, 'warn', 'Error in handleCustomLogicToggle');
         }
     }
 

@@ -496,6 +496,8 @@ span {
 }
 
 .tableDiv {
+    flex: 1;
+    min-height: 0;
     overflow: auto;
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -531,8 +533,9 @@ span {
 }
 
 .noresult {
+    flex: 1;
+    min-height: 0;
     overflow: auto;
-    height: 85%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -596,6 +599,7 @@ span {
 }
 
 .paginationDiv {
+    flex-shrink: 0;
     padding: 0.5rem 1rem;
     display: flex;
     justify-content: center;

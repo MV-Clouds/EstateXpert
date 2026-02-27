@@ -31,6 +31,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track processedContactData = [];
     @track unchangedProcessContact = [];
     @track filteredSelectedContacts = [];
+    @track pendingFilterEvent = null; // Store filter event if received before data loads
     allSelectedContacts = [];
     @track sortField = 'Name';
     @track sortOrder = 'asc';
@@ -635,6 +636,13 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.sortData();
             this.updateShownData();
             this.spinnerShow = false;
+
+            // Apply pending filter if it was received before data loaded
+            if (this.pendingFilterEvent) {
+                const filterEvent = this.pendingFilterEvent;
+                this.pendingFilterEvent = null; // Clear the pending event
+                this.handleFilteredContacts(filterEvent);
+            }
         } catch (error) {
             console.log('Error processContacts->' + error);
         }
@@ -762,6 +770,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     handleFilteredContacts(event) {
         try {
+            // If contact data hasn't loaded yet, store the filter event for later
+            if (!this.unchangedProcessContact || this.unchangedProcessContact.length === 0) {
+                this.pendingFilterEvent = event;
+                return;
+            }
+
             this.sortField = 'Name';
             this.sortOrder = 'asc';
 

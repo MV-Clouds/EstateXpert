@@ -46,7 +46,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         isConfigOpen = false;
 
     //new variables
-    @track wrapOn = false;
+    @track wrapOn = true; // Default to closed (hidden filter)
     @track screenWidth = 0;
     @track currentPage = 1;
     @track visiblePages = 5;
@@ -1308,57 +1308,60 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
    * Created By:Vyom Soni
    */
     wrapFilter() {
-        try {
+        try{
+            const toggleBtn = this.template.querySelector('.filter-toggle-btn');
+            const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+            const div1 = this.template.querySelector('.innerDiv1');
+            const div2 = this.template.querySelector('.innerDiv2');
+            
             if (this.wrapOn) {
-                const svgElement = this.template.querySelector('.innerDiv1 .filterWrap svg');
-                svgElement.classList.remove('svgRotate');
-
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                // Currently hidden, show filter
+                toggleBtn.classList.add('active'); // Blue when filter showing
                 filterDiv.classList.remove('removeInnerDiv1');
-
-                if (this.screenWidth >= 900) {
-                    const div1 = this.template.querySelector('.innerDiv1');
+                div1.classList.remove('removeInnerDiv1');
+    
+                if(this.screenWidth >= 900){
                     div1.style.width = '22%';
-                    div1.style.height = '100%';
-                    const div2 = this.template.querySelector('.innerDiv2');
+                    div1.style.opacity = '1';
+                    div1.style.marginLeft = '0.75rem';
                     div2.style.width = '78%';
-                    div2.style.height = '100%';
-                } else {
-                    const div1 = this.template.querySelector('.innerDiv1');
+                }else{
                     div1.style.height = 'fit-content';
                     div1.style.width = '100%';
-                    const div2 = this.template.querySelector('.innerDiv2');
+                    div1.style.opacity = '1';
                     div2.style.height = '30rem';
                     div2.style.width = '100%';
                 }
                 this.wrapOn = false;
             } else {
-                const svgElement = this.template.querySelector('.innerDiv1 .filterWrap svg');
-                svgElement.classList.add('svgRotate');
-
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-                filterDiv.classList.add('removeInnerDiv1');
-
-                if (this.screenWidth >= 900) {
-                    const div1 = this.template.querySelector('.innerDiv1');
-                    div1.style.width = 'fit-content';
-                    div1.style.height = '100%';
-                    const div2 = this.template.querySelector('.innerDiv2');
-                    div2.style.height = '100%';
+                // Currently showing, hide filter
+                toggleBtn.classList.remove('active'); // White when filter hidden
+                
+                if(this.screenWidth >= 900){
+                    div1.style.width = '0';
+                    div1.style.opacity = '0';
+                    div1.style.marginLeft = '0';
                     div2.style.width = '100%';
-                } else {
-                    const div1 = this.template.querySelector('.innerDiv1');
-                    div1.style.height = 'fit-content';
+                    
+                    // Hide filter content and remove margin after animation starts
+                    setTimeout(() => {
+                        if (this.wrapOn) {
+                            filterDiv.classList.add('removeInnerDiv1');
+                            div1.classList.add('removeInnerDiv1');
+                        }
+                    }, 150);
+                }else{
+                    filterDiv.classList.add('removeInnerDiv1');
+                    div1.style.height = '0';
+                    div1.style.opacity = '0';
                     div1.style.width = '100%';
-                    const div2 = this.template.querySelector('.innerDiv2');
                     div2.style.height = '100%';
                     div2.style.width = '100%';
                 }
-
                 this.wrapOn = true;
             }
-        } catch (error) {
-            console.log('Error wrapFilter->' + error);
+        }catch(error){
+            errorDebugger('MarketingListCmp', 'wrapFilter', error, 'warn', 'Error in wrapFilter');
         }
     }
 

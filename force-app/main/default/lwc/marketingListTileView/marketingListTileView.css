@@ -1,25 +1,32 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
 * {
     font-family: 'Mulish';
     user-select: none;
 }
 
-.cover-div{
+.tile-view-container {
+    display: flex;
+    flex-direction: column;
     height: 100%;
-}
-
-.inner-div{
-    border-radius: 8px;
-    height: 100%;
+    width: 100%;
     overflow: hidden;
 }
 
 .mainDiv {
+    flex: 1;
     overflow: auto;
-    height: 90%;
-    padding: 1rem 0.6rem 1rem 1rem;
+    width: 100%;
+    padding: 1rem;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .mainDiv .tile-items {
@@ -29,84 +36,101 @@
 }
 
 .mainDiv .tile-items .tile-item {
+    position: relative;
     display: flex;
-    border: 1px solid #B2b1b1;
-    border-radius: 0.5rem;
-    /* box-shadow: 2px 1px 8px 0px #0376D3; */
-    padding: 0.7rem;
-    min-height: 8rem;
-}
-
-/* .outerCover{
-    border: 1px solid #c9c9c9;
-    border-radius: 0.25rem;
-    height: fit-content;
-    display: flex;
-    padding: 1rem;
-    box-shadow: 1px 3px 5px 0px;
-    overflow: hidden;
-} */
-
-.content-div {
-    width: 92%;
-    height: 100%;
-    /* justify-content: space-between; */
-    display: flex;
-    /* display: flex; */
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    border: 1px solid rgba(1, 118, 211, 0.2);
+    border-left: 4px solid #0176D3;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 8px -1px, rgba(0, 0, 0, 0.1) 0px 1px 4px -1px;
+    min-height: 140px;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.content-div .content {
+.mainDiv .tile-items .tile-item:hover {
+    transform: translateY(-2px);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.2) 0px 3px 7px -3px;
+    border-color: rgba(1, 118, 211, 0.4);
+}
+
+.checkbox-wrapper {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+}
+
+.contact-content {
     display: flex;
-    width: 97%;
-    margin: 0.2rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    padding-right: 2rem;
 }
 
-.lable {
-    width: 50%;
-    color: #0176D3;
+.contact-header {
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(1, 118, 211, 0.15);
+}
+
+.contact-name {
+    font-size: 16px;
     font-weight: 500;
+    color: #0176D3;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.value {
-    width: 50%;
-    text-align: left;
-    color: black;
+.contact-name:hover {
+    color: #0157a0;
+    text-decoration: underline;
+}
+
+.contact-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 13px;
+}
+
+.field-label {
+    color: #636363;
+    font-weight: 500;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.field-label::after {
+    content: ':';
+    margin-left: 2px;
+}
+
+.field-value {
+    color: #0f1419;
     font-weight: 400;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex: 1;
 }
 
-.input-div {
-    width: 8%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: self-end;
-}
-
-.share-div {
-    height: 1.2rem;
-    width: 1.2rem;
-}
-
-.input-div .share-div svg {
-    fill: black;
-    height: 1rem;
+.listing-manager-icon {
     width: 1rem;
-    cursor: pointer;
-}
-
-.input-div .share-div svg:hover {
-    fill: #0176D3;
     height: 1rem;
-    width: 1rem;
     cursor: pointer;
 }
 
@@ -115,8 +139,8 @@
 .pagination-container {
     display: flex;
     align-items: center;
-    font-family: Arial, sans-serif;
     font-size: 14px;
+    gap: 2px;
 }
 
 .pagination-button {
@@ -126,8 +150,8 @@
     padding: 6px 12px;
     margin: 0 2px;
     cursor: pointer;
-    transition: background-color 0.3s;
-    border-radius: 0.3rem;
+    transition: all 0.2s;
+    border-radius: 6px;
     font-size: 12px;
 }
 
@@ -139,6 +163,7 @@
 
 .pagination-button:hover {
     background-color: #f0f0f0;
+    border-color: #0176D3;
 }
 
 .pagination-button.active {
@@ -179,9 +204,9 @@ span {
     margin: 0 5px;
 }
 
-/* Specific styles for Back and Next buttons */
 .pagination-button:first-child,
 .pagination-button:last-child {
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -189,15 +214,14 @@ span {
 
 
 .paginationDiv {
-    background-color: aliceblue;
-    height:10%;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: transparent;
+    border-top: 1px solid rgba(1, 118, 211, 0.08);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .paginationDiv .btnCover {
@@ -213,35 +237,25 @@ span {
 }
 
 .noresult {
+    flex: 1;
     overflow: auto;
-    scroll-behavior: scroll;
-    height: 90%;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .noresult .tag1 {
-    font-size: 16px;
+    font-size: 1.1rem;
     font-weight: 500;
     line-height: 25px;
     text-align: center;
-
 }
 
 .noresult .tag2 {
-    font-size: 12px;
+    font-size: 0.9rem;
     font-weight: 400;
     line-height: 25px;
     text-align: center;
-
-}
-
-input[type=checkbox] {
-    width: 1rem;
-    height: 1rem;
-    accent-color: #0376D3;
-    ;
 }
 
 
@@ -253,8 +267,30 @@ input[type=checkbox] {
     }
 
     .mainDiv .tile-items {
-        grid-template-columns: calc(100%);
-        width: 100%;
+        grid-template-columns: calc(100% - 1rem);
+        gap: 1rem;
+    }
+
+    .mainDiv .tile-items .tile-item {
+        padding: 0.75rem;
+        min-height: 120px;
+    }
+
+    .contact-content {
+        padding-right: 2.5rem;
+    }
+
+    .field-label {
+        min-width: 100px;
+        font-size: 12px;
+    }
+
+    .field-value {
+        font-size: 12px;
+    }
+
+    .contact-name {
+        font-size: 15px;
     }
 
     .paginationDiv {

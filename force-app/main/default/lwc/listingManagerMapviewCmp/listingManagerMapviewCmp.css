@@ -1,18 +1,31 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
 * {
     font-family: 'Mulish';
     user-select: none;
 }
 
-.mapCmp {
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    height: calc(100% + 3.2rem);
+.map-view-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     width: 100%;
-    margin-top: -1.4rem;
+    overflow: hidden;
+}
+
+.mapCmp {
+    flex: 1;
+    overflow: hidden;
 }
 
 .mapCmp .map-class {
-    height: 93%;
+    height: 100%;
+    width: 100%;
 }
 
 .gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom .gm-svpc {
@@ -21,4 +34,75 @@
 
 .slds-coordinates {
     display: none;
+}
+
+/* pagination css */
+
+.paginationDiv {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border-top: 1px solid rgba(1, 118, 211, 0.08);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.paginationDiv .btnCover {
+    display: flex;
+    justify-content: center;
+}
+
+.pagination-container {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    gap: 2px;
+}
+
+.pagination-button {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    color: #333;
+    padding: 6px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.pagination-button svg {
+    fill: black;
+    width: 0.7rem;
+    height: 0.7rem;
+}
+
+.pagination-button:hover {
+    background-color: #f0f0f0;
+    border-color: #0176D3;
+}
+
+.pagination-button.active {
+    background-color: #0070d2;
+    color: white;
+    border-color: #0070d2;
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-button:first-child,
+.pagination-button:last-child {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-ellipsis {
+    margin: 0 5px;
 }

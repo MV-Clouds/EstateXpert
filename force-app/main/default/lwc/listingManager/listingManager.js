@@ -29,7 +29,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @track selectedListingData;
     @track isPrevDisabled = true;
     @track isNextDisabled = false;
-    @track wrapOn = false;
+    @track wrapOn = true; // Default to closed (hidden filter)
     @track pageSize = 30;
     @track screenWidth = 0;
     @track currentPage = 1;
@@ -38,6 +38,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @track isAccessible = false;
     @track listingLoading = false;
     isConfigOpen = false;
+    hasInitializedFilter = false;
 
     /**
     * Method Name : totalItems
@@ -291,6 +292,39 @@ export default class ListingManager extends NavigationMixin(LightningElement){
 
         }catch(error){
             errorDebugger('ListingManager', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
+        }
+    }
+
+    /**
+    * Method Name : renderedCallback
+    * @description : Initialize filter toggle button state only once
+    * * Date: 26/02/2026
+    * Created By:Vyom Soni
+    */
+    renderedCallback(){
+        try{
+            // Only initialize filter state once on first render
+            if (!this.hasInitializedFilter && this.wrapOn) {
+                const toggleBtn = this.template.querySelector('.filter-toggle-btn');
+                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                const div1 = this.template.querySelector('.innerDiv1');
+                
+                if (toggleBtn && filterDiv && div1) {
+                    // Filter should be hidden by default
+                    filterDiv.classList.add('removeInnerDiv1');
+                    div1.classList.add('removeInnerDiv1');
+                    
+                    if (this.screenWidth >= 900) {
+                        div1.style.width = '0';
+                        div1.style.opacity = '0';
+                    }
+                    
+                    // Mark as initialized
+                    this.hasInitializedFilter = true;
+                }
+            }
+        }catch(error){
+            errorDebugger('ListingManager', 'renderedCallback', error, 'warn', 'Error in renderedCallback');
         }
     }
 
@@ -934,50 +968,50 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     wrapFilter() {
         try{
+            const toggleBtn = this.template.querySelector('.filter-toggle-btn');
+            const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+            const div1 = this.template.querySelector('.innerDiv1');
+            const div2 = this.template.querySelector('.innerDiv2');
+            
             if (this.wrapOn) {
-                const svgElement = this.template.querySelector('.innerDiv1 .filterWrap svg');
-                svgElement.classList.remove('imgRotate');
-    
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                // Currently hidden, show filter
+                toggleBtn.classList.add('active'); // Blue when filter showing
                 filterDiv.classList.remove('removeInnerDiv1');
+                div1.classList.remove('removeInnerDiv1');
     
                 if(this.screenWidth >= 900){
-                    const div1 = this.template.querySelector('.innerDiv1');
                     div1.style.width = '22%';
-                    div1.style.height = '100%';
-
-                    const div2 = this.template.querySelector('.innerDiv2');
+                    div1.style.opacity = '1';
                     div2.style.width = '78%';
-                    div2.style.height = '100%';
                 }else{
-                    const div1 = this.template.querySelector('.innerDiv1');
                     div1.style.height = 'fit-content';
                     div1.style.width = '100%';
-    
-                    const div2 = this.template.querySelector('.innerDiv2');
+                    div1.style.opacity = '1';
                     div2.style.height = '30rem';
                     div2.style.width = '100%';
                 }
                 this.wrapOn = false;
             } else {
-                const svgElement = this.template.querySelector('.innerDiv1 .filterWrap svg');
-                svgElement.classList.add('imgRotate');
-
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-                filterDiv.classList.add('removeInnerDiv1');
-
+                // Currently showing, hide filter
+                toggleBtn.classList.remove('active'); // White when filter hidden
+                
                 if(this.screenWidth >= 900){
-                    const div1 = this.template.querySelector('.innerDiv1');
-                    div1.style.width = 'fit-content';
-                    div1.style.height = '100%';
-                    const div2 = this.template.querySelector('.innerDiv2');
-                    div2.style.height = '100%';
+                    div1.style.width = '0';
+                    div1.style.opacity = '0';
                     div2.style.width = '100%';
+                    
+                    // Hide filter content and remove margin after animation starts
+                    setTimeout(() => {
+                        if (this.wrapOn) {
+                            filterDiv.classList.add('removeInnerDiv1');
+                            div1.classList.add('removeInnerDiv1');
+                        }
+                    }, 150);
                 }else{
-                    const div1 = this.template.querySelector('.innerDiv1');
-                    div1.style.height = 'fit-content';
+                    filterDiv.classList.add('removeInnerDiv1');
+                    div1.style.height = '0';
+                    div1.style.opacity = '0';
                     div1.style.width = '100%';
-                    const div2 = this.template.querySelector('.innerDiv2');
                     div2.style.height = '100%';
                     div2.style.width = '100%';
                 }
@@ -988,29 +1022,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         }
     }
 
-    /**
-    * Method Name : handleRecordManager
-    * @description : Method Redirect to the record manager component
-    * date: 14/10/2024
-    * Created By:Vyom Soni
-    */
-    // handleRecordManager(){
-    //     let componentDef = {
-    //         componentDef: "c:recordConfigBodyCmp",
-    //         attributes: {
-    //             isFromListingManager: true
-    //         }
-    //     };
-        
-    //     let encodedComponentDef = btoa(JSON.stringify(componentDef));
-    //     this[NavigationMixin.Navigate]({
-    //         type: 'standard__webPage',
-    //         attributes: {
-    //             url: '/one/one.app#' + encodedComponentDef
-    //         }
-    //     });
-    // }
-
     openConfigureSettings(){
         this.isConfigOpen = true;
     }
@@ -1018,72 +1029,5 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     handleCloseModal() {
         this.isConfigOpen = false;
         this.getListingDataMethod();
-    }
-
-    /**
-    * Method Name : backToControlCenter
-    * @description : Method Redirect to the control center
-    * date: 14/10/2024
-    * Created By:Vyom Soni
-    */
-    backToControlCenter(event) {
-        try {
-            event.preventDefault();
-            this[NavigationMixin.Navigate]({
-                type: "standard__navItemPage",
-                attributes: {
-                    apiName: "Control_Center",
-                },
-            });
-        } catch (error) {
-            errorDebugger('ListingManager', 'backToControlCenter', error, 'warn', 'Error in backToControlCenter');
-        }
-    }
-
-    redirectToVisitBooking(event){
-        try{
-            let recordId = event.currentTarget.dataset.id;
-            let componentDef = {
-                componentDef: "c:siteAndBookingManagement",
-                attributes: {
-                    recordId: recordId
-                }
-            };
-            
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
-            });
-        } catch (error) {
-            errorDebugger('ListingManager', 'redirectToVisitBooking', error, 'warn', 'Error in redirectToVisitBooking');
-        }
-    }
-
-    redirectToOffers(event){
-        try{
-            let recordId = event.currentTarget.dataset.id;
-            let componentDef = {
-
-                componentDef: "c:offerManager",
-                 attributes: {
-                    listingId: recordId
-                 }
-            };
-
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url:
-                    '/one/one.app#' + encodedComponentDef
-                }
-            });
-        
-        } catch (error) {
-            errorDebugger('ListingManager', 'redirectToOffers', error, 'warn', 'Error in redirectToOffers');
-        }
     }
 }

@@ -142,6 +142,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track NoDataImageUrl = emptyState;
     @track hideFilterButton = false;
     @track filteredGroupMembers = [];
+    @track pagedFilteredInquiryData = [];
+    @track modalFilteredInquiryData = [];
+    @track sendMailInquiryDataList = [];
 
     get modalContainerClass() {
         return this.popUpSecondPage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
@@ -449,7 +452,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (feature && feature.MVEX__isAvailable__c) {
                     this.hideFilterButton = true;
                     console.log('Map_Listing_And_Inquiry feature is enabled. Hiding filter button.');
-
+                    
                 }
             })
             .catch(error => {
@@ -649,7 +652,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     fetchFilterConfiguration() {
         this.isLoading = true;
-        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', featureName: 'Suggested Inquiry Filter' })
+        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', featureName: 'Inquiry_Filter_Config' })
             .then((result) => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     const jsonConfig = result.metadataRecords[0];
@@ -932,12 +935,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * * Date: 20/08/2024
     * Created By:Rachit Shah
     */
-    /**
-    * Method Name : applyFiltersData
-    * @description : method to apply filter initially
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
     applyFiltersData(listing) {
         try {
             this.pagedFilteredInquiryData = this.totalinquiry;
@@ -1171,7 +1168,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     applyFilters() {
         try {
-            this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
+            this.pagedFilteredInquiryData = this.modalFilteredInquiryData.filter(inquiry => {
                 const searchInquiry = inquiry.name.toLowerCase().includes(this.searchTerm);
                 return searchInquiry;
             });
@@ -1313,7 +1310,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             saveMappings({
                 objectApiName: 'MVEX__Inquiry__c',
-                featureName: 'Suggested Inquiry Filter',
+                featureName: 'Inquiry_Filter_Config',
                 checklistData: JSON.stringify(config),
                 totalPages: 0
             })
@@ -1330,6 +1327,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             if (this.mappings.length === 0) {
                 this.pagedFilteredInquiryData = [...this.totalinquiry];
+                this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Update popup filtered data
                 this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
                 this.totalRecords = this.pagedFilteredInquiryData.length;
                 this.currentPage = 1;
@@ -1555,6 +1553,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.pagedFilteredInquiryData = [...this.totalinquiry];
                 }
             }
+
+            this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Store latest popup filters to state
 
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
             this.totalRecords = this.pagedFilteredInquiryData.length;
@@ -2009,8 +2009,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.filteredGroupMembers = [...this.broadcastContactList];
 
                     this.showTemplate = true;
-                    this.popUpFirstPage = false;
-                    this.popUpSecondPage = true;
+                    this.popUpFirstPage = false; 
+                    this.popUpSecondPage = true; 
                     this.popUpConfirmPage = false;
                     this.popUpLastPage = false;
                     this.popupHeader = 'Send Message';
@@ -2041,7 +2041,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.filteredGroupMembers = [...this.broadcastContactList];
             return;
         }
-        this.filteredGroupMembers = this.broadcastContactList.filter(member =>
+        this.filteredGroupMembers = this.broadcastContactList.filter(member => 
             (member.Name && member.Name.toLowerCase().includes(searchTerm)) ||
             (member.Phone && member.Phone.includes(searchTerm)) ||
             (member.GroupName && member.GroupName.toLowerCase().includes(searchTerm))
@@ -2052,7 +2052,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         try {
             const memberId = event.target.dataset.id;
             const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
-
+            
             if (memberToRemove) {
                 const inquiryId = memberToRemove.InquiryId;
 
@@ -2072,8 +2072,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
 
                 // 4. Update check-all state
-                this.checkAll = this.pagedFilteredInquiryData.length > 0 &&
-                    this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
+                this.checkAll = this.pagedFilteredInquiryData.length > 0 && 
+                               this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
 
                 // 5. If no members left, close the modal
                 if (this.broadcastContactList.length === 0) {
@@ -2086,7 +2086,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    clearSelectedInquiryWithCheckboxFalse() {
+    clearSelectedInquiryWithCheckboxFalse(){
         this.selectedInquiry = null;
         this.selectedInquiryList = [];
         this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
@@ -2264,23 +2264,23 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             });
     }
 
-    navigateToBroadcastComponent(broadcastId) {
-        let componentDef = {
-            componentDef: "MVEX:broadcastReportComp",
-            attributes: {
-                recordId: broadcastId
-            }
-        };
+        navigateToBroadcastComponent(broadcastId) {
+            let componentDef = {
+                componentDef: "MVEX:broadcastReportComp",
+                attributes: {
+                    recordId: broadcastId
+                }
+            };
 
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/one/one.app#' + encodedComponentDef
-            }
-        });
-    }
+            let encodedComponentDef = btoa(JSON.stringify(componentDef));
+    
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedComponentDef
+                }
+            });
+}
 
     // Handle schedule button on second page
     handleSchedulePopup() {
@@ -2357,7 +2357,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     fetchInquiryConfiguration() {
-        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', configName: 'Suggested Inquiry Field' })
+        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', configName: 'Inquiry_Fields' })
             .then(result => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {

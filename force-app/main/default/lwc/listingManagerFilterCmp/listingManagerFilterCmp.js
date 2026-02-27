@@ -11,6 +11,7 @@ import { errorDebugger } from 'c/globalProperties';
 export default class ListingManagerFilterCmp extends LightningElement {
 
     @track addModal = false;
+    @track saveConfirmationModal = false;
     @track listings = [];
     @track valueFromChild = [];
     @track isAddButtonDisabled = true;
@@ -42,6 +43,14 @@ export default class ListingManagerFilterCmp extends LightningElement {
       get isFilterChanged() {
         return JSON.stringify(this.filterFields) !== 
                JSON.stringify(this.originalFilterFields);
+    }
+
+    get customLogicToggleClass() {
+        return this.isCustomLogicEnabled ? 'custom-logic-toggle active' : 'custom-logic-toggle';
+    }
+
+    get showCustomLogicFooter() {
+        return this.isCustomLogicEnabled && this.filterFields.length > 0;
     }
 
 
@@ -92,6 +101,19 @@ export default class ListingManagerFilterCmp extends LightningElement {
     }
 
     saveFilterPermanent(){
+        this.saveConfirmationModal = true;
+    }
+
+    handleConfirmSave(){
+        this.saveConfirmationModal = false;
+        this.performSaveFilter();
+    }
+
+    handleCancelSave(){
+        this.saveConfirmationModal = false;
+    }
+
+    performSaveFilter(){
         saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters', fieldsJson: JSON.stringify(this.filterFields)})
         .then(() => {
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
@@ -1275,13 +1297,15 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
     /**
      * Method Name: handleCustomLogicToggle
-     * @description: Handle the custom logic checkbox toggle and set default logic string
+     * @description: Handle the custom logic toggle button and set default logic string
      * Date: 14/06/2024
      * Created By: Vyom Soni
      */
     handleCustomLogicToggle(event) {
         try {
-            this.isCustomLogicEnabled = event.target.checked;
+            // Toggle the state
+            this.isCustomLogicEnabled = !this.isCustomLogicEnabled;
+            
             if (this.isCustomLogicEnabled) {
                 // Generate default logic string based on filters with selected values
                 const requiredIndices = [];

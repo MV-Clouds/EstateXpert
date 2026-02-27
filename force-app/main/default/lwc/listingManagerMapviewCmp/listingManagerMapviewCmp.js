@@ -9,6 +9,9 @@ export default class ListingManagerMapviewCmp extends LightningElement {
     @track mapMarkers = [];
     @track mapMarkers1 = [];
     @track mapMarkers2 = [];
+    @track pageSize = 30;
+    @track currentPage = 1;
+    @track visiblePages = 5;
 
     /**
     * Method Name : get listingsdata
@@ -30,10 +33,14 @@ export default class ListingManagerMapviewCmp extends LightningElement {
      */
     set listingsdata(value) {
         if (value && Array.isArray(value)) {
+            if (this.listings.length != value.length) {
+                this.currentPage = 1;
+            }
             this.listings = value;
             this.loadPropertyData(this.listings);
         } else {
             this.listings = [];
+            this.currentPage = 1;
         }
     }
 
@@ -51,6 +58,146 @@ export default class ListingManagerMapviewCmp extends LightningElement {
     }
 
     /**
+    * Method Name : totalItems
+    * @description : get the total number of listings
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    get totalItems() {
+        return this.listings.length;
+    }
+
+    /**
+    * Method Name : totalPages
+    * @description : get the total number of pages
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    get totalPages() {
+        return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    /**
+    * Method Name : pageNumbers
+    * @description : get the page numbers for pagination display
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    get pageNumbers() {
+        try {
+            const totalPages = this.totalPages;
+            const currentPage = this.currentPage;
+            const visiblePages = this.visiblePages;
+
+            let pages = [];
+
+            if (totalPages <= visiblePages) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+            } else {
+                pages.push({
+                    number: 1,
+                    isEllipsis: false,
+                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
+                });
+                if (currentPage > 3) {
+                    pages.push({ isEllipsis: true });
+                }
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(currentPage + 1, totalPages - 1);
+                for (let i = start; i <= end; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+                if (currentPage < totalPages - 2) {
+                    pages.push({ isEllipsis: true });
+                }
+                pages.push({
+                    number: totalPages,
+                    isEllipsis: false,
+                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                });
+            }
+            return pages;
+        } catch (error) {
+            errorDebugger('ListingManagerMapviewCmp', 'pageNumbers', error, 'warn', 'Error in pageNumbers');
+            return [];
+        }
+    }
+
+    /**
+    * Method Name : isFirstPage
+    * @description : check if current page is first page
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    get isFirstPage() {
+        return this.currentPage === 1;
+    }
+
+    /**
+    * Method Name : isLastPage
+    * @description : check if current page is last page
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    get isLastPage() {
+        return this.currentPage === this.totalPages;
+    }
+
+    /**
+    * Method Name : handlePrevious
+    * @description : handle previous page button click
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    handlePrevious() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.loadPropertyData(this.listings);
+        }
+    }
+
+    /**
+    * Method Name : handleNext
+    * @description : handle next page button click
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    handleNext() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.loadPropertyData(this.listings);
+        }
+    }
+
+    /**
+    * Method Name : handlePageChange
+    * @description : handle page number button click
+    * date:26/02/2026
+    * Created By: Karan Singh
+    */
+    handlePageChange(event) {
+        try {
+            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+            if (selectedPage !== this.currentPage) {
+                this.currentPage = selectedPage;
+                this.loadPropertyData(this.listings);
+            }
+        } catch (error) {
+            errorDebugger('ListingManagerMapviewCmp', 'handlePageChange', error, 'warn', 'Error in handlePageChange');
+        }
+    }
+
+    /**
     * Method Name : loadPropertyData
     * @description : load the marker from the selected properties.
     * @param: data- properties data.
@@ -60,7 +207,12 @@ export default class ListingManagerMapviewCmp extends LightningElement {
     loadPropertyData(data) {
         try {
             if (data) {
-                this.data = data;
+                // Calculate pagination
+                const startIndex = (this.currentPage - 1) * this.pageSize;
+                const endIndex = Math.min(startIndex + this.pageSize, data.length);
+                const paginatedData = data.slice(startIndex, endIndex);
+                
+                this.data = paginatedData;
                 this.mapMarkers = [];
                 this.mapMarkers1 = [];
                 this.mapMarkers2 = [];

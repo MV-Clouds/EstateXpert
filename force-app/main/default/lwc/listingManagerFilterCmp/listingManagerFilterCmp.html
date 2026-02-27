@@ -3,194 +3,173 @@
     <div class="filter-header">
         <div class="filter-text">Filters</div>
         <div class="header-buttons">
+            <div class="add-btn-cover" onclick={openModal} title="Add More Filter">
+                <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
+                </svg>
+            </div>
+            <div class="reset-text" onclick={handleReset} title="Reset All">
+                <svg width="16" height="16" fill="#ffffff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+                    <path
+                        d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
+                        fill-rule="evenodd"></path>
+                </svg>
+            </div>
             <template if:true={filterFields.length}>
-                <div class="reset-text" onclick={handleReset}>Reset All</div>
+                <div class={customLogicToggleClass} onclick={handleCustomLogicToggle} title="Custom Logic">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="white"/>
+                    </svg>
+                </div>
             </template>
             <template if:true={isFilterChanged}>
-            <div class="reset-text" onclick={saveFilterPermanent}>Save Filter</div>
+                <div class="save-btn-cover" onclick={saveFilterPermanent} title="Save Filter">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M13.5 0H1.5C0.671573 0 0 0.671573 0 1.5V14.5C0 15.3284 0.671573 16 1.5 16H14.5C15.3284 16 16 15.3284 16 14.5V2.5L13.5 0ZM8 14C6.34315 14 5 12.6569 5 11C5 9.34315 6.34315 8 8 8C9.65685 8 11 9.34315 11 11C11 12.6569 9.65685 14 8 14ZM11 3H2V1H11V3Z"
+                            fill="white" />
+                    </svg>
+                </div>
             </template>
         </div>
-        
+
     </div>
     <div class="slds-var-p-around_small filter-outer">
         <div class="filter-content">
             <template if:false={modalValue}>
-            <template if:true={filterFields.length}>
-                <template for:each={filterFields} for:item="option" for:index="index">
-                    <template if:true={option.picklist}>
-                        <div key={option.apiName} class="slds-form-element combobox">
-                            <div class="filter-index-label">
-                                <template if:true={isCustomLogicEnabled}>
-                                    <span class="filter-index">{option.displayIndex}.</span>
-                                </template>
-                                <label class="custom-field-lable">{option.label}</label>
-                                <span>
-                                    <template if:true={option.isNot}>
-                                        <label class="slds-form-element__label operator-div">not  </label>
+                <template if:true={filterFields.length}>
+                    <template for:each={filterFields} for:item="option" for:index="index">
+                        <template if:true={option.picklist}>
+                            <div key={option.apiName} class="slds-form-element combobox">
+                                <div class="filter-index-label">
+                                    <template if:true={isCustomLogicEnabled}>
+                                        <span class="filter-index">{option.displayIndex}.</span>
                                     </template>
-                                </span>
-                                <span>
-                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                </span>
-                            </div>
-                            <div class="slds-form-element__control">
-                                <div class="slds-combobox_container slds-has-selection">
-                                    <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                        <div class="input-delete-cover picklist-search">
-                                            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
-                                                role="none">
-                                                <input type="text" class="slds-input slds-combobox__input picklist-input"
-                                                    placeholder={option.label} data-id={index} value={option.searchTerm}
-                                                    onkeyup={handleSearchChange1} onfocus={handleFocus1} onblur={handleBlur1} minlength="0" maxlength="25"/>
-                                                <span
-                                                    class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right">
-                                                    <svg class="chev-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>                                                  
-                                                </span>
-                                                <template if:true={option.isFocused}>
-                                                    <div class="options-box" onmousedown={handlePreventDefault}>
-                                                        <ul class="options-cover">
-                                                            <template for:each={option.picklistValue} for:item="option1">
-                                                                <template if:false={option1.showRightIcon}>
-                                                                    <li key={option1.value} data-index={index} data-id={option1.value} onclick={selectOption1}
-                                                                        class="options-value">
-                                                                        <span class="slds-media__body">
-                                                                            <span class="_entity">{option1.label}</span>
-                                                                        </span>
-                                                                    </li>
-                                                                </template>
-                                                                <template if:true={option1.showRightIcon}>
-                                                                    <li  data-index={index} key={option1.value} data-id={option1.value} onclick={selectOption1} class="slds-listbox__item">
-                                                                        <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center picklist-option">
-                                                                            <span class="slds-media__body">
-                                                                                <span class="slds-truncate" title={option1.label}>{option1.label}</span>
-                                                                            </span>
-                                                                            <span class="slds-media__figure slds-media__figure_reverse">
-                                                                                <lightning-icon icon-name="utility:check" alternative-text="Lookup Field" size="x-small"></lightning-icon>
-                                                                            </span>
-                                                                        </div>
-                                                                    </li>
-                                                                </template>  
-                                                            </template>
-                                                        </ul>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                            <div class="delete-icon-cover" >
-                                                <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                </svg>                                                
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <label class="custom-field-lable">{option.label}</label>
+                                    <span>
+                                        <template if:true={option.isNot}>
+                                            <label class="slds-form-element__label operator-div">not </label>
+                                        </template>
+                                    </span>
+                                    <span>
+                                        <label class="slds-form-element__label operator-div">{option.operatorName}
+                                        </label>
+                                    </span>
                                 </div>
-                                <template if:true={option.selectedOptions}>
-                                    <div class="pill-section">
-                                        <ul class="slds-listbox slds-listbox_horizontal" aria-label="Selected Options:">
-                                            <template for:each={option.selectedOptions} for:item="option2">
-                                                <li key={option2.value} class="slds-listbox-item pill-body">
-                                                    <span class="slds-pill">
-                                                        <span class="slds-pill__label"
-                                                            title="Burlington Textiles Corp of America">{option2.label}</span>
-                                                        <span class="slds-icon_container slds-pill__remove" title="Remove">
-                                                            <button
-                                                                class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
-                                                                title="Remove" data-index={index} onclick={removeOptionMethod} data-id={option2.value}>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                                    viewBox="0 0 520 520" fill="#fff">
-                                                                    <path
-                                                                        d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
-                                                                </svg>
-                                                                <span class="slds-assistive-text">Remove</span>
-                                                            </button>
-                                                        </span>
-                                                    </span>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </div>
-                                </template>
-                            </div>
-                            <template if:true={option.message}>
-                                <label class="error-message">{option.message}</label>
-                            </template>
-                        </div>
-                    </template>
-                    <template if:true={option.string}>
-                        <div key={option.apiName} class="slds-form-element combobox">
-                            <div class="filter-index-label">
-                                <template if:true={isCustomLogicEnabled}>
-                                    <span class="filter-index">{option.displayIndex}.</span>
-                                </template>
-                                <label class="custom-field-lable">{option.label}</label>
-                                <span>
-                                    <template if:true={option.isNot}>
-                                        <label class="slds-form-element__label operator-div">not  </label>
-                                    </template>
-                                </span>
-                                <span>
-                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                </span>
-                            </div>
-                            <div class="slds-form-element__control">
                                 <div class="slds-form-element__control">
                                     <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                            <div class="input-delete-cover">
-                                                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
+                                        <div
+                                            class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                            <div class="input-delete-cover picklist-search">
+                                                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
                                                     role="none">
-                                                    <input type="text" class="slds-input slds-combobox__input"
-                                                        placeholder={option.label}  data-id={index} value={option.searchTerm}
-                                                        onkeyup={handleSearchChangeString} minlength="0" maxlength="25"/>
+                                                    <input type="text"
+                                                        class="slds-input slds-combobox__input picklist-input"
+                                                        placeholder={option.label} data-id={index}
+                                                        value={option.searchTerm} onkeyup={handleSearchChange1}
+                                                        onfocus={handleFocus1} onblur={handleBlur1} minlength="0"
+                                                        maxlength="25" />
+                                                    <span
+                                                        class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right">
+                                                        <svg class="chev-down" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                                                            <path
+                                                                d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+                                                        </svg>
+                                                    </span>
+                                                    <template if:true={option.isFocused}>
+                                                        <div class="options-box" onmousedown={handlePreventDefault}>
+                                                            <ul class="options-cover">
+                                                                <template for:each={option.picklistValue}
+                                                                    for:item="option1">
+                                                                    <template if:false={option1.showRightIcon}>
+                                                                        <li key={option1.value} data-index={index}
+                                                                            data-id={option1.value}
+                                                                            onclick={selectOption1}
+                                                                            class="options-value">
+                                                                            <span class="slds-media__body">
+                                                                                <span
+                                                                                    class="_entity">{option1.label}</span>
+                                                                            </span>
+                                                                        </li>
+                                                                    </template>
+                                                                    <template if:true={option1.showRightIcon}>
+                                                                        <li data-index={index} key={option1.value}
+                                                                            data-id={option1.value}
+                                                                            onclick={selectOption1}
+                                                                            class="slds-listbox__item">
+                                                                            <div
+                                                                                class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center picklist-option">
+                                                                                <span class="slds-media__body">
+                                                                                    <span class="slds-truncate"
+                                                                                        title={option1.label}>{option1.label}</span>
+                                                                                </span>
+                                                                                <span
+                                                                                    class="slds-media__figure slds-media__figure_reverse">
+                                                                                    <lightning-icon
+                                                                                        icon-name="utility:check"
+                                                                                        alternative-text="Lookup Field"
+                                                                                        size="x-small"></lightning-icon>
+                                                                                </span>
+                                                                            </div>
+                                                                        </li>
+                                                                    </template>
+                                                                </template>
+                                                            </ul>
+                                                        </div>
+                                                    </template>
                                                 </div>
-                                                <div class="plus" data-id={index} onclick={addTheString}><svg xmlns="http://www.w3.org/2000/svg"
-                                                        height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                                        <path
-                                                            d="M300 290h165c8 0 15-7 15-15v-30c0-8-7-15-15-15H300c-6 0-10-4-10-10V55c0-8-7-15-15-15h-30c-8 0-15 7-15 15v165c0 6-4 10-10 10H55c-8 0-15 7-15 15v30c0 8 7 15 15 15h165c6 0 10 4 10 10v165c0 8 7 15 15 15h30c8 0 15-7 15-15V300c0-6 4-10 10-10z" />
-                                                    </svg></div>
                                                 <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>    
+                                                    <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                                        viewBox="0 0 14 14" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
+                                                    </svg>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <template if:true={option.selectedOptions}>
-                                    <div class="pill-section">
-                                        <ul class="slds-listbox slds-listbox_horizontal" aria-label="Selected Options:">
-                                            <template for:each={option.selectedOptions} for:item="option2">
-                                                <li key={option2.value} class="slds-listbox-item pill-body">
-                                                    <span class="slds-pill">
-                                                        <span class="slds-pill__label"
-                                                            title="Burlington Textiles Corp of America">{option2.label}</span>
-                                                        <span class="slds-icon_container slds-pill__remove" title="Remove">
-                                                            <button
-                                                                class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
-                                                                title="Remove" data-index={index} onclick={removeOptionMethodString} data-id={option2.value}>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                                    viewBox="0 0 520 520" fill="#fff">
-                                                                    <path
-                                                                        d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
-                                                                </svg>
-                                                                <span class="slds-assistive-text">Remove</span>
-                                                            </button>
+                                    <template if:true={option.selectedOptions}>
+                                        <div class="pill-section">
+                                            <ul class="slds-listbox slds-listbox_horizontal"
+                                                aria-label="Selected Options:">
+                                                <template for:each={option.selectedOptions} for:item="option2">
+                                                    <li key={option2.value} class="slds-listbox-item pill-body">
+                                                        <span class="slds-pill">
+                                                            <span class="slds-pill__label"
+                                                                title="Burlington Textiles Corp of America">{option2.label}</span>
+                                                            <span class="slds-icon_container slds-pill__remove"
+                                                                title="Remove">
+                                                                <button
+                                                                    class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
+                                                                    title="Remove" data-index={index}
+                                                                    onclick={removeOptionMethod}
+                                                                    data-id={option2.value}>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                        width="52" viewBox="0 0 520 520" fill="#fff">
+                                                                        <path
+                                                                            d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
+                                                                    </svg>
+                                                                    <span class="slds-assistive-text">Remove</span>
+                                                                </button>
+                                                            </span>
                                                         </span>
-                                                    </span>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </div>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </template>
+                                </div>
+                                <template if:true={option.message}>
+                                    <label class="error-message">{option.message}</label>
                                 </template>
                             </div>
-                            <template if:true={option.message}>
-                                <label class="error-message">{option.message}</label>
-                            </template>
-                        </div>  
-                    </template>
-                    <template if:true={option.currency}>
-                        <template if:true={option.isRange}>
-                            <div key={option.apiName} class="slds-form-element combobox min-max-field">
+                        </template>
+                        <template if:true={option.string}>
+                            <div key={option.apiName} class="slds-form-element combobox">
                                 <div class="filter-index-label">
                                     <template if:true={isCustomLogicEnabled}>
                                         <span class="filter-index">{option.displayIndex}.</span>
@@ -198,674 +177,866 @@
                                     <label class="custom-field-lable">{option.label}</label>
                                     <span>
                                         <template if:true={option.isNot}>
-                                            <label class="slds-form-element__label operator-div">not  </label>
+                                            <label class="slds-form-element__label operator-div">not </label>
                                         </template>
                                     </span>
                                     <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                        <label class="slds-form-element__label operator-div">{option.operatorName}
+                                        </label>
                                     </span>
                                 </div>
                                 <div class="slds-form-element__control">
-                                    <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                            <div class="input-delete-cover">
-                                                <div class="min-max-input-cover">
-                                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
-                                                        role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Min.." data-index={index} data-id={option.minValue} value={option.minValue} oninput={handleMinValueChange} min="0" minlength="0" maxlength="25"/>
-                                                    </div>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-combobox_container slds-has-selection">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                                <div class="input-delete-cover">
                                                     <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
                                                         role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} oninput={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                        </div>
-                                                        <template if:true={option.message}>
-                                                            <label class="error-message">{option.message}</label>
-                                                        </template>
-                                                </div>
-                                                <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>    
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>    
-                        </template>
-                        <template if:true={option.isMin}>
-                            <div key={option.apiName} class="slds-form-element combobox min-max-field">
-                                <div class="filter-index-label">
-                                    <template if:true={isCustomLogicEnabled}>
-                                        <span class="filter-index">{option.displayIndex}.</span>
-                                    </template>
-                                    <label class="custom-field-lable">{option.label}</label>
-                                    <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                    </span>
-                                </div>
-                                <div class="slds-form-element__control">
-                                    <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                            <div class="input-delete-cover">
-                                                <div class="min-max-input-cover">
-                                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
-                                                        role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                        placeholder="Min.." data-index={index} data-id={option.minValue} value={option.minValue} oninput={handleMinValueChange} min="0" minlength="0" maxlength="25"/>
+                                                        <input type="text" class="slds-input slds-combobox__input"
+                                                            placeholder={option.label} data-id={index}
+                                                            value={option.searchTerm} onkeyup={handleSearchChangeString}
+                                                            minlength="0" maxlength="25" />
                                                     </div>
-                                                    <template if:true={option.message}>
-                                                        <label class="error-message">{option.message}</label>
-                                                    </template>
-                                                </div>
-                                                <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>    
+                                                    <div class="plus" data-id={index} onclick={addTheString}><svg
+                                                            xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                            viewBox="0 0 520 520" fill="#fff">
+                                                            <path
+                                                                d="M300 290h165c8 0 15-7 15-15v-30c0-8-7-15-15-15H300c-6 0-10-4-10-10V55c0-8-7-15-15-15h-30c-8 0-15 7-15 15v165c0 6-4 10-10 10H55c-8 0-15 7-15 15v30c0 8 7 15 15 15h165c6 0 10 4 10 10v165c0 8 7 15 15 15h30c8 0 15-7 15-15V300c0-6 4-10 10-10z" />
+                                                        </svg></div>
+                                                    <div class="delete-icon-cover">
+                                                        <svg data-id={index} onclick={clearSearch} width="15"
+                                                            height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>  
-                            
-                        </template>
-                        <template if:true={option.isMax}>
-                            <div key={option.apiName} class="slds-form-element combobox min-max-field">
-                                <div class="filter-index-label">
-                                    <template if:true={isCustomLogicEnabled}>
-                                        <span class="filter-index">{option.displayIndex}.</span>
+                                    <template if:true={option.selectedOptions}>
+                                        <div class="pill-section">
+                                            <ul class="slds-listbox slds-listbox_horizontal"
+                                                aria-label="Selected Options:">
+                                                <template for:each={option.selectedOptions} for:item="option2">
+                                                    <li key={option2.value} class="slds-listbox-item pill-body">
+                                                        <span class="slds-pill">
+                                                            <span class="slds-pill__label"
+                                                                title="Burlington Textiles Corp of America">{option2.label}</span>
+                                                            <span class="slds-icon_container slds-pill__remove"
+                                                                title="Remove">
+                                                                <button
+                                                                    class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
+                                                                    title="Remove" data-index={index}
+                                                                    onclick={removeOptionMethodString}
+                                                                    data-id={option2.value}>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                        width="52" viewBox="0 0 520 520" fill="#fff">
+                                                                        <path
+                                                                            d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
+                                                                    </svg>
+                                                                    <span class="slds-assistive-text">Remove</span>
+                                                                </button>
+                                                            </span>
+                                                        </span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
                                     </template>
-                                    <label class="custom-field-lable">{option.label}</label>
-                                    <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                    </span>
                                 </div>
-                                <div class="slds-form-element__control">
-                                    <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                            <div class="input-delete-cover">
-                                                <div class="min-max-input-cover">
-                                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
-                                                        role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} oninput={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                        </div>
-                                                        <template if:true={option.message}>
-                                                            <label class="error-message">{option.message}</label>
-                                                        </template>
-                                                </div>
-                                                <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>    
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>  
+                                <template if:true={option.message}>
+                                    <label class="error-message">{option.message}</label>
+                                </template>
+                            </div>
                         </template>
-                    </template>
-                    <template if:true={option.double}>
-                        <div key={option.apiName} class="slds-form-element combobox min-max-field">
+                        <template if:true={option.currency}>
                             <template if:true={option.isRange}>
-                                <div class="filter-index-label">
-                                    <template if:true={isCustomLogicEnabled}>
-                                        <span class="filter-index">{option.displayIndex}.</span>
-                                    </template>
-                                    <label class="custom-field-lable">{option.label}</label>
-                                    <span>
-                                        <template if:true={option.isNot}>
-                                            <label class="slds-form-element__label operator-div">not  </label>
+                                <div key={option.apiName} class="slds-form-element combobox min-max-field">
+                                    <div class="filter-index-label">
+                                        <template if:true={isCustomLogicEnabled}>
+                                            <span class="filter-index">{option.displayIndex}.</span>
                                         </template>
-                                    </span>
-                                    <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                    </span>  
-                                </div>
-                                <div class="slds-form-element__control">
-                                    <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                            <div class="input-delete-cover">
-                                                <div class="min-max-input-cover">
-                                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
-                                                        role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                        placeholder="Min.." data-index={index} data-id={option.minValue} value={option.minValue} oninput={handleMinValueChange} min="0" minlength="0" maxlength="25"/>
-                                                        <svg class="up-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff" data-index={index} data-id={option.minValue} onclick={incrementMinValue}>
+                                        <label class="custom-field-lable">{option.label}</label>
+                                        <span>
+                                            <template if:true={option.isNot}>
+                                                <label class="slds-form-element__label operator-div">not </label>
+                                            </template>
+                                        </span>
+                                        <span>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
+                                    </div>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-combobox_container slds-has-selection">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                                <div class="input-delete-cover">
+                                                    <div class="min-max-input-cover">
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Min.." data-index={index}
+                                                                data-id={option.minValue} value={option.minValue}
+                                                                oninput={handleMinValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                        </div>
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                oninput={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
+                                                    </div>
+                                                    <div class="delete-icon-cover">
+                                                        <svg data-id={index} onclick={clearSearch} width="15"
+                                                            height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
-                                                                d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
-                                                        </svg>
-                                                        <svg class="down-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff" data-index={index} data-id={option.minValue} onclick={decrementMinValue}>
-                                                            <path
-                                                                d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
                                                         </svg>
                                                     </div>
-                                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
-                                                        role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                        placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} oninput={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                        <svg class="up-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={incrementMaxValue}>
-                                                            <path
-                                                                d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
-                                                        </svg>
-                                                        <svg class="down-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={decrementMaxValue}>
-                                                            <path
-                                                                d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
-                                                        </svg>
-                                                    </div>
-                                                    <template if:true={option.message}>
-                                                        <label class="error-message">{option.message}</label>
-                                                    </template>
-                                                </div>
-                                                <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>    
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                
                             </template>
                             <template if:true={option.isMin}>
-                                <div class="filter-index-label">
-                                    <template if:true={isCustomLogicEnabled}>
-                                        <span class="filter-index">{option.displayIndex}.</span>
-                                    </template>
-                                    <label class="custom-field-lable">{option.label}</label>
-                                    <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                    </span>
-                                </div>
-                                
-                                <div class="slds-form-element__control">
-                                    <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                            <div class="input-delete-cover">
-                                                <div class="min-max-input-cover">
-                                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
-                                                        role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Min.." data-index={index} data-id={index} value={option.minValue} oninput={handleMinValueChange} min="0" minlength="0" maxlength="25"/>
-                                                        <svg class="up-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff" data-index={index} data-id={option.minValue} onclick={incrementMinValue}>
+                                <div key={option.apiName} class="slds-form-element combobox min-max-field">
+                                    <div class="filter-index-label">
+                                        <template if:true={isCustomLogicEnabled}>
+                                            <span class="filter-index">{option.displayIndex}.</span>
+                                        </template>
+                                        <label class="custom-field-lable">{option.label}</label>
+                                        <span>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
+                                    </div>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-combobox_container slds-has-selection">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                                <div class="input-delete-cover">
+                                                    <div class="min-max-input-cover">
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Min.." data-index={index}
+                                                                data-id={option.minValue} value={option.minValue}
+                                                                oninput={handleMinValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
+                                                    </div>
+                                                    <div class="delete-icon-cover">
+                                                        <svg data-id={index} onclick={clearSearch} width="15"
+                                                            height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
-                                                                d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
-                                                        </svg>
-                                                        <svg class="down-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff" data-index={index} data-id={option.minValue} onclick={decrementMinValue}>
-                                                            <path
-                                                                d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
                                                         </svg>
                                                     </div>
-                                                    <template if:true={option.message}>
-                                                        <label class="error-message">{option.message}</label>
-                                                    </template>
-                                                </div>
-                                                <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>    
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             </template>
                             <template if:true={option.isMax}>
-                                <div class="filter-index-label">
-                                    <template if:true={isCustomLogicEnabled}>
-                                        <span class="filter-index">{option.displayIndex}.</span>
-                                    </template>
-                                    <label class="custom-field-lable">{option.label}</label>
-                                    <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                    </span>
-                                </div>
-                                <div class="slds-form-element__control">
-                                    <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
-                                            <div class="input-delete-cover">
-                                                <div class="min-max-input-cover">
-                                                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
-                                                        role="none">
-                                                        <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} oninput={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                        <svg class="up-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={incrementMaxValue}>
+                                <div key={option.apiName} class="slds-form-element combobox min-max-field">
+                                    <div class="filter-index-label">
+                                        <template if:true={isCustomLogicEnabled}>
+                                            <span class="filter-index">{option.displayIndex}.</span>
+                                        </template>
+                                        <label class="custom-field-lable">{option.label}</label>
+                                        <span>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
+                                    </div>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-combobox_container slds-has-selection">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                                <div class="input-delete-cover">
+                                                    <div class="min-max-input-cover">
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                oninput={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
+                                                    </div>
+                                                    <div class="delete-icon-cover">
+                                                        <svg data-id={index} onclick={clearSearch} width="15"
+                                                            height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
-                                                                d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
-                                                        </svg>
-                                                        <svg class="down-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                            width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={decrementMaxValue}>
-                                                            <path
-                                                                d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
                                                         </svg>
                                                     </div>
-                                                    <template if:true={option.message}>
-                                                        <label class="error-message">{option.message}</label>
-                                                    </template>
-                                                </div>
-                                                <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                                    </svg>    
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </template>
-                        </div>
-                    </template>
-                    <template if:true={option.datetime}>
-                        <template if:true={option.isDateRange}>
-                            <div class="date-time-div-cover combobox" key={option.apiName}>
-                                <div class="date-time-div">
-                                    <div class="input-wrapper">
-                                        <div class="filter-index-label">
-                                            <template if:true={isCustomLogicEnabled}>
-                                                <span class="filter-index">{option.displayIndex}.</span>
-                                            </template>
-                                            <label class="custom-field-lable">{option.label}</label>
-                                            <span>
-                                                <template if:true={option.isNot}>
-                                                    <label class="slds-form-element__label operator-div">not  </label>
-                                                </template>
-                                            </span>
-                                            <span>
-                                                <template if:true={option.isNot}>
-                                                    <label class="slds-form-element__label operator-div">not  </label>
-                                                </template>
-                                            </span>
-                                            <span>
-                                                <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                            </span>
-                                        </div>
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Min. </div>
-                                            <lightning-input
-                                            data-id={index}
-                                            class="input-tag"
-                                            type="datetime"
-                                            variant="label-hidden"
-                                            value={option.minDate}
-                                            onchange={handleMinDate}
-                                        ></lightning-input>
-                                        </div>
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Max. </div>
-                                            <lightning-input
-                                            data-id={index}
-                                            class="input-tag"
-                                            type="datetime"
-                                            variant="label-hidden"
-                                            value={option.maxDate}
-                                            onchange={handleMaxDate}
-                                        ></lightning-input>
-                                        </div>
-                                    </div>
-            
-                                <div class="delete-icon-cover">
-                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                    </svg>    
-                                </div>
-                                </div>
-                                <template if:true={option.message}>
-                                    <label class="error-message">{option.message}</label>
-                                </template>
-                            </div>
                         </template>
-                        <template if:true={option.isDateMax}>
-                            <div class="date-time-div-cover combobox" key={option.apiName}>     
-                                <div class="date-time-div" >
-                                    <div class="input-wrapper">
-                                        <div class="filter-index-label">
-                                            <template if:true={isCustomLogicEnabled}>
-                                                <span class="filter-index">{option.displayIndex}.</span>
+                        <template if:true={option.double}>
+                            <div key={option.apiName} class="slds-form-element combobox min-max-field">
+                                <template if:true={option.isRange}>
+                                    <div class="filter-index-label">
+                                        <template if:true={isCustomLogicEnabled}>
+                                            <span class="filter-index">{option.displayIndex}.</span>
+                                        </template>
+                                        <label class="custom-field-lable">{option.label}</label>
+                                        <span>
+                                            <template if:true={option.isNot}>
+                                                <label class="slds-form-element__label operator-div">not </label>
                                             </template>
-                                            <label class="custom-field-lable">{option.label}</label>
-                                            <span>
-                                                <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                            </span>
-                                        </div>
-                                    <div class="date-input-cover">
-                                        <div class="min-max-text">Max. </div>
-                                        <lightning-input
-                                        data-id={index}
-                                        class="input-tag"
-                                        type="datetime"
-                                        variant="label-hidden"
-                                        value={option.maxDate}
-                                        onchange={handleMaxDate}
-                                    ></lightning-input>
+                                        </span>
+                                        <span>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
                                     </div>
-                                    </div>
-            
-                                <div class="delete-icon-cover single">
-                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                    </svg>    
-                                </div>
-                                </div>
-                                <template if:true={option.message}>
-                                    <label class="error-message">{option.message}</label>
-                                </template>
-                            </div>
-                        </template>
-                        <template if:true={option.isDateMin}>
-                            <div class="date-time-div-cover combobox" key={option.apiName}>
-                                <div class="date-time-div" >
-                                    <div class="input-wrapper">
-                                        <div class="filter-index-label">
-                                            <template if:true={isCustomLogicEnabled}>
-                                                <span class="filter-index">{option.displayIndex}.</span>
-                                            </template>
-                                            <label class="custom-field-lable">{option.label}</label>
-                                            <span>
-                                                <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                            </span>
-                                        </div>
-                                    <div class="date-input-cover">
-                                        <div class="min-max-text">Min. </div>
-                                        <lightning-input
-                                        data-id={index}
-                                        class="input-tag"
-                                        type="datetime"
-                                        variant="label-hidden"
-                                        value={option.minDate}
-                                        onchange={handleMinDate}
-                                    ></lightning-input>
-                                    </div>
-                                    </div>
-            
-                                <div class="delete-icon-cover single">
-                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                    </svg>    
-                                </div>
-                                </div>
-                                <template if:true={option.message}>
-                                    <label class="error-message">{option.message}</label>
-                                </template>
-                            </div>
-                        </template>
-                    
-                    </template>
-                    <template if:true={option.date}>
-                        <template if:true={option.isDateMax}>
-                            <div class="date-time-div-cover combobox" key={option.apiName}>     
-                                <div class="date-time-div" >
-                                    <div class="input-wrapper">
-                                        <div class="filter-index-label">
-                                            <template if:true={isCustomLogicEnabled}>
-                                                <span class="filter-index">{option.displayIndex}.</span>
-                                            </template>
-                                            <label class="custom-field-lable">{option.label}</label>
-                                            <span>
-                                                <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                            </span>
-                                        </div>
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Max. </div>
-                                            <div class="date-input-flex">     
-                                                <lightning-input
-                                                data-id={index}
-                                                class="input-tag"
-                                                type="date"
-                                                variant="label-hidden"
-                                                value={option.maxDate}
-                                                onchange={handleMaxDate}
-                                            ></lightning-input>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-combobox_container slds-has-selection">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                                <div class="input-delete-cover">
+                                                    <div class="min-max-input-cover">
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Min.." data-index={index}
+                                                                data-id={option.minValue} value={option.minValue}
+                                                                oninput={handleMinValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                            <svg class="up-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.minValue}
+                                                                onclick={incrementMinValue}>
+                                                                <path
+                                                                    d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
+                                                            </svg>
+                                                            <svg class="down-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.minValue}
+                                                                onclick={decrementMinValue}>
+                                                                <path
+                                                                    d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
+                                                            </svg>
+                                                        </div>
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                oninput={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                            <svg class="up-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={incrementMaxValue}>
+                                                                <path
+                                                                    d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
+                                                            </svg>
+                                                            <svg class="down-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={decrementMaxValue}>
+                                                                <path
+                                                                    d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
+                                                            </svg>
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
+                                                    </div>
+                                                    <div class="delete-icon-cover">
+                                                        <svg data-id={index} onclick={clearSearch} width="15"
+                                                            height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-            
-                                <div class="delete-icon-cover single">
-                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                    </svg>    
-                                </div>
-                                </div>
-                                <template if:true={option.message}>
-                                    <label class="error-message">{option.message}</label>
+
                                 </template>
-                            </div>
-                        </template>
-                        <template if:true={option.isDateMin}>
-                            <div class="date-time-div-cover combobox" key={option.apiName}>
-                                <div class="date-time-div" >
-                                    <div class="input-wrapper">
-                                        <div class="filter-index-label">
-                                            <template if:true={isCustomLogicEnabled}>
-                                                <span class="filter-index">{option.displayIndex}.</span>
-                                            </template>
-                                            <label class="custom-field-lable">{option.label}</label>
-                                            <span>
-                                                <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                            </span>
-                                        </div>
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Min. </div>
-                                            <div class="date-input-flex">
-                                                <lightning-input
-                                                data-id={index}
-                                                class="input-tag"
-                                                type="date"
-                                                variant="label-hidden"
-                                                value={option.minDate}
-                                                onchange={handleMinDate}
-                                            ></lightning-input>
+                                <template if:true={option.isMin}>
+                                    <div class="filter-index-label">
+                                        <template if:true={isCustomLogicEnabled}>
+                                            <span class="filter-index">{option.displayIndex}.</span>
+                                        </template>
+                                        <label class="custom-field-lable">{option.label}</label>
+                                        <span>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
+                                    </div>
+
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-combobox_container slds-has-selection">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                                <div class="input-delete-cover">
+                                                    <div class="min-max-input-cover">
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Min.." data-index={index} data-id={index}
+                                                                value={option.minValue} oninput={handleMinValueChange}
+                                                                min="0" minlength="0" maxlength="25" />
+                                                            <svg class="up-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.minValue}
+                                                                onclick={incrementMinValue}>
+                                                                <path
+                                                                    d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
+                                                            </svg>
+                                                            <svg class="down-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.minValue}
+                                                                onclick={decrementMinValue}>
+                                                                <path
+                                                                    d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
+                                                            </svg>
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
+                                                    </div>
+                                                    <div class="delete-icon-cover">
+                                                        <svg data-id={index} onclick={clearSearch} width="15"
+                                                            height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-            
-                                <div class="delete-icon-cover single">
-                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                    </svg>    
-                                </div>
-                                </div>
-                                <template if:true={option.message}>
-                                    <label class="error-message">{option.message}</label>
+                                </template>
+                                <template if:true={option.isMax}>
+                                    <div class="filter-index-label">
+                                        <template if:true={isCustomLogicEnabled}>
+                                            <span class="filter-index">{option.displayIndex}.</span>
+                                        </template>
+                                        <label class="custom-field-lable">{option.label}</label>
+                                        <span>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
+                                    </div>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-combobox_container slds-has-selection">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                                <div class="input-delete-cover">
+                                                    <div class="min-max-input-cover">
+                                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
+                                                            role="none">
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                oninput={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                            <svg class="up-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={incrementMaxValue}>
+                                                                <path
+                                                                    d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
+                                                            </svg>
+                                                            <svg class="down-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={decrementMaxValue}>
+                                                                <path
+                                                                    d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
+                                                            </svg>
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
+                                                    </div>
+                                                    <div class="delete-icon-cover">
+                                                        <svg data-id={index} onclick={clearSearch} width="15"
+                                                            height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </template>
                             </div>
                         </template>
-                        <template if:true={option.isDateRange}>
-                            <div class="date-time-div-cover combobox" key={option.apiName}>
-                                <div class="date-time-div">
-                                    <div class="input-wrapper">
-                                        <div class="filter-index-label">
-                                            <template if:true={isCustomLogicEnabled}>
-                                                <span class="filter-index">{option.displayIndex}.</span>
-                                            </template>
-                                            <label class="custom-field-lable">{option.label}</label>
-                                            <span>
-                                                <template if:true={option.isNot}>
-                                                    <label class="slds-form-element__label operator-div">not  </label>
+                        <template if:true={option.datetime}>
+                            <template if:true={option.isDateRange}>
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
+                                        <div class="input-wrapper">
+                                            <div class="filter-index-label">
+                                                <template if:true={isCustomLogicEnabled}>
+                                                    <span class="filter-index">{option.displayIndex}.</span>
                                                 </template>
-                                            </span>
-                                            <!-- <span>
+                                                <label class="custom-field-lable">{option.label}</label>
+                                                <span>
+                                                    <template if:true={option.isNot}>
+                                                        <label class="slds-form-element__label operator-div">not
+                                                        </label>
+                                                    </template>
+                                                </span>
+                                                <span>
+                                                    <template if:true={option.isNot}>
+                                                        <label class="slds-form-element__label operator-div">not
+                                                        </label>
+                                                    </template>
+                                                </span>
+                                                <span>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
+                                                </span>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Min. </div>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.minDate}
+                                                    onchange={handleMinDate}></lightning-input>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Max. </div>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.maxDate}
+                                                    onchange={handleMaxDate}></lightning-input>
+                                            </div>
+                                        </div>
+
+                                        <div class="delete-icon-cover">
+                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <template if:true={option.message}>
+                                        <label class="error-message">{option.message}</label>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:true={option.isDateMax}>
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
+                                        <div class="input-wrapper">
+                                            <div class="filter-index-label">
+                                                <template if:true={isCustomLogicEnabled}>
+                                                    <span class="filter-index">{option.displayIndex}.</span>
+                                                </template>
+                                                <label class="custom-field-lable">{option.label}</label>
+                                                <span>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
+                                                </span>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Max. </div>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.maxDate}
+                                                    onchange={handleMaxDate}></lightning-input>
+                                            </div>
+                                        </div>
+
+                                        <div class="delete-icon-cover single">
+                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <template if:true={option.message}>
+                                        <label class="error-message">{option.message}</label>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:true={option.isDateMin}>
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
+                                        <div class="input-wrapper">
+                                            <div class="filter-index-label">
+                                                <template if:true={isCustomLogicEnabled}>
+                                                    <span class="filter-index">{option.displayIndex}.</span>
+                                                </template>
+                                                <label class="custom-field-lable">{option.label}</label>
+                                                <span>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
+                                                </span>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Min. </div>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.minDate}
+                                                    onchange={handleMinDate}></lightning-input>
+                                            </div>
+                                        </div>
+
+                                        <div class="delete-icon-cover single">
+                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <template if:true={option.message}>
+                                        <label class="error-message">{option.message}</label>
+                                    </template>
+                                </div>
+                            </template>
+
+                        </template>
+                        <template if:true={option.date}>
+                            <template if:true={option.isDateMax}>
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
+                                        <div class="input-wrapper">
+                                            <div class="filter-index-label">
+                                                <template if:true={isCustomLogicEnabled}>
+                                                    <span class="filter-index">{option.displayIndex}.</span>
+                                                </template>
+                                                <label class="custom-field-lable">{option.label}</label>
+                                                <span>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
+                                                </span>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Max. </div>
+                                                <div class="date-input-flex">
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.maxDate}
+                                                        onchange={handleMaxDate}></lightning-input>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="delete-icon-cover single">
+                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <template if:true={option.message}>
+                                        <label class="error-message">{option.message}</label>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:true={option.isDateMin}>
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
+                                        <div class="input-wrapper">
+                                            <div class="filter-index-label">
+                                                <template if:true={isCustomLogicEnabled}>
+                                                    <span class="filter-index">{option.displayIndex}.</span>
+                                                </template>
+                                                <label class="custom-field-lable">{option.label}</label>
+                                                <span>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
+                                                </span>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Min. </div>
+                                                <div class="date-input-flex">
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.minDate}
+                                                        onchange={handleMinDate}></lightning-input>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="delete-icon-cover single">
+                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <template if:true={option.message}>
+                                        <label class="error-message">{option.message}</label>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:true={option.isDateRange}>
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
+                                        <div class="input-wrapper">
+                                            <div class="filter-index-label">
+                                                <template if:true={isCustomLogicEnabled}>
+                                                    <span class="filter-index">{option.displayIndex}.</span>
+                                                </template>
+                                                <label class="custom-field-lable">{option.label}</label>
+                                                <span>
+                                                    <template if:true={option.isNot}>
+                                                        <label class="slds-form-element__label operator-div">not
+                                                        </label>
+                                                    </template>
+                                                </span>
+                                                <!-- <span>
                                                 <template if:true={option.isNot}>
                                                     <label class="slds-form-element__label operator-div">not  </label>
                                                 </template>
                                             </span> -->
-                                            <span>
-                                                <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                            </span>
-                                        </div>
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Min. </div>
-                                            <div class="date-input-flex">
-                                                <lightning-input
-                                                data-id={index}
-                                                class="input-tag"
-                                                type="date"
-                                                variant="label-hidden"
-                                                value={option.minDate}
-                                                onchange={handleMinDate}
-                                            ></lightning-input>
+                                                <span>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
+                                                </span>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Min. </div>
+                                                <div class="date-input-flex">
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.minDate}
+                                                        onchange={handleMinDate}></lightning-input>
+                                                </div>
+                                            </div>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Max. </div>
+                                                <div class="date-input-flex">
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.maxDate}
+                                                        onchange={handleMaxDate}></lightning-input>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Max. </div>
-                                            <div class="date-input-flex">     
-                                                <lightning-input
-                                                data-id={index}
-                                                class="input-tag"
-                                                type="date"
-                                                variant="label-hidden"
-                                                value={option.maxDate}
-                                                onchange={handleMaxDate}
-                                            ></lightning-input>
-                                            </div>
+
+                                        <div class="delete-icon-cover">
+                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
                                         </div>
                                     </div>
-            
+                                    <template if:true={option.message}>
+                                        <label class="error-message">{option.message}</label>
+                                    </template>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:true={option.boolean}>
+                            <div key={option.apiName} class="slds-form-element combobox boolen-field">
+                                <div class="boolean-wrapper">
+                                    <div class="filter-index-label">
+                                        <template if:true={isCustomLogicEnabled}>
+                                            <span class="filter-index">{option.displayIndex}.</span>
+                                        </template>
+                                        <label class="custom-field-lable">{option.label}</label>
+                                        <span>
+                                            <template if:true={option.isNot}>
+                                                <label class="slds-form-element__label operator-div">not </label>
+                                            </template>
+                                        </span>
+                                        <span>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
+                                    </div>
+
+                                    <div class="slds-form-element__control">
+                                        <lightning-input type="checkbox" value={option.fieldChecked} data-index={index}
+                                            onclick={checkboxFieldChange}></lightning-input>
+                                    </div>
+                                </div>
                                 <div class="delete-icon-cover">
-                                    <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                    </svg>    
+                                    <svg data-id={index} onclick={clearSearch} width="15" height="15"
+                                        viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
                                 </div>
-                                </div>
-                                <template if:true={option.message}>
-                                    <label class="error-message">{option.message}</label>
-                                </template>
                             </div>
                         </template>
                     </template>
-                    <template if:true={option.boolean}>
-                        <div key={option.apiName} class="slds-form-element combobox boolen-field">
-                            <div class="boolean-wrapper">
-                                <div class="filter-index-label">
-                                    <template if:true={isCustomLogicEnabled}>
-                                        <span class="filter-index">{option.displayIndex}.</span>
-                                    </template>
-                                    <label class="custom-field-lable">{option.label}</label>
-                                    <span>
-                                        <template if:true={option.isNot}>
-                                            <label class="slds-form-element__label operator-div">not  </label>
-                                        </template>
-                                    </span>
-                                    <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                    </span>
-                                </div>
-                    
-                                <div class="slds-form-element__control">
-                                    <lightning-input type="checkbox" value={option.fieldChecked} data-index={index} onclick={checkboxFieldChange}></lightning-input>
-                                </div>
-                            </div>
-                            <div class="delete-icon-cover">
-                                <svg data-id={index} onclick={clearSearch} width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.616 15.77C2.15533 15.77 1.771 15.616 1.463 15.308C1.155 15 1.00067 14.6153 1 14.154V1.77H0V0.77H4V0H10V0.77H14V1.77H13V14.155C13 14.615 12.846 14.9993 12.538 15.308C12.23 15.6167 11.8453 15.7707 11.384 15.77H2.616ZM4.808 12.77H5.808V3.77H4.808V12.77ZM8.192 12.77H9.192V3.77H8.192V12.77Z" fill="#454545"/>
-                                </svg>    
-                            </div>
-                        </div>  
-                    </template>
+                </template>
+                <template if:false={filterFields.length}>
+                    <div class="no-filter">
+                        No filter added
+                    </div>
                 </template>
             </template>
-            <template if:false={filterFields.length}>
-                <div class="no-filter">
-                    No filter added
-                </div>
-            </template>
-        </template>
         </div>
-       <div class="filter-footer">
-            <template if:true={filterFields.length}>
+        <template if:true={showCustomLogicFooter}>
+            <div class="filter-footer">
                 <div class="custom-logic-section">
-                    <lightning-input 
-                        type="checkbox" 
-                        label="Enable Custom Logic" 
-                        checked={isCustomLogicEnabled} 
-                        onchange={handleCustomLogicToggle}
-                    ></lightning-input>
-                    <template if:true={isCustomLogicEnabled}>
-                        <div class="slds-form-element">
-                            <label class="slds-form-element__label" for="customLogicInput">Custom Logic Expression</label>
-                            <div class="input-section">
-                                <div class="slds-col">
-                                    <input 
-                                        type="text" 
-                                        id="customLogicInput" 
-                                        class="slds-input" 
-                                        placeholder="e.g., (1 AND 2) OR 3" 
-                                        value={customLogicExpression}
-                                        onkeyup={handleCustomLogicChange}
-                                    />
-                                </div>
-                                <div>
-                                    <button 
-                                        class="slds-button slds-button_brand" 
-                                        onclick={handleApplyCustomLogic}
-                                        disabled={isApplyDisabled}
-                                        >Apply</button>
-                                    </div>
-                                    <!-- disabled={customLogicError} -->
-                            </div>
-                            <template if:true={customLogicError}>
-                                <label class="error-message">{customLogicError}</label>
-                            </template>
-                        </div>
-                    </template>
-                </div>
-            </template>
-            
-            <div class="field-add-btn plus">
-                <div class="add-btn-cover" onclick={openModal}>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white"/>
-                    </svg>
-                    Add More Filter
-                </div>
-                <!-- <template if:true={filterFields.length}>
-                    <div class="save-btn-cover" onclick={saveFilterPermanent}>
-                    Save Default
+                    <div class="custom-logic-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="#0176D3"/>
+                        </svg>
+                        <span class="custom-logic-title">Custom Logic Expression</span>
                     </div>
-                </template> -->
-               
+                    <div class="slds-form-element">
+                        <div class="input-section">
+                            <div class="slds-col">
+                                <input type="text" id="customLogicInput" class="slds-input"
+                                    placeholder="e.g., (1 AND 2) OR 3" value={customLogicExpression}
+                                    onkeyup={handleCustomLogicChange} />
+                            </div>
+                            <div>
+                                <button class="slds-button slds-button_brand" onclick={handleApplyCustomLogic}
+                                    disabled={isApplyDisabled}>Apply</button>
+                            </div>
+                        </div>
+                        <template if:true={customLogicError}>
+                            <label class="error-message">{customLogicError}</label>
+                        </template>
+                    </div>
+                </div>
             </div>
-        </div>
+        </template>
 
         <!--modal code-->
 
         <template if:true={addModal}>
-            <div class="add-modal">
-                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
-                    <div class="slds-modal__container">
-                        <!-- Modal/Popup Header -->
-                        <header class="slds-modal__header custom-modal-header">
-                            <button class="custom-close-button" title="Close" onclick={handleClose}>
-                                <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#000000" stroke="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill="#ffffff" d="M195.2 195.2a64 64 0 0 1 90.496 0L512 421.504 738.304 195.2a64 64 0 0 1 90.496 90.496L602.496 512 828.8 738.304a64 64 0 0 1-90.496 90.496L512 602.496 285.696 828.8a64 64 0 0 1-90.496-90.496L421.504 512 195.2 285.696a64 64 0 0 1 0-90.496z"></path></g></svg>
-                                <span class="slds-assistive-text">Close</span>
-                            </button>
-                            <h2 class="slds-text-heading_medium">Add filter</h2>
-                        </header>
-                        <!-- Modal/Popup Body -->
-                        <div class="slds-modal__content slds-p-around_medium modal-body custom-modal-body">
-                            <slot>
-                                <c-listing-manager-filter-add-cmp onfieldchange={handleFieldChange} onvalueselected={handleValueSelected}></c-listing-manager-filter-add-cmp>
-                                <div class="custom-modal">
-                                    <button class="slds-button slds-button_neutral custom-modal-button" onclick={handleClose}>Cancel</button>
-                                    <button class="slds-button slds-button_brand custom-modal-button"  disabled={isAddButtonDisabled} onclick={handleSave}>Add</button>
-                                </div>
-                            </slot>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close closs_icon_css" onclick={handleClose}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
+                        </svg>
+                    </div>
+
+                    <div class="slds-modal__header blue-header">
+                        <h2 class="slds-modal__title">Add filter</h2>
+                    </div>
+
+                    <div class="slds-modal__content slds-p-around_medium modal-body">
+                        <c-listing-manager-filter-add-cmp onfieldchange={handleFieldChange}
+                            onvalueselected={handleValueSelected}></c-listing-manager-filter-add-cmp>
+                    </div>
+                    <div class="slds-modal__footer add-modal-footer">
+                        <button class="cancel_btn_css" onclick={handleClose}>Cancel</button>
+                        <button class="save_btn_css" disabled={isAddButtonDisabled} onclick={handleSave}>Add</button>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Save Confirmation Modal -->
+        <template if:true={saveConfirmationModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small"
+                aria-labelledby="confirm-modal-heading">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close closs_icon_css" onclick={handleCancelSave}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
+                        </svg>
+                    </div>
+
+                    <div class="slds-modal__header blue-header">
+                        <h2 class="slds-modal__title" id="confirm-modal-heading">Are you sure?</h2>
+                    </div>
+
+                    <div class="slds-modal__content slds-p-around_medium confirmation-modal-body">
+                        <p class="confirmation-message">Are you sure you want to save these filter settings? This will update your default filter configuration.</p>
+
+                        <div class="confirmation-modal-footer">
+                            <button class="cancel_btn_css" onclick={handleCancelSave}>Cancel</button>
+                            <button class="save_btn_css" onclick={handleConfirmSave}>Yes, Save</button>
                         </div>
                     </div>
-                </section>
-                <div class="slds-backdrop slds-backdrop_open"></div>   
-            </div>
-        </template>  
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
     </div>
 </template>

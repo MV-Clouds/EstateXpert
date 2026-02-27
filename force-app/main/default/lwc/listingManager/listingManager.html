@@ -5,63 +5,63 @@
     <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
         <template if:true={isAccessible}>
             <div class="main">
-                <div hide-header="true" variant="narrow" class="slds-size_full full-page-card">
-                    <div class="custom-header">
-                        <div class="slds-page-header__row first-row">
-                            <div class="slds-page-header__col-title">
-                                <div class="slds-media header-text">
-                                    <div class="portal_mapping">
-                                        Listing Manager
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="slds-page-header__col-actions header-button">
-                                <div class="slds-page-header__controls header-buttons-div">
-                                    <div class="header-buttons">
-                                        <button onclick={openConfigureSettings} class="icon-button">
-                                            Configure Settings
-                                        </button>
-                                        <template if:true={isConfigOpen}>
-                                            <c-record-config-body-cmp feature-name="Listing Manager" onclose={handleCloseModal}></c-record-config-body-cmp>
-                                        </template>
-                                        <button onclick={goTONewListing} class="icon-button">
-                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
-                                                    fill="white" />
-                                            </svg>
-                                            New Listing
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="custom-header">
+                    <div class="sub_main_header_css">
+                        <div class="header_block_css">
+                            Listing Manager
                         </div>
-                        <div class="slds-page-header__row second-row">
-                            <div class="slds-page-header__col-meta">
-                                <template if:false={isSelected}>
-                                    <p class="slds-page-header__meta-text">{totalListings} {lisitngItems}</p>
-                                </template>
-                                <template if:true={isSelected}>
-                                    <p class="slds-page-header__meta-text">{totalSelected} {items} Selected</p>
-                                </template>
-                            </div>
+                        <div class="header-buttons">
+                            <button onclick={openConfigureSettings} class="icon-button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12 15.5C10.07 15.5 8.5 13.93 8.5 12C8.5 10.07 10.07 8.5 12 8.5C13.93 8.5 15.5 10.07 15.5 12C15.5 13.93 13.93 15.5 12 15.5ZM19.43 12.97C19.47 12.65 19.5 12.33 19.5 12C19.5 11.67 19.47 11.34 19.43 11L21.54 9.37C21.73 9.22 21.78 8.95 21.66 8.73L19.66 5.27C19.54 5.05 19.27 4.96 19.05 5.05L16.56 6.05C16.04 5.66 15.5 5.32 14.87 5.07L14.5 2.42C14.46 2.18 14.25 2 14 2H10C9.75 2 9.54 2.18 9.5 2.42L9.13 5.07C8.5 5.32 7.96 5.67 7.44 6.05L4.95 5.05C4.73 4.96 4.46 5.05 4.34 5.27L2.34 8.73C2.21 8.95 2.27 9.22 2.46 9.37L4.57 11C4.53 11.34 4.5 11.67 4.5 12C4.5 12.33 4.53 12.65 4.57 12.97L2.46 14.63C2.27 14.78 2.21 15.05 2.34 15.27L4.34 18.73C4.46 18.95 4.73 19.03 4.95 18.95L7.44 17.94C7.96 18.34 8.5 18.68 9.13 18.93L9.5 21.58C9.54 21.82 9.75 22 10 22H14C14.25 22 14.46 21.82 14.5 21.58L14.87 18.93C15.5 18.67 16.04 18.33 16.56 17.94L19.05 18.95C19.27 19.03 19.54 18.95 19.66 18.73L21.66 15.27C21.78 15.05 21.73 14.78 21.54 14.63L19.43 12.97Z"
+                                        fill="white" />
+                                </svg>
+                                Configure Settings
+                            </button>
+                            <template if:true={isConfigOpen}>
+                                <c-record-config-body-cmp feature-name="Listing Manager"
+                                    onclose={handleCloseModal}></c-record-config-body-cmp>
+                            </template>
+                            <button onclick={goTONewListing} class="icon-button">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
+                                        fill="white" />
+                                </svg>
+                                New Listing
+                            </button>
+                        </div>
+                    </div>
+                    <div class="second-row">
+                        <div class="meta-text">
+                            <template if:false={isSelected}>
+                                <span class="count-badge">{totalListings} {lisitngItems}</span>
+                            </template>
+                            <template if:true={isSelected}>
+                                <span class="count-badge selected-badge">{totalSelected} {items} Selected</span>
+                            </template>
+                        </div>
+                        <div class="filter-tab-btns">
                             <div class="tab-section">
                                 <div class="sort-desc">
                                     <div class="sort-icon">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M10 14H2M8 10H2M6 6H2M12 18H2M19 20V4M19 20L22 17M19 20L16 17M19 4L22 7M19 4L16 7"
-                                                stroke="#131314" stroke-width="1.5" stroke-linecap="round"
+                                                stroke="#0176D3" stroke-width="1.5" stroke-linecap="round"
                                                 stroke-linejoin="round" />
                                         </svg>
                                     </div>
                                     <div class="sort-text">{sortDescription}</div>
                                 </div>
+                                
                                 <div class="tab-btns">
                                     <ul>
                                         <li class="tab-div active-tab-div" onclick={handleMenuTabClick} data-tab-id="1">
-                                            <svg class="activeSvg menusvg" width="24" height="14" viewBox="0 0 24 14"
+                                            <svg class="activeSvg menusvg" width="16" height="12" viewBox="0 0 24 14"
                                                 fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path data-tab-index="1"
                                                     d="M0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333ZM0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333Z"
@@ -86,6 +86,16 @@
                                         </li>
                                     </ul>
                                 </div>
+                                <div class="filter-tab-wrapper">
+                                    <div class="filter-toggle-btn" onclick={wrapFilter}>
+                                        <svg class="filter-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M7.9996 0.999999L7.9996 10.3497M7.9996 13.6499L7.9996 15M7.9996 13.6499C7.53904 13.6499 7.09734 13.4761 6.77167 13.1668C6.446 12.8574 6.26304 12.4378 6.26304 12.0002C6.26304 11.5627 6.446 11.1431 6.77167 10.8337C7.09734 10.5243 7.53904 10.3505 7.9996 10.3505C8.46016 10.3505 8.90186 10.5243 9.22753 10.8337C9.5532 11.1431 9.73616 11.5627 9.73616 12.0002C9.73616 12.4378 9.5532 12.8574 9.22753 13.1668C8.90186 13.4761 8.46016 13.6499 7.9996 13.6499ZM13.2626 0.999999L13.2626 5.34984M13.2626 5.34984C13.7233 5.34984 14.1655 5.52407 14.4913 5.83352C14.817 6.14298 15 6.56269 15 7.00032C15 7.43786 14.8162 7.85747 14.4906 8.16686C14.1649 8.47624 13.7232 8.65005 13.2626 8.65005M13.2626 5.34984C12.802 5.34984 12.3606 5.52407 12.0348 5.83352C11.7091 6.14298 11.5261 6.56269 11.5261 7.00032C11.5261 7.43786 11.709 7.85747 12.0347 8.16686C12.3604 8.47624 12.8021 8.65005 13.2626 8.65005M13.2626 8.65005L13.2626 15M2.73656 0.999999L2.73656 3.34973M2.73656 6.64995L2.73656 15M2.73656 6.64995C2.27599 6.64995 1.83429 6.47614 1.50863 6.16675C1.18296 5.85737 1 5.43775 1 5.00022C1 4.78357 1.04492 4.56905 1.13219 4.36889C1.21946 4.16874 1.34737 3.98687 1.50863 3.83368C1.66988 3.68049 1.86132 3.55897 2.07201 3.47606C2.28269 3.39316 2.50851 3.35049 2.73656 3.35049C2.96461 3.35049 3.19042 3.39316 3.40111 3.47606C3.6118 3.55897 3.80323 3.68049 3.96449 3.83368C4.12574 3.98687 4.25366 4.16874 4.34093 4.36889C4.4282 4.56905 4.47311 4.78357 4.47311 5.00022C4.47311 5.43775 4.29016 5.85737 3.96449 6.16675C3.63882 6.47614 3.19712 6.64995 2.73656 6.64995Z"
+                                                stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -94,7 +104,8 @@
                     <div class="wrap-mobile">
                         <div>Filter</div>
                         <div class="svg-cover" onclick={wrapFilter}>
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M7.9996 0.999999L7.9996 10.3497M7.9996 13.6499L7.9996 15M7.9996 13.6499C7.53904 13.6499 7.09734 13.4761 6.77167 13.1668C6.446 12.8574 6.26304 12.4378 6.26304 12.0002C6.26304 11.5627 6.446 11.1431 6.77167 10.8337C7.09734 10.5243 7.53904 10.3505 7.9996 10.3505C8.46016 10.3505 8.90186 10.5243 9.22753 10.8337C9.5532 11.1431 9.73616 11.5627 9.73616 12.0002C9.73616 12.4378 9.5532 12.8574 9.22753 13.1668C8.90186 13.4761 8.46016 13.6499 7.9996 13.6499ZM13.2626 0.999999L13.2626 5.34984M13.2626 5.34984C13.7233 5.34984 14.1655 5.52407 14.4913 5.83352C14.817 6.14298 15 6.56269 15 7.00032C15 7.43786 14.8162 7.85747 14.4906 8.16686C14.1649 8.47624 13.7232 8.65005 13.2626 8.65005M13.2626 5.34984C12.802 5.34984 12.3606 5.52407 12.0348 5.83352C11.7091 6.14298 11.5261 6.56269 11.5261 7.00032C11.5261 7.43786 11.709 7.85747 12.0347 8.16686C12.3604 8.47624 12.8021 8.65005 13.2626 8.65005M13.2626 8.65005L13.2626 15M2.73656 0.999999L2.73656 3.34973M2.73656 6.64995L2.73656 15M2.73656 6.64995C2.27599 6.64995 1.83429 6.47614 1.50863 6.16675C1.18296 5.85737 1 5.43775 1 5.00022C1 4.78357 1.04492 4.56905 1.13219 4.36889C1.21946 4.16874 1.34737 3.98687 1.50863 3.83368C1.66988 3.68049 1.86132 3.55897 2.07201 3.47606C2.28269 3.39316 2.50851 3.35049 2.73656 3.35049C2.96461 3.35049 3.19042 3.39316 3.40111 3.47606C3.6118 3.55897 3.80323 3.68049 3.96449 3.83368C4.12574 3.98687 4.25366 4.16874 4.34093 4.36889C4.4282 4.56905 4.47311 4.78357 4.47311 5.00022C4.47311 5.43775 4.29016 5.85737 3.96449 6.16675C3.63882 6.47614 3.19712 6.64995 2.73656 6.64995Z"
                                     stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
@@ -103,22 +114,8 @@
                     </div>
                 </template>
                 <div class="body">
-                    <div class="innerDiv1">
-                        <div class="filterDiv">
-                            <c-listing-manager-filter-cmp onvalueselected={handleFilteredListings}
-                                onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}
-                                onloading={handleLoading}>
-                            </c-listing-manager-filter-cmp>
-                        </div>
-                        <div class="filterWrap" onclick={wrapFilter}>
-                            <svg width="9" height="12" viewBox="0 0 9 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9.00001 11.192L0.846008 5.99998L9.00001 0.807983V11.192Z" fill="#454545" />
-                            </svg>
-
-                        </div>
-                    </div>
                     <template if:false={fieldsModal}>
-                        <div class="innerDiv2">
+                        <div class="innerDiv2 main_content_cls">
                             <template if:true={listingSpinnerLoading}>
                                 <c-spinner-component is-absolute="true"></c-spinner-component>
                             </template>
@@ -126,7 +123,8 @@
                                 <template if:false={showSection}>
                                     <div class="tableDiv" id="tableDiv">
                                         <table aria-multiselectable="true"
-                                            class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
+                                            class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
+                                            role="grid"
                                             aria-label="Example advanced table of Opportunities in actionable mode">
                                             <thead>
                                                 <tr class="slds-line-height_reset fields-names">
@@ -182,7 +180,8 @@
                                                             scope="col">
                                                             <div class="sort-cover" role="button" tabindex="0">
                                                                 <span class="slds-assistive-text">Sort by: </span>
-                                                                <div class="slds-has-flexi-truncate center-trancate-head">
+                                                                <div
+                                                                    class="slds-has-flexi-truncate center-trancate-head">
                                                                     <span class="slds-truncate"
                                                                         title="Title">{listing.fieldLabel}</span>
                                                                     <span
@@ -311,7 +310,7 @@
                                     </div>
                                 </template>
 
-                                <div class="paginationDiv slds-var-p-around_medium">
+                                <div class="paginationDiv">
                                     <div class="btnCover">
                                         <div class="pagination-container">
                                             <button class="pagination-button" disabled={isFirstPage}
@@ -326,8 +325,8 @@
 
                                             <template for:each={pageNumbers} for:item="page">
                                                 <template if:false={page.isEllipsis}>
-                                                    <button key={page.number} data-id={page.number} class={page.className}
-                                                        onclick={handlePageChange}>
+                                                    <button key={page.number} data-id={page.number}
+                                                        class={page.className} onclick={handlePageChange}>
                                                         {page.number}
                                                     </button>
                                                 </template>
@@ -336,7 +335,8 @@
                                                 </template>
                                             </template>
 
-                                            <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                                            <button class="pagination-button" disabled={isLastPage}
+                                                onclick={handleNext}>
                                                 Next
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
                                                     viewBox="0 0 520 520" fill="#fff">
@@ -349,17 +349,25 @@
                                 </div>
                             </template>
 
-                            <templete if:true={showTile}>
+                            <template if:true={showTile}>
                                 <c-listing-manager-tile-view-cmp onvalueselected={handleListingSelect}
                                     listingsdata={processedListingData}
                                     pagesize={pageSize}></c-listing-manager-tile-view-cmp>
-                            </templete>
-                            <templete if:true={showMap}>
-                                <c-listing-manager-mapview-cmp class="slds-p-around_medium"
+                            </template>
+                            <template if:true={showMap}>
+                                <c-listing-manager-mapview-cmp
                                     listingsdata={listingData}></c-listing-manager-mapview-cmp>
-                            </templete>
+                            </template>
                         </div>
                     </template>
+                    <div class="innerDiv1">
+                        <div class="filterDiv">
+                            <c-listing-manager-filter-cmp onvalueselected={handleFilteredListings}
+                                onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}
+                                onloading={handleLoading}>
+                            </c-listing-manager-filter-cmp>
+                        </div>
+                    </div>
                 </div>
             </div>
         </template>

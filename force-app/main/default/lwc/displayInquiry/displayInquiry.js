@@ -17,7 +17,7 @@ import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.ge
 import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
 import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmpController.processBroadcastMessageWithObject';
 import { errorDebugger } from 'c/globalProperties';
-import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
+import getObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
@@ -39,7 +39,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track filters = '';
     @track logicalExpression = '';
     @track listingRecord = {};
-    @track condtiontype = '';
+    @track conditiontype = 'related';
     @track checkAll = false;
 
     @track isShowModal = false;
@@ -59,7 +59,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track quickTemplates = [];
     @track listingTemplateOptions = [];
 
-    @track selectedConditionType = 'Custom Logic Is Met';
+    @track selectedConditionType = 'Related List';
     @track mappings = [];
 
     @track isAddConditionModalVisible = false;
@@ -112,11 +112,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     ];
 
     conditionOptions = [
-        { label: 'All Condition Are Met', value: 'All Condition Are Met' },
-        { label: 'Any Condition Is Met', value: 'Any Condition Is Met' },
-        { label: 'Custom Logic Is Met', value: 'Custom Logic Is Met' },
-        { label: 'Related List', value: 'Related List' },
-        { label: 'No Filter', value: 'None' },
+        { label: 'All Condition Are Met', value: 'all' },
+        { label: 'Any Condition Is Met', value: 'any' },
+        { label: 'Custom Logic Is Met', value: 'custom' },
+        { label: 'Related List', value: 'related' },
+        { label: 'No Filter', value: 'none' },
     ];
 
     @track broadcastContactList = [];
@@ -422,13 +422,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     async connectedCallback() {
         await this.getObjectApiName();
         await this.checkBusinessAccountConfig();
-        loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('Css loaded successfully');
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'loadStyle:connectedCallback', error, 'warn', 'Error while loading css');
-            });
+        loadStyle(this, MulishFontCss);
         this.getInquiryFields();
         this.fetchInquiryConfiguration();
         this.fetchFilterConfiguration();
@@ -447,12 +441,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     checkHideFilterButton() {
         getMetadataRecords()
             .then(result => {
-                console.log('Metadata records fetched successfully:', JSON.stringify(result));
                 const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
                 if (feature && feature.MVEX__isAvailable__c) {
                     this.hideFilterButton = true;
-                    console.log('Map_Listing_And_Inquiry feature is enabled. Hiding filter button.');
-                    
                 }
             })
             .catch(error => {
@@ -461,10 +452,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     processInquiryData(inquiries) {
-        console.log('inquiries', inquiries);
-
         const cols = this.tableColumns;
-        console.log('tableColumns', cols);
 
         return (inquiries || []).map(inquiry => {
             const row = { ...inquiry };
@@ -480,9 +468,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                 // Convert value to string for display if it exists, else default to '-'
                 const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
-                const displayValue = hasRealValue ? String(value) : '-';
+                let displayValue = hasRealValue ? String(value) : '-';
 
-                console.log(`Field: ${key}, Value: ${value}, DisplayValue: ${displayValue}`);
+                // Apply formatting for date/datetime fields if format is provided
+                if (col.format && hasRealValue && (col.type === 'date' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
+                    displayValue = this.applyFieldFormat(value, col.format);
+                }
 
                 return {
                     key,
@@ -505,6 +496,63 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         } catch (error) {
             errorDebugger('displayInquiry', 'getObjectApiName', error, 'warn', 'Error fetching object API name');
             return null;
+        }
+    }
+
+    /**
+    * Method Name : applyFieldFormat
+    * @description : Method to apply formatting based on the format value from dateOptions and dateTimeOptions
+    * Date: 03/03/2026
+    * Created By: Karan Singh
+    */
+    applyFieldFormat(fieldValue, format) {
+        try {
+            let date = new Date(fieldValue);
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                return fieldValue;
+            }
+            
+            let day = String(date.getDate()).padStart(2, '0');
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let year = date.getFullYear();
+            let hours24 = String(date.getHours()).padStart(2, '0');
+            let minutes = String(date.getMinutes()).padStart(2, '0');
+            let hours12 = hours24 > 12 ? String(hours24 - 12).padStart(2, '0') : hours24;
+            let period = hours24 >= 12 ? 'PM' : 'AM';
+
+            switch (format) {
+                // Date formats
+                case 'ddmmyyyy':
+                    return `${day}-${month}-${year}`;
+                case 'mmddyyyy':
+                    return `${month}-${day}-${year}`;
+                case 'yyyymmdd':
+                    return `${year}-${month}-${day}`;
+
+                // DateTime 24-hour formats
+                case 'ddmmyyy24':
+                    return `${day}-${month}-${year} ${hours24}:${minutes}`;
+                case 'mmddyyyy24':
+                    return `${month}-${day}-${year} ${hours24}:${minutes}`;
+                case 'yyyymmdd24':
+                    return `${year}-${month}-${day} ${hours24}:${minutes}`;
+
+                // DateTime 12-hour formats
+                case 'ddmmyyy12':
+                    return `${day}-${month}-${year} ${hours12}:${minutes} ${period}`;
+                case 'mmddyyyy12':
+                    return `${month}-${day}-${year} ${hours12}:${minutes} ${period}`;
+                case 'yyyymmdd12':
+                    return `${year}-${month}-${day} ${hours12}:${minutes} ${period}`;
+
+                default:
+                    return fieldValue;
+            }
+        } catch (error) {
+            errorDebugger('displayInquiry', 'applyFieldFormat', error, 'warn', 'Error applying field format');
+            return fieldValue;
         }
     }
 
@@ -639,12 +687,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
-    * Method Name : fetchMetadataRecords
-    * @description : method to fetch metadata records
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    /**
     * Method Name : fetchFilterConfiguration
     * @description : method to fetch filter configuration from Custom Object
     * Date: 17/02/2026
@@ -652,7 +694,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     fetchFilterConfiguration() {
         this.isLoading = true;
-        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', featureName: 'Inquiry_Filter_Config' })
+        getObjectFields({ objectApiName: 'MVEX__Inquiry__c', featureName: 'Suggested_Inquiry_Filters' })
             .then((result) => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     const jsonConfig = result.metadataRecords[0];
@@ -661,29 +703,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             const config = JSON.parse(jsonConfig);
                             this.mappings = config.mappings || [];
                             this.logicalExpression = config.logic || '';
-                            // Ensure condition type is valid
-                            this.selectedConditionType = config.conditionType || 'All Condition Are Met';
-
-                            // Map old 'condtiontype' for backward compatibility if needed
-                            if (config.conditionType === 'Custom Logic Is Met') {
-                                this.condtiontype = 'custom';
-                            } else if (config.conditionType === 'Any Condition Is Met') {
-                                this.condtiontype = 'any';
-                            } else if (config.conditionType === 'All Condition Are Met') {
-                                this.condtiontype = 'all';
-                            } else if (config.conditionType === 'Related List') {
-                                this.condtiontype = 'related';
-                            } else if (config.conditionType === 'None') {
-                                this.condtiontype = 'none';
-                            } else {
-                                this.condtiontype = config.conditionType;
-                            }
-
                         } catch (e) {
                             console.error('Error parsing filter config', e);
                         }
                     }
                 }
+                this.conditiontype = 'related';
                 this.fetchListings();
                 this.isLoading = false;
             })
@@ -964,28 +989,240 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             });
 
 
-            if (this.condtiontype === 'custom') {
+            if (this.conditiontype === 'custom') {
                 this.selectedConditionType = 'Custom Logic Is Met';
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
                 }
-                this.applyModalFilters();
+                const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
 
-            } else if (this.condtiontype === 'any') {
+                if (this.logicalExpression.trim() === '') {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Expression cannot be empty');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
+
+                const mappinglength = this.mappings.length;
+                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
+
+                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
+
+                const numbers = this.logicalExpression.match(/\d+/g);
+                if (numbers) {
+                    const numberSet = new Set(numbers.map(Number));
+                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
+
+                    if (invalidIndex) {
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
+                            inputElement.reportValidity();
+                        }
+                        return;
+                    }
+
+                    if (numberSet.size !== mappinglength) {
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Condition must include all indices.');
+                            inputElement.reportValidity();
+                        }
+                        return;
+                    }
+
+                    // Basic syntax check for balanced parentheses
+                    let openParens = 0;
+                    for (let char of this.logicalExpression) {
+                        if (char === '(') openParens++;
+                        if (char === ')') openParens--;
+                        if (openParens < 0) {
+                            if (inputElement) {
+                                inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                                inputElement.reportValidity();
+                            }
+                            return;
+                        }
+                    }
+                    if (openParens !== 0) {
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                            inputElement.reportValidity();
+                        }
+                        return;
+                    }
+
+                    if (inputElement) {
+                        inputElement.setCustomValidity('');
+                        inputElement.reportValidity();
+                    }
+                } else {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
+
+                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
+                    let filterResults = [];
+                    this.mappings.forEach((mapping, index) => {
+                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                        let filterValue = mapping.valueField;
+
+                        switch (mapping.operator) {
+                            case 'lessThan':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                filterResults[index + 1] = parseFloat(inquiryValue) < parseFloat(filterValue);
+                                break;
+                            case 'greaterThan':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                filterResults[index + 1] = parseFloat(inquiryValue) > parseFloat(filterValue);
+                                break;
+                            case 'equalTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                filterResults[index + 1] = inquiryValue === filterValue;
+                                break;
+                            case 'contains':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                filterResults[index + 1] = inquiryValue && inquiryValue.includes(filterValue);
+                                break;
+                            case 'notEqualTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = inquiryValue !== filterValue;
+                                break;
+                            case 'notContains':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) filterResults[index + 1] = false;
+                                else filterResults[index + 1] = inquiryValue && !inquiryValue.includes(filterValue);
+                                break;
+                            default:
+                                filterResults[index + 1] = false;
+                        }
+                    });
+
+                    const evalExpression = this.logicalExpression
+                        .replace(/\bAND\b/gi, '&&')
+                        .replace(/\bOR\b/gi, '||');
+                    try {
+                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
+                        return evaluationResult;
+                    } catch (e) {
+                        console.error('Error in eval', e);
+                        return false;
+                    }
+                });
+
+            } else if (this.conditiontype === 'any') {
                 this.selectedConditionType = 'Any Condition Is Met';
                 this.logicalExpression = '';
-                this.applyModalFilters();
-            } else if (this.condtiontype === 'all') {
+                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
+                    return this.mappings.some(mapping => {
+                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                        let filterValue = mapping.valueField;
+
+                        switch (mapping.operator) {
+                            case 'greaterThan':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(inquiryValue) > parseFloat(filterValue);
+                            case 'lessThan':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                                filterValue = filterValue !== undefined ? filterValue : 0;
+                                return parseFloat(inquiryValue) < parseFloat(filterValue);
+                            case 'equalTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return inquiryValue === filterValue;
+                            case 'contains':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                return inquiryValue.includes(filterValue);
+                            case 'notEqualTo':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
+                                return inquiryValue !== filterValue;
+                            case 'notContains':
+                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                                filterValue = filterValue !== undefined ? filterValue : '';
+                                if (!inquiryValue) return false;
+                                return !inquiryValue.includes(filterValue);
+                            default:
+                                return false;
+                        }
+                    });
+                });
+            } else if (this.conditiontype === 'all') {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
-                this.applyModalFilters();
-            } else if (this.condtiontype === 'related') {
+                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
+                return this.mappings.every(mapping => {
+                    let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                    let filterValue = mapping.valueField;
+
+                    switch (mapping.operator) {
+                        case 'greaterThan':
+                            inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                            filterValue = filterValue !== undefined ? filterValue : 0;
+                            return parseFloat(inquiryValue) > parseFloat(filterValue);
+                        case 'lessThan':
+                            inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
+                            filterValue = filterValue !== undefined ? filterValue : 0;
+                            return parseFloat(inquiryValue) < parseFloat(filterValue);
+                        case 'equalTo':
+                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                            filterValue = filterValue !== undefined ? filterValue : '';
+                            return inquiryValue === filterValue;
+                        case 'contains':
+                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                            filterValue = filterValue !== undefined ? filterValue : '';
+                            return inquiryValue.includes(filterValue);
+                        case 'notEqualTo':
+                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                            filterValue = filterValue !== undefined ? filterValue : '';
+                            if (!inquiryValue) return false;
+                            return inquiryValue !== filterValue;
+                        case 'notContains':
+                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
+                            filterValue = filterValue !== undefined ? filterValue : '';
+                            if (!inquiryValue) return false;
+                            return !inquiryValue.includes(filterValue);
+                        default:
+                            return false;
+                    }
+                });
+            });
+            } else if (this.conditiontype === 'related') {
                 this.selectedConditionType = 'Related List';
-                this.applyModalFilters();
-            } else if (this.condtiontype === 'none') {
+                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => inquiry.mvex__listing__c === this.recordId);
+            } else if (this.conditiontype === 'none') {
                 this.selectedConditionType = 'None';
-                this.applyModalFilters();
+                this.pagedFilteredInquiryData = [...this.totalinquiry];
             }
+
+            this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Store latest popup filters to state
+
+            this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
+            this.totalRecords = this.pagedFilteredInquiryData.length;
+            this.currentPage = 1;
+            this.hideModalBox();
+            this.searchTerm = '';
+            this.checkAll = false;
+            this.sendMailInquiryDataList = [];
+            this.isLoading = false;
         } catch (error) {
             errorDebugger('displayInquiry', 'applyFiltersData', error, 'warn', 'Error applying filters');
             this.showToast('Error', 'Error applying filters', 'error');
@@ -1269,7 +1506,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     handleConditionTypeChange(event) {
-        this.selectedConditionType = event.detail.value;
+        this.conditiontype = event.detail.value;
+        this.selectedConditionType = this.conditionOptions.find(option => option.value === this.conditiontype)?.label || '';
     }
 
     /**
@@ -1300,24 +1538,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     applyModalFilters() {
         try {
-
-            // Save Configuration Logic
             const config = {
                 conditionType: 'Related List',
                 logic: this.logicalExpression,
                 mappings: this.mappings
             };
 
-            saveMappings({
-                objectApiName: 'MVEX__Inquiry__c',
-                featureName: 'Inquiry_Filter_Config',
-                checklistData: JSON.stringify(config),
-                totalPages: 0
-            })
+            saveMappings({objectApiName: 'MVEX__Inquiry__c', featureName: 'Suggested_Inquiry_Filters', checklistData: JSON.stringify(config), totalPages: 0})
                 .then(result => {
-                    if (result === 'Success') {
-                        // Configuration saved
-                    } else {
+                    if (result !== 'Success') {
                         this.showToast('Error', 'Failed to save configuration', 'error');
                     }
                 })
@@ -1339,231 +1568,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return;
             }
 
-            if (this.selectedConditionType === 'All Condition Are Met') {
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    return this.mappings.every(mapping => {
-                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
-
-                        switch (mapping.operator) {
-                            case 'greaterThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(inquiryValue) > parseFloat(filterValue);
-                            case 'lessThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(inquiryValue) < parseFloat(filterValue);
-                            case 'equalTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return inquiryValue === filterValue;
-                            case 'contains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return inquiryValue.includes(filterValue);
-                            case 'notEqualTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) return false;
-                                return inquiryValue !== filterValue;
-                            case 'notContains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) return false;
-                                return !inquiryValue.includes(filterValue);
-                            default:
-                                return false;
-                        }
-                    });
-                });
-            } else if (this.selectedConditionType === 'Any Condition Is Met') {
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    return this.mappings.some(mapping => {
-                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
-
-                        switch (mapping.operator) {
-                            case 'greaterThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(inquiryValue) > parseFloat(filterValue);
-                            case 'lessThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(inquiryValue) < parseFloat(filterValue);
-                            case 'equalTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return inquiryValue === filterValue;
-                            case 'contains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return inquiryValue.includes(filterValue);
-                            case 'notEqualTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) return false;
-                                return inquiryValue !== filterValue;
-                            case 'notContains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) return false;
-                                return !inquiryValue.includes(filterValue);
-                            default:
-                                return false;
-                        }
-                    });
-                });
-            } else if (this.selectedConditionType === 'Custom Logic Is Met') {
-                const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
-
-                if (this.logicalExpression.trim() === '') {
-                    if (inputElement) {
-                        inputElement.setCustomValidity('Expression cannot be empty');
-                        inputElement.reportValidity();
-                    }
-                    return;
-                }
-
-                const mappinglength = this.mappings.length;
-                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
-
-                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
-                    if (inputElement) {
-                        inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
-                        inputElement.reportValidity();
-                    }
-                    return;
-                }
-
-                const numbers = this.logicalExpression.match(/\d+/g);
-                if (numbers) {
-                    const numberSet = new Set(numbers.map(Number));
-                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
-
-                    if (invalidIndex) {
-                        if (inputElement) {
-                            inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
-                            inputElement.reportValidity();
-                        }
-                        return;
-                    }
-
-                    if (numberSet.size !== mappinglength) {
-                        if (inputElement) {
-                            inputElement.setCustomValidity('Condition must include all indices.');
-                            inputElement.reportValidity();
-                        }
-                        return;
-                    }
-
-                    // Basic syntax check for balanced parentheses
-                    let openParens = 0;
-                    for (let char of this.logicalExpression) {
-                        if (char === '(') openParens++;
-                        if (char === ')') openParens--;
-                        if (openParens < 0) {
-                            if (inputElement) {
-                                inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                                inputElement.reportValidity();
-                            }
-                            return;
-                        }
-                    }
-                    if (openParens !== 0) {
-                        if (inputElement) {
-                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                            inputElement.reportValidity();
-                        }
-                        return;
-                    }
-
-                    if (inputElement) {
-                        inputElement.setCustomValidity('');
-                        inputElement.reportValidity();
-                    }
-                } else {
-                    if (inputElement) {
-                        inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
-                        inputElement.reportValidity();
-                    }
-                    return;
-                }
-
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    let filterResults = [];
-                    this.mappings.forEach((mapping, index) => {
-                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
-
-                        switch (mapping.operator) {
-                            case 'lessThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = parseFloat(inquiryValue) < parseFloat(filterValue);
-                                break;
-                            case 'greaterThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = parseFloat(inquiryValue) > parseFloat(filterValue);
-                                break;
-                            case 'equalTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = inquiryValue === filterValue;
-                                break;
-                            case 'contains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = inquiryValue && inquiryValue.includes(filterValue);
-                                break;
-                            case 'notEqualTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) filterResults[index + 1] = false;
-                                else filterResults[index + 1] = inquiryValue !== filterValue;
-                                break;
-                            case 'notContains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) filterResults[index + 1] = false;
-                                else filterResults[index + 1] = inquiryValue && !inquiryValue.includes(filterValue);
-                                break;
-                            default:
-                                filterResults[index + 1] = false;
-                        }
-                    });
-
-                    const evalExpression = this.logicalExpression
-                        .replace(/\bAND\b/gi, '&&')
-                        .replace(/\bOR\b/gi, '||');
-                    try {
-                        const evaluationResult = eval(evalExpression.replace(/\d+/g, match => filterResults[match]));
-                        return evaluationResult;
-                    } catch (e) {
-                        console.error('Error in eval', e);
-                        return false;
-                    }
-                });
-            } else if (this.selectedConditionType === 'Related List' || this.selectedConditionType === 'None') {
-                if (this.selectedConditionType === 'Related List') {
-                    this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => inquiry.mvex__listing__c === this.recordId);
-                } else {
-                    this.pagedFilteredInquiryData = [...this.totalinquiry];
-                }
-            }
-
-            this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Store latest popup filters to state
-
-            this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-            this.totalRecords = this.pagedFilteredInquiryData.length;
-            this.currentPage = 1;
-            this.hideModalBox();
-            this.searchTerm = '';
-            this.checkAll = false;
-            this.sendMailInquiryDataList = [];
-            this.isLoading = false;
+            this.applyFiltersData(this.listingRecord);
         } catch (error) {
             errorDebugger('displayInquiry', 'applyModalFilters', error, 'warn', 'Error applying modal filters');
             this.showToast('Error', 'Error applying filters', 'error');
@@ -2357,7 +2362,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     fetchInquiryConfiguration() {
-        getConfigObjectFields({ objectApiName: 'MVEX__Inquiry__c', configName: 'Inquiry_Fields' })
+        getObjectFields({ objectApiName: 'MVEX__Inquiry__c', featureName: 'Suggested_Inquiry_Fields' })
             .then(result => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
@@ -2368,6 +2373,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 label: field.label || field.fieldLabel,
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
                                 type: this.getColumnType(field.fieldType),
+                                fieldType: field.fieldType,
                                 format: field.format
                             }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;

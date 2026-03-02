@@ -110,8 +110,7 @@ public with sharing class ListingManagerController {
             List<MVEX__Configuration_Settings__c> configs = [
                 SELECT MVEX__Fields_Data__c 
                 FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Feature_Name__c = 'Listing Manager' 
-                AND MVEX__Object_API_Name__c = 'MVEX__Listing__c' 
+                WHERE MVEX__Feature_Name__c = 'Listing_Manager_Fields' 
                 WITH USER_MODE 
                 LIMIT 1
             ];
@@ -144,8 +143,7 @@ public with sharing class ListingManagerController {
             List<MVEX__Configuration_Settings__c> configs = [
                 SELECT MVEX__Page_Size__c 
                 FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Feature_Name__c = 'Listing Manager' 
-                AND MVEX__Object_API_Name__c = 'MVEX__Listing__c' 
+                WHERE MVEX__Feature_Name__c = 'Listing_Manager_Fields' 
                 WITH USER_MODE 
                 LIMIT 1
             ];

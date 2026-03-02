@@ -80,14 +80,8 @@ public with sharing class MarketingListCmpController {
     private static List<Map<String, String>> getConfiguredFields() {
         try {
             // Query Custom Object instead of Metadata
-            List<MVEX__Configuration_Settings__c> configs = [
-                SELECT MVEX__Fields_Data__c 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Feature_Name__c = 'Marketing List' 
-                AND MVEX__Object_API_Name__c = 'Contact' 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Fields_Data__c  FROM MVEX__Configuration_Settings__c 
+                                                            WHERE MVEX__Feature_Name__c = 'Marketing_List_Fields' WITH USER_MODE LIMIT 1];
             
             List<Map<String, String>> fields = new List<Map<String, String>>();
             
@@ -112,14 +106,8 @@ public with sharing class MarketingListCmpController {
     private static Integer getPageSizeFromConfig() {
         try {
             // Query Custom Object instead of Metadata
-            List<MVEX__Configuration_Settings__c> configs = [
-                SELECT MVEX__Page_Size__c 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Feature_Name__c = 'Marketing List' 
-                AND MVEX__Object_API_Name__c = 'Contact' 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Page_Size__c FROM MVEX__Configuration_Settings__c 
+                                                            WHERE MVEX__Feature_Name__c = 'Marketing_List_Fields' WITH USER_MODE LIMIT 1];
         
             if (!configs.isEmpty()) {
                 MVEX__Configuration_Settings__c config = configs[0];

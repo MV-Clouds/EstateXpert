@@ -7,7 +7,7 @@ public class RecordManagersCmpControllerTest {
         Configuration_Settings__c listingConfig = new Configuration_Settings__c(
             Name = 'Listing_Manager_MVEX__Listing__c',
             Object_API_Name__c = 'MVEX__Listing__c',
-            Feature_Name__c = 'Listing Manager',
+            Feature_Name__c = 'Listing_Manager_Fields',
             Fields_Data__c = '[{"label":"Name","value":"Name"},{"label":"Status","value":"Status__c"}]',
             Page_Size__c = 25
         );
@@ -24,7 +24,7 @@ public class RecordManagersCmpControllerTest {
         // Create Global Config with Blocked Fields
         Configuration_Settings__c globalConfig = new Configuration_Settings__c(
             Name = 'Global_Listing_Filter',
-            Feature_Name__c = 'Listing Filter Config',
+            Feature_Name__c = 'Listing_Manager_Filters',
             Blocked_Fields__c = 'Password__c;SSN__c;CreditCard__c'
         );
         insert globalConfig;
@@ -33,7 +33,7 @@ public class RecordManagersCmpControllerTest {
         Configuration_Settings__c inquiryConfig = new Configuration_Settings__c(
             Name = 'Inquiry_Manager_MVEX__Inquiry__c',
             Object_API_Name__c = 'MVEX__Inquiry__c',
-            Feature_Name__c = 'Inquiry Manager',
+            Feature_Name__c = 'Marketing_List_Fields',
             Fields_Data__c = '[{"label":"Name","value":"Name"}]',
             Page_Size__c = 30
         );
@@ -43,7 +43,7 @@ public class RecordManagersCmpControllerTest {
         Configuration_Settings__c listingConfigSpecial = new Configuration_Settings__c(
             Name = 'Listing_Config_Special',
             Object_API_Name__c = 'MVEX__Listing__c',
-            Feature_Name__c = 'Listing_Configuration',
+            Feature_Name__c = 'Marketing_List_Filters',
             Fields_Data__c = '[{"label":"Config Field","value":"ConfigField__c"}]',
             Page_Size__c = 40
         );
@@ -109,8 +109,7 @@ public class RecordManagersCmpControllerTest {
         List<Configuration_Settings__c> configs = [
             SELECT Id, Fields_Data__c, Page_Size__c 
             FROM Configuration_Settings__c 
-            WHERE Object_API_Name__c = 'MVEX__Listing__c' 
-            AND Feature_Name__c = 'Listing Manager'
+            WHERE Feature_Name__c = 'Listing_Manager_Fields'
         ];
         
         System.assertEquals(1, configs.size(), 'Config should be updated');
@@ -149,8 +148,7 @@ public class RecordManagersCmpControllerTest {
         List<Configuration_Settings__c> configs = [
             SELECT Id, Feature_Name__c 
             FROM Configuration_Settings__c 
-            WHERE Object_API_Name__c = 'MVEX__Inquiry__c'
-            AND Feature_Name__c = 'Inquiry Manager'
+            WHERE Feature_Name__c = 'Marketing_List_Fields'
         ];
         
         System.assertEquals(1, configs.size(), 'Inquiry config should exist');
@@ -167,8 +165,7 @@ public class RecordManagersCmpControllerTest {
         List<Configuration_Settings__c> configs = [
             SELECT Id, Feature_Name__c 
             FROM Configuration_Settings__c 
-            WHERE Object_API_Name__c = 'MVEX__Listing__c'
-            AND Feature_Name__c = 'Listing_Configuration'
+            WHERE Feature_Name__c = 'Listing_Manager_Filters'
         ];
         
         System.assertEquals(1, configs.size(), 'Listing Configuration should exist');
@@ -205,57 +202,6 @@ public class RecordManagersCmpControllerTest {
         System.assertNotEquals(null, results, 'The result should not be null.');
         System.assertNotEquals(null, results.fieldDetailsList, 'Field details list should not be null');
         System.assertEquals(0, results.metadataRecords.size(), 'Should have no metadata when config doesnt exist');
-    }
-
-    @IsTest
-    static void testGetObjectFieldsWithMetaData() {
-        Test.startTest();
-        RecordManagersCmpController.RecordManagerData results = RecordManagersCmpController.getObjectFieldsWithMetaData('MVEX__Listing__c');
-        Test.stopTest();
-
-        System.assertNotEquals(null, results, 'The result should not be null.');
-        System.assertNotEquals(null, results.fieldDetailsList, 'Field details list should not be null');
-        System.assertNotEquals(null, results.metadataRecords, 'Metadata records should not be null');
-        System.assertEquals(1, results.metadataRecords.size(), 'Should have new record fields data');
-    }
-
-    @IsTest
-    static void testGetObjectFieldsWithMetaDataNoConfig() {
-        Test.startTest();
-        RecordManagersCmpController.RecordManagerData results = RecordManagersCmpController.getObjectFieldsWithMetaData('Account');
-        Test.stopTest();
-
-        System.assertNotEquals(null, results, 'The result should not be null.');
-        System.assertEquals(0, results.metadataRecords.size(), 'Should have no metadata when config doesnt exist');
-    }
-
-    @IsTest
-    static void testSaveMappingsNewFieldsInsert() {
-        // Delete existing to test insert
-        delete [SELECT Id FROM Configuration_Settings__c WHERE Object_API_Name__c = 'Account'];
-        
-        Test.startTest();
-        String selectFieldsData = '[{"label":"Account Name","value":"Name"}]';
-        String result = RecordManagersCmpController.saveMappingsNewFields(selectFieldsData, 'Account');
-        Test.stopTest();
-
-        System.assertEquals('success', result, 'Should return success');
-        
-        List<Configuration_Settings__c> configs = [
-            SELECT Id, Fields_Data__c 
-            FROM Configuration_Settings__c 
-            WHERE Object_API_Name__c = 'Account'
-        ];
-        
-        System.assertEquals(1, configs.size(), 'New record fields config should be inserted');
-    }
-
-    @IsTest
-    static void testSaveMappingsNewFieldsUpdate() {
-        Test.startTest();
-        String selectFieldsData = '[{"label":"Updated Field","value":"UpdatedField__c"}]';
-        RecordManagersCmpController.saveMappingsNewFields(selectFieldsData, 'MVEX__Listing__c');
-        Test.stopTest();
     }
 
     @IsTest

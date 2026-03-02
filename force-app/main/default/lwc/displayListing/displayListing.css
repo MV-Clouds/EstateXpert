@@ -208,7 +208,7 @@
 .header-cell {
     padding: 10px;
     background-color: #f4f6f9;
-    font-weight: 600;
+    font-weight: 500;
     text-align: left;
     background: #0176D3;
     color: white;
@@ -314,7 +314,7 @@ button:disabled {
 }
 
 .mapping-id {
-    font-weight: bold;
+    font-weight: 500;
     margin-right: 10px;
 }
 

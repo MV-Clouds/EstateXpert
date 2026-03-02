@@ -162,18 +162,10 @@ public with sharing class ListingManagerFilterController {
     * @return String of JSON data.
     */
     @AuraEnabled(cacheable=true)
-    public static String getStaticFields(
-        String objectApiName,
-        String featureName
-    ) {
+    public static String getStaticFields(String objectApiName, String featureName) {
         try {
-            MVEX__Configuration_Settings__c config = [
-                SELECT MVEX__Fields_Data__c
-                FROM MVEX__Configuration_Settings__c
-                WHERE MVEX__Object_API_Name__c = :objectApiName
-                AND MVEX__Feature_Name__c = :featureName
-                LIMIT 1
-            ];
+            MVEX__Configuration_Settings__c config = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c
+                                                        WHERE MVEX__Feature_Name__c = :featureName LIMIT 1];
 
             return config.MVEX__Fields_Data__c;
 
@@ -189,11 +181,7 @@ public with sharing class ListingManagerFilterController {
     * @return void.
     */
     @AuraEnabled
-    public static void saveStaticFields(
-        String objectApiName,
-        String featureName,
-        String fieldsJson
-    ) {
+    public static void saveStaticFields(String objectApiName, String featureName, String fieldsJson) {
         try {
             if (String.isBlank(objectApiName) || 
                 String.isBlank(featureName) || 
@@ -204,13 +192,8 @@ public with sharing class ListingManagerFilterController {
             // Try to find existing config
             MVEX__Configuration_Settings__c config;
 
-            List<MVEX__Configuration_Settings__c> existingConfigs = [
-                SELECT Id
-                FROM MVEX__Configuration_Settings__c
-                WHERE MVEX__Object_API_Name__c = :objectApiName
-                AND MVEX__Feature_Name__c = :featureName
-                LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> existingConfigs = [SELECT Id FROM MVEX__Configuration_Settings__c
+                                                                        WHERE MVEX__Feature_Name__c = :featureName LIMIT 1];
 
             if (!existingConfigs.isEmpty()) {
                 config = existingConfigs[0];
@@ -218,8 +201,6 @@ public with sharing class ListingManagerFilterController {
                 config = new MVEX__Configuration_Settings__c();
                 config.MVEX__Object_API_Name__c = objectApiName;
                 config.MVEX__Feature_Name__c = featureName;
-
-                // Meaningful, deterministic Name
                 config.Name = objectApiName + '_' + featureName;
             }
 

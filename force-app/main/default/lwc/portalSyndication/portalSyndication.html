@@ -64,10 +64,10 @@
             </div>
         </template>
 
-        <div if:true={showSpinner}>
+        <template if:true={showSpinner}>
             <lightning-spinner variant="brand" alternative-text="Loading Portals" size="medium">
             </lightning-spinner>
-        </div>
+        </template>
     </div>
     <template if:true={isErrorPopup}>
         <div class="popup-container my_popup_container">

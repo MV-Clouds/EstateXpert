@@ -242,6 +242,7 @@ export default class PortalSyndication extends LightningElement {
                         buttonLabel: portal.flag ? 'Unpublish' : 'Publish',
                         buttonColor: portal.flag ? 'unpublish_css' : 'publish_css',
                         badgeColor: portal.flag ? 'active_cls' : 'inactive_cls',
+                        isPublished: portal.flag
                     }));
                     this.showSpinner = false;
                 })

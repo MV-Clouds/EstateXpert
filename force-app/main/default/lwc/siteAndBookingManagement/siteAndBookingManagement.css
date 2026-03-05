@@ -1,242 +1,229 @@
-/* ================================
-== COMPONENT WRAPPER & HEADER
-================================
-*/
-.real-estate-wrapper {
-    /* height: calc(100% + 1.5rem);
-    margin-top: -0.8rem;
-    width: calc(100% + 1.5rem);
-    margin-left: -0.8rem; */
+* {
     font-family: 'Mulish';
     user-select: none;
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
-.component-header {
+.main-card {
+    min-height: 550px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #003366; /* Navy theme */
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
-    border-bottom: 2px solid #0176d3;
-}
-
-.component-header h1 {
-    color: white;
-    font-weight: 400;
-}
-
-/* ================================
-== LEFT COLUMN: PROPERTY DETAILS
-================================
-*/
-.left-container {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 10px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
-}
-
-.carousel-container {
-    position: relative;
-    width: 100%;
-    height: 300px; 
-    overflow: hidden;
-    border: 1px solid #0176d3;
+    flex-direction: column;
+    background: #f5f7fa;
+    padding: 1rem;
     border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
-.carousel-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.image-counter {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(3, 118, 211, 0.8);
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.no-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    background: #e0e0e0;
-    color: #666;
-    font-size: 18px;
-    font-weight: 400;
-}
-
-.property-details {
-    margin-top: 20px;
-}
-
-.property-details h2 {
-    color: #003366;
-    font-size: 20px;
-    margin: 0 0 8px;
-    font-weight: 400;
-}
-
-.detail-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    font-size: 16px;
-    color: #34495e;
-    font-weight: 400;
-}
-
-.detail-grid div {
-    padding-bottom: 8px;
-}
-
-.detail-label {
-    font-weight: 400;
-    color: #003366;
-    margin-right: 5px;
-}
-
-.left-container h3 {
-    color: #003366;
-    font-size: 20px;
-    margin: 10px 0 10px;
-    font-weight: 400;
-}
-
-.property-map {
-    height: 300px; 
-    border: 1px solid #0176d3;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-/* ================================
-== RIGHT COLUMN: CONTACTS TABLE
-================================
-*/
 .contacts-container {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.20);
-    border-radius: 10px;
-    height: 100%; 
+    background: #f5f7fa;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    min-height: 550px;
+    display: flex;
+    flex-direction: column;
 }
 
 .contacts-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    background-color: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.contacts-container h2 {
+    color: #1a1a1a;
+    font-size: 18px;
+    margin: 0;
+    font-weight: 500;
 }
 
 .header-actions {
     display: flex;
-    gap: 4px;
+    gap: 8px;
     align-items: center;
 }
 
-.contacts-container h2 {
-    color: #003366;
-    font-size: 20px;
-    margin: 0;
-    font-weight: 400;
+.header-action-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0176D3;
+    color: white;
+    gap: 8px;
+    padding: 6px 12px;
+    height: 32px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+    font-size: 14px;
 }
 
+.header-action-btn:hover {
+    background-color: #005fb2;
+}
+
+.header-action-btn svg,
+.header-action-btn svg * {
+    pointer-events: none;
+}
+
+/* ================================
+== TABLE CONTAINER
+================================ */
 .custom-datatable {
-    border-radius: 8px;
+    margin-top: 16px;
+    max-width: 100%;
     overflow: auto;
-    background-color: white;
+    border-radius: 8px;
+    flex: 1;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    position: relative;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
 }
 
 .contacts-table {
-    width: 100%;
+    max-width: 100%;
     border-collapse: collapse;
-}
-
-.contacts-table th,
-.contacts-table td {
-    padding: 0.6rem;
-    text-align: center;
+    background-color: #fff;
     font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-    vertical-align: middle;
+    overflow: scroll;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 .contacts-table th {
-    background-color: #0176D3;
+    padding: 10px;
+    background: #0176D3;
     color: white;
+    text-align: center;
     position: sticky;
     top: 0;
-    z-index: 98;
-    height: 45px;
+    z-index: 97;
+    font-weight: 500;
 }
 
 .contacts-table td {
-    height: 45px;
+    padding: 10px;
+    text-align: center;
+    color: #585858;
+    font-weight: 400;
 }
 
 .contacts-table tbody tr:nth-child(odd) {
     background-color: aliceblue;
 }
 
-.contacts-table thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 90;
+.contacts-table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
 }
 
 .contacts-table a {
-    color: #006dcc;
+    color: #0176D3;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .contacts-table a:hover {
     text-decoration: underline;
-}
-
-.error-message {
-    color: #c0392b;
-    text-align: center;
-    padding: 10px;
-    background: #f9d6d5;
-    border-radius: 8px;
-    font-weight: 400;
-}
-
-.action-btn {
-    display: flex;
-    justify-content: center;
+    color: #014a8f;
 }
 
 /* ================================
-== MODAL STYLES (SHARED)
-================================
-*/
-.slds-modal__header {
+== ACTION BUTTONS
+================================ */
+.action-btn {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.action-div {
+    background-color: #0176D3;
+    color: white;
+    border-radius: 4px;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 5px;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.action-div:hover {
+    background-color: #005fb2;
+}
+
+.action-div:disabled {
+    background-color: #737D8C;
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.action-div svg,
+.action-div svg * {
+    pointer-events: none;
+}
+
+/* ================================
+== NO DATA STATE
+================================ */
+.no-prop {
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    font-size: 1.5rem;
+}
+
+.no-data-img {
+    max-width: 22%;
+    min-width: 12rem;
+}
+
+/* ================================
+== ERROR MESSAGE
+================================ */
+.error-message {
+    color: #dc2626;
+    text-align: center;
+    padding: 10px;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-radius: 8px;
+    font-weight: 400;
+    border: 1px solid #ef4444;
+    margin: 1rem;
+}
+
+/* ================================
+== MODAL STYLES
+================================ */
+.slds-modal__header {
     background-color: #0176D3;
     color: white;
-    --slds-c-icon-color-foreground-default: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
 }
 
 .custom-modal-header {
@@ -246,17 +233,15 @@
 .slds-modal {
     --slds-c-input-color-border: #0176D3;
     --slds-c-modal-radius-border: 8px;
+    --slds-c-button-brand-color-background: #0176D3;
+    --slds-c-button-brand-color-background-hover: #005fb2;
 }
 
 .modal-body {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background: #f5f7fa;
     border-radius: 0px 0px 8px 8px;
     min-height: 75vh;
-    overflow: auto; /* Changed to auto for the modal body */
+    overflow: auto;
 }
 
 .closs_icon_css {
@@ -270,14 +255,23 @@
 }
 
 .backdrop-filter {
-    background: #06050569;
+    background: rgba(6, 5, 5, 0.41);
     backdrop-filter: blur(4px);
 }
 
+.slds-backdrop_open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9000;
+}
+
 /* ================================
-== MODAL 1: "View Schedule"
-================================
-*/
+== SCHEDULE MODAL
+================================ */
 .schedule-modal-container {
     width: 70%;
     max-width: 1000px;
@@ -295,32 +289,36 @@
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
+.calender-modal-body {
+    min-height: auto;
+}
+
 /* ================================
-== MODAL 2: "Manage Showing"
-================================
-*/
+== MANAGE MODAL
+================================ */
 .manage-modal-container {
     width: 90%;
-    max-width: 75rem; /* NEW: Smaller width */
+    max-width: 75rem;
 }
 
 .modal-controls {
-    background: rgba(255, 255, 255, 0.8);
+    background: white;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
-    /* height: 100%; */
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .modal-buttons {
     margin-top: auto;
-    border-top: 1px solid black;
+    border-top: 1px solid #e5e5e5;
+    padding-top: 1rem;
 }
 
 .modal-preview-area {
     display: flex;
     flex-direction: column;
-    /* max-height: 70vh;  */
 }
 
 .preview-container {
@@ -329,12 +327,17 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
 }
 
-/* NEW: Style for the "Completed/Cancelled" message box */
-.center-message-box {
+.action-message-center {
+    height: 100%;
+    display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 }
 
 .whatsapp-preview {
@@ -362,24 +365,14 @@
     border-radius: 4px;
 }
 
-.calender-modal-body{
-    min-height: auto;
-}
-
-.action-message-center{
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
-
 c-template-preview {
     max-height: none !important;
     --max-height-of-the-preview-div: none !important;
 }
 
-/* Responsive fix for modal 50/50 layout */
+/* ================================
+== RESPONSIVE
+================================ */
 @media (max-width: 64em) {
     .modal-preview-area {
         border-left: none !important;

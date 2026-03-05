@@ -16,17 +16,31 @@ export default class ListingMediaGallery extends LightningElement {
     @track currentIndex = 0;
     @track subscription = null;
     @track isModalOpen = false;
+    @track isAutoPlaying = true;
+    @track imageLoading = false;
+    @track modalImageUrl = '';
+    autoPlayInterval = null;
 
     /**
     * Method Name: currentImageUrl
     * @description: Used to get the current image URL.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
     get currentImageUrl() {
         return this.data && this.data.length > 0 ? this.data[this.currentIndex]?.MVEX__BaseUrl__c : '';
+    }
+
+    /**
+    * Method Name: imageCounter
+    * @description: Used to get the image counter text.
+    * Created Date: 05/03/2026
+    * Created By: Karan Singh
+    */
+    get imageCounter() {
+        return this.data && this.data.length > 0 ? `${this.currentIndex + 1} / ${this.data.length}` : '';
     }
 
     /**
@@ -78,7 +92,7 @@ export default class ListingMediaGallery extends LightningElement {
     * Method Name: connectedCallback
     * @description: Used to load css and fetch data.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
@@ -100,14 +114,15 @@ export default class ListingMediaGallery extends LightningElement {
 
     /**
     * Method Name: disconnectedCallback
-    * @description: Used to unsubscribe the message channel.
+    * @description: Used to unsubscribe the message channel and stop auto-play.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
     disconnectedCallback() {
         try {
+            this.stopAutoPlay();
             unsubscribe(this.subscription);
             this.subscription = null;
         } catch (error) {
@@ -119,7 +134,7 @@ export default class ListingMediaGallery extends LightningElement {
     * Method Name: fetchingdata
     * @description: Used to fetch the data from apex.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
@@ -131,6 +146,9 @@ export default class ListingMediaGallery extends LightningElement {
                     this.data = result.listingImages;
                     this.isdata = result.listingImages?.length > 0;
                     this.showSpinner = false;
+                    if (this.isdata && this.isAutoPlaying) {
+                        this.startAutoPlay();
+                    }
                 })
                 .catch(error => {
                     errorDebugger('ListingMediaGallery', 'fetchingdata', error, 'warn', 'Error in fetchingdata');
@@ -145,13 +163,12 @@ export default class ListingMediaGallery extends LightningElement {
     * Method Name: showPreviousImage
     * @description: Used to show the previous image in the gallery.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
     showPreviousImage() {
         try {
-            this.showSpinner = true;
             if (this.currentIndex > 0) {
                 this.currentIndex--;
             }
@@ -160,8 +177,6 @@ export default class ListingMediaGallery extends LightningElement {
             }
         } catch (error) {
             errorDebugger('ListingMediaGallery', 'showPreviousImage', error, 'warn', 'Error in showPreviousImage');
-        } finally {
-            this.showSpinner = false;
         }
     }
 
@@ -169,13 +184,12 @@ export default class ListingMediaGallery extends LightningElement {
     * Method Name: showNextImage
     * @description: Used to show the next image in the gallery.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
     showNextImage() {
         try {
-            this.showSpinner = true;
             if (this.currentIndex < this.data.length - 1) {
                 this.currentIndex++;
             }
@@ -184,8 +198,59 @@ export default class ListingMediaGallery extends LightningElement {
             }
         } catch (error) {
             errorDebugger('ListingMediaGallery', 'showNextImage', error, 'warn', 'Error in showNextImage');
-        } finally {
-            this.showSpinner = false;
+        }
+    }
+
+    /**
+    * Method Name: startAutoPlay
+    * @description: Starts the auto-play carousel.
+    * Created Date: 05/03/2026
+    * Created By: Karan Singh
+    */
+    startAutoPlay() {
+        try {
+            this.stopAutoPlay();
+            this.autoPlayInterval = setInterval(() => {
+                this.showNextImage();
+            }, 3000);
+        } catch (error) {
+            errorDebugger('ListingMediaGallery', 'startAutoPlay', error, 'warn', 'Error in startAutoPlay');
+        }
+    }
+
+    /**
+    * Method Name: stopAutoPlay
+    * @description: Stops the auto-play carousel.
+    * Created Date: 05/03/2026
+    * Created By: Karan Singh
+    */
+    stopAutoPlay() {
+        try {
+            if (this.autoPlayInterval) {
+                clearInterval(this.autoPlayInterval);
+                this.autoPlayInterval = null;
+            }
+        } catch (error) {
+            errorDebugger('ListingMediaGallery', 'stopAutoPlay', error, 'warn', 'Error in stopAutoPlay');
+        }
+    }
+
+    /**
+    * Method Name: toggleAutoPlay
+    * @description: Toggles auto-play on/off.
+    * Created Date: 05/03/2026
+    * Created By: Karan Singh
+    */
+    toggleAutoPlay() {
+        try {
+            this.isAutoPlaying = !this.isAutoPlaying;
+            if (this.isAutoPlaying) {
+                this.startAutoPlay();
+            } else {
+                this.stopAutoPlay();
+            }
+        } catch (error) {
+            errorDebugger('ListingMediaGallery', 'toggleAutoPlay', error, 'warn', 'Error in toggleAutoPlay');
         }
     }
 
@@ -193,13 +258,14 @@ export default class ListingMediaGallery extends LightningElement {
     * Method Name: reloadComponent
     * @description: Used to reload the component and fetch the data again from apex.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
     reloadComponent() {
         try {
             this.showSpinner = true;
+            this.stopAutoPlay();
             this.fetchingdata();
             this.currentIndex = 0;
         } catch (error) {
@@ -234,24 +300,41 @@ export default class ListingMediaGallery extends LightningElement {
     * Method Name: closeModal
     * @description: Used to close the modal popup for image preview.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
     closeModal() {
         this.isModalOpen = false;
+        this.imageLoading = false;
+        this.modalImageUrl = '';
     }
 
     /**
     * Method Name: openImageModel
     * @description: Used to open the modal popup for image preview.
     * Created Date: 27/06/2024
-    * Modified Date: 26/12/2024
+    * Modified Date: 05/03/2026
     * Created By: Karan Singh
     * Modified By: Karan Singh
     */
     openImageModel() {
-        this.modalImageUrl = this.currentImageUrl;
-        this.isModalOpen = true;
+        try {
+            this.imageLoading = true;
+            this.modalImageUrl = this.currentImageUrl;
+            this.isModalOpen = true;
+        } catch (error) {
+            errorDebugger('ListingMediaGallery', 'openImageModel', error, 'warn', 'Error in openImageModel');
+        }
+    }
+
+    /**
+    * Method Name: handleImageLoad
+    * @description: Called when modal image finishes loading.
+    * Created Date: 05/03/2026
+    * Created By: Karan Singh
+    */
+    handleImageLoad() {
+        this.imageLoading = false;
     }
 }

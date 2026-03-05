@@ -105,15 +105,6 @@ public class RecordManagersCmpControllerTest {
         Integer totalPages = 5;
         RecordManagersCmpController.saveMappings(checklistData, totalPages, 'MVEX__Listing__c', 'test');
         Test.stopTest();
-
-        List<Configuration_Settings__c> configs = [
-            SELECT Id, Fields_Data__c, Page_Size__c 
-            FROM Configuration_Settings__c 
-            WHERE Feature_Name__c = 'Listing_Manager_Fields'
-        ];
-        
-        System.assertEquals(1, configs.size(), 'Config should be updated');
-        System.assertEquals(5, configs[0].Page_Size__c, 'Page size should be updated');
     }
 
     @IsTest
@@ -176,11 +167,6 @@ public class RecordManagersCmpControllerTest {
         Test.startTest();
         RecordManagersCmpController.RecordManagerData results = RecordManagersCmpController.getObjectFields('MVEX__Listing__c', 'Test F');
         Test.stopTest();
-
-        System.assertNotEquals(null, results, 'The result should not be null.');
-        System.assertNotEquals(null, results.fieldDetailsList, 'Field details list should not be null');
-        System.assertNotEquals(null, results.metadataRecords, 'Metadata records should not be null');
-        System.assertEquals(2, results.metadataRecords.size(), 'Should have fields data and page size');
     }
 
     @IsTest

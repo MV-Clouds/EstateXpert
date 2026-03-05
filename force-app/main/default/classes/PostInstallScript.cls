@@ -14,7 +14,7 @@ global class PostInstallScript implements InstallHandler {
         try {
             // Define the required features for Change 1
             Set<String> requiredFeatures = new Set<String>{
-                'ListingManagerFilters', 'Inquiry Manager', 'Listing Manager', 'Marketing List', 'Listing_Configuration'
+                'Listing_Manager_Filters', 'Listing_Manager_Fields', 'Marketing_List_Fields', 'Marketing_List_Filters', 'Suggested_Listing_Fields', 'Suggested_Inquiry_Fields'
             };
 
             // Query existing records to prevent duplicates
@@ -24,16 +24,9 @@ global class PostInstallScript implements InstallHandler {
             }
 
             // 1. Query the Metadata (The "Templates")
-            List<MVEX__recordManagerInquiryConfig__mdt> metadataRecords = [
-                SELECT MasterLabel, DeveloperName, 
-                       MVEX__Object_API_Name__c, 
-                       MVEX__Feature_Name__c, 
-                       MVEX__FieldsData__c, 
-                       MVEX__PageSize__c, 
-                       MVEX__Blocked_Fields__c
-                FROM MVEX__recordManagerInquiryConfig__mdt
-                WHERE MVEX__Feature_Name__c IN :requiredFeatures
-            ];
+            List<MVEX__recordManagerInquiryConfig__mdt> metadataRecords = [SELECT MasterLabel, DeveloperName, MVEX__Object_API_Name__c, MVEX__Feature_Name__c, 
+                                                                            MVEX__FieldsData__c, MVEX__PageSize__c, MVEX__Blocked_Fields__c
+                                                                            FROM MVEX__recordManagerInquiryConfig__mdt WHERE MVEX__Feature_Name__c IN :requiredFeatures];
 
             List<MVEX__Configuration_Settings__c> settingsToInsert = new List<MVEX__Configuration_Settings__c>();
 
@@ -63,8 +56,6 @@ global class PostInstallScript implements InstallHandler {
             }
 
         } catch (Exception e) {
-            // Log error or send email to admin if needed
-            System.debug('Error in PostInstallScript: ' + e.getMessage());
             ErrorHandler.insertErrorData(e, 'PostInstallScript', 'createDefaultConfigRecords', 'Error while updating or creating PortalListing__c record.');
         }
     }
@@ -90,7 +81,6 @@ global class PostInstallScript implements InstallHandler {
                 }
             }
         } catch (Exception e) {
-            System.debug('Error setting up EmbeddedSignUpConfig: ' + e.getMessage());
             ErrorHandler.insertErrorData(e, 'PostInstallScript', 'setupEmbeddedSignUpConfig', 'Error while updating or creating PortalListing__c record.');
         }
     }

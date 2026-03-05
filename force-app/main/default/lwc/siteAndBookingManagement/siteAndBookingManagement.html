@@ -8,113 +8,104 @@
             Error loading data: {error}
         </div>
     </template>
-    
-    <div>
-        <div class="slds-col slds-size_1-of-1">
-            <div class="contacts-container">
-                <div class="contacts-header">
-                    <h2>Related Contacts</h2>
-                    <div class="header-actions">
-                        <lightning-button-icon 
-                            icon-name="utility:refresh" 
-                            variant="border-filled"
-                            alternative-text="Refresh Data"
-                            title="Refresh Data"
-                            onclick={handleRefreshData}
-                            class="slds-m-right_x-small">
-                        </lightning-button-icon>
-                        <lightning-button-icon 
-                            icon-name="utility:event" 
-                            variant="border-filled"
-                            alternative-text="View Schedule"
-                            title="View Full Schedule"
-                            onclick={openScheduleModal}>
-                        </lightning-button-icon>
-                    </div>
-                </div>
-                <template if:true={isContactDataAvailable}>
-                    <div class="custom-datatable">
-                        <table class="contacts-table slds-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">
-                                        <div>Name</div>
-                                    </th>
-                                    <th scope="col">
-                                        <div>Email</div>
-                                    </th>
-                                    <th scope="col">
-                                        <div>Phone</div>
-                                    </th>
-                                    <th scope="col">
-                                        <div>Showing Status</div>
-                                    </th>
-                                    <th scope="col">
-                                        <div>Schedule Date</div>
-                                    </th>
-                                    <th scope="col">
-                                        <div>Actions</div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template for:each={contacts} for:item="contact">
-                                    <tr key={contact.Id}>
-                                        <td data-label="Name">
-                                            <div><a href="javascript:void(0);" onclick={navigateToContact} data-id={contact.Id}>{contact.Name}</a></div>
-                                        </td>
-                                        <td data-label="Email">
-                                            <div>{contact.Email}</div>
-                                        </td>
-                                        <td data-label="Phone">
-                                            <div>{contact.MobilePhone}</div>
-                                        </td>
-                                        <td data-label="Showing Status">
-                                            <div>
-                                                <lightning-formatted-text value={contact.ShowingStatus}></lightning-formatted-text>
-                                            </div>
-                                        </td>
-                                        <td data-label="Schedule Date">
-                                            <div>{contact.FormattedScheduleDate}</div>
-                                        </td>
-                                        <td data-label="Actions">
-                                            <div class="action-btn">
-                                                <lightning-button-icon 
-                                                    icon-name="utility:settings"
-                                                    variant="border-filled"
-                                                    alternative-text="Manage Showing"
-                                                    title="Manage Showing"
-                                                    onclick={openManageModal} 
-                                                    data-contact={contact.Json}
-                                                    class="slds-m-left_x-small">
-                                                </lightning-button-icon>
-                                                <lightning-button-icon 
-                                                    icon-name="utility:share"
-                                                    variant="border-filled"
-                                                    alternative-text="View Showing Record"
-                                                    title="View Showing Record in New Tab"
-                                                    onclick={openShowingInNewTab}
-                                                    data-showing-id={contact.ShowingId}
-                                                    disabled={contact.isShowingDisabled}
-                                                    class="view-showing-btn slds-m-left_x-small">
-                                                </lightning-button-icon>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </template>
-                <template if:false={isContactDataAvailable}>
-                    <div class="sldc-text-body_regular slds-text-color_error slds-p-around_medium slds-text-align_center">
-                        <lightning-icon icon-name="utility:info" alternative-text="Info" size="small"
-                            class="slds-m-right_small"></lightning-icon>No Related Contacts<br />
-                        There are currently no related contacts for this property listing.
-                    </div>
-                </template>
+
+    <div class="contacts-container">
+        <div class="contacts-header">
+            <h2>Related Inquiries</h2>
+            <div class="header-actions">
+                <button class="header-action-btn" onclick={handleRefreshData} title="Refresh Data">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21.5 2V8.5M21.5 8.5H15M21.5 8.5L18 5C16.6 3.5 14.8 2.5 12.6 2.1C8.9 1.5 5.4 3.1 3.5 6.1M2.5 22V15.5M2.5 15.5H9M2.5 15.5L6 19C7.4 20.5 9.2 21.5 11.4 21.9C15.1 22.5 18.6 20.9 20.5 17.9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Refresh
+                </button>
+                <button class="header-action-btn" onclick={openScheduleModal} title="View Full Schedule">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    View Schedule
+                </button>
             </div>
         </div>
+        <template if:true={isContactDataAvailable}>
+            <div class="custom-datatable">
+                <table class="contacts-table slds-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                <div>Name</div>
+                            </th>
+                            <th scope="col">
+                                <div>Email</div>
+                            </th>
+                            <th scope="col">
+                                <div>Phone</div>
+                            </th>
+                            <th scope="col">
+                                <div>Showing Status</div>
+                            </th>
+                            <th scope="col">
+                                <div>Schedule Date</div>
+                            </th>
+                            <th scope="col">
+                                <div>Actions</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={contacts} for:item="contact">
+                            <tr key={contact.Id}>
+                                <td data-label="Name">
+                                    <div><a href="javascript:void(0);" onclick={navigateToContact}
+                                            data-id={contact.Id}>{contact.Name}</a></div>
+                                </td>
+                                <td data-label="Email">
+                                    <div>{contact.Email}</div>
+                                </td>
+                                <td data-label="Phone">
+                                    <div>{contact.MobilePhone}</div>
+                                </td>
+                                <td data-label="Showing Status">
+                                    <div>
+                                        <lightning-formatted-text
+                                            value={contact.ShowingStatus}></lightning-formatted-text>
+                                    </div>
+                                </td>
+                                <td data-label="Schedule Date">
+                                    <div>{contact.FormattedScheduleDate}</div>
+                                </td>
+                                <td data-label="Actions">
+                                    <div class="action-btn">
+                                        <button class="action-div" onclick={openManageModal}
+                                            data-contact={contact.Json} title="Send Email/WhatsApp">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M7.39993 6.31991L15.8899 3.48991C19.6999 2.21991 21.7699 4.29991 20.5099 8.10991L17.6799 16.5999C15.7799 22.3099 12.6599 22.3099 10.7599 16.5999L9.91993 14.0799L7.39993 13.2399C1.68993 11.3399 1.68993 8.22991 7.39993 6.31991Z" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M10.1101 13.6501L13.6901 10.0601" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <button class="action-div" onclick={openShowingInNewTab}
+                                            data-showing-id={contact.ShowingId}
+                                            disabled={contact.isShowingDisabled}
+                                            title="View Showing Record">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M13 11L22 2M22 2H16M22 2V8M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template if:false={isContactDataAvailable}>
+            <div class="no-prop">
+                <img src={NoDataImageUrl} class="no-data-img" alt="No Data Found">
+                <p>No related contacts found for this property listing.</p>
+            </div>
+        </template>
     </div>
 
 
@@ -122,8 +113,7 @@
         <section role="dialog" class="slds-modal slds-fade-in-open">
             <div class="slds-modal__container schedule-modal-container">
                 <div class="slds-modal__close closs_icon_css" onclick={closeScheduleModal}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                             fill="white" />
@@ -148,130 +138,95 @@
     <template if:true={showManageModal}>
         <section role="dialog" class="slds-modal slds-fade-in-open backdrop-filter">
             <div class="slds-modal__container manage-modal-container">
-                
+
                 <div class="slds-modal__close closs_icon_css" onclick={closeManageModal}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                             fill="white" />
                     </svg>
                 </div>
-                
+
                 <header class="slds-modal__header">
                     <h2 class="slds-modal__title custom-modal-header">Manage Showing</h2>
                 </header>
-                
+
                 <div class="modal-body slds-grid slds-grid_vertical-stretch">
-                    
+
                     <div class="slds-col slds-size_2-of-8 slds-p-around_medium modal-controls">
-                        
+
                         <div class="slds-text-heading_medium slds-m-bottom_medium">
                             Contact: {currentContact.Name}
                         </div>
 
-                        <lightning-combobox 
-                            name="action" 
-                            label="Select Action"
-                            value={selectedAction} 
-                            options={actionOptions} 
-                            onchange={handleActionChange}
-                            class="slds-m-bottom_medium"
-                            required>
+                        <lightning-combobox name="action" label="Select Action" value={selectedAction}
+                            options={actionOptions} onchange={handleActionChange} class="slds-m-bottom_medium" required>
                         </lightning-combobox>
 
                         <template if:true={showDateTimeInputs}>
-                            <label class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr> Select Date</label>
-                            <lightning-input 
-                                type="date" 
-                                name="selectedDate"
-                                label="Selected Date"
-                                variant="label-hidden"
-                                value={selectedDate}
-                                onchange={handleDateChange}
-                                class="slds-m-bottom_small"
-                                required>
+                            <label class="slds-form-element__label"><abbr class="slds-required"
+                                    title="required">*</abbr> Select Date</label>
+                            <lightning-input type="date" name="selectedDate" label="Selected Date"
+                                variant="label-hidden" value={selectedDate} onchange={handleDateChange}
+                                class="slds-m-bottom_small" required>
                             </lightning-input>
 
-                            <lightning-input 
-                                type="time" 
-                                name="time"
-                                label="Visit Time"
-                                value={selectedTime}
-                                onchange={handleTimeChange}
-                                class="slds-m-bottom_medium"
-                                required
+                            <lightning-input type="time" name="time" label="Visit Time" value={selectedTime}
+                                onchange={handleTimeChange} class="slds-m-bottom_medium" required
                                 message-when-value-missing="Time is required">
                             </lightning-input>
                         </template>
 
                         <template if:true={showCommunicationInputs}>
-                            <lightning-combobox 
-                                name="communicationMethod" 
-                                label="Communication Method"
-                                options={communicationMethodOptions} 
-                                value={selectedCommunicationMethod}
-                                onchange={handleCommunicationMethodChange} 
-                                required
+                            <lightning-combobox name="communicationMethod" label="Communication Method"
+                                options={communicationMethodOptions} value={selectedCommunicationMethod}
+                                onchange={handleCommunicationMethodChange} required
                                 message-when-value-missing="Communication method is required"
                                 class="slds-m-bottom_medium">
                             </lightning-combobox>
 
                             <template if:true={isWhatsAppSelected}>
-                                <lightning-combobox 
-                                    name="template" 
-                                    label="Select Template" 
-                                    options={templateOptions}
-                                    onchange={handleTemplateChange} 
-                                    value={selectedTemplate} 
-                                    required
-                                    message-when-value-missing="Template is required" 
-                                    class="slds-m-bottom_medium">
+                                <lightning-combobox name="template" label="Select Template" options={templateOptions}
+                                    onchange={handleTemplateChange} value={selectedTemplate} required
+                                    message-when-value-missing="Template is required" class="slds-m-bottom_medium">
                                 </lightning-combobox>
                             </template>
                         </template>
 
                         <div class="slds-text-align_center slds-p-top_small modal-buttons">
-                            <lightning-button 
-                                variant="neutral" 
-                                label="Cancel" 
-                                onclick={closeManageModal}
+                            <lightning-button variant="neutral" label="Cancel" onclick={closeManageModal}
                                 class="slds-p-right_medium">
                             </lightning-button>
-                            <lightning-button 
-                                variant="brand" 
-                                label={saveButtonLabel}
-                                title={saveButtonLabel}
+                            <lightning-button variant="brand" label={saveButtonLabel} title={saveButtonLabel}
                                 onclick={handleSave}>
                             </lightning-button>
                         </div>
                     </div>
 
                     <div class="slds-col slds-size_6-of-8 slds-p-around_medium slds-border_left modal-preview-area">
-                        
+
                         <!-- <template if:true={showDateTimeInputs}> -->
-                            <!-- <h3 class="slds-text-heading_medium slds-m-bottom_small">Select Date</h3> -->
-                            <!-- <div class="calendar-container-wrapper">
+                        <!-- <h3 class="slds-text-heading_medium slds-m-bottom_small">Select Date</h3> -->
+                        <!-- <div class="calendar-container-wrapper">
                                 <div class="evo-calendar manage-calendar"></div>
                             </div> -->
                         <!-- </template> -->
-                        
+
                         <template if:true={showCommunicationInputs}>
                             <h3 class="slds-text-heading_medium slds-m-bottom_small">Live Preview</h3>
                             <div class="slds-box slds-theme_default preview-container">
-                                
+
                                 <template if:true={isWhatsAppSelected}>
                                     <template if:true={selectedTemplate}>
                                         <div class="whatsapp-preview">
-                                            <c-template-preview
-                                                template-id={selectedTemplate}
-                                                record-id={currentShowingId}
-                                                object-api-name="MVEX__Showing__c">
+                                            <c-template-preview template-id={selectedTemplate}
+                                                record-id={currentShowingId} object-api-name="MVEX__Showing__c">
                                             </c-template-preview>
                                         </div>
                                     </template>
                                     <template if:false={selectedTemplate}>
-                                        <div class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
+                                        <div
+                                            class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
                                             Select a WhatsApp template to preview
                                         </div>
                                     </template>
@@ -284,7 +239,8 @@
                                             </div>
                                         </template>
                                         <template if:false={previewEmailHtml}>
-                                            <div class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
+                                            <div
+                                                class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
                                                 Email preview loading...
                                             </div>
                                         </template>
@@ -294,9 +250,13 @@
                         </template>
 
                         <template if:false={showCommunicationInputsAndDate}>
-                            <div class="slds-box slds-theme_default preview-container slds-text-align_center slds-p-around_large">
+                            <div
+                                class="slds-box slds-theme_default preview-container slds-text-align_center slds-p-around_large">
                                 <div class="action-message action-message-center">
-                                    <lightning-icon icon-name="utility:check" size="large" variant="success"></lightning-icon>
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M7.75 12L10.58 14.83L16.25 9.17" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
                                     <h3 class="slds-text-heading_medium slds-m-top_medium">
                                         You are about to update the status to "{selectedAction}".
                                     </h3>

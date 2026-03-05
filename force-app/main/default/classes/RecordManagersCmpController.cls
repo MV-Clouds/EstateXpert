@@ -78,17 +78,10 @@ public with sharing class RecordManagersCmpController {
 
             // 2. Fetch Configuration from Custom Object
             List<String> configValues = new List<String>();
-            String storedFeatureName = getStoredFeatureName(objectApiName, featureName);
             
             // Query the generic Custom Object
-            List<MVEX__Configuration_Settings__c> settings = [
-                SELECT MVEX__Fields_Data__c, MVEX__Page_Size__c 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Object_API_Name__c = :objectApiName 
-                AND MVEX__Feature_Name__c = :storedFeatureName
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c, MVEX__Page_Size__c FROM MVEX__Configuration_Settings__c 
+                                                                WHERE MVEX__Feature_Name__c = :featureName WITH USER_MODE LIMIT 1];
 
             if (!settings.isEmpty()) {
                 MVEX__Configuration_Settings__c setting = settings[0];
@@ -101,56 +94,6 @@ public with sharing class RecordManagersCmpController {
             return recordData;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'getObjectFields', e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Method Name : getObjectFieldsWithMetaData
-     * @description : Get configuration for "New Record Fields" logic.
-     */
-    @AuraEnabled
-    public static RecordManagerData getObjectFieldsWithMetaData(String objectApiName) {
-        try {
-            RecordManagerData recordData = new RecordManagerData();
-            List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
-
-            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectApiName).getDescribe();
-            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
-
-            for (String fieldName : fieldsMap.keySet()) {
-                Schema.SObjectField field = fieldsMap.get(fieldName);
-                Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
-
-                FieldDetails fieldDetails = new FieldDetails();
-                fieldDetails.label = fieldDescribe.getLabel();
-                fieldDetails.value = fieldDescribe.getName();
-                fieldDetails.fieldType = String.valueOf(fieldDescribe.getType());
-
-                fieldDetailsList.add(fieldDetails);
-            }
-            recordData.fieldDetailsList = fieldDetailsList;
-            
-            List<String> configValues = new List<String>();
-
-            // Query Custom Object for 'New Record Fields' type
-            List<MVEX__Configuration_Settings__c> settings = [
-                SELECT MVEX__Fields_Data__c 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Object_API_Name__c = :objectApiName 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
-
-            if (!settings.isEmpty()) {
-                configValues.add(settings[0].MVEX__Fields_Data__c);
-            }
-
-            recordData.metadataRecords = configValues;
-
-            return recordData;
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'getObjectFieldsWithMetaData', e.getMessage());
             return null;
         }
     }
@@ -176,17 +119,9 @@ public with sharing class RecordManagersCmpController {
     @AuraEnabled
     public static String saveMappings(String checklistData, Integer totalPages, String objectApiName, String featureName) {
         try {
-            String storedFeatureName = getStoredFeatureName(objectApiName, featureName);
-
             // Check if record exists
-            List<MVEX__Configuration_Settings__c> settingsList = [
-                SELECT Id 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Object_API_Name__c = :objectApiName 
-                AND MVEX__Feature_Name__c = :storedFeatureName
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> settingsList = [SELECT Id FROM MVEX__Configuration_Settings__c WHERE MVEX__Feature_Name__c = :featureName
+                                                                    WITH USER_MODE LIMIT 1];
 
             MVEX__Configuration_Settings__c settingToSave;
 
@@ -195,63 +130,20 @@ public with sharing class RecordManagersCmpController {
             } else {
                 settingToSave = new MVEX__Configuration_Settings__c();
                 settingToSave.MVEX__Object_API_Name__c = objectApiName;
-                settingToSave.MVEX__Feature_Name__c = storedFeatureName;
+                settingToSave.MVEX__Feature_Name__c = featureName;
                 // Setting a Name is optional if Auto-Number, but good for reference
-                settingToSave.Name = storedFeatureName.replaceAll(' ', '_') + '_' + objectApiName; 
+                settingToSave.Name = featureName + '_' + objectApiName; 
             }
 
             settingToSave.MVEX__Fields_Data__c = checklistData;
             settingToSave.MVEX__Page_Size__c = totalPages;
 
-            // Perform standard DML
-            if (Schema.sObjectType.MVEX__Configuration_Settings__c.isUpdateable() || 
-                Schema.sObjectType.MVEX__Configuration_Settings__c.isCreateable()) {
-                upsert settingToSave;
-            }
+            upsert settingToSave;
 
             return 'Success';
 
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'saveMappings', e.getStackTraceString());
-            return e.getMessage();
-        }
-    }
-
-    /**
-     * Method Name : saveMappingsNewFields
-     * @description : Save mappings for 'New Record Fields' type using DML.
-     */
-    @AuraEnabled
-    public static String saveMappingsNewFields(String selectFieldsData, String objectApiName) {
-        try {
-            List<MVEX__Configuration_Settings__c> settingsList = [
-                SELECT Id 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Object_API_Name__c = :objectApiName 
-                WITH USER_MODE
-                LIMIT 1
-            ];
-
-            MVEX__Configuration_Settings__c settingToSave;
-
-            if (!settingsList.isEmpty()) {
-                settingToSave = settingsList[0];
-            } else {
-                settingToSave = new MVEX__Configuration_Settings__c();
-                settingToSave.MVEX__Object_API_Name__c = objectApiName;
-                settingToSave.Name = 'NewFields_' + objectApiName;
-            }
-
-            settingToSave.MVEX__Fields_Data__c = selectFieldsData;
-
-            if (Schema.sObjectType.MVEX__Configuration_Settings__c.isUpdateable() || 
-                Schema.sObjectType.MVEX__Configuration_Settings__c.isCreateable()) {
-                upsert settingToSave;
-            }
-
-            return 'success';
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e,'RecordManagersCmpController','saveMappingsNewFields' , e.getStackTraceString());
             return e.getMessage();
         }
     }
@@ -266,13 +158,8 @@ public with sharing class RecordManagersCmpController {
             List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
 
             // Fetch Blocked Fields from the "Global Config" record in Custom Object
-            List<MVEX__Configuration_Settings__c> configList = [
-                SELECT MVEX__Blocked_Fields__c 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Feature_Name__c = 'Listing Filter Config'
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> configList = [SELECT MVEX__Blocked_Fields__c FROM MVEX__Configuration_Settings__c 
+                                                                WHERE MVEX__Feature_Name__c = 'Suggested_Listing_Fields' WITH USER_MODE LIMIT 1];
 
             Set<String> blockedFields = new Set<String>();
             if (!configList.isEmpty() && configList[0].MVEX__Blocked_Fields__c != null) {

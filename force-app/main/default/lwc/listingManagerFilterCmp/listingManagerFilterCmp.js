@@ -78,7 +78,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     initializeStaticFields() {
         this.isLoading = true;
         this.dispatchEvent(new CustomEvent('loading', { detail: true }));
-        getStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters'})
+        getStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'Listing_Manager_Filters'})
             .then(result => {
                 this.staticFields = JSON.parse(result);
                 this.filterFields = this.filterFields.concat(this.staticFields);
@@ -114,7 +114,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     }
 
     performSaveFilter(){
-        saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'ListingManagerFilters', fieldsJson: JSON.stringify(this.filterFields)})
+        saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'Listing_Manager_Filters', fieldsJson: JSON.stringify(this.filterFields)})
         .then(() => {
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.staticFields = JSON.parse(JSON.stringify(this.filterFields));

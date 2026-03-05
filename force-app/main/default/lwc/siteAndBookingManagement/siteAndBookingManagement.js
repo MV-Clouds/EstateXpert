@@ -2,6 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import EvoCalendarZip from '@salesforce/resourceUrl/evoCalender';
+import emptyState from '@salesforce/resourceUrl/emptyState';
 import getPropertyData from '@salesforce/apex/SiteAndBookingController.getPropertyData';
 import sendEmailsAndCreateShowings from '@salesforce/apex/SiteAndBookingController.sendEmailsAndCreateShowings';
 import createShowings from '@salesforce/apex/SiteAndBookingController.createShowings';
@@ -28,6 +29,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @api recordId;
     @track listing = {};
     @track images = [];
+    @track NoDataImageUrl = emptyState;
     @track contacts = [];
     @track currentImageIndex = 0;
     @track mapMarkers = [];
@@ -413,7 +415,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     openManageModal(event) {
         try {
-            this.currentContact = JSON.parse(event.target.dataset.contact);
+            this.currentContact = JSON.parse(event.currentTarget.dataset.contact);
             this.currentShowingId = this.currentContact.ShowingId;
             this.currentContactId = this.currentContact.Id;
             this.mobileNumber = this.currentContact.MobilePhone;
@@ -456,7 +458,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
             this.showManageModal = true;
         } catch (e) {
-            console.error('Error opening manage modal:', e, event.target.dataset.contact);
+            console.error('Error opening manage modal:', e, event.currentTarget.dataset.contact);
             this.showToast('Error', 'Could not open modal. ' + e.message, 'error');
         }
     }
@@ -765,7 +767,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     }
 
     navigateToContact(event) {
-        const contactId = event.target.dataset.id;
+        const contactId = event.currentTarget.dataset.id;
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',
             attributes: { recordId: contactId, objectApiName: 'Contact', actionName: 'view' }
@@ -973,7 +975,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     }
 
     openShowingInNewTab(event) {
-        const showingId = event.target.dataset.showingId;
+        const showingId = event.currentTarget.dataset.showingId;
 
         if (!showingId) {
             this.showToast('Info', 'No Showing record exists yet.', 'info');

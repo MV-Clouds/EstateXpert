@@ -87,7 +87,7 @@
                         </button>
 
                         <template if:true={isConfigOpen}>
-                            <c-record-config-body-cmp feature-name="Listing_Configuration"
+                            <c-record-config-body-cmp feature-name="Suggested_Listing_Fields"
                                 onclose={handleCloseModal}></c-record-config-body-cmp>
                         </template>
                     </div>
@@ -114,7 +114,7 @@
                                     <div class="scroll-div">
                                         <div class="slds-form_element">
                                             <lightning-combobox name="conditionType" label="Condition Type"
-                                                value={selectedConditionType} options={conditionOptions}
+                                                value={conditiontype} options={conditionOptions}
                                                 onchange={handleConditionTypeChange}>
                                             </lightning-combobox>
                                         </div>

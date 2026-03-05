@@ -94,7 +94,7 @@ private class MarketingListCmpControllerTest {
 
         // Create Configuration Settings
         Configuration_Settings__c configSettings = new Configuration_Settings__c(
-            Feature_Name__c = 'Marketing List',
+            Feature_Name__c = 'Marketing_List_Fields',
             Object_API_Name__c = 'Contact',
             Fields_Data__c = '[{"label":"First Name","value":"FirstName"},{"label":"Last Name","value":"LastName"}]',
             Page_Size__c = 50

@@ -95,7 +95,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     initializeStaticFields() {
         this.isLoading = true;
         this.dispatchEvent(new CustomEvent('loading', { detail: true }));
-        getStaticFields({objectApiName: 'Marketing Contact', featureName: 'MarketingManagerFilter'})
+        getStaticFields({objectApiName: 'Contact', featureName: 'Marketing_List_Filters'})
             .then(result => {
                 this.staticFields = result ? JSON.parse(result) : [];
                 // Always add mandatory Contact Type field at the beginning, regardless of configuration
@@ -150,7 +150,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     performSaveFilter(){
         const fieldsToSave = this.filterFields.filter(field => !field.isMandatory);
         
-        saveStaticFields({objectApiName: 'Marketing Contact', featureName: 'MarketingManagerFilter', fieldsJson: JSON.stringify(fieldsToSave)})
+        saveStaticFields({objectApiName: 'Contact', featureName: 'Marketing_List_Filters', fieldsJson: JSON.stringify(fieldsToSave)})
         .then(() => {
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.staticFields = JSON.parse(JSON.stringify(fieldsToSave));

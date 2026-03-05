@@ -2,17 +2,18 @@
     <div class="portal-syndication">
         <h2>Portal Syndication</h2>
         <template if:true={isDataAvailable}>
-            <div class="portal_syndication_table">
-                <table class="slds-table">
+            <div class="data-table-container">
+                <div class="portal_syndication_table">
+                    <table class="custom-data-table">
                     <thead>
                         <tr class="table_tr_cls">
-                            <th scope="col" class="name">
+                            <th scope="col" class="header-cell">
                                 <div>Name</div>
                             </th>
-                            <th scope="col" class="status">
+                            <th scope="col" class="header-cell">
                                 <div>Status</div>
                             </th>
-                            <th scope="col" class="action">
+                            <th scope="col" class="header-cell">
                                 <div>Action</div>
                             </th>
                         </tr>
@@ -29,15 +30,30 @@
                                     </span>
                                 </td>
                                 <td data-label="Action">
-                                    <button class={portal.buttonColor} onclick={handleToggleStatus} data-id={portal.id}
-                                        data-pname={portal.pname} data-button-label={portal.buttonLabel}>
-                                        {portal.buttonLabel}
-                                    </button>
+                                    <template if:true={portal.isPublished}>
+                                        <button class="unpublish_css" onclick={handleToggleStatus} data-id={portal.id}
+                                            data-pname={portal.pname} data-button-label={portal.buttonLabel}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z" fill="white"/>
+                                            </svg>
+                                            {portal.buttonLabel}
+                                        </button>
+                                    </template>
+                                    <template if:false={portal.isPublished}>
+                                        <button class="publish_css" onclick={handleToggleStatus} data-id={portal.id}
+                                            data-pname={portal.pname} data-button-label={portal.buttonLabel}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" fill="white"/>
+                                            </svg>
+                                            {portal.buttonLabel}
+                                        </button>
+                                    </template>
                                 </td>
                             </tr>
                         </template>
                     </tbody>
                 </table>
+                </div>
             </div>
         </template>
 

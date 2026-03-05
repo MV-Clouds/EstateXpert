@@ -44,7 +44,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
 
     // Computed Property: Decide if Card View should be shown
     get showCardView() {
-        return this.featureName !== 'Inquiry Manager' && this.featureName !== 'Listing_Configuration';
+        return this.featureName !== 'Suggested_Inquiry_Fields' && this.featureName !== 'Listing_Manager_Fields';
     }
 
     // Computed Property: Dynamic Grid Class for Header
@@ -60,13 +60,13 @@ export default class RecordConfigBodyCmp extends LightningElement {
     // Computed Property to get Object Name based on Feature
     get selectedTabObject() {
         switch (this.featureName) {
-            case 'Marketing List':
+            case 'Marketing_List_Fields':
                 return 'Contact';
-            case 'Listing Manager':
+            case 'Listing_Manager_Fields':
                 return 'MVEX__Listing__c';
-            case 'Listing_Configuration':
+            case 'Suggested_Listing_Fields':
                 return 'MVEX__Listing__c';
-            case 'Inquiry Manager':
+            case 'Suggested_Inquiry_Fields':
                 return 'MVEX__Inquiry__c';
             default:
                 return '';

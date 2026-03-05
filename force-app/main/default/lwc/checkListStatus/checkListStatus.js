@@ -174,6 +174,7 @@ export default class CheckListStatus extends LightningElement {
         try {
             this.checklistItems = this.checklistItems.map(item => {
                 item.statusClass = item.completed ? 'status1 completed' : 'status2 pending';
+                item.statusIndicatorClass = item.completed ? 'status-indicator status1' : 'status-indicator status2';
                 item.statusText = item.completed ? 'Completed' : 'Pending';
                 item.dropdownIcon = item.showDropdown ? '▲' : '▼';
                 return item;

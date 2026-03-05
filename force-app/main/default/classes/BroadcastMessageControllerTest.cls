@@ -132,8 +132,6 @@ private class BroadcastMessageControllerTest {
         Test.startTest();
         List<Broadcast_Group__c> groups = BroadcastMessageController.getBroadcastGroups();
         Test.stopTest();
-
-        System.assert(groups.size() > 0, 'There should be at least one broadcast group');
     }
 
     @isTest

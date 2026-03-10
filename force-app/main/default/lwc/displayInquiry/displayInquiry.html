@@ -22,7 +22,8 @@
 
                     <div class="btn-container">
 
-                        <button class="btn mapping-btn" onclick={openConfigureSettings}><svg fill="white" height="18px" width="18px" version="1.1" viewBox="0 0 512.003 512.003">
+                        <button class="btn mapping-btn" onclick={openConfigureSettings}><svg fill="white" height="18px"
+                                width="18px" version="1.1" viewBox="0 0 512.003 512.003">
                                 <g>
                                     <path d="M491.584,192.579l-55.918-6.914c-0.919-2.351-1.884-4.682-2.892-6.993l34.648-44.428
                                         c7.227-9.267,6.412-22.464-1.899-30.773l-57.028-56.996c-8.308-8.304-21.502-9.114-30.763-1.893L333.32,79.216
@@ -46,11 +47,11 @@
                                         c8.493-4.565,17.541-8.31,26.896-11.132c8.825-2.662,15.247-10.279,16.378-19.427l6.166-49.867h39.494l6.169,49.869
                                         c1.133,9.148,7.557,16.767,16.384,19.427c9.328,2.811,18.379,6.557,26.902,11.135c8.122,4.364,18.055,3.522,25.325-2.149
                                         l39.616-30.894l27.927,27.912l-30.897,39.618c-5.666,7.267-6.513,17.191-2.158,25.311c4.58,8.54,8.328,17.599,11.138,26.923
-                                        c2.661,8.825,10.279,15.248,19.427,16.381l49.878,6.169V275.74z"/>
+                                        c2.661,8.825,10.279,15.248,19.427,16.381l49.878,6.169V275.74z" />
                                     <path d="M255.997,155.153c-55.606,0-100.845,45.244-100.845,100.856c0,55.603,45.239,100.839,100.845,100.839
                                         c55.609,0,100.852-45.236,100.852-100.839C356.849,200.397,311.606,155.153,255.997,155.153z M255.997,310.303
                                         c-29.941,0-54.3-24.356-54.3-54.294c0-29.947,24.359-54.311,54.3-54.311c29.944,0,54.306,24.363,54.306,54.311
-                                        C310.303,285.947,285.941,310.303,255.997,310.303z"/>
+                                        C310.303,285.947,285.941,310.303,255.997,310.303z" />
                                 </g>
                             </svg>Settings
                         </button>
@@ -62,22 +63,31 @@
                         <template if:true={hasBusinessAccountConfigured}>
                             <button class="btn mapping-btn" onclick={handleSendMessage}
                                 disabled={isSendEmailButtonDisabled}>
-                                <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" 
-                                        d="M3.50002 12C3.50002 7.30558 7.3056 3.5 12 3.5C16.6944 3.5 20.5 7.30558 20.5 12C20.5 16.6944 16.6944 20.5 12 20.5C10.3278 20.5 8.77127 20.0182 7.45798 19.1861C7.21357 19.0313 6.91408 18.9899 6.63684 19.0726L3.75769 19.9319L4.84173 17.3953C4.96986 17.0955 4.94379 16.7521 4.77187 16.4751C3.9657 15.176 3.50002 13.6439 3.50002 12ZM12 1.5C6.20103 1.5 1.50002 6.20101 1.50002 12C1.50002 13.8381 1.97316 15.5683 2.80465 17.0727L1.08047 21.107C0.928048 21.4637 0.99561 21.8763 1.25382 22.1657C1.51203 22.4552 1.91432 22.5692 2.28599 22.4582L6.78541 21.1155C8.32245 21.9965 10.1037 22.5 12 22.5C17.799 22.5 22.5 17.799 22.5 12C22.5 6.20101 17.799 1.5 12 1.5ZM14.2925 14.1824L12.9783 15.1081C12.3628 14.7575 11.6823 14.2681 10.9997 13.5855C10.2901 12.8759 9.76402 12.1433 9.37612 11.4713L10.2113 10.7624C10.5697 10.4582 10.6678 9.94533 10.447 9.53028L9.38284 7.53028C9.23954 7.26097 8.98116 7.0718 8.68115 7.01654C8.38113 6.96129 8.07231 7.046 7.84247 7.24659L7.52696 7.52195C6.76823 8.18414 6.3195 9.2723 6.69141 10.3741C7.07698 11.5163 7.89983 13.314 9.58552 14.9997C11.3991 16.8133 13.2413 17.5275 14.3186 17.8049C15.1866 18.0283 16.008 17.7288 16.5868 17.2572L17.1783 16.7752C17.4313 16.5691 17.5678 16.2524 17.544 15.9269C17.5201 15.6014 17.3389 15.308 17.0585 15.1409L15.3802 14.1409C15.0412 13.939 14.6152 13.9552 14.2925 14.1824Z" 
-                                        fill="white"/>
+                                <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M3.50002 12C3.50002 7.30558 7.3056 3.5 12 3.5C16.6944 3.5 20.5 7.30558 20.5 12C20.5 16.6944 16.6944 20.5 12 20.5C10.3278 20.5 8.77127 20.0182 7.45798 19.1861C7.21357 19.0313 6.91408 18.9899 6.63684 19.0726L3.75769 19.9319L4.84173 17.3953C4.96986 17.0955 4.94379 16.7521 4.77187 16.4751C3.9657 15.176 3.50002 13.6439 3.50002 12ZM12 1.5C6.20103 1.5 1.50002 6.20101 1.50002 12C1.50002 13.8381 1.97316 15.5683 2.80465 17.0727L1.08047 21.107C0.928048 21.4637 0.99561 21.8763 1.25382 22.1657C1.51203 22.4552 1.91432 22.5692 2.28599 22.4582L6.78541 21.1155C8.32245 21.9965 10.1037 22.5 12 22.5C17.799 22.5 22.5 17.799 22.5 12C22.5 6.20101 17.799 1.5 12 1.5ZM14.2925 14.1824L12.9783 15.1081C12.3628 14.7575 11.6823 14.2681 10.9997 13.5855C10.2901 12.8759 9.76402 12.1433 9.37612 11.4713L10.2113 10.7624C10.5697 10.4582 10.6678 9.94533 10.447 9.53028L9.38284 7.53028C9.23954 7.26097 8.98116 7.0718 8.68115 7.01654C8.38113 6.96129 8.07231 7.046 7.84247 7.24659L7.52696 7.52195C6.76823 8.18414 6.3195 9.2723 6.69141 10.3741C7.07698 11.5163 7.89983 13.314 9.58552 14.9997C11.3991 16.8133 13.2413 17.5275 14.3186 17.8049C15.1866 18.0283 16.008 17.7288 16.5868 17.2572L17.1783 16.7752C17.4313 16.5691 17.5678 16.2524 17.544 15.9269C17.5201 15.6014 17.3389 15.308 17.0585 15.1409L15.3802 14.1409C15.0412 13.939 14.6152 13.9552 14.2925 14.1824Z"
+                                        fill="white" />
                                 </svg>
                                 Send Message
                             </button>
                         </template>
 
-                        <button class="btn mapping-btn" onclick={openModal} disabled={isSendEmailButtonDisabled}> 
+                        <button class="btn mapping-btn" onclick={openModal} disabled={isSendEmailButtonDisabled}>
                             <svg width="18px" height="18px" version="1.1" viewBox="0 0 512 512">
                                 <g>
-                                    <path d="M2.072,127.79c-1.335,4.946-2.058,10.14-2.058,15.502c0,241.727-0.087,226.177,0.18,229.813L157.121,229.27L2.072,127.79z" fill="white"/>
-                                    <path d="M255.904,281.128c-23.968,0-35.227-10.26-66.592-30.789L15.964,409.225c10.888,11.717,26.415,19.066,43.633,19.066h392.611c17.219,0,32.746-7.35,43.633-19.066L322.495,250.34C291.131,270.868,279.87,281.128,255.904,281.128z" fill="white"/>
-                                    <path d="M271.397,239.225l217.829-142.57c-10.174-8.093-23.036-12.946-37.017-12.946H59.597c-13.981,0-26.842,4.853-37.018,12.946l217.829,142.57C249.821,245.385,261.986,245.386,271.397,239.225z" fill="white"/>
-                                    <path d="M509.734,127.79l-155.05,101.48l156.928,143.835C511.704,371.862,513.168,140.518,509.734,127.79z" fill="white"/>
+                                    <path
+                                        d="M2.072,127.79c-1.335,4.946-2.058,10.14-2.058,15.502c0,241.727-0.087,226.177,0.18,229.813L157.121,229.27L2.072,127.79z"
+                                        fill="white" />
+                                    <path
+                                        d="M255.904,281.128c-23.968,0-35.227-10.26-66.592-30.789L15.964,409.225c10.888,11.717,26.415,19.066,43.633,19.066h392.611c17.219,0,32.746-7.35,43.633-19.066L322.495,250.34C291.131,270.868,279.87,281.128,255.904,281.128z"
+                                        fill="white" />
+                                    <path
+                                        d="M271.397,239.225l217.829-142.57c-10.174-8.093-23.036-12.946-37.017-12.946H59.597c-13.981,0-26.842,4.853-37.018,12.946l217.829,142.57C249.821,245.385,261.986,245.386,271.397,239.225z"
+                                        fill="white" />
+                                    <path
+                                        d="M509.734,127.79l-155.05,101.48l156.928,143.835C511.704,371.862,513.168,140.518,509.734,127.79z"
+                                        fill="white" />
                                 </g>
                             </svg>
                             Send Mail
@@ -85,10 +95,11 @@
 
                         <template if:true={hideFilterButton}>
                             <button class="btn mapping-btn" onclick={showModalBox}>
-                                <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
-                                    <path fill-rule="evenodd" clip-rule="evenodd" 
-                                        d="M3 7C3 6.44772 3.44772 6 4 6H20C20.5523 6 21 6.44772 21 7C21 7.55228 20.5523 8 20 8H4C3.44772 8 3 7.55228 3 7ZM6 12C6 11.4477 6.44772 11 7 11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H7C6.44772 13 6 12.5523 6 12ZM9 17C9 16.4477 9.44772 16 10 16H14C14.5523 16 15 16.4477 15 17C15 17.5523 14.5523 18 14 18H10C9.44772 18 9 17.5523 9 17Z" 
-                                        fill="white"/>
+                                <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M3 7C3 6.44772 3.44772 6 4 6H20C20.5523 6 21 6.44772 21 7C21 7.55228 20.5523 8 20 8H4C3.44772 8 3 7.55228 3 7ZM6 12C6 11.4477 6.44772 11 7 11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H7C6.44772 13 6 12.5523 6 12ZM9 17C9 16.4477 9.44772 16 10 16H14C14.5523 16 15 16.4477 15 17C15 17.5523 14.5523 18 14 18H10C9.44772 18 9 17.5523 9 17Z"
+                                        fill="white" />
                                 </svg>Filters
                             </button>
                         </template>
@@ -101,15 +112,24 @@
                                     Filter Inquiries
                                 </div>
                                 <div class="scroll-div">
-                                    <div class="slds-form_element">
-                                        <lightning-combobox name="conditionType" label="Condition Type"
-                                            value={conditiontype} options={conditionOptions}
-                                            onchange={handleConditionTypeChange}>
-                                        </lightning-combobox>
+                                    <div class="condition-type-wrapper">
+                                        <div class="slds-form_element slds-m-bottom_medium condition-type-field">
+                                            <lightning-combobox name="conditionType" label="Condition Type"
+                                                value={conditiontype} options={conditionOptions}
+                                                onchange={handleConditionTypeChange}>
+                                            </lightning-combobox>
+                                        </div>
+                                        <template if:true={showAddConditionIcon}>
+                                            <button class="add-condition-icon-btn" onclick={addCondition} title="Add Condition">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                                </svg>
+                                            </button>
+                                        </template>
                                     </div>
 
                                     <template if:true={isCustomLogicSelected}>
-                                        <div class="slds-form_element slds-m-top_medium">
+                                        <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                             <label><span class="required-class">*</span>Logical Expression</label>
                                             <lightning-input variant="label-hidden" data-id="condition-input"
                                                 value={logicalExpression} onchange={handleLogicalExpressionChange}
@@ -165,15 +185,13 @@
                             </div>
                             <div class="filter-footer">
                                 <div class="add-condtion">
-                                    <button class="btn modal-btn-blue" onclick={addCondition}
-                                        disabled={isRealatedList}>Add Condition</button>
                                     <template if:true={isAddConditionModalVisible}>
                                         <div class="condition-div">
                                             <div class="filter-header">
                                                 Configure Condition
                                             </div>
                                             <div class="condition-div-body">
-                                                <div class="slds-form_element">
+                                                <div class="slds-form_element slds-m-bottom_medium">
                                                     <lightning-combobox name="inquiryField" label="Inquiry Field"
                                                         value={inquiryFieldObject.MVEX__Field_Name__c}
                                                         options={inquirypicklistoptions}
@@ -181,7 +199,7 @@
                                                     </lightning-combobox>
                                                 </div>
 
-                                                <div class="slds-form_element slds-m-top_medium">
+                                                <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                     <lightning-combobox name="conditionOperator" label="Condition"
                                                         value={selectedConditionOperator}
                                                         options={conditionOperatorOptions}
@@ -189,14 +207,14 @@
                                                     </lightning-combobox>
                                                 </div>
 
-                                                <div class="slds-form_element slds-m-top_medium">
+                                                <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                     <lightning-input type="checkbox" label="Use Constant Value"
                                                         checked={isConstant} onchange={handleUseConstantChange}>
                                                     </lightning-input>
                                                 </div>
 
                                                 <template if:true={isConstant}>
-                                                    <div class="slds-form_element slds-m-top_medium">
+                                                    <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                         <label><span class="red">*</span>Value</label>
                                                         <template if:true={inquiryFieldObject.isPrimary}>
                                                             <lightning-input
@@ -223,7 +241,7 @@
                                                 </template>
 
                                                 <template if:false={isConstant}>
-                                                    <div class="slds-form_element slds-m-top_medium">
+                                                    <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                         <lightning-combobox name="listingField" label="Listing Field"
                                                             value={selectedListingField} options={listingFieldOptions}
                                                             onchange={handleListingFieldChange} required>
@@ -232,17 +250,37 @@
                                                 </template>
                                             </div>
                                             <div class="condition-div-footer">
-                                                <button class="btn modal-btn-white"
-                                                    onclick={closeAddConditionModal}>Cancel</button>
-                                                <button class="btn modal-btn-blue" onclick={saveCondition}>Save</button>
+                                                <button class="modal-btn-white"
+                                                    onclick={closeAddConditionModal}>
+                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                                    </svg>
+                                                    Cancel
+                                                </button>
+                                                <button class="modal-btn-blue" onclick={saveCondition}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                                    </svg>
+                                                    Save
+                                                </button>
                                             </div>
                                             <div class="arrow"></div>
                                         </div>
                                     </template>
                                 </div>
                                 <div class="custom__footer">
-                                    <button class="btn modal-btn-white" onclick={hideModalBox}>Cancel</button>
-                                    <button class="btn modal-btn-blue" onclick={applyModalFilters}>Apply</button>
+                                    <button class="modal-btn-white" onclick={hideModalBox}>
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                        </svg>
+                                        Cancel
+                                    </button>
+                                    <button class="modal-btn-blue" onclick={applyModalFilters}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                        </svg>
+                                        Apply
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -361,7 +399,7 @@
             <div class="slds-modal__container">
                 <!-- Modal/Popup Header -->
                 <div class="slds-modal__close closs_icon_css" onclick={closeModal}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                             fill="white" />
@@ -373,65 +411,82 @@
                 </div>
 
                 <!-- Modal/Popup Body -->
-                <div class="slds-modal__content slds-p-around_medium custom-modal-content">
-                    <template if:true={isFirstScreen}>
-                        <div class="total-records">
-                            Total Inquiry Selected : {totalSelectedItems}
-                        </div>
+                <div class="slds-modal__content custom-modal-content">
+                    <div class="sub-send-email">
+                        <template if:true={isFirstScreen}>
+                            <div class="total-records">
+                                Total Inquiry Selected : {totalSelectedItems}
+                            </div>
 
-                        <div class="dotted-border"></div>
+                            <div class="dotted-border"></div>
 
-                        <div class="input-box">
-                            <legend class="slds-form-element__legend slds-form-element__label"><span
-                                    class="red">*</span>How do you want to send?</legend>
-                            <lightning-combobox name="sendMethod" value={sendMethod} placeholder="Select a method"
-                                options={messageOptions} onchange={handleSendMethodChange}>
-                            </lightning-combobox>
-                        </div>
+                            <div class="input-box">
+                                <legend class="slds-form-element__legend slds-form-element__label"><span
+                                        class="red">*</span>How do you want to send?</legend>
+                                <lightning-combobox name="sendMethod" value={sendMethod} placeholder="Select a method"
+                                    options={messageOptions} onchange={handleSendMethodChange}>
+                                </lightning-combobox>
+                            </div>
 
-                        <div class="input-box">
-                            <legend class="slds-form-element__legend slds-form-element__label"><span
-                                    class="red">*</span>Select Custom Template</legend>
-                            <lightning-combobox name="gmailTemplate" value={selectedTemplate}
-                                placeholder="Select a template" options={quickTemplates}
-                                onchange={handletemplateChange}>
-                            </lightning-combobox>
-                        </div>
+                            <div class="input-box">
+                                <legend class="slds-form-element__legend slds-form-element__label"><span
+                                        class="red">*</span>Select Custom Template</legend>
+                                <lightning-combobox name="gmailTemplate" value={selectedTemplate}
+                                    placeholder="Select a template" options={quickTemplates}
+                                    onchange={handletemplateChange}>
+                                </lightning-combobox>
+                            </div>
 
 
-                        <div class="input-box" if:true={isForSingle}>
-                            <legend class="slds-form-element__legend slds-form-element__label">Select Listing Template
-                            </legend>
-                            <lightning-combobox name="listingTemplate" value={selectedListingTemplate}
-                                placeholder="Select a template" options={listingTemplateOptions}
-                                onchange={handleListingTemplateChange}>
-                            </lightning-combobox>
-                        </div>
-                    </template>
+                            <div class="input-box" if:true={isForSingle}>
+                                <legend class="slds-form-element__legend slds-form-element__label">Select Listing Template
+                                </legend>
+                                <lightning-combobox name="listingTemplate" value={selectedListingTemplate}
+                                    placeholder="Select a template" options={listingTemplateOptions}
+                                    onchange={handleListingTemplateChange}>
+                                </lightning-combobox>
+                            </div>
+                        </template>
 
-                    <template if:false={isFirstScreen}>
-                        <div class="content-body">
-                            <template if:true={isTemplateBody}>
-                                <div class="template-body-header">
-                                    <h3>Preview</h3>
-                                </div>
-                                <div class="dotted-border"></div>
-                                <div class="scrollable-content">
-                                    <div class="richText"></div>
-                                </div>
-                            </template>
-                        </div>
-                        <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC} width="0%"
-                            height="0%"></iframe>
-                    </template>
+                        <template if:false={isFirstScreen}>
+                            <div class="content-body">
+                                <template if:true={isTemplateBody}>
+                                    <div class="template-body-header">
+                                        <h3>Preview</h3>
+                                    </div>
+                                    <div class="dotted-border"></div>
+                                    <div class="scrollable-content">
+                                        <div class="richText"></div>
+                                    </div>
+                                </template>
+                            </div>
+                            <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC} width="0%"
+                                height="0%"></iframe>
+                        </template>
+                    </div>
 
                     <div class="footer-btns">
                         <template if:true={isFirstScreen}>
-                            <button class="save_btn_css" onclick={handleFooterButtonClick}>Next</button>
+                            <button class="save_btn_css" onclick={handleFooterButtonClick}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Next
+                            </button>
                         </template>
                         <template if:false={isFirstScreen}>
-                            <button class="cancel_btn_css" onclick={handleBack}>Back</button>
-                            <button class="save_btn_css" onclick={handleFooterButtonClick}>Send</button>
+                            <button class="cancel_btn_css" onclick={handleBack}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Back
+                            </button>
+                            <button class="save_btn_css" onclick={handleFooterButtonClick}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                </svg>
+                                Send
+                            </button>
                         </template>
                     </div>
                 </div>
@@ -446,9 +501,9 @@
     <template if:true={showTemplate}>
         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
             class="slds-modal slds-fade-in-open slds-modal_small">
-            <div class="slds-modal__container send-template-modal-container">
+            <div class="slds-modal__container">
                 <div class="slds-modal__close closs_icon_css" onclick={handleCloseTemplate}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                             fill="white" />
@@ -456,7 +511,7 @@
                 </div>
 
                 <div class="slds-modal__header blue-header">
-                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{popupHeader}</h1>
+                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Send Message</h1>
                 </div>
 
                 <div class="modal-body">
@@ -469,8 +524,7 @@
                                         <lightning-combobox name="template" label="Select Template"
                                             options={templateOptions} onchange={handleInputChange}
                                             value={selectedTemplate} required
-                                            message-when-value-missing="Template is required"
-                                            class="template-combobox">
+                                            message-when-value-missing="Template is required" class="template-combobox">
                                         </lightning-combobox>
                                     </div>
 
@@ -495,8 +549,8 @@
                                 <!-- Group 2: Contact List (Right) -->
                                 <div class="preview-section-right">
                                     <lightning-input type="search" variant="label-hidden"
-                                        placeholder="Search by Name or Phone..."
-                                        onchange={handleSearchMembers} class="contact-search">
+                                        placeholder="Search by Name or Phone..." onchange={handleSearchMembers}
+                                        class="contact-search">
                                     </lightning-input>
 
                                     <div class="selected-contacts-section">
@@ -516,14 +570,11 @@
                                                                 <td>{member.Name}</td>
                                                                 <td>{member.Phone}</td>
                                                                 <td>
-                                                                    <lightning-button-icon 
-                                                                        icon-name="utility:delete" 
-                                                                        variant="bare" 
-                                                                        alternative-text="Remove" 
-                                                                        title="Remove" 
-                                                                        data-id={member.Id}
-                                                                        onclick={handleRemoveMember}>
-                                                                    </lightning-button-icon>
+                                                                    <button class="table-delete-btn" data-id={member.Id} onclick={handleRemoveMember} title="Remove">
+                                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                        </svg>
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                         </template>
@@ -532,7 +583,8 @@
                                                         <tr>
                                                             <td colspan="3" class="no-results-cell">
                                                                 <div class="no-results-container">
-                                                                    <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
+                                                                    <lightning-icon icon-name="utility:search"
+                                                                        size="small"></lightning-icon>
                                                                     <span>No matching contacts found</span>
                                                                 </div>
                                                             </td>
@@ -544,11 +596,19 @@
                                     </div>
                                 </div>
                             </div>
-                             <div class="popUpFooter slds-text-align--center">
-                                <lightning-button variant="brand" label="Send" onclick={handleConfirmPopup}
-                                    class="slds-m-left_x-small"></lightning-button>
-                                <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
-                                    class="slds-m-left_x-small"></lightning-button>
+                            <div class="popUpFooter">
+                                <button class="save_btn_css" onclick={handleConfirmPopup}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                    </svg>
+                                    Send
+                                </button>
+                                <button class="save_btn_css" onclick={handleSchedulePopup}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+                                    </svg>
+                                    Schedule
+                                </button>
                             </div>
                         </template>
 
@@ -562,27 +622,31 @@
         <!-- Last Page: Selection of Date and Time (Now as Overlay Modal) -->
         <template if:true={popUpLastPage}>
             <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop"></div>
-            
+
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="datetime-modal-heading"
                 class="slds-modal slds-fade-in-open schedule-modal">
-                <div class="slds-modal__container schedule-modal-container">
+                <div class="slds-modal__container">
                     <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="white" />
+                                fill="#1F2937" />
                         </svg>
                     </div>
 
-                    <div class="slds-modal__header schedule-modal-header">
+                    <div class="slds-modal__header blue-header">
                         <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date & Time</h2>
                     </div>
 
                     <div class="slds-modal__content schedule-modal-content">
                         <div class="datetime-selection-wrapper">
                             <div class="timezone-note">
-                                <svg class="w-6 h-6 text-gray-800 cal-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+                                <svg class="w-6 h-6 text-gray-800 cal-icon" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                    viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z" />
                                 </svg>
                                 <div class="schedule-message">
                                     <p class="main-line">Schedule your message</p>
@@ -591,14 +655,23 @@
                             </div>
                             <lightning-input type="datetime-local" name="dateTime" label="Select Date and Time"
                                 value={selectedDateTime} onchange={handleInputChange} required
-                                message-when-value-missing="Please select a date and time"
-                                variant="label-stacked">
+                                message-when-value-missing="Please select a date and time">
                             </lightning-input>
                         </div>
 
-                        <div class="schedule-modal-footer slds-text-align--center">
-                            <lightning-button variant="neutral" label="Cancel" onclick={handlePreviousLastPage}></lightning-button>
-                            <lightning-button variant="brand" label="Confirm & Send" onclick={handleSchedule}></lightning-button>
+                        <div class="schedule-modal-footer">
+                            <button class="cancel_btn_css" onclick={handlePreviousLastPage}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                </svg>
+                                Cancel
+                            </button>
+                            <button class="save_btn_css" onclick={handleSchedule}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                </svg>
+                                Confirm & Send
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -609,37 +682,41 @@
 
         <template if:true={popUpConfirmPage}>
             <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handleBackdropClick}></div>
-            
+
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="confirm-modal-heading"
-                class="slds-modal slds-fade-in-open confirm-modal"
-                aria-describedby="modal-content-id-3">
-                <div class="slds-modal__container schedule-modal-container">
+                class="slds-modal slds-fade-in-open confirm-modal" aria-describedby="modal-content-id-3">
+                <div class="slds-modal__container">
                     <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="white" />
+                                fill="#1F2937" />
                         </svg>
                     </div>
 
-                    <div class="slds-modal__header schedule-modal-header">
+                    <div class="slds-modal__header blue-header">
                         <h2 class="slds-modal__title" id="confirm-modal-heading">Are you sure?</h2>
                     </div>
 
                     <div class="slds-modal__content schedule-modal-content" id="modal-content-id-3">
-                        <p>Are you sure you want to send this template to the selected contacts?</p>
-                        
+                        <div class="confirm-send">
+                            <p>Are you sure you want to send this template to the selected contacts?</p>
+                        </div>
 
-                        <div class="schedule-modal-footer slds-text-align--center">
-                                    <lightning-button variant="neutral" 
-                            label="Cancel" 
-                            onclick={handlePreviousLastPage}>
-                        </lightning-button>
-                        <lightning-button variant="brand" 
-                            label="Confirm & Send" 
-                            onclick={handleSendOnPopup}>
-                        </lightning-button>
-                                </div>
+                        <div class="schedule-modal-footer">
+                            <button class="cancel_btn_css" onclick={handlePreviousLastPage}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                </svg>
+                                Cancel
+                            </button>
+                            <button class="save_btn_css" onclick={handleSendOnPopup}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                </svg>
+                                Confirm & Send
+                            </button>
+                        </div>
                     </div>
 
                 </div>

@@ -22,6 +22,8 @@ export default class EditCheckListModal extends LightningElement {
     @track isPrimary = false;
     @track isPicklist = false;
     @track isReference = false;
+    @track dragStartIndex = null;
+    scrollInterval = null;
 
     operatorOptions = [
         { label: 'Equals', value: 'Equals' },
@@ -153,62 +155,135 @@ export default class EditCheckListModal extends LightningElement {
     }
 
     /**
-    * Method Name: handleOrderChange
-    * @description: Used to handle order change.
-    * Created Date: 09/07/2024
+    * Method Name: handleDragStart
+    * @description: Used to handle drag start.
+    * Created Date: 09/03/2026
     * Created By: Karan Singh
     */
-    handleOrderChange(event) {
+    handleDragStart(event) {
         try {
-            const action = event.currentTarget.dataset.action;
-            const index = parseInt(event.currentTarget.dataset.index, 10);
-            if (action === 'up') {
-                this.moveItemUp(index);
-            } else if (action === 'down') {
-                this.moveItemDown(index);
-            }
+            this.dragStartIndex = Number(event.currentTarget.dataset.index);
+            event.currentTarget.classList.add('dragged');
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.dropEffect = 'move';
         } catch (error) {
-            errorDebugger('EditCheckListModal', 'handleOrderChange', error, 'warn', 'error in handleOrderChange');
+            errorDebugger('EditCheckListModal', 'handleDragStart', error, 'warn', 'error in handleDragStart');
         }
     }
 
     /**
-    * Method Name: moveItemUp
-    * @description: Used to move item up.
-    * Created Date: 09/07/2024
-    * Updated Date: 23/12/2024
+    * Method Name: handleDragLeave
+    * @description: Used to handle drag leave.
+    * Created Date: 09/03/2026
     * Created By: Karan Singh
-    * Updated By: Karan Singh
     */
-    moveItemUp(index) {
+    handleDragLeave(event) {
         try {
-            if (index > 0) {
-                const updatedItems = [...this.checklistItems];
-                [updatedItems[index - 1], updatedItems[index]] = [updatedItems[index], updatedItems[index - 1]]; // Swap items
-                this.checklistItems = updatedItems;
+            const row = event.currentTarget;
+            row.classList.remove('drop-over');
+            if (this.scrollInterval) {
+                clearInterval(this.scrollInterval);
+                this.scrollInterval = null;
             }
         } catch (error) {
-            errorDebugger('EditCheckListModal', 'moveItemUp', error, 'warn', 'error in moveItemUp');
+            errorDebugger('EditCheckListModal', 'handleDragLeave', error, 'warn', 'error in handleDragLeave');
         }
     }
 
     /**
-    * Method Name: moveItemDown
-    * @description: Used to move item down.
-    * Created Date: 09/07/2024
-    * Updated Date: 23/12/2024
+    * Method Name: handleDragOver
+    * @description: Used to handle drag over with auto-scroll.
+    * Created Date: 09/03/2026
     * Created By: Karan Singh
-    * Updated By: Karan Singh
     */
-    moveItemDown(index) {
+    handleDragOver(event) {
         try {
-            if (index < this.checklistItems.length - 1) {
-                const updatedItems = [...this.checklistItems];
-                [updatedItems[index], updatedItems[index + 1]] = [updatedItems[index + 1], updatedItems[index]]; // Swap items
-                this.checklistItems = updatedItems;
+            event.preventDefault();
+            const row = event.currentTarget;
+            row.classList.add('drop-over');
+        
+            // Auto-scroll functionality
+            const container = this.template.querySelector('.tableContainer');
+            if (!container) return;
+        
+            const bounding = container.getBoundingClientRect();
+            const mouseY = event.clientY;
+            const scrollMargin = 70;
+            const scrollSpeed = 20;
+            const maxScroll = container.scrollHeight - container.clientHeight;
+            const currentScroll = container.scrollTop;
+        
+            // Clear any existing interval to prevent duplicates
+            if (this.scrollInterval) {
+                clearInterval(this.scrollInterval);
+                this.scrollInterval = null;
+            }
+        
+            // Top zone scrolling
+            if (mouseY < bounding.top + scrollMargin && currentScroll > 0) {
+                this.scrollInterval = setInterval(() => {
+                    container.scrollTop = Math.max(0, container.scrollTop - scrollSpeed);
+                }, 16);
+            } 
+            // Bottom zone scrolling
+            else if (mouseY > bounding.bottom - scrollMargin && currentScroll < maxScroll) {
+                this.scrollInterval = setInterval(() => {
+                    container.scrollTop = Math.min(maxScroll, container.scrollTop + scrollSpeed);
+                }, 16);
             }
         } catch (error) {
-            errorDebugger('EditCheckListModal', 'moveItemDown', error, 'warn', 'error in moveItemDown');
+            errorDebugger('EditCheckListModal', 'handleDragOver', error, 'warn', 'error in handleDragOver');
+        }
+    }
+
+    /**
+    * Method Name: handleDrop
+    * @description: Used to handle drop and reorder items.
+    * Created Date: 09/03/2026
+    * Created By: Karan Singh
+    */
+    handleDrop(event) {
+        try {
+            event.preventDefault();
+            const dragStartIndex = this.dragStartIndex;
+            const dropIndex = Number(event.currentTarget.dataset.index);
+
+            if (dragStartIndex === dropIndex) return;
+
+            // Reorder items
+            const items = [...this.checklistItems];
+            const [draggedItem] = items.splice(dragStartIndex, 1);
+            items.splice(dropIndex, 0, draggedItem);
+
+            this.checklistItems = items;
+
+            // Reset styling
+            event.currentTarget.classList.remove('drop-over');
+        } catch (error) {
+            errorDebugger('EditCheckListModal', 'handleDrop', error, 'warn', 'error in handleDrop');
+        }
+    }
+
+    /**
+    * Method Name: handleDragEnd
+    * @description: Used to handle drag end and cleanup.
+    * Created Date: 09/03/2026
+    * Created By: Karan Singh
+    */
+    handleDragEnd(event) {
+        try {
+            // Clear all drag classes
+            this.template.querySelectorAll('.popup__data-row').forEach(row => {
+                row.classList.remove('dragged', 'drop-over');
+            });
+            
+            // Clear interval
+            if (this.scrollInterval) {
+                clearInterval(this.scrollInterval);
+                this.scrollInterval = null;
+            }
+        } catch (error) {
+            errorDebugger('EditCheckListModal', 'handleDragEnd', error, 'warn', 'error in handleDragEnd');
         }
     }
 

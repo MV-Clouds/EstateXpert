@@ -273,9 +273,17 @@
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     cursor: pointer;
     transition: all 0.2s ease;
     border: none;
+}
+
+.action_btn svg {
+    flex-shrink: 0;
 }
 
 .action_btn.primary {

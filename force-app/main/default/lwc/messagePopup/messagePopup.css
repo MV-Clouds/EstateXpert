@@ -370,67 +370,127 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  right: -2rem;
-  bottom: 0rem;
-  background: transparent;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #F3F6F9;
+  transition: all 0.2s ease;
+}
+
+.closs_icon_css svg path {
+  fill: #1F2937;
 }
 
 .blue-header {
   background-color: #0176D3;
   color: white;
   border-bottom-style: unset;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  padding: 1rem 1.25rem;
 }
 
 .modalbody {
-  background-color: aliceblue;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  background-image: url('/resource/MVEX__newImageandMediaBg/');
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  background-color: #F9FAFB !important;
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content_body {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .delete_modal_font_css {
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 26px;
   text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: 3rem;
-  margin-bottom: 1rem;
+  color: #374151;
 }
 
-.edit_modal_footerbtns {
+.delete_modal_font_css p {
+  margin: 1rem;
+}
+
+.footerbtns {
   display: flex;
   justify-content: center;
   gap: 1rem;
+  padding: 1rem;
+  background: #FFFFFF;
+  border-top: 1px solid #E5E7EB;
+  flex-shrink: 0;
 }
 
 .delete_btn_css {
   font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
+  font-weight: 500;
   border: 1px solid #bf0a00;
-  padding: 0px 20px;
+  padding: 0.5rem 1.5rem;
   background: #B3261E;
   color: white;
-  border-radius: 5px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete_btn_css:hover {
+  background: #980800;
+  box-shadow: 0 4px 8px rgba(191, 10, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.save_btn_css {
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  background: #0176D3;
+  color: white;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save_btn_css:hover {
+  background: #0156A3;
+  box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+  transform: translateY(-1px);
 }
 
 .cancel_btn_css {
   font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
-  padding: 0px 20px;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
   background: #FFFFFF;
-  border: 1px solid #0176D3;
+  border: 1.5px solid #0176D3;
   color: #0176D3;
-  border-radius: 5px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel_btn_css:hover {
+  background: #F3F6F9;
+  box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }

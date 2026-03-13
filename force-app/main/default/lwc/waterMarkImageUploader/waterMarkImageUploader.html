@@ -3,18 +3,17 @@
         class="slds-modal slds-fade-in-open slds-modal_small">
         <div class="slds-modal__container">
             <div class="slds-modal__close closs_icon_css" onclick={handleDialogueClose}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                        fill="white" />
+                        fill="#1F2937" />
                 </svg>
             </div>
             <div class="slds-modal__header blue-header">
                 <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">AWS Watermark Image
                     Uploader</h1>
             </div>
-            <div class="slds-modal__content slds-p-around_medium slds-p-bottom_small forBGSetup"
-                id="modal-content-id-1">
+            <div class="slds-modal__content modalbody" id="modal-content-id-1">
                 <div class="content_body">
                     <!-- Existing file selector and dropzone -->
                     <div class="image_content">
@@ -66,14 +65,12 @@
                                                 <p class="imgd2">{imagedata.ContentSize} kb</p>
                                             </div>
                                             <div class="removeImage">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
                                                     data-id={imagedata.Id} data-name="cvdata" onclick={flipCard}>
-                                                    <path opacity="0.3"
-                                                        d="M12 4C7.59 4 4 7.59 4 12C4 16.41 7.59 20 12 20C16.41 20 20 16.41 20 12C20 7.59 16.41 4 12 4ZM16 14.59L14.59 16L12 13.41L9.41 16L8 14.59L10.59 12L8 9.41L9.41 8L12 10.59L14.59 8L16 9.41L13.41 12L16 14.59Z"
-                                                        fill="#858585" />
                                                     <path
-                                                        d="M14.59 8L12 10.59L9.41 8L8 9.41L10.59 12L8 14.59L9.41 16L12 13.41L14.59 16L16 14.59L13.41 12L16 9.41L14.59 8ZM12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"
-                                                        fill="#858585" />
+                                                        d="M7.625 8.29166L8.15964 15.2088C8.23242 16.1498 9.01758 16.875 9.96139 16.875H14.0386C14.9824 16.875 15.7676 16.1498 15.8404 15.2088L16.375 8.29166M10.125 8.08333V7.45833C10.125 6.53786 10.8712 5.79166 11.7917 5.79166H12.2083C13.1288 5.79166 13.875 6.53786 13.875 7.45833V8.08333M6.16669 8.29166H17.8334"
+                                                        stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
                                                 </svg>
                                             </div>
                                         </div>
@@ -86,14 +83,14 @@
                                                         data-id={imagedata.Id} data-name="cvdata"
                                                         onclick={confirmDelete}>
                                                         <path d="M9 16.2L4.8 12L3.4 13.4L9 19L21 7L19.6 5.6L9 16.2Z"
-                                                            fill="#28A745" />
+                                                            fill="currentColor" />
                                                     </svg>
                                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                                         data-id={imagedata.Id} data-name="cvdata"
                                                         onclick={cancelDelete}>
                                                         <path
                                                             d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
-                                                            fill="#DC3545" />
+                                                            fill="currentColor" />
                                                     </svg>
                                                 </div>
                                             </div>
@@ -117,12 +114,10 @@
                                         <div class="removeImage">
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                                 data-name="uploaderdata" onclick={flipCard}>
-                                                <path opacity="0.3"
-                                                    d="M12 4C7.59 4 4 7.59 4 12C4 16.41 7.59 20 12 20C16.41 20 20 16.41 20 12C20 7.59 16.41 4 12 4ZM16 14.59L14.59 16L12 13.41L9.41 16L8 14.59L10.59 12L8 9.41L9.41 8L12 10.59L14.59 8L16 9.41L13.41 12L16 14.59Z"
-                                                    fill="#858585" />
                                                 <path
-                                                    d="M14.59 8L12 10.59L9.41 8L8 9.41L10.59 12L8 14.59L9.41 16L12 13.41L14.59 16L16 14.59L13.41 12L16 9.41L14.59 8ZM12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"
-                                                    fill="#858585" />
+                                                    d="M7.625 8.29166L8.15964 15.2088C8.23242 16.1498 9.01758 16.875 9.96139 16.875H14.0386C14.9824 16.875 15.7676 16.1498 15.8404 15.2088L16.375 8.29166M10.125 8.08333V7.45833C10.125 6.53786 10.8712 5.79166 11.7917 5.79166H12.2083C13.1288 5.79166 13.875 6.53786 13.875 7.45833V8.08333M6.16669 8.29166H17.8334"
+                                                    stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
                                             </svg>
                                         </div>
                                     </div>
@@ -134,13 +129,13 @@
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                                     data-name="uploaderdata" onclick={confirmDelete}>
                                                     <path d="M9 16.2L4.8 12L3.4 13.4L9 19L21 7L19.6 5.6L9 16.2Z"
-                                                        fill="#28A745" />
+                                                        fill="currentColor" />
                                                 </svg>
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                                     data-name="uploaderdata" onclick={cancelDelete}>
                                                     <path
                                                         d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
-                                                        fill="#DC3545" />
+                                                        fill="currentColor" />
                                                 </svg>
                                             </div>
                                         </div>
@@ -151,9 +146,20 @@
                     </template>
                 </div>
                 <div class="footerbtns">
-                    <button class="cancel_btn_css" aria-label="Cancel and close"
-                        onclick={handleDialogueClose}>Close</button>
-                    <button class="save_btn_css" onclick={handleSave}>Upload</button>
+                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={handleDialogueClose}>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="currentColor" />
+                        </svg>
+                        Close
+                    </button>
+                    <button class="save_btn_css" onclick={handleSave}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                        </svg>
+                        Upload
+                    </button>
                 </div>
             </div>
         </div>

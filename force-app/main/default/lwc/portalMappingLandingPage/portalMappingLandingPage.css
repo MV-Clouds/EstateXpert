@@ -84,6 +84,8 @@
   flex-direction: column;
   height: calc(100% - 3.25rem);
   width: 100%;
+  border: 1px solid #e5e7eb;
+  box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 5px -1px, rgba(15, 23, 42, 0.12) 0px 1px 3px -1px;
 }
 
 .portalMapping_header-row {
@@ -325,25 +327,29 @@ button[disabled] {
 .btn-save {
   font-size: 14px;
   font-weight: 500;
-  line-height: 34px;
+  line-height: 20px;
   text-align: center;
-  border: 1px solid #0176D3;
-  padding: 0px 20px;
+  border: none;
+  padding: 0.5rem 1.5rem;
   background: #0176D3;
   color: white;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-save:hover:not(:disabled) {
-  background: #014a8f;
-  border-color: #014a8f;
-  box-shadow: 0 2px 6px rgba(1, 118, 211, 0.3);
+  background: #0156A3;
+  box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+  transform: translateY(-1px);
 }
 
 .btn-save:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 
 .btn-save:disabled {
@@ -357,25 +363,29 @@ button[disabled] {
 .btn-revert {
   font-size: 14px;
   font-weight: 500;
-  line-height: 34px;
+  line-height: 20px;
   text-align: center;
-  border: 1px solid #f59e0b;
-  padding: 0px 20px;
+  border: none;
+  padding: 0.5rem 1.5rem;
   background: #f59e0b;
   color: white;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-revert:hover:not(:disabled) {
   background: #d97706;
-  border-color: #d97706;
-  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.25);
+  transform: translateY(-1px);
 }
 
 .btn-revert:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 
 .btn-revert:disabled {
@@ -389,24 +399,28 @@ button[disabled] {
 .btn-view {
   font-size: 14px;
   font-weight: 500;
-  line-height: 34px;
+  line-height: 20px;
   text-align: center;
-  padding: 0px 20px;
+  padding: 0.5rem 1.5rem;
   background: #FFFFFF;
-  border: 1px solid #0176D3;
+  border: 1.5px solid #0176D3;
   color: #0176D3;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-view:hover {
-  background: #f0f7ff;
+  background: #F3F6F9;
   box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .btn-view:active {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 
 .action {

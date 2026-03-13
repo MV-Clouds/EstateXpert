@@ -76,7 +76,7 @@
 .title {
     margin-right: 20px;
     font-size: 25px;
-    font-weight: bold;
+    font-weight: 500;
     color: #333;
 }
 
@@ -164,19 +164,106 @@
 
 .save-btn button {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    border: none;
+    padding: 0.5rem 1.25rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.save-btn button:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .save-btn button:disabled {
     background: #c9c9c9;
     border: 1px solid #c9c9c9;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.add_field_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.custom-accordion {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.custom-accordion__header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8eef4 100%);
+    color: #1f2937;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.custom-accordion__header:hover {
+    background: linear-gradient(135deg, #e8f1fb 0%, #dbeafe 100%);
+}
+
+.custom-accordion__title {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.custom-accordion__chevron {
+    color: #0176D3;
+    transition: transform 0.2s ease;
+}
+
+.custom-accordion__chevron.open {
+    transform: rotate(180deg);
+}
+
+.custom-accordion__body {
+    padding: 0 1rem;
+    background: #f9fafb;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: max-height 0.32s ease, opacity 0.25s ease, transform 0.25s ease, padding 0.25s ease;
+}
+
+.custom-accordion__body.expanded {
+    max-height: 520px;
+    opacity: 1;
+    transform: translateY(0);
+    padding: 1rem;
+}
+
+.custom-accordion__body.collapsed {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .mapping-symbol img {
@@ -296,41 +383,67 @@
     display: flex;
     justify-content: center;
     gap: 1rem;
-    padding-top: 2rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
 }
 
 .popdiv_cls {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-color: #F9FAFB;
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 1rem;
 }
 
 .cancel_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    padding: 0px 20px;
+    padding: 0.5rem 1.5rem;
     background: #FFFFFF;
-    border: 1px solid #0176D3;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 5px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    border: none;
+    padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.save_btn_css:hover {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 @media only screen and (max-width: 900px) {
@@ -447,9 +560,17 @@
     height: 100%;
     background-color: white;
     margin: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 5px -1px, rgba(15, 23, 42, 0.12) 0px 1px 3px -1px;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
+}
+
+.popup-table-content {
+    margin: 0;
+    height: auto;
+    max-height: 45vh;
 }
 
 .table-content .slds-table th,
@@ -489,36 +610,55 @@
 .action-btn {
     display: flex;
     justify-content: center;
-    gap: 5%;
-}
-
-.action-btn .slds-button {
-    border: 1px solid black !important;
+    gap: 0.5rem;
 }
 
 .delete-div {
     padding: 5px;
-    border: 1px solid;
-    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background-color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    color: #212529;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .delete-div:hover svg {
-    fill: #ff0707a8;
+    fill: currentColor;
+}
+
+.delete-div:hover svg path {
+    stroke: currentColor;
+}
+
+.delete-div:hover {
+    color: #dc2626;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
 .delete-div:disabled{
-    background-color: rgb(243 243 243);
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
     cursor: not-allowed;
     opacity: 0.5;
+    box-shadow: none;
+    transform: none;
 }
 
 .delete-div:disabled:hover svg{
-    fill: none;
+    fill: currentColor;
+}
+
+.delete-div:disabled:hover svg path{
+    stroke: currentColor;
 }
 
 
@@ -573,9 +713,11 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    transition: all 0.2s ease;
 }
 
 .blue-header {
@@ -584,17 +726,9 @@
     border-bottom-style: unset;
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
 }
 
 .custom-field{
     width: 30rem;
-}
-
-/* Hide back button and description when used in control center (breadcrumb handles navigation, sidebar shows description) */
-.svg_back_icon {
-    display: none;
-}
-
-.details_cls {
-    display: none;
 }

@@ -122,15 +122,31 @@
     cursor: pointer;
     top: 0;
     right: 0;
-    border: 2px solid #0176D3;
+    border: 1px solid #e5e7eb;
     margin: 10px;
     padding: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 6px;
     height: 28px;
     width: 28px;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    color: #0176D3;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+}
+
+.add_icon_css:hover {
+    background: linear-gradient(135deg, #e8f1fb 0%, #dbeafe 100%);
+    border-color: #93c5fd;
+    color: #0156A3;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(1, 118, 211, 0.2);
+}
+
+.add_icon_css svg path {
+    stroke: currentColor;
 }
 
 .count_p_css {
@@ -303,45 +319,69 @@
 .action-btn {
     display: flex;
     justify-content: center;
-    gap: 5%;
+    gap: 0.5rem;
 }
 
 .delete-div {
     padding: 5px;
-    border: 1px solid;
-    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background-color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    color: #212529;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .delete-div:hover svg {
-    fill: #ff0707a8;
+    fill: currentColor;
 }
 
 .delete-div:hover svg path {
-    fill: #ff0707a8;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.delete-div:hover {
+    color: #dc2626;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
 .action-div {
     padding: 5px;
-    border: 1px solid;
-    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background-color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    color: #212529;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .action-div:hover svg {
-    fill: #0176d3;
+    fill: currentColor;
 }
 
 .action-div:hover svg path {
-    fill: #0176d3;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.action-div:hover {
+    color: #0176D3;
+    background: linear-gradient(135deg, #e8f1fb 0%, #dbeafe 100%);
+    border-color: #93c5fd;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
 }
 
 .container {

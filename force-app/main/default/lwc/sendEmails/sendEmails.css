@@ -50,11 +50,6 @@
     transition: all 0.2s ease;
 }
 
-.closs_icon_css:hover {
-    background: #E5E7EB;
-    transform: scale(1.05);
-}
-
 .closs_icon_css svg path {
     fill: #1F2937;
 }

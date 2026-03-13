@@ -404,10 +404,6 @@
     margin-top: 1rem;
 }
 
-.modal-body{
-    height: 17rem;
-}
-
 /* date-time-field */
 
 .date-time-div-cover{
@@ -576,14 +572,11 @@
 
 /* Modal Body */
 .modal-body {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    max-height: 17rem;
+    background-color: #F9FAFB;
+    max-height: calc(100vh - 220px);
     overflow-y: auto;
     overflow-x: hidden;
+    min-height: 16rem;
 }
 
 /* Add Modal Footer */
@@ -592,9 +585,11 @@
     justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    background-color: aliceblue;
-    border-top: 1px solid rgba(1, 118, 211, 0.2);
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
     flex-shrink: 0;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
 }
 
 @media only screen and (max-width: 900px) { 
@@ -671,6 +666,7 @@
     border-bottom-style: unset;
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
 }
 
 .blue-header h2 {
@@ -684,18 +680,22 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    transition: all 0.2s ease;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
 /* Confirmation Modal Body */
 .confirmation-modal-body {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-color: #F9FAFB;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
 }
 
 .confirmation-message {
@@ -711,40 +711,56 @@
     display: flex;
     justify-content: center;
     gap: 1rem;
-    padding-top: 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    margin: 1rem -1rem -1rem -1rem;
 }
 
 /* Button Styles */
 .cancel_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    padding: 0px 20px;
+    padding: 0.5rem 1.5rem;
     background: #FFFFFF;
-    border: 1px solid #0176D3;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 5px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .cancel_btn_css:hover {
-    background: #f0f6ff;
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    border: none;
+    padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .save_btn_css:hover {
-    background: #0157a0;
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }

@@ -404,44 +404,61 @@ span {
 
 .filter-icon-container {
     cursor: pointer;
-    padding: 6px 12px;
-    text-align: right;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid #d0d4d8;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    color: #0176D3;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
+    transition: all 0.2s ease;
+    z-index: 1000;
 }
 
 .filter-icon-container:hover {
-    border-color: #0176D3;
-    box-shadow: 0 3px 10px rgba(1, 118, 211, 0.2);
+    background: #F3F6F9;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
     transform: translateY(-1px);
 }
 
-.filter-icon-container:hover lightning-icon {
-    --slds-c-icon-color-foreground-default: #0176D3;
+.filter-trigger-icon {
+    display: block;
+    color: inherit;
 }
 
 .refresh-icon-container {
     cursor: pointer;
-    padding: 6px 12px;
-    text-align: center;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid #d0d4d8;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    color: #0176D3;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    --slds-c-icon-color-foreground-default: #0176D3;
 }
 
 .refresh-icon-container:hover {
-    border-color: #0176D3;
-    box-shadow: 0 3px 10px rgba(1, 118, 211, 0.2);
+    background: #F3F6F9;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
     transform: translateY(-1px);
 }
 
 .refresh-icon-container:hover lightning-icon {
     --slds-c-icon-color-foreground-default: #0176D3;
+}
+
+.refresh-icon-container lightning-icon {
+    --slds-c-icon-color-foreground-default: #0176D3;
+    pointer-events: none;
 }
 
 .filter-backdrop {
@@ -450,9 +467,9 @@ span {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgb(0 0 0 / 34%);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    background: rgb(15 23 42 / 20%);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
     z-index: 999;
     animation: fadeIn 0.3s ease-in-out;
 }
@@ -467,10 +484,10 @@ span {
 }
 
 .filter-dropdown-box {
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
-    border: 1px solid #d0d4d8;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(1, 118, 211, 0.1);
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     margin-top: 40px;
     z-index: 1000;
     position: absolute;
@@ -498,15 +515,15 @@ span {
 .filter-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-    padding-bottom: 60px;
+    gap: 1.1rem;
+    padding: 1.25rem;
+    padding-bottom: 5rem;
 }
 
 .filter-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 0.9rem;
 }
 
 .filter-item {
@@ -517,8 +534,8 @@ span {
 .filter-label {
     font-size: 14px;
     font-weight: 500;
-    color: #1f2937;
-    margin-bottom: 4px;
+    color: #1F2937;
+    margin-bottom: 0.35rem;
     letter-spacing: 0.2px;
 }
 
@@ -527,45 +544,49 @@ span {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: #ffffff;
-    border-top: 1px solid #e0e0e0;
-    padding: 8px 16px;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    padding: 0.85rem 1rem;
     display: flex;
     justify-content: flex-end;
-    gap: 16px;
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    gap: 0.75rem;
+    box-shadow: 0 -1px 0 rgba(15, 23, 42, 0.03);
 }
 
 .filter-btn {
-    padding: 4px 16px;
-    border-radius: 4px;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .filter-btn-clear {
-    background-color: #ffffff;
-    border: 1px solid #d0d0d0;
-    color: #333333;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
+    color: #0176D3;
 }
 
 .filter-btn-clear:hover {
-    transform: translateY(-1px);
-    background: linear-gradient(135deg, #f0f0f0 0%, #e5e7eb 100%);
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .filter-btn-apply {
     background: #0176D3;
     border: none;
     color: #ffffff;
-    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
 }
 
 .filter-btn-apply:hover {
     transform: translateY(-1px);
-    background: #0158a3;
+    background: #0156A3;
 }
 
 .handleFilterContainerClick {

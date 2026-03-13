@@ -24,7 +24,16 @@
                 </div>
                 <div class="icon-button-container">
                     <div class="filter-icon-container" onclick={handleFilterClick}>
-                        <lightning-icon icon-name={filterIconName} alternative-text="Filter" size="x-small"></lightning-icon>
+                        <template if:false={isFilterModalOpen}>
+                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Show filters">
+                                <path d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z" fill="currentColor"/>
+                            </svg>
+                        </template>
+                        <template if:true={isFilterModalOpen}>
+                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hide filters">
+                                <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                            </svg>
+                        </template>
                     </div>
                     <div class="refresh-icon-container" onclick={handleRefresh}>
                         <lightning-icon icon-name="utility:refresh" alternative-text="Refresh" size="x-small"></lightning-icon>
@@ -50,8 +59,18 @@
                             </div>
                         </div>
                         <div class="filter-actions">
-                            <button class="filter-btn filter-btn-clear" onclick={clearFilterModal}>Clear</button>
-                            <button class="filter-btn filter-btn-apply" onclick={applyFilter}>Apply</button>
+                            <button class="filter-btn filter-btn-clear" onclick={clearFilterModal}>
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M12.25 1.75L1.75 12.25M1.75 1.75L12.25 12.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Clear
+                            </button>
+                            <button class="filter-btn filter-btn-apply" onclick={applyFilter}>
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M2.33331 7.58333L5.24998 10.5L11.6666 4.08333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Apply
+                            </button>
                         </div>
                     </div>
                 </div>

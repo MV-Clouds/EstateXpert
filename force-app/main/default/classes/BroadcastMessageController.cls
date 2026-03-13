@@ -63,6 +63,17 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
+    public static List<Broadcast_Group__c> getBroadcastEmailGroups() {
+        List<Broadcast_Group__c> broadcastGroups = new List<Broadcast_Group__c>();
+        try {
+            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WHERE Communication_Type__c IN ('Both', 'Email') WITH USER_MODE ORDER BY LastModifiedDate DESC];
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastEmailGroups', e.getMessage());
+        }
+        return broadcastGroups;
+    }
+
+    @AuraEnabled
     public static void deleteBroadcastGroup(Id groupId) {
         try {
             Broadcast_Group__c groupToDelete = [

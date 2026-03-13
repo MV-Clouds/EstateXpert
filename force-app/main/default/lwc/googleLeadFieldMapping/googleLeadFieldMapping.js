@@ -27,6 +27,7 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
     @track newGoogleFieldLabel = '';
     @track newGoogleFieldValue = '';
     @track isScroll = false;
+    @track isManageFieldsAccordionOpen = false;
 
     get integrationLabel() {
         return this.integrationType === 'Meta' ? 'Meta Ads' : 'Google Ads';
@@ -323,12 +324,26 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
 
     openManageFieldsModal() {
         this.showManageFieldsModal = true;
+        this.isManageFieldsAccordionOpen = false;
     }
 
     closeManageFieldsModal() {
         this.showManageFieldsModal = false;
         this.newGoogleFieldLabel = '';
         this.newGoogleFieldValue = '';
+        this.isManageFieldsAccordionOpen = false;
+    }
+
+    toggleManageFieldsAccordion() {
+        this.isManageFieldsAccordionOpen = !this.isManageFieldsAccordionOpen;
+    }
+
+    get manageFieldsChevronClass() {
+        return `custom-accordion__chevron ${this.isManageFieldsAccordionOpen ? 'open' : ''}`;
+    }
+
+    get manageFieldsAccordionBodyClass() {
+        return `custom-accordion__body ${this.isManageFieldsAccordionOpen ? 'expanded' : 'collapsed'}`;
     }
 
     forceUpdate() {

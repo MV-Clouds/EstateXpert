@@ -18,6 +18,8 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  background: #F9FAFB;
+  gap: 0;
 }
 
 .iframe_outer {
@@ -25,6 +27,8 @@
   height: 100%;
   overflow: hidden;
   position: relative;
+  background: #FFFFFF;
+  margin-bottom: 0;
 }
 
 .preview_iframe {
@@ -63,10 +67,9 @@
 
 .popupBody {
   background-color: white;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0px 0px 35px 0px #00000042;
-
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 }
 
 .topDesingSection {
@@ -158,8 +161,9 @@
   top: calc(50% + (var(--documerPageHeight)/2) + 2rem);
   left: 50%;
   transform: translate(-50%, 0px);
-  font-size: 20px;
-  color: #02afff;
+  font-size: 18px;
+  font-weight: 500;
+  color: #0176D3;
   text-transform: capitalize;
 }
 
@@ -200,13 +204,10 @@
 }
 
 .body_container {
-  padding: 1rem;
-  background-color: aliceblue;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  background-image: url('/resource/MVEX__newImageandMediaBg');
+  background-color: #F9FAFB;
   height: 80%;
+  display: flex;
+  flex-direction: column;
 }
 
 .edit_modal_footerbtns {
@@ -215,41 +216,112 @@
   gap: 1rem;
   padding: 1rem;
   width: 100%;
+  background: #FFFFFF;
+  border-top: 1px solid #E5E7EB;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 .cancel_btn_css {
   font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
-  padding: 0px 20px;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
   background: #FFFFFF;
-  border: 1px solid #0176D3;
+  border: 1.5px solid #0176D3;
   color: #0176D3;
-  border-radius: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.cancel_btn_css:hover {
+  background: #F3F6F9;
+  box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
   font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
-  border: 1px solid #0176D3;
-  padding: 0px 20px;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
+  border: none;
   background: #0176D3;
   color: white;
-  border-radius: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.save_btn_css:hover:not(:disabled) {
+  background: #0156A3;
+  box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+  transform: translateY(-1px);
+}
+
+.save_btn_css:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .dropdown_class {
   position: fixed;
   width: 96%;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+}
+
+.dropdown_class .slds-listbox__option:hover {
+  background-color: #F3F6F9;
+  cursor: pointer;
+}
+
+.dropdown_class .slds-listbox__item {
+  transition: background-color 0.2s ease;
 }
 
 .main_body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.main_body label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 0.5rem;
+}
+
+.main_body lightning-input {
+  --slds-c-input-radius-border: 6px;
+  --slds-c-input-color-border: #E5E7EB;
+  --slds-c-input-color-border-focus: #0176D3;
+  --slds-c-input-shadow-focus: 0 0 0 3px rgba(1, 118, 211, 0.1);
+  --slds-c-input-sizing-border: 1.5px;
+  --slds-c-input-color-background: #FFFFFF;
+  --slds-c-input-text-color: #1F2937;
+  --slds-c-input-spacing-block-start: 0.625rem;
+  --slds-c-input-spacing-block-end: 0.625rem;
+  --slds-c-input-spacing-inline-start: 0.75rem;
+  --slds-c-input-spacing-inline-end: 0.75rem;
+}
+
+.main_body lightning-input::part(input) {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.main_body lightning-input:hover {
+  --slds-c-input-color-border: #CBD5E1;
 }
 
 .emptyStateContainer {
@@ -257,8 +329,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* padding: 3rem 1rem;
-  min-height: 25rem; */
+  padding: 3rem 1rem;
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  flex: 1;
 }
 
 .emptyStateImage {

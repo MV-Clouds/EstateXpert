@@ -5,26 +5,6 @@
 
     <template if:true={isDataLoaded}>
         <div class="smi_container">
-            <!-- Header -->
-            <!-- <div class="main_header_cls">
-                <div class="header_block_css">
-                    <div class="svg_back_icon" onclick={backToControlCenter}>
-                        <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                                fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <div class="portal_mapping">Integration Hub</div>
-                    <div class="active_badge">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="10" cy="10" r="8" fill="#4BB543" />
-                        </svg>
-                        <span>{activeIntegrationCount} Active</span>
-                    </div>
-                </div>
-            </div> -->
-
             <!-- Integration Cards Grid -->
             <div class="main_container">
                 <div class="cards_grid">
@@ -105,11 +85,27 @@
                                             </div>
                                             <div class="card_actions">
                                                 <button class="action_btn primary" onclick={newIntegrationModal}
-                                                    data-name="AWS">Edit</button>
+                                                    data-name="AWS">
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    Edit
+                                                </button>
                                                 <button class="action_btn secondary"
-                                                    onclick={awsWatermarkUploaderMethod}>Set Watermark</button>
+                                                    onclick={awsWatermarkUploaderMethod}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M12 3C12 3 6 9.24 6 13.5C6 16.8137 8.68629 19.5 12 19.5C15.3137 19.5 18 16.8137 18 13.5C18 9.24 12 3 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Set Watermark
+                                                </button>
                                                 <button class="action_btn outline" onclick={handleDeactivateClick}
-                                                    data-integration="AWS">Deactivate</button>
+                                                    data-integration="AWS">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                        <path d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    </svg>
+                                                    Deactivate
+                                                </button>
                                             </div>
                                         </div>
                                     </template>
@@ -117,7 +113,13 @@
                                 <template if:false={awsData.isValid}>
                                     <div class="card_footer">
                                         <button class="action_btn primary full_width" onclick={newIntegrationModal}
-                                            data-name="AWS">Connect</button>
+                                            data-name="AWS">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            Connect
+                                        </button>
                                     </div>
                                 </template>
                             </div>
@@ -194,9 +196,20 @@
                                             </div>
                                             <div class="card_actions">
                                                 <button class="action_btn primary" onclick={newIntegrationModal}
-                                                    data-name="Outlook">Edit</button>
+                                                    data-name="Outlook">
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    Edit
+                                                </button>
                                                 <button class="action_btn outline" onclick={handleDeactivateClick}
-                                                    data-integration="Outlook">Deactivate</button>
+                                                    data-integration="Outlook">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                        <path d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    </svg>
+                                                    Deactivate
+                                                </button>
                                             </div>
                                         </div>
                                     </template>
@@ -204,7 +217,13 @@
                                 <template if:false={outlookData.isValid}>
                                     <div class="card_footer">
                                         <button class="action_btn primary full_width" onclick={newIntegrationModal}
-                                            data-name="Outlook">Connect</button>
+                                            data-name="Outlook">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            Connect
+                                        </button>
                                     </div>
                                 </template>
                             </div>
@@ -286,9 +305,20 @@
                                             </div>
                                             <div class="card_actions">
                                                 <button class="action_btn primary" onclick={newIntegrationModal}
-                                                    data-name="Gmail">Edit</button>
+                                                    data-name="Gmail">
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    Edit
+                                                </button>
                                                 <button class="action_btn outline" onclick={handleDeactivateClick}
-                                                    data-integration="Gmail">Deactivate</button>
+                                                    data-integration="Gmail">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                        <path d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    </svg>
+                                                    Deactivate
+                                                </button>
                                             </div>
                                         </div>
                                     </template>
@@ -296,7 +326,13 @@
                                 <template if:false={gmailData.isValid}>
                                     <div class="card_footer">
                                         <button class="action_btn primary full_width" onclick={newIntegrationModal}
-                                            data-name="Gmail">Connect</button>
+                                            data-name="Gmail">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            Connect
+                                        </button>
                                     </div>
                                 </template>
                             </div>
@@ -378,9 +414,20 @@
                                             </div>
                                             <div class="card_actions">
                                                 <button class="action_btn primary" onclick={newIntegrationModal}
-                                                    data-name="Instagram">Edit</button>
+                                                    data-name="Instagram">
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    Edit
+                                                </button>
                                                 <button class="action_btn outline" onclick={handleDeactivateClick}
-                                                    data-integration="Instagram">Deactivate</button>
+                                                    data-integration="Instagram">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                        <path d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    </svg>
+                                                    Deactivate
+                                                </button>
                                             </div>
                                         </div>
                                     </template>
@@ -388,7 +435,13 @@
                                 <template if:false={instagramData.isValid}>
                                     <div class="card_footer">
                                         <button class="action_btn primary full_width" onclick={newIntegrationModal}
-                                            data-name="Instagram">Connect</button>
+                                            data-name="Instagram">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            Connect
+                                        </button>
                                     </div>
                                 </template>
                             </div>

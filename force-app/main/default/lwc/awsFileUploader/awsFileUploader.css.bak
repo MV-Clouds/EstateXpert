@@ -1,39 +1,44 @@
 * {
-    font-family: 'Mulish';
+    font-family: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     user-select: none;
 }
 
 .blue-header {
-    background-color: #0176D3;
-    color: white;
-    border-bottom-style: unset;
-    border-top-left-radius: 8px !important;
-    border-top-right-radius: 8px !important;
+    background: linear-gradient(135deg, #FFFFFF 0%, #E3F2FD 100%);
+    color: #1F2937;
+    border-bottom: 1px solid #E5E7EB;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+    padding: 1.5rem !important;
+}
+
+.blue-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1F2937;
 }
 
 .footerbtns {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    padding: 1rem;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
     background: #FFFFFF;
     border-top: 1px solid #E5E7EB;
-    flex-shrink: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
 }
 
 .cancel_btn_css {
     font-size: 14px;
     font-weight: 500;
-    padding: 0.5rem 1.5rem;
+    padding: 0.625rem 1.5rem;
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .cancel_btn_css:hover {
@@ -44,16 +49,13 @@
 .save_btn_css {
     font-size: 14px;
     font-weight: 500;
-    padding: 0.5rem 1.5rem;
+    padding: 0.625rem 1.5rem;
     border: none;
     background: #0176D3;
     color: white;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .save_btn_css:hover:not(:disabled) {
@@ -85,41 +87,16 @@
 
 .images_upcss {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    justify-content: center;
-    align-items: center;
+    flex-direction: row;
+    gap: 4px;
     font-family: Inter;
     font-size: 14px;
     line-height: 20px;
 }
 
-.images_upcss p {
-    margin: 0;
-    color: #6B7280;
-}
-
 .images_upcss label span {
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.images_upcss label {
-    border: 1.5px solid #0176D3;
-    background: #FFFFFF;
     color: #0176D3;
-    padding: 0.625rem 2rem;
-    border-radius: 6px;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.images_upcss label:hover {
-    background: #0176D3;
-    color: #FFFFFF;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
 }
 
 .progress {
@@ -151,8 +128,18 @@ progress::-moz-progress-bar {
     border-radius: 4px;
 }
 
+.slds-backdrop_open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9000;
+}
+
 .lightningPillCss {
-    gap: 0.75rem;
+    gap: 0.5rem;
     display: flex;
     flex-direction: column;
 }
@@ -162,24 +149,31 @@ progress::-moz-progress-bar {
         font-size: 0.7rem;
     }
 
-    .blue-header h1 {
-        font-size: 18px;
+    .blue-header {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 12.89px;
     }
 
     .watermark_container {
-        font-size: 13px !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        line-height: 16.8px !important;
+        text-align: left;
     }
 
     .label_css {
-        font-size: 13px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        line-height: 12.89px !important;
+        text-align: left;
     }
 
     .tab-menu ul li a {
-        padding: 0.5rem !important;
+        padding: 5px 10px !important;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 13px;
     }
 
     .tab {
@@ -190,40 +184,19 @@ progress::-moz-progress-bar {
 .tab {
     display: none;
     animation: fadeIn 0.5s ease-in-out;
-    padding: 1rem 0;
+    height: 20rem;
+    overflow: auto;
 }
 
 .tab-container {
+    height: 100%;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-    padding: 1rem;
-}
-
-.tab-content-wrapper {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-top: 1rem;
-}
-
-.tab-menu {
-    border-radius: 8px;
-    flex-shrink: 0;
-}
-
-.tab-menu ul {
-    display: flex;
-    list-style-type: none;
-    padding: 4px;
+    padding-b4px;
     margin: 0;
     justify-content: space-around;
     width: 100%;
     border-radius: 8px;
-    background: linear-gradient(135deg, #f0f4f8 0%, #e8eef4 100%);
-    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    background: #E5E7EB;
     user-select: none;
 }
 
@@ -239,30 +212,56 @@ progress::-moz-progress-bar {
     font-weight: 500;
     font-size: 14px;
     display: block;
-    padding: 10px 15px;
+    padding: 0.625rem 1rem;
     text-align: center;
     text-decoration: none;
-    color: #445058;
-    transition: all 0.3s ease;
+    color: #6B7280;
+    transition: all 0.2s ease;
     cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     border-radius: 6px;
 }
 
 .tab-menu ul li a.active-tab {
-    color: white;
+    color: #FFFFFF;
     background: #0176D3;
-    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.35);
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.2
+    cursor: pointer;
 }
 
-.tab-menu ul li a:hover:not(.active-tab) {
-    background: rgba(1, 118, 211, 0.1);
+.tab-menu ul li a.active-tab {
+    color: white;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #1565c0, #81d4fa);
 }
 
 .active-tab-content {
     display: block;
+}
+
+.images_upcss {
+    display: flex;
+    flex-dire.5px solid #0176D3;
+    background: #FFFFFF;
+    color: #0176D3;
+    padding: 0.625rem 2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.images_upcss label:hover {
+    background: #0176D3;
+    color: #FFFFFF;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px)
+.images_upcss label {
+    border: 1px solid #0276D3;
+    background: #fff;
+    color: #0276D3;
+    padding: 10px 6rem;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 @keyframes fadeIn {
@@ -277,14 +276,15 @@ progress::-moz-progress-bar {
 
 .modalbody {
     background-color: #F9FAFB !important;
-    display: flex;
-    flex-direction: column;
-    max-height: calc(100vh - 200px);
-    overflow: hidden;
+    padding: 1.5rem !important;
+    min-height: 300px;
 }
 
-.watermark_container {
-    padding-top: 1rem;
+.slds-modal__container {
+    border-radius: 12px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+1rem;
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -295,20 +295,21 @@ progress::-moz-progress-bar {
     color: #374151;
 }
 
-.watermark_container input[type="checkbox"] {
-    margin-right: 10px;
-    height: 1rem;
-    width: 1rem;
-    cursor: pointer;
-}
-
 .label_css {
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;
     text-align: left;
     padding-left: 2px;
-    color: #1F2937;
+    color: #1F2937
+}
+
+.label_css {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: left;
+    padding-left: 5px;
 }
 
 .tab lightning-input,
@@ -316,20 +317,24 @@ progress::-moz-progress-bar {
     padding: 5px;
 }
 
+.tab-menu {
+    border-radius: 5px;
+    padding-bottom: 20px;
+}
+
 .file_view_upload {
-    padding-top: 1.25rem;
+    padding-top: 20px;
     overflow: hidden;
 }
 
 .upload_icon_css {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 400;
     line-height: 20px;
     text-align: left;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #374151;
 }
 
 .upload_icon_css lightning-icon {
@@ -340,26 +345,26 @@ progress::-moz-progress-bar {
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
     width: 32px;
     height: 32px;
     border-radius: 6px;
     background: #F3F6F9;
     transition: all 0.2s ease;
+    position: absolute;
+    right: 1rem;
+    top: 1.25rem;
+}
+
+.closs_icon_css:hover {
+    background: #E5E7EB;
+    transform: scale(1.05);
 }
 
 .closs_icon_css svg path {
-    fill: #1F2937;
+    fill: #1F2937
+    background: transparent;
 }
-
-.image-list {
-    list-style: none;
-    width: 100%;
-}
-
-.container {
-    display: flex;
-    flex-direction: row;
+flex-direction: row;
     border: 1px solid #E5E7EB;
     border-radius: 8px;
     width: 100%;
@@ -370,7 +375,15 @@ progress::-moz-progress-bar {
 
 .container:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border-color: #CBD5E1;
+    border-color: #CBD5E1
+    display: flex;
+    /* flex-wrap: wrap; */
+    flex-direction: row;
+    border: solid 1px #E7E7E7;
+    border-radius: 1rem;
+    width: 100%;
+    padding: 1rem;
+    background: #fff;
 }
 
 .box1 {
@@ -398,11 +411,6 @@ progress::-moz-progress-bar {
 
 .removeImage svg {
     cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.removeImage svg:hover {
-    transform: scale(1.1);
 }
 
 .removeImage p {
@@ -415,16 +423,15 @@ progress::-moz-progress-bar {
     font-weight: 600;
     line-height: 18px;
     text-align: left;
-    color: #1F2937;
 }
 
 .imgd2 {
     font-family: Inter;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 400;
     line-height: 16px;
     text-align: left;
-    color: #6B7280;
+    color: #6D6D6D;
     padding-top: 3px;
 }
 
@@ -440,19 +447,5 @@ progress::-moz-progress-bar {
     height: -webkit-fill-available;
     width: -webkit-fill-available;
     transition: background-color 0.3s ease;
-    border-radius: 6px;
-    object-fit: cover;
-}
-
-.content_body {
-    flex: 1;
-    width: 100%;
-    overflow: auto;
-    min-height: 27rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.fileuploader_container {
-    width: 100%;
+    border-radius: 4px;
 }

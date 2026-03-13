@@ -19,39 +19,60 @@
     border-bottom-style: unset;
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
 }
 
 .footerbtns {
-    padding: 1rem;
     display: flex;
     justify-content: center;
     gap: 1rem;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
 }
 
 .cancel_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    padding: 0px 20px;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
     background: #FFFFFF;
-    border: 1px solid #0176D3;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 5px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    font-weight: 500;
+    border: none;
+    padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.save_btn_css:hover {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .flex_css {
@@ -108,8 +129,9 @@
 }
 
 .content_body {
-    padding: 1rem;
-    padding-top: 0;
+    padding: 1.5rem;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .image-list {
@@ -126,6 +148,7 @@
     width: 100%;
     padding: 1rem;
     background: #FFFFFF;
+    box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 5px -1px, rgba(15, 23, 42, 0.12) 0px 1px 3px -1px;
 }
 
 .box1 {
@@ -153,6 +176,20 @@
 
 .removeImage svg {
     cursor: pointer;
+    color: #6B7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.removeImage svg:hover {
+    color: #dc2626;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
 .removeImage p {
@@ -187,9 +224,25 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    transition: all 0.2s ease;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
+}
+
+.modalbody {
+    background-color: #F9FAFB !important;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 140px);
+    overflow: hidden;
 }
 
 /* Flip card container */
@@ -221,6 +274,7 @@
     border-radius: 1rem;
     background: #FFFFFF;
     padding: 1rem;
+    box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 5px -1px, rgba(15, 23, 42, 0.12) 0px 1px 3px -1px;
 }
 
 .flip-card-front {
@@ -255,5 +309,38 @@
 }
 
 .confirmation-actions svg {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    border-radius: 8px;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    color: #64748b;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.confirmation-actions svg:first-child {
+    color: #28a745;
+}
+
+.confirmation-actions svg:last-child {
+    color: #dc3545;
+}
+
+.confirmation-actions svg:first-child:hover {
+    background: #e7f7ec;
+    border-color: #28a745;
+    color: #1f8a3d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+}
+
+.confirmation-actions svg:last-child:hover {
+    background: #fff5f5;
+    border-color: #dc3545;
+    color: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
 }

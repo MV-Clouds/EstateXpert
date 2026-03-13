@@ -603,19 +603,29 @@
 
 .filter-icon-container {
     cursor: pointer;
-    padding: 6px 12px;
-    text-align: right;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid #d0d4d8;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    color: #0176D3;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
+    transition: all 0.2s ease;
+    z-index: 1000;
 }
 
 .filter-icon-container:hover {
-    border-color: #0176D3;
-    box-shadow: 0 3px 10px rgba(1, 118, 211, 0.2);
+    background: #F3F6F9;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
     transform: translateY(-1px);
+}
+
+.filter-trigger-icon {
+    display: block;
+    color: inherit;
 }
 
 .filter-backdrop {
@@ -624,9 +634,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgb(0 0 0 / 34%);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    background: rgb(15 23 42 / 20%);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
     z-index: 999;
     animation: fadeIn 0.3s ease-in-out;
 }
@@ -642,15 +652,20 @@
 
 .filter-dropdown-box {
     position: absolute;
-    right: 16px;
-    top: 105%;
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
-    border: 1px solid #d0d4d8;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(1, 118, 211, 0.1);
+    right: 0;
+    margin-top: 40px;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     padding: 0.75rem;
     z-index: 1000;
-    width: 250px;
+    width: 100%;
+    max-width: 350px;
+    max-height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
     animation: slideDown 0.3s ease-out;
 }
 

@@ -10,6 +10,9 @@
     --input-label-color: #444444;
     --input-text-color: #2b2826;
     --input-placeholder-color: #706e6b;
+    --uniform-card-radius: 8px;
+    --uniform-card-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .wrapper{
@@ -26,7 +29,7 @@
     border: none;
     border-radius: 8px 8px 0 0;
     position: relative;
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.25rem;
 }
 
 .slds-modal__container {
@@ -39,58 +42,96 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    transition: all 0.2s ease;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
 .modal-wrapper .slds-modal__content.custom-content {
-    background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
-    background-position: bottom;
-    background-repeat: no-repeat;
-    background-size: cover;
-    height: 70vh;
+    background-color: #F9FAFB;
+    max-height: calc(100vh - 220px);
+    min-height: 70vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .custom-footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
-    border-top-style: none !important;
-    margin-top: 1rem;
+    gap: 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    margin-top: auto;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    margin-bottom: -1rem;
     flex-shrink: 0;
 }
 
 .custom-footer button {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    padding: 0px 20px;
-    border-radius: 5px;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border: 1px solid var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+}
+
+.custom-footer button svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
 }
 
 .custom-footer button[data-action="handleBack"] {
     background: #FFFFFF;
+    border: 1.5px solid var(--primary-color);
     color: var(--primary-color);
 }
 
 .custom-footer button[data-action="handleNext"],
 .custom-footer button[data-action="handleFinish"] {
     background: var(--primary-color);
+    border: none;
     color: white;
+}
+
+.custom-footer button[data-action="handleBack"]:hover,
+.custom-footer button.back-button:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
+}
+
+.custom-footer button[data-action="handleNext"]:hover,
+.custom-footer button[data-action="handleFinish"]:hover,
+.custom-footer button.next-button:hover,
+.custom-footer button.finish-button:hover {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .custom-footer button.back-button {
     background: #FFFFFF;
+    border: 1.5px solid var(--primary-color);
     color: var(--primary-color);
 }
 
@@ -109,12 +150,21 @@
 
 /* Wizard Progress Bar */
 .wizard-progress {
-    padding: 12px 0px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
     flex-shrink: 0;
 }
 
 .wizard-progress lightning-progress-indicator{
     pointer-events: none;
+    --slds-c-progress-color-background: #D7DEE7;
+    --slds-c-progress-color-background-complete: #0176D3;
+    --slds-c-progress-step-color-background: #EEF2F7;
+    --slds-c-progress-step-color-border: #C9D3DF;
 }
 
 /* Option Cards */
@@ -179,9 +229,15 @@
 
 /* Campaign Details Form */
 .campaign-details {
-    padding:12px 6px;
+    padding: 1.25rem;
     flex: 1;
     overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    margin-bottom: 1rem;
 }
 
 .form-grid {
@@ -223,10 +279,13 @@
 }
 
 .template-selection-left {
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
+    height: 100%;
+    overflow: scroll;
 }
 
 .template-selection-header h3 {
@@ -275,7 +334,7 @@
     border-radius: 6px;
     background: white;
     overflow: hidden;
-    margin: 1rem;
+    margin-left: 1rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -297,7 +356,7 @@
     flex: 1;
     padding: 1rem;
     overflow: auto;
-    max-height: 350px;
+    height: 100%;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) transparent;
     background: #fafafa;
@@ -383,21 +442,6 @@
     padding: 1rem;
 }
 
-.skip-container {
-    text-align: right;
-    margin-bottom: 1rem;
-}
-
-.skip-link {
-    color: #706e6b;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.skip-link:hover {
-    color: var(--primary-color);
-}
-
 .listing-instruction {
     color: #706e6b;
     margin-bottom: 1rem;
@@ -407,6 +451,18 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
+}
+
+.tab-buttons button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.tab-buttons button svg {
+    width: 14px;
+    height: 14px;
 }
 
 .listing-list {
@@ -552,10 +608,9 @@
 .contact-selection-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
     height: 100%;
     min-height: 300px;
-    overflow: hidden;
 }
 
 .contact-section {
@@ -645,6 +700,7 @@
     border-radius: 8px;
     padding: 1rem;
     margin-top: auto;
+    margin-bottom: 1rem;
 }
 
 .contact-summary h4 {
@@ -738,19 +794,22 @@
 /* Drip Campaign Styles - Two Panel Layout */
 .drip-campaign-wrapper {
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
     height: 500px;
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    overflow: hidden;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
 }
 
 /* Left Panel - Drip Sequence */
 .drip-sequence-panel {
     flex: 1;
-    border-right: 1px solid #e5e5e5;
-    padding-right: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    padding: 1rem 1.25rem;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -813,9 +872,10 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    border: 2px solid #e5e5e5;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    box-shadow: none;
     transition: all 0.2s ease;
     cursor: pointer;
     min-height: 80px;
@@ -823,13 +883,13 @@
 
 .drip-sequence-list > div:hover {
     border-color: #0176D3;
-    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.1);
+    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.16);
 }
 
 .drip-sequence-list > div.selected {
     border-color: #0176D3;
     background: #f3f9ff;
-    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.2);
+    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.22);
 }
 
 .drip-sequence-number {
@@ -906,36 +966,47 @@
 }
 
 .delete-email-btn {
-    background: none;
-    border: 1px solid #dc3545;
-    border-radius: 4px;
-    width: 32px;
-    height: 32px;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 6px;
+    width: auto;
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #dc3545;
+    color: #6b7280;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     flex-shrink: 0;
 }
 
 .delete-email-btn:hover {
-    background: #dc3545;
-    color: white;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
 /* Right Panel - Configure Email */
 .configure-email-panel {
     flex: 1;
-    padding-left: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    padding: 1rem 1.25rem;
     overflow-y: auto;
 }
 
 .configure-email-form {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1.5rem;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
     height: 100%;
 }
 
@@ -1024,24 +1095,38 @@
 }
 
 .preview-template-btn {
-    background: #f8f9fa;
-    border: none;
-    /* border-left: 1px solid #e5e5e5; */
-    /* padding: 0.75rem 1rem; */
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
+    border-radius: 6px;
+    padding: 0.5rem 1.25rem;
     color: #0176D3;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
-    min-width: 80px;
+    min-width: 96px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.preview-template-btn svg {
+    width: 14px;
+    height: 14px;
 }
 
 .preview-template-btn:hover {
-    background: #e6f3ff;
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
+    transform: translateY(-1px);
 }
 
 .preview-template-btn:disabled {
-    background: #f1f1f1;
-    color: #999;
+    background: #DBDBDB;
+    border-color: #DBDBDB;
+    color: #969492;
+    box-shadow: none;
+    transform: none;
     cursor: not-allowed;
 }
 
@@ -1074,16 +1159,13 @@
     }
     
     .drip-sequence-panel {
-        border-right: none;
         border-bottom: 1px solid #e5e5e5;
-        padding-right: 0;
-        padding-bottom: 1rem;
+        padding: 1rem;
         max-height: 300px;
     }
     
     .configure-email-panel {
-        padding-left: 0;
-        padding-top: 1rem;
+        padding: 1rem;
     }
     
     .delay-section {
@@ -1249,6 +1331,25 @@
     background: rgba(1, 118, 211, 0.1);
     border-radius: 4px;
     border-left: 4px solid var(--primary-color);
+}
+
+/* Keep card surfaces consistent across all popup pages */
+.wizard-progress,
+.option-card,
+.template-selection-left,
+.selected-template-info,
+.template-selection-right,
+.listing-item,
+.no-listing-message,
+.contact-section,
+.contact-summary,
+.summary-item,
+.drip-sequence-list > div,
+.broadcast-groups-container,
+.broadcast-group-item,
+.selected-groups-summary {
+    border-radius: var(--uniform-card-radius);
+    box-shadow: var(--uniform-card-shadow);
 }
 
 .summary-text {

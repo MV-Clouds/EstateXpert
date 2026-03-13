@@ -36,9 +36,25 @@
                 <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC}
                         onload={fileDownloaded} width="0%" height="0%"></iframe>
                 <div class="edit_modal_footerbtns">
-                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>Cancel</button>
-                    <button class="save_btn_css" onclick={goToStep2}>Preview</button>
-                    <button class="save_btn_css" onclick={downloadFile}>Download</button>
+                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                        </svg>
+                        Cancel
+                    </button>
+                    <button class="save_btn_css" onclick={goToStep2}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Preview
+                    </button>
+                    <button class="save_btn_css" onclick={downloadFile}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Download
+                    </button>
                 </div>
             </template>
             <template if:false={isDataAvailable}>
@@ -49,7 +65,12 @@
                     </div>
                 </div>
                 <div class="edit_modal_footerbtns">
-                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>Close</button>
+                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                        </svg>
+                        Close
+                    </button>
                 </div>
             </template>
         </div>
@@ -100,9 +121,24 @@
                 </template>
             </div>
             <div class="edit_modal_footerbtns">
-                <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>Cancel</button>
-                <button class="save_btn_css" onclick={goToStep1}>Back</button>
-                <button class="save_btn_css" onclick={downloadFile}>Download</button>
+                <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                    </svg>
+                    Cancel
+                </button>
+                <button class="save_btn_css" onclick={goToStep1}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Back
+                </button>
+                <button class="save_btn_css" onclick={downloadFile}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Download
+                </button>
             </div>
         </div>
     </template>

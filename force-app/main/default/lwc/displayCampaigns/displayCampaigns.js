@@ -483,12 +483,22 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
 
     /*
     * Method Name: handleFilterClick
-    * @description: Method to open filter modal
+    * @description: Method to toggle filter modal
     * Date: 23/06/2024
     * Created By: Rachit Shah
     */
     handleFilterClick() {
-        this.isFilterModalOpen = true;
+        this.isFilterModalOpen = !this.isFilterModalOpen;
+    }
+
+    /*
+    * Method Name: handleFilterContainerClick
+    * @description: Keep clicks inside filter box from affecting outer handlers
+    * Date: 13/03/2026
+    * Created By: GitHub Copilot
+    */
+    handleFilterContainerClick(event) {
+        event.stopPropagation();
     }
 
     /*

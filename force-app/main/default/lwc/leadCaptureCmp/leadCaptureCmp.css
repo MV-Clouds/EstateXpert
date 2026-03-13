@@ -317,6 +317,14 @@
     cursor: pointer;
     transition: all 0.2s ease;
     border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.action_btn svg {
+    flex-shrink: 0;
 }
 
 .action_btn.primary {

@@ -9,7 +9,7 @@ import getAllContacts from '@salesforce/apex/SendEmailsController.getAllContacts
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 // Import the correct methods for single and drip campaigns
 import createCampaignAndEmails from '@salesforce/apex/EmailCampaignController.createCampaignAndEmails';
-import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastGroups';
+import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastEmailGroups';
 
 export default class SendEmails extends LightningElement {
     @api showModal = false;
@@ -176,7 +176,10 @@ export default class SendEmails extends LightningElement {
                 variant: 'neutral',
                 onclick: 'handleBack',
                 disabled: false,
-                buttonClass: 'custom-footer-button back-button'
+                buttonClass: 'custom-footer-button back-button',
+                isBack: true,
+                isNext: false,
+                isFinish: false
             });
         }
 
@@ -187,7 +190,10 @@ export default class SendEmails extends LightningElement {
                 variant: 'brand',
                 onclick: 'handleNext',
                 disabled: false,
-                buttonClass: 'custom-footer-button next-button'
+                buttonClass: 'custom-footer-button next-button',
+                isBack: false,
+                isNext: true,
+                isFinish: false
             });
         } else if (this.currentStep === 3) {
             buttons.push({
@@ -195,7 +201,10 @@ export default class SendEmails extends LightningElement {
                 variant: 'brand',
                 onclick: 'handleNext',
                 disabled: false,
-                buttonClass: 'custom-footer-button next-button'
+                buttonClass: 'custom-footer-button next-button',
+                isBack: false,
+                isNext: true,
+                isFinish: false
             });
         } else if (this.currentStep === 4) {
             let isDisabled = false;
@@ -213,7 +222,10 @@ export default class SendEmails extends LightningElement {
                 variant: 'brand',
                 onclick: 'handleNext',
                 disabled: isDisabled,
-                buttonClass: 'custom-footer-button next-button'
+                buttonClass: 'custom-footer-button next-button',
+                isBack: false,
+                isNext: true,
+                isFinish: false
             });
         } else if (this.currentStep === 5) {
             const hasRecipients = this.selectedContacts.length > 0 || this.selectedBroadcastGroups.length > 0;
@@ -222,11 +234,18 @@ export default class SendEmails extends LightningElement {
                 variant: 'brand', 
                 onclick: 'handleFinish',
                 disabled: !hasRecipients,
-                buttonClass: 'custom-footer-button finish-button'
+                buttonClass: 'custom-footer-button finish-button',
+                isBack: false,
+                isNext: false,
+                isFinish: true
             });
         }
 
         return buttons;
+    }
+
+    get showFooter() {
+        return this.footerButtons.length > 0;
     }
 
     // Template options based on selected template type and listing

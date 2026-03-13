@@ -151,28 +151,44 @@
 }
 
 .action-div {
-    background-color: #0176D3;
-    color: white;
-    border-radius: 4px;
+    padding: 6px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px;
-    border: none;
-    padding: 8px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.action-div svg {
+    transition: all 0.3s ease;
 }
 
 .action-div:hover {
-    background-color: #005fb2;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #0176D3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
+}
+
+.action-div:hover svg {
+    fill: #0176d3;
+}
+
+.action-div:hover svg path {
+    fill: #0176d3;
+    stroke: #0176d3;
 }
 
 .action-div:disabled {
-    background-color: #737D8C;
+    background-color: #f3f4f6;
     cursor: not-allowed;
     opacity: 0.5;
     pointer-events: none;
+    border-color: #d1d5db;
 }
 
 .action-div svg,
@@ -224,6 +240,9 @@
     justify-content: center;
     align-items: center;
     font-weight: 500;
+    border-bottom-style: unset;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
 }
 
 .custom-modal-header {
@@ -238,10 +257,24 @@
 }
 
 .modal-body {
-    background: #f5f7fa;
+    background: #F9FAFB;
     border-radius: 0px 0px 8px 8px;
     min-height: 75vh;
+    max-height: calc(100vh - 250px);
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.slds-modal__content.modal-body .slds-grid {
+    flex: 1;
     overflow: auto;
+    min-height: 0;
+}
+
+.slds-modal__content.modal-body .footerbtns {
+    flex-shrink: 0;
 }
 
 .closs_icon_css {
@@ -249,9 +282,16 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    transition: all 0.2s ease;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
 .backdrop-filter {
@@ -275,6 +315,9 @@
 .schedule-modal-container {
     width: 70%;
     max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
 }
 
 .calender-cover {
@@ -291,6 +334,8 @@
 
 .calender-modal-body {
     min-height: auto;
+    overflow: auto;
+    flex: 1;
 }
 
 /* ================================
@@ -299,21 +344,93 @@
 .manage-modal-container {
     width: 90%;
     max-width: 75rem;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
 }
 
 .modal-controls {
     background: white;
-    border-radius: 8px;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .modal-buttons {
     margin-top: auto;
-    border-top: 1px solid #e5e5e5;
-    padding-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+}
+
+.modal-buttons lightning-button {
+    --slds-c-button-neutral-color-background: #FFFFFF;
+    --slds-c-button-neutral-color-border: #0176D3;
+    --slds-c-button-neutral-text-color: #0176D3;
+    --slds-c-button-brand-color-background: #0176D3;
+    --slds-c-button-brand-color-background-hover: #0156A3;
+    --slds-c-button-radius-border: 6px;
+}
+
+.footerbtns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
+}
+
+.cancel_btn_css {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
+    color: #0176D3;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
+}
+
+.save_btn_css {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.save_btn_css:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
+}
+
+.save_btn_css:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .modal-preview-area {
@@ -329,7 +446,8 @@
     flex-direction: column;
     background: white;
     border-radius: 8px;
-    padding: 1rem;
+    padding: 1.5rem;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .action-message-center {

@@ -3,32 +3,29 @@
         <c-spinner-component></c-spinner-component>
     </template>
     <div class="wrapper">
-        <!-- <div class="main_header_cls">
-            <div slot="title" class="header_block_css">
-                <div class="svg_back_icon" onclick={backLeadCenter}>
-                    <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                            fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <div class="portal_mapping">
-                    Map {integrationLabel} Form Fields to Salesforce Contact Fields
-                </div>
-            </div>
-            <div class="details_cls">
-                <p>
-                    The "Map {integrationLabel} Form Fields" modal enables users to define mappings between {integrationLabel} form fields and Salesforce Contact fields. This ensures seamless data integration from {integrationLabel} leads into Salesforce, reducing manual data entry and errors.
-                </p>
-            </div>
-        </div> -->
-
         <div class="main_content_cls">
             <div class="slds-m-around_medium navbar">
                 <div class="save-btn">
-                    <button onclick={addNewPair}>Add</button>
-                    <button onclick={openManageFieldsModal}>Manage {integrationLabel} Fields</button>
-                    <button disabled={savebutton} onclick={handleAddPairClick}>Save Mapping</button>
+                        <button onclick={addNewPair}>
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            Add
+                        </button>
+                        <button onclick={openManageFieldsModal}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 7H20M4 12H20M4 17H14" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Manage {integrationLabel} Fields
+                        </button>
+                        <button disabled={savebutton} onclick={handleAddPairClick}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                            </svg>
+                            Save Mapping
+                        </button>
                 </div>
             </div>
 
@@ -88,7 +85,7 @@
                                         <div class="action-btn">
                                             <button class="delete-div" data-id={index} onclick={deletePair}>
                                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
                                                 </svg>                                                    
                                             </button>
                                         </div>
@@ -114,17 +111,17 @@
                 aria-describedby="modal-content-id-2" class="slds-modal slds-fade-in-open slds-modal_small">
                 <div class="slds-modal__container">
                     <div class="slds-modal__close closs_icon_css" onclick={closeManageFieldsModal}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="white" />
+                                fill="#1F2937" />
                         </svg>
                     </div>
                     
                     <div class="slds-modal__header blue-header">
                         <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate" tabindex="-1">Manage {integrationLabel} Fields</h1>
                     </div>
-                    <div class="slds-modal__content slds-p-around_medium popdiv_cls" id="modal-content-id-2">
+                    <div class="slds-modal__content popdiv_cls" id="modal-content-id-2">
                         <div class="slds-form-element slds-m-bottom_medium">
                             <lightning-input 
                                 label="New Field Label" 
@@ -138,13 +135,28 @@
                                 onchange={handleNewGoogleFieldValueChange}
                                 placeholder="Enter field api name (e.g., CUSTOM_FIELD_1)" required>
                             </lightning-input>
-                            <button class="slds-button slds-button_brand slds-m-top_small" onclick={addGoogleField}>Add Field</button>
+                            <button class="slds-button slds-button_brand slds-m-top_small add_field_btn" onclick={addGoogleField}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                                Add Field
+                            </button>
                         </div>
-                        <lightning-accordion allow-multiple-sections-open="false">
-                            <lightning-accordion-section name="field-mappings" label="Form Fields">
-                                <div class="slds-m-top_medium">
+                        <div class="custom-accordion">
+                            <button type="button" class="custom-accordion__header" onclick={toggleManageFieldsAccordion}
+                                aria-expanded={isManageFieldsAccordionOpen}>
+                                <span class="custom-accordion__title">Form Fields</span>
+                                <svg class={manageFieldsChevronClass} width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </button>
+
+                            <div class={manageFieldsAccordionBodyClass}>
                                     <template if:true={googleFieldOptions.length}>
-                                        <div class="table-content">
+                                        <div class="table-content popup-table-content">
                                             <table class="slds-table slds-table_cell-buffer">
                                                 <thead>
                                                     <tr class="table_tr_cls">
@@ -166,12 +178,13 @@
                                                             <td data-label="Field Api Name">{field.value}</td>
                                                             <td data-label="Actions">
                                                                 <div class="action-btn">
-                                                                    <button class="delete-div" 
-                                                                            data-value={field.value} 
-                                                                            onclick={deleteGoogleField} 
-                                                                            disabled={field.disable}>
-                                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                    <button class="delete-div" data-value={field.value}
+                                                                        onclick={deleteGoogleField} disabled={field.disable}>
+                                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                                            xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                                stroke="currentColor" stroke-width="1.25"
+                                                                                stroke-linecap="round" stroke-linejoin="round" />
                                                                         </svg>
                                                                     </button>
                                                                 </div>
@@ -185,9 +198,8 @@
                                     <template if:false={googleFieldOptions.length}>
                                         <div class="slds-text-align_center">No {integrationLabel} fields available</div>
                                     </template>
-                                </div>
-                            </lightning-accordion-section>
-                        </lightning-accordion>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -199,21 +211,33 @@
                 aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
                 <div class="slds-modal__container">
                     <div class="slds-modal__close closs_icon_css" onclick={closeConfirmationModal}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="white" />
+                                fill="#1F2937" />
                         </svg>
                     </div>
                     
                     <div class="slds-modal__header blue-header">
                         <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Confirmation</h1>
                     </div>
-                    <div class="slds-modal__content slds-p-around_medium popdiv_cls" id="modal-content-id-1">
+                    <div class="slds-modal__content popdiv_cls" id="modal-content-id-1">
                         <p class="slds-text-align_center con-msg">Are you sure you want to save the changes?</p>
                         <div class="footer_css">
-                            <button class="cancel_btn_css" onclick={closeConfirmationModal}>Cancel</button>
-                            <button class="save_btn_css" onclick={handleConfirmAddPair}>Save</button>
+                            <button class="cancel_btn_css" onclick={closeConfirmationModal}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
+                                </svg>
+                                Cancel
+                            </button>
+                            <button class="save_btn_css" onclick={handleConfirmAddPair}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                                </svg>
+                                Save
+                            </button>
                         </div>
                     </div>
                 </div>

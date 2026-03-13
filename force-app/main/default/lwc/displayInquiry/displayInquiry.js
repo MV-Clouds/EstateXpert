@@ -201,6 +201,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name : showAddConditionIcon
+    * @description : method to check if add condition icon should be shown
+    * Date: 10/03/2026
+    */
+    get showAddConditionIcon() {
+        return this.conditiontype && this.conditiontype !== 'related' && this.conditiontype !== 'none';
+    }
+
+    /**
     * Method Name : totalPages
     * @description : set the totalpages count.
     * * Date: 20/08/2024

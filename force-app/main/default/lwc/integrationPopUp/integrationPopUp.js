@@ -204,19 +204,19 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                         if (this.integrationname === 'Instagram' && data.objectData) {
                             if (data.objectData.MVEX__ClientId__c) {
                                 this.originalCredentials.MVEX__ClientId__c = data.objectData.MVEX__ClientId__c;
-                                this.fieldsData.MVEX__ClientId__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__ClientId__c = data.objectData.MVEX__ClientId__c;
                             }
                             if (data.objectData.MVEX__ClientSecret__c) {
                                 this.originalCredentials.MVEX__ClientSecret__c = data.objectData.MVEX__ClientSecret__c;
-                                this.fieldsData.MVEX__ClientSecret__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__ClientSecret__c = data.objectData.MVEX__ClientSecret__c;
                             }
                             if (data.objectData.MVEX__AccessToken__c) {
                                 this.originalCredentials.MVEX__AccessToken__c = data.objectData.MVEX__AccessToken__c;
-                                this.fieldsData.MVEX__AccessToken__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__AccessToken__c = data.objectData.MVEX__AccessToken__c;
                             }
                             if (data.objectData.MVEX__Long_Access_Token__c) {
                                 this.originalCredentials.MVEX__Long_Access_Token__c = data.objectData.MVEX__Long_Access_Token__c;
-                                this.fieldsData.MVEX__Long_Access_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
+                                this.fieldsData.MVEX__Long_Access_Token__c = data.objectData.MVEX__Long_Access_Token__c;
                             }
                         }
                         
@@ -291,6 +291,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                 self.fieldsData.MVEX__AccessToken__c = self.responseBody;
                 self.fieldsData.MVEX__Long_Access_Token__c = objData.MVEX__PortalName__c;
                 self.fieldsData.MVEX__User_Id__c = objData.MVEX__Listing_Id__c;
+                this.checkValidity();
                 self.showToast('Success', 'Authorization has been successfully completed.', 'success');
             }
         };
@@ -769,6 +770,8 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                 url: 'https://www.instagram.com/oauth/authorize?client_id=' + this.fieldsData.MVEX__ClientId__c + '&redirect_uri=' + this.fieldsData.MVEX__Redirect_URI__c + '&response_type=code&scope=business_basic%2Cbusiness_manage_messages%2Cbusiness_manage_comments%2Cbusiness_content_publish'
             }
         });
+
+        this.saveDisable = false;
     }
 
     /**

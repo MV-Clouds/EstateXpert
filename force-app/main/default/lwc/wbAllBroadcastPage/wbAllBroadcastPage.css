@@ -76,18 +76,23 @@
 
 .refresh-icon-container {
     cursor: pointer;
-    padding: 6px 12px;
-    text-align: center;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid #d0d4d8;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    color: #0176D3;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
+    transition: all 0.2s ease;
+    --slds-c-icon-color-foreground-default: #0176D3;
 }
 
 .refresh-icon-container:hover {
-    border-color: #0176D3;
-    box-shadow: 0 3px 10px rgba(1, 118, 211, 0.2);
+    background: #F3F6F9;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
     transform: translateY(-1px);
 }
 
@@ -433,7 +438,6 @@ span {
 
 .box-container{
     display: grid;
-    gap: 1rem;
     max-height: 20rem;
     overflow: scroll;
     padding: 2px;
@@ -453,12 +457,6 @@ span {
 .box-container .slds-text-heading_small {
     color: #1a73e8;
     font-weight: 500;
-}
-
-.popUpFooter{
-    position: sticky;
-    bottom: 0;
-    padding-top: 1rem;
 }
 
 .action-buttons {
@@ -519,7 +517,6 @@ span {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     max-width: 400px;
     text-align: center;
-    font-family: Arial, sans-serif;
     animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -656,14 +653,32 @@ span {
     text-overflow: ellipsis;
 }
 
+.custom-modal-shell {
+    z-index: 1000;
+}
+
+.custom-modal-container {
+    border-radius: 8px;
+    overflow: hidden;
+    background: #F9FAFB;
+    box-shadow: rgba(15, 23, 42, 0.24) 0px 14px 36px -12px;
+}
+
 .closs_icon_css {
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    border: 1px solid #E5E7EB;
+    z-index: 2;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
 .blue-header {
@@ -672,50 +687,75 @@ span {
     border-bottom-style: unset;
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
 }
 
 .cancel_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    padding: 0px 20px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0.5rem 1.5rem;
     background: #FFFFFF;
-    border: 1px solid #0176D3;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    font-weight: 500;
+    line-height: 20px;
+    border: none;
+    padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.save_btn_css:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .save_btn_css:disabled {
-    background: #c9c9c9;
-    border: 1px solid #c9c9c9;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .popup_content_cls {
+    background: #F9FAFB;
+}
+
+.modalbody {
+    background-color: #F9FAFB;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
-    display: flex;
-    min-height: 400px;
-    width: 100%;
-    padding: 12px;
-    overflow: auto;
-    scrollbar-width: none;
-    max-height: 470px;
-    position: relative;
-    flex-direction: column;
+}
+
+.content_body {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .sorting_header .slds-icon_container {
@@ -789,13 +829,13 @@ span {
 .restricted-access {
     padding: 48px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     text-align: center;
     max-width: 450px;
     width: 100%;
     transition: transform 0.4s ease, box-shadow 0.4s ease;
     border: 1px solid #bfdbfe;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #f0f6ff 100%);
 }
 
 .restricted-access svg {
@@ -807,7 +847,6 @@ span {
 }
 
 .restricted-access h1 {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     font-size: 2.25rem;
     font-weight: 500;
     color: #1e3a8a;
@@ -815,7 +854,6 @@ span {
 }
 
 .restricted-access p {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     font-size: 1.25rem;
     color: #374151;
     line-height: 1.6;
@@ -824,11 +862,7 @@ span {
 .custom-card {
     max-width: 600px;
     margin: auto;
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
+    background-color: #ffffff;
     border-radius: 16px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
     padding: 2rem;
@@ -959,15 +993,13 @@ span {
 }
 
 .configuration-error-content h1 {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     font-size: 2.25rem;
-    font-weight: 900;
+    font-weight: 500;
     color: #92400e;
     margin-bottom: 20px;
 }
 
 .configuration-error-content p {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     font-size: 1.25rem;
     color: #78350f;
     line-height: 1.6;
@@ -992,10 +1024,9 @@ span {
 .secondPage {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
     height: 100%;
-    padding: 1.5rem;
-    padding-top: 1rem;
+    padding: 1rem;
     overflow: hidden;
 }
 
@@ -1066,7 +1097,7 @@ span {
 .preview-box-container {
     background: #f3f4f6;
     border-radius: 8px;
-    padding: 1.5rem 3rem;
+    padding: 1rem;
     border: 1px solid rgb(201 201 201 / 54%);
     overflow-y: auto;
     flex: 1;
@@ -1129,7 +1160,7 @@ span {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    border-radius: 8px 8px 0px 0px;
+    border-radius: 8px;
     box-shadow: 0px 4px 10px 0px #28282814;
 }
 
@@ -1220,15 +1251,22 @@ span {
 }
 
 /* Footer */
-.send-template-modal-container .popUpFooter {
+.popUpFooter {
     position: sticky;
     bottom: 0;
     display: flex;
     justify-content: center;
     gap: 0.75rem;
-    padding: 2rem;
+    padding: 1rem;
     flex-shrink: 0;
-    padding-top: 0;
+    border-top: 1px solid #E5E7EB;
+    background: #FFFFFF;
+}
+
+.footerbtns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
 }
 
 /* Main modal overlay when schedule modal is open */
@@ -1284,15 +1322,15 @@ span {
 .schedule-modal-header {
     background-color: #0176D3;
     color: white;
-    padding: 1rem;
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .schedule-modal-header h2 {
     color: white;
     font-size: 1.125rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
 }
 
@@ -1301,10 +1339,7 @@ span {
     padding: 1.5rem;
     max-height: calc(100vh - 200px);
     overflow-y: auto;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background: #F9FAFB;
 }
 
 .timezone-note {
@@ -1336,15 +1371,29 @@ span {
     display: flex;
     justify-content: center;
     gap: 0.75rem;
-    padding-top: 1rem;
-    border-bottom-left-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
+    padding: 1rem;
+    border-top: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    margin: 1rem -1.5rem -1.5rem -1.5rem;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .schedule-close-icon {
-    left: 2rem;
-    top: 0rem;
-    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    border: 1px solid #E5E7EB;
+    z-index: 2;
+}
+
+.schedule-close-icon svg path {
+    fill: #1F2937;
 }
 
 .empty-state__content {
@@ -1366,4 +1415,8 @@ span {
     margin-top: 1rem;
     display: flex;
     justify-content: center;
+}
+
+.schedule-modal-container {
+    --lwc-fontWeightBold: 500;
 }

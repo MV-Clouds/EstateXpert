@@ -3,11 +3,15 @@ public without sharing class InstagramController {
       public Boolean isRecordCreated { get; set; }
     public Boolean hasError { get; set; }
     public String errorMessage { get; set; }
+    public String longLivedToken { get; set; }
+    public String instagramUserId { get; set; }
     
     public InstagramController() {
         isRecordCreated = false;
         hasError = false;
         errorMessage = '';
+        longLivedToken = '';
+        instagramUserId = '';
     }
 
      public PageReference getRefreshToken() {
@@ -45,13 +49,15 @@ public without sharing class InstagramController {
                 Map<String, Object> responseBody = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
                 String accessToken = (String) responseBody.get('access_token');
                 Long userId = (Long) responseBody.get('user_id');
-                String sUserId = userId.format();
+                String sUserId = String.valueOf(userId);
                 
                 String longTermToken = getLongLivedAccessToken(accessToken, clientSecret);
                 Boolean status = getUserId(accessToken, longTermToken);
     
                 if (status) {
                     isRecordCreated = true;
+                    longLivedToken = longTermToken;
+                    instagramUserId = sUserId;
                 } else {
                     hasError = true;
                     errorMessage = 'Failed to retrieve user information.';
@@ -115,8 +121,6 @@ public without sharing class InstagramController {
                 Map<String, Object> responseBody = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                 String userId = (String) responseBody.get('user_id');
                     
-                saveCustomSettings(accessToken , longRefreshToken ,userId);
-    
                 return true;
     
             }
@@ -125,14 +129,5 @@ public without sharing class InstagramController {
         }
         
         return false;
-    }
-
-
-    public static void saveCustomSettings(String accessToken, String longRefreshToken , String userId){
-        try {
-            PlatformEventController.publishEvent('Instagram', accessToken, longRefreshToken, userId);
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'InstagramController', 'saveCustomSettings', 'Error while saving custom settings.');
-        }
     }
 }

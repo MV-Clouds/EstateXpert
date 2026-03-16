@@ -47,7 +47,6 @@
 
             .title {
                 position: absolute;
-                left: 42%;
                 font-weight: 500;
             }
 
@@ -60,7 +59,7 @@
 
             .instructions {
                 margin-bottom: 0;
-                margin-top: 4rem;
+                margin-top: 3rem;
                 padding-left: 2px;
             }
 
@@ -119,6 +118,14 @@
             .header_cls {
                 display: flex;
                 align-items: center;
+                padding: 1rem;
+                position: relative;
+                justify-content: center;
+            }
+
+            .header_cls img{
+                position: absolute;
+                left: 0;
             }
 
             .error-popup {
@@ -202,7 +209,7 @@
 
         <div class="container">
             <div class="header_cls">
-                <apex:image url="{!URLFOR($Resource.templateBuilderLogo)}" width="auto" height="auto" />
+                <apex:image url="{!URLFOR($Resource.estatexpertlogo)}" width="200" height="auto" />
                 <h2 class="title">Integrate with EstateXpert</h2>
             </div>
             <p class="instructions">Paste this refresh token to the Gmail Integration page.</p>

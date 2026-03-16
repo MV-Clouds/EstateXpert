@@ -147,7 +147,7 @@ public with sharing class IntegrationPopupController {
                 GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
                 
                 // Fetch Credentials from Custom Metadata
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
                 
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
@@ -171,6 +171,19 @@ public with sharing class IntegrationPopupController {
                 result.siteUrl = getSiteUrl(outlookSettings.Redirect_URI__c, 'Outlook');
             } else if (integrationType == 'Instagram') {
                 IG_Configuration__c instaSettings = IG_Configuration__c.getOrgDefaults();
+
+                  // Fetch Credentials from Custom Metadata
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
+                
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 3) {
+                        instaSettings.MVEX__ClientID__c = parts[0];
+                        instaSettings.MVEX__ClientSecret__c = parts[1];
+                        instaSettings.MVEX__Redirect_URI__c = parts[2];
+                    }
+                }
+
                 result.objectData = instaSettings;
                 result.siteUrl = getSiteUrl(instaSettings.Redirect_URI__c, 'Instagram');
             } else if (integrationType == 'Google'){

@@ -1,5 +1,5 @@
 import { LightningElement, track } from 'lwc';
-import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastGroups';
+import getAllBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getAllBroadcastGroups';
 import deleteBroadcastGroup from '@salesforce/apex/BroadcastMessageController.deleteBroadcastGroup';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
@@ -160,7 +160,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
 
     loadBroadcastGroups() {
         this.isLoading = true;
-        getBroadcastGroups()
+        getAllBroadcastGroups()
             .then(result => {
                 this.data = result.map((item, index) => ({
                     ...item,
@@ -291,7 +291,6 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
         if (this.hasBusinessAccountConfigured) {
             this.showCommunicationPopup = true;
         } else {
-            // Bypass popup if no WhatsApp integration exists
             this.selectedCommunicationType = 'Email';
             this.broadcastGroupId = null;
             this.navigateToNewBroadcast();
@@ -304,6 +303,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
 
     handlePopupContinue() {
         this.showCommunicationPopup = false;
+        this.broadcastGroupId = null;
         this.navigateToNewBroadcast();
     }
 

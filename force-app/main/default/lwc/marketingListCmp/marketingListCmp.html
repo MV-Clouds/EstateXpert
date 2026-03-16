@@ -442,16 +442,18 @@
                                                         <td>{contact.Name}</td>
                                                         <td>{contact.Phone}</td>
                                                         <td>
-                                                                <button class="contacts-action-delete" onclick={handleRemoveContact}
-                                                                    data-id={contact.Id} data-index={index} title="Remove">
-                                                                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                                            stroke-linejoin="round" />
-                                                                    </svg>
-                                                                </button>
+                                                            <button class="contacts-action-delete"
+                                                                onclick={handleRemoveContact} data-id={contact.Id}
+                                                                data-index={index} title="Remove">
+                                                                <svg width="15" height="15" viewBox="0 0 14 14"
+                                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                        stroke="#212529" stroke-width="1.25"
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round" />
+                                                                </svg>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 </template>

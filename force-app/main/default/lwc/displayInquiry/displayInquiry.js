@@ -145,6 +145,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track pagedFilteredInquiryData = [];
     @track modalFilteredInquiryData = [];
     @track sendMailInquiryDataList = [];
+    filterModalSnapshot = null;
 
     get modalContainerClass() {
         return this.popUpSecondPage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
@@ -943,6 +944,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By:Rachit Shah
     */
     handleDeleteMapping(event) {
+        event.stopPropagation();
         const mappingIdToDelete = event.currentTarget.dataset.id;
         this.mappings = this.mappings
             .filter(mapping => mapping.id !== parseInt(mappingIdToDelete, 10))
@@ -1227,7 +1229,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
             this.totalRecords = this.pagedFilteredInquiryData.length;
             this.currentPage = 1;
-            this.hideModalBox();
+            this.hideModalBox(false);
             this.searchTerm = '';
             this.checkAll = false;
             this.sendMailInquiryDataList = [];
@@ -1494,6 +1496,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     showModalBox() {
+        this.filterModalSnapshot = {
+            conditiontype: this.conditiontype,
+            selectedConditionType: this.selectedConditionType,
+            logicalExpression: this.logicalExpression,
+            mappings: JSON.parse(JSON.stringify(this.mappings || []))
+        };
         this.isShowModal = true;
     }
 
@@ -1503,7 +1511,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Date: 25/07/2024
     * Created By: Rachit Shah
     */
-    hideModalBox() {
+    hideModalBox(shouldRevert = true) {
+        if (shouldRevert && this.filterModalSnapshot) {
+            this.conditiontype = this.filterModalSnapshot.conditiontype;
+            this.selectedConditionType = this.filterModalSnapshot.selectedConditionType;
+            this.logicalExpression = this.filterModalSnapshot.logicalExpression;
+            this.mappings = JSON.parse(JSON.stringify(this.filterModalSnapshot.mappings || []));
+        }
+
+        this.filterModalSnapshot = null;
         this.closeAddConditionModal();
         this.isShowModal = false;
     }
@@ -1570,7 +1586,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.totalRecords = this.pagedFilteredInquiryData.length;
                 this.currentPage = 1;
                 this.logicalExpression = '';
-                this.hideModalBox();
+                this.hideModalBox(false);
                 this.checkAll = false;
                 this.sendMailInquiryDataList = [];
                 this.isLoading = false;
@@ -1834,6 +1850,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     handleMappingClick(event) {
+        if (event.target?.closest('.delete-div')) {
+            return;
+        }
+
         const nameAttribute = event.currentTarget.dataset.name;
 
         if (nameAttribute && nameAttribute !== 'delete') {

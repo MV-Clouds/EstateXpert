@@ -78,6 +78,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track listingColumns = [];
     @track isConfigOpen = false;
     @track modalFilteredListingData = []; // New variable to store popup-filtered data
+    filterModalSnapshot = null;
 
     @track defaultColumns = [
         { label: 'Image', fieldName: 'media_url', type: 'image' },
@@ -874,7 +875,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             }
 
             this.modalFilteredListingData = [...this.pagedFilteredListingData];
-            this.hideModalBox();
+            this.hideModalBox(false);
             this.searchTerm = '';
             this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
             this.totalRecords = this.pagedFilteredListingData.length;
@@ -920,6 +921,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
      * Created By:Rachit Shah
      */
     handleMappingClick(event) {
+        if (event.target?.closest('.delete-div')) {
+            return;
+        }
+
         const nameAttribute = event.currentTarget.dataset.name;
 
         if (nameAttribute && nameAttribute !== 'delete') {
@@ -1114,6 +1119,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     showModalBox() {
+        this.filterModalSnapshot = {
+            conditiontype: this.conditiontype,
+            selectedConditionType: this.selectedConditionType,
+            logicalExpression: this.logicalExpression,
+            mappings: JSON.parse(JSON.stringify(this.mappings || []))
+        };
         this.isShowModal = true;
     }
 
@@ -1123,7 +1134,15 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Date: 17/06/2024
     * Created By: Rachit Shah
     */
-    hideModalBox() {
+    hideModalBox(shouldRevert = true) {
+        if (shouldRevert && this.filterModalSnapshot) {
+            this.conditiontype = this.filterModalSnapshot.conditiontype;
+            this.selectedConditionType = this.filterModalSnapshot.selectedConditionType;
+            this.logicalExpression = this.filterModalSnapshot.logicalExpression;
+            this.mappings = JSON.parse(JSON.stringify(this.filterModalSnapshot.mappings || []));
+        }
+
+        this.filterModalSnapshot = null;
         this.isShowModal = false;
         this.closeAddConditionModal();
     }
@@ -1247,7 +1266,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 this.totalRecords = this.pagedFilteredListingData.length;
                 this.currentPage = 1;
                 this.logicalExpression = '';
-                this.hideModalBox();
+                this.hideModalBox(false);
                 this.isLoading = false;
                 this.updateMapMarkers();
                 return;

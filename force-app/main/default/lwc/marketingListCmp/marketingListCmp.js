@@ -72,7 +72,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track tempBroadcastGroupName = '';
     @track listViewId = '';
 
-    @track popUpFirstPage = true;
     @track popUpLastPage = false;
     @track popUpConfirmPage = false;
     @track popupHeader = 'Create Broadcast Group';
@@ -1533,7 +1532,6 @@ openConfigureSettings(){
     // Handle send message button click
     handleSendMessage() {
         this.showTemplate = true;
-        this.popUpFirstPage = true; // Show template list first
         this.popUpLastPage = false;
         this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
@@ -1547,7 +1545,6 @@ openConfigureSettings(){
     // Handle closing the template modal
     handleCloseTemplate() {
         this.showTemplate = false;
-        this.popUpFirstPage = true;
         this.popUpLastPage = false;
         this.popUpConfirmPage = false;
         this.popupHeader = 'Create Broadcast Group';
@@ -1604,7 +1601,6 @@ openConfigureSettings(){
         }
 
         if(this.tempBroadcastGroupName == this.broadcastGroupName){
-            this.popUpFirstPage = false;
             this.popupHeader = 'Choose Template';
             return;
         }
@@ -1630,7 +1626,6 @@ openConfigureSettings(){
             .then(result => {
                 this.broadcastGroupId = result; // Assuming Apex returns the created Broadcast Group ID
                 this.showToast('Success', 'Broadcast group created successfully', 'success');
-                this.popUpFirstPage = false;
                 this.popupHeader = 'Choose Template';
                 this.tempBroadcastGroupName = this.broadcastGroupName;
                 this.updateTemplateOptions();
@@ -1646,7 +1641,6 @@ openConfigureSettings(){
 
     // Handle previous button on second page
     handlePreviousOnPopup() {
-        this.popUpFirstPage = true;
         this.popupHeader = 'Create Broadcast Group';
         this.selectedTemplate = '';
         this.popUpConfirmPage = false;

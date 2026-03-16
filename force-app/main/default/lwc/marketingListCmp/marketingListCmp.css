@@ -440,9 +440,9 @@ span {
     overflow: hidden;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border: 1px solid rgba(1, 118, 211, 0.1);
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s ease,
-                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease,
+        margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     margin-left: 0;
 }
 
@@ -940,9 +940,17 @@ input[type=checkbox]::before {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    border: 1px solid #E5E7EB;
+    transition: all 0.2s ease;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
 .blue-header {
@@ -951,6 +959,7 @@ input[type=checkbox]::before {
     border-bottom-style: unset;
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
 }
 
 .blue-header h2 {
@@ -960,36 +969,49 @@ input[type=checkbox]::before {
 
 .cancel_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    padding: 0px 20px;
+    padding: 0.5rem 1.5rem;
     background: #FFFFFF;
-    border: 1px solid #0176D3;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .cancel_btn_css:hover {
-    background: #f0f6ff;
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    border: none;
+    padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .save_btn_css:hover {
-    background: #0157a0;
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .footer-btns {
@@ -1001,15 +1023,10 @@ input[type=checkbox]::before {
 }
 
 .custom-modal-content {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-color: #F9FAFB;
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
+    padding: 1.5rem;
 }
 
 .custom-modal-content .slds-form-element__label {
@@ -1113,21 +1130,24 @@ input[type=checkbox]::before {
 }
 
 .modal-body {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-color: #F9FAFB !important;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 200px);
+    overflow: hidden;
     border-radius: 0px 0px 8px 8px;
 }
 
 .modal-body .custom-modal-body {
     display: flex;
-    min-height: 580px;
+    min-height: 400px;
     width: 100%;
     overflow: hidden;
     scrollbar-width: none;
     position: relative;
+    flex-direction: row;
+    padding: 1rem;
+    gap: 1rem;
 }
 
 .send-template-modal-container {
@@ -1135,24 +1155,12 @@ input[type=checkbox]::before {
     min-width: 60rem;
     display: flex;
     flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .send-template-modal-container .slds-modal__header {
     flex-shrink: 0;
-}
-
-.send-template-modal-container .modal-body {
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.send-template-modal-container .custom-modal-body {
-    flex: 1;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
 }
 
 .fieldmapping_css {
@@ -1329,12 +1337,20 @@ input[type=checkbox]::before {
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
 }
 
 .preview-container {
-    background-color: #dcf8c6; /* WhatsApp background-like color */
+    background-color: #dcf8c6;
+    /* WhatsApp background-like color */
     border-radius: 8px;
     max-height: 400px;
     overflow-y: auto;
@@ -1346,21 +1362,21 @@ c-template-preview {
     width: 100%;
 }
 
-.popUpBody{
+.popUpBody {
     flex-grow: 1;
     margin-bottom: 0.5rem;
 }
 
-.inner-body-grid{
+.inner-body-grid {
     height: 100%;
 }
 
-.no-text{
+.no-text {
     font-size: large;
     color: #0076d3;
 }
 
-.right-section-preview{
+.right-section-preview {
     height: 100%;
     display: flex;
     align-items: center;
@@ -1371,23 +1387,17 @@ c-template-preview {
 
 /* ==================== NEW TEMPLATE SELECTION UI ==================== */
 
-.template-prev{
+.template-prev {
     height: 100%;
-    max-height: 405px;
+    max-height: 400px;
     overflow-y: auto;
 }
+
 .template-selector-section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 0.5rem;
-    padding-bottom: 0;
-}
-
-.template-selector-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    width: 50%;
 }
 
 .template-combobox {
@@ -1400,11 +1410,12 @@ c-template-preview {
     gap: 0.75rem;
     flex: 1;
     min-height: 0;
+    max-height: 400px;
 }
 
 .contacts-table-label {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #374151;
     margin: 0;
 }
@@ -1415,7 +1426,7 @@ c-template-preview {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    border-radius: 8px 8px 0px 0px;
+    border-radius: 8px;
     box-shadow: 0px 4px 10px 0px #28282814;
 }
 
@@ -1492,19 +1503,53 @@ c-template-preview {
     display: table-cell;
 }
 
+.contacts-action-delete {
+    padding: 6px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.contacts-action-delete svg {
+    width: 15px;
+    height: 15px;
+}
+
+.contacts-action-delete svg path {
+    stroke: #212529;
+}
+
+.contacts-action-delete:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.contacts-action-delete:hover svg path {
+    stroke: #dc2626;
+}
+
 /* Preview Section */
 .preview-section-right {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     /* margin-top: 0.3rem; */
-    padding-top: 2rem;
+    padding-top: 24px;
+    width: 50%;
 }
 
 .preview-box-container {
     background: #f3f4f6;
     border-radius: 8px;
-    padding: 1.5rem 3rem;
+    padding: 1rem;
     border: 1px solid rgb(201 201 201 / 54%);
     overflow-y: auto;
     flex: 1;
@@ -1551,12 +1596,10 @@ c-template-preview {
 .popUpFooter {
     display: flex;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 2rem;
-    /* border-top: 1px solid #e5e7eb;
-    background: #fff; */
-    flex-shrink: 0;
-    padding-top: 0;
+    gap: 1rem;
+    border-top: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    padding: 1rem;
 }
 
 .send-template-modal-container .popUpFooter {
@@ -1604,7 +1647,8 @@ c-template-preview {
 
 /* Schedule modal */
 .schedule-modal {
-    z-index: 9200; /* Higher than backdrop */
+    z-index: 9200;
+    /* Higher than backdrop */
 }
 
 .schedule-modal .slds-modal__container {
@@ -1619,7 +1663,8 @@ c-template-preview {
 }
 
 .confirm-modal {
-    z-index: 9200; /* Higher than backdrop */
+    z-index: 9200;
+    /* Higher than backdrop */
 }
 
 .confirm-modal .slds-modal__container {
@@ -1637,15 +1682,15 @@ c-template-preview {
 .schedule-modal-header {
     background-color: #0176D3;
     color: white;
-    padding: 1rem;
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .schedule-modal-header h2 {
     color: white;
     font-size: 1.125rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
 }
 
@@ -1654,10 +1699,8 @@ c-template-preview {
     padding: 1.5rem;
     max-height: calc(100vh - 200px);
     overflow-y: auto;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background: #F9FAFB;
+    --lwc-fontWeightBold: 500;
 }
 
 .timezone-note {
@@ -1672,16 +1715,16 @@ c-template-preview {
     align-items: center;
 }
 
-.timezone-note svg{
-color: #0074da;
+.timezone-note svg {
+    color: #0074da;
 }
 
-.main-line{
+.main-line {
     font-size: 14px;
 }
 
-.next-line{
-font-size: 12px;
+.next-line {
+    font-size: 12px;
 }
 
 /* Schedule modal footer */
@@ -1689,15 +1732,52 @@ font-size: 12px;
     display: flex;
     justify-content: center;
     gap: 0.75rem;
-    padding-top: 1rem;
-    /* border-top: 1px solid #dddbda; */
-    /* background-color: #f3f2f2; */
-    border-bottom-left-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
+    padding: 1rem;
+    border-top: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    margin: 1rem -1.5rem -1.5rem -1.5rem;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
-.schedule-close-icon{
-    left: 2rem;
-    top: 0rem;
-    background: none;
+.schedule-close-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    border: 1px solid #E5E7EB;
+    position: absolute;
+    right: 1rem;
+    top: 1.25rem;
+    z-index: 2;
+    transition: all 0.2s ease;
+}
+
+.schedule-close-icon:hover {
+    background: #E5E7EB;
+    transform: scale(1.05);
+}
+
+.schedule-close-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.schedule-close-icon svg path {
+    fill: #1F2937;
+}
+
+.custom-modal-shell {
+    z-index: 1000;
+}
+
+.custom-modal-container {
+    border-radius: 8px;
+    overflow: hidden;
+    background: #F9FAFB;
+    box-shadow: rgba(15, 23, 42, 0.24) 0px 14px 36px -12px;
 }

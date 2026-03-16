@@ -5,9 +5,9 @@
 
     <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
         aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
-        <div class="slds-modal__container modal-wrapper">
+        <div class="slds-modal__container">
             <div class="slds-modal__close closs_icon_css" onclick={handleCloseModal}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                         fill="white" />
@@ -18,48 +18,60 @@
                 <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Email Campaign Template</h1>
             </div>
 
-            <div class="slds-modal__content slds-p-around_medium custom-content">
-                <div class="input-field input-field-bold">
-                    <lightning-combobox name="selectedTemplate" label="Email Campaign Template"
-                        value={selectedTemplateIdValue} placeholder="Select a template" options={templateOptions}
-                        onchange={handleChange} disabled={isEdit}>
-                    </lightning-combobox>
-                </div>
+            <div class="slds-modal__content modalbody" id="modal-content-id-1">
+                <div class="content_body">
+                    <div class="input-field input-field-bold">
+                        <lightning-combobox name="selectedTemplate" label="Email Campaign Template"
+                            value={selectedTemplateIdValue} placeholder="Select a template" options={templateOptions}
+                            onchange={handleChange} disabled={isEdit}>
+                        </lightning-combobox>
+                    </div>
 
-                <div class="input-field input-field-bold">
-                    <lightning-combobox name="objectSelector" label="Select Object" value={formDataValue.selectedObject}
-                        placeholder="Select an object" options={objectOptions} onchange={handleChange} disabled={isEdit} required>
-                    </lightning-combobox>
-                </div>
+                    <div class="input-field input-field-bold">
+                        <lightning-combobox name="objectSelector" label="Select Object" value={formDataValue.selectedObject}
+                            placeholder="Select an object" options={objectOptions} onchange={handleChange} disabled={isEdit} required>
+                        </lightning-combobox>
+                    </div>
 
-                <div class="input-field input-field-bold">
-                    <lightning-input name="campaignName" label="Email Campaign Name" required
-                        value={formDataValue.campaignName} onchange={handleChange} placeholder="Campaign name"
-                        max-length="50"></lightning-input>
-                </div>
+                    <div class="input-field input-field-bold">
+                        <lightning-input name="campaignName" label="Email Campaign Name" required
+                            value={formDataValue.campaignName} onchange={handleChange} placeholder="Campaign name"
+                            max-length="50"></lightning-input>
+                    </div>
 
+                    <div class="input-field">
+                        <lightning-combobox name="messagingService" label="Select Messaging Service"
+                            value={formDataValue.messagingService} placeholder="Select an Option" options={messageOptions}
+                            onchange={handleChange} required>
+                        </lightning-combobox>
+                    </div>
 
-                <div class="input-field">
-                    <lightning-combobox name="messagingService" label="Select Messaging Service"
-                        value={formDataValue.messagingService} placeholder="Select an Option" options={messageOptions}
-                        onchange={handleChange} required>
-                    </lightning-combobox>
-                </div>
-
-                <div class="input-field">
-                    <lightning-input type="checkbox" name="saveForFuture"
-                        label="If you want to save marketing campaign for future" checked={formDataValue.saveForFuture}
-                        onchange={handleChange}></lightning-input>
-                </div>
-                <div class="footer-btns">
-                    <template if:true={isEdit}>
-                        <button onclick={handleSave} disabled={isSaveDisabled}>Save</button>
-                    </template>
-                    <template if:false={isEdit}>
-                        <button onclick={handleNext}>Next</button>
-                    </template>
+                    <div class="input-field no-gap">
+                        <lightning-input type="checkbox" name="saveForFuture"
+                            label="If you want to save marketing campaign for future" checked={formDataValue.saveForFuture}
+                            onchange={handleChange}></lightning-input>
+                    </div>
                 </div>
             </div>
+
+            <div class="footerbtns">
+                <template if:true={isEdit}>
+                    <button class="save_btn_css" onclick={handleSave} disabled={isSaveDisabled}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                        </svg>
+                        Save
+                    </button>
+                </template>
+                <template if:false={isEdit}>
+                    <button class="save_btn_css" onclick={handleNext}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14.83 12L10.24 16.59L11.66 18L17.66 12L11.66 6L10.24 7.41L14.83 12Z" fill="currentColor" />
+                        </svg>
+                        Next
+                    </button>
+                </template>
+                </div>
 
         </div>
     </section>

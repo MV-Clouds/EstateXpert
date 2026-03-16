@@ -146,21 +146,40 @@
         <template if:true={isCreateBroadcastModalOpen}>
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__content slds-p-around_medium modal-content" id="modal-content-id-2">
-                        <div>
-                            <div class="modal-heading slds-modal__header">
-                                <h1>Create/Edit Broadcast Group</h1>
+                    <div class="slds-modal__close closs_icon_css" onclick={closePopUp}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
+                        </svg>
+                    </div>
+
+                    <div class="slds-modal__header blue-header">
+                        <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Create/Edit Broadcast Group</h1>
+                    </div>
+
+                    <div class="slds-modal__content modalbody" id="modal-content-id-2">
+                        <div class="content_body">
+                            <div class="modal-body-content">
+                                <lightning-input placeholder="Enter Name Here" type="text" label="Name" name="name" onchange={handleInputChange} value={broadcastGroupName} class="slds-m-bottom_medium" required message-when-value-missing=" "></lightning-input>
+                                <lightning-textarea name="message" label="Description" placeholder="Enter Descriptive Message Here" class="slds-m-bottom_medium" value={messageText} required message-when-value-missing=" " onchange={handleInputChange}></lightning-textarea>
                             </div>
-                            <div class="modal-body">
-                                <div class="modal-body-content">
-                                    <lightning-input placeholder="Enter Name Here" type="text" label="Name" name="name" onchange={handleInputChange} value={broadcastGroupName} class="slds-m-bottom_medium" required message-when-value-missing=" "></lightning-input>
-                                    <lightning-textarea name="message" label="Description" placeholder="Enter Descriptive Message Here" class="slds-m-bottom_medium" value={messageText} required message-when-value-missing=" " onchange={handleInputChange}></lightning-textarea>
-                                </div>
-                            </div>
-                            <div class="footer">
-                                <button class="close-btn" onclick={closePopUp}>Close</button>
-                                <button class="save-btn" onclick={handleSave}>Save Group</button>
-                            </div>
+                        </div>
+                        <div class="popUpFooter footerbtns">
+                            <button class="cancel_btn_css" onclick={closePopUp}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
+                                </svg>
+                                Close
+                            </button>
+                            <button class="save_btn_css" onclick={handleSave}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                                </svg>
+                                Save Group
+                            </button>
                         </div>
                     </div>
                 </div>

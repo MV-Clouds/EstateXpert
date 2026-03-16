@@ -11,10 +11,11 @@
                             </div>
                             <div class="header">
                                 <button class="btn" onclick={newBroadcast}>
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
-                                    </svg> 
-                                    New Broadcast                      
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                                    </svg>
+                                    New Broadcast
                                 </button>
                             </div>
                         </div>
@@ -23,11 +24,13 @@
                     <div class="main_content_cls">
                         <div class="slds-m-around_medium navbar">
                             <div class="search-input">
-                                <lightning-input type="search" onchange={handleSearch} placeholder="Search by Name..." class="input-broadcast" variant="label-hidden"></lightning-input>
+                                <lightning-input type="search" onchange={handleSearch} placeholder="Search by Name..."
+                                    class="input-broadcast" variant="label-hidden"></lightning-input>
                             </div>
                             <div class="icon-button-container">
                                 <div class="refresh-icon-container" onclick={handleRefresh}>
-                                    <lightning-icon icon-name="utility:refresh" alternative-text="Refresh" size="x-small"></lightning-icon>
+                                    <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                        size="x-small"></lightning-icon>
                                 </div>
                             </div>
                         </div>
@@ -44,7 +47,8 @@
                                             <th data-id="Name" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name" role="button" tabindex="0">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
+                                                    role="button" tabindex="0">
                                                     <span class="slds-truncate" title="Name">Name</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                         <svg data-index="Name" class="listing-manager-icon"
@@ -58,11 +62,14 @@
                                             <th data-id="MVEX__Recipient_Count__c" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header recipient-count"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                    <span class="slds-truncate" title="Recipient Count">Recipient Count</span>
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Recipient Count">Recipient
+                                                        Count</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="MVEX__Recipient_Count__c" class="listing-manager-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <svg data-index="MVEX__Recipient_Count__c"
+                                                            class="listing-manager-icon" viewBox="0 0 384 512"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
@@ -72,7 +79,8 @@
                                             <th data-id="MVEX__Status__c" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header status"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
                                                     <span class="slds-truncate status_cls" title="Status">Status</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                         <svg data-index="MVEX__Status__c" class="listing-manager-icon"
@@ -86,11 +94,13 @@
                                             <th data-id="MVEX__Total_Sent__c" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-sent"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
                                                     <span class="slds-truncate" title="Total Sent">Total Sent</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="MVEX__Total_Sent__c" class="listing-manager-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <svg data-index="MVEX__Total_Sent__c"
+                                                            class="listing-manager-icon" viewBox="0 0 384 512"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
@@ -100,11 +110,14 @@
                                             <th data-id="MVEX__Total_Delivered__c" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-delivered"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                    <span class="slds-truncate" title="Total Delivered">Total Delivered</span>
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Total Delivered">Total
+                                                        Delivered</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="MVEX__Total_Delivered__c" class="listing-manager-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <svg data-index="MVEX__Total_Delivered__c"
+                                                            class="listing-manager-icon" viewBox="0 0 384 512"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
@@ -114,11 +127,13 @@
                                             <th data-id="MVEX__Total_Read__c" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-read"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
                                                     <span class="slds-truncate" title="Total Read">Total Read</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="MVEX__Total_Read__c" class="listing-manager-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <svg data-index="MVEX__Total_Read__c"
+                                                            class="listing-manager-icon" viewBox="0 0 384 512"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
@@ -128,11 +143,13 @@
                                             <th data-id="MVEX__Total_Failed__c" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-failed"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
                                                     <span class="slds-truncate" title="Total Failed">Total Failed</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="MVEX__Total_Failed__c" class="listing-manager-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <svg data-index="MVEX__Total_Failed__c"
+                                                            class="listing-manager-icon" viewBox="0 0 384 512"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
@@ -142,11 +159,14 @@
                                             <th data-id="progressPercentage" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header progress"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                    <span class="slds-truncate progress_cls" title="Progress">Progress</span>
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate progress_cls"
+                                                        title="Progress">Progress</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="progressPercentage" class="listing-manager-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <svg data-index="progressPercentage"
+                                                            class="listing-manager-icon" viewBox="0 0 384 512"
+                                                            xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
@@ -156,7 +176,8 @@
                                             <th data-id="CreatedDate" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header created-date"
                                                 scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
                                                     <span class="slds-truncate" title="Created Date">Created Date</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                         <svg data-index="CreatedDate" class="listing-manager-icon"
@@ -176,7 +197,9 @@
                                                     <div>{row.index}</div>
                                                 </td>
                                                 <td data-label="Name" class="truncate_css">
-                                                    <div><a href="javascript:void(0);" class="clickable_css" data-record-id={row.Id} onclick={handleNameClick}>{row.Name}</a></div>
+                                                    <div><a href="javascript:void(0);" class="clickable_css"
+                                                            data-record-id={row.Id}
+                                                            onclick={handleNameClick}>{row.Name}</a></div>
                                                 </td>
                                                 <td data-label="Recipient Count">
                                                     <div>{row.MVEX__Recipient_Count__c}</div>
@@ -199,8 +222,11 @@
                                                 <td data-label="Progress" class="progress-container">
                                                     <div class="modern-progress-wrapper">
                                                         <div class="modern-progress-bar">
-                                                            <div class="modern-progress-fill" data-progress={row.progressPercentage} style={row.progressWidth}></div>
-                                                            <span class="modern-progress-text">{row.progressPercentage}%</span>
+                                                            <div class="modern-progress-fill"
+                                                                data-progress={row.progressPercentage}
+                                                                style={row.progressWidth}></div>
+                                                            <span
+                                                                class="modern-progress-text">{row.progressPercentage}%</span>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -225,7 +251,8 @@
                         <template if:true={paginatedData.length}>
                             <div class="pagination-container">
                                 <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
                                         <path
                                             d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
                                     </svg>
@@ -246,7 +273,8 @@
 
                                 <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
                                     Next
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
                                         <path
                                             d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                                     </svg>
@@ -258,15 +286,17 @@
 
                     <template if:true={showPopup}>
                         <!-- Use wider modal container when on second page (like marketingListCmp) -->
-                        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+                        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+                            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
                             <div class={modalContainerClass}>
 
                                 <!-- Close Button -->
                                 <div class="slds-modal__close closs_icon_css" onclick={handleCloseOnPopup}>
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                        fill="white" />
+                                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                            fill="white" />
                                     </svg>
                                 </div>
 
@@ -276,65 +306,90 @@
 
                                 <!-- Page 1: Group Selection (unchanged) -->
                                 <template if:true={popUpFirstPage}>
-                                    <div class="slds-modal__content slds-p-around_medium popup_content_cls">
-                                        <div class="popUpBody">
-                                            <!-- Header Section: Search -->
-                                            <div class="slds-m-bottom_medium">
-                                                <div class="slds-grid slds-gutters">
-                                                    <div class="slds-col slds-size_8-of-12">
-                                                        <lightning-input type="search" variant="label-hidden"
-                                                            placeholder="Search by Name" onchange={handleSearchPopup}>
-                                                        </lightning-input>
+                                    <div class="slds-modal__content popup_content_cls modalbody">
+                                        <div class="content_body">
+                                            <div class="popUpBody">
+                                                <!-- Header Section: Search -->
+                                                <div class="slds-m-bottom_medium">
+                                                    <div class="slds-grid slds-gutters">
+                                                        <div class="slds-col slds-size_8-of-12">
+                                                            <lightning-input type="search" variant="label-hidden"
+                                                                placeholder="Search by Name"
+                                                                onchange={handleSearchPopup}>
+                                                            </lightning-input>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <!-- Groups List -->
-                                            <div class="box-container">
-                                                <template if:true={filteredGroups.length}>
-                                                    <template for:each={filteredGroups} for:item="group">
-                                                        <div key={group.Id}>
-                                                            <div class="box-data">
-                                                                <div>
-                                                                    <lightning-input type="checkbox" label="Select"
-                                                                        variant="label-hidden" data-id={group.Id}
-                                                                        onchange={handleGroupSelection} checked={group.IsChecked}>
-                                                                    </lightning-input>
-                                                                </div>
-                                                                <div>
-                                                                    <h3 class="slds-text-heading_small">{group.Name}</h3>
-                                                                    <p>Members: {group.MVEX__Count_of_Members__c}</p>
-                                                                    <p>Object of Group Members: {group.MVEX__Object_Name__c}</p>
-                                                                    <p>Description: {group.MVEX__Description__c}</p>
+                                                <!-- Groups List -->
+                                                <div class="box-container">
+                                                    <template if:true={filteredGroups.length}>
+                                                        <template for:each={filteredGroups} for:item="group">
+                                                            <div key={group.Id}>
+                                                                <div class="box-data">
+                                                                    <div>
+                                                                        <lightning-input type="checkbox" label="Select"
+                                                                            variant="label-hidden" data-id={group.Id}
+                                                                            onchange={handleGroupSelection}
+                                                                            checked={group.IsChecked}>
+                                                                        </lightning-input>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h3 class="slds-text-heading_small">{group.Name}
+                                                                        </h3>
+                                                                        <p>Members: {group.MVEX__Count_of_Members__c}
+                                                                        </p>
+                                                                        <p>Object of Group Members:
+                                                                            {group.MVEX__Object_Name__c}</p>
+                                                                        <p>Description: {group.MVEX__Description__c}</p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        </template>
                                                     </template>
+                                                </div>
+
+                                                <template if:false={filteredGroups.length}>
+                                                    <div class="empty-state__content">
+                                                        <div class="empty-state__icon">
+                                                            <img src="/resource/MVEX__emptyState" alt=""
+                                                                draggable="false">
+                                                        </div>
+                                                        <div class="empty-state__message">No Data Available to Show.
+                                                        </div>
+                                                    </div>
                                                 </template>
                                             </div>
-
-                                            <template if:true={filteredGroups.length}>
-                                                <div class="popUpFooter slds-text-align--center">
-                                                    <button class="cancel_btn_css slds-m-left_x-small" onclick={handleCloseOnPopup}>Close</button>
-                                                    <button class="save_btn_css slds-m-left_x-small" onclick={handleNextOnPopup} disabled={isNextDisabled}>Next</button>
-                                                </div>
-                                            </template>
-
-                                            <template if:false={filteredGroups.length}>
-                                                <div class="empty-state__content">
-                                                    <div class="empty-state__icon">
-                                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                                    </div>
-                                                    <div class="empty-state__message">No Data Available to Show.</div>
-                                                </div>
-                                            </template>
                                         </div>
+                                        <template if:true={filteredGroups.length}>
+                                            <div class="popUpFooter footerbtns slds-text-align--center">
+                                                <button class="cancel_btn_css" onclick={handleCloseOnPopup}>
+                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                            fill="currentColor" />
+                                                    </svg>
+                                                    Close
+                                                </button>
+                                                <button class="save_btn_css" onclick={handleNextOnPopup}
+                                                    disabled={isNextDisabled}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M14.83 12L10.24 16.59L11.66 18L17.66 12L11.66 6L10.24 7.41L14.83 12Z"
+                                                            fill="currentColor" />
+                                                    </svg>
+                                                    Next
+                                                </button>
+                                            </div>
+                                        </template>
                                     </div>
                                 </template>
 
                                 <!-- Page 2: Template Selection + Contact List (matching marketingListCmp UI) -->
                                 <template if:true={popUpSecondpage}>
-                                    <div class="modal-body">
+                                    <div class="slds-modal__content popup_content_cls modalbody">
                                         <div class="custom-modal-body" id="modal-content-id-1">
                                             <div class="secondPage">
                                                 <!-- Left Column: Template Selector + Preview -->
@@ -352,8 +407,7 @@
                                                         <div class="preview-box-container">
                                                             <template if:true={selectedTemplate}>
                                                                 <div class="preview-box">
-                                                                    <c-template-preview 
-                                                                        template-id={selectedTemplate} 
+                                                                    <c-template-preview template-id={selectedTemplate}
                                                                         object-api-name={selectedObjectName}>
                                                                     </c-template-preview>
                                                                 </div>
@@ -369,13 +423,9 @@
 
                                                 <!-- Right Column: Contact List -->
                                                 <div class="preview-section-right">
-                                                    <lightning-input 
-                                                        type="search"
-                                                        label="Search contacts"
-                                                        variant="label-hidden"
-                                                        placeholder="Search by name or phone"
-                                                        onchange={handleSearchMembers}
-                                                        data-id="member-search-input"
+                                                    <lightning-input type="search" label="Search contacts"
+                                                        variant="label-hidden" placeholder="Search by name or phone"
+                                                        onchange={handleSearchMembers} data-id="member-search-input"
                                                         class="contact-search">
                                                     </lightning-input>
 
@@ -391,7 +441,8 @@
                                                                 </thead>
                                                                 <tbody>
                                                                     <template if:true={filteredGroupMembers.length}>
-                                                                        <template for:each={filteredGroupMembers} for:item="member" for:index="index">
+                                                                        <template for:each={filteredGroupMembers}
+                                                                            for:item="member" for:index="index">
                                                                             <tr key={member.Id}>
                                                                                 <td>{member.Name}</td>
                                                                                 <td>{member.Phone}</td>
@@ -403,8 +454,11 @@
                                                                         <tr>
                                                                             <td colspan="3" class="no-results-cell">
                                                                                 <div class="no-results-container">
-                                                                                    <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
-                                                                                    <span>No matching contacts found</span>
+                                                                                    <lightning-icon
+                                                                                        icon-name="utility:search"
+                                                                                        size="small"></lightning-icon>
+                                                                                    <span>No matching contacts
+                                                                                        found</span>
                                                                                 </div>
                                                                             </td>
                                                                         </tr>
@@ -415,14 +469,35 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div class="popUpFooter slds-text-align--center">
-                                                <button class="cancel_btn_css slds-m-left_x-small" onclick={handlePreviousOnPopup}>Previous</button>
-                                                <lightning-button variant="brand" label="Send" onclick={handleConfirmPopup}
-                                                    class="slds-m-left_x-small"></lightning-button>
-                                                <lightning-button variant="brand" label="Schedule" onclick={handleSchedulePopup}
-                                                    class="slds-m-left_x-small"></lightning-button>
-                                            </div>
+                                        </div>
+                                        <div class="popUpFooter slds-text-align--center">
+                                            <button class="cancel_btn_css" onclick={handlePreviousOnPopup}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M9.17 12L13.76 7.41L12.34 6L6.34 12L12.34 18L13.76 16.59L9.17 12Z"
+                                                        fill="currentColor" />
+                                                </svg>
+                                                Previous
+                                            </button>
+                                            <button class="save_btn_css" onclick={handleConfirmPopup}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
+                                                        fill="currentColor" />
+                                                </svg>
+                                                Send
+                                            </button>
+                                            <button class="save_btn_css" onclick={handleSchedulePopup}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M19 4H18V2H16V4H8V2H6V4H5C3.89 4 3.01 4.9 3.01 6L3 20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V10H19V20ZM19 8H5V6H19V8ZM12 13H17V18H12V13Z"
+                                                        fill="currentColor" />
+                                                </svg>
+                                                Schedule
+                                            </button>
                                         </div>
                                     </div>
                                 </template>
@@ -435,55 +510,69 @@
 
                         <!-- Schedule Modal (overlay on top of main modal, same as marketingListCmp) -->
                         <template if:true={popUpLastPage}>
-                            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handlePreviousLastPage}></div>
-                            
-                            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="datetime-modal-heading"
+                            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop"
+                                onclick={handlePreviousLastPage}></div>
+
+                            <section role="dialog" tabindex="-1" aria-modal="true"
+                                aria-labelledby="datetime-modal-heading"
                                 class="slds-modal slds-fade-in-open schedule-modal"
                                 aria-describedby="modal-content-id-2">
                                 <div class="slds-modal__container schedule-modal-container">
                                     <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                                 fill="white" />
                                         </svg>
                                     </div>
 
-                                    <div class="slds-modal__header schedule-modal-header">
-                                        <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date &amp; Time</h2>
+                                    <div class="slds-modal__header blue-header">
+                                        <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date &amp;
+                                            Time</h2>
                                     </div>
 
                                     <div class="slds-modal__content schedule-modal-content" id="modal-content-id-2">
                                         <div class="datetime-selection-wrapper">
                                             <div class="timezone-note">
-                                                <svg class="w-6 h-6 text-gray-800 dark:text-white cal-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+                                                <svg class="w-6 h-6 text-gray-800 dark:text-white cal-icon"
+                                                    aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                    height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="2"
+                                                        d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z" />
                                                 </svg>
                                                 <div class="schedule-message">
                                                     <p class="main-line">Schedule your message</p>
                                                     <p class="next-line">Choose when to send the template.</p>
                                                 </div>
                                             </div>
-                                            <lightning-input type="datetime-local" 
-                                                name="scheduleDateTime" 
-                                                label="Select Date and Time"
-                                                value={selectedDateTime}
-                                                onchange={handleInputChange}
-                                                required
+                                            <lightning-input type="datetime-local" name="scheduleDateTime"
+                                                label="Select Date and Time" value={selectedDateTime}
+                                                onchange={handleInputChange} required
                                                 message-when-value-missing="Please select a date and time"
                                                 variant="label-stacked">
                                             </lightning-input>
                                         </div>
 
                                         <div class="schedule-modal-footer slds-text-align--center">
-                                            <lightning-button variant="neutral" 
-                                                label="Cancel" 
-                                                onclick={handlePreviousLastPage}>
-                                            </lightning-button>
-                                            <lightning-button variant="brand" 
-                                                label="Confirm &amp; Send" 
-                                                onclick={handleSchedule}>
-                                            </lightning-button>
+                                            <button class="cancel_btn_css" onclick={handlePreviousLastPage}>
+                                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                        fill="currentColor" />
+                                                </svg>
+                                                Cancel
+                                            </button>
+                                            <button class="save_btn_css" onclick={handleSchedule}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
+                                                        fill="currentColor" />
+                                                </svg>
+                                                Confirm &amp; Send
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -493,38 +582,50 @@
                         <div class="slds-backdrop slds-backdrop_open main-modal-backdrop"></div>
 
                         <template if:true={popUpConfirmPage}>
-                            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handleBackdropClick}></div>
-                            
-                            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="confirm-modal-heading"
+                            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop"
+                                onclick={handleBackdropClick}></div>
+
+                            <section role="dialog" tabindex="-1" aria-modal="true"
+                                aria-labelledby="confirm-modal-heading"
                                 class="slds-modal slds-fade-in-open confirm-modal"
                                 aria-describedby="modal-content-id-3">
                                 <div class="slds-modal__container schedule-modal-container">
                                     <div class="slds-modal__close schedule-close-icon" onclick={handlePreviousLastPage}>
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                                 fill="white" />
                                         </svg>
                                     </div>
 
-                                    <div class="slds-modal__header schedule-modal-header">
+                                    <div class="slds-modal__header blue-header">
                                         <h2 class="slds-modal__title" id="confirm-modal-heading">Are you sure?</h2>
                                     </div>
 
                                     <div class="slds-modal__content schedule-modal-content" id="modal-content-id-3">
                                         <p>Are you sure you want to send this template to the selected contacts?</p>
-                                        
+
 
                                         <div class="schedule-modal-footer slds-text-align--center">
-                                                    <lightning-button variant="neutral" 
-                                            label="Cancel" 
-                                            onclick={handlePreviousLastPage}>
-                                        </lightning-button>
-                                        <lightning-button variant="brand" 
-                                            label="Confirm & Send" 
-                                            onclick={handleSendOnPopup}>
-                                        </lightning-button>
-                                                </div>
+                                            <button class="cancel_btn_css" onclick={handlePreviousLastPage}>
+                                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                        fill="currentColor" />
+                                                </svg>
+                                                Cancel
+                                            </button>
+                                            <button class="save_btn_css" onclick={handleSendOnPopup}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
+                                                        fill="currentColor" />
+                                                </svg>
+                                                Confirm &amp; Send
+                                            </button>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -540,9 +641,9 @@
                 <div class="custom-card">
                     <div class="content-wrapper">
                         <div class="icon-container">
-                            <svg class="custom-icon" width="40" height="40" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
-                                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"
-                                fill="#000000">
+                            <svg class="custom-icon" width="40" height="40" version="1.1" id="Layer_1"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                viewBox="0 0 512 512" xml:space="preserve" fill="#000000">
                                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                                 <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                                 <g id="SVGRepo_iconCarrier">
@@ -575,8 +676,10 @@
                         </div>
                         <div class="text-content">
                             <h2 class="custom-heading">Connect WhatsApp Business Account</h2>
-                            <p class="custom-text">Reach your clients instantly with WhatsApp broadcasts. Connect your WhatsApp Business account to start sending property updates and communications.</p>
-                            <p class="custom-text">Set up your WhatsApp Business integration in the WhatsApp Embedded Settings page to enable broadcast messaging and enhance your client communication.</p>
+                            <p class="custom-text">Reach your clients instantly with WhatsApp broadcasts. Connect your
+                                WhatsApp Business account to start sending property updates and communications.</p>
+                            <p class="custom-text">Set up your WhatsApp Business integration in the WhatsApp Embedded
+                                Settings page to enable broadcast messaging and enhance your client communication.</p>
                         </div>
                     </div>
                 </div>

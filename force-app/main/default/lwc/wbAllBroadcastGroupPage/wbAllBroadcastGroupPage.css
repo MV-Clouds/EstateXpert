@@ -80,23 +80,24 @@
 
 .refresh-btn {
     cursor: pointer;
-    padding: 6px 12px;
-    text-align: center;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid #d0d4d8;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    color: #0176D3;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
+    transition: all 0.2s ease;
+    --slds-c-icon-color-foreground-default: #0176D3;
 }
 
 .refresh-btn:hover {
-    border-color: #0176D3;
-    box-shadow: 0 3px 10px rgba(1, 118, 211, 0.2);
+    background: #F3F6F9;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
     transform: translateY(-1px);
-}
-
-.refresh-btn:hover lightning-icon {
-    --slds-c-icon-color-foreground-default: #0176D3;
 }
 
 .main_content_cls {
@@ -480,14 +481,32 @@ span {
 }
 
 /* Modal popup styles */
+.custom-modal-shell {
+    z-index: 1000;
+}
+
+.custom-modal-container {
+    border-radius: 8px;
+    overflow: hidden;
+    background: #F9FAFB;
+    box-shadow: rgba(15, 23, 42, 0.24) 0px 14px 36px -12px;
+}
+
 .closs_icon_css {
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    border: 1px solid #E5E7EB;
+    z-index: 2;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
 .blue-header {
@@ -496,41 +515,75 @@ span {
     border-bottom-style: unset;
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
 }
 
 .cancel_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    padding: 0px 20px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0.5rem 1.5rem;
     background: #FFFFFF;
-    border: 1px solid #0176D3;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    font-weight: 500;
+    line-height: 20px;
+    border: none;
+    padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.save_btn_css:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .save_btn_css:disabled {
-    background: #c9c9c9;
-    border: 1px solid #c9c9c9;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .popup_content_cls {
+    background: #F9FAFB;
+}
+
+.modalbody {
+    background-color: #F9FAFB;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+}
+
+.content_body {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .popUpBody {
@@ -538,9 +591,16 @@ span {
 }
 
 .popUpFooter {
-    position: sticky;
-    bottom: 0;
-    padding-top: 1rem;
+    padding: 1rem;
+    border-top: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    flex-shrink: 0;
+}
+
+.footerbtns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
 }
 
 /* Radio group styles for communication type popup */
@@ -608,7 +668,7 @@ span {
 .restricted-access h1 {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     font-size: 2.25rem;
-    font-weight: 900;
+    font-weight: 500;
     color: #1e3a8a;
     margin-bottom: 20px;
 }

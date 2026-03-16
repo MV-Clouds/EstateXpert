@@ -165,13 +165,21 @@
 .save-btn button {
     font-size: 14px;
     font-weight: 400;
-    line-height: 34px;
+    line-height: 1;
     text-align: center;
     border: 1px solid #0176D3;
-    padding: 0px 20px;
+    padding: 10px 20px;
     background: #0176D3;
     color: white;
     border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.save-btn button svg {
+    flex-shrink: 0;
 }
 
 .save-btn button:disabled {

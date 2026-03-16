@@ -26,18 +26,15 @@
 
             <div class="main_content_cls">
                 <div class="filterdiv slds-m-around_medium">
-                    <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
-                        type="search" placeholder="Search by Name" onchange={handleSearch}></lightning-input>
-                    <lightning-combobox
-                        variant="label-hidden"
-                        class="filter-combobox"
-                        value={selectedCommunicationTypeFilter}
-                        placeholder="Filter by Type"
-                        options={communicationTypeOptions}
-                        onchange={handleCommunicationTypeFilter}>
+                    <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" type="search"
+                        placeholder="Search by Name" onchange={handleSearch}></lightning-input>
+                    <lightning-combobox variant="label-hidden" class="filter-combobox"
+                        value={selectedCommunicationTypeFilter} placeholder="Filter by Type"
+                        options={communicationTypeOptions} onchange={handleCommunicationTypeFilter}>
                     </lightning-combobox>
                     <button class="refresh-btn" onclick={handleRefresh} title="Refresh">
-                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh" size="x-small"></lightning-icon>
+                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
+                            size="x-small"></lightning-icon>
                     </button>
                 </div>
 
@@ -87,24 +84,24 @@
                                         </td>
                                         <td data-label="Actions">
                                             <div class="action-btn">
-                                                <button class="action-div" data-id={row.Id} data-communication-type={row.MVEX__Communication_Type__c}
+                                                <button class="action-div" data-id={row.Id}
+                                                    data-communication-type={row.MVEX__Communication_Type__c}
                                                     onclick={handleEditGroup}>
                                                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                            stroke="#212529" stroke-width="1.25"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
                                                     </svg>
                                                 </button>
-                                                <button class="delete-div" data-id={row.Id}
-                                                    onclick={handleDeleteGroup}>
+                                                <button class="delete-div" data-id={row.Id} onclick={handleDeleteGroup}>
                                                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                            stroke="#212529" stroke-width="1.25"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
                                                     </svg>
                                                 </button>
                                             </div>
@@ -171,15 +168,15 @@
 
         <!-- Popup for Communication Type -->
         <template if:true={showCommunicationPopup}>
-            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+                aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
-
                     <!-- Close Button -->
                     <div class="slds-modal__close closs_icon_css" onclick={handlePopupClose}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                            fill="white" />
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
                         </svg>
                     </div>
 
@@ -187,29 +184,49 @@
                         <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Select Communication Type</h1>
                     </div>
 
-                    <div class="slds-modal__content slds-p-around_medium popup_content_cls">
-                        <div class="popUpBody">
+                    <div class="slds-modal__content modalbody" id="modal-content-id-1">
+                        <div class="content_body">
                             <div class="radio-group">
                                 <label class="radio-option">
-                                    <input type="radio" name="communicationType" value="Email" checked={isEmailChecked} onchange={handleCommunicationTypeChange} />
-                                    <span>Email <span class="option-description">(Send marketing messages via email)</span></span>
+                                    <input type="radio" name="communicationType" value="Email"
+                                        checked={isEmailChecked} onchange={handleCommunicationTypeChange} />
+                                    <span>Email <span class="option-description">(Send marketing messages via
+                                            email)</span></span>
                                 </label>
                                 <label class="radio-option">
-                                    <input type="radio" name="communicationType" value="WhatsApp" checked={isWhatsAppChecked} onchange={handleCommunicationTypeChange} />
-                                    <span>WhatsApp <span class="option-description">(Send marketing messages via WhatsApp)</span></span>
+                                    <input type="radio" name="communicationType" value="WhatsApp"
+                                        checked={isWhatsAppChecked} onchange={handleCommunicationTypeChange} />
+                                    <span>WhatsApp <span class="option-description">(Send marketing messages via
+                                            WhatsApp)</span></span>
                                 </label>
                                 <label class="radio-option">
-                                    <input type="radio" name="communicationType" value="Both" checked={isBothChecked} onchange={handleCommunicationTypeChange} />
-                                    <span>Both <span class="option-description">(Send marketing messages via both Email and WhatsApp)</span></span>
+                                    <input type="radio" name="communicationType" value="Both"
+                                        checked={isBothChecked} onchange={handleCommunicationTypeChange} />
+                                    <span>Both <span class="option-description">(Send marketing messages via both
+                                            Email and WhatsApp)</span></span>
                                 </label>
                             </div>
                         </div>
-                        <div class="popUpFooter slds-text-align--center">
-                            <button class="cancel_btn_css slds-m-left_x-small" onclick={handlePopupClose}>Cancel</button>
-                            <button class="save_btn_css slds-m-left_x-small" onclick={handlePopupContinue}>Continue</button>
+                        <div class="popUpFooter footerbtns slds-text-align--center">
+                            <button class="cancel_btn_css" onclick={handlePopupClose}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
+                                </svg>
+                                Cancel
+                            </button>
+                            <button class="save_btn_css" onclick={handlePopupContinue}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.83 12L10.24 16.59L11.66 18L17.66 12L11.66 6L10.24 7.41L14.83 12Z"
+                                        fill="currentColor" />
+                                </svg>
+                                Continue
+                            </button>
                         </div>
                     </div>
-
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>

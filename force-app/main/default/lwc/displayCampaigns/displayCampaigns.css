@@ -442,7 +442,6 @@ span {
     color: #0176D3;
     box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
     transition: all 0.2s ease;
-    z-index: 1000;
     --slds-c-icon-color-foreground-default: #0176D3;
 }
 
@@ -491,7 +490,7 @@ span {
     margin-top: 40px;
     z-index: 1000;
     position: absolute;
-    right: 0;
+    right: 43px;
     width: 100%;
     max-width: 600px;
     max-height: 80vh;

@@ -64,6 +64,10 @@ export default class CheckListStatus extends LightningElement {
         return `width: ${percentage}%;`;
     }
 
+    get buttonLabel() {
+        return this.checklistItems?.length > 0 ? 'Edit Checklist' : 'Create Checklist';
+    }
+
     /**
     * Method Name: connectedCallback
     * @description: Used to call checklistValues method.

@@ -20,7 +20,7 @@
 
 }
 
-.modal-wrapper .slds-modal__header.custom-header {
+.custom-header {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -30,11 +30,6 @@
     border-radius: 8px 8px 0 0;
     position: relative;
     padding: 1rem 1.25rem;
-}
-
-.slds-modal__container {
-    width: 80% !important;
-    max-width: 1200px !important;
 }
 
 .closs_icon_css {
@@ -54,7 +49,7 @@
     fill: #1F2937;
 }
 
-.modal-wrapper .slds-modal__content.custom-content {
+.custom-content {
     background-color: #F9FAFB;
     max-height: calc(100vh - 220px);
     min-height: 70vh;
@@ -62,6 +57,7 @@
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
+    border-radius: 0 0 8px 8px !important;
 }
 
 .custom-footer {

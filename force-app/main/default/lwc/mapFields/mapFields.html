@@ -16,9 +16,24 @@
                         </div>
                     </div>
                     <div class="save-btn">
-                        <button disabled={isAutoSyncEnabled} onclick={addNewPair}>Add</button>
-                        <button disabled={savebutton} onclick={handleAddPairClick}>Save Mapping</button>
-                        <button disabled={isRevertDisabled} onclick={revertChanges}>Revert Changes</button>
+                        <button disabled={isAutoSyncEnabled} onclick={addNewPair}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
+                            </svg>
+                            Add
+                        </button>
+                        <button disabled={savebutton} onclick={handleAddPairClick}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                            </svg>
+                            Save Mapping
+                        </button>
+                        <button disabled={isRevertDisabled} onclick={revertChanges}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V1L7 6L12 11V7C15.31 7 18 9.69 18 13C18 16.31 15.31 19 12 19C8.69 19 6 16.31 6 13H4C4 17.42 7.58 21 12 21C16.42 21 20 17.42 20 13C20 8.58 16.42 5 12 5Z" fill="currentColor" />
+                            </svg>
+                            Revert Changes
+                        </button>
                     </div>
                 </div>
 

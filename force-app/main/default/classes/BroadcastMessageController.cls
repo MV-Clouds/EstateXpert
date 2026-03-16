@@ -55,9 +55,20 @@ public with sharing class BroadcastMessageController {
     public static List<Broadcast_Group__c> getBroadcastGroups() {
         List<Broadcast_Group__c> broadcastGroups = new List<Broadcast_Group__c>();
         try {
-            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WHERE Communication_Type__c = 'WhatsApp' WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WHERE Communication_Type__c IN ('Both', 'WhatsApp') WITH USER_MODE ORDER BY LastModifiedDate DESC];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastGroups', e.getMessage());
+        }
+        return broadcastGroups;
+    }
+
+    @AuraEnabled
+    public static List<Broadcast_Group__c> getAllBroadcastGroups() {
+        List<Broadcast_Group__c> broadcastGroups = new List<Broadcast_Group__c>();
+        try {
+            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WHERE Communication_Type__c IN ('Both', 'WhatsApp', 'Email') WITH USER_MODE ORDER BY LastModifiedDate DESC];
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getAllBroadcastGroups', e.getMessage());
         }
         return broadcastGroups;
     }

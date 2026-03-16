@@ -332,12 +332,6 @@
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
-.calender-modal-body {
-    min-height: auto;
-    overflow: auto;
-    flex: 1;
-}
-
 /* ================================
 == MANAGE MODAL
 ================================ */

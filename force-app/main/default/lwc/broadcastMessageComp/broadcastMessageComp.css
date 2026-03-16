@@ -135,30 +135,36 @@ span {
     width: 40px;
 }
 
-/* Modal CSS */
-
-
-.modal-content {
-    padding: 0;
+.custom-modal-container {
     border-radius: 8px;
     overflow: hidden;
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+    background: #F9FAFB;
+    box-shadow: rgba(15, 23, 42, 0.24) 0px 14px 36px -12px;
 }
 
-
-.modal-heading {
+.blue-header {
     background-color: #0176D3;
     color: white;
     border-bottom-style: unset;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
 }
 
-.modal-heading h1 {
-    font-size: 20px;
-    font-weight: 500;
+.modalbody {
+    background-color: #F9FAFB;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
 }
 
-.modal-body {
-    padding: 1rem 1rem 0 1rem;
+.content_body {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .modal-body-content {
@@ -167,38 +173,77 @@ span {
     height: -webkit-fill-available;
 }
 
-.save-btn {
+.save_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    border: 1px solid #0176D3;
-    padding: 0px 20px;
+    font-weight: 500;
+    line-height: 20px;
+    border: none;
+    padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.close-btn {
+.save_btn_css:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
+}
+
+.cancel_btn_css {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    padding: 0px 20px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0.5rem 1.5rem;
     background: #FFFFFF;
-    border: 1px solid #0176D3;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.footer {
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
+}
+
+.popUpFooter {
+    padding: 1rem;
+    border-top: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    flex-shrink: 0;
+}
+
+.footerbtns {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    border-radius: 0rem 0rem 0.25rem 0.25rem;
+}
+
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
     align-items: center;
-    width: 100%;
-    padding-bottom: 1rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    border: 1px solid #E5E7EB;
+    z-index: 2;
+}
+
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
 .empty-state {

@@ -13,7 +13,7 @@ import checkContactDateFields from '@salesforce/apex/EmailCampaignController.che
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getCampaign from '@salesforce/apex/EmailCampaignController.getCampaign';
 // New import for Broadcast Groups
-import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastGroups';
+import getBroadcastEmailGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastEmailGroups';
 
 
 export default class EmailCampaignTemplateForm extends NavigationMixin(LightningElement) {
@@ -270,7 +270,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Created By: Gemini
     */
     loadBroadcastGroups(){
-        getBroadcastGroups()
+        getBroadcastEmailGroups()
         .then(data => {
             if(data && data.length > 0){
                 this.broadcastGroupOptions = data.map(option => ({

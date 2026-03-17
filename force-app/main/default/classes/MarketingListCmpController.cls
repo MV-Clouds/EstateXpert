@@ -49,7 +49,10 @@ public with sharing class MarketingListCmpController {
 
             for (String fieldName : allFields) {
                 if (!blockedFields.contains(fieldName)) {
-                    filteredFields.add(fieldName);
+                    Schema.DescribeFieldResult fieldDescribe = fieldMap.get(fieldName).getDescribe();
+                    if (fieldDescribe.isAccessible()) {
+                        filteredFields.add(fieldName);
+                    }
                 }
             }
 

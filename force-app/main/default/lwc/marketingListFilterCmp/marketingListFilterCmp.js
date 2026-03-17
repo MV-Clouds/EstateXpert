@@ -1336,8 +1336,9 @@ export default class MarketingListFilterCmp extends LightningElement {
             this.customLogicExpression = '';
             this.customLogicError = null;
             
-            this.setFilteredContactsReset();
             this.updateFilterIndices();
+            this.applyFilters();
+            this.setFilteredContactsReset();
         }catch(error){
             errorDebugger('MarketingListFilterCmp', 'handleReset', error, 'warn', 'Error in handleReset');
         }

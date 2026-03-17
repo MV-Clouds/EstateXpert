@@ -649,14 +649,24 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     // Method to apply formatting based on the format value from dateOptions and dateTimeOptions
     applyFieldFormat(fieldValue, format) {
+        if (!fieldValue || fieldValue === '-') {
+            return '-';
+        }
+
         let date = new Date(fieldValue);
+        
+        if (isNaN(date.getTime())) {
+            return '-';
+        }
+
         let day = String(date.getDate()).padStart(2, '0');
         let month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based in JS
         let year = date.getFullYear();
         let hours24 = String(date.getHours()).padStart(2, '0');
         let minutes = String(date.getMinutes()).padStart(2, '0');
-        let hours12 = hours24 > 12 ? String(hours24 - 12).padStart(2, '0') : hours24;
+        let hours12 = hours24 % 12 || 12; // Handle 12:00 correctly
         let period = hours24 >= 12 ? 'PM' : 'AM';
+        hours12 = String(hours12).padStart(2, '0');
 
         switch (format) {
             // Date formats
@@ -1397,7 +1407,7 @@ openConfigureSettings(){
     }
     handleCloseModal() {
         this.isConfigOpen = false;
-        this.getContactDataMethod();
+        // this.getContactDataMethod();
     }
 
     /**

@@ -41,6 +41,10 @@ public with sharing class MarketingListFilterController {
                 Schema.SObjectField field = fieldsMap.get(fieldName);
                 Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
 
+                if (!fieldDescribe.isAccessible()) {
+                    continue;
+                }
+
                 // Create a new FieldDetails object for each field
                 FieldDetails fieldDetails = new FieldDetails();
                 fieldDetails.fieldName = fieldDescribe.getLabel();
@@ -189,6 +193,16 @@ public with sharing class MarketingListFilterController {
                 }
             }
 
+            // Check field accessibility for Contact
+            Map<String, Schema.SObjectField> contactFieldsMap = Schema.SObjectType.Contact.fields.getMap();
+            Set<String> validContactFields = new Set<String>();
+            for (String fieldName : contactFields) {
+                if (fieldName == 'Id' || (contactFieldsMap.containsKey(fieldName) && contactFieldsMap.get(fieldName).getDescribe().isAccessible())) {
+                    validContactFields.add(fieldName);
+                }
+            }
+            contactFields = validContactFields;
+
             // Build Contact query
             String contactQuery = 'SELECT ';
             List<String> contactFieldList = new List<String>(contactFields);
@@ -207,6 +221,16 @@ public with sharing class MarketingListFilterController {
             for (FilterCondition filter : inquiryFilters) {
                 inquiryFields.add(filter.fieldPath);
             }
+
+            // Check field accessibility for Inquiry__c
+            Map<String, Schema.SObjectField> inquiryFieldsMap = Schema.SObjectType.Inquiry__c.fields.getMap();
+            Set<String> validInquiryFields = new Set<String>();
+            for (String fieldName : inquiryFields) {
+                if (fieldName == 'Id' || fieldName == 'Contact__c' || (inquiryFieldsMap.containsKey(fieldName) && inquiryFieldsMap.get(fieldName).getDescribe().isAccessible())) {
+                    validInquiryFields.add(fieldName);
+                }
+            }
+            inquiryFields = validInquiryFields;
 
             // Build Inquiry__c query
             String inquiryQuery = 'SELECT ' + String.join(new List<String>(inquiryFields), ', ') + 

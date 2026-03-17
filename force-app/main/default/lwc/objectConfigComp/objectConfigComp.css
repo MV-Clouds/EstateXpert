@@ -45,7 +45,8 @@
     border-radius: 8px;
     background: var(--ex-card);
     box-shadow: rgba(0, 0, 0, 0.12) 0 1px 4px;
-    overflow: hidden;
+    overflow: visible;
+    background-clip: padding-box;
 }
 
 .accordion-item.open {
@@ -67,6 +68,10 @@
     gap: 1rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
 }
 
 .accordion-header-btn:hover {
@@ -77,6 +82,8 @@
     background: linear-gradient(180deg, #f2f8ff 0%, #e8f2ff 100%);
     border-bottom: 1px solid #d9e8f7;
     box-shadow: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .accordion-title-group {
@@ -137,6 +144,8 @@
     padding: 1rem;
     background: #ffffff;
     border-top: 1px solid #edf1f6;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
 }
 
 .user-header {
@@ -225,7 +234,7 @@
 }
 
 .table-content {
-    overflow: auto;
+    overflow: visible;
     border-radius: 8px;
     background: #ffffff;
     margin: 16px 0;
@@ -234,6 +243,8 @@
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
+    background-clip: padding-box;
+    --slds-g-color-neutral-base-100: transparent;
 }
 
 .Object-table {
@@ -259,6 +270,7 @@
     font-weight: 400;
     color: #585858;
     height: 45px;
+    --slds-g-color-neutral-base-100: #ffffff;
 }
 
 .table-content .slds-table th {
@@ -267,6 +279,14 @@
     font-weight: 500;
     letter-spacing: 0.3px;
     padding: 0.6rem;
+}
+
+.table-content .slds-table thead tr th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.table-content .slds-table thead tr th:last-child {
+    border-top-right-radius: 8px;
 }
 
 .table-content .slds-table td {
@@ -282,6 +302,14 @@
 
 .table-content tbody tr:nth-child(odd) {
     background-color: aliceblue;
+}
+
+.table-content .slds-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+
+.table-content .slds-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
 }
 
 .table-content table tbody tr:hover td {

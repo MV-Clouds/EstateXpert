@@ -24,7 +24,7 @@ export default class ObjectConfigComp extends NavigationMixin(LightningElement) 
     @track chatConfigCounter = 0;
     @track selectedPhoneFieldVal = '';
     @track selectedPhoneFieldLabel = '';
-    @track activeSectionName = 'chatWindowConfig'; // Default open section
+    @track activeSectionName = ['chatWindowConfig', 'webhookConfig']; // Keep both sections open by default
     @track isWebhookConfigEdit = false;
     @track isChatWindowConfigEdit = false;
     @track isLoading = false;
@@ -34,7 +34,7 @@ export default class ObjectConfigComp extends NavigationMixin(LightningElement) 
     // Fetch saved metadata on load
     async connectedCallback(){
         try {
-            this.showSpinner = true;
+            this.isLoading = true;
             loadStyle(this, MulishFontCss);
             await this.checkBusinessAccountConfig();
             this.loadSavedValues();
@@ -364,9 +364,28 @@ export default class ObjectConfigComp extends NavigationMixin(LightningElement) 
         this.isChatWindowConfigEdit = false;
     }
 
-    handleSectionToggle(event) {
-        const openSections = event.detail.openSections;
-        this.activeSectionName = openSections;
+    get isChatSectionOpen() {
+        return this.activeSectionName.includes('chatWindowConfig');
+    }
+
+    get isWebhookSectionOpen() {
+        return this.activeSectionName.includes('webhookConfig');
+    }
+
+    get chatSectionClass() {
+        return `accordion-item ${this.isChatSectionOpen ? 'open' : ''}`;
+    }
+
+    get webhookSectionClass() {
+        return `accordion-item ${this.isWebhookSectionOpen ? 'open' : ''}`;
+    }
+
+    handleToggleSection(event) {
+        const sectionName = event.currentTarget.dataset.section;
+        const isOpen = this.activeSectionName.includes(sectionName);
+        this.activeSectionName = isOpen
+            ? this.activeSectionName.filter(section => section !== sectionName)
+            : [...this.activeSectionName, sectionName];
     }
 
     handleSave() {

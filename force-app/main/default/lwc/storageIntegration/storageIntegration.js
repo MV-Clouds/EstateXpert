@@ -1,7 +1,6 @@
 import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import saveSettings from '@salesforce/apex/IntegrationPopupController.saveSettings';

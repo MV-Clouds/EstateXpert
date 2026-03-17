@@ -384,3 +384,180 @@
         width: 100%;
     }
 }
+
+/* ── Direct Token Input Section (Gmail & Instagram) ─────────────────────── */
+
+.token_input_section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E5E5E5;
+    animation: slideDown 0.3s ease-out;
+}
+
+.token_input_label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    letter-spacing: 0.01em;
+}
+
+.token_textarea_wrap {
+    width: 100%;
+}
+
+.token_textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1.5px solid #D0DAE9;
+    border-radius: 6px;
+    padding: 0.65rem 0.85rem;
+    font-size: 13px;
+    font-family: 'Mulish', sans-serif;
+    color: #131314;
+    background: #F8FAFB;
+    resize: vertical;
+    min-height: 72px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    line-height: 1.5;
+}
+
+.token_textarea:focus {
+    border-color: #0176D3;
+    box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.12);
+    background: #ffffff;
+}
+
+.token_textarea::placeholder {
+    color: #aab4bd;
+    font-size: 12px;
+}
+
+/* Authorize button — slightly differentiated style */
+.authorize_btn {
+    margin-top: 0.25rem;
+}
+
+.authorize_btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ── Masked Token Display (active state — not editable) ─────────────────── */
+
+.token_masked_section {
+    background: #F3F6F9;
+    border: 1.5px solid #E0E8F0;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    animation: fadeInUp 0.35s ease-out both;
+}
+
+.token_masked_label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.token_masked_value {
+    font-size: 18px;
+    letter-spacing: 0.18em;
+    color: #636363;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.token_hint_text {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-style: italic;
+}
+
+/* ── Deactivate button variant ───────────────────────────────────────────── */
+
+.action_btn.deactivate_btn {
+    color: #C23934;
+    border-color: #C23934;
+    background: #fff;
+}
+
+.action_btn.deactivate_btn:hover {
+    background: #FFF0F0;
+    border-color: #A61C17;
+    color: #A61C17;
+}
+
+/* ── Single-line text input (e.g. Instagram User ID) ────────────────────── */
+
+.token_text_input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1.5px solid #D0DAE9;
+    border-radius: 6px;
+    padding: 0.65rem 0.85rem;
+    font-size: 13px;
+    font-family: 'Mulish', sans-serif;
+    color: #131314;
+    background: #F8FAFB;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    line-height: 1.5;
+}
+
+.token_text_input:focus {
+    border-color: #0176D3;
+    box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.12);
+    background: #ffffff;
+}
+
+.token_text_input::placeholder {
+    color: #aab4bd;
+    font-size: 12px;
+}
+
+/* ── OAuth info note (shown when input section is open) ─────────────────── */
+
+.token_oauth_note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-size: 12px;
+    color: #555;
+    background: #EAF3FF;
+    border: 1px solid #C2DCFA;
+    border-radius: 6px;
+    padding: 0.55rem 0.75rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.token_oauth_note svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── Save/Cancel button pair ─────────────────────────────────────────────── */
+
+.card_actions .action_btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}

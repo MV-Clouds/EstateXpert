@@ -3,6 +3,9 @@ import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
+import saveSettings from '@salesforce/apex/IntegrationPopupController.saveSettings';
+import getSettings from '@salesforce/apex/IntegrationPopupController.getSettings';
+import saveCustomTempData from '@salesforce/apex/IntegrationPopupController.saveCustomTempData';
 import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeAWSAccess';
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
 import revokeOutlookAccess from '@salesforce/apex/IntegrationPopupController.revokeOutlookAccess';
@@ -24,7 +27,27 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track isWaterMarkUploader = false;
     @track featureAvailability = {};
     @track activeIntegrationCount = 0;
+
+    // Card-level state for Gmail inline flow 
+    @track showGmailInput = false;
+    @track gmailRefreshToken = '';       // Refresh Token input
+
+    // Card-level state for Instagram inline flow
+    @track showInstagramInput = false;
+    @track instagramUserId = '';          // User ID input
+    @track instagramLongToken = '';       // Long-Lived Access Token input
+
     integrationToDeactivate = null;
+
+    // Disable Save buttons until minimum required fields are filled
+    get isGmailSaveDisabled() {
+        return !this.gmailRefreshToken || this.gmailRefreshToken.trim() === '';
+    }
+
+    get isInstagramSaveDisabled() {
+        return (!this.instagramUserId   || this.instagramUserId.trim()   === '') ||
+               (!this.instagramLongToken || this.instagramLongToken.trim() === '');
+    }
 
     @wire(getMetadataRecords)
     metadataRecords({ error, data }) {
@@ -130,6 +153,12 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     }
                 });
                 this.activeIntegrationCount = activeCount;
+                // Reset inline states after data refresh
+                this.showGmailInput = false;
+                this.gmailRefreshToken = '';
+                this.showInstagramInput = false;
+                this.instagramUserId = '';
+                this.instagramLongToken = '';
                 this.isDataLoaded = true;
                 this.isSpinner = false;
             })
@@ -168,18 +197,9 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             
             // Determine AM/PM
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // Convert 0 to 12
-            
-            // Pad numbers with leading zeros
-            const paddedDay = day < 10 ? `0${day}` : day;
-            const paddedMonth = month < 10 ? `0${month}` : month;
-            const paddedHours = hours < 10 ? `0${hours}` : hours;
-            const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-            const paddedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-            
-            // Format: DD/MM/YYYY, HH:MM:SS AM/PM
-            return `${paddedDay}/${paddedMonth}/${year}, ${paddedHours}:${paddedMinutes}:${paddedSeconds} ${ampm}`;
+            hours = hours % 12 || 12;
+            const pad = n => n < 10 ? `0${n}` : n;
+            return `${pad(day)}/${pad(month)}/${year}, ${pad(hours)}:${pad(minutes)}:${pad(seconds)} ${ampm}`;
         } catch (error) {
             errorDebugger('StorageIntegration', 'formatDate', error, 'warn', 'Error occurred while formatting the date');
             return dateStr;
@@ -280,7 +300,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
     /**
     * Method Name: newIntegrationModal
-    * @description: Used to open the modal.
+    * @description: Used to open the modal (AWS and Outlook only).
     * Created Date: 27/12/2024
     * Created By: Karan Singh
     */
@@ -372,6 +392,270 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         }
     }
 
+    // ══ Gmail — Connect / Input section state ═════════════════════════════════
+
+    /**
+    * Method Name: handleGmailConnect
+    * @description: Shown when Gmail is inactive. Redirects to Gmail OAuth login page
+    *               (same as integrationPopUp) and reveals the input section for manual token entry.
+    *               Uses getSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
+    * Created Date: 16/03/2026
+    * Created By: Karan Singh
+    */
+    handleGmailConnect() {
+        try {
+            this.isSpinner = true;
+            getSettings({ integrationType: 'Gmail' })
+                .then(data => {
+                    this.isSpinner = false;
+                    if (!data || !data.objectData) {
+                        this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
+                        return;
+                    }
+                    const fieldsData = data.objectData;
+                    const requiredFields = ['MVEX__Redirect_URI__c', 'MVEX__Client_ID__c', 'MVEX__Client_Secret__c'];
+                    for (const field of requiredFields) {
+                        if (!fieldsData[field]) {
+                            this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
+                            return;
+                        }
+                    }
+                    // Show the inline input section so the user can also paste manually
+                    this.showGmailInput = true;
+                    // Save temp data for the OAuth callback
+                    this.saveTempData(fieldsData.MVEX__Client_ID__c, fieldsData.MVEX__Client_Secret__c, fieldsData.MVEX__Redirect_URI__c);
+                    // Redirect to Google OAuth — identical URL to integrationPopUp
+                    this[NavigationMixin.Navigate]({
+                        type: 'standard__webPage',
+                        attributes: {
+                            url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + fieldsData.MVEX__Client_ID__c +
+                                 '&redirect_uri=' + fieldsData.MVEX__Redirect_URI__c +
+                                 '&response_type=code&access_type=offline&prompt=consent&scope=https://www.googleapis.com/auth/gmail.send'
+                        }
+                    });
+                })
+                .catch(error => {
+                    errorDebugger('StorageIntegration', 'handleGmailConnect', error, 'warn', 'Error fetching Gmail settings');
+                    this.showToast('Error', 'Failed to load Gmail configuration.', 'error');
+                    this.isSpinner = false;
+                });
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'handleGmailConnect', error, 'warn', 'Error in handleGmailConnect');
+            this.isSpinner = false;
+        }
+    }
+
+    /** Cancel Gmail inline input — reset to Connect button state */
+    handleGmailCancel() {
+        this.showGmailInput = false;
+        this.gmailRefreshToken = '';
+    }
+
+    /** Capture Gmail Refresh Token from textarea */
+    handleGmailTokenChange(event) {
+        this.gmailRefreshToken = event.target.value;
+    }
+
+    /**
+    * Method Name: saveGmailToken
+    * @description: Saves the Gmail refresh token together with Client ID, Client Secret and Redirect URI
+    *               fetched from Custom Metadata. All four fields are required by getIntegrationDetails.isValid.
+    *               Mirrors the full save pattern used in integrationPopUp.saveDetails.
+    * Created Date: 16/03/2026
+    * Created By: Karan Singh
+    */
+    saveGmailToken() {
+        try {
+            const token = (this.gmailRefreshToken || '').trim();
+            if (!token) {
+                this.showToast('Error', 'Please enter a valid refresh token before saving.', 'error');
+                return;
+            }
+            this.isSpinner = true;
+            getSettings({ integrationType: 'Gmail' })
+                .then(data => {
+                    if (!data || !data.objectData) {
+                        // Throw so the .catch() handles spinner + toast
+                        throw new Error('MISSING_CONFIG');
+                    }
+                    const fieldsData = data.objectData;
+                    const payload = JSON.stringify({
+                        MVEX__Client_ID__c:     fieldsData.MVEX__Client_ID__c     || '',
+                        MVEX__Client_Secret__c: fieldsData.MVEX__Client_Secret__c || '',
+                        MVEX__Redirect_URI__c:  fieldsData.MVEX__Redirect_URI__c  || '',
+                        MVEX__Refresh_Token__c: token
+                    });
+                    return saveSettings({ jsonData: payload, integrationType: 'Gmail' });
+                })
+                .then(() => {
+                    // Reaches here only when saveSettings resolves successfully
+                    this.showToast('Success', 'Gmail has been authorized successfully.', 'success');
+                    this.getSocialMediaDataToShow();
+                })
+                .catch(error => {
+                    if (error && error.message === 'MISSING_CONFIG') {
+                        this.showToast('Error', 'Missing Gmail configuration. Please check Custom Metadata.', 'error');
+                    } else {
+                        errorDebugger('StorageIntegration', 'saveGmailToken', error, 'warn', 'Error saving Gmail token');
+                        this.showToast('Error', 'An error occurred while saving the token. Please try again.', 'error');
+                    }
+                    this.isSpinner = false;
+                });
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'saveGmailToken', error, 'warn', 'Error saving Gmail token');
+            this.isSpinner = false;
+        }
+    }
+
+    // ══ Instagram — Connect / Input section state ═════════════════════════════
+
+    /**
+    * Method Name: handleInstagramConnect
+    * @description: Shown when Instagram is inactive. Redirects to Instagram OAuth login page
+    *               (same as integrationPopUp) and reveals the input section.
+    *               Uses getSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
+    *               Field names mirror integrationPopUp.redirectToInstagramLoginPage: MVEX__ClientId__c (lowercase d).
+    * Created Date: 16/03/2026
+    * Created By: Karan Singh
+    */
+    handleInstagramConnect() {
+        try {
+            this.isSpinner = true;
+            getSettings({ integrationType: 'Instagram' })
+                .then(data => {
+                    this.isSpinner = false;
+                    if (!data || !data.objectData) {
+                        this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
+                        return;
+                    }
+                    const fieldsData = data.objectData;
+                    // Field names must match what integrationPopUp uses (MVEX__ClientId__c, MVEX__ClientSecret__c)
+                    const clientId     = fieldsData.MVEX__ClientId__c     || fieldsData.MVEX__ClientID__c;
+                    const clientSecret = fieldsData.MVEX__ClientSecret__c || fieldsData.MVEX__ClientSecret__c;
+                    const redirectUri  = fieldsData.MVEX__Redirect_URI__c || data.siteUrl;
+                    if (!clientId || !clientSecret || !redirectUri) {
+                        this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
+                        return;
+                    }
+                    // Show the inline input section so user can also enter manually
+                    this.showInstagramInput = true;
+                    // Save temp data for the OAuth callback
+                    this.saveTempData(clientId, clientSecret, redirectUri);
+                    // Redirect to Instagram OAuth — identical URL to integrationPopUp.redirectToInstagramLoginPage
+                    this[NavigationMixin.Navigate]({
+                        type: 'standard__webPage',
+                        attributes: {
+                            url: 'https://www.instagram.com/oauth/authorize?client_id=' + clientId +
+                                 '&redirect_uri=' + redirectUri +
+                                 '&response_type=code&scope=business_basic%2Cbusiness_manage_messages%2Cbusiness_manage_comments%2Cbusiness_content_publish'
+                        }
+                    });
+                })
+                .catch(error => {
+                    errorDebugger('StorageIntegration', 'handleInstagramConnect', error, 'warn', 'Error fetching Instagram settings');
+                    this.showToast('Error', 'Failed to load Instagram configuration.', 'error');
+                    this.isSpinner = false;
+                });
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'handleInstagramConnect', error, 'warn', 'Error in handleInstagramConnect');
+            this.isSpinner = false;
+        }
+    }
+
+    /** Cancel Instagram inline input — reset to Connect button state */
+    handleInstagramCancel() {
+        this.showInstagramInput = false;
+        this.instagramUserId = '';
+        this.instagramLongToken = '';
+    }
+
+    /** Capture Instagram User ID from input */
+    handleInstagramUserIdChange(event) {
+        this.instagramUserId = event.target.value;
+    }
+
+    /** Capture Instagram Long-Lived Access Token from textarea */
+    handleInstagramLongTokenChange(event) {
+        this.instagramLongToken = event.target.value;
+    }
+
+    /**
+    * Method Name: saveInstagramToken
+    * @description: Saves Instagram User ID + Long-Lived Access Token together with Client ID and
+    *               Client Secret fetched from Custom Metadata. All four fields are required by
+    *               getIntegrationDetails.isValid (checks ClientId__c and ClientSecret__c).
+    * Created Date: 16/03/2026
+    * Created By: Karan Singh
+    */
+    saveInstagramToken() {
+        try {
+            const userId    = (this.instagramUserId    || '').trim();
+            const longToken = (this.instagramLongToken || '').trim();
+            if (!userId || !longToken) {
+                this.showToast('Error', 'Please fill in both User ID and Long-Lived Access Token.', 'error');
+                return;
+            }
+            this.isSpinner = true;
+            getSettings({ integrationType: 'Instagram' })
+                .then(data => {
+                    if (!data || !data.objectData) {
+                        // Throw so the .catch() handles spinner + toast
+                        throw new Error('MISSING_CONFIG');
+                    }
+                    const fieldsData = data.objectData;
+                    const clientId     = fieldsData.MVEX__ClientId__c     || fieldsData.MVEX__ClientID__c     || '';
+                    const clientSecret = fieldsData.MVEX__ClientSecret__c || '';
+                    const redirectUri  = fieldsData.MVEX__Redirect_URI__c  || data.siteUrl || '';
+                    const payload = JSON.stringify({
+                        MVEX__ClientId__c:          clientId,
+                        MVEX__ClientSecret__c:      clientSecret,
+                        MVEX__Redirect_URI__c:      redirectUri,
+                        MVEX__User_Id__c:           userId,
+                        MVEX__Long_Access_Token__c: longToken
+                    });
+                    return saveSettings({ jsonData: payload, integrationType: 'Instagram' });
+                })
+                .then(() => {
+                    // Reaches here only when saveSettings resolves successfully
+                    this.showToast('Success', 'Instagram has been authorized successfully.', 'success');
+                    this.getSocialMediaDataToShow();
+                })
+                .catch(error => {
+                    if (error && error.message === 'MISSING_CONFIG') {
+                        this.showToast('Error', 'Missing Instagram configuration. Please check Custom Metadata.', 'error');
+                    } else {
+                        errorDebugger('StorageIntegration', 'saveInstagramToken', error, 'warn', 'Error saving Instagram token');
+                        this.showToast('Error', 'An error occurred while saving the token. Please try again.', 'error');
+                    }
+                    this.isSpinner = false;
+                });
+        } catch (error) {
+            errorDebugger('StorageIntegration', 'saveInstagramToken', error, 'warn', 'Error saving Instagram token');
+            this.isSpinner = false;
+        }
+    }
+
+    // ══ Shared OAuth helper ═══════════════════════════════════════════════════
+
+    /**
+    * Method Name: saveTempData
+    * @description: Saves OAuth credentials to TempData__c custom setting before redirecting.
+    *               Mirrors the same method in integrationPopUp.
+    * Created Date: 16/03/2026
+    * Created By: Karan Singh
+    */
+    saveTempData(clientId, clientSecret, redirectURI) {
+        try {
+            saveCustomTempData({ clientId, clientSecret, redirectURI })
+                .then(() => { console.log('Temp data saved successfully.'); })
+                .catch(error => { console.log('Failed to save temp data:', error); });
+        } catch (error) {
+            console.log('Error in saveTempData:', error);
+        }
+    }
+
+    // ══ Deactivation ══════════════════════════════════════════════════════════
+
     /**
     * Method Name: deactivateGmail
     * @description: Used to deactivate Gmail integration.
@@ -384,7 +668,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             revokeGmailAccess({ refreshToken: this.gmailData.integrationData.MVEX__Refresh_Token__c, recordId: this.gmailData.integrationData.Id })
             .then(data => {
                 if (data === 'success') {
-                    this.showToast('Success', 'Changes has been done successfully.', 'success');
+                    this.showToast('Success', 'Gmail integration has been deactivated. Click Connect to re-authorize.', 'success');
                     this.getSocialMediaDataToShow();
                 } else {
                     this.showToast('Error', data, 'error');
@@ -442,7 +726,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             revokeInstagramAccess({ recordId: this.instagramData.integrationData.Id })
             .then(data => {
                 if (data === 'success') {
-                    this.showToast('Success', 'Changes has been done successfully.', 'success');
+                    this.showToast('Success', 'Instagram integration has been deactivated. Click Connect to re-authorize.', 'success');
                     this.getSocialMediaDataToShow();
                 } else {
                     this.showToast('Error', data, 'error');
@@ -460,7 +744,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     }
 
     showMessagePopup(Status, Title, Message) {
-        const messageContainer = this.template.querySelector('c-message-popup')
+        const messageContainer = this.template.querySelector('c-message-popup');
         if (messageContainer) {
             messageContainer.showMessagePopup({
                 status: Status,

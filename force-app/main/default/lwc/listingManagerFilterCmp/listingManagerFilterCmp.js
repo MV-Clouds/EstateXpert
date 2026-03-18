@@ -733,8 +733,8 @@ export default class ListingManagerFilterCmp extends LightningElement {
                     field.selectedOptions = [...field.selectedOptions, {"label": value, "value": value}];
                     this.filterFields[index].searchTerm = '';
                 }
+                this.applyFilters();
             }
-            this.applyFilters();
         }catch(error){
             errorDebugger('ListingManagerFilterCmp', 'addTheString', error, 'warn', 'Error in addTheString');
         }
@@ -1331,7 +1331,18 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 // Clear expression and error when custom logic is disabled
                 this.customLogicExpression = '';
                 this.customLogicError = null;
-                this.applyFilters();
+                const hasAnyFilter = this.filterFields.some(field =>
+                    (field.selectedOptions && field.selectedOptions.length > 0) ||
+                    (field.minValue != null && field.minValue !== '' && !isNaN(parseFloat(field.minValue))) ||
+                    (field.maxValue != null && field.maxValue !== '' && !isNaN(parseFloat(field.maxValue))) ||
+                    (field.minDate != null && field.minDate !== '') ||
+                    (field.maxDate != null && field.maxDate !== '') ||
+                    (field.fieldChecked === true)
+                );
+
+                if (hasAnyFilter) {
+                    this.applyFilters();
+                }
             }
         } catch (error) {
             console.log('Error in handleCustomLogicToggle:', error.stack);

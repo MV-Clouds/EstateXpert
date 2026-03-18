@@ -995,12 +995,13 @@ export default class MarketingListFilterCmp extends LightningElement {
                 if (!isValueAlreadySelected) {
                     field.selectedOptions = [...field.selectedOptions, {"label": value, "value": value}];
                     this.filterFields[index].searchTerm = '';
+                    // Only apply filters if a new valid string was actually added
+                    this.applyFilters();
                 } else {
                    console.log('Value already exists in selectedOptions');
                 }
             }
             
-            this.applyFilters();
         }catch(e){
             console.log('Error addTheString ->'+e);
         }

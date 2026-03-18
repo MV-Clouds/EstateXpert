@@ -145,12 +145,6 @@
     align-items: center;
 }
 
-.error_css {
-    border: 2px solid red;
-    border-radius: 7px;
-    height: 36px;
-}
-
 .display_css {
     display: flex;
     flex-direction: row;
@@ -173,7 +167,7 @@
 
 .save_btn_css:hover:not(:disabled) {
     background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
     transform: translateY(-1px);
 }
 

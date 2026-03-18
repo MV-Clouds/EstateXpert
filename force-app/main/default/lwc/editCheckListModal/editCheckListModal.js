@@ -358,7 +358,6 @@ export default class EditCheckListModal extends LightningElement {
     */
     handleFieldNameChange(event) {
         try {
-            this.removeError();
             const index = event.currentTarget.dataset.index;
             const value = event.currentTarget.value;
             this.checklistItems[index].MVEX__Field_Name__c = value;
@@ -408,7 +407,6 @@ export default class EditCheckListModal extends LightningElement {
     */
     handleOperatorChange(event) {
         try {
-            this.removeError();
             const index = event.currentTarget.dataset.index;
             const value = event.currentTarget.value;
             const fieldApiName = event.currentTarget.dataset.fieldapiname;
@@ -472,7 +470,6 @@ export default class EditCheckListModal extends LightningElement {
     */
     handleInputChange(event) {
         try {
-            this.removeError();
             const index = event.currentTarget.dataset.index;
             const field = event.currentTarget.dataset.field;
             const value = event.currentTarget.value;
@@ -523,7 +520,7 @@ export default class EditCheckListModal extends LightningElement {
                     let fieldName1 = 'Name';
                     const inputElement = this.template.querySelector(`lightning-input[data-field="${fieldName1}"][data-index="${index}"]`);
                     if (inputElement) {
-                        inputElement.classList.add('error_css');
+                        inputElement.classList.add('slds-has-error');
                     }
                     this.isSpinner = false;
                     return;
@@ -532,7 +529,7 @@ export default class EditCheckListModal extends LightningElement {
                     let fieldName2 = 'Name';
                     const inputElement = this.template.querySelector(`lightning-input[data-field="${fieldName2}"][data-index="${index}"]`);
                     if (inputElement) {
-                        inputElement.classList.add('error_css');
+                        inputElement.classList.add('slds-has-error');
                     }
                     this.isSpinner = false;
                     return;
@@ -544,7 +541,7 @@ export default class EditCheckListModal extends LightningElement {
                         let fieldName3 = 'MVEX__Field_Name__c';
                         const inputElement = this.template.querySelector(`lightning-combobox[data-field="${fieldName3}"][data-index="${index}"]`);
                         if (inputElement) {
-                            inputElement.classList.add('error_css');
+                            inputElement.classList.add('slds-has-error');
                         }
                         this.isSpinner = false;
                         return;
@@ -554,7 +551,7 @@ export default class EditCheckListModal extends LightningElement {
                         let fieldName4 = 'MVEX__Operator__c';
                         const inputElement = this.template.querySelector(`lightning-combobox[data-field="${fieldName4}"][data-index="${index}"]`);
                         if (inputElement) {
-                            inputElement.classList.add('error_css');
+                            inputElement.classList.add('slds-has-error');
                         }
                         this.isSpinner = false;
                         return;
@@ -564,7 +561,7 @@ export default class EditCheckListModal extends LightningElement {
                         let fieldName5 = 'MVEX__Value__c';
                         const inputElement = this.template.querySelector(`lightning-input[data-field="${fieldName5}"][data-index="${index}"]`);
                         if (inputElement) {
-                            inputElement.classList.add('error_css');
+                            inputElement.classList.add('slds-has-error');
                         }
                         this.isSpinner = false;
                         return;
@@ -683,30 +680,6 @@ export default class EditCheckListModal extends LightningElement {
             }
         } catch (error) {
             errorDebugger('EditCheckListModal', 'toast', error, 'warn', 'error in toast');
-        }
-    }
-
-    /**
-    * Method Name: removeError
-    * @description: Used to remove error.
-    * Created Date: 09/07/2024
-    * Updated Date: 23/12/2024
-    * Created By: Karan Singh
-    * Updated By: Karan Singh
-    */
-    removeError(){
-        try {
-            const inputElements = this.template.querySelectorAll('lightning-input');
-            inputElements.forEach(input => {
-                input.classList.remove('error_css');
-            });
-
-            const comboboxElements = this.template.querySelectorAll('lightning-combobox');
-            comboboxElements.forEach(combobox => {
-                combobox.classList.remove('error_css');
-            });
-        } catch (error) {
-            errorDebugger('EditCheckListModal', 'removeError', error, 'warn', 'error in removeError');
         }
     }
 

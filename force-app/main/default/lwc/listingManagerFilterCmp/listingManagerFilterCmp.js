@@ -1378,6 +1378,22 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 return;
             }
 
+            // Extract all indices from the expression
+            const allMatches = this.customLogicExpression.match(/\d+/g) || [];
+
+            // Validation: Single field usage is not allowed
+            if (allMatches.length <= 1) {
+                this.customLogicError = 'Single field usage is not allowed. Custom logic must include at least two filters (e.g., 1 AND 2).';
+                return;
+            }
+
+            // Validation: No filtered field get repeated in the expression
+            const uniqueMatches = new Set(allMatches);
+            if (uniqueMatches.size !== allMatches.length) {
+                this.customLogicError = 'Repeated filter indices are not allowed in the custom logic expression.';
+                return;
+            }
+
             // Token-based validation for operator placement
             const tokens = normalizedExpression.split(' ').filter(token => token !== '');
             for (let i = 0; i < tokens.length; i++) {
@@ -1403,7 +1419,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                     (field.minValue != null && field.minValue !== '' && !isNaN(parseFloat(field.minValue))) ||
                     (field.maxValue != null && field.maxValue !== '' && !isNaN(parseFloat(field.maxValue))) ||
                     (field.minDate != null && field.minDate !== '') ||
-                    (field.maxDate != null && field.minDate !== '') ||
+                    (field.maxDate != null && field.maxDate !== '') ||
                     (field.fieldChecked === true);
                 if (hasSelectedValues) {
                     requiredIndices.push((index + 1).toString()); // 1-based index
@@ -1411,7 +1427,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
             });
 
             // Extract unique indices from the custom logic expression
-            const usedIndices = [...new Set(this.customLogicExpression.match(/\d+/g) || [])];
+            const usedIndices = [...uniqueMatches];
             const erroredIndices = [];
 
             usedIndices.forEach(idx => {

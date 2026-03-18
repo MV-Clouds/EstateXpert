@@ -283,12 +283,30 @@
     letter-spacing: 0.3px;
 }
 
-.table-content .slds-table td {
+.table-content .slds-table th.drag-column,
+.table-content .slds-table th.action {
     text-align: center;
+}
+
+.table-content .slds-table td {
+    text-align: left;
+    padding: 0 0.5rem;
     font-size: 14px;
     font-weight: 400;
     color: #585858;
     height: 45px;
+}
+
+.table-content .slds-table td lightning-combobox,
+.table-content .slds-table td lightning-input,
+.table-content .slds-table td lightning-record-picker {
+    width: 100%;
+    margin: 0;
+}
+
+.table-content .slds-table td.drag-handle,
+.table-content .slds-table td[data-label="action"] {
+    text-align: center;
 }
 
 .delete-div {

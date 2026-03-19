@@ -121,6 +121,7 @@ public with sharing class CheckListItemController {
         @AuraEnabled public String objectName;
         @AuraEnabled public String operator;
         @AuraEnabled public String value;
+        @AuraEnabled public String displayValue;
         @AuraEnabled public Boolean completed;
         @AuraEnabled public Boolean showDropdown;
         @AuraEnabled public Boolean isDescription;
@@ -195,6 +196,61 @@ public with sharing class CheckListItemController {
                 }
 
                 checklistDataToShow.checklistData.add(wrapper);
+            }
+
+            // Resolve Name for Reference values
+            Map<String, Set<Id>> objectToIds = new Map<String, Set<Id>>();
+            for (ChecklistWrapper wrap : checklistDataToShow.checklistData) {
+                if (wrap.fieldName != null && fieldMap.containsKey(wrap.fieldName)) {
+                    Schema.DescribeFieldResult dr = fieldMap.get(wrap.fieldName).getDescribe();
+                    if (dr.getType() == Schema.DisplayType.Reference && wrap.value != null && wrap.value.length() >= 15) {
+                        try {
+                            Id recId = (Id) wrap.value;
+                            if (dr.getReferenceTo().size() > 0) {
+                                String sObjName = dr.getReferenceTo()[0].getDescribe().getName();
+                                if (!objectToIds.containsKey(sObjName)) {
+                                    objectToIds.put(sObjName, new Set<Id>());
+                                }
+                                objectToIds.get(sObjName).add(recId);
+                            }
+                        } catch (Exception e) {
+                            // Ignore if not a valid ID
+                        }
+                    }
+                }
+            }
+
+            Map<Id, String> idToName = new Map<Id, String>();
+            for (String sObj : objectToIds.keySet()) {
+                try {
+                    String queryIds = '(' + String.join(new List<Id>(objectToIds.get(sObj)), '\',\'') + ')';
+                    // We can use a simpler approach for the query
+                    Set<Id> ids = objectToIds.get(sObj);
+                    String q = 'SELECT Id, Name FROM ' + String.escapeSingleQuotes(sObj) + ' WHERE Id IN :ids';
+                    List<SObject> recs = Database.query(q, AccessLevel.USER_MODE);
+                    for (SObject r : recs) {
+                        idToName.put(r.Id, (String) r.get('Name'));
+                    }
+                } catch (Exception e) {
+                    // Ignore errors if 'Name' field is not available
+                }
+            }
+
+            for (ChecklistWrapper wrap : checklistDataToShow.checklistData) {
+                if (wrap.value != null && wrap.value.length() >= 15) {
+                    try {
+                        Id recId = (Id) wrap.value;
+                        if (idToName.containsKey(recId)) {
+                            wrap.displayValue = idToName.get(recId);
+                        } else {
+                            wrap.displayValue = wrap.value;
+                        }
+                    } catch (Exception e) {
+                        wrap.displayValue = wrap.value;
+                    }
+                } else {
+                    wrap.displayValue = wrap.value;
+                }
             }
 
             return checklistDataToShow;

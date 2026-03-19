@@ -101,6 +101,22 @@ export default class ListingManagerFilterCmp extends LightningElement {
     }
 
     saveFilterPermanent(){
+        // Validate that no random text is left in picklist fields
+        let hasError = false;
+        this.filterFields.forEach(field => {
+            if (field.picklist && field.searchTerm && field.searchTerm.trim() !== '') {
+                field.message = 'Please select a valid option or clear the text.';
+                hasError = true;
+            } else {
+                field.message = null;
+            }
+        });
+
+        if (hasError) {
+            this.filterFields = [...this.filterFields];
+            return;
+        }
+
         this.saveConfirmationModal = true;
     }
 
@@ -114,8 +130,19 @@ export default class ListingManagerFilterCmp extends LightningElement {
     }
 
     performSaveFilter(){
-        saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'Listing_Manager_Filters', fieldsJson: JSON.stringify(this.filterFields)})
+        // Clear search terms and focus states before saving
+        const fieldsToSave = this.filterFields.map(field => {
+            const f = {...field};
+            f.searchTerm = '';
+            f.isFocused = false;
+            f.message = null;
+            f.picklistValue = f.unchangePicklistValue; // Reset picklist values to full list
+            return f;
+        });
+
+        saveStaticFields({objectApiName: 'MVEX__Listing__c', featureName: 'Listing_Manager_Filters', fieldsJson: JSON.stringify(fieldsToSave)})
         .then(() => {
+            this.filterFields = fieldsToSave;
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
 
@@ -478,34 +505,39 @@ export default class ListingManagerFilterCmp extends LightningElement {
                   option.label.toLowerCase().includes(this.filterFields[index].searchTerm.toLowerCase().trim())
               );
               if (event.key === 'Enter') {
-                  let fields = this.filterFields;
-                  const value = this.filterFields[index].picklistValue[0].value;
-                  const field = fields[index];
-                  if (field != null) {
-                      if (field.selectedOptions == null) {
-                          field.selectedOptions = [];
+                  if (this.filterFields[index].picklistValue && this.filterFields[index].picklistValue.length > 0) {
+                      let fields = this.filterFields;
+                      const value = this.filterFields[index].picklistValue[0].value;
+                      const field = fields[index];
+                      if (field != null) {
+                          if (field.selectedOptions == null) {
+                              field.selectedOptions = [];
+                          }
+                          const exists = field.selectedOptions.some(option => option.value === value);
+                          if (!exists) {
+                              this.filterFields[index].searchTerm = '';
+                              field.selectedOptions = [...field.selectedOptions, {"label": value, "value": value}];
+                              this.applyFilters();
+              
+                              const newPicklistValue = field.unchangePicklistValue.map(option => {
+                                  if (option.value === value) {
+                                      return {...option, showRightIcon: true};
+                                  }
+                                  return option;
+                              });
+              
+                              field.picklistValue = newPicklistValue;
+                              field.unchangePicklistValue = newPicklistValue;
+                              fields[index] = field;
+                              this.filterFields = fields;
+                              const inputs = this.template.querySelectorAll('.picklist-input');
+                              inputs.forEach(input => input.blur());
+                              this.handleBlur1(event);
+                          }
                       }
-                      const exists = field.selectedOptions.some(option => option.value === value);
-                      if (!exists) {
-                          this.filterFields[index].searchTerm = '';
-                          field.selectedOptions = [...field.selectedOptions, {"label": value, "value": value}];
-                          this.applyFilters();
-          
-                          const newPicklistValue = field.unchangePicklistValue.map(option => {
-                              if (option.value === value) {
-                                  return {...option, showRightIcon: true};
-                              }
-                              return option;
-                          });
-          
-                          field.picklistValue = newPicklistValue;
-                          field.unchangePicklistValue = newPicklistValue;
-                          fields[index] = field;
-                          this.filterFields = fields;
-                          const inputs = this.template.querySelectorAll('.picklist-input');
-                          inputs.forEach(input => input.blur());
-                          this.handleBlur1(event);
-                      }
+                  } else if (this.filterFields[index].searchTerm && this.filterFields[index].searchTerm.trim() !== '') {
+                      this.filterFields[index].message = 'No matching option found.';
+                      this.filterFields = [...this.filterFields];
                   }
               }
           }

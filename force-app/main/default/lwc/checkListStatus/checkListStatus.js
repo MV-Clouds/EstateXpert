@@ -65,7 +65,7 @@ export default class CheckListStatus extends LightningElement {
     }
 
     get buttonLabel() {
-        return this.checklistItems?.length > 0 ? 'Edit Checklist' : 'Create Checklist';
+        return this.checklistItems?.length > 0 ? 'Manage Checklist' : 'Create Checklist';
     }
 
     /**

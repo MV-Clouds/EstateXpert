@@ -134,7 +134,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
                 // Exclude OwnerId and map lookup flags
                 this.fieldOptions = this.fieldOptions.map(option => ({
                     ...option,
-                    showRightRef: this.isLookupField(option.fieldType)
+                    showRightRef: false
                 })).filter(option => option.value !== 'OwnerId');
 
                 if (result.metadataRecords && result.metadataRecords.length > 0) {

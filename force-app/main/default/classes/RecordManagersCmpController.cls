@@ -52,11 +52,8 @@ public with sharing class RecordManagersCmpController {
                 fieldDetails.fieldType = String.valueOf(fieldDescribe.getType());
 
                 if (fieldDescribe.getType() == Schema.DisplayType.Reference) {
-                    List<Schema.SObjectType> referenceTo = fieldDescribe.getReferenceTo();
-                    if (!referenceTo.isEmpty()) {
-                        fieldDetails.referenceObjectName = referenceTo[0].getDescribe().getName();
-                        fieldDetails.relationshipName = fieldDescribe.getRelationshipName();
-                    }
+                    fieldDetails.referenceObjectName = objectApiName;
+                    fieldDetails.relationshipName = null;
                 } else {
                     fieldDetails.referenceObjectName = objectApiName;
                 }

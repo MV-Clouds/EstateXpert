@@ -1093,40 +1093,31 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     let filterResults = [];
                     this.mappings.forEach((mapping, index) => {
                         let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
+                        let filterValue = mapping.resolvedValue;
+
+                        // Normalize values for comparison
+                        const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
+                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
 
                         switch (mapping.operator) {
                             case 'lessThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = parseFloat(inquiryValue) < parseFloat(filterValue);
+                                filterResults[index + 1] = parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                                 break;
                             case 'greaterThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                filterResults[index + 1] = parseFloat(inquiryValue) > parseFloat(filterValue);
+                                filterResults[index + 1] = parseFloat(normInquiryValue) > parseFloat(normFilterValue);
                                 break;
                             case 'equalTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = inquiryValue === filterValue;
+                                // Use soft equality to handle string vs number comparison
+                                filterResults[index + 1] = normInquiryValue == normFilterValue;
                                 break;
                             case 'contains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                filterResults[index + 1] = inquiryValue && inquiryValue.includes(filterValue);
+                                filterResults[index + 1] = String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                                 break;
                             case 'notEqualTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) filterResults[index + 1] = false;
-                                else filterResults[index + 1] = inquiryValue !== filterValue;
+                                filterResults[index + 1] = normInquiryValue != normFilterValue;
                                 break;
                             case 'notContains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) filterResults[index + 1] = false;
-                                else filterResults[index + 1] = inquiryValue && !inquiryValue.includes(filterValue);
+                                filterResults[index + 1] = !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                                 break;
                             default:
                                 filterResults[index + 1] = false;
@@ -1151,35 +1142,24 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
                     return this.mappings.some(mapping => {
                         let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
+                        let filterValue = mapping.resolvedValue;
+
+                        const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
+                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
 
                         switch (mapping.operator) {
                             case 'greaterThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(inquiryValue) > parseFloat(filterValue);
+                                return parseFloat(normInquiryValue) > parseFloat(normFilterValue);
                             case 'lessThan':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(inquiryValue) < parseFloat(filterValue);
+                                return parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                             case 'equalTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return inquiryValue === filterValue;
+                                return normInquiryValue == normFilterValue;
                             case 'contains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return inquiryValue.includes(filterValue);
+                                return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             case 'notEqualTo':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) return false;
-                                return inquiryValue !== filterValue;
+                                return normInquiryValue != normFilterValue;
                             case 'notContains':
-                                inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!inquiryValue) return false;
-                                return !inquiryValue.includes(filterValue);
+                                return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             default:
                                 return false;
                         }
@@ -1191,35 +1171,24 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
                 return this.mappings.every(mapping => {
                     let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                    let filterValue = mapping.valueField;
+                    let filterValue = mapping.resolvedValue;
+
+                    const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
+                    const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
 
                     switch (mapping.operator) {
                         case 'greaterThan':
-                            inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                            filterValue = filterValue !== undefined ? filterValue : 0;
-                            return parseFloat(inquiryValue) > parseFloat(filterValue);
+                            return parseFloat(normInquiryValue) > parseFloat(normFilterValue);
                         case 'lessThan':
-                            inquiryValue = inquiryValue !== undefined ? inquiryValue : 0;
-                            filterValue = filterValue !== undefined ? filterValue : 0;
-                            return parseFloat(inquiryValue) < parseFloat(filterValue);
+                            return parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                         case 'equalTo':
-                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                            filterValue = filterValue !== undefined ? filterValue : '';
-                            return inquiryValue === filterValue;
+                            return normInquiryValue == normFilterValue;
                         case 'contains':
-                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                            filterValue = filterValue !== undefined ? filterValue : '';
-                            return inquiryValue.includes(filterValue);
+                            return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                         case 'notEqualTo':
-                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                            filterValue = filterValue !== undefined ? filterValue : '';
-                            if (!inquiryValue) return false;
-                            return inquiryValue !== filterValue;
+                            return normInquiryValue != normFilterValue;
                         case 'notContains':
-                            inquiryValue = inquiryValue !== undefined ? inquiryValue : '';
-                            filterValue = filterValue !== undefined ? filterValue : '';
-                            if (!inquiryValue) return false;
-                            return !inquiryValue.includes(filterValue);
+                            return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                         default:
                             return false;
                     }

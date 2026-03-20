@@ -38,7 +38,7 @@
 
 .search-input {
     flex-grow: 1;
-    --sds-c-input-radius-border: 8px;
+    --sds-c-input-radius-border: 6px;
     color: #000000;
 }
 
@@ -504,13 +504,13 @@
 .filter-icon-container {
     cursor: pointer;
     width: 34px;
-    height: 34px;
+    height: 33px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #0176D3;
     box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
     transition: all 0.2s ease;
@@ -655,7 +655,7 @@
 
 .filter-btn {
     padding: 0.5rem 1.25rem;
-    border-radius: 6px;
+    border-radius: 5px;
     font-size: 14px;
     font-weight: 500;
     display: inline-flex;

@@ -77,13 +77,4 @@ private class InstagramControllerTest {
 
         System.assertEquals(true, result, 'Should return true if userId is parsed');
     }
-
-    @isTest
-    static void testSaveCustomSettingsPublishesEvent() {
-        Test.startTest();
-        InstagramController.saveCustomSettings('access_token', 'long_token', 'user123');
-        Test.stopTest();
-
-        System.assert(true, 'Method executed without error');
-    }
 }

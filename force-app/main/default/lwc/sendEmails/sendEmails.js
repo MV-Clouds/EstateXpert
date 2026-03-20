@@ -48,6 +48,9 @@ export default class SendEmails extends LightningElement {
 
     @track selectedDripId = null;
 
+    @track isListingDropdownOpen = false;
+    @track listingSearchTerm = '';
+
     @track selectedOption = '';
     @track selectedOptionLabel = '';
     @track currentStep = 1;
@@ -87,6 +90,13 @@ export default class SendEmails extends LightningElement {
         { label: 'Template Selection', value: 'step-4' },
         { label: 'Select Recipients', value: 'step-5' }
     ];
+
+    get dynamicSteps() {
+        if (this.isDripCampaign) {
+            return this.steps.filter(s => s.value !== 'step-3');
+        }
+        return this.steps;
+    }
 
     // Get current step value for progress indicator
     get currentStepValue() {
@@ -146,7 +156,8 @@ export default class SendEmails extends LightningElement {
 
     // Template combobox label based on selection
     get templateComboboxLabel() {
-        if (this.selectedListing) {
+        const currentListing = this.isDripCampaign && this.selectedDrip ? this.selectedDrip.selectedListingId : this.selectedListing;
+        if (currentListing) {
             return `${this.campaignDetails.templateType} (Generic + Listing Templates)`;
         }
         return this.campaignDetails.templateType;
@@ -262,8 +273,10 @@ export default class SendEmails extends LightningElement {
             templates = [...this.filteredCustomTemplates];
         }
     
+        const currentListingId = this.isDripCampaign && this.selectedDrip ? this.selectedDrip.selectedListingId : this.selectedListing;
+
         // If listing is selected, show listing templates + general templates without merge fields
-        if (this.selectedListing && this.campaignDetails.templateType === 'EstateXpert Template') {
+        if (currentListingId && this.campaignDetails.templateType === 'EstateXpert Template') {
             const listingTemplates = this.allCustomTemplates.filter(template => 
                 template.objectName === 'MVEX__Listing__c'
             );
@@ -437,7 +450,15 @@ export default class SendEmails extends LightningElement {
         })
         .catch(error => {
             console.log('Error occurring during loading external css', error);
-        });        
+        });
+        this._documentClickHandler = this.handleDocumentClick.bind(this);
+        document.addEventListener('click', this._documentClickHandler);
+    }
+
+    disconnectedCallback() {
+        if (this._documentClickHandler) {
+            document.removeEventListener('click', this._documentClickHandler);
+        }
     }
 
     renderedCallback() {
@@ -697,7 +718,8 @@ export default class SendEmails extends LightningElement {
             selectedClass: 'selected',
             canDelete: false,
             hasNoTemplate: true,
-            selectedListingId: null
+            selectedListingId: null,
+            selectedListingName: ''
         }];
         
         // Set the first drip as selected by default
@@ -811,7 +833,8 @@ export default class SendEmails extends LightningElement {
                 selectedClass: '',
                 canDelete: true,
                 hasNoTemplate: true,
-                selectedListingId: null
+                selectedListingId: null,
+                selectedListingName: ''
             };
             
             // Update existing drips to unselect them and update classes
@@ -955,17 +978,83 @@ export default class SendEmails extends LightningElement {
         });
     }
 
-    // Handle listing selection for drip emails
-    handleListingSelect(event) {
-        const dripId = parseInt(event.target.dataset.id);
-        const selectedListingId = event.detail.recordId;
+    // Handle custom combobox actions for drip listing
+    get filteredListingsOptions() {
+        let term = this.listingSearchTerm.toLowerCase();
+        let options = this.listingOptions.map(l => ({ label: l.name, value: l.value }));
+        if (term) {
+            return options.filter(opt => opt.label.toLowerCase().includes(term));
+        }
+        return options;
+    }
+
+    handleListingComboboxClick(event) {
+        event.stopPropagation();
+        this.isListingDropdownOpen = true;
+    }
+
+    handleListingDropdownClick(event) {
+        event.stopPropagation();
+    }
+
+    handleListingSearchInput(event) {
+        this.listingSearchTerm = event.target.value;
+    }
+
+    handleDripListingSelect(event) {
+        event.stopPropagation();
+        const listingId = event.currentTarget.dataset.value;
+        const listingName = event.currentTarget.dataset.label;
+        const dripId = this.selectedDripId;
         
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
-                return { ...drip, selectedListingId: selectedListingId };
+                return { 
+                    ...drip, 
+                    selectedListingId: listingId, 
+                    selectedListingName: listingName,
+                    template: '', 
+                    subject: '',
+                    hasNoTemplate: true 
+                };
             }
             return drip;
         });
+        this.isListingDropdownOpen = false;
+        this.listingSearchTerm = '';
+    }
+
+    handleClearDripListing(event) {
+        event.stopPropagation();
+        const dripId = this.selectedDripId;
+        this.dripSequence = this.dripSequence.map(drip => {
+            if (drip.id === dripId) {
+                return { 
+                    ...drip, 
+                    selectedListingId: null, 
+                    selectedListingName: '',
+                    template: '', 
+                    subject: '',
+                    hasNoTemplate: true 
+                };
+            }
+            return drip;
+        });
+    }
+
+    handleDocumentClick(event) {
+        const comboboxContainers = this.template.querySelectorAll('.custom-combobox-container');
+        let clickedInside = false;
+        
+        comboboxContainers.forEach(container => {
+            if (container.contains(event.target)) {
+                clickedInside = true;
+            }
+        });
+        
+        if (!clickedInside) {
+            this.isListingDropdownOpen = false;
+        }
     }
 
     // Validate drip sequence
@@ -1128,7 +1217,11 @@ export default class SendEmails extends LightningElement {
     // Handle back button
     handleBack() {
         if (this.currentStep > 1) {
-            this.currentStep--;
+            if (this.currentStep === 4 && this.isDripCampaign) {
+                this.currentStep = 2; // Skip Step 3
+            } else {
+                this.currentStep--;
+            }
             if (this.currentStep === 1) {
                 this.selectedOption = '';
                 this.selectedOptionLabel = '';
@@ -1146,7 +1239,11 @@ export default class SendEmails extends LightningElement {
         }
 
         if (this.currentStep < this.totalSteps) {
-            this.currentStep++;
+            if (this.currentStep === 2 && this.isDripCampaign) {
+                this.currentStep = 4; // Skip Step 3
+            } else {
+                this.currentStep++;
+            }
             if (this.currentStep === 4) {
                 setTimeout(() => {
                     this.renderTemplatePreview();

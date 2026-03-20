@@ -29,7 +29,7 @@
                         <!-- Wizard Progress Bar -->
                         <div class="wizard-progress">
                             <lightning-progress-indicator current-step={currentStepValue} type="path" variant="base">
-                                <template for:each={steps} for:item="step">
+                                <template for:each={dynamicSteps} for:item="step">
                                     <lightning-progress-step label={step.label} value={step.value} key={step.value}></lightning-progress-step>
                                 </template>
                             </lightning-progress-indicator>
@@ -347,6 +347,40 @@
                                                     </div>
                                                 </div>
     
+                                                <!-- Add Listing Selector Here -->
+                                                <div class="form-field listing-field slds-m-bottom_medium">
+                                                    <label class="form-label">Select Listing (Optional)</label>
+                                                    <div class="custom-combobox-container">
+                                                        <div class="combobox-input-wrapper" onclick={handleListingComboboxClick}>
+                                                            <input type="text" class="combobox-input" placeholder="Search listing..." value={selectedDrip.selectedListingName} readonly />
+                                                            <lightning-icon icon-name="utility:down" size="x-small" class="combobox-icon"></lightning-icon>
+                                                            <template if:true={selectedDrip.selectedListingId}>
+                                                                <lightning-icon icon-name="utility:close" size="x-small" class="combobox-clear-icon" onclick={handleClearDripListing}></lightning-icon>
+                                                            </template>
+                                                        </div>
+                                                        <template if:true={isListingDropdownOpen}>
+                                                            <div class="combobox-dropdown" onclick={handleListingDropdownClick}>
+                                                                <div class="combobox-search-wrapper">
+                                                                    <lightning-icon icon-name="utility:search" size="x-small" class="search-icon"></lightning-icon>
+                                                                    <input type="text" class="combobox-search-input" placeholder="Search listing..." value={listingSearchTerm} oninput={handleListingSearchInput} />
+                                                                </div>
+                                                                <div class="combobox-options">
+                                                                    <template if:true={filteredListingsOptions.length}>
+                                                                        <template for:each={filteredListingsOptions} for:item="option">
+                                                                            <div key={option.value} class="combobox-option" data-value={option.value} data-label={option.label} onclick={handleDripListingSelect}>
+                                                                                {option.label}
+                                                                            </div>
+                                                                        </template>
+                                                                    </template>
+                                                                    <template if:false={filteredListingsOptions.length}>
+                                                                        <div class="combobox-no-results">No matching listings found</div>
+                                                                    </template>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
                                                 <!-- Template Selection -->
                                                 <div class="form-field template-field">
                                                     <label class="form-label">Template</label>

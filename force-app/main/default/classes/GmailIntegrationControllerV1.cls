@@ -24,7 +24,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 String clientSecret = '';
                 String redirectUrl = '';
                 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig'  LIMIT 1];
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
                     if(parts.size() >= 3) {
@@ -115,7 +115,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 String clientId = '';
                 String clientSecret = '';
                 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig' LIMIT 1];
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
                     if(parts.size() >= 2) {
@@ -126,8 +126,8 @@ public with sharing class GmailIntegrationControllerV1 {
                 }
 
                 if(String.isBlank(clientId) || String.isBlank(clientSecret)) {
-                    // Log error or handle missing credentials
-                    throw new CalloutException('Gmail Client ID or Secret missing in Metadata.');
+                    ErrorHandler.insertErrordata(null, 'GmailIntegrationControllerV1', 'requestNewAccessToken', 'Gmail Client ID or Secret missing in Metadata and error at line no 129.');
+                    return;
                 }
 
                 String endPoint = gmailEndpoint + 'token';
@@ -149,7 +149,8 @@ public with sharing class GmailIntegrationControllerV1 {
                     Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(tokenRes.getBody());
                     accessToken = (String) jsonResponse.get('access_token');
                 } else {
-                    throw new CalloutException('Failed to get new access token: ' + tokenRes.getBody());
+                    ErrorHandler.insertErrordata(null, 'GmailIntegrationControllerV1', 'sendEmail', 'Failed to get new access token: ' + tokenRes.getBody());
+                    return;
                 }
         
                 // Step 2: Process emails in batches

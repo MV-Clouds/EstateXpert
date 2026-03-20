@@ -14,6 +14,7 @@ import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappi
 import { errorDebugger } from 'c/globalProperties';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -70,6 +71,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track listingFieldOptions = [];
     @track inquiryFieldOptions = [];
     @track isConstant = false;
+    @track selectedRecordName = '';
     @track visiblePages = 5;
     @track divElement;
     @track NoDataImageUrl = emptyState;
@@ -332,15 +334,25 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Method Name: ConnectedCallback
     * @description: Standard ConnectedCallback method which executes when the component is loaded
     */
-    connectedCallback() {
-        loadStyle(this, MulishFontCss);
-        this.isLoading = true;
-        this.getListingFields();
-        this.getInquiryFields();
-        this.fetchListingConfiguration(); // This will call fetchMetadataRecords internally
-        loadStyle(this, mapCss_V1);
-        window?.globalThis?.addEventListener('click', this.handleClickOutside);
-        this.checkHideFilterButton();
+    async connectedCallback() {
+        try {
+            loadStyle(this, MulishFontCss);
+            loadStyle(this, mapCss_V1);
+            this.isLoading = true;
+            
+            // Wait for both required data loads before fetching filter configuration
+            await Promise.all([
+                this.getListingFields(),
+                this.getInquiryFields()
+            ]);
+            
+            await this.fetchListingConfiguration(); // This will call fetchMetadataRecords internally
+            window?.globalThis?.addEventListener('click', this.handleClickOutside);
+            this.checkHideFilterButton();
+        } catch (error) {
+            errorDebugger('DisplayListing', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
+            this.isLoading = false;
+        }
     }
 
     checkHideFilterButton() {
@@ -374,7 +386,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Created By: Vyom Soni
     */
     getListingFields() {
-        getFieldMap({ objectName: 'MVEX__Listing__c' })
+        return getFieldMap({ objectName: 'MVEX__Listing__c' })
             .then(result => {
                 this.listingFieldOptions = result.fields;
                 this.listingpicklistOptions = result.fields.map(field => {
@@ -385,7 +397,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     }
 
     getInquiryFields() {
-        getFieldMap({ objectName: 'MVEX__Inquiry__c' })
+        return getFieldMap({ objectName: 'MVEX__Inquiry__c' })
             .then(result => {
                 this.inquiryFieldOptions = result.fields.map(field => {
                     return { label: field.label, value: field.value };
@@ -398,7 +410,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
     fetchFilterConfiguration() {
         this.isLoading = true;
-        getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters' })
+        return getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters' })
             .then(result => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
@@ -428,7 +440,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 * Created By: Rachit Shah
 */
     fetchListingConfiguration() {
-        getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Fields' })
+        return getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters' })
             .then(result => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
@@ -460,7 +472,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             })
             .finally(() => {
                 // Call existing data fetching method only once
-                this.fetchFilterConfiguration();
+                return this.fetchFilterConfiguration();
             });
     }
 
@@ -742,29 +754,30 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                         let fieldValue = listing[mapping.field.toLowerCase()];
                         let filterValue = mapping.resolvedValue;
 
-                        // Ensure values are defined
-                        fieldValue = fieldValue !== undefined && fieldValue !== null ? fieldValue : '';
-                        filterValue = filterValue !== undefined && filterValue !== null ? filterValue : '';
+                        // Normalize values for comparison
+                        const normFieldValue = (fieldValue !== undefined && fieldValue !== null) ? fieldValue : '';
+                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
 
                         let result = false;
                         switch (mapping.operator) {
                             case 'lessThan':
-                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) < parseFloat(filterValue);
+                                result = isNaN(parseFloat(normFieldValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normFieldValue) < parseFloat(normFilterValue);
                                 break;
                             case 'greaterThan':
-                                result = isNaN(parseFloat(fieldValue)) || isNaN(parseFloat(filterValue)) ? false : parseFloat(fieldValue) > parseFloat(filterValue);
+                                result = isNaN(parseFloat(normFieldValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normFieldValue) > parseFloat(normFilterValue);
                                 break;
                             case 'equalTo':
-                                result = String(fieldValue) === String(filterValue);
+                                // Use soft equality for string vs number comparison
+                                result = normFieldValue == normFilterValue;
                                 break;
                             case 'contains':
-                                result = String(fieldValue).includes(String(filterValue));
+                                result = String(normFieldValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                                 break;
                             case 'notEqualTo':
-                                result = String(fieldValue) !== String(filterValue);
+                                result = normFieldValue != normFilterValue;
                                 break;
                             case 'notContains':
-                                result = !String(fieldValue).includes(String(filterValue));
+                                result = !String(normFieldValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                                 break;
                             default:
                                 result = false;
@@ -790,35 +803,24 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 this.pagedFilteredListingData = this.totalListing.filter(listing => {
                     return this.mappings.some(mapping => {
                         let fieldValue = listing[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
+                        let filterValue = mapping.resolvedValue;
+
+                        const normFieldValue = (fieldValue !== undefined && fieldValue !== null) ? fieldValue : '';
+                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
 
                         switch (mapping.operator) {
                             case 'greaterThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(fieldValue) > parseFloat(filterValue);
+                                return parseFloat(normFieldValue) > parseFloat(normFilterValue);
                             case 'lessThan':
-                                fieldValue = fieldValue !== undefined ? fieldValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(fieldValue) < parseFloat(filterValue);
+                                return parseFloat(normFieldValue) < parseFloat(normFilterValue);
                             case 'equalTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return fieldValue === filterValue;
+                                return normFieldValue == normFilterValue;
                             case 'contains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return fieldValue.includes(filterValue);
+                                return String(normFieldValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             case 'notEqualTo':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!fieldValue) return false;
-                                return fieldValue !== filterValue;
+                                return normFieldValue != normFilterValue;
                             case 'notContains':
-                                fieldValue = fieldValue !== undefined ? fieldValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!fieldValue) return false;
-                                return !fieldValue.includes(filterValue);
+                                return !String(normFieldValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             default:
                                 return false;
                         }
@@ -830,35 +832,24 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 this.pagedFilteredListingData = this.totalListing.filter(listing => {
                     return this.mappings.every(mapping => {
                         let listingValue = listing[mapping.field.toLowerCase()];
-                        let filterValue = mapping.valueField;
+                        let filterValue = mapping.resolvedValue;
+
+                        const normListingValue = (listingValue !== undefined && listingValue !== null) ? listingValue : '';
+                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
 
                         switch (mapping.operator) {
                             case 'greaterThan':
-                                listingValue = listingValue !== undefined ? listingValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(listingValue) > parseFloat(filterValue);
+                                return parseFloat(normListingValue) > parseFloat(normFilterValue);
                             case 'lessThan':
-                                listingValue = listingValue !== undefined ? listingValue : 0;
-                                filterValue = filterValue !== undefined ? filterValue : 0;
-                                return parseFloat(listingValue) < parseFloat(filterValue);
+                                return parseFloat(normListingValue) < parseFloat(normFilterValue);
                             case 'equalTo':
-                                listingValue = listingValue !== undefined ? listingValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return listingValue === filterValue;
+                                return normListingValue == normFilterValue;
                             case 'contains':
-                                listingValue = listingValue !== undefined ? listingValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                return listingValue.includes(filterValue);
+                                return String(normListingValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             case 'notEqualTo':
-                                listingValue = listingValue !== undefined ? listingValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!listingValue) return false;
-                                return listingValue !== filterValue;
+                                return normListingValue != normFilterValue;
                             case 'notContains':
-                                listingValue = listingValue !== undefined ? listingValue : '';
-                                filterValue = filterValue !== undefined ? filterValue : '';
-                                if (!listingValue) return false;
-                                return !listingValue.includes(filterValue);
+                                return !String(normListingValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             default:
                                 return false;
                         }
@@ -943,6 +934,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             if (currentMapping) {
                 this.selectedMappingId = currentMapping.id;
                 this.isConstant = currentMapping.type === 'constant';
+                this.selectedRecordName = currentMapping.displayValue;
 
                 // Trigger field change logic to populate metadata
                 this.handleInquiryFieldChange({ detail: { value: currentMapping.field } });
@@ -951,6 +943,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 this.listingFieldObject.MVEX__Field_Name__c = currentMapping.field;
                 this.selectedConditionOperator = currentMapping.operator;
                 this.selectedInquiryValue = currentMapping.valueField;
+                this.selectedRecordName = currentMapping.displayValue;
             }
         }
     }
@@ -1345,9 +1338,24 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     handleRefChange(event) {
-        event.stopPropagation();
-        let selectedValueId = event.detail.recordId;
-        this.selectedInquiryValue = selectedValueId;
+        try {
+            event.stopPropagation();
+            let selectedValueId = event.detail.recordId;
+            this.selectedInquiryValue = selectedValueId;
+            this.selectedRecordName = ''; // Reset
+
+            if (selectedValueId && this.listingFieldObject.objectApiName) {
+                getRecordName({ recordId: selectedValueId, objectApiName: this.listingFieldObject.objectApiName })
+                    .then(name => {
+                        this.selectedRecordName = name;
+                    })
+                    .catch(error => {
+                        errorDebugger('DisplayListing', 'handleRefChange', error, 'warn', 'Error fetching record name');
+                    });
+            }
+        } catch (error) {
+            errorDebugger('DisplayListing', 'handleRefChange', error, 'warn', 'Error in handleRefChange');
+        }
     }
 
     /**
@@ -1363,6 +1371,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         this.listingFieldObject.isReference = false;
         this.selectedConditionOperator = '';
         this.selectedInquiryValue = '';
+        this.selectedRecordName = '';
         this.isAddConditionModalVisible = false;
         this.selectedMappingId = null;
 
@@ -1400,6 +1409,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             } else if (this.listingFieldObject.isPicklist && this.listingFieldObject.picklistValues) {
                 const picklistOption = this.listingFieldObject.picklistValues.find(opt => opt.value === this.selectedInquiryValue);
                 displayValue = picklistOption ? picklistOption.label : this.selectedInquiryValue;
+            } else if (this.listingFieldObject.isReference && this.selectedRecordName) {
+                displayValue = this.selectedRecordName;
             }
 
             const newMapping = {

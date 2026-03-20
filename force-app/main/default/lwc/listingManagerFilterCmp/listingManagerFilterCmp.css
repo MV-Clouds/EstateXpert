@@ -561,13 +561,14 @@
 .error-message{
     font-size: 0.75rem;
     color: #ef4444;
-    position: absolute;
-    bottom: -1.25rem;
+    display: block;
+    margin-top: 0.5rem;
     font-weight: 500;
-}   
+}
 
 .combobox .input-delete-cover .min-max-input-cover .error-message{
-    bottom: -0.5rem;
+    margin-top: 0.25rem;
+    position: static;
 }
 
 /* Modal Body */

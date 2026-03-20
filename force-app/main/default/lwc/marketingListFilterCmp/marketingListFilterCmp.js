@@ -135,6 +135,22 @@ export default class MarketingListFilterCmp extends LightningElement {
     }
 
     saveFilterPermanent(){
+        // Validate that no random text is left in picklist fields
+        let hasError = false;
+        this.filterFields.forEach(field => {
+            if (field.picklist && field.searchTerm && field.searchTerm.trim() !== '') {
+                field.message = 'Please select a valid option or clear the text.';
+                hasError = true;
+            } else {
+                field.message = null;
+            }
+        });
+
+        if (hasError) {
+            this.filterFields = [...this.filterFields];
+            return;
+        }
+
         this.saveConfirmationModal = true;
     }
 
@@ -148,6 +164,16 @@ export default class MarketingListFilterCmp extends LightningElement {
     }
 
     performSaveFilter(){
+        // Clear search terms and focus states before saving
+        this.filterFields = this.filterFields.map(field => {
+            const f = {...field};
+            f.searchTerm = '';
+            f.isFocused = false;
+            f.message = null;
+            f.picklistValue = f.unchangePicklistValue;
+            return f;
+        });
+
         const fieldsToSave = this.filterFields.filter(field => !field.isMandatory);
         
         saveStaticFields({objectApiName: 'Contact', featureName: 'Marketing_List_Filters', fieldsJson: JSON.stringify(fieldsToSave)})
@@ -729,39 +755,43 @@ export default class MarketingListFilterCmp extends LightningElement {
                     option.label.toLowerCase().includes(this.filterFields[index].searchTerm.toLowerCase().trim())
                 );
                 if (event.key === 'Enter') { // Check if Enter key was pressed
-                    let fields = this.filterFields; // Assuming this is where 'fields' should be declared
-                    const value = this.filterFields[index].picklistValue[0].value;
-                    const field = fields[index]; // Access 'fields' instead of 'this.filterFields'
-                    if (field != null) {
-                        if (field.selectedOptions == null) {
-                            field.selectedOptions = [];
+                    if (this.filterFields[index].picklistValue && this.filterFields[index].picklistValue.length > 0) {
+                        let fields = this.filterFields; // Assuming this is where 'fields' should be declared
+                        const value = this.filterFields[index].picklistValue[0].value;
+                        const field = fields[index]; // Access 'fields' instead of 'this.filterFields'
+                        if (field != null) {
+                            if (field.selectedOptions == null) {
+                                field.selectedOptions = [];
+                            }
+                
+                            // Check if the value already exists in selectedOptions
+                            const exists = field.selectedOptions.some(option => option.value === value);
+                            if (!exists) {
+                                this.filterFields[index].searchTerm = '';
+                                field.selectedOptions = [...field.selectedOptions, {"label": value, "value": value}];
+                                this.applyFilters();
+                
+                                const newPicklistValue = field.unchangePicklistValue.map(option => {
+                                    if (option.value === value) {
+                                        return {...option, showRightIcon: true};
+                                    }
+                                    return option;
+                                });
+                
+                                field.picklistValue = newPicklistValue;
+                                field.unchangePicklistValue = newPicklistValue;
+                                fields[index] = field;
+                                this.filterFields = fields;
+                                const inputs = this.template.querySelectorAll('.picklist-input');
+                                // Loop through each input and call the blur method
+                                inputs.forEach(input => input.blur());
+                                this.handleBlur1(event);
+                            } else {
+                               console.log('Value already exists in selectedOptions');
+                            }
                         }
-            
-                        // Check if the value already exists in selectedOptions
-                        const exists = field.selectedOptions.some(option => option.value === value);
-                        if (!exists) {
-                            this.filterFields[index].searchTerm = '';
-                            field.selectedOptions = [...field.selectedOptions, {"label": value, "value": value}];
-                            this.applyFilters();
-            
-                            const newPicklistValue = field.unchangePicklistValue.map(option => {
-                                if (option.value === value) {
-                                    return {...option, showRightIcon: true};
-                                }
-                                return option;
-                            });
-            
-                            field.picklistValue = newPicklistValue;
-                            field.unchangePicklistValue = newPicklistValue;
-                            fields[index] = field;
-                            this.filterFields = fields;
-                            const inputs = this.template.querySelectorAll('.picklist-input');
-                            // Loop through each input and call the blur method
-                            inputs.forEach(input => input.blur());
-                            this.handleBlur1(event);
-                        } else {
-                           console.log('Value already exists in selectedOptions');
-                        }
+                    } else if (this.filterFields[index].searchTerm && this.filterFields[index].searchTerm.trim() !== '') {
+                        this.filterFields = [...this.filterFields];
                     }
                 }
             }

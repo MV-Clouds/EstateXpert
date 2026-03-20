@@ -26,7 +26,7 @@
 
             <div class="main_content_cls">
                 <div class="filterdiv slds-m-around_medium">
-                    <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" type="search"
+                    <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" value={searchTerm} type="search"
                         placeholder="Search by Name" onchange={handleSearch}></lightning-input>
                     <lightning-combobox variant="label-hidden" class="filter-combobox"
                         value={selectedCommunicationTypeFilter} placeholder="Filter by Type"

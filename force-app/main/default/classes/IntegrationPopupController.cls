@@ -190,8 +190,6 @@ public with sharing class IntegrationPopupController {
                 result.objectData = GoogleLeadConfig__c.getOrgDefaults();
             } else if (integrationType == 'Meta'){
                 result.objectData = MetaLeadConfig__c.getOrgDefaults();
-            } else {
-                throw new IllegalArgumentException('Invalid integration type: ' + integrationType);
             }
             return result;
         } catch (Exception e) {

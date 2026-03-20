@@ -88,20 +88,13 @@ public with sharing class CreateOfferFromListingController {
     @AuraEnabled
     public static MVEX__Listing__c getListingDetails(Id listingId) {
         try {
-            MVEX__Listing__c listing = [
-                SELECT Id, 
-                       MVEX__Listing_Type__c,
-                       MVEX__Listing_Price__c,
-                       MVEX__Property_OwnerContact__c
-                FROM MVEX__Listing__c 
-                WHERE Id = :listingId 
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Listing_Type__c, MVEX__Listing_Price__c, MVEX__Property_OwnerContact__c
+                                        FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
+
             return listing;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'CreateOfferFromListingController', 'getListingDetails', e.getMessage());
-            throw new AuraHandledException('Error retrieving listing details: ' + e.getMessage());
+            return null;
         }
     }
 
@@ -116,29 +109,14 @@ public with sharing class CreateOfferFromListingController {
     @AuraEnabled
     public static MVEX__Offer__c getOfferDetails(Id offerId) {
         try {
-            MVEX__Offer__c offer = [
-                SELECT Id,
-                       MVEX__Listing__c,
-                       MVEX__Listing_Type__c,
-                       MVEX__Listing_Price__c,
-                       MVEX__Seller_Contact__c,
-                       MVEX__Buyer_Contact__c,
-                       MVEX__Offer_made_by__c,
-                       MVEX__Offer_Amount__c,
-                       MVEX__Status__c,
-                       MVEX__Offer_Expiration_Date__c,
-                       MVEX__Target_Close_Date__c,
-                       MVEX__Description__c,
-                       MVEX__First_Offer_Id__c
-                FROM MVEX__Offer__c 
-                WHERE Id = :offerId 
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            MVEX__Offer__c offer = [SELECT Id, MVEX__Listing__c, MVEX__Listing_Type__c, MVEX__Listing_Price__c, MVEX__Seller_Contact__c, MVEX__Buyer_Contact__c,
+                                    MVEX__Offer_made_by__c, MVEX__Offer_Amount__c, MVEX__Status__c, MVEX__Offer_Expiration_Date__c, MVEX__Target_Close_Date__c,
+                                    MVEX__Description__c, MVEX__First_Offer_Id__c FROM MVEX__Offer__c WHERE Id = :offerId WITH USER_MODE LIMIT 1];
+
             return offer;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'CreateOfferFromListingController', 'getOfferDetails', e.getMessage());
-            throw new AuraHandledException('Error retrieving offer details: ' + e.getMessage());
+            return null;
         }
     }
     
@@ -161,13 +139,7 @@ public with sharing class CreateOfferFromListingController {
                 offer.MVEX__First_Offer_Id__c = String.valueOf(offerId);
                 
                 // Get Active Offer RecordType
-                RecordType activeOfferRT = [
-                    SELECT Id 
-                    FROM RecordType 
-                    WHERE SObjectType = 'MVEX__Offer__c' 
-                    AND DeveloperName = 'Active' 
-                    LIMIT 1
-                ];
+                RecordType activeOfferRT = [SELECT Id FROM RecordType WHERE SObjectType = 'MVEX__Offer__c' AND DeveloperName = 'Active' LIMIT 1];
                 
                 if (activeOfferRT != null) {
                     offer.RecordTypeId = activeOfferRT.Id;

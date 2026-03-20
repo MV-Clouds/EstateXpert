@@ -183,12 +183,6 @@ public with sharing class ListingManagerFilterController {
     @AuraEnabled
     public static void saveStaticFields(String objectApiName, String featureName, String fieldsJson) {
         try {
-            if (String.isBlank(objectApiName) || 
-                String.isBlank(featureName) || 
-                String.isBlank(fieldsJson)) {
-                throw new AuraHandledException('Required values are missing.');
-            }
-
             // Try to find existing config
             MVEX__Configuration_Settings__c config;
 
@@ -210,13 +204,7 @@ public with sharing class ListingManagerFilterController {
             upsert config;
 
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(
-                e,
-                'ListingManagerFilterController',
-                'saveStaticFields',
-                e.getMessage()
-            );
-            throw new AuraHandledException('Unable to save configuration.');
+            ErrorHandler.insertErrorData(e, 'ListingManagerFilterController', 'saveStaticFields', e.getMessage());
         }
     }
 }

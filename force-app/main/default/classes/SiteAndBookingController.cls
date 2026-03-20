@@ -52,7 +52,7 @@ public with sharing class SiteAndBookingController {
             return result;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'getPropertyData', e.getMessage());
-            throw new AuraHandledException('Error fetching property data: ' + e.getMessage());
+            return null;
         }
     }
 
@@ -90,7 +90,6 @@ public with sharing class SiteAndBookingController {
             Messaging.sendEmail(emails);
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'sendEmailsAndCreateShowings', e.getMessage());
-            throw new AuraHandledException('Error sending emails and creating showings: ' + e.getMessage());
         }
     }
 
@@ -155,7 +154,7 @@ public with sharing class SiteAndBookingController {
             return result;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'createShowings', e.getMessage());
-            throw new AuraHandledException('Error creating showings: ' + e.getMessage());
+            return null;
         }
     }
 
@@ -175,7 +174,7 @@ public with sharing class SiteAndBookingController {
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'updateShowing', e.getMessage());
-            throw new AuraHandledException('Error updating showing: ' + e.getMessage());
+            return false;
         }
     }
 
@@ -193,7 +192,7 @@ public with sharing class SiteAndBookingController {
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'markShowingAsCompleted', e.getMessage());
-            throw new AuraHandledException('Error marking showing as completed: ' + e.getMessage());
+            return false;
         }
     }
 
@@ -285,7 +284,7 @@ public with sharing class SiteAndBookingController {
             return formattedShowings;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'getShowingsFromToday', e.getMessage());
-            throw new AuraHandledException('Error fetching showings: ' + e.getMessage());
+            return null;
         }
     }
 
@@ -348,8 +347,6 @@ public with sharing class SiteAndBookingController {
                 
                 // Insert temporarily for preview
                 insert showing;
-            } else {
-                throw new AuraHandledException('Either showingId must exist, or both contactId and listingId must be provided for preview.');
             }
 
             // ---------------------------------------------------------
@@ -405,7 +402,8 @@ public with sharing class SiteAndBookingController {
             };
         }
         catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'previewEmailTemplate', e.getMessage());
+            return null;
         }
     }
 
@@ -423,7 +421,7 @@ public with sharing class SiteAndBookingController {
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'updateShowingStatus', e.getMessage());
-            throw new AuraHandledException('Error updating showing status: ' + e.getMessage());
+            return false;
         }
     }
 }

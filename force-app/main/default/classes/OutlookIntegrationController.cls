@@ -91,13 +91,11 @@ public with sharing class OutlookIntegrationController {
     
                 sendEmail(newAccessToken, outlookMailsJson, remainingEmailsJson, campaignJson, IsCampaignData);
             } else {
-                throw new CalloutException('Failed to get new access token: ' + res.getBody());
+                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'requestNewAccessToken', 'Failed to get new access token: ' + res.getBody() + ' and error at line 94.');
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'OutlookIntegrationController', 'requestNewAccessToken', 'Error while getting new access token.');
         }
-
-
     }
     
     @future(callout=true)
@@ -198,8 +196,7 @@ public with sharing class OutlookIntegrationController {
                 if(IsCampaignData){
                     System.enqueueJob(new CampaignUpdateQueueable(remainingEmails, campaign, outlookMails.size(), 'Failed', res.getBody()));
                 }
-
-                throw new CalloutException('Failed to send batch email: ' + res.getBody());
+                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'requestNewAccessToken', 'Failed to send batch email: ' + res.getBody() + ' and error at line 199.');
             } else {
                 if(consolidatedContactEmailInfoMap.size() > 0){
                     CreateActivityRecordsFromMail.createCaseEmailMessage(consolidatedContactEmailInfoMap);

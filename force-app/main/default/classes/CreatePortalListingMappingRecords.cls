@@ -31,7 +31,8 @@ public with sharing class CreatePortalListingMappingRecords {
                     if (item instanceof Map<String, Object>) {
                         jsonData.add((Map<String, Object>) item);
                     } else {
-                        throw new TypeException('Unexpected JSON structure.');
+                        ErrorHandler.insertErrorData(null, 'CreatePortalListingMappingRecords', 'createPortalRecords', 'Unexpected JSON structure for portal name - ' + portalName + ' at line number 34.');
+                        return null;
                     }
                 }
 
@@ -89,7 +90,8 @@ public with sharing class CreatePortalListingMappingRecords {
 
                 return JSON.serialize(stringMap);
             } else {
-                throw new TypeException('Unexpected JSON structure.');
+                ErrorHandler.insertErrorData(null, 'CreatePortalListingMappingRecords', 'createPortalRecords', 'Unexpected JSON structure for portal name - ' + portalName + ' at line number 94.');
+                return null;
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'CreatePortalListingMappingRecords', 'createPortalRecords', 'Error while creating Portal_Listing_Mapping__c records for portal name - ' + portalName);

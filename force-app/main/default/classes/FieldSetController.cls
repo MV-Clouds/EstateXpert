@@ -14,18 +14,15 @@ public with sharing class FieldSetController {
     public static List<RecordType> fetchRecordTypes(String sObjectApiName) {
         try {
              if (String.isBlank(sObjectApiName)) {
-            throw new AuraHandledException('SObject API name is required');
-        }
+                ErrorHandler.insertErrordata(null, 'FieldSetController', 'fetchRecordTypes', 'SObject API name is required and error at line no 17');
+                return new List<RecordType>();
+            }
 
-        return [
-            SELECT Id, DeveloperName, Name, SObjectType
-            FROM RecordType
-            WHERE SObjectType = :sObjectApiName
-            AND IsActive = true
-            WITH USER_MODE
-        ];
+            return [SELECT Id, DeveloperName, Name, SObjectType FROM RecordType WHERE SObjectType = :sObjectApiName AND IsActive = true WITH USER_MODE];
+
         } catch (Exception e) {
-            throw new AuraHandledException('Error fetching record types: ' + e.getMessage());
+            ErrorHandler.insertErrordata(e, 'FieldSetController', 'fetchRecordTypes', 'Error fetching record types: ' + e.getMessage());
+            return new List<RecordType>();
         }
     }
 
@@ -80,14 +77,7 @@ public with sharing class FieldSetController {
                     propertyIds.add(propertyId);
                 }
             }
-            if (!Schema.sObjectType.Property_File__c.isAccessible()) {
-                throw new AuraHandledException('You do not have permission to access Property File records.');
-            }
-            // Check if the user has read access to the necessary fields of Property_File__c
-            if (!Schema.sObjectType.Property_File__c.fields.BaseUrl__c.isAccessible() ||
-                !Schema.sObjectType.Property_File__c.fields.Property__c.isAccessible()) {
-                throw new AuraHandledException('You do not have permission to access required fields of Property File records.');
-            }
+
             List<Property_File__c> medias = [SELECT Id, BaseUrl__c, Property__c FROM Property_File__c WHERE Property__c IN :propertyIds WITH USER_MODE LIMIT 5000];
             Map<Id, String> propertyMediaUrlsMap = new Map<Id, String>();
             for (Property_File__c media : medias) {
@@ -238,22 +228,13 @@ public with sharing class FieldSetController {
     @AuraEnabled
     public static List<Map<String, Object>> getListingFieldsByRecordType(Id recordTypeId) {
         try {
-            RecordType rt = [
-                SELECT DeveloperName
-                FROM RecordType
-                WHERE Id = :recordTypeId
-                AND SObjectType = 'MVEX__Listing__c'
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            RecordType rt = [SELECT DeveloperName FROM RecordType WHERE Id = :recordTypeId AND SObjectType = 'MVEX__Listing__c' WITH USER_MODE LIMIT 1];
 
             String fieldSetName;
             if (rt.DeveloperName == 'Sale') {
                 fieldSetName = 'MVEX__ListingManagerFieldSet';
             } else if (rt.DeveloperName == 'Rent') {
                 fieldSetName = 'MVEX__RentListingManager';
-            } else {
-                throw new AuraHandledException('Unsupported record type');
             }
 
             // Object describe
@@ -261,11 +242,11 @@ public with sharing class FieldSetController {
                 MVEX__Listing__c.SObjectType.getDescribe();
 
             // Field sets
-            Schema.FieldSet fs =
-                objDescribe.fieldSets.getMap().get(fieldSetName);
+            Schema.FieldSet fs = objDescribe.fieldSets.getMap().get(fieldSetName);
 
             if (fs == null) {
-                throw new AuraHandledException('Field set not found: ' + fieldSetName);
+                ErrorHandler.insertErrordata(null, 'FieldSetController', 'fetchContacts', 'Field set not found: ' + fieldSetName + ' and error at line no 248');
+                return null;
             }
 
             // Field map (IMPORTANT)
@@ -287,24 +268,19 @@ public with sharing class FieldSetController {
                     fieldRef.getDescribe();
 
                 Map<String, Object> fieldInfo = new Map<String, Object>();
-                fieldInfo.put('APIName', fsm.getFieldPath());
-                fieldInfo.put('Label', fsm.getLabel());
-                fieldInfo.put('Type', String.valueOf(dfr.getType()));
-            fieldInfo.put('Required', fsm.getRequired());
+                    fieldInfo.put('APIName', fsm.getFieldPath());
+                    fieldInfo.put('Label', fsm.getLabel());
+                    fieldInfo.put('Type', String.valueOf(dfr.getType()));
+                    fieldInfo.put('Required', fsm.getRequired());
 
-                result.add(fieldInfo);
+                    result.add(fieldInfo);
             }
 
             return result;
 
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(
-                e,
-                'FieldSetController',
-                'getListingFieldsByRecordType',
-                'Error while getting listing fields by record type.'
-            );
-            throw new AuraHandledException(e.getMessage());
+            ErrorHandler.insertErrordata(e, 'FieldSetController', 'getListingFieldsByRecordType', 'Error while getting listing fields by record type.');
+            return null;
         }
     }
 
@@ -325,8 +301,6 @@ public with sharing class FieldSetController {
                 fieldSetName = 'MVEX__CompanyContactFieldset';
             } else if (rt.DeveloperName == 'Individual Contact' || rt.DeveloperName == 'Individual_Contact') {
                 fieldSetName = 'MVEX__MarketingListFieldSet';
-            } else {
-                throw new AuraHandledException('Unsupported record type');
             }
 
             // Object describe
@@ -338,7 +312,8 @@ public with sharing class FieldSetController {
                 objDescribe.fieldSets.getMap().get(fieldSetName);
 
             if (fs == null) {
-                throw new AuraHandledException('Field set not found: ' + fieldSetName);
+                ErrorHandler.insertErrordata(null, 'FieldSetController', 'getContactFieldsByRecordType', 'Field set not found: ' + fieldSetName + ' and error at line no 315');
+                return null;
             }
 
             // Field map (IMPORTANT)
@@ -363,7 +338,7 @@ public with sharing class FieldSetController {
                 fieldInfo.put('APIName', fsm.getFieldPath());
                 fieldInfo.put('Label', fsm.getLabel());
                 fieldInfo.put('Type', String.valueOf(dfr.getType()));
-            fieldInfo.put('Required', fsm.getRequired());
+                fieldInfo.put('Required', fsm.getRequired());
 
                 result.add(fieldInfo);
             }
@@ -371,13 +346,8 @@ public with sharing class FieldSetController {
             return result;
 
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(
-                e,
-                'FieldSetController',
-                'getContactFieldsByRecordType',
-                'Error while getting contact fields by record type.'
-            );
-            throw new AuraHandledException(e.getMessage());
+            ErrorHandler.insertErrordata(e, 'FieldSetController', 'getContactFieldsByRecordType', 'Error while getting contact fields by record type.');
+            return null;
         }
     }
 

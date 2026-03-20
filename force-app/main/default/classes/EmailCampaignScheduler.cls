@@ -240,7 +240,8 @@ public with sharing class EmailCampaignScheduler {
             List<String> fieldNames = new List<String>();
             Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
             if (!sObjectType.getDescribe().isAccessible()) {
-                throw new AuraHandledException('No access to object: ' + objectName);
+                ErrorHandler.insertErrordata(null, 'EmailCampaignScheduler', 'getAllFieldNames', 'No access to object: ' + objectName + ' at line 243.');
+                return null;
             }
             Map<String, Schema.SObjectField> fields = sObjectType.getDescribe().fields.getMap();
             for (String fieldName : fields.keySet()) {

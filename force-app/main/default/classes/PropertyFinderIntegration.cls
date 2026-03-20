@@ -390,11 +390,12 @@ public with sharing class PropertyFinderIntegration {
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res3.getBody());
                 return (String) responseMap.get('accessToken');
             } else {
-                throw new AuraHandledException('Failed to get access token: ' + res3.getBody());
+                ErrorHandler.insertErrorData(null, 'PropertyFinderIntegration', 'getAccesstoken', 'Failed to get access token: ' + res3.getBody() + ' and error at line 393');
+                return 'Failed to get access token: ' + res3.getBody();
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PropertyFinderIntegration', 'getAccesstoken', 'Error while getting access token.');
-            throw e;
+            ErrorHandler.insertErrorData(e, 'PropertyFinderIntegration', 'getAccesstoken', 'Error while getting access token.');   
+            return 'Error while getting access token: ' + e.getMessage();
         }
     }
 }

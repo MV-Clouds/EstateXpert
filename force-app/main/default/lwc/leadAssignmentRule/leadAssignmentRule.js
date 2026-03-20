@@ -110,7 +110,6 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                 selectedUser: rule.Name,
                 selectedUserName: userName,
                 displayUserName: userName,
-                doNotReassignOwner: rule.MVEX__Do_Not_Reassign_Owner__c || false,
                 conditions: conditions.map((condition, cIndex) => ({
                     selectedField: condition.Lead_Field,
                     selectedCondition: condition.Condition,
@@ -222,7 +221,6 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
             selectedUser: '',
             selectedUserName: '',
             displayUserName: 'Select User',
-            doNotReassignOwner: false,
             conditions: [{
                 Id: `temp_${Date.now()}_0`,
                 selectedField: '',
@@ -318,11 +316,6 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         this.currentRule.selectedUser = userId;
         this.currentRule.selectedUserName = userName;
         this.currentRule.displayUserName = userName || 'Select User';
-        this.currentRule = { ...this.currentRule };
-    }
-
-    handleDoNotReassignChange(event) {
-        this.currentRule.doNotReassignOwner = event.target.checked;
         this.currentRule = { ...this.currentRule };
     }
 
@@ -547,7 +540,6 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
             Logic_Type: this.currentRule.logicalExpression ? 'Custom' : 'All',
             Logical_Expression: this.currentRule.logicalExpression || '',
             User_Order: this.isEditMode ? this.userGroups[this.currentEditIndex].userOrder : this.userGroups.length,
-            Do_Not_Reassign_Owner: this.currentRule.doNotReassignOwner || false
         };
 
         manageRule({ operation: this.isEditMode ? 'update' : 'insert', ruleData: ruleToSave })
@@ -556,7 +548,6 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                     ...this.currentRule,
                     Id: this.isEditMode ? this.userGroups[this.currentEditIndex].Id : result,
                     displayUserName: this.currentRule.displayUserName || 'Select User',
-                    doNotReassignOwner: this.currentRule.doNotReassignOwner || false,
                     displayLogicalExpression: this.currentRule.logicalExpression || 'All conditions must be true (AND)',
                     showConditions: false,
                     visibleIconName: 'utility:chevronright'

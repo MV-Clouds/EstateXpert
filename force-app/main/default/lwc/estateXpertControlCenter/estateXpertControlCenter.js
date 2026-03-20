@@ -271,8 +271,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         event.preventDefault();
         this.openComponent(
             'leadAssignmentRule', 
-            'Lead Assignment Rules',
-            'The "Lead Assignment Rule" modal allows users to configure lead assignment rules, enabling automatic distribution of leads based on custom criteria. Set up intelligent routing to ensure leads reach the right team members efficiently.'
+            'Contact Assignment Rules',
+            'The "Contact Assignment Rule" modal allows users to configure contact assignment rules, enabling automatic distribution of contacts based on custom criteria. Set up intelligent routing to ensure contacts reach the right team members efficiently.'
         );
     }
 

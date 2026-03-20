@@ -57,7 +57,7 @@ public with sharing class LeadAssignmentController {
             result.users = Database.query(userQuery);
 
             // Get rules
-            result.rules = [SELECT Id, Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c, Object_Name__c, Do_Not_Reassign_Owner__c
+            result.rules = [SELECT Id, Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c, Object_Name__c
                             FROM Lead_Assignment_Setting__c WHERE Object_Name__c = 'Contact' WITH USER_MODE ORDER BY User_Order__c];
 
             return result;
@@ -90,7 +90,6 @@ public with sharing class LeadAssignmentController {
                 newRule.Logic_Type__c = (String)rule.get('Logic_Type');
                 newRule.Logical_Expression__c = (String)rule.get('Logical_Expression');
                 newRule.User_Order__c = Integer.valueOf(rule.get('User_Order'));
-                newRule.Do_Not_Reassign_Owner__c = Boolean.valueOf(rule.get('Do_Not_Reassign_Owner'));
 
                 insert as user newRule;
                 return newRule.Id;
@@ -107,7 +106,6 @@ public with sharing class LeadAssignmentController {
                 existingRule.Logic_Type__c = (String)rule.get('Logic_Type');
                 existingRule.Logical_Expression__c = (String)rule.get('Logical_Expression');
                 existingRule.User_Order__c = Integer.valueOf(rule.get('User_Order'));
-                existingRule.Do_Not_Reassign_Owner__c = Boolean.valueOf(rule.get('Do_Not_Reassign_Owner'));
 
                 update as user existingRule;
                 return existingRule.Id;

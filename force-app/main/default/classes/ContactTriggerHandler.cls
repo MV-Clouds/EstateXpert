@@ -15,7 +15,7 @@ public without sharing class ContactTriggerHandler {
     public static void handleLeadAssignment(List<Contact> newLeads, Map<Id, Contact> oldLeadMap) {
         try {
             List<Lead_Assignment_Setting__c> allRules = [
-                SELECT Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c, Do_Not_Reassign_Owner__c
+                SELECT Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c
                 FROM Lead_Assignment_Setting__c
                 ORDER BY User_Order__c ASC
             ];
@@ -26,24 +26,10 @@ public without sharing class ContactTriggerHandler {
 
             Boolean isInsert = (oldLeadMap == null);
 
-            Map<Id, Lead_Assignment_Setting__c> rulesForExistingOwners = new Map<Id, Lead_Assignment_Setting__c>();
-            for (Lead_Assignment_Setting__c rule : allRules) {
-                if (rule.Do_Not_Reassign_Owner__c) {
-                    rulesForExistingOwners.put(rule.Name, rule);
-                }
-            }
 
             List<Contact> leadsToProcess = new List<Contact>();
             for (Contact lead : newLeads) {
-                if (isInsert) {
-                    if (!lead.Is_Converted__c) {
-                        leadsToProcess.add(lead);
-                    }
-                } else {
-                    Contact oldLead = oldLeadMap.get(lead.Id);
-                    if (lead.Is_Converted__c || rulesForExistingOwners.containsKey(oldLead.OwnerId)) {
-                        continue;
-                    }
+                if (isInsert && !lead.Is_Converted__c) {
                     leadsToProcess.add(lead);
                 }
             }

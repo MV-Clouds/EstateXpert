@@ -10,8 +10,7 @@ private class LeadAssignmentControllerTest {
             Object_Name__c = 'Contact',
             Logic_Type__c = 'AND',
             Logical_Expression__c = '1',
-            User_Order__c = 1,
-            Do_Not_Reassign_Owner__c = false
+            User_Order__c = 1
         );
         Lead_Assignment_Setting__c rule2 = new Lead_Assignment_Setting__c(
             Name = 'Test Rule 2',
@@ -19,8 +18,7 @@ private class LeadAssignmentControllerTest {
             Object_Name__c = 'Contact',
             Logic_Type__c = 'OR',
             Logical_Expression__c = '1 OR 2',
-            User_Order__c = 2,
-            Do_Not_Reassign_Owner__c = true
+            User_Order__c = 2
         );
         insert new List<Lead_Assignment_Setting__c>{ rule1, rule2 };
     }
@@ -46,8 +44,7 @@ private class LeadAssignmentControllerTest {
             'Object_Name' => 'Contact',
             'Logic_Type' => 'AND',
             'Logical_Expression' => '1',
-            'User_Order' => 3,
-            'Do_Not_Reassign_Owner' => false
+            'User_Order' => 3
         };
         
         Test.startTest();
@@ -62,8 +59,7 @@ private class LeadAssignmentControllerTest {
             'Object_Name' => 'Contact',
             'Logic_Type' => 'OR',
             'Logical_Expression' => '1 OR 2',
-            'User_Order' => 4,
-            'Do_Not_Reassign_Owner' => true
+            'User_Order' => 4
         };
         String updateResult = LeadAssignmentController.manageRule('update', updateRule);
         System.assertEquals(insertResult, updateResult, 'Update should return same rule ID');

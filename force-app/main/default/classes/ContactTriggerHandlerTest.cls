@@ -173,24 +173,4 @@ public class ContactTriggerHandlerTest {
         System.assert(true, 'Catches were executed successfully');
     }
 
-    @isTest
-    static void testDoNotReassignLogic() {
-        // Cover the Do_Not_Reassign_Owner__c branch
-        Contact con = new Contact(LastName = 'NoReassign', OwnerId = UserInfo.getUserId());
-        insert con;
-        
-        Lead_Assignment_Setting__c rule = new Lead_Assignment_Setting__c(
-            Name = UserInfo.getUserId(),
-            Do_Not_Reassign_Owner__c = true,
-            User_Order__c = 1
-        );
-        insert rule;
-        
-        Contact updatedCon = con.clone(true);
-        updatedCon.FirstName = 'Changed';
-        
-        Test.startTest();
-        ContactTriggerHandler.handleLeadAssignment(new List<Contact>{updatedCon}, new Map<Id, Contact>{con.Id => con});
-        Test.stopTest();
-    }
 }

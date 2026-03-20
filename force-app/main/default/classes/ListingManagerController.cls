@@ -29,9 +29,6 @@ public with sharing class ListingManagerController {
     */
     @AuraEnabled
     public static WrapperClass getListingData(){
-        if (!Schema.sObjectType.MVEX__Listing__c.isAccessible()) {
-            throw new AuraHandledException('You do not have permission to access Listing records.');
-        }
         try {
             String listingFields = 'Id,MVEX__City__c,MVEX__Status__c,MVEX__Bathrooms__c,MVEX__Listing__c.MVEX__Property__c,MVEX__Country__c,MVEX__State__c,MVEX__Street__c,Name,MVEX__Sq_Ft__c,MVEX__Listing_Address__CountryCode__s,MVEX__Listing_Address__StateCode__s,MVEX__Listing_Address__City__s,MVEX__Listing_Address__PostalCode__s,MVEX__Listing_Address__Street__s,MVEX__Property_Type__c, MVEX__Property_Category__c';
             List<Map<String, String>> configuredFields = getConfiguredFields(); // Method to get selected fields from the config
@@ -94,7 +91,7 @@ public with sharing class ListingManagerController {
             
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'ListingManagerController', 'getListingData', 'Error while getting listing data.');
-            throw new AuraHandledException(e.getMessage());
+            return null;
         }
     }
 

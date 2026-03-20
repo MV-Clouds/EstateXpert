@@ -96,7 +96,8 @@ public without sharing class InstagramController {
                 String longTermAccessToken = (String) responseBody.get('access_token');
                     return longTermAccessToken;
             } else {
-                throw new AuraHandledException('Failed to get long-lived token: ' + res.getBody());
+                ErrorHandler.insertErrordata(null, 'InstagramController', 'getLongLivedAccessToken', 'Failed to get long-lived token: ' + res.getBody() + ' and error at line no 99.');
+                return null;
             }
 
         } catch (Exception e) {

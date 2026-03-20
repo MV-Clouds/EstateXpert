@@ -279,7 +279,6 @@ public with sharing class BroadcastMessageController {
 
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastRecsWithReplies', e.getMessage());
-            throw new AuraHandledException('Error fetching broadcast data: ' + e.getMessage());
         }
         return result;
     }

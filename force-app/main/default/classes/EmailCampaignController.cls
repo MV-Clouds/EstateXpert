@@ -1344,7 +1344,8 @@ public with sharing class EmailCampaignController {
             }
             return results;
         } catch (Exception e) {
-            throw new AuraHandledException('Failed to fetch campaign member emails: ' + e.getMessage());
+            ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getCampaignMemberEmails', 'Error while fetching campaign member emails for campaignId: ' + campaignId);
+            return null;
         }
     }
                     
@@ -2259,7 +2260,8 @@ public with sharing class EmailCampaignController {
             
             Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
             if (!sObjectType.getDescribe().isAccessible()) {
-                throw new AuraHandledException('No access to object: ' + objectName);
+                ErrorHandler.insertErrordata(null, 'EmailCampaignController', 'getAllFieldNames', 'No access to object: ' + objectName + ' at line 2263.');
+                return null;
             }
             
             Map<String, Schema.SObjectField> fields = sObjectType.getDescribe().fields.getMap();

@@ -71,7 +71,7 @@ public with sharing class MarketingListCmpController {
            return wc;
        } catch (Exception e) {
            ErrorHandler.insertErrorData(e, 'MarketingListCmpController', 'getContactData', 'Error while getting contact data.');
-           throw new AuraHandledException(e.getMessage());
+           return null;
        }
    }
 
@@ -194,13 +194,12 @@ public with sharing class MarketingListCmpController {
                         allContactIds.add(member.Contact_Id__c);
                     }
                 }
-                
-                System.debug('Added ' + (allContactIds.size() - (contactListRaw != null ? contactListRaw.size() : 0)) + ' contacts from broadcast groups');
             }
             
             // Validate total recipients for messaging service limits
             if (sendMethod == 'outlook' && allContactIds.size() > 20) {
-                throw new AuraHandledException('Outlook has a limit of 20 recipients. Total recipients: ' + allContactIds.size() + '. Please select fewer recipients or use a different messaging service.');
+                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'sendEmail', 'Outlook has a limit of 20 recipients. Total recipients: ' + allContactIds.size() + ' and error at line 203.');
+                return; // Outlook has a limit of 20 recipients per email
             }
             
             // Convert contact IDs to contact objects for processing
@@ -305,11 +304,6 @@ public with sharing class MarketingListCmpController {
                 }
             }
 
-            System.debug('Total emails to send: ' + (emails.size() + gmails.size() + outlookMails.size()));
-            System.debug('Individual contacts: ' + (contactListRaw != null ? contactListRaw.size() : 0));
-            System.debug('Broadcast group contacts: ' + (allContactIds.size() - (contactListRaw != null ? contactListRaw.size() : 0)));
-            System.debug('Total unique recipients: ' + allContactIds.size());
-
             if (!emails.isEmpty()) {
                 Messaging.sendEmail(emails);
                 CreateActivityFromMail2.createCaseEmailMessage(contactEmailInfoMap);
@@ -319,8 +313,6 @@ public with sharing class MarketingListCmpController {
                 OutlookIntegrationController.requestNewAccessToken(outlookMails,null,null,false);
             }
         } catch (Exception e) {
-            System.debug('Error in sendEmail: ' + e.getMessage());
-            System.debug('Stack trace: ' + e.getStackTraceString());
             ErrorHandler.insertErrorData(e, 'MarketingListCmpController', 'sendEmail', 'Error while sending email.');
         }
     }
@@ -330,22 +322,18 @@ public with sharing class MarketingListCmpController {
         try {
             String objectName = 'Contact';
             String developerName = 'EX_Contacts';
-            // Validate inputs
-            if (String.isBlank(objectName) || String.isBlank(developerName)) {
-                throw new AuraHandledException('Object name and developer name must not be blank');
-            }
 
             // Query ListView with sanitized inputs
             List<ListView> listViews = [SELECT Id, Name FROM ListView WHERE SobjectType = :objectName AND DeveloperName = :developerName WITH USER_MODE LIMIT 1];
 
             // Check if any ListView was found
             if (listViews.isEmpty()) {
-                throw new AuraHandledException('No ListView found for object: ' + objectName + ' and developer name: ' + developerName);
+                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'getListViewId', 'No ListView found for object: ' + objectName + ' and developer name: ' + developerName + ' at line 340.');
+                return 'Error: No ListView found for the specified object and developer name.';
             }
 
             return listViews[0].Id;
         } catch (Exception e) {
-            
             ErrorHandler.insertErrorData(e, 'MarketingListCmpController', 'getListViewId', 'Error while fetching ListView.');
             return 'Error: ' + e.getMessage();
         }
@@ -372,16 +360,6 @@ public with sharing class MarketingListCmpController {
             String phoneField = (String) request.get('phoneField');
             String communicationType = (String) request.get('communicationType');
     
-            // Basic validation
-            if (String.isBlank(objectApiName) || 
-                String.isBlank(description) || 
-                String.isBlank(name) || 
-                String.isBlank(listViewName) ||
-                String.isBlank(phoneField) || 
-                phoneNumbers.isEmpty()) {
-                throw new AuraHandledException('All fields in the request are required, including the broadcast group name');
-            }
-    
             Broadcast_Group__c broadcastGroup;
     
             broadcastGroup = new Broadcast_Group__c();
@@ -394,7 +372,8 @@ public with sharing class MarketingListCmpController {
 
             Database.SaveResult insertResult = Database.insert(broadcastGroup, false, AccessLevel.USER_MODE);
             if (!insertResult.isSuccess()) {
-                throw new AuraHandledException('Failed to create broadcast group.');
+                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'processBroadcastMessageWithObject', 'Failed to create broadcast group and error at line 384.');
+                return 'Failed to create broadcast group.';
             }
     
             // Handle group members
@@ -427,20 +406,10 @@ public with sharing class MarketingListCmpController {
     
             if (!newMembersToInsert.isEmpty()) {
                 Database.SaveResult[] insertResults = Database.insert(newMembersToInsert, false, AccessLevel.USER_MODE);
-                for (Database.SaveResult res : insertResults) {
-                    if (!res.isSuccess()) {
-                        throw new AuraHandledException('Error inserting some broadcast group members.');
-                    }
-                }
             }
     
             if (!membersToDelete.isEmpty()) {
                 Database.DeleteResult[] deleteResults = Database.delete(membersToDelete, false, AccessLevel.USER_MODE);
-                for (Database.DeleteResult res : deleteResults) {
-                    if (!res.isSuccess()) {
-                        throw new AuraHandledException('Error deleting some broadcast group members.');
-                    }
-                }
             }
     
             return broadcastGroup.Id;

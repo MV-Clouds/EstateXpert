@@ -153,7 +153,8 @@ public with sharing class CheckListItemController {
 
             Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
             if (sObjectType == null) {
-                throw new AuraHandledException('Invalid object name: ' + objectName);
+                ErrorHandler.insertErrordata(null, 'CheckListItemController', 'getCheckList', 'Invalid object name: ' + objectName + ' at line 156.');
+                return null;
             }
             Schema.DescribeSObjectResult describeResult = sObjectType.getDescribe();
             Map<String, Schema.SObjectField> fieldMap = describeResult.fields.getMap();

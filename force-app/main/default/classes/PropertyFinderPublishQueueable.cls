@@ -31,11 +31,12 @@ public class PropertyFinderPublishQueueable implements Queueable, Database.Allow
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res3.getBody());
                 return (String) responseMap.get('accessToken');
             } else {
-                throw new AuraHandledException('Failed to get access token: ' + res3.getBody());
+                ErrorHandler.insertErrorData(null, 'PropertyFinderPublishQueueable', 'getAccesstoken', 'Failed to get access token: ' + res3.getBody() + ' and error at line 393');
+                return 'Failed to get access token: ' + res3.getBody();
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PropertyFinderIntegration', 'getAccesstoken', 'Error while getting access token.');
-            throw e;
+            ErrorHandler.insertErrorData(e, 'PropertyFinderPublishQueueable', 'getAccesstoken', 'Error while getting access token.');
+            return 'Error while getting access token: ' + e.getMessage();
         }
     }
 
@@ -67,7 +68,7 @@ public class PropertyFinderPublishQueueable implements Queueable, Database.Allow
             }
         } catch (Exception e) {
             PropertyFinderIntegration.updatePortalListingRecord(listingId, portalId, e.getMessage(), 'Exception');
-            ErrorHandler.insertErrorData(e, 'PropertyFinderIntegration', 'propertyFinderPublishListing', 'Error while publishing listing on PropertyFinder.');
+            ErrorHandler.insertErrorData(e, 'PropertyFinderPublishQueueable', 'propertyFinderPublishListing', 'Error while publishing listing on PropertyFinder.');
         }
     }
 }

@@ -72,7 +72,8 @@ public class InstagramMediaPublisher implements Schedulable {
                 HttpResponse res = http2.send(req);
 
                 if(res.getStatusCode() != 200) {
-                    throw new CalloutException('Failed to delete AWS objects: ' + res.getBody());
+                    ErrorHandler.insertErrordata(null, 'InstagramMediaPublisher', 'publishMedia', 'Failed to delete AWS objects: ' + res.getBody() + ' and error at line no 75.');
+                    return;
                 }
 
             }

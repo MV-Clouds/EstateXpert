@@ -213,7 +213,6 @@ public with sharing class MarketingListFilterController {
             }
             contactQuery += String.join(contactFieldList, ', ');
             contactQuery += ' FROM Contact ORDER BY CreatedDate DESC LIMIT 1000';
-            System.debug('Contact Query: ' + contactQuery);
             wrapper.contacts = Database.query(contactQuery, AccessLevel.USER_MODE);
 
             // Collect fields for Inquiry__c query
@@ -235,14 +234,12 @@ public with sharing class MarketingListFilterController {
             // Build Inquiry__c query
             String inquiryQuery = 'SELECT ' + String.join(new List<String>(inquiryFields), ', ') + 
                                  ' FROM Inquiry__c WHERE Contact__c != NULL ORDER BY CreatedDate DESC LIMIT 10000';
-            System.debug('Inquiry Query: ' + inquiryQuery);
             wrapper.inquiries = Database.query(inquiryQuery, AccessLevel.USER_MODE);
 
             return wrapper;
         } catch (Exception e) {
-            System.debug('Error in getFilteredContacts: ' + e.getMessage() + ' at line ' + e.getLineNumber());
             ErrorHandler.insertErrorData(e, 'MarketingListFilterController', 'getFilteredContacts', e.getMessage());
-            throw new AuraHandledException('Error retrieving filtered contacts: ' + e.getMessage());
+            return null;
         }
     }
 

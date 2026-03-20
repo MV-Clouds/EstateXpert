@@ -674,9 +674,17 @@ export default class SendEmails extends LightningElement {
         this.currentStep = 2;
     }
 
+    // Helper to get current time + 1 hour in HH:mm format
+    getDefaultTimePlusOneHour() {
+        const now = new Date();
+        now.setHours(now.getHours() + 1);
+        return now.getHours().toString().padStart(2, '0') + ':' + 
+               now.getMinutes().toString().padStart(2, '0');
+    }
+
     // Initialize drip sequence with first drip
     initializeDripSequence() {
-        const defaultTime = '09:00'; // Default to 9:00 AM
+        const defaultTime = this.getDefaultTimePlusOneHour(); 
         this.dripSequence = [{
             id: this.nextDripId++,
             name: 'Email 1',
@@ -789,7 +797,7 @@ export default class SendEmails extends LightningElement {
     // Add new drip to sequence
     handleAddNewEmail() {
         if (this.canAddDrip) {
-            const defaultTime = '09:00'; // Default to 9:00 AM
+            const defaultTime = this.getDefaultTimePlusOneHour();
             const newDrip = {
                 id: this.nextDripId++,
                 name: `Email ${this.dripSequence.length + 1}`,

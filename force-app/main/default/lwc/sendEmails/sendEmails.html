@@ -269,7 +269,7 @@
                                                             </template>
                                                             <template if:true={email.hasInvalidTime}>
                                                                 <div class="invalid-time-warning">
-                                                                    ⚠️ This time is in the past
+                                                                    This time is in the past
                                                                 </div>
                                                             </template>
                                                         </div>
@@ -325,7 +325,8 @@
                                                             step="1"
                                                             data-id={selectedDrip.id}
                                                             onchange={handleDaysAfterStartDateChange}
-                                                            class={computeDelayInputClass}>
+                                                            class={computeDelayInputClass}
+                                                            variant="label-hidden">
                                                         </lightning-input>
                                                     </div>
                                                     <div class="delay-field">
@@ -335,7 +336,8 @@
                                                             value={selectedDrip.timeToSend}
                                                             data-id={selectedDrip.id}
                                                             onchange={handleTimeToSendChange}
-                                                            class={computeTimeInputClass}>
+                                                            class={computeTimeInputClass}
+                                                            variant="label-hidden">
                                                         </lightning-input>
                                                         <template if:true={selectedDrip.hasInvalidTime}>
                                                             <div class="invalid-time-warning">

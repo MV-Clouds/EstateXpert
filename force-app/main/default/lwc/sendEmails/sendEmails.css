@@ -135,6 +135,7 @@
 .custom-footer button.finish-button {
     background: var(--primary-color);
     color: white;
+    flex-direction: row-reverse;
 }
 
 .custom-footer button:disabled {
@@ -794,7 +795,7 @@
     height: 500px;
     background: transparent;
     border-radius: 0;
-    padding: 0;
+    padding: 0px 0px 12px 0px;
 }
 
 /* Left Panel - Drip Sequence */
@@ -1091,11 +1092,11 @@
 }
 
 .preview-template-btn {
-    background: #FFFFFF;
+    background: var(--primary-color);
     border: 1.5px solid #0176D3;
     border-radius: 6px;
     padding: 0.5rem 1.25rem;
-    color: #0176D3;
+    color: #ffffff;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
@@ -1112,8 +1113,8 @@
 }
 
 .preview-template-btn:hover {
-    background: #F3F6F9;
-    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
     transform: translateY(-1px);
 }
 

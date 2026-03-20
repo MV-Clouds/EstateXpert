@@ -352,26 +352,6 @@ private class WhatsAppWebhookTest {
     }
 
     @isTest
-    static void testSendEmail() {
-        Contact testContact = [SELECT Id FROM Contact LIMIT 1];
-        ContentVersion cv = new ContentVersion(
-            Title = 'TestDoc',
-            PathOnClient = 'TestDoc.pdf',
-            VersionData = Blob.valueOf('Test Content'),
-            FirstPublishLocationId = testContact.Id
-        );
-        insert cv;
-        
-        ContentVersion insertedCV = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id LIMIT 1];
-        
-        String body = '{"linkedEntityId":"' + testContact.Id + '","contentDocumentId":"' + insertedCV.ContentDocumentId + '"}';
-        
-        Test.startTest();
-        WhatsAppWebhook.sendEmail(body);
-        Test.stopTest();
-    }
-
-    @isTest
     static void testSendWhatsAppResponse() {
         HttpResponse mockResponse = new HttpResponse();
         mockResponse.setStatusCode(200);

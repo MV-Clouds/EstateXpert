@@ -37,8 +37,7 @@
                                         size="x-small"></lightning-icon>
                                 </button>
                                 <span class="rule-serial">{group.serialNumber}</span>
-                                <span class="rule-user">Assigned User: {group.displayUserName} | Do Not Reassign:
-                                    {group.doNotReassignOwner}</span>
+                                <span class="rule-user">Assigned User: {group.displayUserName}</span>
                                 <div class="rule-actions">
                                     <button class="action-div" onclick={openEditRulePopup} data-index={index}>
                                         <svg width="16" height="16" viewBox="0 0 14 14" fill="none"
@@ -105,12 +104,6 @@
                                         <lightning-combobox options={userOptions} value={currentRule.selectedUser}
                                             onchange={handleUserChange} placeholder="Select User"
                                             variant="label-hidden"></lightning-combobox>
-                                    </div>
-                                    <div class="check-box-css">
-                                        <label>Do Not Reassign Owner</label>
-                                        <lightning-input type="checkbox" checked={currentRule.doNotReassignOwner}
-                                            onchange={handleDoNotReassignChange}
-                                            variant="label-hidden"></lightning-input>
                                     </div>
                                 </div>
                             </div>

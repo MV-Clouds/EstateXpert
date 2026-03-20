@@ -24,7 +24,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 String clientSecret = '';
                 String redirectUrl = '';
                 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig'  LIMIT 1];
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
                     if(parts.size() >= 3) {
@@ -115,7 +115,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 String clientId = '';
                 String clientSecret = '';
                 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt LIMIT 1];
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig' LIMIT 1];
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
                     if(parts.size() >= 2) {

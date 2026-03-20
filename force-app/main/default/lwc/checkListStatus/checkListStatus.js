@@ -65,7 +65,7 @@ export default class CheckListStatus extends LightningElement {
     }
 
     get buttonLabel() {
-        return this.checklistItems?.length > 0 ? 'Edit Checklist' : 'Create Checklist';
+        return this.checklistItems?.length > 0 ? 'Manage Checklist' : 'Create Checklist';
     }
 
     /**
@@ -181,6 +181,19 @@ export default class CheckListStatus extends LightningElement {
                 item.statusIndicatorClass = item.completed ? 'status-indicator status1' : 'status-indicator status2';
                 item.statusText = item.completed ? 'Completed' : 'Pending';
                 item.dropdownIcon = item.showDropdown ? '▲' : '▼';
+                item.displayValueToShow = item.displayValue || item.value;
+                
+                // Determine if "to" should be displayed
+                const operator = item.operator ? item.operator.trim() : '';
+                const operatorLower = operator.toLowerCase();
+                
+                if (operatorLower.endsWith('to')) {
+                    item.isToRequired = false;
+                } else {
+                    const needTo = ['equals', 'not equals'];
+                    item.isToRequired = needTo.includes(operatorLower);
+                }
+                
                 return item;
             });
             this.isSpinner = false;

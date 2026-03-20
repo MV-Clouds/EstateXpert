@@ -66,7 +66,7 @@
                                         <template if:false={item.isDescription}>
                                             <div class="description-text">
                                                 <span class="desc-label">Condition:</span>
-                                                <span class="desc-value">{item.fieldLabel} should {item.operator} to {item.value}</span>
+                                                <span class="desc-value">{item.fieldLabel} should {item.operator} <template if:true={item.isToRequired}>to </template>{item.displayValueToShow}</span>
                                             </div>
                                         </template>
                                         <template if:true={item.isDescription}>

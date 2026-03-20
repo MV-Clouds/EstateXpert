@@ -32,6 +32,21 @@ public with sharing class PropertySearchController {
             return '';
         }
     }
+
+    @AuraEnabled
+    public static String getRecordName(String recordId, String objectApiName) {
+        try {
+            if (String.isBlank(recordId) || String.isBlank(objectApiName)) return '';
+            String query = 'SELECT Name FROM ' + String.escapeSingleQuotes(objectApiName) + ' WHERE Id = :recordId LIMIT 1';
+            List<SObject> records = Database.query(query, AccessLevel.USER_MODE);
+            if (!records.isEmpty()) {
+                return (String) records[0].get('Name');
+            }
+            return '';
+        } catch (Exception e) {
+            return '';
+        }
+    }
     
     
     

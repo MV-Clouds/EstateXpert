@@ -192,7 +192,7 @@ span {
     border: none;
     background: #0176D3;
     color: white;
-    border-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
@@ -278,7 +278,7 @@ span {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 7px;
+    border-radius: 6px;
     transition: all 0.3s ease;
     cursor: pointer;
 }
@@ -976,7 +976,7 @@ input[type=checkbox]::before {
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
@@ -999,7 +999,7 @@ input[type=checkbox]::before {
     padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
@@ -1530,6 +1530,10 @@ c-template-preview {
     border-color: #ef4444;
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.contacts-action-delete:hover svg {
+    fill: #dc2626;
 }
 
 .contacts-action-delete:hover svg path {

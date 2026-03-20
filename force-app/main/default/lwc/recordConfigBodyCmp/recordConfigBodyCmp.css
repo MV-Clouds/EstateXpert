@@ -102,7 +102,7 @@
     background: #0176D3;
     border: none;
     color: #FFFFFF;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -369,7 +369,7 @@
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -389,7 +389,7 @@
     border: none;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;

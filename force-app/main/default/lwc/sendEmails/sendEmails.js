@@ -459,6 +459,14 @@ export default class SendEmails extends LightningElement {
         if (this._documentClickHandler) {
             document.removeEventListener('click', this._documentClickHandler);
         }
+        
+        // Remove loaded styles to prevent affecting other components
+        const styleLinks = document.querySelectorAll('link[href*="summernote"]');
+        styleLinks.forEach(link => {
+            if (link.parentNode) {
+                link.parentNode.removeChild(link);
+            }
+        });
     }
 
     renderedCallback() {
@@ -646,6 +654,36 @@ export default class SendEmails extends LightningElement {
         } else {
             this.selectedCCContacts = [];
             this.updateSelectedContactsDetails();
+        }
+    }
+
+    // Handle removing primary contact from pill
+    handleRemovePrimaryContact(event) {
+        const contactId = event.currentTarget.name;
+        
+        // Remove from selectedContacts
+        this.selectedContacts = this.selectedContacts.filter(id => id !== contactId);
+        this.updateSelectedContactsDetails();
+        
+        // Unselect from combobox
+        const combobox = this.template.querySelector('c-custom-combobox[data-id="primary-combo"]');
+        if (combobox) {
+            combobox.unselectOption(contactId);
+        }
+    }
+
+    // Handle removing CC contact from pill
+    handleRemoveCCContact(event) {
+        const contactId = event.currentTarget.name;
+        
+        // Remove from selectedCCContacts
+        this.selectedCCContacts = this.selectedCCContacts.filter(id => id !== contactId);
+        this.updateSelectedContactsDetails();
+        
+        // Unselect from combobox
+        const combobox = this.template.querySelector('c-custom-combobox[data-id="cc-combo"]');
+        if (combobox) {
+            combobox.unselectOption(contactId);
         }
     }
 

@@ -122,6 +122,7 @@
     font-size: 14px;
     font-weight: 400;
     text-align: center;
+    transition: all 0.2s ease;
     border: none;
     background: #0176D3;
     color: white;
@@ -132,6 +133,12 @@
 .btn svg {
     width: 16px;
     height: 16px;
+}
+
+.btn:hover {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .empty-state {
@@ -449,7 +456,7 @@ span {
 }
 
 .delete-div:hover svg path {
-    fill: #dc2626;
+    stroke: #dc2626;
 }
 
 .action-div {
@@ -477,7 +484,7 @@ span {
 }
 
 .action-div:hover svg path {
-    fill: #0176d3;
+    stroke: #0176d3;
 }
 
 /* Modal popup styles */

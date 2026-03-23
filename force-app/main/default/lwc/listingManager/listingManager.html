@@ -95,7 +95,7 @@
                                                     </th>
                                                     <th key={listing.fieldName} aria-sort="none" data-id="Name"
                                                         onclick={sortClick}
-                                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                        class={nameHeaderClass}
                                                         scope="col">
                                                         <div class="slds-text-link_reset sort-cover" role="button"
                                                             tabindex="0">
@@ -105,7 +105,7 @@
                                                                     Name</span>
                                                                 <span
                                                                     class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                    <svg data-index="Name" class="listing-manager-icon"
+                                                                    <svg data-index="Name" class={nameIconClass}
                                                                         viewBox="0 0 384 512"
                                                                         xmlns="http://www.w3.org/2000/svg">
                                                                         <path
@@ -115,10 +115,10 @@
                                                             </div>
                                                         </div>
                                                     </th>
-                                                    <template for:each={fields} for:item="listing" for:index="index">
+                                                    <template for:each={fieldsWithIconClass} for:item="listing" for:index="index">
                                                         <th key={listing.fieldName} data-id={listing.fieldName}
                                                             onclick={sortClick} aria-sort="none"
-                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                            class={listing.headerClass}
                                                             scope="col">
                                                             <div class="sort-cover" role="button" tabindex="0">
                                                                 <span class="slds-assistive-text">Sort by: </span>
@@ -129,7 +129,7 @@
                                                                     <span
                                                                         class="slds-icon_container slds-icon-utility-arrowdown">
                                                                         <svg data-index={listing.fieldName}
-                                                                            class="listing-manager-icon"
+                                                                            class={listing.iconClass}
                                                                             viewBox="0 0 384 512"
                                                                             xmlns="http://www.w3.org/2000/svg">
                                                                             <path

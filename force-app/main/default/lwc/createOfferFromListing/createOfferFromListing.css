@@ -64,10 +64,23 @@
     text-align: center;
     padding: 0px 20px;
     background: #FFFFFF;
+    transition: all 0.2s ease;
     border: 1px solid #0176D3;
     color: #0176D3;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
+}
+
+.save_btn_css:hover:not(:disabled) {
+    background: #0156A3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
 }
 
 .save_btn_css {
@@ -76,6 +89,7 @@
     line-height: 34px;
     text-align: center;
     border: 1px solid #0176D3;
+    transition: all 0.2s ease;
     padding: 0px 20px;
     background: #0176D3;
     color: white;

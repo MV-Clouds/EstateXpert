@@ -102,7 +102,7 @@
     color: white;
     padding: 8px 16px;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 13px;
     font-weight: 400;
@@ -111,11 +111,14 @@
     justify-content: center;
     gap: 5px;
     margin: auto;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
+     box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
 }
 
 .portal_syndication_table .publish_css:hover {
-    background-color: #005fb2;
+    background: #0157a0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
 }
 
 .portal_syndication_table .publish_css svg {
@@ -127,7 +130,7 @@
     color: white;
     padding: 8px 16px;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 13px;
     font-weight: 400;
@@ -136,11 +139,13 @@
     justify-content: center;
     gap: 5px;
     margin: auto;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .portal_syndication_table .unpublish_css:hover {
-    background-color: #8a0411;
+    background-color: rgb(138, 4, 17);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(138, 4, 17, 0.4);
 }
 
 .portal_syndication_table .unpublish_css svg {

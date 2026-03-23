@@ -295,17 +295,22 @@
 .action_btn.primary:hover {
     background: #0158A3;
     border-color: #0158A3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
 }
 
 .action_btn.secondary {
     background: #78C9F5;
     color: white;
     border: 1px solid #78C9F5;
+    
 }
 
 .action_btn.secondary:hover {
     background: #5AB8E8;
     border-color: #5AB8E8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
 }
 
 .action_btn.outline {
@@ -316,6 +321,8 @@
 
 .action_btn.outline:hover {
     background: #F3F6F9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
 }
 
 .action_btn.full_width {

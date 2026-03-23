@@ -74,6 +74,12 @@
     min-width: max-content;
 }
 
+.btn:hover{
+    background: #0157a0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
+}
+
 .btn svg {
     width: 16px;
     height: 16px;
@@ -194,7 +200,7 @@
 }
 
 .delete-div:hover svg path {
-    fill: #dc2626;
+    stroke: #dc2626;
 }
 
 .action-div {
@@ -222,7 +228,7 @@
 }
 
 .action-div:hover svg path {
-    fill: #0176d3;
+    stroke: #0176d3;
 }
 
 .pagination-container {

@@ -230,7 +230,9 @@
 .combobox .input-delete-cover .delete-icon-cover svg path{
     stroke: #6b7280;
 }
-
+.combobox .input-delete-cover .delete-icon-cover:hover svg{
+    fill: #dc2626;
+}
 .combobox .input-delete-cover .delete-icon-cover:hover svg path{
     stroke: #dc2626;
 }
@@ -399,6 +401,9 @@
 .date-time-div .delete-icon-cover svg path{
     stroke: #6b7280;
 }
+.date-time-div .delete-icon-cover:hover svg{
+    fill: #dc2626;
+}
 
 .date-time-div .delete-icon-cover:hover svg path{
     stroke: #dc2626;
@@ -560,6 +565,10 @@
     stroke: #6b7280;
 }
 
+.boolen-field .delete-icon-cover:hover svg{
+    fill: #dc2626;
+}
+
 .boolen-field .delete-icon-cover:hover svg path{
     stroke: #dc2626;
 }
@@ -685,7 +694,7 @@
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 6px;
+    border-radius: 5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -708,7 +717,7 @@
     padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;

@@ -228,6 +228,9 @@
 
 .search-div {
     width: 45%;
+     flex-grow: 1;
+    --sds-c-input-radius-border: 6px;
+    color: #000000;
 }
 
 .icon {
@@ -399,9 +402,23 @@
     min-width: max-content;
 }
 
+.btn:hover {
+    background: #0157a0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
+}
+
+.btn:disabled {
+    background: #DBDBDB;
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+}
+
 .btn svg {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
 }
 
 .table-content {
@@ -500,7 +517,7 @@
 }
 
 .delete-div:hover svg path {
-    fill: #dc2626;
+    stroke: #dc2626;
 }
 
 .action-div {
@@ -528,7 +545,7 @@
 }
 
 .action-div:hover svg path {
-    fill: #0176d3;
+    stroke: #0176d3;
 }
 
 .filter-icon {
@@ -604,13 +621,13 @@
 .filter-icon-container {
     cursor: pointer;
     width: 34px;
-    height: 34px;
+    height: 33px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #0176D3;
     box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
     transition: all 0.2s ease;

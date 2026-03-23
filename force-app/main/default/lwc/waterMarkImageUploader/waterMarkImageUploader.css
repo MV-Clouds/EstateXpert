@@ -39,7 +39,7 @@
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 6px;
+    border-radius: 5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -60,7 +60,7 @@
     padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -186,10 +186,15 @@
 
 .removeImage svg:hover {
     color: #dc2626;
+    fill: #dc2626;
     background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
     border-color: #ef4444;
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.removeImage svg:hover path{
+    stroke: #dc2626;
 }
 
 .removeImage p {

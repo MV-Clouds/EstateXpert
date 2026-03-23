@@ -597,7 +597,18 @@ textarea {
 }
 
 .remove-button:hover {
-    background-color: #f1eeee;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.remove-button:hover svg {
+    fill: #dc2626;
+}
+
+.remove-button:hover svg path {
+    stroke: #dc2626;
 }
 
 .creattempdiv3 {

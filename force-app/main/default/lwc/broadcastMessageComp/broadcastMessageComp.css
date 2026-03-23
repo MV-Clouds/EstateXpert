@@ -302,10 +302,17 @@ span {
     font-weight: 400;
     text-align: center;
     border: none;
+    transition: all 0.2s ease;
     background: #0176D3;
     color: white;
     border-radius: 5px;
     min-width: max-content;
+}
+
+.btn:hover {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .btn:disabled {

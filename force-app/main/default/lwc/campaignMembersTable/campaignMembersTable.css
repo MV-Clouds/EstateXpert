@@ -262,12 +262,18 @@ span {
     height: 2rem;
     padding: 16px 11px;
     display: flex;
+    transition: all 0.2s ease;
     justify-content: center;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     font-size: 16px;
     font-weight: 400;
+}
+
+.filter-btn:hover {
+    background: #eff4f9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .filter-btn-container {
@@ -397,9 +403,15 @@ span {
     text-align: center;
     padding: 0px 20px;
     background: #FFFFFF;
+    transition: all 0.2s ease;
     border: 1px solid #0176D3;
     color: #0176D3;
     border-radius: 5px;
+}
+
+.cancel_btn_css:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .save_btn_css {
@@ -408,10 +420,17 @@ span {
     line-height: 34px;
     text-align: center;
     border: 1px solid #0176D3;
+    transition: all 0.2s ease;
     padding: 0px 20px;
     background: #0176D3;
     color: white;
     border-radius: 5px;
+}
+
+.save_btn_css:hover {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 @media only screen and (max-width: 900px) {
@@ -433,8 +452,15 @@ span {
     font-size: 14px;
     font-weight: 400;
     text-align: center;
+    transition: all 0.2s ease;
     border: none;
     background: #0176D3;
     color: white;
     border-radius: 5px;
+}
+
+.edit-btn:hover {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }

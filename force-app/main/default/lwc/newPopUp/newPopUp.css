@@ -79,6 +79,8 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
+    max-height: 30rem;
+    height: 100%;
 }
 
 .footerbtns {
@@ -98,7 +100,7 @@
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 6px;
+    border-radius: 5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -119,7 +121,7 @@
     padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;

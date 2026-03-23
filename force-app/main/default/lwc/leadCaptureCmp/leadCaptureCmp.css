@@ -331,22 +331,28 @@
     background: #0176D3;
     color: white;
     border: 1px solid #0176D3;
+    transition: all 0.2s ease;
 }
 
 .action_btn.primary:hover {
     background: #0158A3;
     border-color: #0158A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .action_btn.secondary {
     background: #78C9F5;
     color: white;
     border: 1px solid #78C9F5;
+    transition: all 0.2s ease;
 }
 
 .action_btn.secondary:hover {
     background: #5AB8E8;
     border-color: #5AB8E8;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .action_btn.outline {

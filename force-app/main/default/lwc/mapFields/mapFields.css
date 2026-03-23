@@ -173,9 +173,16 @@
     color: white;
     border-radius: 5px;
     display: inline-flex;
+    transition: all 0.2s ease;
     align-items: center;
     justify-content: center;
     gap: 8px;
+}
+
+.save-btn button:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .save-btn button svg {

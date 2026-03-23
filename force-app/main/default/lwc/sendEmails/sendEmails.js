@@ -333,6 +333,10 @@ export default class SendEmails extends LightningElement {
         return this.dripSequence.length < 10; // Limit to 10 drips
     }
 
+    get cannotAddDrip() {
+        return !this.canAddDrip;
+    }
+
     // Get the selected drip details
     get selectedDrip() {
         return this.dripSequence.find(drip => drip.id === this.selectedDripId);
@@ -856,6 +860,10 @@ export default class SendEmails extends LightningElement {
 
     // Add new drip to sequence
     handleAddNewEmail() {
+        if (!this.canAddDrip) {
+            this.showToast('Drip Limit Reached', 'You can add up to 10 emails in a drip sequence.', 'info');
+            return;
+        }
         if (this.canAddDrip) {
             const defaultTime = this.getDefaultTimePlusOneHour();
             const newDrip = {

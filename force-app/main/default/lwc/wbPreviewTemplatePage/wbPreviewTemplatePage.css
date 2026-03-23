@@ -196,6 +196,7 @@ input{
     font-size: 14px;
     font-weight: 400;
     border: 1px solid #0176D3;
+    transition: all 0.2s ease;
 }
 
 .send-btn-active{

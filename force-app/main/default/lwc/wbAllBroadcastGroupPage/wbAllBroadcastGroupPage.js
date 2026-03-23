@@ -1,6 +1,7 @@
 import { LightningElement, track } from 'lwc';
 import getAllBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getAllBroadcastGroups';
 import deleteBroadcastGroup from '@salesforce/apex/BroadcastMessageController.deleteBroadcastGroup';
+import getActiveCampaignsForGroup from '@salesforce/apex/BroadcastMessageController.getActiveCampaignsForGroup';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -336,22 +337,42 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
         if (event.detail === true) {
             this.isLoading = true;
             let recordId = this.broadcastGroupId;
-            deleteBroadcastGroup({ groupId: recordId })
-                .then(() => {
-                    this.showToast('Success', 'Broadcast Group deleted successfully', 'success');
-                    this.data = this.data
-                        .filter(item => item.Id !== recordId)
-                        .map((item, index) => ({
-                            ...item,
-                            index: index + 1,
-                        }));
-                    this.filteredData = this.data;
-                    this.updateShownData();
+            getActiveCampaignsForGroup({ groupId: recordId })
+                .then(activeCampaigns => {
+                    if (activeCampaigns && activeCampaigns.length > 0) {
+                        let campaignList = activeCampaigns.join(', ');
+                        this.showToast(
+                            'Cannot Delete Group',
+                            'This group is currently used in the following active campaign(s): ' + campaignList + '. Please complete or remove the group from these campaigns before deleting.',
+                            'error'
+                        );
+                        this.isLoading = false;
+                        this.broadcastGroupId = null;
+                    } else {
+                        deleteBroadcastGroup({ groupId: recordId })
+                            .then(() => {
+                                this.showToast('Success', 'Broadcast Group deleted successfully', 'success');
+                                this.data = this.data
+                                    .filter(item => item.Id !== recordId)
+                                    .map((item, index) => ({
+                                        ...item,
+                                        index: index + 1,
+                                    }));
+                                this.filteredData = this.data;
+                                this.updateShownData();
+                            })
+                            .catch(() => {
+                                this.showToast('Error', 'Failed to delete Broadcast Group', 'error');
+                            })
+                            .finally(() => {
+                                this.isLoading = false;
+                                this.broadcastGroupId = null;
+                            });
+                    }
                 })
-                .catch(() => {
-                    this.showToast('Error', 'Failed to delete Broadcast Group', 'error');
-                })
-                .finally(() => {
+                .catch(error => {
+                    console.error('Error checking active campaigns:', error);
+                    this.showToast('Error', 'Failed to verify group usage. Please try again.', 'error');
                     this.isLoading = false;
                     this.broadcastGroupId = null;
                 });

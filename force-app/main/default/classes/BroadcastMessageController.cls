@@ -85,6 +85,53 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
+    public static List<String> getActiveCampaignsForGroup(Id groupId) {
+        List<String> activeCampaignNames = new List<String>();
+        try {
+            String groupIdStr = String.valueOf(groupId);
+
+            // Check WhatsApp Broadcasts (Broadcast_Group_IDs__c is comma-separated)
+            List<Broadcast__c> broadcasts = [
+                SELECT Id, Name, Status__c, Broadcast_Group_IDs__c
+                FROM Broadcast__c
+                WHERE Status__c != 'Completed'
+                WITH USER_MODE
+            ];
+            for (Broadcast__c b : broadcasts) {
+                if (String.isBlank(b.Broadcast_Group_IDs__c)) continue;
+                List<String> groupIds = b.Broadcast_Group_IDs__c.split(',');
+                for (String gId : groupIds) {
+                    if (gId.trim() == groupIdStr) {
+                        activeCampaignNames.add('Broadcast: ' + b.Name);
+                        break;
+                    }
+                }
+            }
+
+            // Check Email Marketing Campaigns (Selected_Broadcast_Groups__c is @@@ separated)
+            List<Marketing_Campaign__c> campaigns = [
+                SELECT Id, Label__c, Status__c, Selected_Broadcast_Groups__c
+                FROM Marketing_Campaign__c
+                WHERE Status__c != 'Completed'
+                WITH USER_MODE
+            ];
+            for (Marketing_Campaign__c c : campaigns) {
+                if (String.isBlank(c.Selected_Broadcast_Groups__c)) continue;
+                List<String> groupIds = c.Selected_Broadcast_Groups__c.split('@@@');
+                for (String gId : groupIds) {
+                    if (gId.trim() == groupIdStr) {
+                        activeCampaignNames.add('Campaign: ' + c.Label__c);
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getActiveCampaignsForGroup', e.getMessage());
+        }
+        return activeCampaignNames;
+    }
+
+    @AuraEnabled
     public static void deleteBroadcastGroup(Id groupId) {
         try {
             Broadcast_Group__c groupToDelete = [

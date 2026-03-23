@@ -185,7 +185,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
         getPicklistValues({apiName:field.apiName,objectName:field.objectApiName})
         .then(result => {
             this.staticFields = this.staticFields.map(f => {
-                if (f.apiName === field.apiName) {
+                if (f.apiName === field.apiName && f.objectApiName === field.objectApiName) {
                     return {
                         ...f,
                         picklistValue: result,
@@ -194,7 +194,17 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 }
                 return f;
             });
-            this.filterFields = [...this.staticFields];
+            this.filterFields = this.filterFields.map(f => {
+                // Match by apiName and objectApiName (and prevApiName if it's a dynamic parent field)
+                if (f.apiName === field.apiName && f.objectApiName === field.objectApiName && f.prevApiName === field.prevApiName) {
+                    return {
+                        ...f,
+                        picklistValue: result,
+                        unchangePicklistValue: result
+                    };
+                }
+                return f;
+            });
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.updateFilterIndices();
             // this.dispatchEvent(new CustomEvent('loading', { detail: false }));
@@ -232,7 +242,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 isNot: field.isNot || false,
                 searchTerm:'',
                 isFocused:false,
-                picklist: field.type === 'PICKLIST',
+                picklist: field.type === 'PICKLIST' || field.type === 'MULTIPICKLIST',
                 string: field.type === 'STRING'||field.type === 'TEXTAREA'||field.type === 'URL'||field.type === 'ID'||field.type === 'EMAIL'||field.type === 'PHONE',
                 fieldChecked:false,
                 currency: field.type === 'CURRENCY',
@@ -259,6 +269,10 @@ export default class ListingManagerFilterCmp extends LightningElement {
             );
             if (!isFieldPresent) {
                 this.filterFields = [...this.filterFields, newField];
+                // Fetch picklist values if not present
+                if (newField.picklist && (!newField.picklistValue || newField.picklistValue.length === 0)) {
+                    this.loadPicklistValues(newField);
+                }
             }else{
                 const evt = new ShowToastEvent({
                     title: 'Field is not added',
@@ -335,10 +349,25 @@ export default class ListingManagerFilterCmp extends LightningElement {
                             );
                             condition = `(${conditions.join(' OR ')})`;
                         } else if (field.operatorName === 'equals') {
-                            const conditions = field.selectedOptions.map(opt => 
-                                `${fieldPath} ${field.isNot ? '!=' : '='} '${opt.value.replace(/'/g, '\\\'')}'`
-                            );
-                            condition = `(${conditions.join(' OR ')})`;
+                            if (field.type === 'MULTIPICKLIST') {
+                                const values = field.selectedOptions.map(opt => `'${opt.value.replace(/'/g, '\\\'')}'`).join(';');
+                                // Exact Match for Multipicklist = 'Val1;Val2'
+                                condition = `${fieldPath} ${field.isNot ? '!=' : '='} '${field.selectedOptions.map(opt => opt.value.replace(/'/g, '\\\'')).join(';')}'`;
+                            } else {
+                                const conditions = field.selectedOptions.map(opt => 
+                                    `${fieldPath} ${field.isNot ? '!=' : '='} '${opt.value.replace(/'/g, '\\\'')}'`
+                                );
+                                condition = `(${conditions.join(' OR ')})`;
+                            }
+                        } else if (field.operatorName === 'includes') {
+                            if (field.type === 'MULTIPICKLIST') {
+                                const values = field.selectedOptions.map(opt => `'${opt.value.replace(/'/g, '\\\'')}'`).join(',');
+                                condition = `${fieldPath} ${field.isNot ? 'EXCLUDES' : 'INCLUDES'} (${values})`;
+                            } else {
+                                const values = field.selectedOptions.map(opt => `'${opt.value.replace(/'/g, '\\\'')}'`).join(',');
+                                const operator = field.isNot ? 'NOT IN' : 'IN';
+                                condition = `${fieldPath} ${operator} (${values})`;
+                            }
                         } else {
                             const values = field.selectedOptions.map(opt => `'${opt.value.replace(/'/g, '\\\'')}'`).join(',');
                             const operator = field.isNot ? 'NOT IN' : 'IN';

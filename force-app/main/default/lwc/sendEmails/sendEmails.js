@@ -459,6 +459,14 @@ export default class SendEmails extends LightningElement {
         if (this._documentClickHandler) {
             document.removeEventListener('click', this._documentClickHandler);
         }
+        
+        // Remove loaded styles to prevent affecting other components
+        const styleLinks = document.querySelectorAll('link[href*="summernote"]');
+        styleLinks.forEach(link => {
+            if (link.parentNode) {
+                link.parentNode.removeChild(link);
+            }
+        });
     }
 
     renderedCallback() {

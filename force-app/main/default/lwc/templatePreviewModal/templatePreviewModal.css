@@ -105,7 +105,7 @@
 .buttonSection button {
   width: max-content;
   min-width: 6rem;
-  height: 2rem;
+  height: 35px;
   border: none;
   outline: none;
   display: flex;
@@ -113,14 +113,10 @@
   justify-content: center;
   gap: 0.5rem;
   font-family: var(--ff_Bahnschrift);
-  border-radius: 6px;
+  border-radius: 5px;
   padding-inline: 1rem;
   transition: all linear 0.19s;
   cursor: pointer;
-}
-
-.buttonSection button:hover {
-  filter: saturate(1.5) brightness(0.9);
 }
 
 .buttonSection button:disabled {
@@ -131,7 +127,15 @@
 .generatePreviewBtn {
   background: #0176D3;
   color: white;
+  transition: all 1s ease;
 }
+
+.generatePreviewBtn:hover:not(:disabled) {
+  background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
+}
+
 
 .generatePreviewBtn svg {
   width: 18px;
@@ -146,7 +150,15 @@
 .exportBtn {
   background: #0176D3;
   color: white;
+  transition: all 1s ease;
 }
+
+.exportBtn:hover:not(:disabled) {
+  background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
+}
+
 
 .exportBtn svg {
   width: 18px;
@@ -158,6 +170,12 @@
   background: white;
   color: #0176D3;
   border: 1px solid #0176D3 !important;
+  transition: all 1s ease;
+}
+
+.closeBtn:hover {
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .closeBtn svg {

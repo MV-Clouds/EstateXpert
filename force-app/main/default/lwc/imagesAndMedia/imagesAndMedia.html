@@ -5,10 +5,10 @@
   <div class="maindiv">
     <div class="stylebtn">
       <button class="btn_in_blue" onclick={saveChanges} disabled={disableEnableBtn}>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M13.5 0H1.5C0.671573 0 0 0.671573 0 1.5V14.5C0 15.3284 0.671573 16 1.5 16H14.5C15.3284 16 16 15.3284 16 14.5V2.5L13.5 0ZM8 14C6.34315 14 5 12.6569 5 11C5 9.34315 6.34315 8 8 8C9.65685 8 11 9.34315 11 11C11 12.6569 9.65685 14 8 14ZM11 3H2V1H11V3Z"
-            fill="white" />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Save Changes
       </button>
@@ -21,22 +21,19 @@
         Cancel
       </button>
       <button class="btn_in_blue" onclick={modalPopup}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white" />
+       <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
         </svg>
         Add New Files
       </button>
       <button class="btn_in_white" onclick={toDeleteAllMedia} disabled={isAllDelete}>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2.06494 4.34671H3.34122H13.5514" stroke="#0176D3" stroke-width="0.765766" stroke-linecap="round"
-            stroke-linejoin="round" />
-          <path
-            d="M5.25523 4.34671V3.07044C5.25523 2.73195 5.3897 2.40732 5.62905 2.16797C5.8684 1.92862 6.19302 1.79416 6.53151 1.79416H9.08406C9.42255 1.79416 9.74718 1.92862 9.98653 2.16797C10.2259 2.40732 10.3603 2.73195 10.3603 3.07044V4.34671M12.2748 4.34671V13.2806C12.2748 13.6191 12.1403 13.9438 11.9009 14.1831C11.6616 14.4225 11.337 14.5569 10.9985 14.5569H4.6171C4.27861 14.5569 3.95398 14.4225 3.71463 14.1831C3.47528 13.9438 3.34082 13.6191 3.34082 13.2806V4.34671H12.2748Z"
-            stroke="#0176D3" stroke-width="0.765766" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M6.53174 7.5374V11.3662" stroke="#0176D3" stroke-width="0.765766" stroke-linecap="round"
-            stroke-linejoin="round" />
-          <path d="M9.08398 7.5374V11.3662" stroke="#0176D3" stroke-width="0.765766" stroke-linecap="round"
-            stroke-linejoin="round" />
+         <svg width="15" height="15"
+            viewBox="0 0 14 14" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                stroke="#0176D3" stroke-width="1.25" stroke-linecap="round"
+                stroke-linejoin="round" />
         </svg>
         Delete All
       </button>
@@ -60,9 +57,9 @@
               <div class="sort-container">
                 <div class="sorting_btn">
                   <button class="sort_btn_blue" onclick={getExpose}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white" />
-                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
+                </svg>
                     Add All
                   </button>
                   <button class="sort_btn_white" onclick={clearExpose}>
@@ -288,7 +285,7 @@
                             stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                       </div>
-                      <div data-key={item.Id} data-url={item.MVEX__BaseUrl__c} data-label={item.MVEX__Filename__c}
+                      <div class="delete-icon" data-key={item.Id} data-url={item.MVEX__BaseUrl__c} data-label={item.MVEX__Filename__c}
                         data-size={item.MVEX__Size__c} onclick={deleteRow}>
                         <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path

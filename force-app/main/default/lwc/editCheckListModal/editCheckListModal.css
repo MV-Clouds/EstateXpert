@@ -41,7 +41,7 @@
 .order_btn {
     padding: 6px;
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -105,7 +105,7 @@
     border: none;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -157,7 +157,7 @@
     border: none;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -183,7 +183,7 @@
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;

@@ -368,17 +368,19 @@
     padding: 0px 20px;
     font-size: 16px;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+     box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
     margin: 0 auto;
     display: block;
     height: 40px;
 }
 
 .upload-button:hover {
-    background-color: #357ae8;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: #0157a0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
 }
 
 .upload-button:active {

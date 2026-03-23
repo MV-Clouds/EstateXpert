@@ -217,7 +217,7 @@
 }
 
 .delete-div:hover svg path {
-    fill: #dc2626;
+    stroke: #dc2626;
 }
 
 .action-div:hover {
@@ -232,7 +232,7 @@
 }
 
 .action-div:hover svg path {
-    fill: #0176d3;
+    stroke: #0176d3;
 }
 
 .action-div:disabled,

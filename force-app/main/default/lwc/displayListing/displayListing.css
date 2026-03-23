@@ -372,11 +372,13 @@ button:disabled {
     height: 32px;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .mapping-btn:hover {
     background-color: #005fb2;
+     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .red {
@@ -463,8 +465,8 @@ button:disabled {
     border: none;
     color: white;
     font-size: 14px;
-    border-radius: 4px;
-    height: 32px;
+    border-radius: 5px;
+    height: 35px;
     cursor: pointer;
 }
 
@@ -476,17 +478,25 @@ button:disabled {
 
 .modal-btn-blue {
     padding: 0px 12px;
+    transition: all 0.2s ease;
+}
+
+.modal-btn-blue:hover {
+    background-color: #005fb2;
+     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
 }
 
 .modal-btn-white {
     padding: 0px 12px;
     background-color: white;
     border: 1px solid #0176D3;
+    transition: all 0.2s ease;
     color: #0176D3;
 }
 
 .modal-btn-white:hover {
-    background-color: rgb(232, 232, 232);
+    background-color: rgba(232, 232, 232, 0.5);
     color: #0176D3;
 }
 

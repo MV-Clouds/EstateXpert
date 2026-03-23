@@ -530,6 +530,7 @@ span {
     color: white;
     border-radius: 5px;
     min-width: max-content;
+    transition: all 0.3s ease;
 }
 
 .btn:hover {

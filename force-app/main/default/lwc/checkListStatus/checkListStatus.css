@@ -48,7 +48,7 @@
     border: none;
     background: #0176D3;
     color: white;
-    border-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);

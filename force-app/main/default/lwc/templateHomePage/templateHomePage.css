@@ -69,6 +69,7 @@
     text-align: center;
     border: none;
     background: #0176D3;
+    transition: all 0.2s ease;
     color: white;
     border-radius: 5px;
     min-width: max-content;

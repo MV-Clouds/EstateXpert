@@ -533,7 +533,7 @@ span {
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
@@ -554,7 +554,7 @@ span {
     padding: 0.5rem 1.5rem;
     background: #0176D3;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;

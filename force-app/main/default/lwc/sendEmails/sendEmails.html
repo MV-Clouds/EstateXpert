@@ -436,16 +436,30 @@
                                         
                                         <!-- Custom Searchable Combobox for Primary Contacts -->
                                         <div class="combobox-container">
-                                            <c-custom-combobox
+                                            <c-custom-combobox data-id="primary-combo"
                                                 placeholder="Search contacts by name, email, or company..."
-                                                options={allContactOptions}
-                                                onselect={handlePrimaryContactSelect}
-                                                searchable="true"
-                                                multiselect="true"
-                                                value={selectedContacts}
-                                                show-clear-button="true"
-                                                class="contact-combobox">
+                                                options={allContactOptions} onselect={handlePrimaryContactSelect}
+                                                searchable="true" multiselect="true" value={selectedContacts}
+                                                show-clear-button="true" class="contact-combobox">
                                             </c-custom-combobox>
+                                            <!-- Breadcrumb Pills for Primary Contacts -->
+                                            <template if:true={selectedContactsDetails.length}>
+                                                <div class="selected_contact_css">
+                                                    <template for:each={selectedContactsDetails} for:item="contact">
+                                                        <span key={contact.id} class="custom-pill slds-pill" title={contact.name}>
+                                                            <span class="slds-icon_container slds-icon-standard-contact" title="Contact">
+                                                                <lightning-icon icon-name="standard:contact" alternative-text="Contact" size="small"></lightning-icon>
+                                                            </span>
+                                                            <span class="slds-pill__label">{contact.name}</span>
+                                                            <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                                                name={contact.id} onclick={handleRemovePrimaryContact}>
+                                                                <lightning-icon icon-name="utility:close" alternative-text="Remove"></lightning-icon>
+                                                                <span class="slds-assistive-text">Remove</span>
+                                                            </button>
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                            </template>
                                         </div>
     
                                         <!-- Broadcast Groups Section - Show only when no contacts selected -->
@@ -498,16 +512,30 @@
                                         
                                         <!-- Custom Searchable Combobox for CC Contacts -->
                                         <div class="combobox-container">
-                                            <c-custom-combobox
-                                                placeholder="Search contacts for CC..."
-                                                options={allContactOptions}
-                                                onselect={handleCCContactSelect}
-                                                searchable="true"
-                                                multiselect="true"
-                                                value={selectedCCContacts}
-                                                show-clear-button="true"
+                                            <c-custom-combobox data-id="cc-combo"
+                                                placeholder="Search contacts for CC..." options={allContactOptions}
+                                                onselect={handleCCContactSelect} searchable="true" multiselect="true"
+                                                value={selectedCCContacts} show-clear-button="true"
                                                 class="contact-combobox">
                                             </c-custom-combobox>
+                                            <!-- Breadcrumb Pills for CC Contacts -->
+                                            <template if:true={selectedCCContactsDetails.length}>
+                                                <div class="selected_contact_css">
+                                                    <template for:each={selectedCCContactsDetails} for:item="contact">
+                                                        <span key={contact.id} class="custom-pill slds-pill" title={contact.name}>
+                                                            <span class="slds-icon_container slds-icon-standard-contact" title="Contact">
+                                                                <lightning-icon icon-name="standard:contact" alternative-text="Contact" size="small"></lightning-icon>
+                                                            </span>
+                                                            <span class="slds-pill__label">{contact.name}</span>
+                                                            <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                                                name={contact.id} onclick={handleRemoveCCContact}>
+                                                                <lightning-icon icon-name="utility:close" alternative-text="Remove"></lightning-icon>
+                                                                <span class="slds-assistive-text">Remove</span>
+                                                            </button>
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>

@@ -607,7 +607,9 @@ export default class CustomCombobox extends LightningElement {
     unselectOption(unselectedOption) {
         try {
             this.selectedItems = this.selectedItems.filter((option) => {
-                option.isSelected = false;
+                if (option.value === unselectedOption) {
+                    option.isSelected = false;
+                }
                 return option.value !== unselectedOption;
             });
 

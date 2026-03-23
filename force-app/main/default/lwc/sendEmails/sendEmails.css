@@ -1546,3 +1546,82 @@
     color: #706e6b;
     font-size: 14px;
 }
+.selected_contact_css {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+/* Custom Pill Styles */
+.custom-pill.slds-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border: 1px solid #0176D3;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0176D3;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.1);
+    height: auto;
+}
+
+.custom-pill.slds-pill:hover {
+    background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
+    transform: translateY(-1px);
+}
+
+.custom-pill .slds-icon_container {
+    /* background: transparent; */
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-pill .slds-icon_container lightning-icon {
+    --slds-c-icon-color-foreground-default: #000000;
+}
+
+.custom-pill .slds-pill__label {
+    color: #0176D3;
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-pill .slds-pill__remove {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.custom-pill .slds-pill__remove:hover {
+    background: rgba(1, 118, 211, 0.15);
+}
+
+.custom-pill .slds-pill__remove lightning-icon {
+    --slds-c-icon-color-foreground-default: #0176D3;
+    width: 12px;
+    height: 12px;
+}

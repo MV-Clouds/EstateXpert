@@ -255,12 +255,11 @@
                                         </th>
 
                                         <th scope="col">
-                                            <div class="slds-truncate" title="Email Template"><abbr
-                                                    class="slds-required" title="required">*</abbr>Email Template</div>
+                                            <div class="slds-truncate" title="Related Listing">Related Listing</div>
                                         </th>
                                         <th scope="col">
-                                            <div class="slds-truncate" title="Related Listing"><abbr
-                                                    class="slds-required" title="required">*</abbr>Related Listing</div>
+                                            <div class="slds-truncate" title="Email Template"><abbr
+                                                    class="slds-required" title="required">*</abbr>Email Template</div>
                                         </th>
                                         <th scope="col">
                                             <div class="slds-truncate" title="Subject"><abbr class="slds-required"
@@ -295,23 +294,23 @@
                                                         variant="label-hidden"></lightning-input>
                                                 </div>
                                             </td>
-                                            <td data-label="Email Template" class="email-template">
-                                                <div>
-                                                    <lightning-combobox name="emailName" value={email.template}
-                                                        options={quickTemplateOptions} onchange={handleTemplateChange}
-                                                        data-id={email.id} disabled={email.disabled}
-                                                        variant="label-hidden"></lightning-combobox>
-                                                </div>
-                                            </td>
                                             <td data-label="Related Listing">
                                                 <div>
                                                     <lightning-record-picker name="relatedListing"
-                                                        disabled={email.isListingSelectionDisabled}
+                                                        disabled={email.disabled}
                                                         placeholder="Search Listing..." onchange={handleListingSelect}
                                                         value={email.selectedListingId} variant="label-hidden"
                                                         label="Related Listing" data-id={email.id}
                                                         object-api-name="MVEX__Listing__c">
                                                     </lightning-record-picker>
+                                                </div>
+                                            </td>
+                                            <td data-label="Email Template" class="email-template">
+                                                <div>
+                                                    <lightning-combobox name="emailName" value={email.template}
+                                                        options={email.templateOptions} onchange={handleTemplateChange}
+                                                        data-id={email.id} disabled={email.disabled}
+                                                        variant="label-hidden"></lightning-combobox>
                                                 </div>
                                             </td>
                                             <td data-label="Subject">

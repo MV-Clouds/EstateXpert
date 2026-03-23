@@ -45,7 +45,7 @@
                     <div class="table-body-div">
                         <div class="tableContainer">
                             <template if:true={isDataAvailable}>
-                                <div class={headerClass}>
+                                <div class="popup__header-row-4">
                                     <div class="slds-col display_css"></div>
                                     <div class="slds-col display_css">
                                         <p class="header-text">Field</p>
@@ -53,13 +53,6 @@
                                     <div class="slds-col display_css">
                                         <p class="header-text">Display Format</p>
                                     </div>
-
-                                    <template if:true={showCardView}>
-                                        <div class="slds-col display_css">
-                                            <p class="header-text">Card view</p>
-                                        </div>
-                                    </template>
-
                                     <div class="slds-col display_css">
                                         <p class="header-text">Delete</p>
                                     </div>
@@ -67,7 +60,7 @@
 
                                 <div class="popup__recordValues">
                                     <template for:each={checklistItems} for:item="item" for:index="index">
-                                        <div key={item.id} class={rowClass} draggable="true" data-index={index}
+                                        <div key={item.id} class="popup__data-row-4 popup__data-row" draggable="true" data-index={index}
                                             ondragstart={handleDragStart} ondragover={handleDragOver}
                                             ondrop={handleDrop} ondragleave={handleDragLeave}
                                             ondragend={handleDragEnd}>
@@ -192,16 +185,6 @@
                                                     value={item.format} onchange={handleFormatChange}
                                                     data-id={index} disabled={item.isDisable}></lightning-combobox>
                                             </div>
-
-                                            <template if:true={showCardView}>
-                                                <div class="slds-col order_btn_grp">
-                                                    <label class="custom-checkbox">
-                                                        <input type="checkbox" checked={item.cardView}
-                                                            data-index={index} onchange={handleCardViewChange}>
-                                                        <span class="checkmark"></span>
-                                                    </label>
-                                                </div>
-                                            </template>
 
                                             <div class="slds-col order_btn_grp">
                                                 <div class="delete-div" onclick={handleDelete} data-index={index}>

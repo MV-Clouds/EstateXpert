@@ -13,7 +13,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @api fieldSet = 'ListingManagerFieldSet';
     @track spinnerShow=true;
     @track showList = true;
-    @track showTile = false;
     @track showMap = false;
     @track listingData = [];
     @track unchangedListingData = [];
@@ -232,6 +231,67 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             errorDebugger('ListingManager', 'sortDescription', error, 'warn', 'Error in sortDescription');
             return null;
         }
+    }
+
+    /**
+    * Method Name : nameIconClass
+    * @description : compute the icon class for Name column based on sort state
+    * Date: 23/03/2026
+    * Created By:Vyom Soni
+    */
+    get nameIconClass() {
+        const baseClass = 'listing-manager-icon';
+        if (this.sortField === 'Name') {
+            const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
+            return `${baseClass} sort-icon-active ${rotationClass}`;
+        }
+        return baseClass;
+    }
+
+    /**
+    * Method Name : nameHeaderClass
+    * @description : compute the class for Name column header including sorted-field
+    * Date: 23/03/2026
+    * Created By:Vyom Soni
+    */
+    get nameHeaderClass() {
+        const baseClass = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
+        if (this.sortField === 'Name') {
+            return `${baseClass} sorted-field`;
+        }
+        return baseClass;
+    }
+
+    /**
+    * Method Name : fieldsWithIconClass
+    * @description : return fields array with computed icon classes and header classes
+    * Date: 23/03/2026
+    * Created By:Vyom Soni
+    */
+    get fieldsWithIconClass() {
+        if (!this.fields || this.fields.length === 0) {
+            return [];
+        }
+        return this.fields.map(field => {
+            const baseClass = 'listing-manager-icon';
+            let iconClass = baseClass;
+            const isSorted = this.sortField === field.fieldName;
+            
+            if (isSorted) {
+                const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
+                iconClass = `${baseClass} sort-icon-active ${rotationClass}`;
+            }
+            
+            const headerBaseClass = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
+            const headerClass = isSorted ? `${headerBaseClass} sorted-field` : headerBaseClass;
+            
+            return {
+                ...field,
+                iconClass: iconClass,
+                isSorted: isSorted,
+                headerClass: headerClass
+            };
+        });
     }
 
     /**
@@ -607,18 +667,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         this.fieldsModal = event.detail;
     }
 
-    /**
-    * Method Name : handleListingSelect
-    * @description : handle data from the tile cmp
-    * Date: 14/06/2024
-    * Created By:Vyom Soni
-    */
-    handleListingSelect(event){
-        this.processedListingData = event.detail;
-        this.updateShownData();
-        this.updateSelectedProperties();
-    }
-
     get listingSpinnerLoading(){
         return !this.spinnerShow && this.listingLoading;
     }
@@ -641,13 +689,10 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         try{
             let target = evt.currentTarget.dataset.tabId;
             this.showList = false;
-            this.showTile = false;
             this.showMap = false;
             if(target == "1"){
                 this.showList = true;
-            }else if(target == "2"){
-                this.showTile = true;
-            }else if(target == "3"){
+            } else if(target == "2"){
                 this.showMap = true;
             }
             this.template.querySelectorAll(".tab-div").forEach(tabEl => {
@@ -875,7 +920,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 this.sortOrder = 'asc';
             }
             this.sortData();
-            this.updateSortIcons();
             this.updateShownData();
         }catch(error){
             errorDebugger('ListingManager', 'sortClick', error, 'warn', 'Error in sortClick');
@@ -918,28 +962,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         }catch(error){
             errorDebugger('ListingManager', 'sortData', error, 'warn', 'Error in sortData');
             return null;
-        }
-    }
-
-    /**
-    * Method Name : updateSortIcons
-    * @description : this method update the sort icons in the wrapbutton
-    * date : 3/06/2024
-    * Created By:Vyom Soni
-    */
-    updateSortIcons() {
-        try{
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
-            });
-    
-            const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
-            if (currentHeader) {
-                currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
-            }
-        }catch(error){
-            errorDebugger('ListingManager', 'updateSortIcons', error, 'warn', 'Error in updateSortIcons');
         }
     }
 

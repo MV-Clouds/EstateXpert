@@ -35,6 +35,7 @@ export default class ListingManagerFilterAddCmp extends LightningElement {
             let options = [];
 
             switch (fieldType) {
+                case 'MULTIPICKLIST':
                 case 'PICKLIST':
                     options = [
                         { label: 'Includes', value: 'includes' },

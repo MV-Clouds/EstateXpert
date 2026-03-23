@@ -33,22 +33,22 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     @track isAccessible = false;
 
     @track statusOptions = [
-        {label: 'None' , value: ''},
+        { label: 'None', value: '' },
         { label: 'Pending', value: 'Pending' },
         { label: 'In Progress', value: 'In Progress' },
         { label: 'Completed', value: 'Completed' },
     ];
 
-     /**
-    * Method Name : totalItems
-    * @description : set the totalItems count.
-    * * Date: 20/08/2024
-    * Created By:Vyom Soni
-    */
-     get totalItems() {
+    /**
+   * Method Name : totalItems
+   * @description : set the totalItems count.
+   * * Date: 20/08/2024
+   * Created By:Vyom Soni
+   */
+    get totalItems() {
         return this.filteredCampaigns.length;
     }
-    
+
     /**
     * Method Name : totalPages
     * @description : set the totalpages count.
@@ -126,13 +126,13 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     get pageNumbers() {
-        try{
+        try {
             const totalPages = this.totalPages;
             const currentPage = this.currentPage;
             const visiblePages = this.visiblePages;
-        
+
             let pages = [];
-        
+
             if (totalPages <= visiblePages) {
                 // If the total pages are less than or equal to the visible pages, show all
                 for (let i = 1; i <= totalPages; i++) {
@@ -149,16 +149,16 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                     isEllipsis: false,
                     className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
-        
+
                 if (currentPage > 3) {
                     // Show ellipsis if the current page is greater than 3
                     pages.push({ isEllipsis: true });
                 }
-        
+
                 // Show the middle pages
                 let start = Math.max(2, currentPage - 1);
                 let end = Math.min(currentPage + 1, totalPages - 1);
-        
+
                 for (let i = start; i <= end; i++) {
                     pages.push({
                         number: i,
@@ -166,12 +166,12 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                         className: `pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
-        
+
                 if (currentPage < totalPages - 2) {
                     // Show ellipsis if the current page is less than totalPages - 2
                     pages.push({ isEllipsis: true });
                 }
-        
+
                 // Always show the last page
                 pages.push({
                     number: totalPages,
@@ -179,9 +179,9 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                     className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
-        
+
             return pages;
-        }catch(error){
+        } catch (error) {
             return null;
         }
     }
@@ -197,12 +197,12 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         Promise.all([
             loadStyle(this, MulishFontCss)
         ])
-        .then(() => {
-            console.log('External Css Loaded');
-        })
-        .catch(() => {
-            this.showToast('Error', 'Error loading external CSS', 'error');
-        });
+            .then(() => {
+                console.log('External Css Loaded');
+            })
+            .catch(() => {
+                this.showToast('Error', 'Error loading external CSS', 'error');
+            });
         this.getAccessible();
     }
 
@@ -214,22 +214,22 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     getAccessible() {
         getMetadataRecords()
-        .then(data => {
-            const marketingCampaignFeature = data.find(
-                item => item.DeveloperName === 'Marketing_Campaign'
-            );
-            this.isAccessible = marketingCampaignFeature ? Boolean(marketingCampaignFeature.MVEX__isAvailable__c) : false;
-            if (this.isAccessible) {
-                this.loadCampaigns();
-            } else {
+            .then(data => {
+                const marketingCampaignFeature = data.find(
+                    item => item.DeveloperName === 'Marketing_Campaign'
+                );
+                this.isAccessible = marketingCampaignFeature ? Boolean(marketingCampaignFeature.MVEX__isAvailable__c) : false;
+                if (this.isAccessible) {
+                    this.loadCampaigns();
+                } else {
+                    this.isLoading = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching accessible fields', error);
+                this.isAccessible = false;
                 this.isLoading = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching accessible fields', error);
-            this.isAccessible = false;
-            this.isLoading = false;
-        });
+            });
     }
 
     /*
@@ -265,7 +265,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             const remaining = campaign.MVEX__Remaining_Emails__c;
             const completed = total - remaining;
             const progressPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    
+
             return {
                 ...campaign,
                 rowIndex: index + 1,
@@ -273,7 +273,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                 CreatedDateformatted: this.formatDate(campaign.CreatedDate),
                 statusClass: this.getStatusClass(campaign.MVEX__Status__c),
                 canDelete: campaign.MVEX__Status__c === 'Pending' || campaign.MVEX__Status__c === 'Failed' ? false : true,
-                canEdit : campaign.MVEX__Status__c === 'Pending' || campaign.MVEX__Status__c === 'In Progress' ? false : true, 
+                canEdit: campaign.MVEX__Status__c === 'Pending' || campaign.MVEX__Status__c === 'In Progress' ? false : true,
                 IsCampaignTemplate: campaign.MVEX__Is_Marketing_Campaign_Template__c ? 'Yes' : 'No',
                 progressPercentage: progressPercentage,
                 progressWidth: `width: ${progressPercentage}%`
@@ -311,12 +311,12 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     updateShownData() {
-        try{
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-        this.visibleCampaigns = this.filteredCampaigns.slice(startIndex, endIndex);
-        }catch(error){
-            console.log('Error updateShownData->'+error);
+        try {
+            const startIndex = (this.currentPage - 1) * this.pageSize;
+            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+            this.visibleCampaigns = this.filteredCampaigns.slice(startIndex, endIndex);
+        } catch (error) {
+            console.log('Error updateShownData->' + error);
         }
     }
 
@@ -327,7 +327,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     handlePrevious() {
-       if (this.currentPage > 1) {
+        if (this.currentPage > 1) {
             this.currentPage--;
             this.updateShownData();
         }
@@ -345,7 +345,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             this.updateShownData();
         }
     }
- 
+
     /**
     * Method Name : handlePageChange
     * @description : handle the direct click on page number.
@@ -360,7 +360,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         }
     }
 
-    
+
     /*
     * Method Name: formatDate
     * @description: Method to customize date string
@@ -388,7 +388,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     handleSearch(event) {
         const searchKey = event.target.value.toLowerCase();
-        this.filteredCampaigns = this.campaigns.filter(campaign => 
+        this.filteredCampaigns = this.campaigns.filter(campaign =>
             campaign.MVEX__Label__c.toLowerCase().includes(searchKey)
         );
         this.currentPage = 1;
@@ -398,7 +398,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         this.createdDateStart = '';
         this.createdDateEnd = '';
     }
-    
+
     /*
     * Method Name: handleAdd
     * @description: Method to open popup to create camapaign
@@ -416,36 +416,36 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By: Rachit Shah
     */
     handleEdit(event) {
-        try{
+        try {
             this.currentRecId = event.currentTarget.dataset.id;
 
             const navigationState = {
-                campaign : this.currentRecId
+                campaign: this.currentRecId
             };
 
             const serializedState = JSON.stringify(navigationState);
 
-            let cmpDef;                
+            let cmpDef;
             cmpDef = {
                 componentDef: 'MVEX:emailCampaignTemplateForm',
-                attributes: {                    
-                        c__navigationState: serializedState,
-                        c__recordId : this.currentRecId
-                    }                
-                };
+                attributes: {
+                    c__navigationState: serializedState,
+                    c__recordId: this.currentRecId
+                }
+            };
 
             let encodedDef = btoa(JSON.stringify(cmpDef));
-                this[NavigationMixin.Navigate]({
+            this[NavigationMixin.Navigate]({
                 type: "standard__webPage",
                 attributes: {
-                    url:  "/one/one.app#" + encodedDef                                                         
+                    url: "/one/one.app#" + encodedDef
                 }
             });
         }
-        catch(e){
+        catch (e) {
             console.log('error in handleEdit - ', e.stack);
             this.showToast('Error', 'Error while redirecting to edit campaign', 'error');
-            
+
         }
     }
 
@@ -457,7 +457,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     handleDelete(event) {
         this.currentRecId = event.currentTarget.dataset.id;
-        this.showMessagePopup('Warning','Delete Campaign','Are you sure you want to delete this campaign? This action cannot be undone.');
+        this.showMessagePopup('Warning', 'Delete Campaign', 'Are you sure you want to delete this campaign? This action cannot be undone.');
     }
 
     /*
@@ -478,6 +478,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     handleRefresh() {
         this.isLoading = true;
+        this.clearSearchInput();
         this.loadCampaigns();
     }
 
@@ -508,7 +509,6 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By: Rachit Shah
     */
     clearFilterModal() {
-        this.isFilterModalOpen = false;
         this.statusFilterList = [];
         this.statusFilter = '';
         this.createdDateStart = '';
@@ -524,7 +524,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Date: 23/06/2024
     * Created By: Rachit Shah
     */
-    closeFilterModal(){
+    closeFilterModal() {
         this.isFilterModalOpen = false;
     }
 
@@ -540,10 +540,10 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             if (filterId === 'statusFilter') {
                 this.statusFilter = event.target.value;
 
-                if(!this.statusFilterList.includes(this.statusFilter) && this.statusFilter !== ''){
+                if (!this.statusFilterList.includes(this.statusFilter) && this.statusFilter !== '') {
                     this.statusFilterList.push(this.statusFilter);
                 }
-    
+
             } else if (filterId === 'createdDateStart') {
                 this.createdDateStart = event.target.value;
             } else if (filterId === 'createdDateEnd') {
@@ -561,19 +561,19 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Date: 23/06/2024
     * Created By: Rachit Shah
     */
-    handleRemove(event){
+    handleRemove(event) {
         const valueRemoved = event.target.name;
 
-        if(this.statusFilter === valueRemoved){
+        if (this.statusFilter === valueRemoved) {
             this.statusFilter = '';
         }
-        
+
         const index = this.statusFilterList.indexOf(valueRemoved);
         if (index > -1) {
             this.statusFilterList.splice(index, 1);
         }
     }
-    
+
     /*
     * Method Name: applyFilter
     * @description: Method to apply filter
@@ -581,11 +581,11 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By: Rachit Shah
     */
     applyFilter() {
-        
+
         if (this.createdDateStart && this.createdDateEnd) {
             const startDate = new Date(this.createdDateStart);
             const endDate = new Date(this.createdDateEnd);
-    
+
             if (endDate < startDate) {
                 this.showToast('Error', 'End Date should be the same or later than Start Date.', 'error');
                 return;
@@ -602,13 +602,13 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             }
             if (endDate) {
                 endDate.setHours(23, 59, 59, 999);
-            }    
+            }
 
             const isStatusMatch = this.statusFilterList.length === 0 || this.statusFilterList.includes(campaign.MVEX__Status__c);
             const isDateMatch = (!startDate || createdDate >= startDate) && (!endDate || createdDate <= endDate);
-    
+
             return isStatusMatch && isDateMatch;
-    
+
         });
         this.currentPage = 1;
         this.isFilterModalOpen = false;
@@ -650,7 +650,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                 },
             });
         } catch (error) {
-            console.log('error--> ',error);
+            console.log('error--> ', error);
         }
     }
 
@@ -683,28 +683,28 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         }
     }
 
-    openMemberModal(event){
-        try{
+    openMemberModal(event) {
+        try {
             const campaignId = event.currentTarget.dataset.id;
-            let cmpDef;                
+            let cmpDef;
             cmpDef = {
                 componentDef: 'MVEX:campaignMembersTable',
-                attributes: {                    
+                attributes: {
                     campaignId: campaignId
-                }                
+                }
             };
-    
+
             let encodedDef = btoa(JSON.stringify(cmpDef));
-                this[NavigationMixin.Navigate]({
+            this[NavigationMixin.Navigate]({
                 type: "standard__webPage",
                 attributes: {
-                    url:  "/one/one.app#" + encodedDef                                                         
+                    url: "/one/one.app#" + encodedDef
                 }
             });
-        }catch(e){
+        } catch (e) {
             console.log('error in openMemberModal - ', e.stack);
             // this.showToast('Error', 'Error while redirecting to campaign members '+e.stack, 'error');
-            
+
         }
     }
 
@@ -720,13 +720,13 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     }
 
     handleConfirmation(event) {
-        if(event.detail === true){
+        if (event.detail === true) {
             this.isLoading = true;
             let campaignId = this.currentRecId;
             deleteCampaign({ campaignId })
                 .then(() => {
                     this.campaigns = this.campaigns.filter(campaign => campaign.Id != campaignId);
-                    this.filteredCampaigns = this.filteredCampaigns.filter(campaign => campaign.Id !==campaignId);
+                    this.filteredCampaigns = this.filteredCampaigns.filter(campaign => campaign.Id !== campaignId);
                     this.updateShownData();
                     this.showToast('Success', 'Campaign deleted successfully', 'success');
                 })

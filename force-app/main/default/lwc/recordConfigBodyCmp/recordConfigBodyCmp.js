@@ -5,8 +5,6 @@ import getListingFieldsParent from '@salesforce/apex/RecordManagersCmpController
 import saveMetadata from '@salesforce/apex/RecordManagersCmpController.saveMappings';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
-// Assuming errorDebugger is a shared utility, if not available, replace with console.error
-import { errorDebugger } from 'c/globalProperties'; 
 
 export default class RecordConfigBodyCmp extends LightningElement {
 
@@ -41,21 +39,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
         { label: 'MM-DD-YYYY (12 hour)', value: 'mmddyyyy12' },
         { label: 'YYYY-MM-DD (12 hour)', value: 'yyyymmdd12' }
     ];
-
-    // Computed Property: Decide if Card View should be shown
-    get showCardView() {
-        return this.featureName !== 'Suggested_Inquiry_Fields' && this.featureName !== 'Listing_Manager_Fields';
-    }
-
-    // Computed Property: Dynamic Grid Class for Header
-    get headerClass() {
-        return this.showCardView ? 'popup__header-row-5' : 'popup__header-row-4';
-    }
-
-    // Computed Property: Dynamic Grid Class for Rows
-    get rowClass() {
-        return this.showCardView ? 'popup__data-row-5 popup__data-row' : 'popup__data-row-4 popup__data-row';
-    }
 
     // Computed Property to get Object Name based on Feature
     get selectedTabObject() {
@@ -144,7 +127,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
                         this.checklistItems = fieldsData.map((item, index) => ({
                             id: index + 1,
                             fieldName: item.fieldName,
-                            cardView: item.cardView || false,
                             value: item.value,
                             label: item.label,
                             fieldType: item.fieldType,
@@ -347,13 +329,10 @@ export default class RecordConfigBodyCmp extends LightningElement {
         this.checklistItems[index].format = value;
     }
 
-    /* ================= ROW MANAGEMENT & CARD VIEW ================= */
-
     addNewRow() {
         const newItem = {
             id: this.checklistItems.length + 1,
             fieldName: '',
-            cardView: false,
             value: '',
             searchTerm: '',
             label: '',
@@ -368,18 +347,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
         const updatedItems = [...this.checklistItems];
         updatedItems.splice(index, 1);
         this.checklistItems = updatedItems;
-    }
-
-    handleCardViewChange(event) {
-        const index = parseInt(event.target.dataset.index, 10);
-        const cardView = event.target.checked;
-        const selectedCardViewCount = this.checklistItems.filter(item => item.cardView).length;
-        if (cardView && selectedCardViewCount >= 5) {
-            event.target.checked = false;
-            this.toast('Error', 'You can only select up to 5 items for card view', 'error');
-        } else {
-            this.checklistItems[index].cardView = cardView;
-        }
     }
 
     /* ================= DRAG AND DROP ================= */
@@ -488,7 +455,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
             const itemsToSave = this.checklistItems.map(item => ({
                 fieldName: item.fieldName,
                 fieldApiname: item.value,
-                cardView: item.cardView,
                 value: item.fieldName,
                 label: item.label,
                 fieldType: item.fieldType,

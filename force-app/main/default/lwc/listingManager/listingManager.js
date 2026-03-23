@@ -13,7 +13,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     @api fieldSet = 'ListingManagerFieldSet';
     @track spinnerShow=true;
     @track showList = true;
-    @track showTile = false;
     @track showMap = false;
     @track listingData = [];
     @track unchangedListingData = [];
@@ -607,18 +606,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         this.fieldsModal = event.detail;
     }
 
-    /**
-    * Method Name : handleListingSelect
-    * @description : handle data from the tile cmp
-    * Date: 14/06/2024
-    * Created By:Vyom Soni
-    */
-    handleListingSelect(event){
-        this.processedListingData = event.detail;
-        this.updateShownData();
-        this.updateSelectedProperties();
-    }
-
     get listingSpinnerLoading(){
         return !this.spinnerShow && this.listingLoading;
     }
@@ -641,13 +628,10 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         try{
             let target = evt.currentTarget.dataset.tabId;
             this.showList = false;
-            this.showTile = false;
             this.showMap = false;
             if(target == "1"){
                 this.showList = true;
-            }else if(target == "2"){
-                this.showTile = true;
-            }else if(target == "3"){
+            } else if(target == "2"){
                 this.showMap = true;
             }
             this.template.querySelectorAll(".tab-div").forEach(tabEl => {

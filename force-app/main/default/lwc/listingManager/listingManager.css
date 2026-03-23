@@ -55,9 +55,7 @@
     flex-direction: row;
     font-size: 26px;
     font-weight: 500;
-    /* line-height: 40.16px; */
     text-align: left;
-    gap: 15px;
     color: #0f1419;
     letter-spacing: 0.3px;
 }
@@ -80,18 +78,17 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
-    padding: 8px 14px;
+    padding: 8px 10px;
     line-height: 20px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     text-align: center;
     border: none;
     background: #0176D3;
     color: white;
     border-radius: 5px;
-    cursor: pointer;
+    min-width: max-content;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
 }
 
 .icon-button:hover {
@@ -159,18 +156,18 @@
 .filter-tab-wrapper {
     padding: 4px;
     border: 1px solid #d0d4d8;
-    border-radius: 10px;
+    border-radius: 5px;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .filter-toggle-btn {
-    width: 2rem;
-    height: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: transparent;
@@ -228,7 +225,7 @@
     gap: 4px;
     padding: 4px;
     border: 1px solid #d0d4d8;
-    border-radius: 10px;
+    border-radius: 5px;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     list-style: none;
@@ -236,12 +233,12 @@
 }
 
 .tab-btns ul .tab-div {
-    width: 2rem;
-    height: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 6px;
+    border-radius: 5px;
     transition: all 0.3s ease;
     cursor: pointer;
 }

@@ -199,7 +199,15 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    transition: all 0.2s ease;
 }
+
+.add_field_btn:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
+}
+
 
 .custom-accordion {
     border: 1px solid #e5e7eb;
@@ -273,19 +281,6 @@
 .disabled-del {
     background-color: #D2D2D2 !important;
     --slds-g-color-neutral-base-80: white !important;
-}
-
-.header_block_css {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-direction: row;
-    font-size: 30px;
-    font-weight: 500;
-    line-height: 40.16px;
-    text-align: left;
-    gap: 15px;
-    color: #131314;
 }
 
 .svg_back_icon {
@@ -492,7 +487,6 @@
     flex-direction: row;
     font-size: 24px;
     font-weight: 500;
-    line-height: 40.16px;
     text-align: left;
     gap: 15px;
     color: #131314;

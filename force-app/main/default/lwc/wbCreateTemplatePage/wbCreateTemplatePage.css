@@ -1210,7 +1210,6 @@ textarea {
     flex-direction: row;
     font-size: 24px;
     font-weight: 500;
-    line-height: 40.16px;
     text-align: left;
     gap: 15px;
     color: #0f1419;
@@ -1238,7 +1237,16 @@ textarea {
     color: white;
     border-radius: 5px;
     min-width: max-content;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
+
+.btn:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    transform: translateY(-1px);
+}
+
 
 .btn svg {
     width: 16px;

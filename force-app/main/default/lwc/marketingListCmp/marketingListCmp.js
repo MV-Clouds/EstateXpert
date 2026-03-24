@@ -52,6 +52,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track visiblePages = 5;
     @track fieldsModal = false;
     @track mobileAddModal = false;
+    isSortApplied = false;
 
     // rachit changes
     @track sendMethod = '';
@@ -400,6 +401,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 }).catch(error => {
                     console.log('Error ==> ', error);
                 });
+            }
+            if (!this.isSortApplied && this.processedContactData?.length > 0) {
+                this.updateSortIcons();
+                this.isSortApplied = true;
             }
         } catch (error) {
             console.log('Error renderedCallback->' + error);
@@ -760,6 +765,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             // Deselect all items in processedListingData and unchangedProcessListings
             const resetCheckedFlag = item => ({ ...item, isChecked: false });
             this.processedContactData = this.processedContactData.map(resetCheckedFlag);
+            this.isSortApplied = false;
+
             this.unchangedProcessContact = this.unchangedProcessContact.map(resetCheckedFlag);
 
             // Apply filtered listings
@@ -794,6 +801,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.unchangedProcessContact = this.unchangedProcessContact.map(resetCheckedFlag);
                 this.processedContactData = this.unchangedProcessContact;
                 this.currentPage = 1;
+                this.isSortApplied = false;
                 this.sortData();
                 this.updateShownData();
                 this.updateSelectedProperties();
@@ -1090,19 +1098,52 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     * Date: 22/06/2024
     * Created By:Vyom Soni
     */
+    // updateSortIcons() {
+    //     try {
+    //         const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+    //         allHeaders.forEach(icon => {
+    //             icon.classList.remove('rotate-asc', 'rotate-desc');
+    //         });
+
+    //         const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
+    //         if (currentHeader) {
+    //             currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+    //         }
+    //     } catch (error) {
+    //         console.log('Error updateSprtIcons->' + error);
+    //     }
+    // }
+
     updateSortIcons() {
         try {
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => {
+            // Reset all icons
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
-            const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
-            if (currentHeader) {
-                currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+            // Remove sorted class from all headers
+            const allHeaders = this.template.querySelectorAll('th');
+            allHeaders.forEach(th => {
+                th.classList.remove('sorted-field');
+            });
+
+            // Apply rotation
+            const currentIcon = this.template.querySelector(`[data-index="${this.sortField}"]`);
+            if (currentIcon) {
+                currentIcon.classList.add(
+                    this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc'
+                );
             }
+
+            // ✅ Mark active column
+            const currentHeader = this.template.querySelector(`th[data-id="${this.sortField}"]`);
+            if (currentHeader) {
+                currentHeader.classList.add('sorted-field');
+            }
+
         } catch (error) {
-            console.log('Error updateSprtIcons->' + error);
+            console.log('Error updateSortIcons -> ' + error);
         }
     }
 

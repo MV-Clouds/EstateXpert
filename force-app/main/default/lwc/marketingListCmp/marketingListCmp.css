@@ -208,18 +208,18 @@ span {
 .filter-tab-wrapper {
     padding: 4px;
     border: 1px solid #d0d4d8;
-    border-radius: 10px;
+    border-radius: 5px;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .filter-toggle-btn {
-    width: 2rem;
-    height: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 7px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: transparent;
@@ -474,6 +474,11 @@ span {
 
 .main .body .innerDiv2 .colume2:hover .slds-icon_container {
     display: block;
+}
+
+/* show active sorted column */
+th.sorted-field .slds-icon_container {
+    display: block !important;
 }
 
 .main .body .innerDiv2 .slds-icon-utility-arrowdown svg {

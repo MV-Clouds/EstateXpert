@@ -530,7 +530,7 @@ th:not(.sorted-field):hover .listing-manager-icon {
 /* Sorted column header styling */
 th.sorted-field {
     background: linear-gradient(135deg, rgba(1, 118, 211, 0.08) 0%, rgba(1, 118, 211, 0.05) 100%);
-    border-left: 3px solid #0176D3;
+    /* border-left: 3px solid #0176D3; */
     box-shadow: inset 0 0 8px rgba(1, 118, 211, 0.1);
 }
 

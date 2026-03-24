@@ -25,7 +25,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track addModal = false;
     @track spinnerShow = true;
     @track showList = true;
-    @track showTile = false;
     @track contactData = [];
     @track fields = [];
     @track processedContactData = [];
@@ -253,40 +252,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
    */
     get showSection() {
         return this.shownProcessedContactData.length === 0;
-    }
-
-    /**
-    * Method Name : sortDescription
-    * @description : set the header sort description.
-    * Date: 16/07/2024
-    * Created By:Vyom Soni
-    */
-    get sortDescription() {
-        try {
-            if (this.sortField != '') {
-                const orderDisplayName = this.sortOrder === 'asc' ? 'Ascending' : 'Descending';
-
-                let field = null;
-                // Assuming `listings` is an array of objects where each object has a `value` and a `label` property
-                if (this.sortField != 'Name') {
-                    field = this.fields.find(item => item.fieldName === this.sortField);
-                } else {
-                    field = { fieldName: 'Name', fieldLabel: 'Contact Name' };
-                }
-                if (!field) {
-                    return '';
-                }
-
-                const fieldDisplayName = field.fieldLabel;
-
-                return `Sorted by : ${fieldDisplayName} (${orderDisplayName})`;
-            }
-
-            return '';
-        } catch (error) {
-            console.log('Error sortDescription->' + error);
-            return null;
-        }
     }
 
     get listingSpinnerLoading(){
@@ -858,43 +823,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.isContactSelected = this.selectedContactList.length <= 0;
         } catch (error) {
             console.log('Error handleContactSelect->' + error);
-        }
-    }
-
-    /**
-    * Method Name : handleMenuTabClick
-    * @description : handle the menu clicks in the header
-    * Date: 22/06/2024
-    * Created By:Vyom Soni
-    */
-    handleMenuTabClick(evt) {
-        try {
-            let target = evt.currentTarget.dataset.tabId;
-            this.showList = false;
-            this.showTile = false;
-            if (target == "1") {
-                this.showList = true;
-            } else if (target == "2") {
-                this.showTile = true;
-            }
-
-            this.template.querySelectorAll(".tab-div").forEach(tabEl => {
-                tabEl.classList.remove("active-tab-div");
-                const pathEl = tabEl.querySelector('path');
-                if (pathEl) {
-                    pathEl.style.fill = '#131314';
-                }
-            });
-
-            // Add active class and set fill color for the selected tab
-            const selectedTab = this.template.querySelector(`[data-tab-id="${target}"]`);
-            selectedTab.classList.add("active-tab-div");
-            const selectedPath = selectedTab.querySelector('path[data-tab-index="' + target + '"]');
-            if (selectedPath) {
-                selectedPath.style.fill = '#fff';
-            }
-        } catch (error) {
-            console.log('Error handleMenuTabClick->' + error);
         }
     }
 

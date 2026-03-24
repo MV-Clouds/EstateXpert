@@ -87,6 +87,14 @@
     padding-bottom: 1rem;
 }
 
+.pagination-container-review {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    justify-content: center;
+    padding-top: 1.5rem;
+}
+
 .pagination-button {
     background-color: #ffffff;
     border: 1px solid #d8d8d8;
@@ -443,6 +451,69 @@ span {
 
 .table-content .slds-table_resizable-cols thead th,
 .table-content .slds-table--resizable-cols thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+}
+
+.table-content-review {
+    overflow: auto;
+    border-radius: 8px;
+    height: 80%;
+    background-color: white;
+    margin: 20px 16px 16px 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.table-content-review .checkbox,
+.table-content-review .sno {
+    width: 10%;
+}
+
+.table-content-review .name,
+.table-content-review .phone,
+.table-content-review .email {
+    width: 30%;
+}
+
+.table-content-review .slds-table th,
+.table-content-review .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 45px;
+}
+
+.table-content-review .slds-table th {
+    background: #0176D3;
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.table-content-review tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.table-content-review table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 98;
+}
+
+.table-content-review table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+.table-content-review .slds-table_resizable-cols thead th,
+.table-content-review .slds-table--resizable-cols thead th {
     padding: 0;
     background: #0376D3;
     color: white;

@@ -11,11 +11,23 @@ import { NavigationMixin } from 'lightning/navigation';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class BroadcastMessageComp extends NavigationMixin(LightningElement) {
-    @api broadcastGroupId;
+    _broadcastGroupId;
+    
+    @api 
+    get broadcastGroupId() {
+        return this._broadcastGroupId;
+    }
+    set broadcastGroupId(value) {
+        this._broadcastGroupId = value;
+        if (value && Object.keys(this.configMap).length > 0) {
+            this.fetchGroupDetails();
+        }
+    }
+
     @api communicationType;
     @track objectOptions = [];
     @track listViewOptions = [];
-    @track selectedObject = '';
+    @track selectedObject = 'Contact';
     @track selectedListView = '';
     @track data = [];
     @track filteredData = [];
@@ -40,95 +52,37 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     @track showPhoneColumn = false;
     @track showEmailColumn = false;
 
-    // ── Two-step flow ──────────────────────────────────────────
-    @track isReviewStep = false;
-    @track reviewData = [];
-    @track reviewCurrentPage = 1;
-
-    // ── Review pagination getters ──────────────────────────────
-    get reviewTotalItems() {
-        return this.reviewData.length;
+    // ── Side Panel CSS Class ────────────────────────────────────
+    get selectedRecordsPanelClass() {
+        return this.selectedRecordsList.length > 0 ? 'right-panel open' : 'right-panel';
     }
 
-    get reviewTotalPages() {
-        return Math.ceil(this.reviewTotalItems / this.pageSize);
+    // ── Selected Records for Pills ──────────────────────────────
+    get selectedRecordsList() {
+        return this.data.filter(record => this.selectedRecords.has(record.Id));
     }
 
-    get reviewPaginatedData() {
-        const start = (this.reviewCurrentPage - 1) * this.pageSize;
-        return this.reviewData.slice(start, start + this.pageSize);
-    }
+    handleRemoveRecord(event) {
+        const recordId = event.target.name;
+        if (recordId) {
+            this.selectedRecords.delete(recordId);
+            this.selectedRecords = new Set(this.selectedRecords);
+            
+            this.data = this.data.map(rec => {
+                if(rec.Id === recordId) rec.isSelected = false;
+                return rec;
+            });
+            
+            this.filteredData = this.filteredData.map(rec => {
+                if(rec.Id === recordId) rec.isSelected = false;
+                return rec;
+            });
 
-    get isReviewFirstPage() {
-        return this.reviewCurrentPage === 1;
-    }
-
-    get isReviewLastPage() {
-        return this.reviewCurrentPage >= this.reviewTotalPages;
-    }
-
-    get reviewPageNumbers() {
-        const totalPages = this.reviewTotalPages;
-        const currentPage = this.reviewCurrentPage;
-        const visiblePages = this.visiblePages;
-        let pages = [];
-        if (totalPages <= visiblePages) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push({ number: i, isEllipsis: false, className: `pagination-button ${i === currentPage ? 'active' : ''}` });
-            }
-        } else {
-            pages.push({ number: 1, isEllipsis: false, className: `pagination-button ${currentPage === 1 ? 'active' : ''}` });
-            if (currentPage > 3) pages.push({ isEllipsis: true });
-            let start = Math.max(2, currentPage - 1);
-            let end = Math.min(currentPage + 1, totalPages - 1);
-            for (let i = start; i <= end; i++) {
-                pages.push({ number: i, isEllipsis: false, className: `pagination-button ${i === currentPage ? 'active' : ''}` });
-            }
-            if (currentPage < totalPages - 2) pages.push({ isEllipsis: true });
-            pages.push({ number: totalPages, isEllipsis: false, className: `pagination-button ${currentPage === totalPages ? 'active' : ''}` });
-        }
-        return pages;
-    }
-
-    handleReviewPrevious() {
-        if (this.reviewCurrentPage > 1) {
-            this.reviewCurrentPage--;
-        }
-    }
-
-    handleReviewNext() {
-        if (this.reviewCurrentPage < this.reviewTotalPages) {
-            this.reviewCurrentPage++;
-        }
-    }
-
-    handleReviewPageChange(event) {
-        const selected = parseInt(event.target.getAttribute('data-id'), 10);
-        if (selected !== this.reviewCurrentPage) {
-            this.reviewCurrentPage = selected;
+            this.updateShownData();
         }
     }
 
     // ── Derived getters ────────────────────────────────────────
-    get dynamicFieldNames() {
-        if (!this.selectedObject || !this.configMap[this.selectedObject]) {
-            return [];
-        }
-        const fields = this.configMap[this.selectedObject];
-        const fieldNames = [`${this.selectedObject}.Name`];
-        if (this.communicationType === 'Email') {
-            fieldNames.push(`${this.selectedObject}.${fields.emailField}`);
-        } else if (this.communicationType === 'Phone' || this.communicationType === 'WhatsApp') {
-            fieldNames.push(`${this.selectedObject}.${fields.phoneField}`);
-        } else if (this.communicationType === 'Both') {
-            fieldNames.push(`${this.selectedObject}.${fields.phoneField}`);
-            if (fields.emailField) {
-                fieldNames.push(`${this.selectedObject}.${fields.emailField}`);
-            }
-        }
-        return fieldNames;
-    }
-
     get isAllSelected() {
         return this.paginatedData.length > 0 && 
                this.paginatedData.every(record => this.selectedRecords.has(record.Id));
@@ -228,13 +182,16 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     // ── Lifecycle ──────────────────────────────────────────────
     connectedCallback() {
         loadStyle(this, MulishFontCss);
+        this.selectedObject = 'Contact';
         this.setColumnVisibility();
         this.loadConfigs();
-        this.fetchGroupDetails();
+        this.loadListViews(); // Load Contact List views initially
     }
 
     // ── Column visibility ──────────────────────────────────────
     setColumnVisibility() {
+        if(!this.selectedObject) return;
+        
         if (this.communicationType === 'Email') {
             this.showEmailColumn = true;
             this.showPhoneColumn = false;
@@ -262,8 +219,17 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                     }
                     return false;
                 });
+                
                 this.configMap = result.configMap;
-                this.setColumnVisibility();
+                
+                if (!this._broadcastGroupId) {
+                    this.broadcastHeading = 'New Group';
+                    getSessionId()
+                        .then(res => { this.sessionId = res; })
+                        .catch(err => { this.showToast('Error', 'Error fetching session ID', 'error'); });
+                } else {
+                    this.fetchGroupDetails();
+                }
             })
             .catch(() => {
                 this.showToast('Error', 'Error loading configs', 'error');
@@ -274,27 +240,17 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     }
 
     fetchGroupDetails() {
-        if (!this.broadcastGroupId) {
-            getSessionId()
-                .then(result => {
-                    this.sessionId = result;
-                })
-                .catch(error => {
-                    this.showToast('Error', 'Error fetching session ID - ' + (error.body.message || error.message), 'error');
-                });
-            return;
-        }
-
         this.isLoading = true;
-        getBroadcastGroupDetails({ groupId: this.broadcastGroupId })
+        getBroadcastGroupDetails({ groupId: this._broadcastGroupId })
             .then((result) => {
                 this.broadcastHeading = 'Edit Group';
                 this.createBtnLabel = 'Save Group';
                 let groupData = result.group || {};
-                this.selectedObject = groupData.MVEX__Object_Name__c || 'Contact';
+                
+                this.selectedObject = 'Contact';
                 this.setColumnVisibility();
-                this.loadListViews();
                 this.selectedListView = groupData.MVEX__List_View__c || '';
+                
                 this.broadcastGroupName = groupData.Name;
                 this.messageText = groupData.MVEX__Description__c;
                 this.groupMembers = result.members || [];
@@ -302,7 +258,9 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 getSessionId()
                     .then(res => {
                         this.sessionId = res;
-                        this.fetchAllListViewRecords(this.selectedListView, this.sessionId, this.maxLimit);
+                        if (this.selectedListView && this.sessionId) {
+                            this.fetchAllListViewRecords(this.selectedListView, this.sessionId, this.maxLimit);
+                        }
                     })
                     .catch(error => {
                         this.showToast('Error', 'Error fetching session ID - ' + (error.body.message || error.message), 'error');
@@ -314,26 +272,6 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             .finally(() => {
                 this.isLoading = false;
             });
-    }
-
-    // ── Step navigation ────────────────────────────────────────
-
-    /**
-     * "Continue" button in Step 1 → validate and move to Step 2 (review).
-     */
-    handleContinue() {
-        if (this.selectedRecords.size === 0) {
-            this.showToast('Error', 'Please select at least one record', 'error');
-            return;
-        }
-
-        this.reviewData = this.data
-            .filter(record => this.selectedRecords.has(record.Id))
-            .map((record, idx) => ({ ...record, index: idx + 1 }));
-
-        this.reviewCurrentPage = 1;
-        this.broadcastHeading = 'Selected Contacts';
-        this.isReviewStep = true;
     }
 
     // ── Pagination ─────────────────────────────────────────────
@@ -387,25 +325,16 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     // ── Navigation: back to group list ─────────────────────────
     handleBack() {
-    try {
-        // If user is on Review Step → go back to Selection screen
-        if (this.isReviewStep) {
-            this.isReviewStep = false;
-            this.broadcastHeading = 'New Group'; // or previous heading if editing
-            return;
+        try {
+            this.cleardata();
+            this.navigateToAllGroup();
+        } catch (error) {
+            this.showToast('Error', 'Error handling back action', 'error');
         }
-
-        // Otherwise → behave like normal back (go to group list)
-        this.cleardata();
-        this.navigateToAllGroup();
-
-    } catch (error) {
-        this.showToast('Error', 'Error handling back action', 'error');
     }
-}
 
     cleardata() {
-        this.selectedObject = '';
+        this.selectedObject = 'Contact';
         this.selectedListView = '';
         this.data = [];
         this.filteredData = [];
@@ -417,47 +346,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         this.isCreateBroadcastModalOpen = false;
         this.groupMembers = [];
         this.isIntialRender = true;
-        this.isReviewStep = false;
-        this.reviewData = [];
-        this.reviewCurrentPage = 1;
         this.broadcastHeading = 'New Group';
-    }
-
-    // ── Search ─────────────────────────────────────────────────
-    handleSearch(event) {
-        this.searchTerm = event.target.value.toLowerCase();
-        const term = this.searchTerm.trim();
-        let results = this.data.filter(item => {
-            const name = item.name?.toLowerCase() || '';
-            const phone = item.phone?.toLowerCase() || '';
-            const email = item.email?.toLowerCase() || '';
-            return !term || name.includes(term) || phone.includes(term) || email.includes(term);
-        });
-
-        this.filteredData = results.sort((a, b) => {
-            const aSelected = this.selectedRecords.has(a.Id);
-            const bSelected = this.selectedRecords.has(b.Id);
-            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
-        });
-
-        this.currentPage = 1;
-        this.updateShownData();
-    }
-
-    // ── Input change (modal form) ──────────────────────────────
-    handleInputChange(event) {
-        const { name, value } = event.target;
-        switch(name) {
-            case 'name':
-                this.broadcastGroupName = value;
-                break;
-            case 'message':
-                this.messageText = value;
-                break;
-            default:
-                this.showToast('Error', `Unhandled input change for name: ${name}`, 'error');
-                break;
-        }
     }
 
     // ── Object / list view change ──────────────────────────────
@@ -469,8 +358,6 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         this.paginatedData = [];
         this.currentPage = 1;
         this.selectedRecords.clear();
-        this.isReviewStep = false;
-        this.reviewData = [];
         this.setColumnVisibility();
         this.loadListViews();
     }
@@ -494,9 +381,43 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     handleListViewChange(event) {
         this.selectedListView = event.detail.value;
-        this.isReviewStep = false;
-        this.reviewData = [];
-        this.fetchAllListViewRecords(this.selectedListView, this.sessionId, this.maxLimit);
+        if(this.sessionId && this.selectedListView) {
+            this.fetchAllListViewRecords(this.selectedListView, this.sessionId, this.maxLimit);
+        }
+    }
+
+    // ── Search ─────────────────────────────────────────────────
+    handleSearch(event) {
+        this.searchTerm = event.target.value.toLowerCase();
+        const term = this.searchTerm.trim();
+        let results = this.data.filter(item => {
+            const name = item.name?.toLowerCase() || '';
+            const phone = item.phone?.toLowerCase() || '';
+            const email = item.email?.toLowerCase() || '';
+            return !term || name.includes(term) || phone.includes(term) || email.includes(term);
+        });
+
+        // Do not alter sorting/order, keep the natural filter order
+        this.filteredData = results;
+
+        this.currentPage = 1;
+        this.updateShownData();
+    }
+
+    // ── Input change (modal form) ──────────────────────────────
+    handleInputChange(event) {
+        const { name, value } = event.target;
+        switch(name) {
+            case 'name':
+                this.broadcastGroupName = value;
+                break;
+            case 'message':
+                this.messageText = value;
+                break;
+            default:
+                this.showToast('Error', `Unhandled input change for name: ${name}`, 'error');
+                break;
+        }
     }
 
     // ── Salesforce API helpers ─────────────────────────────────
@@ -511,18 +432,23 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             headers: myHeaders,
             redirect: "follow"
         };
-
+        
         let domainURL = location.origin.replace('lightning.force.com', 'my.salesforce.com');
         let queryURL = '/services/data/v58.0/sobjects/' + this.selectedObject + '/listviews/' + this.selectedListView + '/describe';
-
+        
         const response = await fetch(domainURL + queryURL, requestOptions);
         const result = await response.json();
 
         if (response.status === 200) {
             const fields = this.configMap[this.selectedObject];
-            let fieldsString = `Id, Name, ${fields.phoneField}`;
-            if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
-                fieldsString += `, ${fields.emailField}`;
+            let fieldsString = `Id, Name`;
+            if (fields && fields.phoneField && fields.phoneField.trim() !== '') {
+                fieldsString += `, ${fields.phoneField}`;
+            }
+            if (fields && (this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField && fields.emailField.trim() !== '') {
+                if (!fieldsString.includes(fields.emailField)) {
+                    fieldsString += `, ${fields.emailField}`;
+                }
             }
 
             let originalQuery = result.query;
@@ -534,13 +460,19 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     }
 
     fetchAllListViewRecords(listViewId, sessionId, maxLimit) {
+        this.isLoading = true;
         this.fetchListViewSOQL(listViewId, sessionId)
             .then(query => {
                 if (!query) {
+                    this.isLoading = false;
                     return;
                 }
                 const soqlQueryUrl = `/services/data/v59.0/query?q=${encodeURIComponent(query)}`;
                 this.fetchRecords(soqlQueryUrl, sessionId, maxLimit);
+            })
+            .catch(err => {
+                this.showToast('Error', 'Error Fetching List View Describe', 'error');
+                this.isLoading = false;
             });
     }
 
@@ -557,7 +489,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             headers: headers,
             redirect: "follow"
         };
-
+        
         return fetch(domainURL + queryUrl, requestOptions)
             .then(response => response.json())
             .then(result => {
@@ -565,22 +497,22 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                     return;
                 }
 
-                if (result) {
+                if (result && result.records) {
                     const fields = this.configMap[this.selectedObject];
                     this.data = result.records.map((record) => {
                         let recordData = {
                             Id: record.Id,
                             name: record['Name'] ? record['Name'] : ' - ',
-                            phone: record[fields.phoneField] ? record[fields.phoneField] : ' - ',
+                            phone: (fields && fields.phoneField && record[fields.phoneField]) ? record[fields.phoneField] : ' - ',
                             isSelected: false
                         };
-                        if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
+                        if (fields && (this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
                             recordData.email = record[fields.emailField] ? record[fields.emailField] : ' - ';
                         }
                         return recordData;
                     });
 
-                    if (this.isIntialRender && this.broadcastGroupId && this.groupMembers.length > 0) {
+                    if (this.isIntialRender && this._broadcastGroupId && this.groupMembers.length > 0) {
                         this.isIntialRender = false;
                         const memberIds = new Set(this.groupMembers.map(member => member.MVEX__Member_Record_Id__c));
                         this.data.forEach(record => {
@@ -590,14 +522,12 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                             }
                         });
                     } else {
+                        // User physically changed dropdowns, clear previously selected records!
                         this.selectedRecords.clear();
                     }
 
-                    this.filteredData = [...this.data].sort((a, b) => {
-                        const aSel = this.selectedRecords.has(a.Id);
-                        const bSel = this.selectedRecords.has(b.Id);
-                        return (aSel === bSel) ? 0 : aSel ? -1 : 1;
-                    });
+                    // DO NOT SORT AUTOMATICALLY to prevent glitching on top
+                    this.filteredData = [...this.data];
 
                     this.currentPage = 1;
                     this.updateShownData();
@@ -614,6 +544,9 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             .catch(() => {
                 this.showToast('error', 'Error', 'Failed to retrieve records');
                 return false;
+            })
+            .finally(() => {
+                this.isLoading = false;
             });
     }
 
@@ -629,10 +562,14 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         }
         this.selectedRecords = new Set(this.selectedRecords);
 
-        this.filteredData = [...this.filteredData].sort((a, b) => {
-            const aSelected = this.selectedRecords.has(a.Id);
-            const bSelected = this.selectedRecords.has(b.Id);
-            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        this.data = this.data.map(rec => {
+            if(rec.Id === recordId) rec.isSelected = isChecked;
+            return rec;
+        });
+
+        this.filteredData = this.filteredData.map(rec => {
+            if(rec.Id === recordId) rec.isSelected = isChecked;
+            return rec;
         });
 
         this.updateShownData();
@@ -649,10 +586,22 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         });
         this.selectedRecords = new Set(this.selectedRecords);
 
-        this.filteredData = [...this.filteredData].sort((a, b) => {
-            const aSelected = this.selectedRecords.has(a.Id);
-            const bSelected = this.selectedRecords.has(b.Id);
-            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        this.data = this.data.map(rec => {
+            if(this.selectedRecords.has(rec.Id)) {
+                rec.isSelected = true;
+            } else if (this.paginatedData.find(p => p.Id === rec.Id)) {
+                rec.isSelected = false;   
+            }
+            return rec;
+        });
+
+        this.filteredData = this.filteredData.map(rec => {
+            if(this.selectedRecords.has(rec.Id)) {
+                rec.isSelected = true;
+            } else if (this.paginatedData.find(p => p.Id === rec.Id)) {
+                rec.isSelected = false;   
+            }
+            return rec;
         });
 
         this.updateShownData();
@@ -697,8 +646,6 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     closePopUp() {
         this.isCreateBroadcastModalOpen = false;
-        this.broadcastGroupName = '';
-        this.messageText = '';
     }
 
     // ── Save ───────────────────────────────────────────────────
@@ -721,7 +668,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             return null;
         }).filter(r => r !== null);
 
-        const isUpdate = this.broadcastGroupId != null;
+        const isUpdate = this._broadcastGroupId != null;
         const fields = this.configMap[this.selectedObject];
         const messageData = {
             objectApiName: this.selectedObject,
@@ -730,7 +677,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             description: this.messageText,
             name: this.broadcastGroupName,
             isUpdate: isUpdate,
-            broadcastGroupId: this.broadcastGroupId,
+            broadcastGroupId: this._broadcastGroupId,
             phoneField: fields.phoneField,
             emailField: fields.emailField || '',
             communicationType: this.communicationType

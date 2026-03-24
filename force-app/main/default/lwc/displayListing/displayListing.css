@@ -21,6 +21,7 @@
     border-radius: 8px;
     padding: 1rem;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    border-left: 4px solid #0176D3;
 }
 
 .search-bar lightning-input {
@@ -212,15 +213,18 @@
 }
 
 .mapping-item-inactive {
-    padding: 0.4rem;
-    border: 1px solid black;
-    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #D1D5DB;
+    margin-bottom: 0.75rem;
     display: flex;
     --lwc-squareIconSmallBoundary: 1rem;
     line-height: 1.6rem;
-    border-radius: 8px;
-    background: rgb(201 201 201);
+    border-radius: 5px;
+    background: #F3F4F6;
     pointer-events: none;
+    opacity: 0.6;
+    justify-content: center;
+    align-items: center;
 }
 
 .mapping-item-active:hover {
@@ -239,8 +243,16 @@ button:disabled {
 }
 
 .mapping-id {
-    font-weight: 500;
+    font-weight: 600;
     margin-right: 10px;
+    background: #0176D3;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    min-width: 24px;
+    text-align: center;
+    flex-shrink: 0;
 }
 
 .image-data img {
@@ -249,11 +261,14 @@ button:disabled {
 }
 
 .mapping-data {
-    width: 100%;
+    flex: 1;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.25rem;
     padding-right: 24px;
+    font-size: 0.875rem;
+    color: #1F2937;
+    line-height: 1.4;
 }
 
 .slds-form_element {
@@ -302,7 +317,7 @@ button:disabled {
 
 .mapping-btn:hover {
     background-color: #005fb2;
-     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
     transform: translateY(-1px);
 }
 
@@ -347,7 +362,7 @@ button:disabled {
     stroke: white !important;
 }
 
-.active-tab-div svg path{
+.active-tab-div svg path {
     stroke: white;
     fill: white;
 }
@@ -414,27 +429,46 @@ button:disabled {
 }
 
 .modal-btn-blue {
-    padding: 0px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    border: none;
+    background: #0176D3;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-.modal-btn-blue:hover {
-    background-color: #005fb2;
-     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
+.modal-btn-blue:hover:not(:disabled) {
+    background: #0156A3;
+    box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
     transform: translateY(-1px);
 }
 
 .modal-btn-white {
-    padding: 0px 12px;
-    background-color: white;
-    border: 1px solid #0176D3;
-    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
     color: #0176D3;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .modal-btn-white:hover {
-    background-color: rgba(232, 232, 232, 0.5);
-    color: #0176D3;
+    background: #F3F6F9;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
 .pagination-button {
@@ -539,14 +573,15 @@ span {
     position: absolute;
     right: 0;
     top: 120%;
-    z-index: 2;
-    border-radius: 12px;
+    z-index: 97;
+    border-radius: 8px;
     background-color: #ffffff;
-    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e5e5;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    border: none;
     display: flex;
     flex-direction: column;
     animation: slideDown 0.3s ease-out forwards;
+    overflow: visible;
 }
 
 .required-class {
@@ -557,24 +592,32 @@ span {
     height: 100%;
     flex-grow: 1;
     overflow-y: auto;
-    /* padding: 16px; */
+    overflow-x: visible;
     scrollbar-width: thin;
-    border-radius: 16px;
+    scrollbar-color: #0170d27d transparent;
+    background: #F9FAFB;
 }
 
 .filter-div .delete-div {
-    padding: 0.5rem;
+    padding: 6px;
     cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.2s ease;
+    border-radius: 6px;
+    transition: all 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 32px;
-    height: 32px;
+    width: auto;
+    height: auto;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.delete-div {
     position: absolute;
-    right: 12px;
-    top: 25%;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 8px;
 }
 
 /* Delete div positioning wrapper if needed */
@@ -586,75 +629,92 @@ span {
 
 .filter-header {
     font-size: 18px;
-    color: #1a1a1a;
+    color: white;
     text-align: left;
     font-weight: 500;
-    padding: 16px 16px 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 1rem;
+    border-bottom: none;
     margin-bottom: 0;
-    background-color: #f5f7fa;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    box-shadow: 0px 2px 7px #0000002b;
-    z-index: 2;
+    background: #0176D3;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    box-shadow: none;
+    z-index: 1;
     position: sticky;
     top: 0;
+    letter-spacing: 0.3px;
 }
 
 .condition-div-body {
-    padding: 0.5rem 1rem;
+    padding: 1rem;
+    background: #F9FAFB;
 }
 
 .filter-div .delete-div:hover {
-    background-color: #fee2e2;
-    border: 1px solid #ef4444;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.delete-div:hover svg path{
+    stroke: #ef4444;
+}
+
+.delete-div:hover svg{
+    fill: #ef4444;
 }
 
 .filter-div .filter-footer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
     gap: 12px;
-    padding: 16px;
-    background-color: #f8fafc;
-    border-top: 1px solid #e5e5e5;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-    box-shadow: 0px -1px 7px #0000002b;
-    z-index: 2;
+    padding: 1rem;
+    background-color: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    z-index: 1;
 }
 
 .filter-div .filter-footer .custtom__footer {
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
-    /* Align buttons to right */
+    justify-content: center;
 }
 
 .filter-div .add-condtion {
     position: relative;
-    width: 100%;
+    width: 0;
+    height: 0;
+    overflow: visible;
 }
 
 .condition-div {
     position: absolute;
-    right: 112%;
-    bottom: 0;
-    padding: 0rem 0rem 1rem 0rem;
-    width: 100%;
+    bottom: -55px;
+    right: 45px;
+    width: 20rem;
     background-color: #ffffff;
-    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e5e5;
-    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    border: none;
+    border-radius: 8px;
     animation: slideInSide 0.3s ease-out forwards;
-    z-index: 2;
+    z-index: 101;
+    overflow: visible;
 }
 
 .condition-div .condition-div-footer {
-    justify-content: flex-end;
+    justify-content: center;
     gap: 0.5rem;
     display: flex;
-    margin-top: 1rem;
-    padding: 0rem 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .condition-div .arrow {
@@ -665,31 +725,36 @@ span {
     right: -6px;
     transform: rotate(45deg);
     background: #ffffff;
-    border-right: 1px solid #e5e5e5;
-    border-top: 1px solid #e5e5e5;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .mapping-item-active {
-    padding: 10px;
-    border: 1px solid #e5e5e5;
+    padding: 0.75rem;
+    border: 1px solid #E5E7EB;
     margin-bottom: 0.75rem;
     display: flex;
-    border-radius: 8px;
-    background-color: #f8fafc;
+    border-radius: 5px;
+    background-color: #FFFFFF;
     transition: all 0.2s;
     cursor: pointer;
-    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    align-items: center;
 }
 
 .mapping-item-active:hover {
-    background-color: #e1f1fe;
+    background-color: #E1F1FE;
     border-color: #0176D3;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.2);
+    transform: translateY(-1px);
 }
 
 .scroll-div {
     flex: 1;
-    padding: 0.5rem 1rem;
-    background: white;
+    padding: 1rem;
+    background: #F9FAFB;
+    overflow: visible;
 }
 
 
@@ -698,12 +763,98 @@ span {
     gap: 8px
 }
 
+ .add-condition-icon-btn {
+        width: 36px;
+        height: 32px;
+        min-width: 36px;
+        background: #0176D3;
+        border: none;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(1, 118, 211, 0.2);
+    }
+
+    .add-condition-icon-btn svg {
+        color: white;
+    }
+
+    .add-condition-icon-btn:hover {
+        background: #0156A3;
+        box-shadow: 0 4px 8px rgba(1, 118, 211, 0.3);
+        transform: translateY(-1px) scale(1.05);
+    }
+
+    .add-condition-icon-btn:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    .condition-type-wrapper {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .condition-type-field {
+        flex: 1;
+        margin-bottom: 0 !important;
+    }
+
+    /* Anchor to control the side popover position relative to + icon */
+    .add-condition-anchor {
+        position: relative;
+    }
 
 @media only screen and (max-width: 900px) {
     .filter-section {
         flex-direction: column;
         gap: 1rem;
         width: 100%;
+    }
+
+    /* On small screens, drop the popover below the + icon */
+    .filter-div .add-condtion .condition-div {
+        position: absolute;
+        bottom: -55px;
+        right: 40px;
+        width: 20rem;
+        background-color: #ffffff;
+        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+        border: none;
+        border-radius: 8px;
+        animation: slideInSide 0.3s ease-out forwards;
+        z-index: 101;
+        overflow: visible;
+    }
+
+    .filter-div .add-condtion .condition-div .arrow {
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        bottom: 20px;
+        right: -6px;
+        transform: rotate(45deg);
+        background: #ffffff;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .condition-type-wrapper .condition-div .arrow {
+        left: auto;
+        right: 2.5rem;
+        top: -6px;
+        transform: rotate(45deg);
+        border-left: none;
+        border-bottom: none;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .data-table-container {
@@ -726,7 +877,97 @@ span {
     }
 
     .open-mapping-div {
-        margin-top: 10px;
+        position: relative;
+    }
+
+    .add-condition-icon-btn {
+        width: 36px;
+        height: 32px;
+        min-width: 36px;
+        background: #0176D3;
+        border: none;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(1, 118, 211, 0.2);
+    }
+
+    .add-condition-icon-btn svg {
+        color: white;
+    }
+
+    .add-condition-icon-btn:hover {
+        background: #0156A3;
+        box-shadow: 0 4px 8px rgba(1, 118, 211, 0.3);
+        transform: translateY(-1px) scale(1.05);
+    }
+
+    .add-condition-icon-btn:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    .condition-type-wrapper {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .condition-type-field {
+        flex: 1;
+        margin-bottom: 0 !important;
+    }
+
+    /* Anchor to control the side popover position relative to + icon */
+    .add-condition-anchor {
+        position: relative;
+    }
+
+    /* Side popover positioning consistent with inquiry */
+    .filter-div .add-condtion .condition-div {
+        position: absolute;
+        bottom: -55px;
+        right: 40px;
+        width: 20rem;
+        background-color: #ffffff;
+        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+        border: none;
+        border-radius: 8px;
+        animation: slideInSide 0.3s ease-out forwards;
+        z-index: 101;
+        overflow: visible;
+    }
+
+    /* Popover arrow like inquiry */
+    .filter-div .add-condtion .condition-div .arrow {
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        bottom: 20px;
+        right: -6px;
+        transform: rotate(45deg);
+        background: #ffffff;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Ensure the side popover stays above scroll area */
+    .filter-div {
+        overflow: visible;
+    }
+
+    .filter-div .filter-fields {
+        overflow-x: visible;
+    }
+
+    /* Tweak + icon alignment in the row */
+    .add-condition-anchor .add-condition-icon-btn {
+        vertical-align: bottom;
     }
 
     .condition-div {

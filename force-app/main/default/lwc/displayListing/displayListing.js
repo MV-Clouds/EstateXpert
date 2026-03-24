@@ -153,6 +153,15 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name : showAddConditionIcon
+    * @description : show add-condition inline icon only when condition type is not related/none
+    * Date: 24/03/2026
+    */
+    get showAddConditionIcon() {
+        return this.conditiontype && this.conditiontype !== 'related' && this.conditiontype !== 'none';
+    }
+
+    /**
     * Method Name : isListView
     * @description : set list view
     * * Date: 20/08/2024
@@ -351,13 +360,13 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             loadStyle(this, MulishFontCss);
             loadStyle(this, mapCss_V1);
             this.isLoading = true;
-            
+
             // Wait for both required data loads before fetching filter configuration
             await Promise.all([
                 this.getListingFields(),
                 this.getInquiryFields()
             ]);
-            
+
             await this.fetchListingConfiguration(); // This will call fetchMetadataRecords internally
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
             this.checkHideFilterButton();
@@ -370,7 +379,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     checkHideFilterButton() {
         getMetadataRecords()
             .then(result => {
-                
+
                 const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
                 if (feature && feature.MVEX__isAvailable__c) {
                     this.hideFilterButton = true;
@@ -526,12 +535,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     applyFieldFormat(fieldValue, format) {
         try {
             let date = new Date(fieldValue);
-            
+
             // Check if date is valid
             if (isNaN(date.getTime())) {
                 return fieldValue;
             }
-            
+
             let day = String(date.getDate()).padStart(2, '0');
             let month = String(date.getMonth() + 1).padStart(2, '0');
             let year = date.getFullYear();
@@ -588,12 +597,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 // Check if value exists, otherwise default to '-'
                 const hasRealValue = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
                 let displayValue = hasRealValue ? fieldValue : '-';
-                
+
                 // Apply formatting for date/datetime fields if format is provided
                 if (col.format && hasRealValue && (col.type === 'date' || col.type === 'datetime' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
                     displayValue = this.applyFieldFormat(fieldValue, col.format);
                 }
-                
+
                 return {
                     key: col.fieldName,
                     value: displayValue,
@@ -1272,12 +1281,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 mappings: this.mappings
             };
 
-            saveMappings({objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters', checklistData: JSON.stringify(config), totalPages: 0})
+            saveMappings({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters', checklistData: JSON.stringify(config), totalPages: 0 })
                 .then(result => {
                     if (result === 'Success') {
                         console.log('Configuration saved successfully');
                     } else {
-                        this.showToast('Error', 'Failed to save configuration: '+result, 'error');
+                        this.showToast('Error', 'Failed to save configuration: ' + result, 'error');
                     }
                 })
                 .catch(error => {

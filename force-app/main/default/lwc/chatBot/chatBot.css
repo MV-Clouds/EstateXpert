@@ -298,6 +298,7 @@
 }
 
 .cancel-button {
+    min-height: 36px;
     background: #e5e7eb;
     color: var(--chat-text-color);
     border-radius: 8px;
@@ -314,6 +315,7 @@
 }
 
 .mail-button {
+    min-height: 36px;
     background: var(--chat-primary-gradient);
     color: white;
     border-radius: 8px;

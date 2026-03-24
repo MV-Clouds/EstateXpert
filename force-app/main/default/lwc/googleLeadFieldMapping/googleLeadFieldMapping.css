@@ -163,6 +163,7 @@
 }
 
 .save-btn button {
+    min-height: 36px;
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;
@@ -195,6 +196,7 @@
 }
 
 .add_field_btn {
+    min-height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -395,6 +397,7 @@
 }
 
 .cancel_btn_css {
+    min-height: 36px;
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;
@@ -418,6 +421,7 @@
 }
 
 .save_btn_css {
+    min-height: 36px;
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;

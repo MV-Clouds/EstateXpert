@@ -22,6 +22,7 @@
 }
 
 .cancel_btn_css {
+    min-height: 36px;
     font-size: 14px;
     font-weight: 500;
     padding: 0.5rem 1.5rem;
@@ -42,6 +43,7 @@
 }
 
 .save_btn_css {
+    min-height: 36px;
     font-size: 14px;
     font-weight: 500;
     padding: 0.5rem 1.5rem;

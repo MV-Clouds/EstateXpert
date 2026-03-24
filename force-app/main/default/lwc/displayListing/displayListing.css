@@ -408,6 +408,7 @@ button:disabled {
 }
 
 .btn {
+    min-height: 36px;
     gap: 8px;
     display: flex;
     justify-content: center;
@@ -429,6 +430,7 @@ button:disabled {
 }
 
 .modal-btn-blue {
+    min-height: 36px;
     font-size: 14px;
     font-weight: 500;
     padding: 0.5rem 1.5rem;
@@ -451,6 +453,7 @@ button:disabled {
 }
 
 .modal-btn-white {
+    min-height: 36px;
     font-size: 14px;
     font-weight: 500;
     padding: 0.5rem 1.5rem;

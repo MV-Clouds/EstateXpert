@@ -87,6 +87,14 @@
     padding-bottom: 1rem;
 }
 
+.pagination-container-review {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    justify-content: center;
+    padding-top: 1.5rem;
+}
+
 .pagination-button {
     background-color: #ffffff;
     border: 1px solid #d8d8d8;
@@ -450,6 +458,69 @@ span {
     height: 45px;
 }
 
+.table-content-review {
+    overflow: auto;
+    border-radius: 8px;
+    height: 80%;
+    background-color: white;
+    margin: 20px 16px 16px 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.table-content-review .checkbox,
+.table-content-review .sno {
+    width: 10%;
+}
+
+.table-content-review .name,
+.table-content-review .phone,
+.table-content-review .email {
+    width: 30%;
+}
+
+.table-content-review .slds-table th,
+.table-content-review .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 45px;
+}
+
+.table-content-review .slds-table th {
+    background: #0176D3;
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.table-content-review tbody tr:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.table-content-review table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 98;
+}
+
+.table-content-review table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+.table-content-review .slds-table_resizable-cols thead th,
+.table-content-review .slds-table--resizable-cols thead th {
+    padding: 0;
+    background: #0376D3;
+    color: white;
+    font-size: 14px;
+    height: 45px;
+}
+
 .truncate_css {
     white-space: nowrap;
     overflow: hidden;
@@ -461,4 +532,70 @@ span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Selected Contacts Pills UI */
+.selected-contacts-container {
+    margin: 0 16px 7px 16px;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 5px;
+    border: 1px solid #e5e7eb;
+}
+
+.selected-heading {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0176D3;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+
+.pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.pill-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pill-container::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+.pill-badge {
+    --slds-c-pill-color-background: #f1f5f9;
+    --slds-c-pill-color-border: #e2e8f0;
+    --slds-c-pill-text-color: #0f172a;
+    --slds-c-pill-radius-border: 16px;
+    /* Pill shape */
+    transition: all 0.2s ease;
+}
+
+.pill-badge:hover {
+    --slds-c-pill-color-background: #e2e8f0;
+}
+
+/* Filter Toolbar UI */
+.filter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 8px 16px 7px 16px;
+}
+
+.filter-toolbar>* {
+    flex: 1 1 250px;
+}
+
+.filter-toolbar lightning-combobox,
+.filter-toolbar lightning-input {
+    --sds-c-input-radius-border: 6px;
 }

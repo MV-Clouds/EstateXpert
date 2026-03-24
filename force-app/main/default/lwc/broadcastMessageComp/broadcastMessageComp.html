@@ -19,29 +19,48 @@
                     </div>
                 </div>
                 <div class="header">
+                    <!-- Single Step View: Show Save Group immediately -->
                     <button class="btn" onclick={handleModalOpen} disabled={isBtnDisabled}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        Save Group          
+                        Save Group
                     </button>
                 </div>
             </div>
         </div>
 
         <div class="main_content_cls">
-            <!-- Comboboxes in Grid -->
-            <div class="comboboxdiv">
-                <div class="internal-comboboxdiv">
-                    <lightning-combobox label="Select Object" value={selectedObject} options={objectOptions} onchange={handleObjectChange}></lightning-combobox>
-                    <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
-                </div>
-                <div>
-                    <lightning-input type="text" label="Search Records" placeholder="Search record by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
-                </div>
+
+            <!-- Filter Toolbar -->
+            <div class="filter-toolbar">
+                <lightning-combobox label="Select Object" value={selectedObject} options={objectOptions} onchange={handleObjectChange}></lightning-combobox>
+                <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
+                <lightning-input type="search" label="Search Contact" placeholder="Search by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
             </div>
+
+            <!-- Selected Records Pills Container -->
+            <template if:true={selectedRecordsList.length}>
+                <div class="selected-contacts-container">
+                    <h3 class="selected-heading">Selected Records ({selectedRecordsList.length})</h3>
+                    <div class="pill-container slds-m-top_small slds-m-bottom_small">
+                        <template for:each={selectedRecordsList} for:item="rec">
+                            <lightning-pill 
+                                key={rec.Id} 
+                                label={rec.name} 
+                                name={rec.Id} 
+                                onremove={handleRemoveRecord} 
+                                class="pill-badge">
+                                <lightning-icon icon-name="standard:contact" alternative-text="Contact"></lightning-icon>
+                            </lightning-pill>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+
 
             <!-- Custom Table -->
             <template if:true={paginatedData.length}>
@@ -49,7 +68,7 @@
                     <table class="slds-table">
                         <thead>
                             <tr class="table_tr_cls">
-                                <th scope="col" class="checkbox sno" >
+                                <th scope="col" class="checkbox sno">
                                     <lightning-input type="checkbox" checked={isAllSelected} onchange={handleSelectAll} indeterminate={isIndeterminate}></lightning-input>
                                 </th>
                                 <th scope="col" class="sno">
@@ -112,7 +131,7 @@
                     </div>
                 </div>
             </template>
-    
+
             <template if:true={paginatedData.length}>
                 <div class="pagination-container">
                     <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
@@ -121,7 +140,7 @@
                         </svg>
                         Previous
                     </button>
-            
+
                     <template for:each={pageNumbers} for:item="page">
                         <template if:false={page.isEllipsis}>
                             <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
@@ -132,7 +151,7 @@
                             <span key={page.number} class="pagination-ellipsis">...</span>
                         </template>
                     </template>
-            
+
                     <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
                         Next
                         <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
@@ -141,8 +160,10 @@
                     </button>
                 </div>
             </template>
+
         </div>
 
+        <!-- ═══════════════════════════════ Save Modal ═══════════════════════════════ -->
         <template if:true={isCreateBroadcastModalOpen}>
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">

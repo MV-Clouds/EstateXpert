@@ -63,7 +63,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     }
 
     handleRemoveRecord(event) {
-        const recordId = event.target.name;
+        const recordId = event.currentTarget.dataset.id || event.target.name;
         if (recordId) {
             this.selectedRecords.delete(recordId);
             this.selectedRecords = new Set(this.selectedRecords);
@@ -183,7 +183,6 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     connectedCallback() {
         loadStyle(this, MulishFontCss);
         this.selectedObject = 'Contact';
-        this.setColumnVisibility();
         this.loadConfigs();
         this.loadListViews(); // Load Contact List views initially
     }
@@ -221,6 +220,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 });
                 
                 this.configMap = result.configMap;
+                this.setColumnVisibility();
                 
                 if (!this._broadcastGroupId) {
                     this.broadcastHeading = 'New Group';

@@ -150,14 +150,16 @@
                         <h3 class="selected-heading">Selected Records ({selectedRecordsList.length})</h3>
                         <div class="pill-container slds-m-top_small slds-m-bottom_small">
                             <template for:each={selectedRecordsList} for:item="rec">
-                                <lightning-pill 
-                                    key={rec.Id} 
-                                    label={rec.name} 
-                                    name={rec.Id} 
-                                    onremove={handleRemoveRecord} 
-                                    class="pill-badge">
-                                    <lightning-icon icon-name="standard:contact" alternative-text="Contact"></lightning-icon>
-                                </lightning-pill>
+                                <span key={rec.Id} class="custom-pill slds-pill" title={rec.name}>
+                                    <span class="slds-icon_container slds-icon-standard-contact" title="Contact">
+                                        <lightning-icon icon-name="standard:contact" alternative-text="Contact" size="small"></lightning-icon>
+                                    </span>
+                                    <span class="slds-pill__label">{rec.name}</span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" name={rec.Id} data-id={rec.Id} onclick={handleRemoveRecord}>
+                                        <lightning-icon icon-name="utility:close" alternative-text="Remove"></lightning-icon>
+                                        <span class="slds-assistive-text">Remove</span>
+                                    </button>
+                                </span>
                             </template>
                         </div>
                     </div>

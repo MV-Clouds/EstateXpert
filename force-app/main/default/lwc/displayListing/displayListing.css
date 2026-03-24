@@ -62,53 +62,6 @@
     margin-bottom: 1rem;
 }
 
-.property-item {
-    background-color: #ffffff;
-    position: relative;
-    height: auto;
-    border: 1px solid #d8d8d8;
-    border-radius: 8px;
-    transition: box-shadow 0.3s ease;
-}
-
-.card {
-    padding: 0 1% 1% 1%;
-    width: 100%;
-}
-
-.property-item:hover {
-    box-shadow: 1px 1px 10px 1px #509fdaa2;
-}
-
-.card-body {
-    padding: 0.5rem;
-    display: flex;
-}
-
-.room_details {
-    display: flex;
-    flex-direction: row;
-}
-
-.property-image {
-    margin-right: 15px;
-    border-radius: 5px;
-    height: 10rem;
-    width: 100%;
-    object-fit: cover;
-}
-
-.property_type {
-    background-color: #dbfaff;
-    border-radius: 5px 0 16px 0;
-    position: absolute;
-    color: black;
-    left: 0;
-    top: 0;
-    z-index: 1;
-    padding: 3px 15px;
-}
-
 .details {
     height: 7rem;
     border-bottom: 0.5px solid grey;
@@ -117,38 +70,10 @@
     justify-content: space-around;
 }
 
-.card-title {
-    color: black;
-    font-size: 16px;
-}
-
-.bedroom,
-.bathroom {
-    display: flex;
-    align-items: end;
-}
-
-.bathroom_icon {
-    width: 20px;
-}
-
 .main {
     background-color: white;
     display: flex;
     width: 100%;
-}
-
-.card-text {
-    display: flex;
-    color: #737D8C;
-    font-size: 12px;
-}
-
-.card-text p {
-    width: -webkit-fill-available;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .item-1 p {
@@ -413,6 +338,11 @@ button:disabled {
 
 .active-tab-div {
     background-color: #0376D3;
+}
+
+.active-tab-div svg path{
+    stroke: white;
+    fill: white;
 }
 
 .tab-btns ul .tab-div svg {
@@ -755,13 +685,6 @@ span {
     background: white;
 }
 
-.custom-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    width: 98% !important;
-    margin: 1rem;
-}
 
 .custtom__footer {
     display: flex;

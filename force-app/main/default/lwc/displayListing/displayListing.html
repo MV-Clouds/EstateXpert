@@ -31,14 +31,6 @@
                                     </svg>
                                 </li>
                                 <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="2">
-                                    <svg class="menusvg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path data-tab-index="2" fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M8 13.3333C8.70724 13.3333 9.38552 13.6143 9.88562 14.1144C10.3857 14.6145 10.6667 15.2928 10.6667 16V21.3333C10.6667 22.0406 10.3857 22.7189 9.88562 23.219C9.38552 23.719 8.70724 24 8 24H2.66667C1.95942 24 1.28115 23.719 0.781048 23.219C0.280951 22.7189 0 22.0406 0 21.3333V16C0 15.2928 0.280951 14.6145 0.781048 14.1144C1.28115 13.6143 1.95942 13.3333 2.66667 13.3333H8ZM21.3333 13.3333C22.0406 13.3333 22.7189 13.6143 23.219 14.1144C23.719 14.6145 24 15.2928 24 16V21.3333C24 22.0406 23.719 22.7189 23.219 23.219C22.7189 23.719 22.0406 24 21.3333 24H16C15.2928 24 14.6145 23.719 14.1144 23.219C13.6143 22.7189 13.3333 22.0406 13.3333 21.3333V16C13.3333 15.2928 13.6143 14.6145 14.1144 14.1144C14.6145 13.6143 15.2928 13.3333 16 13.3333H21.3333ZM8 0C8.70724 0 9.38552 0.280951 9.88562 0.781048C10.3857 1.28115 10.6667 1.95942 10.6667 2.66667V8C10.6667 8.70724 10.3857 9.38552 9.88562 9.88562C9.38552 10.3857 8.70724 10.6667 8 10.6667H2.66667C1.95942 10.6667 1.28115 10.3857 0.781048 9.88562C0.280951 9.38552 0 8.70724 0 8V2.66667C0 1.95942 0.280951 1.28115 0.781048 0.781048C1.28115 0.280951 1.95942 0 2.66667 0H8ZM21.3333 0C22.0406 0 22.7189 0.280951 23.219 0.781048C23.719 1.28115 24 1.95942 24 2.66667V8C24 8.70724 23.719 9.38552 23.219 9.88562C22.7189 10.3857 22.0406 10.6667 21.3333 10.6667H16C15.2928 10.6667 14.6145 10.3857 14.1144 9.88562C13.6143 9.38552 13.3333 8.70724 13.3333 8V2.66667C13.3333 1.95942 13.6143 1.28115 14.1144 0.781048C14.6145 0.280951 15.2928 0 16 0H21.3333Z"
-                                            fill="white" />
-                                    </svg>
-                                </li>
-                                <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="3">
                                     <svg class="menusvg" width="24" height="25" viewBox="0 0 24 25" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path data-tab-index="3"
@@ -339,56 +331,6 @@
                         </tbody>
                     </table>
                 </template>
-
-                <template if:true={isGridView}>
-                    <div class="custom-grid">
-                        <template for:each={pagedProperties} for:item="property">
-                            <div class="card" key={property.id}>
-                                <div class="property-item">
-                                    <img class="property-image card-img-top" src={property.media_url}
-                                        alt="Property image" draggable="false"></img>
-                                    <div class="property_type">
-                                        <p>For {property.mvex__listing_type__c}</p>
-                                    </div>
-                                    <div class="card-body details">
-                                        <h5 class="card-title"><b>{property.name}</b></h5>
-                                        <div class="card-text">
-                                            <img src={location_icon} height="18px" width="18px" draggable="false" />
-                                            <p class="slds-m-left_xx-small">{property.mvex__city__c},
-                                                {property.mvex__state__c},
-                                                {property.mvex__postalcode__c}</p>
-                                        </div>
-                                        <div class="room_details">
-                                            <lightning-layout-item class="bedroom">
-                                                <img src={bedroom_icon} height="24px" width="20px" draggable="false" />
-                                                <h1 class="slds-m-left_xx-small">{property.mvex__bedrooms__c} Bedrooms
-                                                </h1>
-                                            </lightning-layout-item>
-                                            <lightning-layout-item class="bathroom" alignment-bump="left">
-                                                <img src={bathroom_icon} class="bathroom_icon" draggable="false" />
-                                                <h1 class="slds-m-left_xx-small">{property.mvex__bathrooms__c} Bathrooms
-                                                </h1>
-                                            </lightning-layout-item>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <lightning-layout-item class="item-1">
-                                            <p class="card-link"><b>
-                                                    <template if:true={property.mvex__listing_price__c}>
-                                                        {property.CurrencyIsoCode} {property.mvex__listing_price__c}
-                                                    </template>
-                                                    <template if:false={property.mvex__listing_price__c}>
-                                                        TBD
-                                                    </template>
-                                                </b></p>
-                                        </lightning-layout-item>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-
                 <template if:true={isMapView}>
                     <div class="main">
                         <lightning-map class="mapmarker slds-size_6-of-6" map-markers={mapMarkers} list-view="visible">

@@ -173,16 +173,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     }
 
     /**
-    * Method Name : isGridView
-    * @description : set grid view
-    * * Date: 20/08/2024
-    * Created By: Rachit Shah
-    */
-    get isGridView() {
-        return this.selectedView === 'Grid';
-    }
-
-    /**
    * Method Name : totalItems
    * @description : set the totalpages count.
    * * Date: 20/08/2024
@@ -1082,9 +1072,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 this.selectedView = 'List';
                 this.currentPage = 1;
             } else if (target === "2") {
-                this.selectedView = 'Grid';
-                this.currentPage = 1;
-            } else if (target === "3") {
                 this.selectedView = 'map';
                 this.currentPage = 1;
                 this.updateMapMarkers();
@@ -1104,6 +1091,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             const selectedPath = selectedTab.querySelector('path[data-tab-index="' + target + '"]');
             if (selectedPath) {
                 selectedPath.style.fill = '#fff';
+                selectedPath.style.stroke = '#fff';
             }
         } catch (error) {
             errorDebugger('DisplayListing', 'handleMenuTabClick', error, 'warn', 'Error in handleMenuTabClick');

@@ -161,7 +161,7 @@ span {
     font-size: 26px;
     font-weight: 500;
     text-align: left;
-    gap: 15px;
+    gap: 5px;
     color: #0f1419;
     letter-spacing: 0.3px;
 }
@@ -202,12 +202,6 @@ span {
     background: #0157a0;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
-}
-
-.filter-tab-btns {
-    display: flex;
-    gap: 4px;
-    align-items: center;
 }
 
 /* ===== FILTER TOGGLE BUTTON ===== */
@@ -254,93 +248,6 @@ span {
     stroke: white;
 }
 
-.tab-section {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-
-.tab-btns ul {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    border: 1px solid #d0d4d8;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    list-style: none;
-    margin: 0;
-}
-
-.tab-btns ul .tab-div {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.tab-btns ul .tab-div:hover {
-    background-color: rgba(1, 118, 211, 0.1);
-}
-
-.active-tab-div {
-    background-color: #0176D3 !important;
-    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.35);
-}
-
-.tab-btns ul .tab-div svg {
-    width: 1rem;
-    fill: #445058;
-}
-
-.tab-btns ul .tab-div .activeSvg {
-    fill: white;
-}
-
-.tab-btns ul .tab-div svg path {
-    fill: #445058;
-}
-
-.tab-btns ul .tab-div .activeSvg path {
-    fill: white;
-}
-
-.active-tab-div svg path {
-    fill: white !important;
-}
-
-.sort-desc {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    border: 1px solid #d0d4d8;
-    border-radius: 8px;
-    padding: 8px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    cursor: default;
-}
-
-.sort-icon {
-    display: flex;
-    align-items: center;
-}
-
-.sort-icon svg {
-    width: 1rem;
-}
-
-.sort-text {
-    font-size: 14px;
-    font-weight: 500;
-    color: #445058;
-    white-space: nowrap;
-}
-
 .center-trancate-text {
     text-align: center;
     /* font-size: 12px; */
@@ -372,20 +279,6 @@ span {
 .main .slds-icon_small,
 .slds-icon--small {
     height: 1rem;
-}
-
-.main .second-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    flex-direction: row;
-}
-
-.meta-text {
-    display: flex;
-    align-items: center;
 }
 
 .count-badge {

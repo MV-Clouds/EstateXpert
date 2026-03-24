@@ -203,46 +203,64 @@
                                                     </div>
 
                                                     <div class="slds-form_element slds-m-top_medium">
-                                                        <lightning-input type="checkbox" label="Use Constant Value"
-                                                            checked={isConstant}
-                                                            onchange={handleUseConstantChange}></lightning-input>
+                                                        <template if:false={isNullOperatorSelected}>
+                                                            <lightning-input type="checkbox" label="Use Constant Value"
+                                                                checked={isConstant}
+                                                                onchange={handleUseConstantChange}></lightning-input>
+                                                        </template>
                                                     </div>
 
-                                                    <div class="slds-form_element slds-m-top_medium">
-                                                        <label><span class="red">*</span>Value</label>
-                                                        <template if:true={isConstant}>
-                                                            <template if:true={listingFieldObject.isPrimary}>
-                                                                <lightning-input
-                                                                    type={listingFieldObject.MVEX__Data_Type__c}
-                                                                    value={selectedInquiryValue}
-                                                                    data-field="MVEX__Value__c"
-                                                                    onchange={handleListingFieldChange}
-                                                                    variant="label-hidden"></lightning-input>
-                                                            </template>
-                                                            <template if:true={listingFieldObject.isPicklist}>
-                                                                <lightning-combobox value={selectedInquiryValue}
-                                                                    data-field="MVEX__Value__c"
-                                                                    options={listingFieldObject.picklistValues}
-                                                                    onchange={handleListingFieldChange}
-                                                                    variant="label-hidden"></lightning-combobox>
-                                                            </template>
-                                                            <template if:true={listingFieldObject.isReference}>
-                                                                <lightning-record-picker value={selectedInquiryValue}
-                                                                    label="Reference" data-field="MVEX__Value__c"
-                                                                    object-api-name={listingFieldObject.objectApiName}
-                                                                    onchange={handleRefChange}
-                                                                    variant="label-hidden"></lightning-record-picker>
-                                                            </template>
-                                                        </template>
-                                                        <template if:false={isConstant}>
-                                                            <lightning-combobox value={selectedInquiryValue}
+                                                    <template if:true={isNullOperatorSelected}>
+                                                        <div class="slds-form_element slds-m-top_medium">
+                                                            <label><span class="red">*</span>Value</label>
+                                                            <lightning-combobox
+                                                                value={selectedInquiryValue}
                                                                 data-field="MVEX__Value__c"
-                                                                options={inquiryFieldOptions}
+                                                                options={isNullPicklistOptions}
                                                                 onchange={handleListingFieldChange}
                                                                 variant="label-hidden"
-                                                                placeholder="Select Inquiry Field"></lightning-combobox>
-                                                        </template>
-                                                    </div>
+                                                                placeholder="Select True or False">
+                                                            </lightning-combobox>
+                                                        </div>
+                                                    </template>
+
+                                                    <template if:false={isNullOperatorSelected}>
+                                                        <div class="slds-form_element slds-m-top_medium">
+                                                            <label><span class="red">*</span>Value</label>
+                                                            <template if:true={isConstant}>
+                                                                <template if:true={listingFieldObject.isPrimary}>
+                                                                    <lightning-input
+                                                                        type={listingFieldObject.MVEX__Data_Type__c}
+                                                                        value={selectedInquiryValue}
+                                                                        data-field="MVEX__Value__c"
+                                                                        onchange={handleListingFieldChange}
+                                                                        variant="label-hidden"></lightning-input>
+                                                                </template>
+                                                                <template if:true={listingFieldObject.isPicklist}>
+                                                                    <lightning-combobox value={selectedInquiryValue}
+                                                                        data-field="MVEX__Value__c"
+                                                                        options={listingFieldObject.picklistValues}
+                                                                        onchange={handleListingFieldChange}
+                                                                        variant="label-hidden"></lightning-combobox>
+                                                                </template>
+                                                                <template if:true={listingFieldObject.isReference}>
+                                                                    <lightning-record-picker value={selectedInquiryValue}
+                                                                        label="Reference" data-field="MVEX__Value__c"
+                                                                        object-api-name={listingFieldObject.objectApiName}
+                                                                        onchange={handleRefChange}
+                                                                        variant="label-hidden"></lightning-record-picker>
+                                                                </template>
+                                                            </template>
+                                                            <template if:false={isConstant}>
+                                                                <lightning-combobox value={selectedInquiryValue}
+                                                                    data-field="MVEX__Value__c"
+                                                                    options={inquiryFieldOptions}
+                                                                    onchange={handleListingFieldChange}
+                                                                    variant="label-hidden"
+                                                                    placeholder="Select Inquiry Field"></lightning-combobox>
+                                                            </template>
+                                                        </div>
+                                                    </template>
                                                 </div>
                                                 <div class="condition-div-footer">
                                                     <button class="btn modal-btn-white"

@@ -340,6 +340,13 @@ button:disabled {
     background-color: #0376D3;
 }
 
+/* Force active tab icons to render white even if SVG has inline fill/stroke */
+.tab-btns ul .tab-div.active-tab-div svg,
+.tab-btns ul .tab-div.active-tab-div svg path {
+    fill: white !important;
+    stroke: white !important;
+}
+
 .active-tab-div svg path{
     stroke: white;
     fill: white;

@@ -3,50 +3,60 @@
         <div class="slds-modal__header blue-header">
             <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{modalTitle}</h1>
         </div>
-        <div class="slds-p-bottom_small">
-            <template if:true={isLoading}>
-                <c-spinner-component></c-spinner-component>
-            </template>
-            <template if:false={isLoading}>
-                <lightning-record-edit-form object-api-name="MVEX__Offer__c" onsuccess={handleSuccess}
-                    onerror={handleError}>
-                    <div class="content_body">
-                        <div class="slds-grid slds-wrap slds-gutters_small">
-                            <template for:each={offerFields} for:item="field">
-                                <template if:false={field.hidden}>
-                                    <div key={field.id}
-                                        class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 field-wrapper">
-                                        <div class="slds-form-element">
-                                            <label class="slds-form-element__label">
-                                                <abbr if:true={field.required} class="slds-required"
-                                                    title="required">*</abbr>
-                                                {field.label}
-                                            </label>
-                                            <div class="slds-form-element__control">
-                                                <lightning-input-field field-name={field.fieldName}
-                                                    value={field.value} disabled={field.disabled}
-                                                    required={field.required} variant="label-hidden">
-                                                </lightning-input-field>
-                                            </div>
+        <template if:true={isLoading}>
+            <c-spinner-component></c-spinner-component>
+        </template>
+        <template if:false={isLoading}>
+            <lightning-record-edit-form object-api-name="MVEX__Offer__c" onsuccess={handleSuccess}
+                onerror={handleError}>
+                <div class="content_body">
+                    <div class="slds-grid slds-wrap slds-gutters_small">
+                        <template for:each={offerFields} for:item="field">
+                            <template if:false={field.hidden}>
+                                <div key={field.id}
+                                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 field-wrapper">
+                                    <div class="slds-form-element">
+                                        <label class="slds-form-element__label">
+                                            <abbr if:true={field.required} class="slds-required"
+                                                title="required">*</abbr>
+                                            {field.label}
+                                        </label>
+                                        <div class="slds-form-element__control">
+                                            <lightning-input-field field-name={field.fieldName} value={field.value}
+                                                disabled={field.disabled} required={field.required}
+                                                variant="label-hidden">
+                                            </lightning-input-field>
                                         </div>
                                     </div>
-                                </template>
-                                <template if:true={field.hidden}>
-                                    <lightning-input-field key={field.id} field-name={field.fieldName}
-                                        value={field.value} class="slds-hide">
-                                    </lightning-input-field>
-                                </template>
+                                </div>
                             </template>
-                        </div>
+                            <template if:true={field.hidden}>
+                                <lightning-input-field key={field.id} field-name={field.fieldName} value={field.value}
+                                    class="slds-hide">
+                                </lightning-input-field>
+                            </template>
+                        </template>
                     </div>
+                </div>
 
-                    <div class="edit_modal_footerbtns">
-                        <button type="button" class="cancel_btn_css" aria-label="Cancel and close"
-                            onclick={handleDialogueClose}>Cancel</button>
-                        <button type="button" class="save_btn_css" onclick={handleSaveClick}>Create Offer</button>
-                    </div>
-                </lightning-record-edit-form>
-            </template>
-        </div>
+                <div class="edit_modal_footerbtns">
+                    <button type="button" class="cancel_btn_css" aria-label="Cancel and close"
+                        onclick={handleDialogueClose}><svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                            xmlns="http://www.w3.org/2000/svg" lwc-6sjivhda71j="">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="currentColor" lwc-6sjivhda71j=""></path>
+                        </svg> Cancel</button>
+                    <button type="button" class="save_btn_css" onclick={handleSaveClick}><svg
+                            xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg> Create Offer</button>
+                </div>
+            </lightning-record-edit-form>
+        </template>
     </div>
 </template>

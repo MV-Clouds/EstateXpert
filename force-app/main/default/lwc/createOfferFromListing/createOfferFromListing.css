@@ -43,18 +43,19 @@
 }
 
 .modalbody {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
+    background-color: #F9FAFB;
 }
 
 .edit_modal_footerbtns {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin-top: 1rem;
+    padding: 1rem;
+    width: 100%;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
+    margin-top: auto;
 }
 
 .cancel_btn_css {

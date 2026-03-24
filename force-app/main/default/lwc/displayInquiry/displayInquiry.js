@@ -86,7 +86,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         { label: 'Equal To', value: 'equalTo' },
         { label: 'Contains', value: 'contains' },
         { label: 'Not Contains', value: 'notContains' },
-        { label: 'Not Equal To', value: 'notEqualTo' }
+        { label: 'Not Equal To', value: 'notEqualTo' },
+        { label: 'Is Null', value: 'isNull' }
     ];
     @track visiblePages = 5;
     @track divElement;
@@ -151,6 +152,27 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     get modalContainerClass() {
         return this.popUpSecondPage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
+    }
+
+    /**
+    * Method Name : isNullOperatorSelected
+    * @description : returns true when the selected condition operator is 'isNull'
+    * Date: 24/03/2026
+    */
+    get isNullOperatorSelected() {
+        return this.selectedConditionOperator === 'isNull';
+    }
+
+    /**
+    * Method Name : isNullPicklistOptions
+    * @description : returns True/False options for the isNull operator picklist
+    * Date: 24/03/2026
+    */
+    get isNullPicklistOptions() {
+        return [
+            { label: 'True', value: 'true' },
+            { label: 'False', value: 'false' }
+        ];
     }
 
     /**
@@ -1101,10 +1123,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                         switch (mapping.operator) {
                             case 'lessThan':
-                                filterResults[index + 1] = parseFloat(normInquiryValue) < parseFloat(normFilterValue);
+                                filterResults[index + 1] = isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                                 break;
                             case 'greaterThan':
-                                filterResults[index + 1] = parseFloat(normInquiryValue) > parseFloat(normFilterValue);
+                                filterResults[index + 1] = isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
                                 break;
                             case 'equalTo':
                                 // Use soft equality to handle string vs number comparison
@@ -1118,6 +1140,14 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 break;
                             case 'notContains':
                                 filterResults[index + 1] = !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                                break;
+                            case 'isNull':
+                                // true value means find null records; false means find non-null records
+                                if (mapping.valueField === 'true') {
+                                    filterResults[index + 1] = inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
+                                } else {
+                                    filterResults[index + 1] = inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
+                                }
                                 break;
                             default:
                                 filterResults[index + 1] = false;
@@ -1149,9 +1179,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                         switch (mapping.operator) {
                             case 'greaterThan':
-                                return parseFloat(normInquiryValue) > parseFloat(normFilterValue);
+                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
                             case 'lessThan':
-                                return parseFloat(normInquiryValue) < parseFloat(normFilterValue);
+                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                             case 'equalTo':
                                 return normInquiryValue == normFilterValue;
                             case 'contains':
@@ -1160,6 +1190,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 return normInquiryValue != normFilterValue;
                             case 'notContains':
                                 return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                            case 'isNull':
+                                // true value means find null records; false means find non-null records
+                                if (mapping.valueField === 'true') {
+                                    return inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
+                                }
+                                return inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
                             default:
                                 return false;
                         }
@@ -1178,9 +1214,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                     switch (mapping.operator) {
                         case 'greaterThan':
-                            return parseFloat(normInquiryValue) > parseFloat(normFilterValue);
+                            return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
                         case 'lessThan':
-                            return parseFloat(normInquiryValue) < parseFloat(normFilterValue);
+                            return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                         case 'equalTo':
                             return normInquiryValue == normFilterValue;
                         case 'contains':
@@ -1189,6 +1225,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             return normInquiryValue != normFilterValue;
                         case 'notContains':
                             return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                        case 'isNull':
+                            // true value means find null records; false means find non-null records
+                            if (mapping.valueField === 'true') {
+                                return inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
+                            }
+                            return inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
                         default:
                             return false;
                     }
@@ -1238,6 +1280,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return 'Not Equal To';
             case 'notContains':
                 return 'Not Contains';
+            case 'isNull':
+                return 'Is Null';
             default:
                 return operator;
         }
@@ -1668,6 +1712,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     handleConditionOperatorChange(event) {
         this.selectedConditionOperator = event.detail.value;
+        this.selectedListingField = ''; // Reset value when operator changes to avoid stale data
     }
 
     /**
@@ -1746,6 +1791,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         // Validate required fields based on constant selection
         const isFieldValid = this.inquiryFieldObject.MVEX__Field_Name__c;
         const isOperatorValid = this.selectedConditionOperator;
+        // For isNull operator, value selection (True/False) is still required
         const isValueValid = this.selectedListingField; // This holds either constant value or listing field name
 
         if (isFieldValid && isOperatorValid && isValueValid) {
@@ -1754,7 +1800,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             // Determine display value
             let displayValue = this.selectedListingField;
-            if (!this.isConstant) {
+            if (this.selectedConditionOperator === 'isNull') {
+                // For isNull, display True or False
+                displayValue = this.selectedListingField === 'true' ? 'True' : 'False';
+            } else if (!this.isConstant) {
                 // If using a field mapping, try to find the label of the listing field
                 const listingOption = this.listingFieldOptions.find(opt => opt.value === this.selectedListingField);
                 displayValue = listingOption ? listingOption.label : this.selectedListingField;

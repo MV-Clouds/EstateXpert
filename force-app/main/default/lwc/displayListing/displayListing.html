@@ -31,14 +31,6 @@
                                     </svg>
                                 </li>
                                 <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="2">
-                                    <svg class="menusvg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path data-tab-index="2" fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M8 13.3333C8.70724 13.3333 9.38552 13.6143 9.88562 14.1144C10.3857 14.6145 10.6667 15.2928 10.6667 16V21.3333C10.6667 22.0406 10.3857 22.7189 9.88562 23.219C9.38552 23.719 8.70724 24 8 24H2.66667C1.95942 24 1.28115 23.719 0.781048 23.219C0.280951 22.7189 0 22.0406 0 21.3333V16C0 15.2928 0.280951 14.6145 0.781048 14.1144C1.28115 13.6143 1.95942 13.3333 2.66667 13.3333H8ZM21.3333 13.3333C22.0406 13.3333 22.7189 13.6143 23.219 14.1144C23.719 14.6145 24 15.2928 24 16V21.3333C24 22.0406 23.719 22.7189 23.219 23.219C22.7189 23.719 22.0406 24 21.3333 24H16C15.2928 24 14.6145 23.719 14.1144 23.219C13.6143 22.7189 13.3333 22.0406 13.3333 21.3333V16C13.3333 15.2928 13.6143 14.6145 14.1144 14.1144C14.6145 13.6143 15.2928 13.3333 16 13.3333H21.3333ZM8 0C8.70724 0 9.38552 0.280951 9.88562 0.781048C10.3857 1.28115 10.6667 1.95942 10.6667 2.66667V8C10.6667 8.70724 10.3857 9.38552 9.88562 9.88562C9.38552 10.3857 8.70724 10.6667 8 10.6667H2.66667C1.95942 10.6667 1.28115 10.3857 0.781048 9.88562C0.280951 9.38552 0 8.70724 0 8V2.66667C0 1.95942 0.280951 1.28115 0.781048 0.781048C1.28115 0.280951 1.95942 0 2.66667 0H8ZM21.3333 0C22.0406 0 22.7189 0.280951 23.219 0.781048C23.719 1.28115 24 1.95942 24 2.66667V8C24 8.70724 23.719 9.38552 23.219 9.88562C22.7189 10.3857 22.0406 10.6667 21.3333 10.6667H16C15.2928 10.6667 14.6145 10.3857 14.1144 9.88562C13.6143 9.38552 13.3333 8.70724 13.3333 8V2.66667C13.3333 1.95942 13.6143 1.28115 14.1144 0.781048C14.6145 0.280951 15.2928 0 16 0H21.3333Z"
-                                            fill="white" />
-                                    </svg>
-                                </li>
-                                <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="3">
                                     <svg class="menusvg" width="24" height="25" viewBox="0 0 24 25" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path data-tab-index="3"
@@ -76,14 +68,14 @@
                                         c8.493-4.565,17.541-8.31,26.896-11.132c8.825-2.662,15.247-10.279,16.378-19.427l6.166-49.867h39.494l6.169,49.869
                                         c1.133,9.148,7.557,16.767,16.384,19.427c9.328,2.811,18.379,6.557,26.902,11.135c8.122,4.364,18.055,3.522,25.325-2.149
                                         l39.616-30.894l27.927,27.912l-30.897,39.618c-5.666,7.267-6.513,17.191-2.158,25.311c4.58,8.54,8.328,17.599,11.138,26.923
-                                        c2.661,8.825,10.279,15.248,19.427,16.381l49.878,6.169V275.74z"/>
+                                        c2.661,8.825,10.279,15.248,19.427,16.381l49.878,6.169V275.74z" />
                                     <path d="M255.997,155.153c-55.606,0-100.845,45.244-100.845,100.856c0,55.603,45.239,100.839,100.845,100.839
                                         c55.609,0,100.852-45.236,100.852-100.839C356.849,200.397,311.606,155.153,255.997,155.153z M255.997,310.303
                                         c-29.941,0-54.3-24.356-54.3-54.294c0-29.947,24.359-54.311,54.3-54.311c29.944,0,54.306,24.363,54.306,54.311
-                                        C310.303,285.947,285.941,310.303,255.997,310.303z"/>
+                                        C310.303,285.947,285.941,310.303,255.997,310.303z" />
                                 </g>
                             </svg>
-                                Settings
+                            Settings
                         </button>
 
                         <template if:true={isConfigOpen}>
@@ -96,10 +88,11 @@
 
                         <template if:true={hideFilterButton}>
                             <button class="btn mapping-btn" onclick={showModalBox}>
-                                <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
-                                    <path fill-rule="evenodd" clip-rule="evenodd" 
-                                        d="M3 7C3 6.44772 3.44772 6 4 6H20C20.5523 6 21 6.44772 21 7C21 7.55228 20.5523 8 20 8H4C3.44772 8 3 7.55228 3 7ZM6 12C6 11.4477 6.44772 11 7 11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H7C6.44772 13 6 12.5523 6 12ZM9 17C9 16.4477 9.44772 16 10 16H14C14.5523 16 15 16.4477 15 17C15 17.5523 14.5523 18 14 18H10C9.44772 18 9 17.5523 9 17Z" 
-                                        fill="white"/>
+                                <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M3 7C3 6.44772 3.44772 6 4 6H20C20.5523 6 21 6.44772 21 7C21 7.55228 20.5523 8 20 8H4C3.44772 8 3 7.55228 3 7ZM6 12C6 11.4477 6.44772 11 7 11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H7C6.44772 13 6 12.5523 6 12ZM9 17C9 16.4477 9.44772 16 10 16H14C14.5523 16 15 16.4477 15 17C15 17.5523 14.5523 18 14 18H10C9.44772 18 9 17.5523 9 17Z"
+                                        fill="white" />
                                 </svg>
                                 Filters
                             </button>
@@ -112,11 +105,23 @@
                                         Filter Listings
                                     </div>
                                     <div class="scroll-div">
-                                        <div class="slds-form_element">
-                                            <lightning-combobox name="conditionType" label="Condition Type"
-                                                value={conditiontype} options={conditionOptions}
-                                                onchange={handleConditionTypeChange}>
-                                            </lightning-combobox>
+                                        <div class="condition-type-wrapper">
+                                            <div class="slds-form_element slds-m-bottom_medium condition-type-field">
+                                                <lightning-combobox name="conditionType" label="Condition Type"
+                                                    value={conditiontype} options={conditionOptions}
+                                                    onchange={handleConditionTypeChange}>
+                                                </lightning-combobox>
+                                            </div>
+                                            <template if:true={showAddConditionIcon}>
+                                                <button class="add-condition-icon-btn" onclick={addCondition}
+                                                    title="Add Condition">
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M8 3V13M3 8H13" stroke="currentColor"
+                                                            stroke-width="2.5" stroke-linecap="round" />
+                                                    </svg>
+                                                </button>
+                                            </template>
                                         </div>
 
                                         <template if:true={isCustomLogicSelected}>
@@ -151,18 +156,13 @@
                                                         </div>
                                                         <div class="delete-div" title="Delete" data-id={mapping.id}
                                                             onclick={handleDeleteMapping} data-name="delete">
-                                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                                xmlns="http://www.w3.org/2000/svg" data-id={mapping.id}>
-                                                                <path d="M3 6H5H21" stroke="#A30D11" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
+                                                            <svg width="15" height="15"
+                                                                viewBox="0 0 14 14" fill="none"
+                                                                xmlns="http://www.w3.org/2000/svg">
                                                                 <path
-                                                                    d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
-                                                                    stroke="#A30D11" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                                <path d="M10 11V17" stroke="#A30D11" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                                <path d="M14 11V17" stroke="#A30D11" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
+                                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                                    stroke-linejoin="round" />
                                                             </svg>
 
                                                             <span class="slds-assistive-text">Delete</span>
@@ -178,15 +178,13 @@
                                 </div>
                                 <div class="filter-footer">
                                     <div class="add-condtion">
-                                        <button class="btn modal-btn-blue" onclick={addCondition}
-                                            disabled={isRealatedList}>Add Condition</button>
                                         <template if:true={isAddConditionModalVisible}>
                                             <div class="condition-div">
                                                 <div class="filter-header">
                                                     Configure Condition
                                                 </div>
                                                 <div class="condition-div-body">
-                                                    <div class="slds-form_element">
+                                                    <div class="slds-form_element slds-m-bottom_medium">
                                                         <lightning-combobox name="listingField" label="Listing Field"
                                                             value={listingFieldObject.MVEX__Field_Name__c}
                                                             options={listingpicklistOptions}
@@ -194,7 +192,8 @@
                                                         </lightning-combobox>
                                                     </div>
 
-                                                    <div class="slds-form_element slds-m-top_medium">
+                                                    <div
+                                                        class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                         <lightning-combobox name="conditionOperator" label="Condition"
                                                             value={selectedConditionOperator}
                                                             options={conditionOperatorOptions}
@@ -202,7 +201,8 @@
                                                         </lightning-combobox>
                                                     </div>
 
-                                                    <div class="slds-form_element slds-m-top_medium">
+                                                    <div
+                                                        class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                         <template if:false={isNullOperatorSelected}>
                                                             <lightning-input type="checkbox" label="Use Constant Value"
                                                                 checked={isConstant}
@@ -211,10 +211,10 @@
                                                     </div>
 
                                                     <template if:true={isNullOperatorSelected}>
-                                                        <div class="slds-form_element slds-m-top_medium">
+                                                        <div
+                                                            class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                             <label><span class="red">*</span>Value</label>
-                                                            <lightning-combobox
-                                                                value={selectedInquiryValue}
+                                                            <lightning-combobox value={selectedInquiryValue}
                                                                 data-field="MVEX__Value__c"
                                                                 options={isNullPicklistOptions}
                                                                 onchange={handleListingFieldChange}
@@ -225,7 +225,8 @@
                                                     </template>
 
                                                     <template if:false={isNullOperatorSelected}>
-                                                        <div class="slds-form_element slds-m-top_medium">
+                                                        <div
+                                                            class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                             <label><span class="red">*</span>Value</label>
                                                             <template if:true={isConstant}>
                                                                 <template if:true={listingFieldObject.isPrimary}>
@@ -244,8 +245,9 @@
                                                                         variant="label-hidden"></lightning-combobox>
                                                                 </template>
                                                                 <template if:true={listingFieldObject.isReference}>
-                                                                    <lightning-record-picker value={selectedInquiryValue}
-                                                                        label="Reference" data-field="MVEX__Value__c"
+                                                                    <lightning-record-picker
+                                                                        value={selectedInquiryValue} label="Reference"
+                                                                        data-field="MVEX__Value__c"
                                                                         object-api-name={listingFieldObject.objectApiName}
                                                                         onchange={handleRefChange}
                                                                         variant="label-hidden"></lightning-record-picker>
@@ -263,18 +265,47 @@
                                                     </template>
                                                 </div>
                                                 <div class="condition-div-footer">
-                                                    <button class="btn modal-btn-white"
-                                                        onclick={closeAddConditionModal}>Cancel</button>
-                                                    <button class="btn modal-btn-blue"
-                                                        onclick={saveCondition}>Save</button>
+                                                    <button class="modal-btn-white" onclick={closeAddConditionModal}>
+                                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                                fill="currentColor" />
+                                                        </svg>
+                                                        Cancel
+                                                    </button>
+                                                    <button class="modal-btn-blue" onclick={saveCondition}>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                                                fill="currentColor" />
+                                                        </svg>
+                                                        Save
+                                                    </button>
                                                 </div>
                                                 <div class="arrow"></div>
                                             </div>
                                         </template>
                                     </div>
                                     <div class="custom__footer">
-                                        <button class="btn modal-btn-white" onclick={hideModalBox}>Cancel</button>
-                                        <button class="btn modal-btn-blue" onclick={applyModalFilters}>Apply</button>
+                                        <button class="modal-btn-white" onclick={hideModalBox}>
+                                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                    fill="currentColor" />
+                                            </svg>
+                                            Cancel
+                                        </button>
+                                        <button class="modal-btn-blue" onclick={applyModalFilters}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                                    fill="currentColor" />
+                                            </svg>
+                                            Apply
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -339,56 +370,6 @@
                         </tbody>
                     </table>
                 </template>
-
-                <template if:true={isGridView}>
-                    <div class="custom-grid">
-                        <template for:each={pagedProperties} for:item="property">
-                            <div class="card" key={property.id}>
-                                <div class="property-item">
-                                    <img class="property-image card-img-top" src={property.media_url}
-                                        alt="Property image" draggable="false"></img>
-                                    <div class="property_type">
-                                        <p>For {property.mvex__listing_type__c}</p>
-                                    </div>
-                                    <div class="card-body details">
-                                        <h5 class="card-title"><b>{property.name}</b></h5>
-                                        <div class="card-text">
-                                            <img src={location_icon} height="18px" width="18px" draggable="false" />
-                                            <p class="slds-m-left_xx-small">{property.mvex__city__c},
-                                                {property.mvex__state__c},
-                                                {property.mvex__postalcode__c}</p>
-                                        </div>
-                                        <div class="room_details">
-                                            <lightning-layout-item class="bedroom">
-                                                <img src={bedroom_icon} height="24px" width="20px" draggable="false" />
-                                                <h1 class="slds-m-left_xx-small">{property.mvex__bedrooms__c} Bedrooms
-                                                </h1>
-                                            </lightning-layout-item>
-                                            <lightning-layout-item class="bathroom" alignment-bump="left">
-                                                <img src={bathroom_icon} class="bathroom_icon" draggable="false" />
-                                                <h1 class="slds-m-left_xx-small">{property.mvex__bathrooms__c} Bathrooms
-                                                </h1>
-                                            </lightning-layout-item>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <lightning-layout-item class="item-1">
-                                            <p class="card-link"><b>
-                                                    <template if:true={property.mvex__listing_price__c}>
-                                                        {property.CurrencyIsoCode} {property.mvex__listing_price__c}
-                                                    </template>
-                                                    <template if:false={property.mvex__listing_price__c}>
-                                                        TBD
-                                                    </template>
-                                                </b></p>
-                                        </lightning-layout-item>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-
                 <template if:true={isMapView}>
                     <div class="main">
                         <lightning-map class="mapmarker slds-size_6-of-6" map-markers={mapMarkers} list-view="visible">

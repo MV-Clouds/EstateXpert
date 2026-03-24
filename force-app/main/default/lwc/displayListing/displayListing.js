@@ -66,7 +66,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         { label: 'Equal To', value: 'equalTo' },
         { label: 'Contains', value: 'contains' },
         { label: 'Not Contains', value: 'notContains' },
-        { label: 'Not Equal To', value: 'notEqualTo' }
+        { label: 'Not Equal To', value: 'notEqualTo' },
+        { label: 'Is Null', value: 'isNull' }
     ];
     @track listingFieldOptions = [];
     @track inquiryFieldOptions = [];
@@ -99,6 +100,27 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         { label: 'Related List', value: 'related' },
         { label: 'No Filter', value: 'none' },
     ];
+
+    /**
+    * Method Name : isNullOperatorSelected
+    * @description : returns true when the selected condition operator is 'isNull'
+    * Date: 24/03/2026
+    */
+    get isNullOperatorSelected() {
+        return this.selectedConditionOperator === 'isNull';
+    }
+
+    /**
+    * Method Name : isNullPicklistOptions
+    * @description : returns True/False options for the isNull operator picklist
+    * Date: 24/03/2026
+    */
+    get isNullPicklistOptions() {
+        return [
+            { label: 'True', value: 'true' },
+            { label: 'False', value: 'false' }
+        ];
+    }
 
     /**
     * Method Name : isCustomLogicSelected
@@ -779,6 +801,14 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                             case 'notContains':
                                 result = !String(normFieldValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                                 break;
+                            case 'isNull':
+                                // true value means find null records; false means find non-null records
+                                if (mapping.valueField === 'true') {
+                                    result = fieldValue === null || fieldValue === undefined || String(fieldValue).trim() === '';
+                                } else {
+                                    result = fieldValue !== null && fieldValue !== undefined && String(fieldValue).trim() !== '';
+                                }
+                                break;
                             default:
                                 result = false;
                         }
@@ -810,9 +840,9 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
                         switch (mapping.operator) {
                             case 'greaterThan':
-                                return parseFloat(normFieldValue) > parseFloat(normFilterValue);
+                                return isNaN(parseFloat(normFieldValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normFieldValue) > parseFloat(normFilterValue);
                             case 'lessThan':
-                                return parseFloat(normFieldValue) < parseFloat(normFilterValue);
+                                return isNaN(parseFloat(normFieldValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normFieldValue) < parseFloat(normFilterValue);
                             case 'equalTo':
                                 return normFieldValue == normFilterValue;
                             case 'contains':
@@ -821,6 +851,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 return normFieldValue != normFilterValue;
                             case 'notContains':
                                 return !String(normFieldValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                            case 'isNull':
+                                // true value means find null records; false means find non-null records
+                                if (mapping.valueField === 'true') {
+                                    return fieldValue === null || fieldValue === undefined || String(fieldValue).trim() === '';
+                                }
+                                return fieldValue !== null && fieldValue !== undefined && String(fieldValue).trim() !== '';
                             default:
                                 return false;
                         }
@@ -839,9 +875,9 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
                         switch (mapping.operator) {
                             case 'greaterThan':
-                                return parseFloat(normListingValue) > parseFloat(normFilterValue);
+                                return isNaN(parseFloat(normListingValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normListingValue) > parseFloat(normFilterValue);
                             case 'lessThan':
-                                return parseFloat(normListingValue) < parseFloat(normFilterValue);
+                                return isNaN(parseFloat(normListingValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normListingValue) < parseFloat(normFilterValue);
                             case 'equalTo':
                                 return normListingValue == normFilterValue;
                             case 'contains':
@@ -850,6 +886,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 return normListingValue != normFilterValue;
                             case 'notContains':
                                 return !String(normListingValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                            case 'isNull':
+                                // true value means find null records; false means find non-null records
+                                if (mapping.valueField === 'true') {
+                                    return listingValue === null || listingValue === undefined || String(listingValue).trim() === '';
+                                }
+                                return listingValue !== null && listingValue !== undefined && String(listingValue).trim() !== '';
                             default:
                                 return false;
                         }
@@ -1188,6 +1230,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 return 'Not Equal To';
             case 'notContains':
                 return 'Not Contains';
+            case 'isNull':
+                return 'Is Null';
             default:
                 return operator;
         }
@@ -1319,6 +1363,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     */
     handleConditionOperatorChange(event) {
         this.selectedConditionOperator = event.detail.value;
+        this.selectedInquiryValue = ''; // Reset value when operator changes to avoid stale data
     }
 
     /**
@@ -1395,6 +1440,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     saveCondition() {
         const isFieldValid = this.listingFieldObject.MVEX__Field_Name__c;
         const isOperatorValid = this.selectedConditionOperator;
+        // For isNull operator, value selection (True/False) is still required
         const isValueValid = this.selectedInquiryValue; // constant or inquiry field
 
         if (isFieldValid && isOperatorValid && isValueValid) {
@@ -1403,7 +1449,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
             // Determine display value
             let displayValue = this.selectedInquiryValue;
-            if (!this.isConstant) {
+            if (this.selectedConditionOperator === 'isNull') {
+                // For isNull, display True or False
+                displayValue = this.selectedInquiryValue === 'true' ? 'True' : 'False';
+            } else if (!this.isConstant) {
                 const inquiryOption = this.inquiryFieldOptions.find(opt => opt.value === this.selectedInquiryValue);
                 displayValue = inquiryOption ? inquiryOption.label : this.selectedInquiryValue;
             } else if (this.listingFieldObject.isPicklist && this.listingFieldObject.picklistValues) {

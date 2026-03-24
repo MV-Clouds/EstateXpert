@@ -48,6 +48,7 @@
 }
 
 .header-action-btn {
+    min-height: 36px;
     display: inline-flex;
     justify-content: center;
     align-items: center;

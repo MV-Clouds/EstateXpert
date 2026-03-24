@@ -27,7 +27,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     @api communicationType;
     @track objectOptions = [];
     @track listViewOptions = [];
-    @track selectedObject = '';
+    @track selectedObject = 'Contact';
     @track selectedListView = '';
     @track data = [];
     @track filteredData = [];
@@ -52,6 +52,11 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     @track showPhoneColumn = false;
     @track showEmailColumn = false;
 
+    // ── Side Panel CSS Class ────────────────────────────────────
+    get selectedRecordsPanelClass() {
+        return this.selectedRecordsList.length > 0 ? 'right-panel open' : 'right-panel';
+    }
+
     // ── Selected Records for Pills ──────────────────────────────
     get selectedRecordsList() {
         return this.data.filter(record => this.selectedRecords.has(record.Id));
@@ -68,11 +73,11 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 return rec;
             });
             
-            this.filteredData = [...this.filteredData].sort((a, b) => {
-                const aSelected = this.selectedRecords.has(a.Id);
-                const bSelected = this.selectedRecords.has(b.Id);
-                return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+            this.filteredData = this.filteredData.map(rec => {
+                if(rec.Id === recordId) rec.isSelected = false;
+                return rec;
             });
+
             this.updateShownData();
         }
     }
@@ -177,8 +182,10 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     // ── Lifecycle ──────────────────────────────────────────────
     connectedCallback() {
         loadStyle(this, MulishFontCss);
+        this.selectedObject = 'Contact';
         this.setColumnVisibility();
         this.loadConfigs();
+        this.loadListViews(); // Load Contact List views initially
     }
 
     // ── Column visibility ──────────────────────────────────────
@@ -240,11 +247,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 this.createBtnLabel = 'Save Group';
                 let groupData = result.group || {};
                 
-                this.selectedObject = groupData.MVEX__Object_Name__c || '';
+                this.selectedObject = 'Contact';
                 this.setColumnVisibility();
-                if(this.selectedObject) {
-                    this.loadListViews();
-                }
                 this.selectedListView = groupData.MVEX__List_View__c || '';
                 
                 this.broadcastGroupName = groupData.Name;
@@ -330,7 +334,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     }
 
     cleardata() {
-        this.selectedObject = '';
+        this.selectedObject = 'Contact';
         this.selectedListView = '';
         this.data = [];
         this.filteredData = [];
@@ -393,11 +397,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             return !term || name.includes(term) || phone.includes(term) || email.includes(term);
         });
 
-        this.filteredData = results.sort((a, b) => {
-            const aSelected = this.selectedRecords.has(a.Id);
-            const bSelected = this.selectedRecords.has(b.Id);
-            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
-        });
+        // Do not alter sorting/order, keep the natural filter order
+        this.filteredData = results;
 
         this.currentPage = 1;
         this.updateShownData();
@@ -441,10 +442,10 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         if (response.status === 200) {
             const fields = this.configMap[this.selectedObject];
             let fieldsString = `Id, Name`;
-            if (fields.phoneField && fields.phoneField.trim() !== '') {
+            if (fields && fields.phoneField && fields.phoneField.trim() !== '') {
                 fieldsString += `, ${fields.phoneField}`;
             }
-            if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField && fields.emailField.trim() !== '') {
+            if (fields && (this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField && fields.emailField.trim() !== '') {
                 if (!fieldsString.includes(fields.emailField)) {
                     fieldsString += `, ${fields.emailField}`;
                 }
@@ -502,10 +503,10 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                         let recordData = {
                             Id: record.Id,
                             name: record['Name'] ? record['Name'] : ' - ',
-                            phone: (fields.phoneField && record[fields.phoneField]) ? record[fields.phoneField] : ' - ',
+                            phone: (fields && fields.phoneField && record[fields.phoneField]) ? record[fields.phoneField] : ' - ',
                             isSelected: false
                         };
-                        if ((this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
+                        if (fields && (this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
                             recordData.email = record[fields.emailField] ? record[fields.emailField] : ' - ';
                         }
                         return recordData;
@@ -525,11 +526,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                         this.selectedRecords.clear();
                     }
 
-                    this.filteredData = [...this.data].sort((a, b) => {
-                        const aSel = this.selectedRecords.has(a.Id);
-                        const bSel = this.selectedRecords.has(b.Id);
-                        return (aSel === bSel) ? 0 : aSel ? -1 : 1;
-                    });
+                    // DO NOT SORT AUTOMATICALLY to prevent glitching on top
+                    this.filteredData = [...this.data];
 
                     this.currentPage = 1;
                     this.updateShownData();
@@ -569,10 +567,9 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             return rec;
         });
 
-        this.filteredData = [...this.filteredData].sort((a, b) => {
-            const aSelected = this.selectedRecords.has(a.Id);
-            const bSelected = this.selectedRecords.has(b.Id);
-            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        this.filteredData = this.filteredData.map(rec => {
+            if(rec.Id === recordId) rec.isSelected = isChecked;
+            return rec;
         });
 
         this.updateShownData();
@@ -598,10 +595,13 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             return rec;
         });
 
-        this.filteredData = [...this.filteredData].sort((a, b) => {
-            const aSelected = this.selectedRecords.has(a.Id);
-            const bSelected = this.selectedRecords.has(b.Id);
-            return (aSelected === bSelected) ? 0 : aSelected ? -1 : 1;
+        this.filteredData = this.filteredData.map(rec => {
+            if(this.selectedRecords.has(rec.Id)) {
+                rec.isSelected = true;
+            } else if (this.paginatedData.find(p => p.Id === rec.Id)) {
+                rec.isSelected = false;   
+            }
+            return rec;
         });
 
         this.updateShownData();

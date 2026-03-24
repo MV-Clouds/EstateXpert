@@ -19,130 +19,230 @@
                     </div>
                 </div>
                 <div class="header">
-                    <button class="btn" onclick={handleModalOpen} disabled={isBtnDisabled}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Save Group          
-                    </button>
+                    <!-- Step 1: Show Continue button -->
+                    <template if:false={isReviewStep}>
+                        <button class="btn" onclick={handleContinue} disabled={isBtnDisabled}>
+                            Continue
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </template>
+
+                    <!-- Step 2: Show Back + Save Group buttons -->
+                    <template if:true={isReviewStep}>
+                        <button class="btn" onclick={handleModalOpen}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Save Group
+                        </button>
+                    </template>
                 </div>
             </div>
         </div>
 
         <div class="main_content_cls">
-            <!-- Comboboxes in Grid -->
-            <div class="comboboxdiv">
-                <div class="internal-comboboxdiv">
-                    <lightning-combobox label="Select Object" value={selectedObject} options={objectOptions} onchange={handleObjectChange}></lightning-combobox>
-                    <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
-                </div>
-                <div>
-                    <lightning-input type="text" label="Search Records" placeholder="Search record by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
-                </div>
-            </div>
 
-            <!-- Custom Table -->
-            <template if:true={paginatedData.length}>
-                <div class="table-content">
-                    <table class="slds-table">
-                        <thead>
-                            <tr class="table_tr_cls">
-                                <th scope="col" class="checkbox sno" >
-                                    <lightning-input type="checkbox" checked={isAllSelected} onchange={handleSelectAll} indeterminate={isIndeterminate}></lightning-input>
-                                </th>
-                                <th scope="col" class="sno">
-                                    <div>No.</div>
-                                </th>
-                                <th scope="col" class="name">
-                                    <div>Name</div>
-                                </th>
-                                <template if:true={showPhoneColumn}>
-                                    <th scope="col" class="phone">
-                                        <div>Phone</div>
-                                    </th>
-                                </template>
-                                <template if:true={showEmailColumn}>
-                                    <th scope="col" class="">
-                                        <div>Email</div>
-                                    </th>
-                                </template>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={paginatedData} for:item="row" for:index="index">
-                                <tr key={row.Id}>
-                                    <td data-label="Checkbox">
-                                        <lightning-input type="checkbox" checked={row.isSelected} data-recordid={row.Id} onchange={handleRecordSelection}></lightning-input>
-                                    </td>
-                                    <td data-label="S.No." class="truncate_css">
-                                        <div>{row.index}</div>
-                                    </td>
-                                    <td data-label="Name">
-                                        <div>{row.name}</div>
-                                    </td>
-                                    <template if:true={showPhoneColumn}>
-                                        <td data-label="Phone">
-                                            <div>{row.phone}</div>
-                                        </td>
-                                    </template>
-                                    <template if:true={showEmailColumn}>
-                                        <td data-label="Email">
-                                            <div>{row.email}</div>
-                                        </td>
-                                    </template>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
-
-            <!-- No Records Message -->
-            <template if:true={showNoRecordsMessage}>
-                <div class="no-records-message">
-                    <div class="empty-state">
-                        <div class="empty-state__content">
-                            <div class="empty-state__icon">
-                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                            </div>
-                            <div class="empty-state__message">No Data Available to Show.</div>
-                        </div>
+            <!-- ═══════════════════════════════ STEP 1: Selection View ═══════════════════════════════ -->
+            <template if:false={isReviewStep}>
+                <!-- Comboboxes in Grid -->
+                <div class="comboboxdiv">
+                    <div class="internal-comboboxdiv">
+                        <lightning-combobox label="Select Object" value={selectedObject} options={objectOptions} onchange={handleObjectChange}></lightning-combobox>
+                        <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
+                    </div>
+                    <div>
+                        <lightning-input type="text" label="Search Records" placeholder="Search record by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
                     </div>
                 </div>
-            </template>
-    
-            <template if:true={paginatedData.length}>
-                <div class="pagination-container">
-                    <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                            <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                        </svg>
-                        Previous
-                    </button>
-            
-                    <template for:each={pageNumbers} for:item="page">
-                        <template if:false={page.isEllipsis}>
-                            <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
-                                {page.number}
-                            </button>
+
+                <!-- Custom Table -->
+                <template if:true={paginatedData.length}>
+                    <div class="table-content">
+                        <table class="slds-table">
+                            <thead>
+                                <tr class="table_tr_cls">
+                                    <th scope="col" class="checkbox sno">
+                                        <lightning-input type="checkbox" checked={isAllSelected} onchange={handleSelectAll} indeterminate={isIndeterminate}></lightning-input>
+                                    </th>
+                                    <th scope="col" class="sno">
+                                        <div>No.</div>
+                                    </th>
+                                    <th scope="col" class="name">
+                                        <div>Name</div>
+                                    </th>
+                                    <template if:true={showPhoneColumn}>
+                                        <th scope="col" class="phone">
+                                            <div>Phone</div>
+                                        </th>
+                                    </template>
+                                    <template if:true={showEmailColumn}>
+                                        <th scope="col" class="">
+                                            <div>Email</div>
+                                        </th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={paginatedData} for:item="row" for:index="index">
+                                    <tr key={row.Id}>
+                                        <td data-label="Checkbox">
+                                            <lightning-input type="checkbox" checked={row.isSelected} data-recordid={row.Id} onchange={handleRecordSelection}></lightning-input>
+                                        </td>
+                                        <td data-label="S.No." class="truncate_css">
+                                            <div>{row.index}</div>
+                                        </td>
+                                        <td data-label="Name">
+                                            <div>{row.name}</div>
+                                        </td>
+                                        <template if:true={showPhoneColumn}>
+                                            <td data-label="Phone">
+                                                <div>{row.phone}</div>
+                                            </td>
+                                        </template>
+                                        <template if:true={showEmailColumn}>
+                                            <td data-label="Email">
+                                                <div>{row.email}</div>
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <!-- No Records Message -->
+                <template if:true={showNoRecordsMessage}>
+                    <div class="no-records-message">
+                        <div class="empty-state">
+                            <div class="empty-state__content">
+                                <div class="empty-state__icon">
+                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                </div>
+                                <div class="empty-state__message">No Data Available to Show.</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={paginatedData.length}>
+                    <div class="pagination-container">
+                        <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                            </svg>
+                            Previous
+                        </button>
+
+                        <template for:each={pageNumbers} for:item="page">
+                            <template if:false={page.isEllipsis}>
+                                <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
+                                    {page.number}
+                                </button>
+                            </template>
+                            <template if:true={page.isEllipsis}>
+                                <span key={page.number} class="pagination-ellipsis">...</span>
+                            </template>
                         </template>
-                        <template if:true={page.isEllipsis}>
-                            <span key={page.number} class="pagination-ellipsis">...</span>
-                        </template>
-                    </template>
-            
-                    <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
-                        Next
-                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                            <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                        </svg>
-                    </button>
-                </div>
+
+                        <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
             </template>
+
+            <!-- ═══════════════════════════════ STEP 2: Review View ═══════════════════════════════ -->
+            <template if:true={isReviewStep}>
+                <template if:true={reviewPaginatedData.length}>
+                    <div class="table-content-review">
+                        <table class="slds-table">
+                            <thead>
+                                <tr class="table_tr_cls">
+                                    <th scope="col" class="sno">
+                                        <div>No.</div>
+                                    </th>
+                                    <th scope="col" class="name">
+                                        <div>Name</div>
+                                    </th>
+                                    <template if:true={showPhoneColumn}>
+                                        <th scope="col" class="phone">
+                                            <div>Phone</div>
+                                        </th>
+                                    </template>
+                                    <template if:true={showEmailColumn}>
+                                        <th scope="col" class="">
+                                            <div>Email</div>
+                                        </th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={reviewPaginatedData} for:item="row">
+                                    <tr key={row.Id}>
+                                        <td data-label="S.No." class="truncate_css">
+                                            <div>{row.index}</div>
+                                        </td>
+                                        <td data-label="Name">
+                                            <div>{row.name}</div>
+                                        </td>
+                                        <template if:true={showPhoneColumn}>
+                                            <td data-label="Phone">
+                                                <div>{row.phone}</div>
+                                            </td>
+                                        </template>
+                                        <template if:true={showEmailColumn}>
+                                            <td data-label="Email">
+                                                <div>{row.email}</div>
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:true={reviewPaginatedData.length}>
+                    <div class="pagination-container-review">
+                        <button class="pagination-button" disabled={isReviewFirstPage} onclick={handleReviewPrevious}>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                            </svg>
+                            Previous
+                        </button>
+
+                        <template for:each={reviewPageNumbers} for:item="page">
+                            <template if:false={page.isEllipsis}>
+                                <button key={page.number} data-id={page.number} class={page.className} onclick={handleReviewPageChange}>
+                                    {page.number}
+                                </button>
+                            </template>
+                            <template if:true={page.isEllipsis}>
+                                <span key={page.number} class="pagination-ellipsis">...</span>
+                            </template>
+                        </template>
+
+                        <button class="pagination-button" disabled={isReviewLastPage} onclick={handleReviewNext}>
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+            </template>
+
         </div>
 
+        <!-- ═══════════════════════════════ Save Modal ═══════════════════════════════ -->
         <template if:true={isCreateBroadcastModalOpen}>
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">

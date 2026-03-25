@@ -432,13 +432,20 @@
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
-.table-content .slds-table th,
-.table-content .slds-table td {
+.table-content .slds-table th {
     text-align: center;
     font-size: 14px;
     font-weight: 400;
     color: #585858;
     height: 45px;
+}
+
+.table-content .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 3.5rem;
 }
 
 .table-content .slds-table th {

@@ -187,7 +187,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                     });                    
                     this.filteredRecords = [...this.allRecords];
                     this.sortData();
-                    this.applyFilters();
+                    this.filterRecords();
                     this.isLoading=false;
                 } else if (error) {
                     console.error('Error fetching WhatsApp templates: ', error);

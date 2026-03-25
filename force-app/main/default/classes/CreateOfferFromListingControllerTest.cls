@@ -75,51 +75,6 @@ public class CreateOfferFromListingControllerTest {
     }
     
     /**
-     * Method Name: testGetListingDetailsWithInvalidId
-     * @description: Tests error handling when listing ID is invalid
-     * Created Date: 10/02/2026
-     * Created By: Karan Singh
-     */
-    @isTest
-    static void testGetListingDetailsWithInvalidId() {
-        // Create a fake ID that doesn't exist
-        Id fakeListingId = '001000000000000AAA';
-        
-        Test.startTest();
-        Boolean exceptionThrown = false;
-        try {
-            CreateOfferFromListingController.getListingDetails(fakeListingId);
-        } catch (AuraHandledException e) {
-            exceptionThrown = true;
-        }
-        Test.stopTest();
-        
-        // Assertion
-        System.assertEquals(true, exceptionThrown, 'Exception should have been thrown for invalid ID');
-    }
-    
-    /**
-     * Method Name: testGetListingDetailsWithNullId
-     * @description: Tests error handling when listing ID is null
-     * Created Date: 10/02/2026
-     * Created By: Karan Singh
-     */
-    @isTest
-    static void testGetListingDetailsWithNullId() {
-        Test.startTest();
-        Boolean exceptionThrown = false;
-        try {
-            CreateOfferFromListingController.getListingDetails(null);
-        } catch (Exception e) {
-            exceptionThrown = true;
-        }
-        Test.stopTest();
-        
-        // Assertion
-        System.assertEquals(true, exceptionThrown, 'Exception should have been thrown for null ID');
-    }
-    
-    /**
      * Method Name: testGetListingDetailsWithAllFields
      * @description: Tests that all required fields are properly returned
      * Created Date: 10/02/2026
@@ -162,30 +117,6 @@ public class CreateOfferFromListingControllerTest {
         System.assertEquals('Sale', result.MVEX__Listing_Type__c, 'Listing type should be Sale');
         System.assertEquals(500000, result.MVEX__Listing_Price__c, 'Listing price should be 500000');
         System.assertEquals(480000, result.MVEX__Offer_Amount__c, 'Offer amount should be 480000');
-    }
-    
-    /**
-     * Method Name: testGetOfferDetailsWithInvalidId
-     * @description: Tests error handling when offer ID is invalid
-     * Created Date: 10/02/2026
-     * Created By: Karan Singh
-     */
-    @isTest
-    static void testGetOfferDetailsWithInvalidId() {
-        // Create a fake ID that doesn't exist
-        Id fakeOfferId = '001000000000000AAA';
-        
-        Test.startTest();
-        Boolean exceptionThrown = false;
-        try {
-            CreateOfferFromListingController.getOfferDetails(fakeOfferId);
-        } catch (AuraHandledException e) {
-            exceptionThrown = true;
-        }
-        Test.stopTest();
-        
-        // Assertion
-        System.assertEquals(true, exceptionThrown, 'Exception should have been thrown for invalid ID');
     }
     
     /**

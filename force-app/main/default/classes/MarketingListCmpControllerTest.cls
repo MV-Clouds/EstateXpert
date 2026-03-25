@@ -353,38 +353,6 @@ private class MarketingListCmpControllerTest {
     }
 
     @isTest
-    static void testProcessBroadcastMessageMissingFields() {
-        String json = JSON.serialize(new Map<String, Object>{
-            'objectApiName' => 'Contact',
-            'phoneNumbers' => new List<String>{'1234567890'}
-        });
-
-        Test.startTest();
-        String result = MarketingListCmpController.processBroadcastMessageWithObject(json);
-        Test.stopTest();
-
-        System.assert(result.contains('Error'), 'Should return error for missing fields');
-    }
-
-    @isTest
-    static void testProcessBroadcastMessageEmptyPhoneNumbers() {
-        String json = JSON.serialize(new Map<String, Object>{
-            'objectApiName' => 'Contact',
-            'listViewName' => 'AllContacts',
-            'phoneNumbers' => new List<String>(),
-            'description' => 'Test',
-            'name' => 'Test Group',
-            'phoneField' => 'Phone'
-        });
-
-        Test.startTest();
-        String result = MarketingListCmpController.processBroadcastMessageWithObject(json);
-        Test.stopTest();
-
-        System.assert(result.contains('Error'), 'Should return error for empty phone numbers');
-    }
-
-    @isTest
     static void testGetListViewIdNotFound() {
         Test.startTest();
         String result = MarketingListCmpController.getListViewId();

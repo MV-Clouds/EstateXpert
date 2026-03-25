@@ -47,17 +47,65 @@
                                     <th scope="col" class="sno">
                                         <div>No.</div>
                                     </th>
-                                    <th scope="col" class="name">
-                                        <div>Group Name</div>
+                                    <th data-id="Name" onclick={sortClick}
+                                        aria-sort="none"
+                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                        scope="col">
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Group Name">Group Name</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="Name" class="listing-manager-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                     </th>
-                                    <th scope="col" class="recipient-count">
-                                        <div>Count of Members</div>
+                                    <th data-id="MVEX__Count_of_Members__c" onclick={sortClick}
+                                        aria-sort="none"
+                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                        scope="col">
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Count of Members">Count of Members</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="MVEX__Count_of_Members__c" class="listing-manager-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                     </th>
-                                    <th scope="col" class="status">
-                                        <div>Communication Type</div>
+                                    <th data-id="MVEX__Communication_Type__c" onclick={sortClick}
+                                        aria-sort="none"
+                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                        scope="col">
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Communication Type">Communication Type</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="MVEX__Communication_Type__c" class="listing-manager-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                     </th>
-                                    <th scope="col" class="status">
-                                        <div>Description</div>
+                                    <th data-id="MVEX__Description__c" onclick={sortClick}
+                                        aria-sort="none"
+                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                        scope="col">
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Description">Description</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="MVEX__Description__c" class="listing-manager-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                     </th>
                                     <th scope="col" class="total-sent">
                                         <div>Actions</div>

@@ -372,8 +372,7 @@ span {
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
-.table-content .slds-table th,
-.table-content .slds-table td {
+.table-content .slds-table th {
     text-align: center;
     font-size: 14px;
     font-weight: 400;
@@ -381,11 +380,20 @@ span {
     height: 45px;
 }
 
+.table-content .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 3.5rem;
+}
+
 .table-content .slds-table th {
     background: #0176D3;
     color: white;
     font-weight: 500;
     letter-spacing: 0.3px;
+    padding: 0;
 }
 
 .table-content tbody tr:nth-child(odd) {
@@ -697,4 +705,60 @@ span {
     50% {
         transform: scale(1.15);
     }
+}
+
+.sorting_header .slds-icon_container {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    padding-left: 0.5rem;
+    /* position: absolute;
+    right: 1rem; */
+}
+
+.sorting_header:hover .slds-icon_container {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sorting_header.active-sort .slds-icon_container {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.table_tr_cls .sort-cover {
+    height: 100%;
+    border-radius: 6px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.5s ease;
+    justify-content: center;
+    position: relative;
+}
+
+.table_tr_cls .sort-cover:hover {
+    background-color: #2c89d6;
+}
+
+.table_tr_cls .slds-icon-utility-arrowdown svg {
+    height: 0.8rem;
+    fill: white;
+}
+
+.listing-manager-icon {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+.rotate-asc {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+}
+
+.rotate-desc {
+    transform: rotate(180deg);
+    transition: transform 0.3s;
 }

@@ -474,6 +474,11 @@
     visibility: visible;
 }
 
+.sorting_header.active-sort .slds-icon_container {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 .table_tr_cls .sort-cover {
     height: 100%;
     border-radius: 8px;

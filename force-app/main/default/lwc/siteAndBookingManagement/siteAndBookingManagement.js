@@ -53,6 +53,8 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track selectedCommunicationMethod = 'Email';
     @track selectedTemplate = '';
     @track hasBusinessAccountConfigured = false;
+    @track sortField = 'Name';
+    @track sortOrder = 'asc';
 
     @track templateOptions = [];
     @track templateMap = new Map();
@@ -249,7 +251,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     // Create a copy for JSON.stringify to avoid circular refs
                     const contactData = { ...contact }; 
                     
-                    return {
+                    const contactObj = {
                         ...contact,
                         Json: JSON.stringify(contactData), // Stringify the contact data for the button
                         FormattedScheduleDate: scheduleDate ? scheduleDate.toLocaleString('en-US', {
@@ -257,7 +259,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                         }) : '',
                         isShowingDisabled: !contact.ShowingId
                     };
+                    return contactObj;
                 });
+                this.sortData();
                 this.mapMarkers = [{
                     location: {
                         Street: this.listing?.MVEX__Listing_Address__c?.street || '',
@@ -318,6 +322,75 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             });
     }
 
+     /**
+     * @description Sort contacts by specified field
+     */
+    sortData() {
+        this.contacts = [...this.contacts].sort((a, b) => {
+            let aValue = a[this.sortField] || '';
+            let bValue = b[this.sortField] || '';
+
+            // Handle FormattedScheduleDate as date for proper sorting
+            if (this.sortField === 'FormattedScheduleDate') {
+                aValue = a.ScheduleDate || a.RescheduleDate || '';
+                bValue = b.ScheduleDate || b.RescheduleDate || '';
+                const aDate = new Date(aValue);
+                const bDate = new Date(bValue);
+                return this.sortOrder === 'asc' ? 
+                    (aDate > bDate ? 1 : (aDate < bDate ? -1 : 0)) : 
+                    (aDate < bDate ? 1 : (aDate > bDate ? -1 : 0));
+            }
+
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                aValue = aValue.toLowerCase();
+                bValue = bValue.toLowerCase();
+            }
+
+            let compare = 0;
+            if (aValue > bValue) compare = 1;
+            else if (aValue < bValue) compare = -1;
+
+            return this.sortOrder === 'asc' ? compare : -compare;
+        });
+    }
+
+    /**
+     * @description Handle column header click for sorting
+     */
+    sortClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+            this.sortData();
+            this.updateSortIcons();
+        } catch (error) {
+            console.error('Error in sortClick:', error);
+        }
+    }
+
+    updateSortIcons() {
+        try {
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allHeaders.forEach(icon => {
+                icon.classList.remove('sort-icon-active', 'rotate-asc', 'rotate-desc');
+            });
+            // Set active header
+            const currentHeader = this.template.querySelector(`[data-id="${this.sortField}"] .slds-icon-utility-arrowdown svg`);
+            if (currentHeader) {
+                currentHeader.classList.add('sort-icon-active');
+                currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+            }
+        } catch (error) {
+            console.error('Error in updateSortIcons:', error);
+        }
+    }
+    
     // --- CALENDAR INITIALIZATION ---
 
     initializeScheduleCalendar() {
@@ -551,8 +624,12 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     handleRefreshData() {
         this.isLoading = true;
+        // Reset to default sort
+        this.sortField = 'Name';
+        this.sortOrder = 'asc';
         this.loadPropertyData();
         this.loadAllShowings();
+        this.updateSortIcons();
         this.showToast('Success', 'Successfully refreshed Showing records!', 'success');
     }
 

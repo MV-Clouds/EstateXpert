@@ -80,8 +80,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
     @track listingColumns = [];
     @track isConfigOpen = false;
-@track modalFilteredListingData = []; // New variable to store popup-filtered data
-filterModalSnapshot = null;
+    @track modalFilteredListingData = []; // New variable to store popup-filtered data
+    filterModalSnapshot = null;
 
     @track sortField = 'name';
     @track sortOrder = 'asc';
@@ -102,6 +102,7 @@ filterModalSnapshot = null;
         { label: 'Any Condition Is Met', value: 'any' },
         { label: 'Custom Logic Is Met', value: 'custom' },
         { label: 'Related List', value: 'related' },
+        { label: 'Linked Listings', value: 'linked' },
         { label: 'No Filter', value: 'none' },
     ];
 
@@ -402,7 +403,7 @@ filterModalSnapshot = null;
     */
     renderedCallback() {
         this.divElement = this.template.querySelector('.open-mapping-div');
-        
+
         if (this.pagedFilteredListingData?.length > 0 && !this.hasUpdatedSortIcons) {
             this.updateSortIcons();
             this.hasUpdatedSortIcons = true;
@@ -642,16 +643,25 @@ filterModalSnapshot = null;
     * Last modified by : Rachit Shah
     */
     fetchListings() {
-        getRecords({ recId: this.recordId, objectName: this.objectName })
+        // Check if this is a linked or related filter request
+        let filterType = 'default';
+        if (this.conditiontype === 'linked') {
+            filterType = 'linked';
+        } else if (this.conditiontype === 'related') {
+            filterType = 'related';
+        }
+
+        getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
             .then(result => {
                 const data = result;
                 let inquiry = {};
+
                 if (this.objectName === 'MVEX__Inquiry__c') {
                     this.totalListing = this.convertKeysToLowercase(data.listings);
                     this.modalFilteredListingData = [...this.totalListing];
-                    inquiry = data.inquiries[0];
+                    inquiry = data.inquiries && data.inquiries.length > 0 ? data.inquiries[0] : {};
                     this.inquiryRecord = inquiry;
-                    this.propertyMediaUrls = result.medias;
+                    this.propertyMediaUrls = result.medias || {};
                 }
 
                 this.totalListing.forEach(row => {
@@ -669,9 +679,23 @@ filterModalSnapshot = null;
                 const lowerCaseListing = convertoLowerCase(inquiry);
                 this.inquiryRecord = lowerCaseListing;
 
-                this.applyFiltersData(this.inquiryRecord);
+                // For linked or related filter, set the filtered data directly
+                if (filterType === 'linked' || filterType === 'related') {
+                    this.pagedFilteredListingData = [...this.totalListing];
+                    this.modalFilteredListingData = [...this.pagedFilteredListingData];
+                    this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+                    this.totalRecords = this.pagedFilteredListingData.length;
+                    this.currentPage = 1;
+                    this.updateMapMarkers();
+                    this.isLoading = false;
+                } else {
+                    this.applyFiltersData(this.inquiryRecord);
+                }
             })
-            .catch(error => errorDebugger('DisplayListing', 'fetchListings', error, 'warn', 'Error in fetchListings'));
+            .catch(error => {
+                errorDebugger('DisplayListing', 'fetchListings', error, 'warn', 'Error in fetchListings');
+                this.isLoading = false;
+            });
     }
 
     /**
@@ -911,6 +935,15 @@ filterModalSnapshot = null;
                 this.pagedFilteredListingData = this.totalListing.filter(listing => {
                     return listing.mvex__inquiries__r && listing.mvex__inquiries__r.some(inq => inq.Id === this.recordId);
                 });
+            } else if (this.conditiontype === 'linked') {
+                this.selectedConditionType = 'Linked Listings';
+                this.pagedFilteredListingData = [...this.totalListing];
+                console.log(this.pagedFilteredListingData.length);
+
+                // Show a message if no linked listings found
+                if (this.pagedFilteredListingData.length === 0) {
+                    this.showToast('Info', 'No linked listings found for this inquiry', 'info');
+                }
             } else if (this.conditiontype === 'none') {
                 this.selectedConditionType = 'None';
                 this.pagedFilteredListingData = [...this.totalListing];
@@ -1283,42 +1316,188 @@ filterModalSnapshot = null;
     */
     applyModalFilters() {
         try {
+            // Save Configuration Logic - Only save if there are mappings and not for related/linked
+            if (this.mappings && this.mappings.length > 0 &&
+                this.conditiontype !== 'related' &&
+                this.conditiontype !== 'linked' &&
+                this.conditiontype !== 'none') {
+                const config = {
+                    conditionType: this.selectedConditionType,
+                    logic: this.logicalExpression,
+                    mappings: this.mappings
+                };
 
-            // Save Configuration Logic
-            const config = {
-                conditionType: 'Related List',
-                logic: this.logicalExpression,
-                mappings: this.mappings
-            };
-
-            saveMappings({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters', checklistData: JSON.stringify(config), totalPages: 0 })
-                .then(result => {
-                    if (result === 'Success') {
-                        console.log('Configuration saved successfully');
-                    } else {
-                        this.showToast('Error', 'Failed to save configuration: ' + result, 'error');
-                    }
+                saveMappings({
+                    objectApiName: 'MVEX__Listing__c',
+                    featureName: 'Suggested_Listing_Filters',
+                    checklistData: JSON.stringify(config),
+                    totalPages: 0
                 })
-                .catch(error => {
-                    errorDebugger('DisplayListing', 'saveConfiguration', error, 'warn', 'Error saving configuration');
-                });
+                    .then(result => {
+                        if (result === 'Success') {
+                            console.log('Configuration saved successfully');
+                        } else {
+                            this.showToast('Error', 'Failed to save configuration: ' + result, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        errorDebugger('DisplayListing', 'saveConfiguration', error, 'warn', 'Error saving configuration');
+                    });
+            }
 
-            if (this.mappings.length === 0) {
+            // Handle different filter types
+            if (this.conditiontype === 'linked') {
+                this.isLoading = true;
+                const filterType = 'linked';
+
+                getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
+                    .then(result => {
+                        const data = result;
+                        let inquiry = {};
+
+                        if (this.objectName === 'MVEX__Inquiry__c') {
+                            // Convert listings to lowercase keys
+                            this.totalListing = this.convertKeysToLowercase(data.listings);
+                            inquiry = data.inquiries && data.inquiries.length > 0 ? data.inquiries[0] : {};
+                            this.inquiryRecord = inquiry;
+                            this.propertyMediaUrls = result.medias || {};
+                        }
+
+                        // Add media URLs to listings
+                        this.totalListing.forEach(row => {
+                            const prop_id = row.mvex__property__c;
+                            row.media_url = this.propertyMediaUrls[prop_id];
+                        });
+
+                        // Convert inquiry record to lowercase
+                        const convertoLowerCase = (obj) => {
+                            return Object.keys(obj).reduce((acc, key) => {
+                                acc[key.toLowerCase()] = obj[key];
+                                return acc;
+                            }, {});
+                        };
+
+                        const lowerCaseListing = convertoLowerCase(inquiry);
+                        this.inquiryRecord = lowerCaseListing;
+
+                        // Set the filtered data
+                        this.pagedFilteredListingData = [...this.totalListing];
+                        this.modalFilteredListingData = [...this.pagedFilteredListingData];
+                        this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+                        this.totalRecords = this.pagedFilteredListingData.length;
+                        this.currentPage = 1;
+                        this.updateMapMarkers();
+                        this.isLoading = false;
+
+                        // Show message if no linked listings found
+                        if (this.pagedFilteredListingData.length === 0) {
+                            this.showToast('Info', 'No linked listings found for this inquiry', 'info');
+                        }
+
+                        this.hideModalBox(false);
+                        this.searchTerm = '';
+                    })
+                    .catch(error => {
+                        errorDebugger('DisplayListing', 'applyModalFilters', error, 'warn', 'Error fetching linked listings');
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error fetching linked listings: ' + (error.body?.message || 'Unknown error'), 'error');
+                    });
+            }
+            else if (this.conditiontype === 'related') {
+                this.isLoading = true;
+                const filterType = 'related';
+
+                console.log('fetching related listings');
+
+
+                getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
+                    .then(result => {
+                        const data = result;
+                        let inquiry = {};
+
+                        if (this.objectName === 'MVEX__Inquiry__c') {
+                            // Convert listings to lowercase keys
+                            this.totalListing = this.convertKeysToLowercase(data.listings);
+                            inquiry = data.inquiries && data.inquiries.length > 0 ? data.inquiries[0] : {};
+                            this.inquiryRecord = inquiry;
+                            this.propertyMediaUrls = result.medias || {};
+                        }
+
+                        // Add media URLs to listings
+                        this.totalListing.forEach(row => {
+                            const prop_id = row.mvex__property__c;
+                            row.media_url = this.propertyMediaUrls[prop_id];
+                        });
+
+                        // Convert inquiry record to lowercase
+                        const convertoLowerCase = (obj) => {
+                            return Object.keys(obj).reduce((acc, key) => {
+                                acc[key.toLowerCase()] = obj[key];
+                                return acc;
+                            }, {});
+                        };
+
+                        const lowerCaseListing = convertoLowerCase(inquiry);
+                        this.inquiryRecord = lowerCaseListing;
+
+                        // Set the filtered data
+                        this.pagedFilteredListingData = [...this.totalListing];
+                        this.modalFilteredListingData = [...this.pagedFilteredListingData];
+                        this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+                        this.totalRecords = this.pagedFilteredListingData.length;
+                        this.currentPage = 1;
+                        this.updateMapMarkers();
+                        this.isLoading = false;
+
+                        // Show message if no related listing found
+                        if (this.pagedFilteredListingData.length === 0) {
+                            this.showToast('Info', 'No listing selected in this inquiry', 'info');
+                        }
+
+                        this.hideModalBox(false);
+                        this.searchTerm = '';
+                    })
+                    .catch(error => {
+                        errorDebugger('DisplayListing', 'applyModalFilters', error, 'warn', 'Error fetching related listing');
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error fetching related listing: ' + (error.body?.message || 'Unknown error'), 'error');
+                    });
+            }
+            else if (this.conditiontype === 'none') {
+                // No filter - show all listings
                 this.pagedFilteredListingData = [...this.totalListing];
                 this.modalFilteredListingData = [...this.pagedFilteredListingData];
                 this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
                 this.totalRecords = this.pagedFilteredListingData.length;
                 this.currentPage = 1;
-                this.logicalExpression = '';
+                this.updateMapMarkers();
                 this.hideModalBox(false);
                 this.isLoading = false;
-                this.updateMapMarkers();
-                return;
+                this.searchTerm = '';
+            }
+            else {
+                // For other filter types (all, any, custom), use the existing applyFiltersData logic
+                if (this.mappings.length === 0) {
+                    this.pagedFilteredListingData = [...this.totalListing];
+                    this.modalFilteredListingData = [...this.pagedFilteredListingData];
+                    this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+                    this.totalRecords = this.pagedFilteredListingData.length;
+                    this.currentPage = 1;
+                    this.logicalExpression = '';
+                    this.hideModalBox(false);
+                    this.isLoading = false;
+                    this.updateMapMarkers();
+                    this.searchTerm = '';
+                    return;
+                }
+
+                this.applyFiltersData(this.inquiryRecord);
             }
 
-            this.applyFiltersData(this.inquiryRecord);
         } catch (error) {
             errorDebugger('DisplayListing', 'applyModalFilters', error, 'warn', 'Error in applyModalFilters');
+            this.showToast('Error', 'Error applying filters', 'error');
+            this.isLoading = false;
         }
     }
 

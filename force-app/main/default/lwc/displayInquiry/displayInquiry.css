@@ -96,7 +96,6 @@ button:disabled {
 }
 
 .header-cell {
-    padding: 10px;
     background-color: #f4f6f9;
     font-weight: 500;
     text-align: left;
@@ -106,6 +105,7 @@ button:disabled {
     position: sticky;
     top: 0;
     z-index: 1;
+    height: 45px;
 }
 
 .sorting_header .slds-icon_container {
@@ -153,7 +153,7 @@ button:disabled {
     visibility: visible !important;
 }
 
-.table_tr_cls .slds-icon-utility-arrowdown svg {
+.header-cell .slds-icon-utility-arrowdown svg {
     height: 0.8rem;
     fill: white;
 }
@@ -166,7 +166,7 @@ button:disabled {
      stroke: white;
 }
 
-.table_tr_cls .sort-cover {
+.header-cell .sort-cover {
     height: 100%;
     border-radius: 6px;
     background-color: transparent;
@@ -178,7 +178,7 @@ button:disabled {
     /* position: relative; */
 }
 
-.table_tr_cls .sort-cover:hover {
+.header-cell .sort-cover:hover {
     background-color: #2c89d6;
 }
 
@@ -189,6 +189,24 @@ button:disabled {
 
 .custom-data-table tr:nth-child(odd) {
     background-color: aliceblue;
+}
+
+/* Add hover effect for table rows */
+.custom-data-table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+/* Add hover effect for table headers */
+.sorting_header:hover {
+    background-color: #2c89d6;
+    transition: background-color 0.3s ease;
+}
+
+/* Add hover effect for sort cover */
+.header-cell .sort-cover:hover {
+    background-color: #2c89d6;
+    transition: background-color 0.3s ease;
 }
 
 .view-more-button {

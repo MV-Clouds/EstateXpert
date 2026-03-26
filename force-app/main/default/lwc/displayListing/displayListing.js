@@ -80,8 +80,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
     @track listingColumns = [];
     @track isConfigOpen = false;
-    @track modalFilteredListingData = []; // New variable to store popup-filtered data
-    filterModalSnapshot = null;
+@track modalFilteredListingData = []; // New variable to store popup-filtered data
+filterModalSnapshot = null;
+
+    @track sortField = 'name';
+    @track sortOrder = 'asc';
+    hasUpdatedSortIcons = false;
 
     @track defaultColumns = [
         { label: 'Image', fieldName: 'media_url', type: 'image' },
@@ -398,6 +402,11 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     */
     renderedCallback() {
         this.divElement = this.template.querySelector('.open-mapping-div');
+        
+        if (this.pagedFilteredListingData?.length > 0 && !this.hasUpdatedSortIcons) {
+            this.updateSortIcons();
+            this.hasUpdatedSortIcons = true;
+        }
     }
 
     /**
@@ -713,6 +722,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     applyFiltersData(inquiry) {
         try {
             this.pagedFilteredListingData = this.totalListing;
+            this.sortData(); // Apply default sorting after filtering
 
             // Mappings are already objects now
             this.mappings = this.mappings.map(mapping => {
@@ -1511,5 +1521,104 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     handleCloseModal() {
         this.isConfigOpen = false;
         this.fetchListingConfiguration();
+        this.sortField = 'name';
+        this.sortOrder = 'asc';
+        this.hasUpdatedSortIcons = false;
+        this.sortData();
+    }
+
+    /**
+     * Method Name : sortClick
+     * @description : Handle column header click for sorting
+     */
+    sortClick(event) {
+        const fieldName = event.currentTarget.dataset.id;
+        if (this.sortField === fieldName) {
+            this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.sortField = fieldName;
+            this.sortOrder = 'asc';
+        }
+        this.sortData();
+        this.updateSortIcons();
+    }
+
+    /**
+     * Method Name : sortData
+     * @description : Sort pagedFilteredListingData by selected field
+     */
+    sortData() {
+        this.pagedFilteredListingData = [...this.pagedFilteredListingData].sort((a, b) => {
+            let aValue = a[this.sortField];
+            let bValue = b[this.sortField];
+
+            // Handle null/undefined values
+            if (aValue == null) aValue = '';
+            if (bValue == null) bValue = '';
+
+            // Convert to numbers if possible for numeric comparison
+            const numA = parseFloat(aValue);
+            const numB = parseFloat(bValue);
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return this.sortOrder === 'asc' ? numA - numB : numB - numA;
+            }
+
+            // String comparison (case insensitive)
+            aValue = String(aValue).toLowerCase();
+            bValue = String(bValue).toLowerCase();
+            return this.sortOrder === 'asc' 
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        });
+    }
+
+    /**
+     * Method Name : updateSortIcons
+     * @description : Update visual sort indicators on headers
+     */
+    updateSortIcons() {
+        // Remove active class from all headers
+        const allHeaders = this.template.querySelectorAll('.header-cell.sortable-header');
+        allHeaders.forEach(header => {
+            header.classList.remove('sorted-field');
+            const icon = header.querySelector('.listing-manager-icon');
+            if (icon) {
+                icon.classList.remove('sort-icon-active', 'rotate-asc', 'rotate-desc');
+            }
+        });
+
+        // Set active header and icon
+        const currentHeader = this.template.querySelector(`[data-id="${this.sortField}"]`);
+        if (currentHeader) {
+            currentHeader.classList.add('sorted-field');
+            const icon = currentHeader.querySelector('.listing-manager-icon');
+            if (icon) {
+                icon.classList.add('sort-icon-active');
+                icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+            }
+        }
+    }
+
+    get fieldsWithIconClass() {
+        return this.tableColumns.map(field => {
+            const baseIconClass = 'listing-manager-icon';
+            let iconClass = baseIconClass;
+            const isSorted = this.sortField === field.fieldName.toLowerCase();
+            
+            if (isSorted) {
+                const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
+                iconClass = `${baseIconClass} sort-icon-active ${rotationClass}`;
+            }
+            
+            const headerBaseClass = 'header-cell sortable-header';
+            const headerClass = isSorted ? `${headerBaseClass} sorted-field` : headerBaseClass;
+            
+            return {
+                ...field,
+                iconClass: iconClass,
+                isSorted: isSorted,
+                headerClass: headerClass
+            };
+        });
     }
 }

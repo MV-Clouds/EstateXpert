@@ -203,6 +203,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
         }
     }
 
+
     /**
     * Method Name: connectedCallback
     * @description: Method to load static resource css and call fetchTemplates method
@@ -224,6 +225,19 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             this.fetchTemplates();
         } catch (error) {
             console.log('error in connectedCallback -> ' + error);
+        }
+    }
+
+        /**
+    * Method Name: renderedCallback
+    * @description: Ensure sort icons are updated after DOM is rendered
+    * Created Date: 25/03/2026
+    * Created By: Kajal Tiwari
+    */
+    renderedCallback() {
+        // Only update sort icons if we have data loaded
+        if (this.templates && this.templates.length > 0) {
+            this.updateSortIcons();
         }
     }
 
@@ -672,17 +686,32 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     * Created Date : 3/06/2024
     * Created By: Karan Singh
     */
+
     updateSortIcons() {
         try {
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => {
+            // Remove icon rotation
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
-            const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
             if (currentHeader) {
-                currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
             }
+
         } catch (error) {
             console.log('Error in updateSortIcons --> ' + error);
         }

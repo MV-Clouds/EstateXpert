@@ -597,8 +597,7 @@ span {
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
-.table-content .slds-table th,
-.table-content .slds-table td {
+.table-content .slds-table th{
     text-align: center;
     font-size: 14px;
     font-weight: 400;
@@ -606,13 +605,20 @@ span {
     height: 45px;
 }
 
+.table-content .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 3.5rem;
+}
+
 .table-content .slds-table th {
     background: #0176D3;
     color: white;
     font-weight: 500;
     letter-spacing: 0.3px;
-    padding: 0.6rem;
-    height: 45px;
+    padding: 0;
 }
 
 .table-content tbody tr:nth-child(odd) {
@@ -765,21 +771,33 @@ span {
     right: 0;
 }
 
+.sorting_header .slds-icon_container {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    
+}
+
 .sorting_header:hover .slds-icon_container {
     opacity: 1;
     visibility: visible;
 }
 
+.sorting_header.active-sort .slds-icon_container {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 .table_tr_cls .sort-cover {
     height: 100%;
-    border-radius: 8px;
+    border-radius: 6px;
     background-color: transparent;
     display: flex;
     align-items: center;
     cursor: pointer;
     transition: background-color 0.5s ease;
     justify-content: center;
-    position: relative;
+    /* position: relative; */
 }
 
 .table_tr_cls .sort-cover:hover {

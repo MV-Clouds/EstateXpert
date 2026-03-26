@@ -42,6 +42,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track listingRecord = {};
     @track conditiontype = 'related';
     @track checkAll = false;
+    @track sortField = 'Name';
+    @track sortOrder = 'asc';
+    _renderedCallbackRunOnce = false;
 
     @track isShowModal = false;
 
@@ -636,37 +639,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    /**
-    * Method Name : renderedCallback
-    * @description : method to load all data initially in the component
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
     renderedCallback() {
-        this.divElement = this.template.querySelector('.open-mapping-div');
-        if (!this.isFirstScreen) {
-            Promise.all([
-                loadScript(this, summerNoteEditor + '/jquery-3.7.1.min.js'),
-            ])
-                .then(() => {
-                    Promise.all([
-                        loadStyle(this, summerNoteEditor + '/summernote-lite.css'),
-                        loadScript(this, summerNoteEditor + '/summernote-lite.js'),
-                    ])
-                        .then(() => {
-                            const richText = this.template.querySelector('.richText');
-                            if (richText) {
-                                richText.innerHTML = this.setTempValue(this.templateBody);
-                            }
-                        })
-                        .catch(error => {
-                            errorDebugger('displayInquiry', 'renderedCallback:loadStyle', error, 'warn', 'Error loading style');
-                        })
-                })
-                .catch(error => {
-                    errorDebugger('displayInquiry', 'renderedCallback:loadScript', error, 'warn', 'Error loading script');
-                })
+        // Initialize sorting icons only once
+        if (!this._renderedCallbackRunOnce && this.pagedFilteredInquiryData && this.pagedFilteredInquiryData.length > 0) {
+            this.updateSortIcons();
+            this._renderedCallbackRunOnce = true;
         }
+        
     }
 
     loadAllTemplates() {
@@ -1332,6 +1311,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.listingRecord = lowerCaseListing;
 
                 this.applyFiltersData(this.listingRecord);
+                
             })
             .catch(error => {
                 errorDebugger('displayInquiry', 'fetchListings', error, 'warn', 'Error getting inquiries from apex');
@@ -2520,5 +2500,149 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     get tableColumns() {
         return this.inquiryColumns.length > 0 ? this.inquiryColumns : this.defaultColumns;
+    }
+
+    /**
+    * Method Name : sortClick
+    * @description : this methods apply the sorting on the all fields
+    * Created Date: 03/06/2024
+    * Created By: Karan Singh
+    */
+    sortClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+            this.sortData();
+            this.updateSortIcons();
+        } catch (error) {
+            errorDebugger('displayInquiry', 'sortClick', error, 'warn', 'Error in sortClick');
+        }
+    }
+
+    /**
+    * Method Name : sortData
+    * @description : Method used to apply sorting on the data
+    * Created Date: 08/11/2024
+    * Created By: Karan Singh
+    */
+    sortData() {
+        try {
+            // Only sort if we have data
+            if (!this.pagedFilteredInquiryData || this.pagedFilteredInquiryData.length === 0) {
+                return;
+            }
+
+            // Sort the full dataset (not just the current page)
+            const sortedData = [...this.pagedFilteredInquiryData].sort((a, b) => {
+                let aValue = a[this.sortField];
+                let bValue = b[this.sortField];
+
+                // Handle null/undefined values
+                if (aValue === undefined || aValue === null) aValue = '';
+                if (bValue === undefined || bValue === null) bValue = '';
+
+                // For string values, do case-insensitive comparison
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                // For numeric comparisons
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    // Both are numbers, compare directly
+                } else if (!isNaN(aValue) && !isNaN(bValue)) {
+                    // Both can be converted to numbers
+                    aValue = Number(aValue);
+                    bValue = Number(bValue);
+                }
+
+                let compare = 0;
+                if (aValue > bValue) {
+                    compare = 1;
+                } else if (aValue < bValue) {
+                    compare = -1;
+                }
+
+                return this.sortOrder === 'asc' ? compare : -compare;
+            });
+
+            // Update the pagedFilteredInquiryData with sorted data
+            this.pagedFilteredInquiryData = sortedData;
+
+            // Update the displayed data for current page
+            this.updateShownData();
+
+        } catch (error) {
+            errorDebugger('displayInquiry', 'sortData', error, 'warn', 'Error in sortData');
+        }
+    }
+
+    /**
+    * Method Name : updateSortIcons
+    * @description : this method update the sort icons in the wrapbutton
+    * Created Date : 3/06/2024
+    * Created By: Karan Singh
+    */
+    updateSortIcons() {
+        try {
+            // Get all header cells with sorting capability
+            const headers = this.template.querySelectorAll('[data-id]');
+            
+            // Remove active class from all headers
+            headers.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            console.log('currentHeader', currentHeader);
+            console.log('currentHeader.classList', currentHeader.classList);
+            
+            
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+                console.log('currentHeader.classList', currentHeader.classList);                
+                
+                
+                // Find the sort icon within this header
+                // Updated selector to match our new HTML structure
+                const icon = currentHeader.querySelector('.listing-manager-icon');
+                if (icon) {
+                    // Remove existing rotation classes
+                    icon.classList.remove('rotate-asc', 'rotate-desc');
+                    
+                    // Add appropriate rotation class based on sort order
+                    if (this.sortOrder === 'asc') {
+                        icon.classList.add('rotate-asc');
+                    } else {
+                        icon.classList.add('rotate-desc');
+                    }
+                }
+            }
+        } catch (error) {
+            errorDebugger('displayInquiry', 'updateSortIcons', error, 'warn', 'Error in updateSortIcons');
+        }
+    }
+
+    /**
+    * Method Name : updateShownData
+    * @description : Update the data shown on the current page after sorting
+    * Created Date: 20/08/2024
+    * Created By: Karan Singh
+    */
+    updateShownData() {
+        try {
+            const startIndex = (this.currentPage - 1) * this.pageSize;
+            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+            // Update the pagedFilteredInquiryData with sorted data
+            this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
+        } catch (error) {
+            errorDebugger('displayInquiry', 'updateShownData', error, 'warn', 'Error in updateShownData');
+        }
     }
 }

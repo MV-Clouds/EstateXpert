@@ -118,8 +118,7 @@
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
-.table-content .slds-table th,
-.table-content .slds-table td {
+.table-content .slds-table th{
     text-align: center;
     font-size: 14px;
     font-weight: 400;
@@ -127,11 +126,24 @@
     height: 45px;
 }
 
+.sno{
+    width: 4rem;
+}
+
+.table-content .slds-table td {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #585858;
+    height: 4rem;
+}
+
 .table-content .slds-table th {
     background: #0176D3;
     color: white;
     font-weight: 500;
     letter-spacing: 0.3px;
+    padding: 0;
 }
 
 .min_width_css {
@@ -452,13 +464,19 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.5s ease, visibility 0.5s ease;
-    position: absolute;
-    right: 0;
+    padding-left: 0.5rem;
+    /* position: absolute;
+    right: 1rem; */
 }
 
 .sorting_header:hover .slds-icon_container {
     opacity: 1;
     visibility: visible;
+}
+
+.sorting_header.active-sort .slds-icon_container {
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .table_tr_cls .sort-cover {

@@ -22,6 +22,8 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     @track selectedCommunicationTypeFilter = '';
     @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
+    @track sortField = 'Name';
+    @track sortOrder = 'asc';
 
     broadcastGroupId = null;
     searchTerm = '';
@@ -168,6 +170,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
                     index: index + 1,
                 }));
                 this.filteredData = [...this.data];
+                this.sortData();
                 this.updateShownData();
             })
             .catch(() => {
@@ -235,7 +238,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
                 index: index + 1 // Re-indexing based on filtered results
             }));
             this.currentPage = 1; // Reset to first page on filter
-            this.updateShownData();
+            this.sortData(); // Apply sorting after filtering
         } catch (error) {
             this.showToast('Error', 'Error applying filters', 'error');
         }
@@ -388,6 +391,119 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
         } catch (error) {
             console.error('Error checking business account configuration:', error);
             this.hasBusinessAccountConfigured = false;
+        }
+    }
+
+    /**
+    * Method Name : sortClick
+    * @description : this methods apply the sorting on the all fields
+    * Created Date: 03/06/2024
+    * Created By: Karan Singh
+    */
+    sortClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+            this.sortData();
+            this.updateSortIcons();
+        } catch (error) {
+            this.showToast('Error', 'Error in sortClick -> ' + error, 'error');
+        }
+    }
+
+    /**
+    * Method Name : sortData
+    * @description : Method used to apply sorting on the data
+    * Created Date: 08/11/2024
+    * Created By: Karan Singh
+    */
+    sortData() {
+        try {
+            this.filteredData = [...this.filteredData].sort((a, b) => {
+                let aValue = a[this.sortField];
+                let bValue = b[this.sortField];
+
+                if (aValue === undefined) aValue = '';
+                if (bValue === undefined) bValue = '';
+
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                // For numeric fields, convert to numbers for proper comparison
+                if (this.sortField === 'MVEX__Count_of_Members__c') {
+                    aValue = Number(aValue) || 0;
+                    bValue = Number(bValue) || 0;
+                }
+
+                let compare = 0;
+                if (aValue > bValue) {
+                    compare = 1;
+                } else if (aValue < bValue) {
+                    compare = -1;
+                }
+
+                return this.sortOrder === 'asc' ? compare : -compare;
+            });
+
+            // Re-index the sorted data
+            this.filteredData = this.filteredData.map((item, index) => ({
+                ...item,
+                index: index + 1
+            }));
+
+            this.updateShownData();
+        } catch (error) {
+            this.showToast('Error', 'Error in sortData -> ' + error, 'error');
+        }
+    }
+
+    /**
+    * Method Name : updateSortIcons
+    * @description : this method update the sort icons in the wrapbutton
+    * Created Date : 3/06/2024
+    * Created By: Karan Singh
+    */
+    updateSortIcons() {
+        try {
+            // Remove icon rotation
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
+            }
+
+        } catch (error) {
+            this.showToast('Error', 'Error in updateSortIcons -> ' + error, 'error');
+        }
+    }
+
+    renderedCallback() {
+        // Only update sort icons if we have data loaded
+        if (this.data && this.data.length > 0) {
+            this.updateSortIcons();
         }
     }
 

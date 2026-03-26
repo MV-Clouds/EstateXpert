@@ -96,7 +96,6 @@ button:disabled {
 }
 
 .header-cell {
-    padding: 10px;
     background-color: #f4f6f9;
     font-weight: 500;
     text-align: left;
@@ -106,6 +105,81 @@ button:disabled {
     position: sticky;
     top: 0;
     z-index: 1;
+    height: 45px;
+}
+
+.sorting_header .slds-icon_container {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    padding-left: 0.5rem;
+}
+
+.sorting_header:hover .slds-icon_container {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sorting_header.active-sort .slds-icon_container {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.rotate-asc {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+}
+
+.rotate-desc {
+    transform: rotate(180deg);
+    transition: transform 0.3s;
+}
+
+/* Sort icon styling */
+.sorting_header .slds-icon_container.slds-icon-utility-arrowdown {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding-left: 0.5rem;
+}
+
+.sorting_header:hover .slds-icon_container.slds-icon-utility-arrowdown {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sorting_header.active-sort .slds-icon_container.slds-icon-utility-arrowdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.header-cell .slds-icon-utility-arrowdown svg {
+    height: 0.8rem;
+    fill: white;
+}
+
+.listing-manager-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    cursor: pointer;
+     fill: white;
+     stroke: white;
+}
+
+.header-cell .sort-cover {
+    height: 100%;
+    border-radius: 6px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.5s ease;
+    justify-content: center;
+    /* position: relative; */
+}
+
+.header-cell .sort-cover:hover {
+    background-color: #2c89d6;
 }
 
 .custom-data-table td {
@@ -115,6 +189,24 @@ button:disabled {
 
 .custom-data-table tr:nth-child(odd) {
     background-color: aliceblue;
+}
+
+/* Add hover effect for table rows */
+.custom-data-table tbody tr:hover td {
+    background-color: #ebf3f6 !important;
+    border: none;
+}
+
+/* Add hover effect for table headers */
+.sorting_header:hover {
+    background-color: #2c89d6;
+    transition: background-color 0.3s ease;
+}
+
+/* Add hover effect for sort cover */
+.header-cell .sort-cover:hover {
+    background-color: #2c89d6;
+    transition: background-color 0.3s ease;
 }
 
 .view-more-button {

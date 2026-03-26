@@ -40,20 +40,60 @@
                 <table class="contacts-table slds-table">
                     <thead>
                         <tr>
-                            <th scope="col">
-                                <div>Name</div>
+                            <th data-id="Name" onclick={sortClick} aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell_action-mode" scope="col">
+                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate center-trancate-head" role="button" tabindex="0">
+                                    <span class="slds-assistive-text">Sort by: </span>
+                                    <span class="slds-truncate" title="Name">Name</span>
+                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                        <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th scope="col">
-                                <div>Email</div>
+                            <th data-id="Email" onclick={sortClick} aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell_action-mode" scope="col">
+                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate center-trancate-head" role="button" tabindex="0">
+                                    <span class="slds-assistive-text">Sort by: </span>
+                                    <span class="slds-truncate" title="Email">Email</span>
+                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                        <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th scope="col">
-                                <div>Phone</div>
+                            <th data-id="MobilePhone" onclick={sortClick} aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell_action-mode" scope="col">
+                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate center-trancate-head" role="button" tabindex="0">
+                                    <span class="slds-assistive-text">Sort by: </span>
+                                    <span class="slds-truncate" title="Phone">Phone</span>
+                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                        <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th scope="col">
-                                <div>Showing Status</div>
+                            <th data-id="ShowingStatus" onclick={sortClick} aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell_action-mode" scope="col">
+                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate center-trancate-head" role="button" tabindex="0">
+                                    <span class="slds-assistive-text">Sort by: </span>
+                                    <span class="slds-truncate" title="Showing Status">Showing Status</span>
+                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                        <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
-                            <th scope="col">
-                                <div>Schedule Date</div>
+                            <th data-id="FormattedScheduleDate" onclick={sortClick} aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell_action-mode" scope="col">
+                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate center-trancate-head" role="button" tabindex="0">
+                                    <span class="slds-assistive-text">Sort by: </span>
+                                    <span class="slds-truncate" title="Schedule Date">Schedule Date</span>
+                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                        <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
                             <th scope="col">
                                 <div>Actions</div>

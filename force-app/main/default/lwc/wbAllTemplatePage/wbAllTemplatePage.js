@@ -37,6 +37,8 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     @track isFilterVisible = false;
     @track editTemplateId='';
     @track subscription = null;
+    @track sortField = 'MVEX__Template_Name__c';
+    @track sortOrder = 'asc';
     showFilters = false;
     channelName = '/event/MVEX__Template_Update__e';
 
@@ -80,6 +82,18 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         }
     }
 
+        /**
+    * Method Name: renderedCallback
+    * @description: Ensure sort icons are updated after DOM is rendered
+    * Created Date: 25/03/2026
+    * Created By: Kajal Tiwari
+    */
+    renderedCallback() {
+        // Only update sort icons if we have data loaded
+        if (this.allRecords && this.allRecords.length > 0) {
+            this.updateSortIcons();
+        }
+    }
 
     disconnectedCallback() {
         this.unregisterPlatformEventListener(); 
@@ -172,6 +186,8 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                         };
                     });                    
                     this.filteredRecords = [...this.allRecords];
+                    this.sortData();
+                    this.filterRecords();
                     this.isLoading=false;
                 } else if (error) {
                     console.error('Error fetching WhatsApp templates: ', error);
@@ -282,6 +298,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             }
     
             this.filteredRecords = filtered;
+            this.sortData();
 
         } catch (error) {
             this.showToastError('An error occurred while filtering the records.');
@@ -417,6 +434,103 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             }
         } else {
             this.editTemplateId = '';
+        }
+    }
+
+    /**
+    * Method Name : sortClick
+    * @description : this methods apply the sorting on the all fields
+    * Created Date: 03/06/2024
+    * Created By: Karan Singh
+    */
+    sortClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+            this.sortData();
+            this.updateSortIcons();
+        } catch (error) {
+            console.log('Error in sortClick --> ' + error);
+        }
+    }
+
+    /**
+    * Method Name : sortData
+    * @description : Method used to apply sorting on the data
+    * Created Date: 08/11/2024
+    * Created By: Karan Singh
+    */
+    sortData() {
+        try {
+            this.filteredRecords = [...this.filteredRecords].sort((a, b) => {
+                let aValue = a[this.sortField];
+                let bValue = b[this.sortField];
+
+                if (aValue === undefined) aValue = '';
+                if (bValue === undefined) bValue = '';
+
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                let compare = 0;
+                if (aValue > bValue) {
+                    compare = 1;
+                } else if (aValue < bValue) {
+                    compare = -1;
+                }
+
+                return this.sortOrder === 'asc' ? compare : -compare;
+            });
+
+            this.filteredRecords = this.filteredRecords.map((record, index) => ({
+                ...record,
+                serialNumber: index + 1
+            }));
+        } catch (error) {
+            console.log('Error in sortData --> ', error.stack);
+        }
+    }
+
+    /**
+    * Method Name : updateSortIcons
+    * @description : this method update the sort icons in the wrapbutton
+    * Created Date : 3/06/2024
+    * Created By: Karan Singh
+    */
+    updateSortIcons() {
+        try {
+            // Remove icon rotation
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
+            }
+
+        } catch (error) {
+            console.log('Error in updateSortIcons --> ' + error);
         }
     }
 }

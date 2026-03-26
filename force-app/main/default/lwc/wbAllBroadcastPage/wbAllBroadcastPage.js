@@ -160,6 +160,13 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         }
     }
 
+    renderedCallback() {
+        // Only update sort icons if we have data loaded
+        if (this.data && this.data.length > 0) {
+            this.updateSortIcons();
+        }
+    }
+
     disconnectedCallback() {
         this.unsubscribeFromPlatformEvent();
     }
@@ -267,6 +274,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         getBroadcastRecsWithReplies()
             .then(result => {
                 this.processTemplates(result);
+
                 this.updateShownData();
                 // Update sort icons to show default sort indicator
                 setTimeout(() => {
@@ -313,6 +321,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         // Just set UI indicators to show the sort arrow
         this.sortField = 'CreatedDate';
         this.sortOrder = 'desc';
+        this.sortData();
         this.filteredData = [...this.data];
     }
 
@@ -886,23 +895,33 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         }
     }
 
-    updateSortIcons() {
+     updateSortIcons() {
         try {
-            const allHeaders = this.template.querySelectorAll('.sorting_header svg');
-            allHeaders.forEach(icon => {
+            // Remove icon rotation
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
-                icon.closest('.slds-icon_container').style.opacity = '0.3';
             });
 
-            if (this.sortField) {
-                const currentHeader = this.template.querySelector(`[data-index="${this.sortField}"]`);
-                if (currentHeader) {
-                    currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
-                    currentHeader.closest('.slds-icon_container').style.opacity = '1';
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
                 }
             }
+
         } catch (error) {
-            this.showToast('Error', 'Error in updateSortIcons: ' + error.message, 'error');
+            this.showToast('Error', 'Error in updateSortIcons -> ' + error, 'error');
         }
     }
 }

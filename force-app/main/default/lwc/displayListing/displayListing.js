@@ -107,6 +107,25 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     ];
 
     /**
+     * Method Name : isApplyButtonDisabled
+     * @description : Disable Apply button when condition type requires mappings but none exist
+     * Date: 26/03/2026
+     * Created By: Kajal Tiwari
+     */
+    get isApplyButtonDisabled() {
+        // Check if the current condition type requires mappings
+        const requiresMappings = this.conditiontype === 'all' || 
+                                this.conditiontype === 'any' || 
+                                this.conditiontype === 'custom';
+        
+        // If it requires mappings, check if mappings exist
+        if (requiresMappings) {
+            return !this.mappings || this.mappings.length === 0;
+        }        
+        return false;
+    }
+
+    /**
     * Method Name : isNullOperatorSelected
     * @description : returns true when the selected condition operator is 'isNull'
     * Date: 24/03/2026

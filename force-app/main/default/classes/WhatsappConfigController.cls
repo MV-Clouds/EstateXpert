@@ -85,16 +85,9 @@ public without sharing class WhatsappConfigController {
 
     public static Boolean saveMetaData(String accessToken, String phoneId, String wabaId, String appId) {
         try {
-            List<WBConnect_Configuration__mdt> metaList = [SELECT MasterLabel, DeveloperName FROM WBConnect_Configuration__mdt WITH USER_MODE];
-
             Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            if (metaList.size() > 0) {
-                mdata.fullName = 'MVEX__WBConnect_Configuration__mdt.' + metaList[0].DeveloperName; 
-                mdata.label = metaList[0].MasterLabel;
-            } else {
-                mdata.fullName = 'MVEX__WBConnect_Configuration__mdt.MVEX__WBConnect_Configuration'; 
-                mdata.label = 'WB_Connect_Config_Details';
-            }
+            mdata.fullName = 'MVEX__WBConnect_Configuration__mdt.MVEX__WBConnect_Configuration'; 
+            mdata.label = 'WBConnect_Configuration';
 
             Metadata.CustomMetadataValue instance1 = new Metadata.CustomMetadataValue();
             instance1.field = 'MVEX__Business_Account_Id__c';

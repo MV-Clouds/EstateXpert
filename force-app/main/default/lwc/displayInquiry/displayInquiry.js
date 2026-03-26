@@ -44,6 +44,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track checkAll = false;
     @track sortField = 'Name';
     @track sortOrder = 'asc';
+    _renderedCallbackRunOnce = false;
 
     @track isShowModal = false;
 
@@ -481,16 +482,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-     renderedCallback() {
-        // Only update sort icons if we have data loaded
-        console.log('inqui ',this.inquiries);
-        console.log('this.sortField ',this.sortField);
-        
-        if (this.inquiries && this.inquiries.length > 0) {
-            this.updateSortIcons();
-        }
-    }
-
     checkHideFilterButton() {
         getMetadataRecords()
             .then(result => {
@@ -648,37 +639,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    /**
-    * Method Name : renderedCallback
-    * @description : method to load all data initially in the component
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
     renderedCallback() {
-        this.divElement = this.template.querySelector('.open-mapping-div');
-        if (!this.isFirstScreen) {
-            Promise.all([
-                loadScript(this, summerNoteEditor + '/jquery-3.7.1.min.js'),
-            ])
-                .then(() => {
-                    Promise.all([
-                        loadStyle(this, summerNoteEditor + '/summernote-lite.css'),
-                        loadScript(this, summerNoteEditor + '/summernote-lite.js'),
-                    ])
-                        .then(() => {
-                            const richText = this.template.querySelector('.richText');
-                            if (richText) {
-                                richText.innerHTML = this.setTempValue(this.templateBody);
-                            }
-                        })
-                        .catch(error => {
-                            errorDebugger('displayInquiry', 'renderedCallback:loadStyle', error, 'warn', 'Error loading style');
-                        })
-                })
-                .catch(error => {
-                    errorDebugger('displayInquiry', 'renderedCallback:loadScript', error, 'warn', 'Error loading script');
-                })
+        // Initialize sorting icons only once
+        if (!this._renderedCallbackRunOnce && this.pagedFilteredInquiryData && this.pagedFilteredInquiryData.length > 0) {
+            this.updateSortIcons();
+            this._renderedCallbackRunOnce = true;
         }
+        
     }
 
     loadAllTemplates() {
@@ -2570,7 +2537,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return;
             }
 
-            this.pagedFilteredInquiryData = [...this.pagedFilteredInquiryData].sort((a, b) => {
+            // Sort the full dataset (not just the current page)
+            const sortedData = [...this.pagedFilteredInquiryData].sort((a, b) => {
                 let aValue = a[this.sortField];
                 let bValue = b[this.sortField];
 
@@ -2603,7 +2571,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return this.sortOrder === 'asc' ? compare : -compare;
             });
 
-            // Update the displayed data
+            // Update the pagedFilteredInquiryData with sorted data
+            this.pagedFilteredInquiryData = sortedData;
+
+            // Update the displayed data for current page
             this.updateShownData();
 
         } catch (error) {
@@ -2629,8 +2600,14 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             // Set active header
             const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            console.log('currentHeader', currentHeader);
+            console.log('currentHeader.classList', currentHeader.classList);
+            
+            
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
+                console.log('currentHeader.classList', currentHeader.classList);                
+                
                 
                 // Find the sort icon within this header
                 // Updated selector to match our new HTML structure
@@ -2662,6 +2639,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+            // Update the pagedFilteredInquiryData with sorted data
             this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
         } catch (error) {
             errorDebugger('displayInquiry', 'updateShownData', error, 'warn', 'Error in updateShownData');

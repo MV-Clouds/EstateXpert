@@ -135,6 +135,24 @@ button:disabled {
     transition: transform 0.3s;
 }
 
+/* Sort icon styling */
+.sorting_header .slds-icon_container.slds-icon-utility-arrowdown {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding-left: 0.5rem;
+}
+
+.sorting_header:hover .slds-icon_container.slds-icon-utility-arrowdown {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sorting_header.active-sort .slds-icon_container.slds-icon-utility-arrowdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 .table_tr_cls .slds-icon-utility-arrowdown svg {
     height: 0.8rem;
     fill: white;

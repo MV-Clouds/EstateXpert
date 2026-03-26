@@ -1970,15 +1970,19 @@ public with sharing class EmailCampaignController {
                         }
 
                         Map<String, Map<String, String>> mappingKeys;
-                        if (request.RelatedObjectName == 'MVEX__Listing__c') {
-                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, request.RelatedObjectName, listingIds, true);
-                        } 
+                        String relObj = request.RelatedObjectName;
                         
-                        if(request.RelatedObjectName == 'Contact') {
-                            Set<Id> idsToMap = new Set<Id>();
-                            idsToMap.add(recipient.Id);
-                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, request.RelatedObjectName, idsToMap, true);
-
+                        if (String.isNotBlank(relObj)) {
+                            if (relObj.equalsIgnoreCase('MVEX__Listing__c') || relObj.equalsIgnoreCase('Listing__c')) {
+                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, listingIds, true);
+                            } else if (relObj.equalsIgnoreCase('Contact')) {
+                                Set<Id> idsToMap = new Set<Id>{recipient.Id};
+                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
+                            } else {
+                                // Default fallback for other objects, assuming recipient.Id is the relevant ID
+                                Set<Id> idsToMap = new Set<Id>{recipient.Id};
+                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
+                            }
                         }
 
                         System.debug('mappingKeys: ' + mappingKeys);

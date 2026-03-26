@@ -1524,7 +1524,8 @@ public with sharing class EmailCampaignController {
             for (EmailRequests req : emailRequests) {
                 campaignIds.add(req.campaignId);
                 templateIds.add(req.templateDataId);
-                if (req.listingId != null && req.RelatedObjectName == 'MVEX__Listing__c') {
+                if (req.listingId != null && String.isNotBlank(req.RelatedObjectName) && 
+                    (req.RelatedObjectName.equalsIgnoreCase('MVEX__Listing__c') || req.RelatedObjectName.equalsIgnoreCase('Listing__c'))) {
                     listingIds.add(req.listingId);
                 }
 
@@ -1969,7 +1970,7 @@ public with sharing class EmailCampaignController {
                             continue;
                         }
 
-                        Map<String, Map<String, String>> mappingKeys;
+                        Map<String, Map<String, String>> mappingKeys = new Map<String, Map<String, String>>();
                         String relObj = request.RelatedObjectName;
                         
                         if (String.isNotBlank(relObj)) {
@@ -1985,19 +1986,36 @@ public with sharing class EmailCampaignController {
                             }
                         }
 
+                        // Safety check: ensure mappingKeys and its sub-maps are initialized
+                        if (mappingKeys == null) {
+                            mappingKeys = new Map<String, Map<String, String>>();
+                        }
+                        if (!mappingKeys.containsKey('objectNGeneral')) {
+                            mappingKeys.put('objectNGeneral', new Map<String, String>());
+                        }
+                        if (!mappingKeys.containsKey('salesforceImages')) {
+                            mappingKeys.put('salesforceImages', new Map<String, String>());
+                        }
+
                         System.debug('mappingKeys: ' + mappingKeys);
 
                         processedKeys.add(matchedKey);
                         if (recipient != null) {
                             Map<String, String> mappingKeyVsMappingValues = mappingKeys.get('objectNGeneral');
                             Map<String, String> salesforceImages = mappingKeys.get('salesforceImages');
-                            for (String key : mappingKeyVsMappingValues.keySet()) {
-                                String escapedKey = Pattern.quote(key);
-                                processedBody = processedBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
+                            
+                            if (mappingKeyVsMappingValues != null) {
+                                for (String key : mappingKeyVsMappingValues.keySet()) {
+                                    String escapedKey = Pattern.quote(key);
+                                    processedBody = processedBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
+                                }
                             }
-                            for (String src : salesforceImages.keySet()) {
-                                String escapedSrc = Pattern.quote(src);
-                                processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
+                            
+                            if (salesforceImages != null) {
+                                for (String src : salesforceImages.keySet()) {
+                                    String escapedSrc = Pattern.quote(src);
+                                    processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
+                                }
                             }
                         }
 

@@ -699,7 +699,22 @@ public without sharing class DataMappingControllerV2 {
                             fieldAPI = subString.trim();
                         }
 
-                        if(validFields.keySet().contains(fieldAPI)){
+                        Boolean isValid = validFields.containsKey(fieldAPI);
+                        if (!isValid && fieldAPI.contains('.')) {
+                            String prefix = fieldAPI.substringBeforeLast('.');
+                            String fieldNameOnly = fieldAPI.substringAfterLast('.');
+                            
+                            // Check if prefix matches sourceObjectAPI or its local name (without namespace)
+                            if (validFields.containsKey(fieldNameOnly)) {
+                                if (prefix.equalsIgnoreCase(sourceObjectAPI) || 
+                                   (sourceObjectAPI.contains('__') && sourceObjectAPI.substringAfter('__').equalsIgnoreCase(prefix))) {
+                                    fieldAPI = fieldNameOnly;
+                                    isValid = true;
+                                }
+                            }
+                        }
+
+                        if(isValid){
                             ExtractedKeys ext = new ExtractedKeys();
                             ext.fieldAPI = fieldAPI;
                             ext.formatType = formateType;
@@ -795,8 +810,14 @@ public without sharing class DataMappingControllerV2 {
                 : '';
 
             Schema.SObjectType sobjType = Schema.getGlobalDescribe().get(namespace + objectAPI);
-            System.debug('Object found: ' + sobjType);
-            System.debug('namespace: ' + namespace);
+            if (sobjType == null) {
+                sobjType = Schema.getGlobalDescribe().get(objectAPI);
+            }
+
+            if (sobjType == null) {
+                System.debug('Object Not Found: ' + objectAPI);
+                return fields;
+            }
             Schema.DescribeSObjectResult r = sobjType.getDescribe();
             Map<String, Schema.SObjectField> mapOfFields = r.fields.getMap();
             List<String> fieldsList = new List<String>(mapOfFields.keySet());

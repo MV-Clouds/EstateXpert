@@ -70,49 +70,77 @@ public with sharing class PropertySearchController {
             List<Listing__c> listings = new List<Listing__c>();
             List<Inquiry__c> inquiries = new List<Inquiry__c>();
 
+            // ---------- COMMON: Fetch current record once ----------
+            Listing__c currentListing;
+            Inquiry__c currentInquiry;
+
+            if (objectName == 'MVEX__Listing__c') {
+                List<Listing__c> temp = Database.query(
+                    'SELECT ' + listingFields + ' FROM MVEX__Listing__c WHERE Id = :recId',AccessLevel.USER_MODE);
+                if (!temp.isEmpty()) currentListing = temp[0];
+            }
+
+            if (objectName == 'MVEX__Inquiry__c') {
+                List<Inquiry__c> temp = Database.query(
+                    'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE Id = :recId',AccessLevel.USER_MODE);
+                if (!temp.isEmpty()) currentInquiry = temp[0];
+            }
+
             // ---------- LINKED ----------
-            if (filterType == 'linked' && objectName == 'MVEX__Inquiry__c') {
+            if (filterType == 'linked') {
 
-                listings = Database.query(
-                    'SELECT ' + listingFields +
-                    ' FROM MVEX__Listing__c WHERE Id IN ' +
-                    '(SELECT MVEX__Listing__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Inquiry__c = :recId)',
-                    AccessLevel.USER_MODE
-                );
+                if (objectName == 'MVEX__Listing__c') {
 
-                inquiries = Database.query(
-                    'SELECT ' + inquiryFields +
-                    ' FROM MVEX__Inquiry__c WHERE Id = :recId',
-                    AccessLevel.USER_MODE
-                );
+                    inquiries = Database.query(
+                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE Id IN ' + '(SELECT MVEX__Inquiry__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Listing__c = :recId)',
+                        AccessLevel.USER_MODE);
+
+                    if (currentListing != null) {
+                        listings.add(currentListing);
+                    }
+                }
+
+                else if (objectName == 'MVEX__Inquiry__c') {
+
+                    listings = Database.query(
+                        'SELECT ' + listingFields +
+                        ' FROM MVEX__Listing__c WHERE Id IN ' + '(SELECT MVEX__Listing__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Inquiry__c = :recId)',
+                        AccessLevel.USER_MODE);
+
+                    if (currentInquiry != null) {
+                        inquiries.add(currentInquiry);
+                    }
+                }
             }
 
             // ---------- RELATED ----------
-            else if (filterType == 'related' && objectName == 'MVEX__Inquiry__c') {
+            else if (filterType == 'related') {
 
-                Inquiry__c inquiryRec = [
-                    SELECT Id, MVEX__Listing__c
-                    FROM MVEX__Inquiry__c
-                    WHERE Id = :recId
-                    WITH USER_MODE
-                    LIMIT 1
-                ];
+                if (objectName == 'MVEX__Listing__c') {
 
-                Id listingId = inquiryRec.MVEX__Listing__c;
+                    inquiries = Database.query(
+                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE MVEX__Listing__c = :recId',
+                        AccessLevel.USER_MODE);
 
-                if (listingId != null) {
-                    listings = Database.query(
-                        'SELECT ' + listingFields +
-                        ' FROM MVEX__Listing__c WHERE Id = :listingId',
-                        AccessLevel.USER_MODE
-                    );
+                    if (currentListing != null) {
+                        listings.add(currentListing);
+                    }
                 }
 
-                inquiries = Database.query(
-                    'SELECT ' + inquiryFields +
-                    ' FROM MVEX__Inquiry__c WHERE Id = :recId',
-                    AccessLevel.USER_MODE
-                );
+                else if (objectName == 'MVEX__Inquiry__c') {
+
+                    Id listingId = currentInquiry != null ? currentInquiry.MVEX__Listing__c : null;
+
+                    if (listingId != null) {
+                        listings = Database.query(
+                            'SELECT ' + listingFields + ' FROM MVEX__Listing__c WHERE Id = :listingId',
+                            AccessLevel.USER_MODE);
+                    }
+
+                    if (currentInquiry != null) {
+                        inquiries.add(currentInquiry);
+                    }
+                }
             }
 
             // ---------- DEFAULT ----------
@@ -122,43 +150,33 @@ public with sharing class PropertySearchController {
 
                     listings = Database.query(
                         'SELECT ' + listingFields +
-                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' +
-                        ' FROM MVEX__Listing__c WHERE Id = :recId',
-                        AccessLevel.USER_MODE
-                    );
+                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c WHERE Id = :recId',
+                        AccessLevel.USER_MODE);
 
                     inquiries = Database.query(
-                        'SELECT ' + inquiryFields +
-                        ' FROM MVEX__Inquiry__c',
-                        AccessLevel.USER_MODE
-                    );
+                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c',AccessLevel.USER_MODE);
                 }
 
                 else if (objectName == 'MVEX__Inquiry__c') {
 
-                    inquiries = Database.query(
-                        'SELECT ' + inquiryFields +
-                        ' FROM MVEX__Inquiry__c WHERE Id = :recId',
-                        AccessLevel.USER_MODE
-                    );
+                    if (currentInquiry != null) {
+                        inquiries.add(currentInquiry);
+                    }
 
                     listings = Database.query(
                         'SELECT ' + listingFields +
-                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' +
-                        ' FROM MVEX__Listing__c',
-                        AccessLevel.USER_MODE
-                    );
+                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c',
+                        AccessLevel.USER_MODE);
                 }
             }
 
-            // ---------- collect property ids ----------
+            // ---------- property ids ----------
             for (Listing__c listing : listings) {
                 if (listing.MVEX__Property__c != null) {
                     propertyIds.add(listing.MVEX__Property__c);
                 }
             }
 
-            // ---------- assign wrapper ----------
             wc.listings = listings;
             wc.inquiries = inquiries;
 

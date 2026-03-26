@@ -163,7 +163,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Created By:Rachit Shah
     */
     get mappingClass() {
-        return this.selectedConditionType !== 'Related List' && this.selectedConditionType !== 'None' ? 'mapping-item-active' : 'mapping-item-inactive';
+        return this.selectedConditionType !== 'Related List' && this.selectedConditionType !== 'Linked Listings' && this.selectedConditionType !== 'No Filter' ? 'mapping-item-active' : 'mapping-item-inactive';
     }
 
     /**

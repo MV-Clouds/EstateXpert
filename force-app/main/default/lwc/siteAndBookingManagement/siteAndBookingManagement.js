@@ -227,6 +227,11 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             // if (this.showManageModal && !this.manageCalendarInitialized && this.showDateTimeInputs) {
             //     this.initializeManageCalendar();
             // }
+
+              // Update sort icons after DOM is rendered
+            if (!this.isLoading && this.contacts.length > 0) {
+                this.updateSortIcons();
+            }
         }
 
         // Render Email Preview Safely
@@ -390,7 +395,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             console.error('Error in updateSortIcons:', error);
         }
     }
-    
+
     // --- CALENDAR INITIALIZATION ---
 
     initializeScheduleCalendar() {

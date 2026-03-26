@@ -1202,7 +1202,7 @@ export default class SendEmails extends LightningElement {
             const campaignEmailData = {
                 templateId: '', // No template ID for new campaigns
                 campaignId: '', // No campaign ID for new campaigns
-                relatedObject: this.campaignDetails.templateRelatedObject,
+                relatedObject: this.campaignDetails.objectName,
                 campaignName: this.campaignDetails.campaignName,
                 messagingService: this.campaignDetails.messagingService,
                 saveForFuture: false, // Not saving as template
@@ -1269,7 +1269,7 @@ export default class SendEmails extends LightningElement {
             const campaignEmailData = {
                 templateId: '', // No template ID for new campaigns
                 campaignId: '', // No campaign ID for new campaigns
-                relatedObject: this.campaignDetails.templateRelatedObject,
+                relatedObject: this.campaignDetails.objectName,
                 campaignName: this.campaignDetails.campaignName,
                 messagingService: this.campaignDetails.messagingService,
                 saveForFuture: false, // Not saving as template

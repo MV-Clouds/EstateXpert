@@ -518,21 +518,15 @@ public with sharing class TemplateBuilderController {
     }
 
     @AuraEnabled
-    public static List<Contact> searchContactsWithEmail(String searchTerm, List<Id> excludeIds) {
+    public static List<Contact> searchContactsWithEmail(String searchTerm){
         try {
             String likeParam = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
-
-            Set<Id> excludeSet = new Set<Id>();
-            if (excludeIds != null && !excludeIds.isEmpty()) {
-                excludeSet.addAll(excludeIds);
-            }
 
             List<Contact> contacts = [
                 SELECT Id, Name, Email 
                 FROM Contact 
                 WHERE (Name LIKE :likeParam OR Email LIKE :likeParam)
                 AND Email != null
-                AND Id NOT IN :excludeIds
                 ORDER BY Name ASC
             ];
 

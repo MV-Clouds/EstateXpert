@@ -378,9 +378,7 @@ export default class ListingPDFGenerator extends LightningElement {
         this.isContactSearching = true;
         this.showContactDropdown = true;
 
-        const excludeIds = this.selectedContacts.map(c => c.id);
-
-        searchContactsWithEmail({ searchTerm, excludeIds })
+        searchContactsWithEmail({ searchTerm })
             .then((results) => {
                 this.contactSearchResults = results.map(c => ({
                     id: c.Id,

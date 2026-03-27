@@ -178,6 +178,7 @@ button:disabled {
     cursor: pointer;
     transition: background-color 0.5s ease;
     justify-content: center;
+    padding-inline: 21px;
     /* position: relative; */
 }
 

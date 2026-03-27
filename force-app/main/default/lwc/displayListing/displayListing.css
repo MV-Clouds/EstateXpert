@@ -190,6 +190,7 @@
     transition: background-color 0.25s;
     justify-content: center;
     position: relative;
+    padding-inline: 21px;
 }
 
 .sort-cover:hover {

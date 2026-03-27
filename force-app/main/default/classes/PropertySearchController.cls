@@ -48,69 +48,160 @@ public with sharing class PropertySearchController {
         }
     }
     
-    
-    
     /**
      * @description       : This apex class method is used for getting listing and inquiry data
      * @author            : MitrajSinh Gohil
-     * @last modified on  : 25-07-2024
-     * @last modified by  : Rachit Shah
+     * @last modified on  : 26-03-2026
+     * @last modified by  : Kajal Tiwari
      **/
     @AuraEnabled
-    public static WrapperClass getRecords(String recId, String objectName) {
+    public static WrapperClass getRecords(String recId, String objectName, String filterType) {
         try {
             if (String.isBlank(objectName) && !String.isBlank(recId)) {
-                Id recordId = Id.valueOf(recId);
-                objectName = recordId.getSObjectType().getDescribe().getName();
+                objectName = Id.valueOf(recId).getSObjectType().getDescribe().getName();
             }
 
             WrapperClass wc = new WrapperClass();
             Set<Id> propertyIds = new Set<Id>();
+
+            String listingFields = getAllFields('MVEX__Listing__c');
+            String inquiryFields = getAllFields('MVEX__Inquiry__c');
+
             List<Listing__c> listings = new List<Listing__c>();
             List<Inquiry__c> inquiries = new List<Inquiry__c>();
-            List<Listing__c> currentListing = new List<Listing__c>();
-            List<Inquiry__c> currentInquiry = new List<Inquiry__c>();
-            
-            String listingFields = String.escapeSingleQuotes(getAllFields('MVEX__Listing__c'));
-            String inquiryFields = String.escapeSingleQuotes(getAllFields('MVEX__Inquiry__c'));
-            
-            String listingData = 'SELECT ' + listingFields + ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r) FROM MVEX__Listing__c WHERE Id = :recId';
-            String inquiryData = 'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c';
-            
-            String listingData2 = 'SELECT ' + listingFields + ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r) FROM MVEX__Listing__c';
-            String inquiryData2 = 'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE id =:recId';
-            
+
+            // ---------- COMMON: Fetch current record once ----------
+            Listing__c currentListing;
+            Inquiry__c currentInquiry;
+
             if (objectName == 'MVEX__Listing__c') {
-                currentListing = Database.query(listingData, AccessLevel.USER_MODE);
-                inquiries = Database.query(inquiryData, AccessLevel.USER_MODE);
-
-                wc.listings = currentListing;
-                wc.inquiries = inquiries;
-                
+                List<Listing__c> temp = Database.query(
+                    'SELECT ' + listingFields + ' FROM MVEX__Listing__c WHERE Id = :recId',AccessLevel.USER_MODE);
+                if (!temp.isEmpty()) currentListing = temp[0];
             }
-            else if (objectName == 'MVEX__Inquiry__c') {
-                currentInquiry = Database.query(inquiryData2, AccessLevel.USER_MODE);
-                listings = Database.query(listingData2, AccessLevel.USER_MODE);
-                
-                for (Listing__c listing : listings) {
-                    propertyIds.add(listing.Property__c);
+
+            if (objectName == 'MVEX__Inquiry__c') {
+                List<Inquiry__c> temp = Database.query(
+                    'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE Id = :recId',AccessLevel.USER_MODE);
+                if (!temp.isEmpty()) currentInquiry = temp[0];
+            }
+
+            // ---------- LINKED ----------
+            if (filterType == 'linked') {
+
+                if (objectName == 'MVEX__Listing__c') {
+
+                    inquiries = Database.query(
+                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE Id IN ' + '(SELECT MVEX__Inquiry__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Listing__c = :recId)',
+                        AccessLevel.USER_MODE);
+
+                    if (currentListing != null) {
+                        listings.add(currentListing);
+                    }
                 }
-                
-                wc.listings = listings;
-                wc.inquiries = currentInquiry;
+
+                else if (objectName == 'MVEX__Inquiry__c') {
+
+                    listings = Database.query(
+                        'SELECT ' + listingFields +
+                        ' FROM MVEX__Listing__c WHERE Id IN ' + '(SELECT MVEX__Listing__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Inquiry__c = :recId)',
+                        AccessLevel.USER_MODE);
+
+                    if (currentInquiry != null) {
+                        inquiries.add(currentInquiry);
+                    }
+                }
             }
 
-            List<Property_File__c> medias = [SELECT Id, BaseUrl__c, Property__c FROM Property_File__c WHERE Property__c IN :propertyIds WITH USER_MODE];
-            Map<Id, String> propertyMediaUrlsMap = new Map<Id, String>();
-            for (Property_File__c media : medias) {
-                propertyMediaUrlsMap.put(media.Property__c, media.BaseUrl__c);
+            // ---------- RELATED ----------
+            else if (filterType == 'related') {
+
+                if (objectName == 'MVEX__Listing__c') {
+
+                    inquiries = Database.query(
+                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE MVEX__Listing__c = :recId',
+                        AccessLevel.USER_MODE);
+
+                    if (currentListing != null) {
+                        listings.add(currentListing);
+                    }
+                }
+
+                else if (objectName == 'MVEX__Inquiry__c') {
+
+                    Id listingId = currentInquiry != null ? currentInquiry.MVEX__Listing__c : null;
+
+                    if (listingId != null) {
+                        listings = Database.query(
+                            'SELECT ' + listingFields + ' FROM MVEX__Listing__c WHERE Id = :listingId',
+                            AccessLevel.USER_MODE);
+                    }
+
+                    if (currentInquiry != null) {
+                        inquiries.add(currentInquiry);
+                    }
+                }
             }
-            
-            wc.medias = propertyMediaUrlsMap;
-            
+
+            // ---------- DEFAULT ----------
+            else {
+
+                if (objectName == 'MVEX__Listing__c') {
+
+                    listings = Database.query(
+                        'SELECT ' + listingFields +
+                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c WHERE Id = :recId',
+                        AccessLevel.USER_MODE);
+
+                    inquiries = Database.query(
+                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c',AccessLevel.USER_MODE);
+                }
+
+                else if (objectName == 'MVEX__Inquiry__c') {
+
+                    if (currentInquiry != null) {
+                        inquiries.add(currentInquiry);
+                    }
+
+                    listings = Database.query(
+                        'SELECT ' + listingFields +
+                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c',
+                        AccessLevel.USER_MODE);
+                }
+            }
+
+            // ---------- property ids ----------
+            for (Listing__c listing : listings) {
+                if (listing.MVEX__Property__c != null) {
+                    propertyIds.add(listing.MVEX__Property__c);
+                }
+            }
+
+            wc.listings = listings;
+            wc.inquiries = inquiries;
+
+            // ---------- media ----------
+            if (!propertyIds.isEmpty()) {
+                Map<Id, String> mediaMap = new Map<Id, String>();
+
+                for (Property_File__c media : [
+                    SELECT Property__c, BaseUrl__c
+                    FROM Property_File__c
+                    WHERE Property__c IN :propertyIds
+                    WITH USER_MODE
+                ]) {
+                    mediaMap.put(media.Property__c, media.BaseUrl__c);
+                }
+
+                wc.medias = mediaMap;
+            } else {
+                wc.medias = new Map<Id, String>();
+            }
+
             return wc;
+
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e,'PropertySearchController','getRecords' , e.getStackTraceString());
+            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'getRecords', e.getStackTraceString());
             return null;
         }
     }

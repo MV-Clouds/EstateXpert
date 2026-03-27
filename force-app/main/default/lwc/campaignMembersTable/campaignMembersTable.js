@@ -171,7 +171,10 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.visibleMembers = this.filteredMembers.slice(startIndex, endIndex);
+            this.visibleMembers = this.filteredMembers.slice(startIndex, endIndex).map((member, idx) => ({
+                ...member,
+                rowIndex: startIndex + idx + 1
+            }));
         } catch (error) {
             console.log('Error updateShownData->' + error);
         }
@@ -217,7 +220,11 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     }
 
     handleFilterClick() {
-        this.isFilterModalOpen = true;
+        this.isFilterModalOpen = !this.isFilterModalOpen;
+    }
+
+    handleFilterContainerClick(event) {
+        event.stopPropagation();
     }
 
     clearFilterModal() {

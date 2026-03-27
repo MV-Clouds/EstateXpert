@@ -4,6 +4,8 @@ import getTemplatesByObject from '@salesforce/apex/SendEmailsController.getTempl
 import getListings from '@salesforce/apex/SendEmailsController.getListings';
 import getAllContacts from '@salesforce/apex/SendEmailsController.getAllContacts';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import { loadStyle } from 'lightning/platformResourceLoader';
 // Import the correct methods for single and drip campaigns
 import createCampaignAndEmails from '@salesforce/apex/EmailCampaignController.createCampaignAndEmails';
 import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastEmailGroups';
@@ -181,7 +183,7 @@ export default class SendEmails extends LightningElement {
     // Footer button configurations
     get footerButtons() {
         const buttons = [];
-        
+
         // Back button (show on step 2 and later)
         if (this.currentStep > 1) {
             buttons.push({
@@ -189,7 +191,7 @@ export default class SendEmails extends LightningElement {
                 variant: 'neutral',
                 onclick: 'handleBack',
                 disabled: false,
-                buttonClass: 'custom-footer-button back-button',
+                buttonClass: 'white-btn-css',
                 isBack: true,
                 isNext: false,
                 isFinish: false
@@ -201,19 +203,19 @@ export default class SendEmails extends LightningElement {
             let isDisabled = false;
             if (this.isDripCampaign) {
                 // For drip campaigns, check if we have at least one drip and start date
-                isDisabled = !this.dripStartDate || this.dripSequence.length === 0 || 
-                            !this.validateDripSequence();
+                isDisabled = !this.dripStartDate || this.dripSequence.length === 0 ||
+                    !this.validateDripSequence();
             } else {
                 // For single campaigns, check if template is selected
                 isDisabled = !this.selectedTemplate;
             }
-            
+
             buttons.push({
                 label: 'Next',
                 variant: 'brand',
                 onclick: 'handleNext',
                 disabled: isDisabled,
-                buttonClass: 'custom-footer-button next-button',
+                buttonClass: 'blue-btn-css',
                 isBack: false,
                 isNext: true,
                 isFinish: false
@@ -223,7 +225,7 @@ export default class SendEmails extends LightningElement {
             const hasCampaignDetails = this.campaignDetails.campaignName && this.campaignDetails.messagingService;
             buttons.push({
                 label: this.isDripCampaign ? 'Create Campaign' : 'Send Emails',
-                variant: 'brand', 
+                variant: 'brand',
                 onclick: 'handleFinish',
                 disabled: !hasRecipients || !hasCampaignDetails,
                 buttonClass: 'custom-footer-button finish-button',
@@ -243,17 +245,17 @@ export default class SendEmails extends LightningElement {
     // Template options based on selected template type and listing
     get availableTemplates() {
         let relatedObj = this.campaignDetails.templateRelatedObject;
-        return this.allCustomTemplates.filter(template => 
+        return this.allCustomTemplates.filter(template =>
             template.objectName === relatedObj || template.objectName === 'Generic'
         );
-    }    
+    }
 
     // Show template preview only for EstateXpert templates and Single Marketing Campaign
     get showTemplatePreview() {
         return this.selectedOption === 'single' &&
-               this.campaignDetails.templateType === 'EstateXpert Template' && 
-               this.selectedTemplate && 
-               this.templatePreview.body;
+            this.campaignDetails.templateType === 'EstateXpert Template' &&
+            this.selectedTemplate &&
+            this.templatePreview.body;
     }
 
     // Get minimum date for drip start date (today)
@@ -364,6 +366,7 @@ export default class SendEmails extends LightningElement {
     }
     
     connectedCallback() {
+        loadStyle(this, MulishFontCss);
         if (this.objectApiName) {
             this.campaignDetails.objectName = this.objectApiName;
             this.campaignDetails.isObjectDropDownDisabled = true;

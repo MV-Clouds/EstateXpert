@@ -73,6 +73,8 @@
     margin-right: -1rem;
     margin-bottom: -1rem;
     flex-shrink: 0;
+    position: sticky;
+    bottom: -18px;
 }
 
 .custom-footer button {
@@ -622,19 +624,6 @@
     min-height: 200px;
 }
 
-.section-title {
-    margin: 0 0 0.25rem 0;
-    color: var(--text-color);
-    font-size: 1.125rem;
-    font-weight: 500;
-}
-
-.section-subtitle {
-    margin: 0 0 1rem 0;
-    color: #706e6b;
-    font-size: 0.875rem;
-}
-
 .search-container {
     margin-bottom: 1rem;
 }
@@ -1027,10 +1016,11 @@
 
 .form-label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 12px;
     font-weight: 500;
     color: #333;
-    margin-bottom: 0.5rem;
+    margin-bottom: 2px;
+    margin-top: 4px;
 }
 
 /* Subject display as text instead of input */
@@ -1651,7 +1641,7 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
 }
@@ -1662,15 +1652,15 @@
 
 .section-title {
     font-size: 1.15rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #1e293b;
     margin-bottom: 0.25rem;
 }
 
 .section-subtitle {
-    font-size: 0.875rem;
-    color: #64748b;
-    margin-bottom: 1.25rem;
+    font-size: 12px;
+    color: #4a4a4a;
+    margin-bottom: 1px;
 }
 
 /* Step 2: Configuration Grid */
@@ -1678,13 +1668,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
-}
-
-.template-selector-body {
-    background: #f8fafc;
-    padding: 1.25rem;
-    border-radius: 8px;
-    border: 1px dashed #cbd5e1;
 }
 
 .template-input-group {
@@ -1698,8 +1681,8 @@
 }
 
 .preview-template-btn {
-    height: 42px; /* Match combobox height */
-    padding: 0 1.5rem;
+    height: 32px;
+    padding: 0 1rem;
     background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
     color: white;
     border: none;
@@ -1927,6 +1910,10 @@
 
 .section-divider span {
     padding: 0 1rem;
+}
+
+.blue-btn-css{
+    margin-bottom: -1px;
 }
 
 /* Responsive fixes */

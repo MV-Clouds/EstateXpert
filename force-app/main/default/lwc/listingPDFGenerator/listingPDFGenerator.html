@@ -1,4 +1,5 @@
 <template>
+    <!-- Step 1: Select Template -->
     <template if:true={isStep1}>
         <div class="slds-modal__header blue-header">
             <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Select Template</h1>
@@ -8,19 +9,17 @@
                 <div class="slds-form-element__control main_body">
                     <label>Select Listing Template</label>
                     <lightning-input label="Select Listing Template" type="search" onclick={showPicklistOptions}
-                    placeholder="Search Template..." onkeyup={search} variant="label-hidden"
-                    value={selectedValue} onblur={hidePicklistOptions} class="input_class" oncommit={handleClear}
-                    readonly={readonly}>
+                        placeholder="Search Template..." onkeyup={search} variant="label-hidden" value={selectedValue}
+                        onblur={hidePicklistOptions} class="input_class" oncommit={handleClear} readonly={readonly}>
                     </lightning-input>
                     <div if:true={dropDown}
-                        class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid dropdown_class"
-                        role="listbox" onmousedown={preventHide}>
+                        class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid dropdown_class" role="listbox"
+                        onmousedown={preventHide}>
                         <ul class="slds-listbox slds-listbox_vertical" role="presentation">
                             <template for:each={searchResults} for:item="searchResult">
-                                <li key={searchResult.value} data-value={searchResult.value}
-                                    role="presentation" onclick={selectSearchResult}
-                                    class="slds-listbox__item">
-                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small "
+                                <li key={searchResult.value} data-value={searchResult.value} role="presentation"
+                                    onclick={selectSearchResult} class="slds-listbox__item">
+                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
                                         role="option">
                                         <span class="slds-media__body">
                                             <span class="slds-truncate" title={searchResult.label}>
@@ -34,40 +33,59 @@
                     </div>
                 </div>
                 <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC}
-                        onload={fileDownloaded} width="0%" height="0%"></iframe>
+                    onload={fileDownloaded} width="0%" height="0%"></iframe>
                 <div class="edit_modal_footerbtns">
-                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>
+                    <button class="white-btn-css" aria-label="Cancel and close" onclick={closeActionScreen}>
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="currentColor" />
                         </svg>
                         Cancel
                     </button>
-                    <button class="save_btn_css" onclick={goToStep2}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <button class="blue-btn-css" onclick={goToStep2}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         Preview
                     </button>
-                    <button class="save_btn_css" onclick={downloadFile}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <button class="blue-btn-css" onclick={downloadFile}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         Download
+                    </button>
+                    <button class="blue-btn-css email_send_btn" onclick={goToStep3}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Send Email
                     </button>
                 </div>
             </template>
             <template if:false={isDataAvailable}>
                 <div class="emptyStateContainer">
-                    <img class="emptyStateImage" src="/resource/MVEX__emptyState" draggable="false"/>
+                    <img class="emptyStateImage" src="/resource/MVEX__emptyState" draggable="false" />
                     <div class="emptyStateMessage">
                         No templates found. Please create a template first.
                     </div>
                 </div>
                 <div class="edit_modal_footerbtns">
-                    <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>
+                    <button class="white-btn-css" aria-label="Cancel and close" onclick={closeActionScreen}>
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="currentColor" />
                         </svg>
                         Close
                     </button>
@@ -83,8 +101,8 @@
                 <template lwc:if={showPreview}>
                     <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC}
                         onload={fileDownloaded} width="0%" height="0%"></iframe>
-                    <iframe lwc:if={vfPageSRC} class="preview_iframe" data-id="vfPage" src={vfPageSRC}
-                        width="100%" height="100%" onload={contentLoaded}></iframe>
+                    <iframe lwc:if={vfPageSRC} class="preview_iframe" data-id="vfPage" src={vfPageSRC} width="100%"
+                        height="100%" onload={contentLoaded}></iframe>
                 </template>
                 <template lwc:elseif={errorOccured}>
                     <div class="errorMessageContainer">
@@ -113,7 +131,7 @@
                 </template>
                 <template lwc:else>
                     <div class="loadingContainer">
-                        <img class="intiImg" src="/resource/MVEX__emptyState" draggable="false"/>
+                        <img class="intiImg" src="/resource/MVEX__emptyState" draggable="false" />
                         <div class="loadingInfo">
                             {loadingInfo}
                         </div>
@@ -121,23 +139,219 @@
                 </template>
             </div>
             <div class="edit_modal_footerbtns">
-                <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeActionScreen}>
+                <button class="white-btn-css" aria-label="Cancel and close" onclick={closeActionScreen}>
                     <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="currentColor" />
                     </svg>
                     Cancel
                 </button>
-                <button class="save_btn_css" onclick={goToStep1}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <button class="blue-btn-css" onclick={goToStep1}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     Back
                 </button>
-                <button class="save_btn_css" onclick={downloadFile}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <button class="blue-btn-css" onclick={downloadFile}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     Download
+                </button>
+                <button class="blue-btn-css" onclick={goToStep3}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Send Email
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Step 3: Send Email -->
+    <template if:true={isStep3}>
+        <div class="slds-modal__header blue-header">
+            <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Send Email</h1>
+        </div>
+        <div class="email_modal_body">
+            <!-- Hidden iframe always present for email PDF generation -->
+            <template if:true={vfEmailPageSRC}>
+                <iframe src={vfEmailPageSRC} data-id="emailGenerateFrame" class="generate_iframe"
+                    onload={emailFrameLoaded}>
+                </iframe>
+            </template>
+            <div class="email-modal">
+                <!-- To: Contact Record Picker with Pills -->
+                <div class="email_field_group">
+                    <label class="email_field_label">
+                        To
+                    </label>
+                    <div class="email_pills_input_wrapper" onclick={focusContactSearch}>
+                        <!-- Selected Contact Pills -->
+                        <template for:each={selectedContacts} for:item="contact">
+                            <span key={contact.id} class="email_contact_pill">
+                                <span class="email_pill_initials">{contact.initials}</span>
+                                <span class="email_pill_text">
+                                    <span class="email_pill_name">{contact.name}</span>
+                                    <span class="email_pill_email">{contact.email}</span>
+                                </span>
+                                <button class="email_pill_close" data-id={contact.id} onmousedown={removeContact}
+                                    aria-label="Remove contact" title="Remove">
+                                    <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                            fill="black" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                        <!-- Search Input -->
+                        <input type="text" class="email_contact_search_input" placeholder={contactInputPlaceholder}
+                            value={contactSearchTerm} oninput={handleContactSearch} onkeydown={handleContactKeydown}
+                            onblur={hideContactDropdown} data-id="contactSearchInput" />
+                    </div>
+                    <!-- Contact Dropdown Results -->
+                    <div if:true={showContactDropdown} class="email_contact_dropdown" onmousedown={preventContactHide}>
+                        <template if:true={isContactSearching}>
+                            <div class="email_dropdown_loader">
+                                <div class="email_loader_dot"></div>
+                                <div class="email_loader_dot"></div>
+                                <div class="email_loader_dot"></div>
+                                <span>Searching contacts...</span>
+                            </div>
+                        </template>
+                        <template if:false={isContactSearching}>
+                            <template if:true={hasContactResults}>
+                                <template for:each={contactSearchResults} for:item="contact">
+                                    <div key={contact.id} class="email_contact_option" data-id={contact.id}
+                                        data-name={contact.name} data-email={contact.email}
+                                        data-initials={contact.initials} onmousedown={selectContact}>
+                                        <span class="email_option_avatar">{contact.initials}</span>
+                                        <div class="email_option_details">
+                                            <span class="email_option_name">{contact.name}</span>
+                                            <span class="email_option_email">{contact.email}</span>
+                                        </div>
+                                        <svg class="email_option_add_icon" width="16" height="16" viewBox="0 0 24 24"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- Free-typed valid email option -->
+                            <template if:true={showFreeEmailOption}>
+                                <div class="email_contact_option email_free_email_option" data-email={freeTypedEmail}
+                                    onmousedown={selectFreeEmail}>
+                                    <span class="email_option_avatar email_option_avatar--manual">@</span>
+                                    <div class="email_option_details">
+                                        <span class="email_option_name">Send to {freeTypedEmail}</span>
+                                        <span class="email_option_email">Not a saved contact · press Enter or Space to
+                                            add</span>
+                                    </div>
+                                    <svg class="email_option_add_icon" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </template>
+
+                            <!-- No results and no valid email typed -->
+                            <template if:false={showFreeEmailOption}>
+                                <template if:false={hasContactResults}>
+                                    <div class="email_dropdown_empty">
+                                        <!-- your existing no-results SVG/text -->
+                                        No contacts found with email address.
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Subject -->
+                <div class="email_field_group">
+                    <label class="email_field_label" for="emailSubjectInput">
+                        Subject
+                    </label>
+                    <input type="text" id="emailSubjectInput" class="email_text_input" value={emailSubject}
+                        oninput={handleSubjectChange} placeholder="Enter email subject..." />
+                </div>
+
+                <!-- Body -->
+                <div class="email_field_group email_body_group">
+                    <label class="email_field_label" for="emailBodyTextarea">
+                        Message
+                    </label>
+                    <textarea id="emailBodyTextarea" class="email_body_textarea" value={emailBody}
+                        oninput={handleBodyChange} placeholder="Enter your message...">{emailBody}
+                </textarea>
+                </div>
+
+                <!-- Attachment -->
+                <div class="email_field_group">
+                    <label class="email_field_label">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M21.44 11.05L12.25 20.24C11.1242 21.3658 9.59723 21.9983 8.005 21.9983C6.41277 21.9983 4.88584 21.3658 3.76 20.24C2.63416 19.1142 2.00166 17.5872 2.00166 15.995C2.00166 14.4028 2.63416 12.8758 3.76 11.75L12.95 2.56C13.7006 1.80943 14.7186 1.38777 15.78 1.38777C16.8414 1.38777 17.8594 1.80943 18.61 2.56C19.3606 3.31057 19.7822 4.32855 19.7822 5.39C19.7822 6.45145 19.3606 7.46943 18.61 8.22L9.41 17.41C9.03472 17.7853 8.52573 17.9961 7.995 17.9961C7.46427 17.9961 6.95528 17.7853 6.58 17.41C6.20472 17.0347 5.99389 16.5257 5.99389 15.995C5.99389 15.4643 6.20472 14.9553 6.58 14.58L15.07 6.1"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        Attachment
+                    </label>
+                    <div class="email_attachment_row">
+                        <div class="email_attachment_chip">
+                            <div class="email_attachment_icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M14 2V8H20M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <span class="email_attachment_name">{attachmentLabel}</span>
+                            <span class="email_attachment_badge">PDF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="edit_modal_footerbtns">
+                <button class="white-btn-css" aria-label="Cancel and close" onclick={closeActionScreen}>
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="currentColor" />
+                    </svg>
+                    Cancel
+                </button>
+                <button class="blue-btn-css" onclick={goBackFromEmail}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Back
+                </button>
+                <button class="blue-btn-css" onclick={sendEmail}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Send
                 </button>
             </div>
         </div>

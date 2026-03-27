@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "/Users/karansingh/EstateXpert"
+    }
+  ],
+  "settings": {
+    "eslint.workingDirectories": [
+      "/Users/karansingh/EstateXpert"
+    ],
+    "eslint.validate": [
+      "javascript",
+      "typescript"
+    ],
+    "eslint.options": {
+      "overrideConfigFile": "/Users/karansingh/EstateXpert/.eslintrc.json"
+    }
+  }
+}

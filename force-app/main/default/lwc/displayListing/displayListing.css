@@ -165,7 +165,10 @@
     cursor: pointer;
     width: 0.9rem;
     height: 0.9rem;
-    margin-left: 0.4rem;
+    /* margin-left: 0.4rem; */
+    position: absolute;
+    top: 33%;
+    right: 5px;
 }
 
 .custom-data-table th:not(.sorted-field):hover .listing-manager-icon {
@@ -585,9 +588,9 @@ button:disabled {
 }
 
 /* Style for the ellipsis */
-span {
+/* span {
     margin: 0 5px;
-}
+} */
 
 /* Specific styles for Back and Next buttons */
 .pagination-button:first-child,

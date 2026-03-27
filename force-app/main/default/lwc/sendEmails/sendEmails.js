@@ -1,7 +1,4 @@
 import { LightningElement, api, track } from 'lwc';
-import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
-import summerNote_Editor from '@salesforce/resourceUrl/summerNoteEditor';
 import getMessagingServiceOptions from '@salesforce/apex/SendEmailsController.getMessagingServiceOptions';
 import getTemplatesByObject from '@salesforce/apex/SendEmailsController.getTemplatesByObject';
 import getListings from '@salesforce/apex/SendEmailsController.getListings';
@@ -37,6 +34,7 @@ export default class SendEmails extends LightningElement {
 
     @track listingOptions = [];
     @track selectedListing = null;
+    @track selectedListingName = '';
     @track activeTab = 'All';
 
     @track allContacts = [];
@@ -54,13 +52,14 @@ export default class SendEmails extends LightningElement {
     @track selectedOption = '';
     @track selectedOptionLabel = '';
     @track currentStep = 1;
-    @track totalSteps = 5;
+    @track totalSteps = 3;
     
     // Single object to store all campaign details
     @track campaignDetails = {
-        objectName: '',
+        objectName: 'Contact',
+        templateRelatedObject: 'Contact',
         campaignName: '',
-        templateType: '',
+        templateType: 'EstateXpert Template',
         messagingService: '',
         selectedTemplate: '',
         isObjectDropDownDisabled: false
@@ -82,19 +81,21 @@ export default class SendEmails extends LightningElement {
         // { label: 'Email Template', value: 'Email Template' },
         { label: 'EstateXpert Template', value: 'EstateXpert Template' }
     ];
+
+    get templateObjectOptions() {
+        return [
+            { label: 'Contact', value: 'Contact' },
+            { label: 'Listing', value: 'MVEX__Listing__c' }
+        ];
+    }
     
     steps = [
         { label: 'Select Type', value: 'step-1' },
-        { label: 'Campaign Details', value: 'step-2' },
-        { label: 'Select Listing (Optional)', value: 'step-3' },
-        { label: 'Template Selection', value: 'step-4' },
-        { label: 'Select Recipients', value: 'step-5' }
+        { label: 'Template Configuration', value: 'step-2' },
+        { label: 'Recipients & Send', value: 'step-3' }
     ];
 
     get dynamicSteps() {
-        if (this.isDripCampaign) {
-            return this.steps.filter(s => s.value !== 'step-3');
-        }
         return this.steps;
     }
 
@@ -116,12 +117,22 @@ export default class SendEmails extends LightningElement {
         return this.currentStep === 3;
     }
 
-    get isStep4() {
-        return this.currentStep === 4;
+    // Check if drip campaign is selected
+    get isDripCampaign() {
+        return this.selectedOption === 'drip';
     }
 
-    get isStep5() {
-        return this.currentStep === 5;
+    // Check if single campaign is selected
+    get isSingleCampaign() {
+        return this.selectedOption === 'single';
+    }
+
+    get showSingleListingSelector() {
+        return this.isSingleCampaign && this.campaignDetails.templateRelatedObject === 'MVEX__Listing__c';
+    }
+
+    get showDripListingSelector() {
+        return this.campaignDetails.templateRelatedObject === 'MVEX__Listing__c';
     }
 
     // Computed filtered listings based on active tab with enhanced listing data
@@ -143,15 +154,6 @@ export default class SendEmails extends LightningElement {
     // Check if there are no listings
     get hasNoListings() {
         return this.listingOptions.length === 0;
-    }
-
-    // Get selected listing name for display
-    get selectedListingName() {
-        if (this.selectedListing) {
-            const listing = this.listingOptions.find(l => l.value === this.selectedListing);
-            return listing ? listing.name : '';
-        }
-        return '';
     }
 
     // Template combobox label based on selection
@@ -196,28 +198,6 @@ export default class SendEmails extends LightningElement {
 
         // Next/Finish button
         if (this.currentStep === 2) {
-            buttons.push({
-                label: 'Next',
-                variant: 'brand',
-                onclick: 'handleNext',
-                disabled: false,
-                buttonClass: 'custom-footer-button next-button',
-                isBack: false,
-                isNext: true,
-                isFinish: false
-            });
-        } else if (this.currentStep === 3) {
-            buttons.push({
-                label: 'Next',
-                variant: 'brand',
-                onclick: 'handleNext',
-                disabled: false,
-                buttonClass: 'custom-footer-button next-button',
-                isBack: false,
-                isNext: true,
-                isFinish: false
-            });
-        } else if (this.currentStep === 4) {
             let isDisabled = false;
             if (this.isDripCampaign) {
                 // For drip campaigns, check if we have at least one drip and start date
@@ -238,13 +218,14 @@ export default class SendEmails extends LightningElement {
                 isNext: true,
                 isFinish: false
             });
-        } else if (this.currentStep === 5) {
+        } else if (this.currentStep === 3) {
             const hasRecipients = this.selectedContacts.length > 0 || this.selectedBroadcastGroups.length > 0;
+            const hasCampaignDetails = this.campaignDetails.campaignName && this.campaignDetails.messagingService;
             buttons.push({
                 label: this.isDripCampaign ? 'Create Campaign' : 'Send Emails',
                 variant: 'brand', 
                 onclick: 'handleFinish',
-                disabled: !hasRecipients,
+                disabled: !hasRecipients || !hasCampaignDetails,
                 buttonClass: 'custom-footer-button finish-button',
                 isBack: false,
                 isNext: false,
@@ -261,48 +242,10 @@ export default class SendEmails extends LightningElement {
 
     // Template options based on selected template type and listing
     get availableTemplates() {
-        let templates = [];
-        console.log('campaign==> ',JSON.stringify(this.campaignDetails));
-        
-        
-        if (this.campaignDetails.templateType === 'Email Template') {
-            templates = [...this.filteredEmailTemplates];
-        } else if (this.campaignDetails.templateType === 'EstateXpert Template') {
-            console.log('here2');
-            
-            templates = [...this.filteredCustomTemplates];
-        }
-    
-        const currentListingId = this.isDripCampaign && this.selectedDrip ? this.selectedDrip.selectedListingId : this.selectedListing;
-
-        // If listing is selected, show listing templates + general templates without merge fields
-        if (currentListingId && this.campaignDetails.templateType === 'EstateXpert Template') {
-            const listingTemplates = this.allCustomTemplates.filter(template => 
-                template.objectName === 'MVEX__Listing__c'
-            );
-
-            console.log('allCustomTemplates:', this.allCustomTemplates);   
-            
-            
-            // Get general templates without merge fields
-            const generalTemplatesWithoutMergeFields = this.allCustomTemplates.filter(template => 
-                template.objectName === 'Generic'
-            );
-
-            console.log('generalTemplatesWithoutMergeFields:', generalTemplatesWithoutMergeFields);
-            
-            
-            templates = [...listingTemplates, ...generalTemplatesWithoutMergeFields];
-        } else {
-            // If no listing selected, show only general templates without merge fields
-            if (this.campaignDetails.templateType === 'EstateXpert Template') {
-                templates = templates.filter(template => 
-                    template.objectName === 'Generic'
-                );
-            }
-        }
-    
-        return templates;
+        let relatedObj = this.campaignDetails.templateRelatedObject;
+        return this.allCustomTemplates.filter(template => 
+            template.objectName === relatedObj || template.objectName === 'Generic'
+        );
     }    
 
     // Show template preview only for EstateXpert templates and Single Marketing Campaign
@@ -311,16 +254,6 @@ export default class SendEmails extends LightningElement {
                this.campaignDetails.templateType === 'EstateXpert Template' && 
                this.selectedTemplate && 
                this.templatePreview.body;
-    }
-
-    // Check if drip campaign is selected
-    get isDripCampaign() {
-        return this.selectedOption === 'drip';
-    }
-
-    // Check if single campaign is selected
-    get isSingleCampaign() {
-        return this.selectedOption === 'single';
     }
 
     // Get minimum date for drip start date (today)
@@ -370,7 +303,7 @@ export default class SendEmails extends LightningElement {
         }
         
         return this.broadcastGroupOptions.filter(group => 
-            group.objectName === this.campaignDetails.objectName
+            group.objectName === 'Contact'
         ).map(group => ({
             ...group,
             selected: this.selectedBroadcastGroups.includes(group.value)
@@ -425,6 +358,10 @@ export default class SendEmails extends LightningElement {
         }
         return '';
     }
+
+    get selectedTemplateDisalbed() {
+        return !this.selectedTemplate;
+    }
     
     connectedCallback() {
         if (this.objectApiName) {
@@ -445,16 +382,6 @@ export default class SendEmails extends LightningElement {
         this.loadAllContacts();
         this.loadBroadcastGroups();
     
-        Promise.all([
-            loadStyle(this, MulishFontCss),
-            loadStyle(this, summerNote_Editor + '/summernote-lite-pdf.css')
-        ])
-        .then(() => {
-            console.log('External Css Loaded');
-        })
-        .catch(error => {
-            console.log('Error occurring during loading external css', error);
-        });
         this._documentClickHandler = this.handleDocumentClick.bind(this);
         document.addEventListener('click', this._documentClickHandler);
     }
@@ -462,20 +389,6 @@ export default class SendEmails extends LightningElement {
     disconnectedCallback() {
         if (this._documentClickHandler) {
             document.removeEventListener('click', this._documentClickHandler);
-        }
-        
-        // Remove loaded styles to prevent affecting other components
-        const styleLinks = document.querySelectorAll('link[href*="summernote"]');
-        styleLinks.forEach(link => {
-            if (link.parentNode) {
-                link.parentNode.removeChild(link);
-            }
-        });
-    }
-
-    renderedCallback() {
-        if (this.currentStep === 4 && this.showTemplatePreview) {
-            this.renderTemplatePreview();
         }
     }
 
@@ -693,7 +606,7 @@ export default class SendEmails extends LightningElement {
 
     // Filter templates based on selected object
     filterTemplatesByObject() {
-        const objectName = this.campaignDetails.objectName;
+        const objectName = this.campaignDetails.templateRelatedObject;
 
         console.log('obj name => ',objectName);
         
@@ -702,8 +615,6 @@ export default class SendEmails extends LightningElement {
             this.filteredCustomTemplates = [];
             return;
         }
-        
-        
         
         this.filteredEmailTemplates = [...this.allEmailTemplates];
         
@@ -733,7 +644,7 @@ export default class SendEmails extends LightningElement {
             this.initializeDripSequence();
         }
         
-        // Go directly to step 2 (Campaign Details)
+        // Go directly to step 2 (Template Configuration)
         this.currentStep = 2;
     }
 
@@ -761,7 +672,9 @@ export default class SendEmails extends LightningElement {
             canDelete: false,
             hasNoTemplate: true,
             selectedListingId: null,
-            selectedListingName: ''
+            selectedListingName: '',
+            templateLabel: 'No Template Selected',
+            templateClass: 'drip-sequence-template no-template'
         }];
         
         // Set the first drip as selected by default
@@ -880,7 +793,9 @@ export default class SendEmails extends LightningElement {
                 canDelete: true,
                 hasNoTemplate: true,
                 selectedListingId: null,
-                selectedListingName: ''
+                selectedListingName: '',
+                templateLabel: 'No Template Selected',
+                templateClass: 'drip-sequence-template no-template'
             };
             
             // Update existing drips to unselect them and update classes
@@ -951,6 +866,29 @@ export default class SendEmails extends LightningElement {
         });
     }
 
+    // Handle related object change in template selection step
+    handleRelatedObjectChange(event) {
+        this.campaignDetails.templateRelatedObject = event.detail.value;
+        
+        // Reset selections on related object change
+        this.selectedTemplate = '';
+        this.selectedListing = null;
+        this.selectedListingName = '';
+        
+        if (this.isDripCampaign) {
+            this.dripSequence = this.dripSequence.map(drip => ({
+                ...drip,
+                template: '',
+                subject: '',
+                hasNoTemplate: true,
+                selectedListingId: null,
+                selectedListingName: '',
+                templateLabel: 'No Template Selected',
+                templateClass: 'drip-sequence-template no-template'
+            }));
+        }
+    }
+
     // Handle template change for drip emails
     handleTemplateChange(event) {
         const dripId = parseInt(event.target.dataset.id);
@@ -966,6 +904,8 @@ export default class SendEmails extends LightningElement {
                         template: selectedTemplate.value,
                         subject: selectedTemplate.subject || '',
                         hasNoTemplate: false,
+                        templateLabel: 'Template Selected',
+                        templateClass: 'drip-sequence-template',
                         templateType: this.campaignDetails.templateType === 'Email Template' ? 'EmailTemplate' : 'EstateXpertTemplate'
                     };
                 }
@@ -1047,6 +987,19 @@ export default class SendEmails extends LightningElement {
         this.listingSearchTerm = event.target.value;
     }
 
+    handleSingleListingSelect(event) {
+        this.selectedListing = event.currentTarget.dataset.value;
+        this.selectedListingName = event.currentTarget.dataset.label;
+        this.isListingDropdownOpen = false;
+        this.listingSearchTerm = '';
+    }
+
+    handleClearSingleListing(event) {
+        event.stopPropagation();
+        this.selectedListing = null;
+        this.selectedListingName = '';
+    }
+
     handleDripListingSelect(event) {
         event.stopPropagation();
         const listingId = event.currentTarget.dataset.value;
@@ -1061,7 +1014,9 @@ export default class SendEmails extends LightningElement {
                     selectedListingName: listingName,
                     template: '', 
                     subject: '',
-                    hasNoTemplate: true 
+                    hasNoTemplate: true,
+                    templateLabel: 'No Template Selected',
+                    templateClass: 'drip-sequence-template no-template'
                 };
             }
             return drip;
@@ -1081,7 +1036,9 @@ export default class SendEmails extends LightningElement {
                     selectedListingName: '',
                     template: '', 
                     subject: '',
-                    hasNoTemplate: true 
+                    hasNoTemplate: true,
+                    templateLabel: 'No Template Selected',
+                    templateClass: 'drip-sequence-template no-template'
                 };
             }
             return drip;
@@ -1129,24 +1086,6 @@ export default class SendEmails extends LightningElement {
         this.activeTab = event.currentTarget.dataset.tab;
     }
 
-    // Handle listing click (single select)
-    handleListingClick(event) {
-        const listingId = event.currentTarget.dataset.id;
-        this.selectedListing = this.selectedListing === listingId ? null : listingId;
-        
-        // Update the selected property for listings
-        this.listingOptions = this.listingOptions.map(listing => ({
-            ...listing,
-            selected: listing.value === this.selectedListing
-        }));
-    }
-
-    // Handle skip listing (proceed without selection)
-    handleSkipListing() {
-        this.selectedListing = null;
-        this.currentStep = 4;
-    }
-
     // Handle campaign field changes
     handleCampaignFieldChange(event) {
         const fieldName = event.target.dataset.id;
@@ -1156,91 +1095,11 @@ export default class SendEmails extends LightningElement {
             ...this.campaignDetails,
             [fieldName]: value
         };
-
-        if (fieldName === 'objectName') {
-            // Reset broadcast groups when object changes
-            this.selectedBroadcastGroups = [];
-            
-            this.filterTemplatesByObject();
-            this.selectedTemplate = '';
-            this.templatePreview = { subject: '', body: '', name: '' };
-            
-            // Reset drip sequence templates if in drip mode
-            if (this.isDripCampaign) {
-                this.dripSequence = this.dripSequence.map(drip => ({
-                    ...drip,
-                    template: '',
-                    subject: '',
-                    hasNoTemplate: true
-                }));
-            }
-        }
-
-        if (fieldName === 'templateType') {
-            this.selectedTemplate = '';
-            this.templatePreview = { subject: '', body: '', name: '' };
-            
-            // Reset drip sequence templates if in drip mode
-            if (this.isDripCampaign) {
-                this.dripSequence = this.dripSequence.map(drip => ({
-                    ...drip,
-                    template: '',
-                    subject: '',
-                    hasNoTemplate: true
-                }));
-            }
-        }
     }
 
     // Handle template selection
     handleTemplateSelect(event) {
         this.selectedTemplate = event.detail.value;
-        this.selectedTemplateType = this.campaignDetails.templateType;
-        
-        if (this.selectedTemplate) {
-            let selectedTemplateData;
-            if (this.campaignDetails.templateType === 'EstateXpert Template') {
-                selectedTemplateData = [...this.filteredCustomTemplates, ...this.allCustomTemplates].find(
-                    template => template.value === this.selectedTemplate
-                );
-            } else {
-                selectedTemplateData = this.filteredEmailTemplates.find(
-                    template => template.value === this.selectedTemplate
-                );
-            }
-            if (selectedTemplateData) {
-                this.templatePreview = {
-                    subject: selectedTemplateData.subject,
-                    body: selectedTemplateData.body,
-                    name: selectedTemplateData.label
-                };
-                this.renderTemplatePreview();
-            }
-        }
-    }
-
-    // Render template preview with placeholders replaced
-    renderTemplatePreview() {
-        if (this.showTemplatePreview && this.templatePreview.body) {
-            setTimeout(() => {
-                const previewElement = this.template.querySelector('.template-preview-body');
-                if (previewElement) {
-                    let formattedContent = this.setTempValue(this.templatePreview.body);
-                    previewElement.innerHTML = formattedContent;
-                }
-            }, 100);
-        }
-    }
-
-    // Format template body for preview
-    setTempValue(value) {
-        return `<div class="note-editor2 note-frame2">
-                    <div class="note-editing-area2">
-                        <div aria-multiline="true" role="textbox" class="note-editable2">
-                            ${value}
-                        </div>
-                    </div>
-                </div>`;
     }
 
     // Generic button handler
@@ -1263,11 +1122,7 @@ export default class SendEmails extends LightningElement {
     // Handle back button
     handleBack() {
         if (this.currentStep > 1) {
-            if (this.currentStep === 4 && this.isDripCampaign) {
-                this.currentStep = 2; // Skip Step 3
-            } else {
-                this.currentStep--;
-            }
+            this.currentStep--;
             if (this.currentStep === 1) {
                 this.selectedOption = '';
                 this.selectedOptionLabel = '';
@@ -1285,16 +1140,7 @@ export default class SendEmails extends LightningElement {
         }
 
         if (this.currentStep < this.totalSteps) {
-            if (this.currentStep === 2 && this.isDripCampaign) {
-                this.currentStep = 4; // Skip Step 3
-            } else {
-                this.currentStep++;
-            }
-            if (this.currentStep === 4) {
-                setTimeout(() => {
-                    this.renderTemplatePreview();
-                }, 100);
-            }
+            this.currentStep++;
         }
     }
 
@@ -1314,7 +1160,6 @@ export default class SendEmails extends LightningElement {
         try {
             if (this.isSingleCampaign) {
                 console.log('handleSingleCampaignSend');
-                
                 this.handleSingleCampaignSend();
             } else {
                 console.log('handleDripCampaignCreate');
@@ -1494,12 +1339,6 @@ export default class SendEmails extends LightningElement {
                 return false;
             }
         } else if (this.currentStep === 2) {
-            if (!this.campaignDetails.objectName || !this.campaignDetails.campaignName ||
-                !this.campaignDetails.templateType || !this.campaignDetails.messagingService) {
-                this.showToast('Error', 'Please fill in all required fields.', 'error');
-                return false;
-            }
-        } else if (this.currentStep === 4) {
             if (this.isDripCampaign) {
                 if (!this.dripStartDate) {
                     this.showToast('Error', 'Please select a start date for your drip campaign.', 'error');
@@ -1555,7 +1394,11 @@ export default class SendEmails extends LightningElement {
                     return false;
                 }
             }
-        } else if (this.currentStep === 5) {
+        } else if (this.currentStep === 3) {
+            if (!this.campaignDetails.campaignName || !this.campaignDetails.messagingService) {
+                this.showToast('Error', 'Please fill in all campaign details.', 'error');
+                return false;
+            }
             if (this.selectedContacts.length === 0 && this.selectedBroadcastGroups.length === 0) {
                 this.showToast('Error', 'Please select at least one contact or broadcast group.', 'error');
                 return false;
@@ -1584,6 +1427,7 @@ export default class SendEmails extends LightningElement {
         this.selectedTemplateType = '';
         this.templatePreview = { subject: '', body: '', name: '' };
         this.selectedListing = null;
+        this.selectedListingName = '';
         this.activeTab = 'All';
         
         // Reset contact selections
@@ -1599,9 +1443,10 @@ export default class SendEmails extends LightningElement {
         this.selectedDripId = null; // Reset selected drip
         
         this.campaignDetails = {
-            objectName: this.objectApiName || '',
+            objectName: 'Contact',
+            templateRelatedObject: 'Contact',
             campaignName: '',
-            templateType: '',
+            templateType: 'EstateXpert Template',
             messagingService: '',
             selectedTemplate: '',
             isObjectDropDownDisabled: !!this.objectApiName
@@ -1625,10 +1470,19 @@ export default class SendEmails extends LightningElement {
 
     handleCloseModal(){
         this.isPreviewModal = false;
+        this.selectedTemplateId = '';
+    }
+
+    handlePreviewSingleTemplate() {
+        if (this.selectedTemplate) {
+            this.selectedTemplateId = this.selectedTemplate;
+            this.templateStatus = true;
+            this.isPreviewModal = true;
+        }
     }
 
     // Preview selected template for a drip email via parent/another component
-    handlePreviewTemplate(event) {
+    handlePreviewDripTemplate(event) {
         const dripId = parseInt(event.currentTarget.dataset.id);
         const drip = this.dripSequence.find(d => d.id === dripId);
 
@@ -1642,7 +1496,6 @@ export default class SendEmails extends LightningElement {
 
         if (selectedTemplate) {
             this.selectedTemplateId = selectedTemplate.value;
-            this.selectedobject = this.campaignDetails.objectName;
             this.templateStatus = true; // Assuming template is active
             this.isPreviewModal = true;
         } else {
@@ -1681,5 +1534,4 @@ export default class SendEmails extends LightningElement {
             this.selectedBroadcastGroups = this.selectedBroadcastGroups.filter(id => id !== groupId);
         }
     }
-
 }

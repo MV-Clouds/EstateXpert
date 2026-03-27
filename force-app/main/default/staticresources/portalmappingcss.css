@@ -19,6 +19,71 @@
   padding-top: 0.5rem;
 }
 
+.blue-btn-css {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0176D3;
+  color: white;
+  gap: 8px;
+  padding: 0 16px;
+  height: 36px;
+  min-height: 36px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.blue-btn-css:hover {
+  background: #0156A3;
+  box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
+  transform: translateY(-1px);
+}
+
+.blue-btn-css:disabled {
+  background-color: #b2aeae;
+  cursor: not-allowed;
+}
+
+.blue-btn-css:disabled:hover {
+  box-shadow: unset;
+  transform: unset;
+}
+
+.white-btn-css {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  color: #0176D3;
+  gap: 8px;
+  padding: 0 16px;
+  height: 36px;
+  min-height: 36px;
+  font-size: 14px;
+  border: 1px solid #0176d3;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.white-btn-css:hover {
+  background: #F3F6F9;
+  box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
+  transform: translateY(-1px);
+}
+
+.white-btn-css:disabled {
+  background-color: #b2aeae;
+  border: none;
+  cursor: not-allowed;
+}
+
+.white-btn-css:disabled:hover {
+  box-shadow: unset;
+  transform: unset;
+}
+
 /* cyrillic-ext */
 @font-face {
     font-family: 'Mulish';

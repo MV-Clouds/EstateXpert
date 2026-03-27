@@ -16,20 +16,20 @@
                         </div>
                     </div>
                     <div class="save-btn">
-                        <button disabled={isAutoSyncEnabled} onclick={addNewPair}>
+                        <button disabled={isAutoSyncEnabled} onclick={addNewPair} class="blue-btn-css">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
                             </svg>
                             Add
                         </button>
-                        <button disabled={savebutton} onclick={handleAddPairClick}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <button disabled={savebutton} onclick={handleAddPairClick} class="blue-btn-css">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
                             </svg>
                             Save Mapping
                         </button>
-                        <button disabled={isRevertDisabled} onclick={revertChanges}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <button disabled={isRevertDisabled} onclick={revertChanges} class="blue-btn-css">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 5V1L7 6L12 11V7C15.31 7 18 9.69 18 13C18 16.31 15.31 19 12 19C8.69 19 6 16.31 6 13H4C4 17.42 7.58 21 12 21C16.42 21 20 17.42 20 13C20 8.58 16.42 5 12 5Z" fill="currentColor" />
                             </svg>
                             Revert Changes
@@ -118,7 +118,7 @@
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
                 aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close closs_icon_css" onclick={closeConfirmationModal}>
+                    <div class="slds-modal__close close-icon-css" onclick={closeConfirmationModal}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -135,14 +135,14 @@
                             <p class="slds-text-align_center con-msg">Are you sure you want to save the changes?</p>
                         </div>
                         <div class="footerbtns">
-                            <button class="cancel_btn_css" onclick={closeConfirmationModal}>
+                            <button class="white-btn-css" onclick={closeConfirmationModal}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
                                 </svg>
                                 Cancel
                             </button>
-                            <button class="save_btn_css" onclick={handleConfirmAddPair}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button class="blue-btn-css" onclick={handleConfirmAddPair}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
                                 </svg>
                                 Save

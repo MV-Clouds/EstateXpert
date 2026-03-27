@@ -812,8 +812,29 @@
                             sendInfoToLWC('Download', true, null);
                         }
 
+                        if (selectedChannels.includes('Email')) {
+                            const message = {
+                                messageFrom: 'docGenerate',
+                                completedChannel: 'Email',
+                                status: true,
+                                error: null,
+                                pdfBase64: fileData   
+                            };
+                            parent.postMessage(message, '*');
+                        }
+
                         if (fileSizeInByte < 37.5 * 1020 * 1020 && selectedChannels.includes('Files')) {
-                            createContentVersion(fileData);
+                            createContentVersion(fileData)
+                                .then(result => {
+                                    console.log('ContentVersion CREATED ✅', result);
+
+                                    sendInfoToLWC('Files', true, null, result.id);
+                                })
+                                .catch(error => {
+                                    console.error('ERROR creating ContentVersion ❌', error);
+
+                                    sendInfoToLWC('Files', false, error, null);
+                                });
                         } else if (selectedChannels.includes('Files')) {
                             sendInfoToLWC('External Storage', false, { message: 'File Size Limit Exceeded!' });
                         }

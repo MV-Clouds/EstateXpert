@@ -516,4 +516,94 @@ public with sharing class TemplateBuilderController {
         }
         return templateRecord;
     }
+
+    @AuraEnabled
+    public static List<Contact> searchContactsWithEmail(String searchTerm, List<Id> excludeIds) {
+        try {
+            String likeParam = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
+
+            Set<Id> excludeSet = new Set<Id>();
+            if (excludeIds != null && !excludeIds.isEmpty()) {
+                excludeSet.addAll(excludeIds);
+            }
+
+            List<Contact> contacts = [
+                SELECT Id, Name, Email
+                FROM Contact
+                WHERE Email != null
+                AND Name LIKE :likeParam
+                AND Id NOT IN :excludeSet
+                ORDER BY Name ASC
+            ];
+
+            return contacts;
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'ListingPDFGeneratorController', 'searchContactsWithEmail', 'Error while getting contact.');
+            return null;
+        }
+    }
+
+    @AuraEnabled
+    public static void sendEmailWithPDF(
+        List<Id> contactIds,
+        String   subject,
+        String   body,
+        String   templateId,
+        String   recordId,
+        String   fileName,
+        String   pdfBase64    
+    ) {
+        try {
+            // Decode the base64 PDF the browser already generated
+            Blob pdfBlob = EncodingUtil.base64Decode(pdfBase64);
+
+            Map<Id, Contact> contactMap = new Map<Id, Contact>(
+                [SELECT Id, Name, Email FROM Contact
+                WHERE Id IN :contactIds AND Email != null]
+            );
+
+            List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+
+            for (Id cId : contactIds) {
+                Contact c = contactMap.get(cId);
+                if (c == null || String.isBlank(c.Email)) continue;
+
+                Messaging.EmailFileAttachment att = new Messaging.EmailFileAttachment();
+                att.setFileName(fileName + '.pdf');
+                att.setBody(pdfBlob);
+                att.setContentType('application/pdf');
+                att.setInline(false);
+
+                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+                mail.setTargetObjectId(c.Id);
+                mail.setToAddresses(new List<String>{ c.Email });
+                mail.setSubject(subject);
+                mail.setPlainTextBody(body);
+                mail.setFileAttachments(new List<Messaging.EmailFileAttachment>{ att });
+                mail.setSaveAsActivity(true);
+                emails.add(mail);
+            }
+
+            if (emails.isEmpty())
+                throw new AuraHandledException('No contacts have a valid email address.');
+
+            Messaging.SendEmailResult[] results = Messaging.sendEmail(emails);
+
+            List<String> errors = new List<String>();
+            for (Messaging.SendEmailResult r : results) {
+                if (!r.isSuccess()) {
+                    for (Messaging.SendEmailError err : r.getErrors())
+                        errors.add(err.getMessage());
+                }
+            }
+            if (!errors.isEmpty())
+                throw new AuraHandledException('Some emails failed: ' + String.join(errors, '; '));
+
+        } catch (AuraHandledException ahe) {
+            throw ahe;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'ListingPDFGeneratorController', 'sendEmailWithPDF', 'Error while sending mail.');
+        }
+    }
 }

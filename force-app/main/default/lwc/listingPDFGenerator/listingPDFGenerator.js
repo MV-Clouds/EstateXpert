@@ -28,12 +28,12 @@ export default class ListingPDFGenerator extends LightningElement {
     @track vfEmailPageSRC;
 
     @track isStep3 = false;
-    @track previousStep = 1;           
+    @track previousStep = 1;
 
     // Contact search
     @track contactSearchTerm = '';
     @track contactSearchResults = [];
-    @track selectedContacts = [];      
+    @track selectedContacts = [];
     @track showContactDropdown = false;
     @track isContactSearching = false;
     @track _contactSearchTimer;
@@ -41,6 +41,11 @@ export default class ListingPDFGenerator extends LightningElement {
     // Email compose
     @track emailSubject = '';
     @track emailBody = '';
+    @track freeTypedEmail = '';
+
+    get showFreeEmailOption() {
+        return this.freeTypedEmail && !this.isContactSearching;
+    }
 
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
@@ -335,24 +340,44 @@ export default class ListingPDFGenerator extends LightningElement {
         const term = event.target.value;
         this.contactSearchTerm = term;
 
+        // Handle space/enter to add email pill directly
+        if (term.endsWith(' ') || term.endsWith(',')) {
+            const trimmed = term.slice(0, -1).trim();
+            if (this.isValidEmail(trimmed)) {
+                this.addEmailAsPill(trimmed);
+                return;
+            }
+        }
+
         if (!term || term.trim().length < 2) {
             this.showContactDropdown = false;
             this.contactSearchResults = [];
+            this.freeTypedEmail = '';
             return;
         }
 
-        // Debounce 300ms to avoid firing on every keystroke
+        // If it looks like a valid email, store it for "use this email" option
+        this.freeTypedEmail = this.isValidEmail(term.trim()) ? term.trim() : '';
+
         clearTimeout(this._contactSearchTimer);
         this._contactSearchTimer = setTimeout(() => {
             this.runContactSearch(term.trim());
         }, 300);
     }
 
+    handleContactKeydown(event) {
+        if (event.key === 'Enter' && this.contactSearchTerm.trim()) {
+            const term = this.contactSearchTerm.trim();
+            if (this.isValidEmail(term)) {
+                this.addEmailAsPill(term);
+            }
+        }
+    }
+
     runContactSearch(searchTerm) {
         this.isContactSearching = true;
         this.showContactDropdown = true;
 
-        // Build list of already-selected IDs to exclude from results
         const excludeIds = this.selectedContacts.map(c => c.id);
 
         searchContactsWithEmail({ searchTerm, excludeIds })
@@ -364,12 +389,44 @@ export default class ListingPDFGenerator extends LightningElement {
                     initials: this.getInitials(c.Name)
                 }));
                 this.isContactSearching = false;
+                // Keep dropdown open even if empty (to show free-type option)
+                this.showContactDropdown = true;
             })
             .catch((error) => {
                 console.error('Error searching contacts', error);
                 this.isContactSearching = false;
                 this.contactSearchResults = [];
+                this.showContactDropdown = true;
             });
+    }
+
+    addEmailAsPill(email) {
+        const alreadyAdded = this.selectedContacts.some(c => c.email === email);
+        if (!alreadyAdded) {
+            this.selectedContacts = [
+                ...this.selectedContacts,
+                {
+                    id: 'manual_' + email,   // synthetic id for non-SF contacts
+                    name: email,
+                    email: email,
+                    initials: email.charAt(0).toUpperCase()
+                }
+            ];
+        }
+        this.contactSearchTerm = '';
+        this.freeTypedEmail = '';
+        this.contactSearchResults = [];
+        this.showContactDropdown = false;
+    }
+
+    selectFreeEmail(event) {
+        event.preventDefault();
+        const email = event.currentTarget.dataset.email;
+        if (email) this.addEmailAsPill(email);
+    }
+
+    isValidEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     }
 
     selectContact(event) {
@@ -457,16 +514,24 @@ export default class ListingPDFGenerator extends LightningElement {
     }
 
     dispatchEmailWithBase64(pdfBase64) {
-        const contactIds = this.selectedContacts.map(c => c.id);
+        // Split into SF contacts and manual emails
+        const contactIds = this.selectedContacts
+            .filter(c => !c.id.toString().startsWith('manual_'))
+            .map(c => c.id);
+
+        const manualEmails = this.selectedContacts
+            .filter(c => c.id.toString().startsWith('manual_'))
+            .map(c => c.email);
 
         sendEmailWithPDF({
             contactIds,
+            manualEmails,          // <-- new param
             subject: this.emailSubject,
             body: this.emailBody,
             templateId: this.templateid,
             recordId: this.recordId,
             fileName: this.attachmentLabel || 'Listing',
-            pdfBase64  
+            pdfBase64
         })
             .then(() => {
                 this.isSpinner = false;

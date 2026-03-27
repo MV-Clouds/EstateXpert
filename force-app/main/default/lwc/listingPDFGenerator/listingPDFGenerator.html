@@ -189,51 +189,70 @@
                 </iframe>
             </template>
             <div class="email-modal">
-            <!-- To: Contact Record Picker with Pills -->
-            <div class="email_field_group">
-                <label class="email_field_label">
-                    To
-                </label>
-                <div class="email_pills_input_wrapper" onclick={focusContactSearch}>
-                    <!-- Selected Contact Pills -->
-                    <template for:each={selectedContacts} for:item="contact">
-                        <span key={contact.id} class="email_contact_pill">
-                            <span class="email_pill_initials">{contact.initials}</span>
-                            <span class="email_pill_text">
-                                <span class="email_pill_name">{contact.name}</span>
-                                <span class="email_pill_email">{contact.email}</span>
+                <!-- To: Contact Record Picker with Pills -->
+                <div class="email_field_group">
+                    <label class="email_field_label">
+                        To
+                    </label>
+                    <div class="email_pills_input_wrapper" onclick={focusContactSearch}>
+                        <!-- Selected Contact Pills -->
+                        <template for:each={selectedContacts} for:item="contact">
+                            <span key={contact.id} class="email_contact_pill">
+                                <span class="email_pill_initials">{contact.initials}</span>
+                                <span class="email_pill_text">
+                                    <span class="email_pill_name">{contact.name}</span>
+                                    <span class="email_pill_email">{contact.email}</span>
+                                </span>
+                                <button class="email_pill_close" data-id={contact.id} onmousedown={removeContact}
+                                    aria-label="Remove contact" title="Remove">
+                                    ×
+                                </button>
                             </span>
-                            <button class="email_pill_close" data-id={contact.id} onmousedown={removeContact}
-                                aria-label="Remove contact" title="Remove">
-                                ×
-                            </button>
-                        </span>
-                    </template>
-                    <!-- Search Input -->
-                    <input type="text" class="email_contact_search_input" placeholder={contactInputPlaceholder}
-                        value={contactSearchTerm} oninput={handleContactSearch} onblur={hideContactDropdown}
-                        data-id="contactSearchInput" />
-                </div>
-                <!-- Contact Dropdown Results -->
-                <div if:true={showContactDropdown} class="email_contact_dropdown" onmousedown={preventContactHide}>
-                    <template if:true={isContactSearching}>
-                        <div class="email_dropdown_loader">
-                            <div class="email_loader_dot"></div>
-                            <div class="email_loader_dot"></div>
-                            <div class="email_loader_dot"></div>
-                            <span>Searching contacts...</span>
-                        </div>
-                    </template>
-                    <template if:false={isContactSearching}>
-                        <template if:true={hasContactResults}>
-                            <template for:each={contactSearchResults} for:item="contact">
-                                <div key={contact.id} class="email_contact_option" data-id={contact.id}
-                                    data-name={contact.name} data-email={contact.email} data-initials={contact.initials}
-                                    onmousedown={selectContact}>
-                                    <span class="email_option_avatar">{contact.initials}</span>
+                        </template>
+                        <!-- Search Input -->
+                        <input type="text" class="email_contact_search_input" placeholder={contactInputPlaceholder}
+                            value={contactSearchTerm} oninput={handleContactSearch} onkeydown={handleContactKeydown}
+                            onblur={hideContactDropdown} data-id="contactSearchInput" />
+                    </div>
+                    <!-- Contact Dropdown Results -->
+                    <div if:true={showContactDropdown} class="email_contact_dropdown" onmousedown={preventContactHide}>
+                        <template if:true={isContactSearching}>
+                            <div class="email_dropdown_loader">
+                                <div class="email_loader_dot"></div>
+                                <div class="email_loader_dot"></div>
+                                <div class="email_loader_dot"></div>
+                                <span>Searching contacts...</span>
+                            </div>
+                        </template>
+                        <template if:false={isContactSearching}>
+                            <template if:true={hasContactResults}>
+                                <template for:each={contactSearchResults} for:item="contact">
+                                    <div key={contact.id} class="email_contact_option" data-id={contact.id}
+                                        data-name={contact.name} data-email={contact.email}
+                                        data-initials={contact.initials} onmousedown={selectContact}>
+                                        <span class="email_option_avatar">{contact.initials}</span>
+                                        <div class="email_option_details">
+                                            <span class="email_option_name">{contact.name}</span>
+                                            <span class="email_option_email">{contact.email}</span>
+                                        </div>
+                                        <svg class="email_option_add_icon" width="16" height="16" viewBox="0 0 24 24"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- Free-typed valid email option -->
+                            <template if:true={showFreeEmailOption}>
+                                <div class="email_contact_option email_free_email_option" data-email={freeTypedEmail}
+                                    onmousedown={selectFreeEmail}>
+                                    <span class="email_option_avatar email_option_avatar--manual">@</span>
                                     <div class="email_option_details">
-                                        <span class="email_option_name">{contact.name}</span>
-                                        <span class="email_option_email">{contact.email}</span>
+                                        <span class="email_option_name">Send to {freeTypedEmail}</span>
+                                        <span class="email_option_email">Not a saved contact · press Enter or Space to
+                                            add</span>
                                     </div>
                                     <svg class="email_option_add_icon" width="16" height="16" viewBox="0 0 24 24"
                                         fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -242,74 +261,67 @@
                                     </svg>
                                 </div>
                             </template>
+
+                            <!-- No results and no valid email typed -->
+                            <template if:false={showFreeEmailOption}>
+                                <template if:false={hasContactResults}>
+                                    <div class="email_dropdown_empty">
+                                        <!-- your existing no-results SVG/text -->
+                                        No contacts found with email address.
+                                    </div>
+                                </template>
+                            </template>
                         </template>
-                        <template if:false={hasContactResults}>
-                            <div class="email_dropdown_empty">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M20 21V19C20 16.7909 18.2091 15 16 15H8C5.79086 15 4 16.7909 4 19V21M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                    <path
-                                        d="M23 21V19C22.9986 17.1771 21.765 15.5857 20 15.13M16 3.13C17.7699 3.58317 19.0078 5.17799 19.0078 7.005C19.0078 8.83201 17.7699 10.4268 16 10.88"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                No contacts found with email address.
-                            </div>
-                        </template>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Subject -->
-            <div class="email_field_group">
-                <label class="email_field_label" for="emailSubjectInput">
-                    Subject
-                </label>
-                <input type="text" id="emailSubjectInput" class="email_text_input" value={emailSubject}
-                    oninput={handleSubjectChange} placeholder="Enter email subject..." />
-            </div>
-
-            <!-- Body -->
-            <div class="email_field_group email_body_group">
-                <label class="email_field_label" for="emailBodyTextarea">
-                    Message
-                </label>
-                <textarea id="emailBodyTextarea" class="email_body_textarea" value={emailBody}
-                    oninput={handleBodyChange} placeholder="Enter your message...">{emailBody}
-                </textarea>
-            </div>
-
-            <!-- Attachment -->
-            <div class="email_field_group">
-                <label class="email_field_label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M21.44 11.05L12.25 20.24C11.1242 21.3658 9.59723 21.9983 8.005 21.9983C6.41277 21.9983 4.88584 21.3658 3.76 20.24C2.63416 19.1142 2.00166 17.5872 2.00166 15.995C2.00166 14.4028 2.63416 12.8758 3.76 11.75L12.95 2.56C13.7006 1.80943 14.7186 1.38777 15.78 1.38777C16.8414 1.38777 17.8594 1.80943 18.61 2.56C19.3606 3.31057 19.7822 4.32855 19.7822 5.39C19.7822 6.45145 19.3606 7.46943 18.61 8.22L9.41 17.41C9.03472 17.7853 8.52573 17.9961 7.995 17.9961C7.46427 17.9961 6.95528 17.7853 6.58 17.41C6.20472 17.0347 5.99389 16.5257 5.99389 15.995C5.99389 15.4643 6.20472 14.9553 6.58 14.58L15.07 6.1"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    Attachment
-                </label>
-                <div class="email_attachment_row">
-                    <div class="email_attachment_chip">
-                        <div class="email_attachment_icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M14 2V8H20M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                        <span class="email_attachment_name">{attachmentLabel}</span>
-                        <span class="email_attachment_badge">PDF</span>
                     </div>
                 </div>
-            </div>
+
+                <!-- Subject -->
+                <div class="email_field_group">
+                    <label class="email_field_label" for="emailSubjectInput">
+                        Subject
+                    </label>
+                    <input type="text" id="emailSubjectInput" class="email_text_input" value={emailSubject}
+                        oninput={handleSubjectChange} placeholder="Enter email subject..." />
+                </div>
+
+                <!-- Body -->
+                <div class="email_field_group email_body_group">
+                    <label class="email_field_label" for="emailBodyTextarea">
+                        Message
+                    </label>
+                    <textarea id="emailBodyTextarea" class="email_body_textarea" value={emailBody}
+                        oninput={handleBodyChange} placeholder="Enter your message...">{emailBody}
+                </textarea>
+                </div>
+
+                <!-- Attachment -->
+                <div class="email_field_group">
+                    <label class="email_field_label">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M21.44 11.05L12.25 20.24C11.1242 21.3658 9.59723 21.9983 8.005 21.9983C6.41277 21.9983 4.88584 21.3658 3.76 20.24C2.63416 19.1142 2.00166 17.5872 2.00166 15.995C2.00166 14.4028 2.63416 12.8758 3.76 11.75L12.95 2.56C13.7006 1.80943 14.7186 1.38777 15.78 1.38777C16.8414 1.38777 17.8594 1.80943 18.61 2.56C19.3606 3.31057 19.7822 4.32855 19.7822 5.39C19.7822 6.45145 19.3606 7.46943 18.61 8.22L9.41 17.41C9.03472 17.7853 8.52573 17.9961 7.995 17.9961C7.46427 17.9961 6.95528 17.7853 6.58 17.41C6.20472 17.0347 5.99389 16.5257 5.99389 15.995C5.99389 15.4643 6.20472 14.9553 6.58 14.58L15.07 6.1"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        Attachment
+                    </label>
+                    <div class="email_attachment_row">
+                        <div class="email_attachment_chip">
+                            <div class="email_attachment_icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M14 2V8H20M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <span class="email_attachment_name">{attachmentLabel}</span>
+                            <span class="email_attachment_badge">PDF</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Footer Buttons -->

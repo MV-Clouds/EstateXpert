@@ -43,7 +43,8 @@
     
                         <template if:true={isStep2}>
                             <div class="step-config-wrapper animate-fade-in">
-                                <div class="section-card slds-m-bottom_medium">
+                                <template if:true={isSingleCampaign}>
+                                    <div class="section-card slds-m-bottom_medium">
                                     <div class="section-header">
                                         <h2 class="section-title">Configuration</h2>
                                     </div>
@@ -55,13 +56,14 @@
                                                 value={campaignDetails.templateRelatedObject}
                                                 options={templateObjectOptions}
                                                 onchange={handleRelatedObjectChange}
+                                                dropdown-alignment="auto"
                                                 required
                                                 class="custom-combobox">
                                             </lightning-combobox>
                                         </div>
                                         <template if:true={showSingleListingSelector}>
                                             <div class="config-item">
-                                                <label class="form-label slds-m-bottom_xx-small">Select Listing (Optional)</label>
+                                                <label class="form-label slds-m-bottom_xx-small"><span style="color: red;">*</span> Select Listing</label>
                                                 <div class="custom-combobox-container">
                                                     <div class="combobox-input-wrapper" onclick={handleListingComboboxClick}>
                                                         <input type="text" class="combobox-input" placeholder="Search listing..." value={selectedListingName} readonly />
@@ -95,12 +97,12 @@
                                         </template>
                                     </div>
                                 </div>
+                            </template>
 
                                 <template if:true={isSingleCampaign}>
                                     <div class="section-card template-selection-card animate-fade-in">
                                         <div class="template-selector-header">
                                             <h3 class="section-title">Email Template</h3>
-                                            <p class="section-subtitle">Choose the template you want to send to your recipients</p>
                                         </div>
                                         <div class="template-selector-body">
                                             <div class="template-input-group">
@@ -110,6 +112,7 @@
                                                     options={availableTemplates}
                                                     onchange={handleTemplateSelect}
                                                     placeholder="Choose a template..."
+                                                    dropdown-alignment="auto"
                                                     class="custom-combobox">
                                                 </lightning-combobox>
                                                 <button class="blue-btn-css" onclick={handlePreviewSingleTemplate} disabled={selectedTemplateDisalbed}>
@@ -167,18 +170,33 @@
                                                     <h3>Configure {selectedDrip.name}</h3>
                                                     <div class="delay-section">
                                                         <div class="delay-field">
-                                                            <label class="form-label">Days After Start Date</label>
+                                                            <label class="form-label"><span style="color: red;">*</span> Days After Start Date</label>
                                                             <lightning-input type="number" value={selectedDrip.daysAfterStartDate} min="0" step="1" data-id={selectedDrip.id} onchange={handleDaysAfterStartDateChange} class={computeDelayInputClass} variant="label-hidden"></lightning-input>
                                                         </div>
                                                         <div class="delay-field">
-                                                            <label class="form-label">Time to Send</label>
+                                                            <label class="form-label"><span style="color: red;">*</span> Time to Send</label>
                                                             <lightning-input type="time" value={selectedDrip.timeToSend} data-id={selectedDrip.id} onchange={handleTimeToSendChange} class={computeTimeInputClass} variant="label-hidden"></lightning-input>
                                                         </div>
+                                                    </div>
+
+                                                    <div class="form-field slds-m-bottom_medium">
+                                                        <label class="form-label"><span style="color: red;">*</span> Select Related Object</label>
+                                                        <lightning-combobox
+                                                            name="dripRelatedObject"
+                                                            variant="label-hidden"
+                                                            value={selectedDrip.relatedObject}
+                                                            options={templateObjectOptions}
+                                                            data-id={selectedDrip.id}
+                                                            onchange={handleDripRelatedObjectChange}
+                                                            placeholder="Choose object..."
+                                                            dropdown-alignment="auto"
+                                                            class="custom-combobox">
+                                                        </lightning-combobox>
                                                     </div>
                                                     
                                                     <template if:true={showDripListingSelector}>
                                                         <div class="form-field listing-field slds-m-bottom_medium">
-                                                            <label class="form-label">Select Listing (Optional)</label>
+                                                            <label class="form-label"><span style="color: red;">*</span> Select Listing</label>
                                                             <div class="custom-combobox-container">
                                                                 <div class="combobox-input-wrapper" onclick={handleListingComboboxClick}>
                                                                     <input type="text" class="combobox-input" placeholder="Search listing..." value={selectedDrip.selectedListingName} readonly />
@@ -204,10 +222,10 @@
                                                     </template>
     
                                                     <div class="form-field template-field">
-                                                        <label class="form-label">Template</label>
+                                                        <label class="form-label"><span style="color: red;">*</span> Template</label>
                                                         <div class="template-selector-inner">
                                                             <div class="template-combobox">
-                                                                <lightning-combobox variant="label-hidden" value={selectedDrip.template} options={availableTemplates} data-id={selectedDrip.id} onchange={handleTemplateChange} placeholder="Choose a template..." class="custom-combobox"></lightning-combobox>
+                                                                <lightning-combobox variant="label-hidden" value={selectedDrip.template} options={availableTemplates} data-id={selectedDrip.id} onchange={handleTemplateChange} placeholder="Choose a template..." dropdown-alignment="auto" class="custom-combobox"></lightning-combobox>
                                                             </div>
                                                             <button class="blue-btn-css" data-id={selectedDrip.id}
                                                                 onclick={handlePreviewDripTemplate}
@@ -239,7 +257,7 @@
                                             <lightning-input type="text" name="campaignName" label="Email Campaign Name" value={campaignDetails.campaignName} placeholder="Enter campaign name" data-id="campaignName" onchange={handleCampaignFieldChange} required class="custom-input"></lightning-input>
                                         </div>
                                         <div class="config-item">
-                                            <lightning-combobox name="messagingService" label="Messaging Service" value={campaignDetails.messagingService} placeholder="Choose service..." options={messagingServiceOptions} data-id="messagingService" onchange={handleCampaignFieldChange} required class="custom-combobox"></lightning-combobox>
+                                            <lightning-combobox name="messagingService" label="Messaging Service" value={campaignDetails.messagingService} placeholder="Choose service..." options={messagingServiceOptions} data-id="messagingService" dropdown-alignment="auto" onchange={handleCampaignFieldChange} required class="custom-combobox"></lightning-combobox>
                                         </div>
                                     </div>
                                 </div>

@@ -134,7 +134,10 @@ export default class SendEmails extends LightningElement {
     }
 
     get showDripListingSelector() {
-        return this.campaignDetails.templateRelatedObject === 'MVEX__Listing__c';
+        if (this.isDripCampaign && this.selectedDrip) {
+            return this.selectedDrip.relatedObject === 'MVEX__Listing__c';
+        }
+        return false;
     }
 
     // Computed filtered listings based on active tab with enhanced listing data
@@ -206,8 +209,8 @@ export default class SendEmails extends LightningElement {
                 isDisabled = !this.dripStartDate || this.dripSequence.length === 0 ||
                     !this.validateDripSequence();
             } else {
-                // For single campaigns, check if template is selected
-                isDisabled = !this.selectedTemplate;
+                // For single campaigns, check if template is selected and listing if required
+                isDisabled = !this.selectedTemplate || (this.showSingleListingSelector && !this.selectedListing);
             }
 
             buttons.push({
@@ -244,7 +247,13 @@ export default class SendEmails extends LightningElement {
 
     // Template options based on selected template type and listing
     get availableTemplates() {
-        let relatedObj = this.campaignDetails.templateRelatedObject;
+        let relatedObj;
+        if (this.isDripCampaign && this.selectedDrip) {
+            relatedObj = this.selectedDrip.relatedObject || 'Contact';
+        } else {
+            relatedObj = this.campaignDetails.templateRelatedObject;
+        }
+        
         return this.allCustomTemplates.filter(template =>
             template.objectName === relatedObj || template.objectName === 'Generic'
         );
@@ -674,6 +683,7 @@ export default class SendEmails extends LightningElement {
             selectedClass: 'selected',
             canDelete: false,
             hasNoTemplate: true,
+            relatedObject: 'Contact', // Added default related object per drip
             selectedListingId: null,
             selectedListingName: '',
             templateLabel: 'No Template Selected',
@@ -795,6 +805,7 @@ export default class SendEmails extends LightningElement {
                 selectedClass: '',
                 canDelete: true,
                 hasNoTemplate: true,
+                relatedObject: 'Contact', // Added default related object per drip
                 selectedListingId: null,
                 selectedListingName: '',
                 templateLabel: 'No Template Selected',
@@ -869,7 +880,41 @@ export default class SendEmails extends LightningElement {
         });
     }
 
-    // Handle related object change in template selection step
+    // Handle related object change for a specific drip
+    handleDripRelatedObjectChange(event) {
+        const dripId = parseInt(event.target.dataset.id);
+        const newObject = event.detail.value;
+        
+        this.dripSequence = this.dripSequence.map(drip => {
+            if (drip.id === dripId) {
+                return {
+                    ...drip,
+                    relatedObject: newObject,
+                    template: '',
+                    subject: '',
+                    hasNoTemplate: true,
+                    selectedListingId: null,
+                    selectedListingName: '',
+                    templateLabel: 'No Template Selected',
+                    templateClass: 'drip-sequence-template no-template'
+                };
+            }
+            return drip;
+        });
+    }
+
+    // New getter to get templates based on selected drip
+    get dripAvailableTemplates() {
+        const drip = this.selectedDrip;
+        if (!drip) return [];
+        
+        let relatedObj = drip.relatedObject || 'Contact';
+        return this.allCustomTemplates.filter(template =>
+            template.objectName === relatedObj || template.objectName === 'Generic'
+        );
+    }
+
+    // Handle related object change in template selection step (kept for Single Campaign)
     handleRelatedObjectChange(event) {
         this.campaignDetails.templateRelatedObject = event.detail.value;
         
@@ -1071,7 +1116,13 @@ export default class SendEmails extends LightningElement {
 
         // Check if all required fields are filled
         for (let drip of this.dripSequence) {
-            if (!drip.name || !drip.template || !drip.timeToSend || drip.daysAfterStartDate == null) {
+            // Check basic fields
+            if (!drip.name || !drip.template || !drip.timeToSend || drip.daysAfterStartDate == null || !drip.relatedObject) {
+                return false;
+            }
+            
+            // Mandatory listing for Listing-type drips
+            if (drip.relatedObject === 'MVEX__Listing__c' && !drip.selectedListingId) {
                 return false;
             }
             
@@ -1394,6 +1445,10 @@ export default class SendEmails extends LightningElement {
                 // Single campaign validation
                 if (!this.selectedTemplate) {
                     this.showToast('Error', 'Please select a template.', 'error');
+                    return false;
+                }
+                if (this.showSingleListingSelector && !this.selectedListing) {
+                    this.showToast('Error', 'Please select a listing.', 'error');
                     return false;
                 }
             }

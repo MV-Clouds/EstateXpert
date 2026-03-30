@@ -250,7 +250,6 @@
                                 <div class="section-card slds-m-bottom_medium">
                                     <div class="campaign-info-header">
                                         <h3 class="section-title">Campaign Identity</h3>
-                                        <p class="section-subtitle">Define your campaign name and select the messaging service</p>
                                     </div>
                                     <div class="campaign-info-grid">
                                         <div class="config-item">
@@ -267,17 +266,21 @@
                                         <div class="section-card recipient-list-card primary-recipients">
                                             <div class="recipient-header">
                                                 <h3 class="section-title">Primary Recipients</h3>
-                                                <div class="badge-count">{selectedContactsDetails.length}</div>
+                                                <div class="badge-count">{totalRecipientCount}</div>
                                             </div>
                                             <div class="combobox-container">
                                                 <c-custom-combobox data-id="primary-combo" placeholder="Search contacts..." options={allContactOptions} onselect={handlePrimaryContactSelect} searchable="true" multiselect="true" value={selectedContacts} show-clear-button="true" class="contact-combobox"></c-custom-combobox>
                                                 <template if:true={selectedContactsDetails.length}>
                                                     <div class="selected-contacts-pills slds-m-top_small">
                                                         <template for:each={selectedContactsDetails} for:item="contact">
-                                                            <span key={contact.id} class="custom-pill">
-                                                                <span class="pill-label">{contact.name}</span>
-                                                                <button class="pill-remove" name={contact.id} onclick={handleRemovePrimaryContact}>
-                                                                    <lightning-icon icon-name="utility:close" size="xx-small" variant="inverse"></lightning-icon>
+                                                            <span key={contact.id} class="custom-pill slds-pill" title={contact.name}>
+                                                                <span class="slds-icon_container slds-icon-standard-account" title="Account">
+                                                                    <lightning-icon icon-name="standard:account" alternative-text="Account" size="small"></lightning-icon>
+                                                                </span>
+                                                                <span class="slds-pill__label">{contact.name}</span>
+                                                                <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" name={contact.id} onclick={handleRemovePrimaryContact}>
+                                                                    <lightning-icon icon-name="utility:close" alternative-text="Remove"></lightning-icon>
+                                                                    <span class="slds-assistive-text">Remove</span>
                                                                 </button>
                                                             </span>
                                                         </template>
@@ -317,10 +320,14 @@
                                                 <template if:true={selectedCCContactsDetails.length}>
                                                     <div class="selected-contacts-pills slds-m-top_small">
                                                         <template for:each={selectedCCContactsDetails} for:item="contact">
-                                                            <span key={contact.id} class="custom-pill pill-cc">
-                                                                <span class="pill-label">{contact.name}</span>
-                                                                <button class="pill-remove" name={contact.id} onclick={handleRemoveCCContact}>
-                                                                    <lightning-icon icon-name="utility:close" size="xx-small" variant="inverse"></lightning-icon>
+                                                            <span key={contact.id} class="custom-pill slds-pill pill-cc" title={contact.name}>
+                                                                <span class="slds-icon_container slds-icon-standard-account" title="Account">
+                                                                    <lightning-icon icon-name="standard:account" alternative-text="Account" size="small"></lightning-icon>
+                                                                </span>
+                                                                <span class="slds-pill__label">{contact.name}</span>
+                                                                <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" name={contact.id} onclick={handleRemoveCCContact}>
+                                                                    <lightning-icon icon-name="utility:close" alternative-text="Remove"></lightning-icon>
+                                                                    <span class="slds-assistive-text">Remove</span>
                                                                 </button>
                                                             </span>
                                                         </template>
@@ -346,7 +353,22 @@
                             <footer class="custom-footer">
                                 <template for:each={footerButtons} for:item="button">
                                     <button key={button.label} data-action={button.onclick} onclick={handleButtonClick} disabled={button.disabled} class={button.buttonClass}>
+                                        <template if:true={button.isBack}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                            </svg>
+                                        </template>
                                         {button.label}
+                                        <template if:true={button.isNext}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                                            </svg>
+                                        </template>
+                                        <template if:true={button.isFinish}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                            </svg>
+                                        </template>
                                     </button>
                                 </template>
                             </footer>

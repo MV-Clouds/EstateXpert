@@ -335,6 +335,10 @@ export default class SendEmails extends LightningElement {
             .reduce((total, group) => total + (group.contactCount || 0), 0);
     }
 
+    get totalRecipientCount() {
+        return (this.selectedContactsDetails ? this.selectedContactsDetails.length : 0) + this.estimatedContactsFromGroups;
+    }
+
     get computeTimingClass() {
         const drip = this.selectedDrip;
         if (drip && drip.hasInvalidTime) {

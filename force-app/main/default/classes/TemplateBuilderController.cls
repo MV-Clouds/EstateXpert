@@ -516,4 +516,192 @@ public with sharing class TemplateBuilderController {
         }
         return templateRecord;
     }
+
+    @AuraEnabled
+    public static List<Contact> searchContactsWithEmail(String searchTerm){
+        try {
+            String likeParam = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
+
+            List<Contact> contacts = [
+                SELECT Id, Name, Email 
+                FROM Contact 
+                WHERE (Name LIKE :likeParam OR Email LIKE :likeParam)
+                AND Email != null
+                ORDER BY Name ASC
+            ];
+
+            return contacts;
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'ListingPDFGeneratorController', 'searchContactsWithEmail', 'Error while getting contact.');
+            return null;
+        }
+    }
+
+
+    @AuraEnabled
+    public static void sendEmailWithPDF(
+        List<Id>     contactIds,
+        List<String> manualEmails,
+        String       subject,
+        String       body,
+        String       templateId,
+        String       recordId,
+        String       fileName,
+        String       pdfBase64
+    ) {
+        try {
+            // ── Validations ───────────────────────────────────────────────
+            Boolean noContacts = (contactIds == null || contactIds.isEmpty());
+            Boolean noManual   = (manualEmails == null || manualEmails.isEmpty());
+
+            if (noContacts && noManual)
+                throw new AuraHandledException('No recipients provided.');
+
+            if (String.isBlank(subject))
+                throw new AuraHandledException('Email subject is required.');
+
+            if (String.isBlank(body))
+                throw new AuraHandledException('Email body is required.');
+
+            if (String.isBlank(pdfBase64))
+                throw new AuraHandledException('PDF data is missing.');
+
+            // ── Decode PDF ───────────────────────────────────────────────
+            Blob pdfBlob = EncodingUtil.base64Decode(pdfBase64);
+
+            List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+            Set<String> uniqueEmails = new Set<String>();
+
+            // ── Process Contacts ─────────────────────────────────────────
+            if (!noContacts) {
+                Map<Id, Contact> contactMap = new Map<Id, Contact>(
+                    [SELECT Id, Name, Email FROM Contact
+                     WHERE Id IN :contactIds AND Email != null]
+                );
+
+                for (Id cId : contactIds) {
+                    Contact c = contactMap.get(cId);
+                    if (c == null || String.isBlank(c.Email)) continue;
+
+                    String email = c.Email.trim().toLowerCase();
+
+                    if (!uniqueEmails.contains(email)) {
+                        uniqueEmails.add(email);
+                        emails.add(buildContactEmail(
+                            c.Id, subject, body, pdfBlob, fileName
+                        ));
+                    }
+                }
+            }
+
+            // ── Process Manual Emails ─────────────────────────────────────
+            if (!noManual) {
+                for (String email : manualEmails) {
+                    if (String.isBlank(email)) continue;
+
+                    email = email.trim().toLowerCase();
+
+                    // Email format validation
+                    if (!Pattern.matches('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$', email)) continue;
+
+                    if (!uniqueEmails.contains(email)) {
+                        uniqueEmails.add(email);
+                        emails.add(buildManualEmail(
+                            email, subject, body, pdfBlob, fileName
+                        ));
+                    }
+                }
+            }
+
+            if (emails.isEmpty())
+                throw new AuraHandledException('No valid recipients found.');
+
+            // ── Send Emails in Batches (limit-safe) ───────────────────────
+            List<String> errors = new List<String>();
+            Integer chunkSize = 10;
+
+            for (Integer i = 0; i < emails.size(); i += chunkSize) {
+                Integer endIdx = Math.min(i + chunkSize, emails.size());
+
+                List<Messaging.SingleEmailMessage> chunk = new List<Messaging.SingleEmailMessage>();
+                for (Integer j = i; j < endIdx; j++) {
+                    chunk.add(emails[j]);
+                }
+
+                Messaging.SendEmailResult[] results = Messaging.sendEmail(chunk);
+
+                for (Messaging.SendEmailResult r : results) {
+                    if (!r.isSuccess()) {
+                        for (Messaging.SendEmailError err : r.getErrors()) {
+                            errors.add(err.getMessage());
+                        }
+                    }
+                }
+            }
+
+            if (!errors.isEmpty())
+                throw new AuraHandledException('Some emails failed: ' + String.join(errors, '; '));
+
+        } catch (AuraHandledException ahe) {
+            throw ahe;
+        } catch (Exception e) {
+            throw new AuraHandledException('Unexpected error: ' + e.getMessage());
+        }
+    }
+
+    // ── Contact Email (uses TargetObjectId correctly) ─────────────────────
+    private static Messaging.SingleEmailMessage buildContactEmail(
+        Id contactId,
+        String subject,
+        String body,
+        Blob pdfBlob,
+        String fileName
+    ) {
+        Messaging.EmailFileAttachment att = new Messaging.EmailFileAttachment();
+        att.setFileName(fileName);
+        att.setBody(pdfBlob);
+        att.setContentType('application/pdf');
+
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setTargetObjectId(contactId); // Correct usage
+        mail.setSubject(subject);
+
+        // Use either one depending on your need
+        mail.setPlainTextBody(body);
+        // mail.setHtmlBody(body);
+
+        mail.setFileAttachments(new List<Messaging.EmailFileAttachment>{ att });
+        mail.setSaveAsActivity(true);
+
+        return mail;
+    }
+
+    // ── Manual Email ─────────────────────────────────────────────────────
+    private static Messaging.SingleEmailMessage buildManualEmail(
+        String email,
+        String subject,
+        String body,
+        Blob pdfBlob,
+        String fileName
+    ) {
+        Messaging.EmailFileAttachment att = new Messaging.EmailFileAttachment();
+        att.setFileName(fileName);
+        att.setBody(pdfBlob);
+        att.setContentType('application/pdf');
+
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new List<String>{ email });
+        mail.setSubject(subject);
+
+        // Use either one depending on your need
+        mail.setPlainTextBody(body);
+        // mail.setHtmlBody(body);
+
+        mail.setFileAttachments(new List<Messaging.EmailFileAttachment>{ att });
+        mail.setSaveAsActivity(false);
+
+        return mail;
+    }
+
 }

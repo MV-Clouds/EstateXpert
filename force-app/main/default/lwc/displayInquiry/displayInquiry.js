@@ -121,6 +121,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         { label: 'Any Condition Is Met', value: 'any' },
         { label: 'Custom Logic Is Met', value: 'custom' },
         { label: 'Related List', value: 'related' },
+        { label: 'Linked Inquiries', value: 'linked' },
         { label: 'No Filter', value: 'none' },
     ];
 
@@ -152,6 +153,26 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track modalFilteredInquiryData = [];
     @track sendMailInquiryDataList = [];
     filterModalSnapshot = null;
+
+    /**
+ * Method Name : isApplyButtonDisabled
+ * @description : Disable Apply button when condition type requires mappings but none exist
+ * Date: 26/03/2026
+ */
+    get isApplyButtonDisabled() {
+        // Check if the current condition type requires mappings
+        const requiresMappings = this.conditiontype === 'all' ||
+            this.conditiontype === 'any' ||
+            this.conditiontype === 'custom';
+
+        // If it requires mappings, check if mappings exist
+        if (requiresMappings) {
+            return !this.mappings || this.mappings.length === 0;
+        }
+
+        // For other condition types (related, linked, none), button is always enabled
+        return false;
+    }
 
     get modalContainerClass() {
         return this.popUpSecondPage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
@@ -215,7 +236,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By:Rachit Shah
     */
     get mappingClass() {
-        return this.selectedConditionType !== 'Related List' && this.selectedConditionType !== 'None' ? 'mapping-item-active' : 'mapping-item-inactive';
+        return this.selectedConditionType !== 'Related List' && this.selectedConditionType !== 'Linked Inquiries' && this.selectedConditionType !== 'No Filter' ? 'mapping-item-active' : 'mapping-item-inactive';
     }
 
     /**
@@ -463,7 +484,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             loadStyle(this, MulishFontCss);
             this.getInquiryFields();
             this.fetchInquiryConfiguration();
-            
+
             // Wait for both required data loads before fetching filter configuration
             await Promise.all([
                 this.getListingFields(),
@@ -471,7 +492,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.loadMessageOptions(),
                 this.loadListViewId()
             ]);
-            
+
             this.loadAllTemplates();
             this.fetchFilterConfiguration();
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
@@ -552,12 +573,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     applyFieldFormat(fieldValue, format) {
         try {
             let date = new Date(fieldValue);
-            
+
             // Check if date is valid
             if (isNaN(date.getTime())) {
                 return fieldValue;
             }
-            
+
             let day = String(date.getDate()).padStart(2, '0');
             let month = String(date.getMonth() + 1).padStart(2, '0');
             let year = date.getFullYear();
@@ -645,7 +666,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.updateSortIcons();
             this._renderedCallbackRunOnce = true;
         }
-        
+
     }
 
     loadAllTemplates() {
@@ -1184,40 +1205,58 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                return this.mappings.every(mapping => {
-                    let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                    let filterValue = mapping.resolvedValue;
+                    return this.mappings.every(mapping => {
+                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                        let filterValue = mapping.resolvedValue;
 
-                    const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
-                    const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
+                        const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
+                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
 
-                    switch (mapping.operator) {
-                        case 'greaterThan':
-                            return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
-                        case 'lessThan':
-                            return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
-                        case 'equalTo':
-                            return normInquiryValue == normFilterValue;
-                        case 'contains':
-                            return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                        case 'notEqualTo':
-                            return normInquiryValue != normFilterValue;
-                        case 'notContains':
-                            return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                        case 'isNull':
-                            // true value means find null records; false means find non-null records
-                            if (mapping.valueField === 'true') {
-                                return inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
-                            }
-                            return inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
-                        default:
-                            return false;
-                    }
+                        switch (mapping.operator) {
+                            case 'greaterThan':
+                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
+                            case 'lessThan':
+                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
+                            case 'equalTo':
+                                return normInquiryValue == normFilterValue;
+                            case 'contains':
+                                return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                            case 'notEqualTo':
+                                return normInquiryValue != normFilterValue;
+                            case 'notContains':
+                                return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                            case 'isNull':
+                                // true value means find null records; false means find non-null records
+                                if (mapping.valueField === 'true') {
+                                    return inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
+                                }
+                                return inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
+                            default:
+                                return false;
+                        }
+                    });
                 });
-            });
             } else if (this.conditiontype === 'related') {
                 this.selectedConditionType = 'Related List';
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => inquiry.mvex__listing__c === this.recordId);
+                // For related list, filter client-side using the listing lookup field
+                // Only filter if we haven't already filtered in fetchListings or applyModalFilters
+                if (this.pagedFilteredInquiryData === this.totalinquiry) {
+                    this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry =>
+                        inquiry.mvex__listing__c === this.recordId
+                    );
+                }
+            } else if (this.conditiontype === 'linked') {
+                this.selectedConditionType = 'Linked Inquiries';
+                // For linked filter, data is already filtered by the server
+                // No additional client-side filtering needed
+                if (this.pagedFilteredInquiryData === this.totalinquiry) {
+                    this.pagedFilteredInquiryData = [...this.totalinquiry];
+                }
+
+                // Show a message if no linked inquiries found
+                if (this.pagedFilteredInquiryData.length === 0) {
+                    this.showToast('Info', 'No linked inquiries found for this listing', 'info');
+                }
             } else if (this.conditiontype === 'none') {
                 this.selectedConditionType = 'None';
                 this.pagedFilteredInquiryData = [...this.totalinquiry];
@@ -1283,20 +1322,72 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
-    * Method Name: fetchListings
-    * @description: this method is used to get all inquiries data from the apex and update the property list to display them
-    * Date: 17/06/2024
-    * Created By: Mitrajsinh Gohil
-    * Last modified by : Rachit Shah
-    */
+  * Method Name: fetchListings
+  * @description: this method is used to get all inquiries data from the apex and update the property list to display them
+  * Date: 17/06/2024
+  * Created By: Mitrajsinh Gohil
+  * Last modified by : Rachit Shah
+  */
     fetchListings() {
-        getRecords({ recId: this.recordId, objectName: this.objectName })
+        // Determine filter type for initial load
+        let filterType = 'default';
+        if (this.conditiontype === 'linked') {
+            filterType = 'linked';
+        } else if (this.conditiontype === 'related') {
+            filterType = 'related';
+        }
+
+        getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
             .then(result => {
-                const data = result;
+                console.log('fetchListings result:', result);
+
                 let listing = {};
+
                 if (this.objectName === 'MVEX__Listing__c') {
-                    this.totalinquiry = this.convertKeysToLowercase(data.inquiries);
-                    listing = data.listings[0];
+                    // Handle inquiries based on filter type
+                    if (filterType === 'linked') {
+                        // LINKED: Get inquiries from the junction object
+                        if (result.inquiries && result.inquiries.length > 0) {
+                            this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
+                        } else {
+                            this.totalinquiry = [];
+                        }
+                    } else if (filterType === 'related') {
+                        // RELATED: Get inquiries where MVEX__Listing__c points to this listing
+                        // For initial load, we need to fetch all inquiries first
+                        filterType = 'default'; // Reset to get all inquiries
+                        getRecords({ recId: this.recordId, objectName: this.objectName, filterType: 'default' })
+                            .then(defaultResult => {
+                                if (defaultResult.inquiries && defaultResult.inquiries.length > 0) {
+                                    this.totalinquiry = this.convertKeysToLowercase(defaultResult.inquiries);
+                                } else {
+                                    this.totalinquiry = [];
+                                }
+
+                                // Now filter for related inquiries
+                                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry =>
+                                    inquiry.mvex__listing__c === this.recordId
+                                );
+                                this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                                this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
+                                this.totalRecords = this.pagedFilteredInquiryData.length;
+                                this.currentPage = 1;
+                                this.isLoading = false;
+                            });
+                        return; // Exit early as we're handling async
+                    } else {
+                        // DEFAULT: Get all inquiries
+                        if (result.inquiries && result.inquiries.length > 0) {
+                            this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
+                        } else {
+                            this.totalinquiry = [];
+                        }
+                    }
+
+                    // Get the listing record (the current listing)
+                    if (result.listings && result.listings.length > 0) {
+                        listing = result.listings[0];
+                    }
                 }
 
                 const convertoLowerCase = (obj) => {
@@ -1307,14 +1398,30 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 };
 
                 const lowerCaseListing = convertoLowerCase(listing);
-
                 this.listingRecord = lowerCaseListing;
 
-                this.applyFiltersData(this.listingRecord);
-                
+                // For linked filter, set the filtered data directly
+                if (filterType === 'linked') {
+                    this.pagedFilteredInquiryData = [...this.totalinquiry];
+                    this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
+                    this.totalRecords = this.pagedFilteredInquiryData.length;
+                    this.currentPage = 1;
+
+                    // Show message if no linked inquiries found
+                    if (this.pagedFilteredInquiryData.length === 0) {
+                        this.showToast('Info', 'No linked inquiries found for this listing', 'info');
+                    }
+
+                    this.isLoading = false;
+                } else if (filterType !== 'related') {
+                    // For default, apply filters normally
+                    this.applyFiltersData(this.listingRecord);
+                }
             })
             .catch(error => {
                 errorDebugger('displayInquiry', 'fetchListings', error, 'warn', 'Error getting inquiries from apex');
+                this.isLoading = false;
             });
     }
 
@@ -1565,40 +1672,172 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     applyModalFilters() {
         try {
-            const config = {
-                conditionType: 'Related List',
-                logic: this.logicalExpression,
-                mappings: this.mappings
-            };
+            // Save Configuration Logic - Only save if there are mappings and not for related/linked
+            if (this.mappings && this.mappings.length > 0 &&
+                this.conditiontype !== 'related' &&
+                this.conditiontype !== 'linked' &&
+                this.conditiontype !== 'none') {
+                const config = {
+                    conditionType: this.selectedConditionType,
+                    logic: this.logicalExpression,
+                    mappings: this.mappings
+                };
 
-            saveMappings({objectApiName: 'MVEX__Inquiry__c', featureName: 'Suggested_Inquiry_Filters', checklistData: JSON.stringify(config), totalPages: 0})
-                .then(result => {
-                    if (result !== 'Success') {
-                        this.showToast('Error', 'Failed to save configuration', 'error');
-                    }
+                saveMappings({
+                    objectApiName: 'MVEX__Inquiry__c',
+                    featureName: 'Suggested_Inquiry_Filters',
+                    checklistData: JSON.stringify(config),
+                    totalPages: 0
                 })
-                .catch(error => {
-                    errorDebugger('displayInquiry', 'saveConfiguration', error, 'warn', 'Error saving configuration');
-                });
-
-            if (this.mappings.length === 0) {
-                this.pagedFilteredInquiryData = [...this.totalinquiry];
-                this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Update popup filtered data
-                this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
-                this.totalRecords = this.pagedFilteredInquiryData.length;
-                this.currentPage = 1;
-                this.logicalExpression = '';
-                this.hideModalBox(false);
-                this.checkAll = false;
-                this.sendMailInquiryDataList = [];
-                this.isLoading = false;
-                return;
+                    .then(result => {
+                        if (result !== 'Success') {
+                            this.showToast('Error', 'Failed to save configuration', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        errorDebugger('displayInquiry', 'saveConfiguration', error, 'warn', 'Error saving configuration');
+                    });
             }
 
-            this.applyFiltersData(this.listingRecord);
+            // Handle different filter types
+            if (this.conditiontype === 'linked') {
+                // LINKED Inquiries: Get inquiries linked through the junction object
+                this.isLoading = true;
+                const filterType = 'linked';
+
+                getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
+                    .then(result => {
+                        console.log('Linked filter result:', result);
+
+                        if (this.objectName === 'MVEX__Listing__c') {
+                            if (result.inquiries && result.inquiries.length > 0) {
+                                this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
+                            } else {
+                                this.totalinquiry = [];
+                            }
+                        }
+
+                        this.pagedFilteredInquiryData = [...this.totalinquiry];
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                        this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
+                        this.totalRecords = this.pagedFilteredInquiryData.length;
+                        this.currentPage = 1;
+
+                        this.searchTerm = '';
+                        this.checkAll = false;
+                        this.sendMailInquiryDataList = [];
+
+                        if (this.pagedFilteredInquiryData.length === 0) {
+                            this.showToast('Info', 'No linked inquiries found for this listing', 'info');
+                        }
+
+                        this.hideModalBox(false);
+                        this.isLoading = false;
+                    })
+                    .catch(error => {
+                        errorDebugger('displayInquiry', 'applyModalFilters', error, 'warn', 'Error fetching linked inquiries');
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error fetching linked inquiries: ' + (error.body?.message || 'Unknown error'), 'error');
+                    });
+            }
+            else if (this.conditiontype === 'related') {
+                // RELATED LIST: Get inquiries where MVEX__Listing__c field points to this listing
+                this.isLoading = true;
+                const filterType = 'related';
+
+                getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
+                    .then(result => {
+                        console.log('Related filter result:', result);
+
+                        if (this.objectName === 'MVEX__Listing__c') {
+                            if (result.inquiries && result.inquiries.length > 0) {
+                                this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
+                            } else {
+                                this.totalinquiry = [];
+                            }
+                        }
+
+                        this.pagedFilteredInquiryData = [...this.totalinquiry];
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                        this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
+                        this.totalRecords = this.pagedFilteredInquiryData.length;
+                        this.currentPage = 1;
+
+                        this.searchTerm = '';
+                        this.checkAll = false;
+                        this.sendMailInquiryDataList = [];
+
+                        if (this.pagedFilteredInquiryData.length === 0) {
+                            this.showToast('Info', 'No related inquiries found for this listing', 'info');
+                        }
+
+                        this.hideModalBox(false);
+                        this.isLoading = false;
+                    })
+                    .catch(error => {
+                        errorDebugger('displayInquiry', 'applyModalFilters', error, 'warn', 'Error fetching related inquiries');
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error fetching related inquiries: ' + (error.body?.message || 'Unknown error'), 'error');
+                    });
+            }
+            else if (this.conditiontype === 'none') {
+                // No filter - show all inquiries
+                this.isLoading = true;
+                const filterType = 'default';
+
+                getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
+                    .then(result => {
+                        if (this.objectName === 'MVEX__Listing__c') {
+                            if (result.inquiries && result.inquiries.length > 0) {
+                                this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
+                            } else {
+                                this.totalinquiry = [];
+                            }
+                        }
+
+                        this.pagedFilteredInquiryData = [...this.totalinquiry];
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                        this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
+                        this.totalRecords = this.pagedFilteredInquiryData.length;
+                        this.currentPage = 1;
+
+                        this.searchTerm = '';
+                        this.checkAll = false;
+                        this.sendMailInquiryDataList = [];
+
+                        this.hideModalBox(false);
+                        this.isLoading = false;
+                    })
+                    .catch(error => {
+                        errorDebugger('displayInquiry', 'applyModalFilters', error, 'warn', 'Error fetching all inquiries');
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error fetching all inquiries', 'error');
+                    });
+            }
+            else {
+                // For other filter types (all, any, custom), use the existing applyFiltersData logic
+                if (this.mappings.length === 0) {
+                    this.pagedFilteredInquiryData = [...this.totalinquiry];
+                    this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
+                    this.totalRecords = this.pagedFilteredInquiryData.length;
+                    this.currentPage = 1;
+                    this.logicalExpression = '';
+                    this.searchTerm = '';
+                    this.checkAll = false;
+                    this.sendMailInquiryDataList = [];
+                    this.hideModalBox(false);
+                    this.isLoading = false;
+                    return;
+                }
+
+                this.applyFiltersData(this.listingRecord);
+            }
+
         } catch (error) {
             errorDebugger('displayInquiry', 'applyModalFilters', error, 'warn', 'Error applying modal filters');
             this.showToast('Error', 'Error applying filters', 'error');
+            this.isLoading = false;
         }
     }
 
@@ -1717,7 +1956,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             let selectedValueId = event.detail.recordId;
             this.selectedListingField = selectedValueId;
             this.selectedRecordName = ''; // Reset
-    
+
             if (selectedValueId && this.inquiryFieldObject.objectApiName) {
                 getRecordName({ recordId: selectedValueId, objectApiName: this.inquiryFieldObject.objectApiName })
                     .then(name => {
@@ -2070,8 +2309,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.filteredGroupMembers = [...this.broadcastContactList];
 
                     this.showTemplate = true;
-                    this.popUpFirstPage = false; 
-                    this.popUpSecondPage = true; 
+                    this.popUpFirstPage = false;
+                    this.popUpSecondPage = true;
                     this.popUpConfirmPage = false;
                     this.popUpLastPage = false;
                     this.popupHeader = 'Send Message';
@@ -2102,7 +2341,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.filteredGroupMembers = [...this.broadcastContactList];
             return;
         }
-        this.filteredGroupMembers = this.broadcastContactList.filter(member => 
+        this.filteredGroupMembers = this.broadcastContactList.filter(member =>
             (member.Name && member.Name.toLowerCase().includes(searchTerm)) ||
             (member.Phone && member.Phone.includes(searchTerm)) ||
             (member.GroupName && member.GroupName.toLowerCase().includes(searchTerm))
@@ -2113,7 +2352,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         try {
             const memberId = event.target.dataset.id;
             const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
-            
+
             if (memberToRemove) {
                 const inquiryId = memberToRemove.InquiryId;
 
@@ -2133,8 +2372,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
 
                 // 4. Update check-all state
-                this.checkAll = this.pagedFilteredInquiryData.length > 0 && 
-                               this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
+                this.checkAll = this.pagedFilteredInquiryData.length > 0 &&
+                    this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
 
                 // 5. If no members left, close the modal
                 if (this.broadcastContactList.length === 0) {
@@ -2147,7 +2386,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    clearSelectedInquiryWithCheckboxFalse(){
+    clearSelectedInquiryWithCheckboxFalse() {
         this.selectedInquiry = null;
         this.selectedInquiryList = [];
         this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
@@ -2325,23 +2564,23 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             });
     }
 
-        navigateToBroadcastComponent(broadcastId) {
-            let componentDef = {
-                componentDef: "MVEX:broadcastReportComp",
-                attributes: {
-                    recordId: broadcastId
-                }
-            };
+    navigateToBroadcastComponent(broadcastId) {
+        let componentDef = {
+            componentDef: "MVEX:broadcastReportComp",
+            attributes: {
+                recordId: broadcastId
+            }
+        };
 
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-    
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
-            });
-}
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/one/one.app#' + encodedComponentDef
+            }
+        });
+    }
 
     // Handle schedule button on second page
     handleSchedulePopup() {
@@ -2592,7 +2831,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         try {
             // Get all header cells with sorting capability
             const headers = this.template.querySelectorAll('[data-id]');
-            
+
             // Remove active class from all headers
             headers.forEach(header => {
                 header.classList.remove('active-sort');
@@ -2602,20 +2841,20 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
             console.log('currentHeader', currentHeader);
             console.log('currentHeader.classList', currentHeader.classList);
-            
-            
+
+
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
-                console.log('currentHeader.classList', currentHeader.classList);                
-                
-                
+                console.log('currentHeader.classList', currentHeader.classList);
+
+
                 // Find the sort icon within this header
                 // Updated selector to match our new HTML structure
                 const icon = currentHeader.querySelector('.listing-manager-icon');
                 if (icon) {
                     // Remove existing rotation classes
                     icon.classList.remove('rotate-asc', 'rotate-desc');
-                    
+
                     // Add appropriate rotation class based on sort order
                     if (this.sortOrder === 'asc') {
                         icon.classList.add('rotate-asc');

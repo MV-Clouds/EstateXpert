@@ -31,6 +31,10 @@
     flex-shrink: 0;
 }
 
+.custom-content {
+    min-height: 97%;
+}
+
 .scrollable-container {
     flex: 1;
     overflow-y: auto;
@@ -371,7 +375,7 @@
 .table-container th {
     padding: 1rem;
     background: #0176D3;
-    color: white;
+    color: white !important;
     font-weight: 500;
     letter-spacing: 0.3px;
 }
@@ -410,6 +414,12 @@
 .table-container .slds-table tbody tr:hover td {
     background-color: #ebf3f6 !important;
     border: none;
+}
+
+.slds-cell-fixed {
+    background: #0176D3 !important;
+    color: white !important;
+    border-bottom: 2px solid #005fb2;
 }
 
 .action-btn {

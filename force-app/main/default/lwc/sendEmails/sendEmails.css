@@ -32,6 +32,10 @@
     padding: 1rem 1.25rem;
 }
 
+.wrapper .slds-modal__content {
+    min-height: 97%;
+}
+
 .closs_icon_css {
     display: flex;
     justify-content: center;
@@ -76,76 +80,6 @@
     position: sticky;
     bottom: -18px;
     z-index: 5;
-}
-
-.custom-footer button {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-    text-align: center;
-    padding: 0.5rem 1.5rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    border: none;
-}
-
-.custom-footer button svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-}
-
-.custom-footer button[data-action="handleBack"] {
-    background: #FFFFFF;
-    border: 1.5px solid var(--primary-color);
-    color: var(--primary-color);
-}
-
-.custom-footer button[data-action="handleNext"],
-.custom-footer button[data-action="handleFinish"] {
-    background: var(--primary-color);
-    border: none;
-    color: white;
-}
-
-.custom-footer button[data-action="handleBack"]:hover,
-.custom-footer button.back-button:hover {
-    background: #F3F6F9;
-    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
-}
-
-.custom-footer button[data-action="handleNext"]:hover,
-.custom-footer button[data-action="handleFinish"]:hover,
-.custom-footer button.next-button:hover,
-.custom-footer button.finish-button:hover {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
-.custom-footer button.back-button {
-    background: #FFFFFF;
-    border: 1.5px solid var(--primary-color);
-    color: var(--primary-color);
-}
-
-.custom-footer button.next-button,
-.custom-footer button.finish-button {
-    background: var(--primary-color);
-    color: white;
-    flex-direction: row-reverse;
-}
-
-.custom-footer button:disabled {
-    background: #DBDBDB !important;
-    border-color: #DBDBDB !important;
-    color: #969492 !important;
-    cursor: not-allowed;
 }
 
 /* Wizard Progress Bar */
@@ -1575,6 +1509,10 @@
     padding: 1rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
+    max-height: 24rem;
+    overflow: auto;
+    scrollbar-width: thin;
+    margin-bottom: 1rem;
 }
 
 .section-card:hover {

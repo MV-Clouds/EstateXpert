@@ -231,7 +231,7 @@ export default class SendEmails extends LightningElement {
                 variant: 'brand',
                 onclick: 'handleFinish',
                 disabled: !hasRecipients || !hasCampaignDetails,
-                buttonClass: 'custom-footer-button finish-button',
+                buttonClass: 'blue-btn-css',
                 isBack: false,
                 isNext: false,
                 isFinish: true

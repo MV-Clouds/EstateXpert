@@ -104,6 +104,56 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         return this.startDateOption === 'contactDateField';
     }
 
+    get isListingObject() {
+        return this.relatedObject === 'Listing' || this.relatedObject === 'MVEX__Listing__c';
+    }
+
+    get isContactObject() {
+        return this.relatedObject === 'Contact';
+    }
+
+    get objectOptions() {
+        return [
+            { label: 'Contact', value: 'Contact' },
+            { label: 'Listing', value: 'MVEX__Listing__c' }
+        ];
+    }
+
+    @track genericOptions = [];
+    @track contactOptions = [];
+    @track listingOptions = [];
+
+    getRowTemplateOptions(email) {
+        let options = [{ label: 'None', value: '' }, ...this.genericOptions];
+        if (email.objectApiName === 'Contact') {
+            options = [...options, ...this.contactOptions];
+        } else if (email.objectApiName === 'MVEX__Listing__c') {
+            options = [...options, ...this.listingOptions];
+        }
+        return options;
+    }
+
+    handleRowObjectChange(event) {
+        const emailId = event.target.dataset.id;
+        const newObject = event.detail.value;
+
+        this.emails = this.emails.map(email => {
+            if (email.id == emailId) {
+                email.objectApiName = newObject;
+                email.isListingObject = newObject === 'MVEX__Listing__c';
+                if (newObject !== 'MVEX__Listing__c') {
+                    email.selectedListingId = '';
+                }
+                email.templateOptions = this.getRowTemplateOptions(email);
+                email.template = '';
+                email.subject = '';
+            }
+            return email;
+        });
+        this.emailsWithTemplate = [...this.emails];
+        this.checkForChanges();
+    }
+
     get searchBoxClass() {
         return this.isFieldSelected ? 'slds-hide' : 'slds-show';
     }
@@ -170,8 +220,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             if(recId){
                 this.campaignId = recId;
                 getCampaign({ campaignId: this.campaignId }).then(result => {
-                        if(result && result.MVEX__RelatedObject__c == 'Contact'){
-                            this.relatedObject = 'Contact';
+                        if(result && result.MVEX__RelatedObject__c){
+                            this.relatedObject = result.MVEX__RelatedObject__c;
                             this.loadContacts();
                         }
                     }
@@ -358,6 +408,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     formData.selectedTemplate = data.templateName;
                     formData.saveForFuture = data.isMarketingCampaignTemplate;
                     formData.selectedObject = data.relatedObject;
+                    this.relatedObject = data.relatedObject;
                     this.navigationStateString = formData;
         
                     if (data.startDate != null) {
@@ -419,19 +470,24 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     if (data.emailRecords) {
                         console.log('data.emailRecords ==> ' );
                         console.log(data.emailRecords);
-                        this.emails = data.emailRecords.map(email => ({
-                            id: email.Id,
-                            template: email.MVEX__Template_Id__c,
-                            templateType: email.MVEX__Template_Type__c,
-                            subject: email.MVEX__Subject__c,
-                            daysAfterStartDate: email.MVEX__Days_After_Start_Date__c,
-                            timeToSend: this.parseTimeString(email.MVEX__TimeToSend__c),
-                            exactDate: this?.specificDate,
-                            name: email.Name,
-                            disabled: this.shouldDisableEmail(data.selectedContactDateField, email?.MVEX__Send_Date_Time__c),
-                            selectedListingId : email.MVEX__Listing__c,
-                            templateOptions: email.MVEX__Listing__c ? this.allTemplateOptions : this.baseTemplateOptions
-                        }));
+                        this.emails = data.emailRecords.map(email => {
+                            let row = {
+                                id: email.Id,
+                                template: email.MVEX__Template_Id__c,
+                                templateType: email.MVEX__Template_Type__c,
+                                subject: email.MVEX__Subject__c,
+                                daysAfterStartDate: email.MVEX__Days_After_Start_Date__c,
+                                timeToSend: this.parseTimeString(email.MVEX__TimeToSend__c),
+                                exactDate : '',
+                                name: email.Name,
+                                disabled: this.shouldDisableEmail(data.selectedContactDateField, email?.MVEX__Send_Date_Time__c),
+                                selectedListingId : email.MVEX__Listing__c,
+                                objectApiName: email.MVEX__RelatedObject__c || (email.MVEX__Listing__c ? 'MVEX__Listing__c' : 'Contact')
+                            };
+                            row.templateOptions = this.getRowTemplateOptions(row);
+                            row.isListingObject = row.objectApiName === 'MVEX__Listing__c';
+                            return row;
+                        });
                         this.emailsWithTemplate = [...this.emails];
                     }
         
@@ -526,46 +582,28 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 } 
                 
 
-                // Filter templates based on relatedObject (Contact)
-                let baseTemplates = [];
-                let listingTemplates = [];
+                // Filter templates based on relatedObject
+                let genericTemplates = result.marketingTemplates.filter(option => option.objectApiName === 'Generic');
+                let contactTemplates = result.marketingTemplates.filter(option => option.objectApiName === 'Contact');
+                let listingTemplates = result.marketingTemplates.filter(option => option.objectApiName === 'MVEX__Listing__c');
                 
-                if (this.relatedObject === 'Contact') {
-                    baseTemplates = result.marketingTemplates.filter(option => option.objectApiName === 'Contact');
-                    listingTemplates = result.marketingTemplates.filter(option => option.objectApiName === 'MVEX__Listing__c');
-                } else {
-                    baseTemplates = result.marketingTemplates;
-                }
+                this.genericOptions = genericTemplates.map(option => ({ label: option.templateName, value: option.templateId }));
+                this.contactOptions = contactTemplates.map(option => ({ label: option.templateName, value: option.templateId }));
+                this.listingOptions = listingTemplates.map(option => ({ label: option.templateName, value: option.templateId }));
 
-                // console.log('result ==> ' , result);
                 this.quickTemplates = [
                     { label: 'None', value: '', body: '', subject: '', objectApiName: '' },
-                    ...baseTemplates.map(option => ({ label: option.templateName, value: option.templateId, body: option.body , subject: option.subject , objectApiName :option.objectApiName })),
-                    ...listingTemplates.map(option => ({ label: option.templateName, value: option.templateId, body: option.body , subject: option.subject , objectApiName :option.objectApiName }))
+                    ...genericTemplates.map(option => ({ label: option.templateName, value: option.templateId, body: option.body, subject: option.subject, objectApiName: option.objectApiName })),
+                    ...contactTemplates.map(option => ({ label: option.templateName, value: option.templateId, body: option.body, subject: option.subject, objectApiName: option.objectApiName })),
+                    ...listingTemplates.map(option => ({ label: option.templateName, value: option.templateId, body: option.body, subject: option.subject, objectApiName: option.objectApiName }))
                 ];
-                
-                this.baseTemplateOptions = [
-                    { label: 'None', value: '' },
-                    ...baseTemplates.map(option => ({ label: option.templateName, value: option.templateId }))
-                ];
-                
-                this.allTemplateOptions = [
-                    { label: 'None', value: '' },
-                    ...baseTemplates.map(option => ({ label: option.templateName, value: option.templateId })),
-                    ...listingTemplates.map(option => ({ label: option.templateName, value: option.templateId }))
-                ];
-                
-                this.quickTemplateOptions = this.allTemplateOptions;
 
                 if (this.emails && this.emails.length > 0) {
                     this.emails = this.emails.map(email => ({
                         ...email,
-                        templateOptions: email.selectedListingId ? this.allTemplateOptions : this.baseTemplateOptions
+                        templateOptions: this.getRowTemplateOptions(email)
                     }));
-                    this.emailsWithTemplate = this.emailsWithTemplate.map(email => ({
-                        ...email,
-                        templateOptions: email.selectedListingId ? this.allTemplateOptions : this.baseTemplateOptions
-                    }));
+                    this.emailsWithTemplate = [...this.emails];
                 }
             })
             .catch(error => {
@@ -753,6 +791,10 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         }
         
         this.emailCampaignName = eventData.campaignName;
+        if (eventData.selectedObject && this.relatedObject !== eventData.selectedObject) {
+            this.relatedObject = eventData.selectedObject;
+            this.fetchQuickTemplates();
+        }
         this.isModalOpen = false;
     }
     
@@ -1163,8 +1205,23 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     handleAddNewEmail() {
         const newId = this.emails.length + 1;
 
-        this.emails = [...this.emails, { id: newId, name:'', template: '', subject: '', daysAfterStartDate: 0, timeToSend: '', exactDate: this.specificDate, disabled: false, selectedListingId: '', templateOptions: this.baseTemplateOptions }];
-        this.emailsWithTemplate = [...this.emailsWithTemplate, { id: newId, name:'', template: '', subject: '', daysAfterStartDate: 0, timeToSend: '', exactDate: this.specificDate, disabled: false, selectedListingId: '', templateOptions: this.baseTemplateOptions }];
+        const newEmail = { 
+            id: newId, 
+            name:'', 
+            template: '', 
+            subject: '', 
+            daysAfterStartDate: 0, 
+            timeToSend: '', 
+            exactDate: this.specificDate, 
+            disabled: false, 
+            selectedListingId: '', 
+            objectApiName: 'Contact' 
+        };
+        newEmail.templateOptions = this.getRowTemplateOptions(newEmail);
+        newEmail.isListingObject = false;
+
+        this.emails = [...this.emails, newEmail];
+        this.emailsWithTemplate = [...this.emailsWithTemplate, newEmail];
         this.checkForChanges();
         }
 
@@ -1193,41 +1250,20 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Date: 24/06/2024
     * Created By: Rachit Shah
     */
-    handleTemplateChange(event) {
+    handleTemplateChange(event){
         const emailId = event.target.dataset.id;
         const selectedTemplateId = event.detail.value;
+        const selectedTemplate = this.quickTemplates.find(template => template.value === selectedTemplateId);
         
-        const selectedTemplate = this.quickTemplates.find(template => template.value == selectedTemplateId);
-
-        console.log(selectedTemplate);
-
-        // console.log('selectedTemplate ==> ' , selectedTemplate);
-        // console.log('selectedTemplate JSON.stringify ==> ' , JSON.stringify(selectedTemplate));
-
+        console.log('in handleTemplateChange');
         this.emails = this.emails.map(email => {
-            if (email.id == emailId) {
-                email.subject = selectedTemplate ? selectedTemplate.subject : '';
-                email.templateType = this.templateType == 'EmailTemplate' ? 'EmailTemplate' : 'EstateXpertTemplate';
-            }
-            return email;
-        });
-
-        this.emails = [...this.emails];
-
-        this.emailsWithTemplate = this.emailsWithTemplate.map(email => {
             if (email.id == emailId) {
                 email.template = selectedTemplateId;
                 email.subject = selectedTemplate ? selectedTemplate.subject : '';
-                email.templateType = this.templateType == 'EmailTemplate' ? 'EmailTemplate' : 'EstateXpertTemplate';
             }
             return email;
         });
-
-        this.emailsWithTemplate = [...this.emailsWithTemplate];
-        
-
-        console.log('this.emailsWithTemplate ==> ' , JSON.stringify(this.emailsWithTemplate));
-
+        this.emailsWithTemplate = [...this.emails];
         this.checkForChanges();
     }
 
@@ -1240,32 +1276,20 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     */
     handleListingSelect(event){
         const emailId = event.target.dataset.id;
+        const listingId = event.detail.recordId;
         console.log('in handleListing sleect');
 
         this.emails = this.emails.map(email => {
             if (email.id == emailId) {
-                email.selectedListingId = event.detail.recordId;
-                email.templateOptions = email.selectedListingId ? this.allTemplateOptions : this.baseTemplateOptions;
+                email.selectedListingId = listingId;
+                email.templateOptions = this.getRowTemplateOptions(email);
                 email.template = '';
                 email.subject = '';
             }
             return email;
         });
-
-        this.emailsWithTemplate = this.emailsWithTemplate.map(email => {
-            if (email.id == emailId) {
-                email.selectedListingId = event.detail.recordId;
-                email.templateOptions = email.selectedListingId ? this.allTemplateOptions : this.baseTemplateOptions;
-                email.template = '';
-                email.subject = '';
-            }
-            return email;
-        });
-
-        console.log('this.emailsWithTemplate ==> ' , JSON.stringify(this.emailsWithTemplate));
+        this.emailsWithTemplate = [...this.emails];
         this.checkForChanges();
-
-        
     }
     
 
@@ -1817,9 +1841,11 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         const hasRecipients = this.selectedPrimaryRecipients.length > 0 || this.selectedBroadcastGroups.length > 0;
         const isDateSelected = this.specificDate || this.selectedContactDateField;
         const emails = this.emailsWithTemplate.filter(email => !email.disabled);
-        const areEmailsValid = emails.every(email =>
-            email.name && email.template && email.daysAfterStartDate != null && email.timeToSend && (email.isListingSelectionDisabled || email.selectedListingId)
-        );
+        const areEmailsValid = emails.every(email => {
+            const isListingRequired = email.objectApiName === 'MVEX__Listing__c';
+            return email.name && email.template && email.daysAfterStartDate != null && email.timeToSend && 
+                   (!isListingRequired || email.selectedListingId);
+        });
         const isValid = hasRecipients && isDateSelected && areEmailsValid;
         console.log('validateInputs result:', isValid);
         return isValid;

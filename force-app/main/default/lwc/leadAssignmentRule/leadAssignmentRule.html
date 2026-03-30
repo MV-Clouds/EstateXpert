@@ -6,9 +6,9 @@
         <div class="rules-container">
             <div class="header-new-btn">
                 <template if:true={hasUnsavedChanges}>
-                    <button class="save-rule-cls" onclick={saveOrderChanges}>Save Order</button>
+                    <button class="blue-btn-css" onclick={saveOrderChanges}>Save Order</button>
                 </template>
-                <button class="save-rule-cls" onclick={openNewRulePopup}>
+                <button class="blue-btn-css" onclick={openNewRulePopup}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
                     </svg>
@@ -85,7 +85,7 @@
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
                 class="slds-modal slds-fade-in-open slds-modal_large">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close closs_icon_css" onclick={closeRulePopup}>
+                    <div class="slds-modal__close close-icon-css" onclick={closeRulePopup}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -170,7 +170,7 @@
                                         </div>
                                     </template>
                                 </div>
-                                <button class="btn-secondary" onclick={addNewCondition}>
+                                <button class="blue-btn-css" onclick={addNewCondition}>
                                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
@@ -192,7 +192,7 @@
                             </div>
                         </div>
                         <div class="footerbtns">
-                            <button class="cancel_btn_css" onclick={closeRulePopup}>
+                            <button class="white-btn-css" onclick={closeRulePopup}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -201,8 +201,8 @@
                                 </svg>
                                 Cancel
                             </button>
-                            <button class="save_btn_css" onclick={saveRule}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            <button class="blue-btn-css" onclick={saveRule}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
                                         fill="currentColor" />
@@ -221,7 +221,7 @@
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
                 class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close closs_icon_css" onclick={closeDeleteConfirmation}>
+                    <div class="slds-modal__close close-icon-css" onclick={closeDeleteConfirmation}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -237,7 +237,7 @@
                             <p class="slds-text-align_center con-msg">Are you sure you want to delete this rule?</p>
                         </div>
                         <div class="footerbtns">
-                            <button class="cancel_btn_css" onclick={closeDeleteConfirmation}>
+                            <button class="white-btn-css" onclick={closeDeleteConfirmation}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -246,7 +246,7 @@
                                 </svg>
                                 Cancel
                             </button>
-                            <button class="delete_btn_css" onclick={confirmDelete}>
+                            <button class="red-btn-css" onclick={confirmDelete}>
                                 <svg class="confirm-delete-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path

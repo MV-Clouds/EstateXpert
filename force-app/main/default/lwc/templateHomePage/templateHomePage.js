@@ -871,7 +871,6 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
         this.dateField = 'LastModifiedDate';
         this.dateFrom = '';
         this.dateTo = '';
-        this.applyFilters();
     }
 
     applyFilters(event) {

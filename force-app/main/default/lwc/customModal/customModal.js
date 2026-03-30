@@ -207,7 +207,7 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
                     console.log('Object Options: ', this.objectOptions);
                     
                     this.objectOptions  = this.objectOptions.filter(option => 
-                        ['contact', 'lead', 'MVEX__Listing__c', 'MVEX__Inquiry__c'].some(type => 
+                        ['contact', 'MVEX__Listing__c'].some(type => 
                             type.toLowerCase() === option.value.toLowerCase()
                         )
                     )

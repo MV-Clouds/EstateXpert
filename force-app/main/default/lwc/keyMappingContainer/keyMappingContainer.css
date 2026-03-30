@@ -1153,11 +1153,16 @@ li {
   background: #0084c1;
 }
 
-.footerBtn svg {
+.blue-btn-css svg {
   width: 14px;
   height: 14px;
-  margin-right: 0.5rem;
   fill: white;
+}
+
+.white-btn-css svg {
+  width: 14px;
+  height: 14px;
+  fill: #0176D3;
 }
 
 /* ------ -------- KEY POPOVER CSS -- START -- ----- ------ -----  */

@@ -1421,17 +1421,16 @@ c-key-mapping-container {
   background: #0084c1;
 }
 
-.footerBtn svg {
+.white-btn-css svg {
   width: 14px;
   height: 14px;
-  margin-right: 0.5rem;
-  fill: white;
+  fill: #0176D3;
 }
 
-.footerBtn.done svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
+.blue-btn-css svg {
+  width: 14px;
+  height: 14px;
+  fill: #ffffff;
 }
 
 /* ---- Basic Detail CSS -- START -------- */

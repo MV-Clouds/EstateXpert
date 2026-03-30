@@ -11,7 +11,7 @@
                             Listing Manager <span class="count-badge">{totalListings} {lisitngItems}</span>
                         </div>
                         <div class="header-buttons">
-                            <button onclick={openConfigureSettings} class="icon-button">
+                            <button onclick={openConfigureSettings} class="blue-btn-css">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -20,7 +20,7 @@
                                 </svg>
                                 Configure Settings
                             </button>
-                            <button onclick={goTONewListing} class="icon-button">
+                            <button onclick={goTONewListing} class="blue-btn-css">
                                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
@@ -185,7 +185,7 @@
                                 <div class="paginationDiv">
                                     <div class="btnCover">
                                         <div class="pagination-container">
-                                            <button class="pagination-button" disabled={isFirstPage}
+                                            <button class="pagination-btn-css" disabled={isFirstPage}
                                                 onclick={handlePrevious}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
                                                     viewBox="0 0 520 520" fill="#fff">
@@ -207,7 +207,7 @@
                                                 </template>
                                             </template>
 
-                                            <button class="pagination-button" disabled={isLastPage}
+                                            <button class="pagination-btn-css" disabled={isLastPage}
                                                 onclick={handleNext}>
                                                 Next
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"

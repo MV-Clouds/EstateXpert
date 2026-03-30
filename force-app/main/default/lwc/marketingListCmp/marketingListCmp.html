@@ -18,7 +18,7 @@
                         </div>
                        
                         <div class="header-buttons">
-                            <button onclick={openConfigureSettings} class="icon-button">
+                            <button onclick={openConfigureSettings} class="blue-btn-css">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -32,7 +32,7 @@
                                     onclose={handleCloseModal}></c-record-config-body-cmp>
                             </template>
                             <template if:true={hasBusinessAccountConfigured}>
-                                <button onclick={handleSendMessage} class="icon-button" disabled={isContactSelected}>
+                                <button onclick={handleSendMessage} class="blue-btn-css" disabled={isContactSelected}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
@@ -42,7 +42,7 @@
                                     Send Message
                                 </button>
                             </template>
-                            <button onclick={handleAdd} class="icon-button">
+                            <button onclick={handleAdd} class="blue-btn-css">
                                 <svg width="18" height="18" version="1.1" viewBox="0 0 512 512">
                                     <g>
                                         <path
@@ -61,7 +61,7 @@
                                 </svg>
                                 Send Emails
                             </button>
-                            <button onclick={goTOContactPage} class="icon-button">
+                            <button onclick={goTOContactPage} class="blue-btn-css">
                                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
@@ -222,7 +222,7 @@
                                     <div class="paginationDiv slds-var-p-around_medium">
                                         <div class="btnCover">
                                             <div class="pagination-container">
-                                                <button class="pagination-button" disabled={isFirstPage}
+                                                <button class="pagination-btn-css" disabled={isFirstPage}
                                                     onclick={handlePrevious}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
                                                         viewBox="0 0 520 520" fill="#fff">
@@ -244,7 +244,7 @@
                                                     </template>
                                                 </template>
 
-                                                <button class="pagination-button" disabled={isLastPage}
+                                                <button class="pagination-btn-css" disabled={isLastPage}
                                                     onclick={handleNext}>
                                                     Next
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
@@ -289,7 +289,7 @@
             aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
             <div class="slds-modal__container">
                 <!-- Modal/Popup Header -->
-                <div class="slds-modal__close closs_icon_css" onclick={handleClose}>
+                <div class="slds-modal__close close-icon-css" onclick={handleClose}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -333,7 +333,7 @@
         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
             class="slds-modal slds-fade-in-open slds-modal_small">
             <div class="slds-modal__container">
-                <div class="slds-modal__close closs_icon_css" onclick={handleCloseTemplate}>
+                <div class="slds-modal__close close-icon-css" onclick={handleCloseTemplate}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -432,7 +432,7 @@
                         </div>
                     </div>
                     <div class="popUpFooter slds-text-align--center">
-                        <button class="save_btn_css" onclick={handleConfirmPopup}>
+                        <button class="blue-btn-css" onclick={handleConfirmPopup}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
@@ -440,7 +440,7 @@
                             </svg>
                             Send
                         </button>
-                        <button class="cancel_btn_css" onclick={handleSchedulePopup}>
+                        <button class="white-btn-css" onclick={handleSchedulePopup}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -463,7 +463,7 @@
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="datetime-modal-heading"
                 class="slds-modal slds-fade-in-open schedule-modal" aria-describedby="modal-content-id-2">
                 <div class="slds-modal__container schedule-modal-container">
-                    <div class="slds-modal__close closs_icon_css" onclick={handlePreviousLastPage}>
+                    <div class="slds-modal__close close-icon-css" onclick={handlePreviousLastPage}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -499,7 +499,7 @@
                         </div>
 
                         <div class="schedule-modal-footer slds-text-align--center">
-                            <button class="cancel_btn_css" onclick={handlePreviousLastPage}>
+                            <button class="white-btn-css" onclick={handlePreviousLastPage}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -508,7 +508,7 @@
                                 </svg>
                                 Cancel
                             </button>
-                            <button class="save_btn_css" onclick={handleSchedule}>
+                            <button class="blue-btn-css" onclick={handleSchedule}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
@@ -531,7 +531,7 @@
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="confirm-modal-heading"
                 class="slds-modal slds-fade-in-open confirm-modal" aria-describedby="modal-content-id-3">
                 <div class="slds-modal__container schedule-modal-container">
-                    <div class="slds-modal__close closs_icon_css" onclick={handlePreviousLastPage}>
+                    <div class="slds-modal__close close-icon-css" onclick={handlePreviousLastPage}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -548,7 +548,7 @@
 
 
                         <div class="schedule-modal-footer slds-text-align--center">
-                            <button class="cancel_btn_css" onclick={handlePreviousLastPage}>
+                            <button class="white-btn-css" onclick={handlePreviousLastPage}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -557,7 +557,7 @@
                                 </svg>
                                 Cancel
                             </button>
-                            <button class="save_btn_css" onclick={handleSendOnPopup}>
+                            <button class="blue-btn-css" onclick={handleSendOnPopup}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"

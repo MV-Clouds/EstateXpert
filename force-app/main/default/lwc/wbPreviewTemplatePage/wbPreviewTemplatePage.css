@@ -30,7 +30,6 @@
 .templateContent3 {
     border: none;
     padding: 1rem;
-    padding-bottom: 3rem;
     height: 100%;
     display: flex;
     justify-content: space-between;
@@ -160,8 +159,8 @@
     font-size: larger;
 }
 
-input{
-    width: -webkit-fill-available;
+.footerbtns input{
+    width: 40%;
     border: 1px solid #cfcfcf;
     border-radius: 5px;
     padding: 0.3rem;
@@ -186,6 +185,7 @@ input{
     gap: 0.5rem;
     margin-top: 0.3rem;
     position: relative;
+    width: 100%;
 }
 .send-btn{
     border-radius: 5px;
@@ -590,4 +590,17 @@ input{
     border-bottom-style: unset;
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
+}
+
+.footerbtns {
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+}
+
+.opt-buttons {
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+    width: 30%;
 }

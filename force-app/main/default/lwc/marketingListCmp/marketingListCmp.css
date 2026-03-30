@@ -208,18 +208,18 @@ span {
 .filter-tab-wrapper {
     padding: 4px;
     border: 1px solid #d0d4d8;
-    border-radius: 5px;
+    border-radius: 6px;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .filter-toggle-btn {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 27px;
+    height: 27px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: transparent;
@@ -299,7 +299,6 @@ span {
 
 .main .sort-cover {
     height: 100%;
-    border-radius: 6px;
     background-color: transparent;
     display: flex;
     align-items: center;
@@ -451,7 +450,7 @@ span {
 }
 
 .main .body .innerDiv2 .slds-cell_action-mode .slds-icon_container {
-    display: none
+    display: none;
 }
 
 .main .body .innerDiv2 .colume1 {

@@ -102,28 +102,6 @@
   border-top: 1px solid rgb(160, 160, 160);
 }
 
-.buttonSection button {
-  width: max-content;
-  min-width: 6rem;
-  height: 35px;
-  border: none;
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: var(--ff_Bahnschrift);
-  border-radius: 5px;
-  padding-inline: 1rem;
-  transition: all linear 0.19s;
-  cursor: pointer;
-}
-
-.buttonSection button:disabled {
-  background: #b1b1b1 !important;
-  cursor: not-allowed;
-}
-
 .generatePreviewBtn {
   background: #0176D3;
   color: white;
@@ -137,13 +115,13 @@
 }
 
 
-.generatePreviewBtn svg {
+.blue-btn-css svg {
   width: 18px;
   height: 18px;
   fill: white;
 }
 
-.generatePreviewBtn .cls-1 {
+.blue-btn-css .cls-1 {
   fill: none;
 }
 
@@ -160,7 +138,7 @@
 }
 
 
-.exportBtn svg {
+.blue-btn-css svg {
   width: 18px;
   height: 18px;
   fill: white;
@@ -178,7 +156,7 @@
     box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
-.closeBtn svg {
+.white-btn-css svg {
   width: 16px;
   height: 16px;
   fill: #0176D3;

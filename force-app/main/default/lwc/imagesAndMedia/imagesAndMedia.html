@@ -4,7 +4,7 @@
   </template>
   <div class="maindiv">
     <div class="stylebtn">
-      <button class="btn_in_blue" onclick={saveChanges} disabled={disableEnableBtn}>
+      <button class="blue-btn-css" onclick={saveChanges} disabled={disableEnableBtn}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -12,7 +12,7 @@
         </svg>
         Save Changes
       </button>
-      <button class="btn_in_white" onclick={cancelChanges} disabled={disableEnableBtn}>
+      <button class="white-btn-css" onclick={cancelChanges} disabled={disableEnableBtn}>
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -20,13 +20,13 @@
         </svg>
         Cancel
       </button>
-      <button class="btn_in_blue" onclick={modalPopup}>
+      <button class="blue-btn-css" onclick={modalPopup}>
        <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
         </svg>
         Add New Files
       </button>
-      <button class="btn_in_white" onclick={toDeleteAllMedia} disabled={isAllDelete}>
+      <button class="white-btn-css" onclick={toDeleteAllMedia} disabled={isAllDelete}>
          <svg width="15" height="15"
             viewBox="0 0 14 14" fill="none"
             xmlns="http://www.w3.org/2000/svg">
@@ -406,7 +406,7 @@
       <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
         class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
-          <div class="slds-modal__close closs_icon_css" onclick={closePopupEdit}>
+          <div class="slds-modal__close close-icon-css" onclick={closePopupEdit}>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -449,14 +449,14 @@
               </div>
             </div>
             <div class="edit_modal_footerbtns">
-              <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closePopupEdit}>
+              <button class="white-btn-css" aria-label="Cancel and close" onclick={closePopupEdit}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
                 </svg>
                 Close
               </button>
-              <button class="save_btn_css" onclick={confirmEdit}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <button class="blue-btn-css" onclick={confirmEdit}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
                 </svg>
                 Save
@@ -477,7 +477,7 @@
       <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
         class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
-          <div class="slds-modal__close closs_icon_css" onclick={closePopup}>
+          <div class="slds-modal__close close-icon-css" onclick={closePopup}>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -493,14 +493,14 @@
               <p>Are you sure to delete Media?</p>
             </div>
             <div class="edit_modal_footerbtns">
-              <button class="cancel_btn_css" onclick={closePopup}>
+              <button class="white-btn-css" onclick={closePopup}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
                 </svg>
                 No
               </button>
-              <button class="delete_btn_css" onclick={handleDelete}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <button class="red-btn-css" onclick={handleDelete}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
                 </svg>
                 Yes
@@ -516,7 +516,7 @@
       <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
         class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
-          <div class="slds-modal__close closs_icon_css" onclick={closePopup}>
+          <div class="slds-modal__close close-icon-css" onclick={closePopup}>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -532,14 +532,14 @@
               <p>Are you sure to delete all Media?</p>
             </div>
             <div class="edit_modal_footerbtns">
-              <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closePopup}>
+              <button class="white-btn-css" aria-label="Cancel and close" onclick={closePopup}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
                 </svg>
                 No
               </button>
-              <button class="delete_btn_css" onclick={deleteAllMedia}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <button class="red-btn-css" onclick={deleteAllMedia}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
                 </svg>
                 Yes

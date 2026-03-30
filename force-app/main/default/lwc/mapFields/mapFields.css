@@ -162,38 +162,6 @@
     gap: 1rem;
 }
 
-.save-btn button {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1;
-    text-align: center;
-    border: 1px solid #0176D3;
-    padding: 10px 20px;
-    background: #0176D3;
-    color: white;
-    border-radius: 5px;
-    display: inline-flex;
-    transition: all 0.2s ease;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.save-btn button:hover:not(:disabled) {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
-.save-btn button svg {
-    flex-shrink: 0;
-}
-
-.save-btn button:disabled {
-    background: #c9c9c9;
-    border: 1px solid #c9c9c9;
-}
-
 /* Revert Button Styling */
 .revert-btn {
     font-size: 14px;
@@ -386,27 +354,6 @@
     box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
-.save_btn_css {
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0.5rem 1.5rem;
-    border: none;
-    background: #0176D3;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.save_btn_css:hover {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
 @media only screen and (max-width: 900px) {
     .wrapper {
         width: 100% !important;
@@ -425,11 +372,6 @@
     .combobox_cls .checkmark {
         width: 16px !important;
         height: 16px !important;
-    }
-
-    .save-btn button {
-        font-size: 12px !important;
-        padding: 0px 15px !important;
     }
 }
 
@@ -677,8 +619,8 @@
 
 .modalbody {
     background-color: #F9FAFB !important;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;

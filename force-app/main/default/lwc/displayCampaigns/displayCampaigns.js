@@ -520,14 +520,12 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     * Created By: Rachit Shah
     */
     clearFilterModal() {
-        this.isFilterModalOpen = false;
         this.statusFilterList = [];
         this.statusFilter = '';
         this.createdDateStart = '';
         this.createdDateEnd = '';
         this.filteredCampaigns = this.campaigns;
         this.currentPage = 1;
-        this.updateShownData();
     }
 
     /*

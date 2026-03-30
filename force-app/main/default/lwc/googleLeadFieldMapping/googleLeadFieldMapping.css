@@ -150,7 +150,7 @@
 }
 
 .con-msg {
-    margin: 16px;
+    margin: 3rem;
     font-size: 16px;
     font-weight: 500;
     line-height: 12.64px;
@@ -160,39 +160,6 @@
     display: flex;
     justify-content: center;
     gap: 1rem;
-}
-
-.save-btn button {
-    min-height: 36px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-    text-align: center;
-    border: none;
-    padding: 0.5rem 1.25rem;
-    background: #0176D3;
-    color: white;
-    border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.save-btn button:hover:not(:disabled) {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
-.save-btn button:disabled {
-    background: #c9c9c9;
-    border: 1px solid #c9c9c9;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
 }
 
 .add_field_btn {
@@ -393,7 +360,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 1rem;
 }
 
 .cancel_btn_css {
@@ -463,11 +429,6 @@
     .combobox_cls .checkmark {
         width: 16px !important;
         height: 16px !important;
-    }
-
-    .save-btn button {
-        font-size: 12px !important;
-        padding: 0px 15px !important;
     }
 }
 

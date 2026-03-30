@@ -742,7 +742,7 @@
 
 .filter-dropdown-box {
     position: absolute;
-    right: 0;
+    right: 15px;
     margin-top: 40px;
     background: #F9FAFB;
     border: 1px solid #E5E7EB;

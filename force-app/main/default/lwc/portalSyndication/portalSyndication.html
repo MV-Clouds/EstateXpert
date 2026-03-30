@@ -31,7 +31,7 @@
                                 </td>
                                 <td data-label="Action">
                                     <template if:true={portal.isPublished}>
-                                        <button class="unpublish_css" onclick={handleToggleStatus} data-id={portal.id}
+                                        <button class="red-btn-css" onclick={handleToggleStatus} data-id={portal.id}
                                             data-pname={portal.pname} data-button-label={portal.buttonLabel}>
                                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -42,9 +42,9 @@
                                         </button>
                                     </template>
                                     <template if:false={portal.isPublished}>
-                                        <button class="publish_css" onclick={handleToggleStatus} data-id={portal.id}
+                                        <button class="blue-btn-css" onclick={handleToggleStatus} data-id={portal.id}
                                             data-pname={portal.pname} data-button-label={portal.buttonLabel}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" fill="white"/>
                                             </svg>
                                             {portal.buttonLabel}

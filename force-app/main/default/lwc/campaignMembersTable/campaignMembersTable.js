@@ -228,14 +228,12 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     }
 
     clearFilterModal() {
-        this.isFilterModalOpen = false;
         this.statusFilterList = [];
         this.statusFilter = '';
         this.sendTimeStart = '';
         this.sendTimeEnd = '';
         this.filteredMembers = this.memberEmails;
         this.currentPage = 1;
-        this.updateShownData();
     }
 
     closeFilterModal() {

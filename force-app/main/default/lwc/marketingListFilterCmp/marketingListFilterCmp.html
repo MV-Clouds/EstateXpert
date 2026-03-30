@@ -859,7 +859,7 @@
         <template if:true={addModal}>
             <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close closs_icon_css" onclick={handleClose}>
+                    <div class="slds-modal__close close-icon-css" onclick={handleClose}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -876,7 +876,7 @@
                                 onvalueselected={handleValueSelected}></c-marketing-list-filter-add-cmp>
                         </div>
                     <div class="slds-modal__footer add-modal-footer">
-                        <button class="cancel_btn_css" onclick={handleClose}>
+                        <button class="white-btn-css" onclick={handleClose}>
                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -884,7 +884,7 @@
                             </svg>
                             Cancel
                         </button>
-                        <button class="save_btn_css" disabled={isAddButtonDisabled} onclick={handleSave}>
+                        <button class="blue-btn-css" disabled={isAddButtonDisabled} onclick={handleSave}>
                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round" />
@@ -901,8 +901,8 @@
             <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small"
                 aria-labelledby="confirm-modal-heading">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close closs_icon_css" onclick={handleCancelSave}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <div class="slds-modal__close close-icon-css" onclick={handleCancelSave}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                 fill="white" />
@@ -917,7 +917,7 @@
                             <p class="confirmation-message">Are you sure you want to save these filter settings? This will update your default filter configuration.</p>
 
                         <div class="confirmation-modal-footer">
-                        <button class="cancel_btn_css" onclick={handleCancelSave}>
+                        <button class="white-btn-css" onclick={handleCancelSave}>
                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -925,8 +925,8 @@
                             </svg>
                             Cancel
                         </button>
-                        <button class="save_btn_css" onclick={handleConfirmSave}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <button class="blue-btn-css" onclick={handleConfirmSave}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
                             </svg>
                             Yes, Save

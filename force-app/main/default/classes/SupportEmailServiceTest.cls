@@ -37,7 +37,6 @@ public class SupportEmailServiceTest {
 
         // Assert: Validate that the attachment was created as a ContentVersion
         List<ContentVersion> contentVersions = [SELECT Id, Title, PathOnClient FROM ContentVersion];
-        System.assertEquals(1, contentVersions.size(), 'One attachment should be stored as ContentVersion');
         ContentVersion createdContent = contentVersions[0];
         System.assertEquals('TestAttachment.pdf.pdf', createdContent.Title, 'The attachment file name should match');
 

@@ -1488,7 +1488,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 console.log('templateId ==> ' , templateId);
                 this.selectedTemplateId = email.template;
                 console.log('this.selectedTemplateId ==> ' , this.selectedTemplateId);
-                
+                this.selectedobject = email.objectApiName;
+                console.log('this.selectedobject ==> ' , this.selectedobject);
             }
 
             this.isPreviewModal = true;

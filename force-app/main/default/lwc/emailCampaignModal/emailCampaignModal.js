@@ -17,11 +17,9 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
     @api isEdit = false;
     @api selectedContacts = [];
     @api formData = {
-        selectedTemplate: '',
         campaignName: '',
         messagingService: '',
-        saveForFuture: false,
-        selectedObject : '' 
+        selectedObject : 'Contact' 
     };
 
     @track messageOptions;
@@ -128,11 +126,9 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
     */
     resetFormData() {
         this.formDataValue = {
-            selectedTemplate: '',
             campaignName: '',
             messagingService: '',
-            saveForFuture: false,
-            selectedObject : ''
+            selectedObject : 'Contact'
         };
         this.selectedTemplateIdValue = '';
     }
@@ -145,41 +141,8 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
     * Created By: Rachit Shah
     */
     handleChange(event) {
-        const { name, value, checked } = event.target;
-        if (name === 'saveForFuture') {
-            this.formDataValue = { ...this.formDataValue, [name]: checked };
-        } else if (name === 'selectedTemplate') {
-            this.selectedTemplateIdValue = value;
-            if (value === '') {
-                this.resetFormData();
-                this.marketingEmails = [];
-            } else {
-                const selectedOption = this.templateOptions.find(option => option.value === value);
-                console.log('selectedOption ==>', selectedOption);
-
-                if (selectedOption) {
-                    const selectedTemplate = this.templates.find(template => template.Id === value);
-                    console.log('selectedTemplate ==> ', selectedTemplate);
-                    if (selectedTemplate) {
-                        this.formDataValue = {
-                            ...this.formDataValue,
-                            selectedTemplate: selectedOption.label,
-                        };
-
-                    }
-                }
-            }
-        } else if (name === 'objectSelector') {
-            // Add any extra logic you want to perform when objectSelector changes
-            console.log('Selected Object:', value);
-            this.formDataValue = {
-                ...this.formDataValue,
-                selectedObject: value
-            };
-        }  
-        else {
-            this.formDataValue = { ...this.formDataValue, [name]: value };
-        }
+        const { name, value } = event.target;
+        this.formDataValue = { ...this.formDataValue, [name]: value };
     }
 
 
@@ -274,8 +237,7 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
         if (
             this.formDataValue.campaignName &&
             this.formDataValue.campaignName.trim() !== '' &&
-            this.formDataValue.messagingService && 
-            this.formDataValue.selectedObject 
+            this.formDataValue.messagingService 
         ) {
             return true;
         }

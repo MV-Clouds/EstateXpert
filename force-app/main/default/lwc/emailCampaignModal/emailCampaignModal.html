@@ -20,18 +20,7 @@
 
             <div class="slds-modal__content modalbody" id="modal-content-id-1">
                 <div class="content_body">
-                    <div class="input-field input-field-bold">
-                        <lightning-combobox name="selectedTemplate" label="Email Campaign Template"
-                            value={selectedTemplateIdValue} placeholder="Select a template" options={templateOptions}
-                            onchange={handleChange} disabled={isEdit}>
-                        </lightning-combobox>
-                    </div>
 
-                    <div class="input-field input-field-bold">
-                        <lightning-combobox name="objectSelector" label="Select Object" value={formDataValue.selectedObject}
-                            placeholder="Select an object" options={objectOptions} onchange={handleChange} disabled={isEdit} required>
-                        </lightning-combobox>
-                    </div>
 
                     <div class="input-field input-field-bold">
                         <lightning-input name="campaignName" label="Email Campaign Name" required
@@ -46,11 +35,6 @@
                         </lightning-combobox>
                     </div>
 
-                    <div class="input-field no-gap">
-                        <lightning-input type="checkbox" name="saveForFuture"
-                            label="If you want to save marketing campaign for future" checked={formDataValue.saveForFuture}
-                            onchange={handleChange}></lightning-input>
-                    </div>
                 </div>
             </div>
 

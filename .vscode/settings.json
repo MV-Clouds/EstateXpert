@@ -41,5 +41,6 @@
   ],
   "eslint.options": {
     "overrideConfigFile": "/Users/karansingh/EstateXpert/.eslintrc.json"
-  }
+  },
+  "xml.preferences.showSchemaDocumentationType": "none"
 }

@@ -404,7 +404,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             campaign.MVEX__Label__c.toLowerCase().includes(searchKey)
         );
         this.currentPage = 1;
-        this.updateShownData();
+        this.sortData();
         this.statusFilterList = [];
         this.statusFilter = '';
         this.createdDateStart = '';
@@ -490,6 +490,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     handleRefresh() {
         this.isLoading = true;
+        this.clearSearchInput();
         this.loadCampaigns();
     }
 

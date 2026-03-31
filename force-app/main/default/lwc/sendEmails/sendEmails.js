@@ -16,9 +16,8 @@ export default class SendEmails extends LightningElement {
     @api selectedContacts = [];
 
     @track isPreviewModal = false;
-    @track selectedTemplateId = '';
-    @track selectedobject = '';
     @track templateStatus = false;
+    @track previewObjectName = 'Contact';
     
     @track messagingServiceOptions = [];
     @track selectedTemplate = '';
@@ -1538,6 +1537,7 @@ export default class SendEmails extends LightningElement {
     handlePreviewSingleTemplate() {
         if (this.selectedTemplate) {
             this.selectedTemplateId = this.selectedTemplate;
+            this.previewObjectName = this.campaignDetails.templateRelatedObject;
             this.templateStatus = true;
             this.isPreviewModal = true;
         }
@@ -1558,6 +1558,7 @@ export default class SendEmails extends LightningElement {
 
         if (selectedTemplate) {
             this.selectedTemplateId = selectedTemplate.value;
+            this.previewObjectName = drip.relatedObject;
             this.templateStatus = true; // Assuming template is active
             this.isPreviewModal = true;
         } else {

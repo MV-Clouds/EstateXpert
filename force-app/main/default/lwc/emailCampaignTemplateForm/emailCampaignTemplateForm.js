@@ -147,6 +147,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 email.templateOptions = this.getRowTemplateOptions(email);
                 email.template = '';
                 email.subject = '';
+                email.isPreviewDisabled = true;
             }
             return email;
         });
@@ -277,7 +278,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                         name : email.Name,
                         disabled : false,
                         selectedListingId : email?.MVEX__Listing__c,
-                        templateOptions: email?.MVEX__Listing__c ? this.allTemplateOptions : this.baseTemplateOptions
+                        templateOptions: email?.MVEX__Listing__c ? this.allTemplateOptions : this.baseTemplateOptions,
+                        isPreviewDisabled: !email.MVEX__Template_Id__c
                     }));
                     this.emailsWithTemplate = [...this.emails];
                     console.log('this.emailsWithTemplate JSON.stringify ==> ' , JSON.stringify(this.emailsWithTemplate));
@@ -482,7 +484,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                                 name: email.Name,
                                 disabled: this.shouldDisableEmail(data.selectedContactDateField, email?.MVEX__Send_Date_Time__c),
                                 selectedListingId : email.MVEX__Listing__c,
-                                objectApiName: email.MVEX__RelatedObject__c || (email.MVEX__Listing__c ? 'MVEX__Listing__c' : 'Contact')
+                                objectApiName: email.MVEX__RelatedObject__c || (email.MVEX__Listing__c ? 'MVEX__Listing__c' : 'Contact'),
+                                isPreviewDisabled: !email.MVEX__Template_Id__c
                             };
                             row.templateOptions = this.getRowTemplateOptions(row);
                             row.isListingObject = row.objectApiName === 'MVEX__Listing__c';
@@ -784,7 +787,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     timeToSend: '',
                     name : email.Name,
                     selectedListingId: email.MVEX__Listing__c,
-                    templateOptions: email.MVEX__Listing__c ? this.allTemplateOptions : this.baseTemplateOptions
+                    templateOptions: email.MVEX__Listing__c ? this.allTemplateOptions : this.baseTemplateOptions,
+                    isPreviewDisabled: !email.MVEX__Template_Id__c
                 }));
                 this.emailsWithTemplate = [...this.emails];
             }
@@ -1219,6 +1223,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         };
         newEmail.templateOptions = this.getRowTemplateOptions(newEmail);
         newEmail.isListingObject = false;
+        newEmail.isPreviewDisabled = true;
 
         this.emails = [...this.emails, newEmail];
         this.emailsWithTemplate = [...this.emailsWithTemplate, newEmail];
@@ -1260,6 +1265,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             if (email.id == emailId) {
                 email.template = selectedTemplateId;
                 email.subject = selectedTemplate ? selectedTemplate.subject : '';
+                email.isPreviewDisabled = !selectedTemplateId;
             }
             return email;
         });
@@ -1285,6 +1291,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 email.templateOptions = this.getRowTemplateOptions(email);
                 email.template = '';
                 email.subject = '';
+                email.isPreviewDisabled = true;
             }
             return email;
         });

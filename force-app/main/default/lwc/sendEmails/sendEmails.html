@@ -377,9 +377,8 @@
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>
-
             <template if:true={isPreviewModal}>
-                <c-template-preview-modal templateid={selectedTemplateId} objectname={campaignDetails.templateRelatedObject} template-type="Marketing Template" is-active={templateStatus} onclosemodal={handleCloseModal}></c-template-preview-modal>
+                <c-template-preview-modal templateid={selectedTemplateId} objectname={previewObjectName} template-type="Marketing Template" is-active={templateStatus} onclosemodal={handleCloseModal}></c-template-preview-modal>
             </template>
         </div>
     </template>

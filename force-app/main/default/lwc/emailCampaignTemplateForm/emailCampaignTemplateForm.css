@@ -31,6 +31,10 @@
     flex-shrink: 0;
 }
 
+.custom-content {
+    min-height: 97%;
+}
+
 .scrollable-container {
     flex: 1;
     overflow-y: auto;
@@ -156,10 +160,6 @@
 .input-date-container {
     width: 50%;
     position: relative;
-}
-
-.input-date {
-    width: 50%;
 }
 
 .revert_btn_css {
@@ -371,7 +371,7 @@
 .table-container th {
     padding: 1rem;
     background: #0176D3;
-    color: white;
+    color: white !important;
     font-weight: 500;
     letter-spacing: 0.3px;
 }
@@ -410,6 +410,12 @@
 .table-container .slds-table tbody tr:hover td {
     background-color: #ebf3f6 !important;
     border: none;
+}
+
+.slds-cell-fixed {
+    background: #0176D3 !important;
+    color: white !important;
+    border-bottom: 2px solid #005fb2;
 }
 
 .action-btn {
@@ -540,17 +546,8 @@
 }
 
 .select-field-div {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    /* margin-bottom: 16px; */
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
-    padding: 1.25rem;
-    border-radius: 12px;
-    /* margin-top: 1rem; */
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    border: 1px solid rgba(1, 118, 211, 0.1);
-    margin: 16px 2px;
+    display: none;
+    /* Hide the old section */
 }
 
 .emails-body {
@@ -564,12 +561,94 @@
     overflow: visible;
 }
 
+.table-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.header-date-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 320px;
+    margin-bottom: -3px;
+}
+
+.header_label_css {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+}
+
+.add-email-icon-btn {
+    padding: 8px;
+    border-radius: 6px;
+    background: #0176D3;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.2);
+}
+
+.add-email-icon-btn:hover {
+    background: #0158a3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.3);
+}
+
+.add-email-icon-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
 .emails-body .table-head-text {
     font-size: 18px;
     font-weight: 500;
     color: #333;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
+    white-space: nowrap;
 }
+
+.subject-field-container {
+    max-width: 250px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.subject-text-cls {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #585858;
+    background: #f3f3f3;
+    border: 1px solid #d1d1d1;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    height: 32px;
+    line-height: normal;
+}
+
 
 .input-field .slds-form-element__label {
     font-weight: 500;

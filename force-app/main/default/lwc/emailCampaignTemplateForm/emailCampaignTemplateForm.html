@@ -219,51 +219,60 @@
                         </div>
                     </div>
                 </div>
-                <div class="select-field-div">
-                    <template if:true={isSpecificDateOption}>
-                        <div class="input-date-container">
-                            <lightning-input class="input-date" label="Select a date" placeholder="Choose a date"
-                                type="date" min={today} value={specificDate} onchange={handleSpecificDateChange}
-                                required></lightning-input>
-                        </div>
-                    </template>
-
-                    <template if:true={isContactDateFieldOption}>
-                        <div class="input-date-combobox slds-m-top_small">
-                            <div class="input-date-container">
-                                <lightning-combobox disabled={isContactDateFieldOptionDisabled}
-                                    label="Select a date field" value={selectedContactDateField}
-                                    placeholder="Select a date field" options={filteredContactDateFields}
-                                    onchange={handleDateFieldSelect} required></lightning-combobox>
-                            </div>
-                        </div>
-                    </template>
-                </div>
 
                 <template if:true={emails}>
                     <div class="emails-body">
-                        <p class="table-head-text">Configure Drip Emails</p>
+                        <div class="table-header-container">
+                            <p class="table-head-text">Configure Drip Emails</p>
+                            <div class="header-actions">
+                                <template if:true={isSpecificDateOption}>
+                                    <div class="header-date-selector">
+                                        <span class="header_label_css">Select Start Date :</span>
+                                        <lightning-input class="input-date" label="Select a date" placeholder="Choose a date"
+                                            type="date" min={today} value={specificDate} onchange={handleSpecificDateChange}
+                                            variant="label-hidden" required></lightning-input>
+                                    </div>
+                                </template>
+        
+                                <template if:true={isContactDateFieldOption}>
+                                    <div class="header-date-selector">
+                                        <span class="header_label_css">Select Start Date :</span>
+                                        <lightning-combobox disabled={isContactDateFieldOptionDisabled}
+                                            label="Select a date field" value={selectedContactDateField}
+                                            placeholder="Select a date field" options={filteredContactDateFields}
+                                            onchange={handleDateFieldSelect} variant="label-hidden" required></lightning-combobox>
+                                    </div>
+                                </template>
+
+                                <button class="add-email-icon-btn" onclick={handleAddNewEmail} title="Add New Email">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                         <div class="table-container">
                             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                                 <thead>
                                     <tr class="slds-line-height_reset">
-
                                         <th scope="col">
-
                                             <div class="slds-truncate" title="Email Name"><abbr class="slds-required"
                                                     title="required">*</abbr>Email Name</div>
                                         </th>
-
                                         <th scope="col">
-                                            <div class="slds-truncate" title="Related Listing">Related Listing</div>
+                                            <div class="slds-truncate" title="Related Object"><abbr class="slds-required"
+                                                title="required">*</abbr>Related Object</div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="slds-truncate" title="Related Listing"><abbr class="slds-required"
+                                                title="required">*</abbr>Related Listing</div>
                                         </th>
                                         <th scope="col">
                                             <div class="slds-truncate" title="Email Template"><abbr
                                                     class="slds-required" title="required">*</abbr>Email Template</div>
                                         </th>
                                         <th scope="col">
-                                            <div class="slds-truncate" title="Subject"><abbr class="slds-required"
-                                                    title="required">*</abbr>Subject</div>
+                                            <div class="slds-truncate" title="Subject">Subject</div>
                                         </th>
                                         <th scope="col">
                                             <div class="slds-truncate" title="Days after start date"><abbr
@@ -274,9 +283,8 @@
                                             <div class="slds-truncate" title="Time to send"><abbr class="slds-required"
                                                     title="required">*</abbr>Time to send</div>
                                         </th>
-
                                         <th scope="col">
-                                            <div class="slds-truncate" title="Exact Date"> Exact Date</div>
+                                            <div class="slds-truncate" title="Exact Date">Exact Date</div>
                                         </th>
                                         <th scope="col">
                                             <div class="slds-truncate" title="Action">Action</div>
@@ -294,30 +302,42 @@
                                                         variant="label-hidden"></lightning-input>
                                                 </div>
                                             </td>
+                                            <td data-label="Related Object">
+                                                <div>
+                                                    <lightning-combobox name="objectApiName" value={email.objectApiName}
+                                                        options={objectOptions} data-id={email.id} onchange={handleRowObjectChange}
+                                                        variant="label-hidden" disabled={email.disabled}>
+                                                    </lightning-combobox>
+                                                </div>
+                                            </td>
                                             <td data-label="Related Listing">
                                                 <div>
-                                                    <lightning-record-picker name="relatedListing"
-                                                        disabled={email.disabled}
-                                                        placeholder="Search Listing..." onchange={handleListingSelect}
-                                                        value={email.selectedListingId} variant="label-hidden"
-                                                        label="Related Listing" data-id={email.id}
-                                                        object-api-name="MVEX__Listing__c">
-                                                    </lightning-record-picker>
+                                                    <template if:true={email.isListingObject}>
+                                                        <lightning-record-picker name="relatedListing"
+                                                            disabled={email.disabled}
+                                                            placeholder="Search Listing..." onchange={handleListingSelect}
+                                                            value={email.selectedListingId} variant="label-hidden"
+                                                            label="Related Listing" data-id={email.id} required
+                                                            object-api-name="MVEX__Listing__c">
+                                                        </lightning-record-picker>
+                                                    </template>
+                                                    <template if:false={email.isListingObject}>
+                                                        <span class="subject-text-cls">Not Applicable</span>
+                                                    </template>
                                                 </div>
                                             </td>
                                             <td data-label="Email Template" class="email-template">
                                                 <div>
                                                     <lightning-combobox name="emailName" value={email.template}
-                                                        options={email.templateOptions} onchange={handleTemplateChange}
-                                                        data-id={email.id} disabled={email.disabled}
-                                                        variant="label-hidden"></lightning-combobox>
+                                                        options={email.templateOptions} data-id={email.id}
+                                                        onchange={handleTemplateChange} placeholder="Select Template"
+                                                        variant="label-hidden" required
+                                                        disabled={email.disabled}></lightning-combobox>
                                                 </div>
                                             </td>
                                             <td data-label="Subject">
-                                                <div>
-                                                    <lightning-input type="text" value={email.subject} disabled
-                                                        class="slds-truncate" title={email.subject}
-                                                        variant="label-hidden"></lightning-input>
+                                                <div class="subject-field-container">
+                                                    <span class="subject-text-cls" title={email.subject}>{email.subject}</span>
                                                 </div>
                                             </td>
                                             <td data-label="Days after start date">
@@ -338,17 +358,14 @@
                                                 </div>
                                             </td>
                                             <td data-label="Exact Date">
-                                                <div>
-                                                    <lightning-input type="date" value={email.exactDate}
-                                                        data-id={email.id} variant="label-hidden"
-                                                        disabled></lightning-input>
+                                                <div class="subject-field-container">
+                                                    <span class="subject-text-cls">{email.exactDate}</span>
                                                 </div>
                                             </td>
-
                                             <td data-label="Action" class="actions">
                                                 <div class="action-btn">
                                                     <button class="preview-div" data-id={email.id}
-                                                        onclick={handlepreviewBtn}>
+                                                        onclick={handlepreviewBtn} disabled={email.isPreviewDisabled}>
                                                         <svg width="14" height="14" fill="#000000"
                                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
                                                             enable-background="new 0 0 52 52" xml:space="preserve">
@@ -376,10 +393,6 @@
                                     </template>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <div class="slds-m-top_medium add-btn">
-                            <lightning-button label="Add New Email" onclick={handleAddNewEmail}></lightning-button>
                         </div>
                     </div>
                 </template>

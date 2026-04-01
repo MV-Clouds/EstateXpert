@@ -580,7 +580,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                         dataToSave.MVEX__Refresh_Token__c = this.originalCredentials.MVEX__Refresh_Token__c;
                     }
                 }
-                
+
                 // For Instagram, restore original credentials if placeholder is still there
                 if (this.integrationname === 'Instagram') {
                     if (dataToSave.MVEX__ClientId__c === this.CREDENTIAL_DISPLAY_TEXT) {
@@ -815,7 +815,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
     */
     redirectToOutlookLoginPage() {
         try {
-            const requiredFields = ['MVEX__Redirect_URI__c', 'MVEX__Client_ID__c', 'MVEX__Client_Secret__c'];
+            const requiredFields = ['MVEX__Redirect_URI__c', 'MVEX__Client_ID__c', 'MVEX__Azure_Client_Secret__c'];
 
             for (let i = 0; i < requiredFields.length; i++) {
                 const field = requiredFields[i];
@@ -824,8 +824,8 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                     return;
                 }
             }
-
-            this.saveTempData(this.fieldsData.MVEX__Client_ID__c, this.fieldsData.MVEX__Client_Secret__c, this.fieldsData.MVEX__Redirect_URI__c);
+ 
+            this.saveTempData(this.fieldsData.MVEX__Client_ID__c, this.fieldsData.MVEX__Azure_Client_Secret__c, this.fieldsData.MVEX__Redirect_URI__c);
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
                 attributes: {

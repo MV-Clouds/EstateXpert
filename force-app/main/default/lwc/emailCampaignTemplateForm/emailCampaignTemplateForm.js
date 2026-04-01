@@ -500,8 +500,8 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                     // Reset button state when loading existing data
                     this.isButtonsDisabled = true;
                     
-                    // Store original state for revert functionality
-                    this.storeOriginalState();
+                    // Store original state will be called after fetchQuickTemplates completes
+                    // to ensure emails have complete templateOptions
                 })
                 .catch(error => {
                     console.error('Error in loading campaign data ==> ', error);
@@ -602,11 +602,37 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 ];
 
                 if (this.emails && this.emails.length > 0) {
-                    this.emails = this.emails.map(email => ({
-                        ...email,
-                        templateOptions: this.getRowTemplateOptions(email)
-                    }));
+                    this.emails = this.emails.map(email => {
+                        // Build templateOptions from quickTemplates with full data
+                        let templateOptions = [{ label: 'None', value: '' }];
+                        
+                        if (this.quickTemplates && this.quickTemplates.length > 0) {
+                            const matchingTemplates = this.quickTemplates.filter(template => {
+                                if (template.objectApiName === 'Generic') return true;
+                                if (email.objectApiName === 'Contact' && template.objectApiName === 'Contact') return true;
+                                if (email.objectApiName === 'MVEX__Listing__c' && template.objectApiName === 'MVEX__Listing__c') return true;
+                                return false;
+                            });
+                            
+                            const templateOptionsList = matchingTemplates.map(template => ({
+                                label: template.label,
+                                value: template.value
+                            }));
+                            
+                            templateOptions = [...templateOptions, ...templateOptionsList];
+                        }
+                        
+                        return {
+                            ...email,
+                            templateOptions: templateOptions
+                        };
+                    });
                     this.emailsWithTemplate = [...this.emails];
+                }
+                
+                // Store original state after templates are loaded and email options are complete
+                if (this.emails && this.emails.length > 0) {
+                    this.storeOriginalState();
                 }
             })
             .catch(error => {
@@ -1536,6 +1562,11 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         this.originalStartDateOption = this.startDateOption;
         this.originalSelectedContactDateField = this.selectedContactDateField;
         this.originalEmailCampaignName = this.emailCampaignName;
+        // Store template options for restoration - these are already in the email objects
+        this.originalGenericOptions = JSON.parse(JSON.stringify(this.genericOptions));
+        this.originalContactOptions = JSON.parse(JSON.stringify(this.contactOptions));
+        this.originalListingOptions = JSON.parse(JSON.stringify(this.listingOptions));
+        this.originalQuickTemplates = JSON.parse(JSON.stringify(this.quickTemplates));
     }
 
     /*
@@ -1550,12 +1581,27 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         this.selectedCCRecipients = JSON.parse(JSON.stringify(this.originalSelectedCCRecipients));
         this.selectedBCCRecipients = JSON.parse(JSON.stringify(this.originalSelectedBCCRecipients));
         this.selectedBroadcastGroups = [...this.originalSelectedBroadcastGroups];
+        
+        // Restore emails WITH their templateOptions intact (they were stored with templateOptions)
         this.emails = JSON.parse(JSON.stringify(this.originalEmails));
         this.emailsWithTemplate = JSON.parse(JSON.stringify(this.originalEmailsWithTemplate));
+        
         this.specificDate = this.originalSpecificDate;
         this.startDateOption = this.originalStartDateOption;
         this.selectedContactDateField = this.originalSelectedContactDateField;
         this.emailCampaignName = this.originalEmailCampaignName;
+        
+        // Restore template data for reference
+        this.genericOptions = JSON.parse(JSON.stringify(this.originalGenericOptions));
+        this.contactOptions = JSON.parse(JSON.stringify(this.originalContactOptions));
+        this.listingOptions = JSON.parse(JSON.stringify(this.originalListingOptions));
+        this.quickTemplates = JSON.parse(JSON.stringify(this.originalQuickTemplates));
+        
+        // Reset input field values for dropdowns and inputs
+        this.inputValuePrimary = '';
+        this.inputValueCC = '';
+        this.inputValueBcc = '';
+        this.isFieldSelected = this.originalSelectedContactDateField ? true : false;
         
         // Reset button state
         this.isButtonsDisabled = true;

@@ -1018,6 +1018,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             .map((mapping, index) => {
                 return { ...mapping, id: index + 1 };
             });
+
+        if (!this.mappings || this.mappings.length === 0) {
+            this.logicalExpression = '';
+        } else {
+            if (!this.logicalExpression || this.logicalExpression.trim() === '') {
+                this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
+            }
+        }
+
         this.closeAddConditionModal();
     }
 
@@ -1472,64 +1481,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
-    * Method Name : handleMappingClick
-    * @description : method to handle mapping click
-    * * Date: 16/10/2024
-    * Created By:Rachit Shah
-    */
-    // handleMappingClick(event) {
-    //     const nameAttribute = event.currentTarget.dataset.name;
-
-    //     if (nameAttribute && nameAttribute !== 'delete') {
-    //         const previouslySelected = this.template.querySelector('.selected');
-    //         if (previouslySelected) {
-    //             previouslySelected.classList.remove('selected');
-    //         }
-
-    //         event.currentTarget.classList.add('selected');
-
-    //         const mappingId = event.currentTarget.dataset.id;
-    //         this.isAddConditionModalVisible = true;
-
-    //         const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
-
-    //         if (currentMapping) {
-    //             this.selectedMappingId = currentMapping.id;
-    //             const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
-
-    //             if (selectedField) {
-    //                 const fieldType = selectedField.type;
-
-    //                 const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
-    //                 const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
-    //                 const referenceFieldTypes = ['REFERENCE'];
-
-    //                 this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
-    //                 this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
-    //                 this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-    //                 this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
-
-    //                 if (fieldType === 'REFERENCE') {
-    //                     this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
-    //                 } else {
-    //                     if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
-    //                         this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
-    //                             return { label: picklistValue, value: picklistValue };
-    //                         });
-    //                     } else {
-    //                         this.inquiryFieldObject.picklistValues = null;
-    //                     }
-    //                 }
-
-    //                 this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
-    //                 this.selectedConditionOperator = currentMapping.operator;
-    //                 this.selectedListingField = currentMapping.valueField;
-    //             }
-    //         }
-    //     }
-    // }
-
-    /**
     * Method Name: handleSearch
     * @description: this method is used to filter the properties based on the search key without overriding other filters
     * Date: 17/06/2024
@@ -1727,6 +1678,19 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     .catch(error => {
                         errorDebugger('displayInquiry', 'saveConfiguration', error, 'warn', 'Error saving configuration');
                     });
+            }
+
+            if (this.conditiontype === 'custom') {
+                const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
+               
+                // If expression is empty, block apply
+                if (!this.logicalExpression || this.logicalExpression.trim() === '') {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Logical expression is required for Custom Logic.');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
             }
 
             // Handle different filter types

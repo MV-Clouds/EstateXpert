@@ -22,7 +22,6 @@ import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappi
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
-import getNamesForIds from '@salesforce/apex/PropertySearchController.getNamesForIds';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -48,6 +47,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     _renderedCallbackRunOnce = false;
 
     refNameCache = {};
+    referenceNameMappings = {};
 
     @track isShowModal = false;
 
@@ -403,7 +403,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
         // Slice the data for current page
         const pagedData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
-        this.resolveReferenceNamesForPage(pagedData);
 
         return this.processInquiryData(pagedData);
     }
@@ -576,37 +575,26 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
-     * Collect all reference Ids on the current page and resolve them to Names in bulk.
-     * Uses a client-side cache to avoid repeated lookups across pages/sorts.
+     * Method Name: populateRefNameCacheFromMappings
+     * @description: Populate the unified refNameCache from referenceNameMappings returned by Apex
      */
-    async resolveReferenceNamesForPage(rows) {
+    populateRefNameCacheFromMappings() {
         try {
-            const refCols = (this.tableColumns || []).filter(c => (c.fieldType || '').toUpperCase() === 'REFERENCE');
-            if (!refCols.length || !rows?.length) return;
+            if (!this.referenceNameMappings || typeof this.referenceNameMappings !== 'object') {
+                return;
+            }
 
-            const toResolve = new Set();
-            for (const r of rows) {
-                for (const c of refCols) {
-                    const key = (c.fieldName || '').toLowerCase();
-                    const val = r[key];
-                    // Basic Id shape check (15/18, string)
-                    if (val && typeof val === 'string' && val.length >= 15 && !this.refNameCache[val]) {
-                        toResolve.add(val);
-                    }
+            // Iterate through each field's name mappings
+            Object.keys(this.referenceNameMappings).forEach(fieldName => {
+                const fieldMappings = this.referenceNameMappings[fieldName];
+                if (fieldMappings && typeof fieldMappings === 'object') {
+                    Object.keys(fieldMappings).forEach(recordId => {
+                        this.refNameCache[recordId] = fieldMappings[recordId];
+                    });
                 }
-            }
-            if (!toResolve.size) return;
-
-            const result = await getNamesForIds({ recordIds: Array.from(toResolve) });
-            if (result) {
-                // Merge into cache
-                Object.keys(result).forEach(id => {
-                    this.refNameCache[id] = result[id];
-                });
-                this.currentPage = this.currentPage;
-            }
+            });
         } catch (error) {
-            errorDebugger('displayInquiry', 'resolveReferenceNamesForPage', error, 'warn', 'Error resolving reference names');
+            errorDebugger('displayInquiry', 'populateRefNameCacheFromMappings', error, 'warn', 'Error populating reference name cache');
         }
     }
   
@@ -1387,6 +1375,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             .then(result => {
                 console.log('fetchListings result:', result);
 
+                // Store reference name mappings from Apex
+                if (result.referenceNameMappings) {
+                    this.referenceNameMappings = result.referenceNameMappings;
+                    this.populateRefNameCacheFromMappings();
+                }
+
                 let listing = {};
 
                 if (this.objectName === 'MVEX__Listing__c') {
@@ -1404,6 +1398,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         filterType = 'default'; // Reset to get all inquiries
                         getRecords({ recId: this.recordId, objectName: this.objectName, filterType: 'default' })
                             .then(defaultResult => {
+                                // Store reference name mappings from Apex
+                                if (defaultResult.referenceNameMappings) {
+                                    this.referenceNameMappings = defaultResult.referenceNameMappings;
+                                    this.populateRefNameCacheFromMappings();
+                                }
+
                                 if (defaultResult.inquiries && defaultResult.inquiries.length > 0) {
                                     this.totalinquiry = this.convertKeysToLowercase(defaultResult.inquiries);
                                 } else {

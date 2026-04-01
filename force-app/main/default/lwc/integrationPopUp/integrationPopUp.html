@@ -131,9 +131,9 @@
                                             class="custom-input" required></lightning-input>
                                         <div class="copyclass">
                                             <lightning-input type="password" label="Azure Client Secret"
-                                                value={fieldsData.MVEX__Azure_Client_Secret__c}
+                                                value={fieldsData.MVEX__Client_Secret__c}
                                                 placeholder="Enter Azure Client Secret" onchange={handleInputChange}
-                                                onfocus={handleCredentialFocus} data-id="MVEX__Azure_Client_Secret__c"
+                                                onfocus={handleCredentialFocus} data-id="MVEX__Client_Secret__c"
                                                 data-name="secret-key-input" class="custom-input"
                                                 required></lightning-input>
                                             <template if:true={isClientSecretHidden}>

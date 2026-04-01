@@ -555,4 +555,52 @@ public with sharing class PropertySearchController {
             return false;
         }
     }
+
+    /**
+     * @description       : This class is used to get the record name for the selected lookup fields.
+     * @author            : Kajal Tiwari
+     * @last modified on  : 01-04-2026
+     * @last modified by  : Kajal Tiwari
+     **/
+    @AuraEnabled(cacheable=true)
+    public static Map<Id, String> getNamesForIds(List<Id> recordIds) {
+        Map<Id, String> result = new Map<Id, String>();
+        try {    
+            if (recordIds == null || recordIds.isEmpty()) {
+                return result;
+            }
+
+            Set<Id> idSet = (recordIds == null) ? new Set<Id>() : new Set<Id>(recordIds);
+
+            // Group Ids by sObject type API name
+            Map<String, List<Id>> idsByType = new Map<String, List<Id>>();
+            for (Id rid : idSet) {
+                if (rid == null) continue;
+                String api = String.valueOf(rid.getSObjectType());
+                if (!idsByType.containsKey(api)) {
+                    idsByType.put(api, new List<Id>());
+                }
+                idsByType.get(api).add(rid);
+            }
+
+            for (String apiName : idsByType.keySet()) {
+                List<Id> ids = idsByType.get(apiName);
+                if (ids.isEmpty()) continue;
+
+                // Build dynamic SOQL. We assume "Name" exists; for objects without Name, nothing will be returned.
+                String soql = 'SELECT Id, Name FROM ' + apiName + ' WHERE Id IN :ids WITH USER_MODE';
+                for (SObject sob : Database.query(soql)) {
+                    Id recId = (Id)sob.get('Id');
+                    String recName = (String)sob.get('Name');
+                    if (recId != null) {
+                        result.put(recId, recName);
+                    }
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'getNamesForIds', 'Error while getting name for the lookup field.');
+            return null;
+        }
+    }
 }

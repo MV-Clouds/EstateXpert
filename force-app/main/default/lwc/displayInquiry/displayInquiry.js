@@ -22,6 +22,7 @@ import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappi
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
+import getNamesForIds from '@salesforce/apex/PropertySearchController.getNamesForIds';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -45,6 +46,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track sortField = 'Name';
     @track sortOrder = 'asc';
     _renderedCallbackRunOnce = false;
+
+    refNameCache = {};
 
     @track isShowModal = false;
 
@@ -400,6 +403,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
         // Slice the data for current page
         const pagedData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
+        this.resolveReferenceNamesForPage(pagedData);
 
         return this.processInquiryData(pagedData);
     }
@@ -535,6 +539,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
                 let displayValue = hasRealValue ? String(value) : '-';
 
+                if (hasRealValue && (col.fieldType || '').toUpperCase() === 'REFERENCE') {
+                    const cachedName = this.refNameCache[value];
+                    if (cachedName) {
+                        displayValue = cachedName;
+                    }
+                }
+
                 // Apply formatting for date/datetime fields if format is provided
                 if (col.format && hasRealValue && (col.type === 'date' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
                     displayValue = this.applyFieldFormat(value, col.format);
@@ -564,6 +575,41 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
+    /**
+     * Collect all reference Ids on the current page and resolve them to Names in bulk.
+     * Uses a client-side cache to avoid repeated lookups across pages/sorts.
+     */
+    async resolveReferenceNamesForPage(rows) {
+        try {
+            const refCols = (this.tableColumns || []).filter(c => (c.fieldType || '').toUpperCase() === 'REFERENCE');
+            if (!refCols.length || !rows?.length) return;
+
+            const toResolve = new Set();
+            for (const r of rows) {
+                for (const c of refCols) {
+                    const key = (c.fieldName || '').toLowerCase();
+                    const val = r[key];
+                    // Basic Id shape check (15/18, string)
+                    if (val && typeof val === 'string' && val.length >= 15 && !this.refNameCache[val]) {
+                        toResolve.add(val);
+                    }
+                }
+            }
+            if (!toResolve.size) return;
+
+            const result = await getNamesForIds({ recordIds: Array.from(toResolve) });
+            if (result) {
+                // Merge into cache
+                Object.keys(result).forEach(id => {
+                    this.refNameCache[id] = result[id];
+                });
+                this.currentPage = this.currentPage;
+            }
+        } catch (error) {
+            errorDebugger('displayInquiry', 'resolveReferenceNamesForPage', error, 'warn', 'Error resolving reference names');
+        }
+    }
+  
     /**
     * Method Name : applyFieldFormat
     * @description : Method to apply formatting based on the format value from dateOptions and dateTimeOptions
@@ -2672,6 +2718,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 format: field.format
                             }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
+                        console.log('this.inquiryColumns', JSON.stringify(this.inquiryColumns));
+                        
                     } catch (e) {
                         this.inquiryColumns = this.defaultColumns;
                     }

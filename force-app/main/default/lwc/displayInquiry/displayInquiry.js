@@ -1166,14 +1166,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 filterResults[index + 1] = isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
                                 break;
                             case 'equalTo':
-                                // Use soft equality to handle string vs number comparison
-                                filterResults[index + 1] = normInquiryValue == normFilterValue;
+                                filterResults[index + 1] = String(normInquiryValue).toLowerCase() == String(normFilterValue).toLowerCase();
                                 break;
                             case 'contains':
                                 filterResults[index + 1] = String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                                 break;
                             case 'notEqualTo':
-                                filterResults[index + 1] = normInquiryValue != normFilterValue;
+                                filterResults[index + 1] = String(normInquiryValue).toLowerCase() != String(normFilterValue).toLowerCase();
                                 break;
                             case 'notContains':
                                 filterResults[index + 1] = !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
@@ -1220,11 +1219,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             case 'lessThan':
                                 return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                             case 'equalTo':
-                                return normInquiryValue == normFilterValue;
+                                return String(normInquiryValue).toLowerCase() == String(normFilterValue).toLowerCase();
                             case 'contains':
                                 return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             case 'notEqualTo':
-                                return normInquiryValue != normFilterValue;
+                                return String(normInquiryValue).toLowerCase() != String(normFilterValue).toLowerCase();
                             case 'notContains':
                                 return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             case 'isNull':
@@ -1255,11 +1254,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             case 'lessThan':
                                 return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
                             case 'equalTo':
-                                return normInquiryValue == normFilterValue;
+                                return String(normInquiryValue).toLowerCase() == String(normFilterValue).toLowerCase();
                             case 'contains':
                                 return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             case 'notEqualTo':
-                                return normInquiryValue != normFilterValue;
+                                return String(normInquiryValue).toLowerCase() != String(normFilterValue).toLowerCase();
                             case 'notContains':
                                 return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
                             case 'isNull':

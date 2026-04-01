@@ -556,7 +556,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     rawValue: value, // Keep original value for type checking
                     hasValue: true, // Always true to display either the value or the hyphen
                     isNameField: key === 'name',
-                    isCurrency: col.type === 'currency'
+                    isCurrency: col.type === 'currency',
+                    isReference: hasRealValue && (col.fieldType || '').toUpperCase() === 'REFERENCE',
+                    recordId: (col.fieldType || '').toUpperCase() === 'REFERENCE' ? value : null
                 };
             });
             return row;

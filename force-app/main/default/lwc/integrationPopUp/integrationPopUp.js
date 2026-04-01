@@ -190,9 +190,9 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                                 this.originalCredentials.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
                                 this.fieldsData.MVEX__Client_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
                             }
-                            if (data.objectData.MVEX__Azure_Client_Secret__c) {
-                                this.originalCredentials.MVEX__Azure_Client_Secret__c = data.objectData.MVEX__Azure_Client_Secret__c;
-                                this.fieldsData.MVEX__Azure_Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
+                            if (data.objectData.MVEX__Client_Secret__c) {
+                                this.originalCredentials.MVEX__Client_Secret__c = data.objectData.MVEX__Client_Secret__c;
+                                this.fieldsData.MVEX__Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
                             }
                             if (data.objectData.MVEX__Refresh_Token__c) {
                                 this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
@@ -381,7 +381,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                     this.fieldsData[field] = value;
                 }
             } else if (this.integrationname === 'Outlook' && 
-                (field === 'MVEX__Client_ID__c' || field === 'MVEX__Azure_Client_Secret__c' || field === 'MVEX__Refresh_Token__c')) {
+                (field === 'MVEX__Client_ID__c' || field === 'MVEX__Client_Secret__c' || field === 'MVEX__Refresh_Token__c')) {
                 // If the value is still the placeholder, don't update
                 if (value !== this.CREDENTIAL_DISPLAY_TEXT && value !== '') {
                     this.fieldsData[field] = value;
@@ -474,8 +474,8 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                     const button = this.template.querySelector('.toggle-btn');
                     button.style.marginBottom = '0px';
                 }
-            } else if (field == 'MVEX__Azure_Client_Secret__c') {
-                const inputField = this.template.querySelector('lightning-input[data-id="MVEX__Azure_Client_Secret__c"]');
+            } else if (field == 'MVEX__Client_Secret__c') {
+                const inputField = this.template.querySelector('lightning-input[data-id="MVEX__Client_Secret__c"]');
 
                 if (inputField && !inputField.checkValidity()) {
                     const button = this.template.querySelector('.toggle-btn');
@@ -573,14 +573,14 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                     if (dataToSave.MVEX__Client_ID__c === this.CREDENTIAL_DISPLAY_TEXT) {
                         dataToSave.MVEX__Client_ID__c = this.originalCredentials.MVEX__Client_ID__c;
                     }
-                    if (dataToSave.MVEX__Azure_Client_Secret__c === this.CREDENTIAL_DISPLAY_TEXT) {
-                        dataToSave.MVEX__Azure_Client_Secret__c = this.originalCredentials.MVEX__Azure_Client_Secret__c;
+                    if (dataToSave.MVEX__Client_Secret__c === this.CREDENTIAL_DISPLAY_TEXT) {
+                        dataToSave.MVEX__Client_Secret__c = this.originalCredentials.MVEX__Client_Secret__c;
                     }
                     if (dataToSave.MVEX__Refresh_Token__c === this.CREDENTIAL_DISPLAY_TEXT) {
                         dataToSave.MVEX__Refresh_Token__c = this.originalCredentials.MVEX__Refresh_Token__c;
                     }
                 }
-                
+
                 // For Instagram, restore original credentials if placeholder is still there
                 if (this.integrationname === 'Instagram') {
                     if (dataToSave.MVEX__ClientId__c === this.CREDENTIAL_DISPLAY_TEXT) {
@@ -824,7 +824,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                     return;
                 }
             }
-
+ 
             this.saveTempData(this.fieldsData.MVEX__Client_ID__c, this.fieldsData.MVEX__Client_Secret__c, this.fieldsData.MVEX__Redirect_URI__c);
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',

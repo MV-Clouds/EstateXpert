@@ -59,60 +59,56 @@ public with sharing class OutlookIntegrationController {
     
     public static void requestNewAccessToken(List<EmailWrapper> outlookMails, Map<String, Integer> remainingEmails, Map<String, Marketing_Campaign__c> campaign, Boolean IsCampaignData) {
         try {
+            String outlookMailsJson = JSON.serialize(outlookMails);
+            String remainingEmailsJson = JSON.serialize(remainingEmails);
+            String campaignJson = JSON.serialize(campaign);
+            
+            sendEmail(outlookMailsJson, remainingEmailsJson, campaignJson, IsCampaignData);
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'OutlookIntegrationController', 'requestNewAccessToken', 'Error in requestNewAccessToken.');
+        }
+    }
+    
+    @future(callout=true)
+    public static void sendEmail(String outlookMailsJson, String remainingEmailsJson, String campaignJson, Boolean IsCampaignData) {
+        try {
             OutlookConfig__c settings = OutlookConfig__c.getOrgDefaults();
             String clientId = settings.Client_ID__c;
             String clientSecret = settings.Client_Secret__c;
-            String refreshToken = settings.Refresh_Token_1__c + settings.Refresh_Token_2__c;
+            String refreshTokenString = settings.Refresh_Token_1__c + settings.Refresh_Token_2__c;
         
-            HttpRequest req = new HttpRequest();
-            req.setEndpoint(outlookEndpoint);
-            req.setMethod('POST');
-            req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-            req.setBody('refresh_token=' + refreshToken +
+            HttpRequest tokenReq = new HttpRequest();
+            tokenReq.setEndpoint(outlookEndpoint);
+            tokenReq.setMethod('POST');
+            tokenReq.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+            tokenReq.setBody('refresh_token=' + refreshTokenString +
                         '&client_id=' + clientId +
                         '&client_secret=' + clientSecret +
                         '&grant_type=refresh_token');
         
             Http http = new Http();
-            HttpResponse res = http.send(req);
-        
-            if (res.getStatusCode() == 200) {
-                Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-                String newAccessToken = (String) jsonResponse.get('access_token');
-        
-                String remainingEmailsJson = '';
-                String campaignJson = '';
-                String outlookMailsJson = JSON.serialize(outlookMails);
-    
-                if(IsCampaignData){
-                    remainingEmailsJson = JSON.serialize(remainingEmails);
-                    campaignJson = JSON.serialize(campaign);
-                }
-    
-                sendEmail(newAccessToken, outlookMailsJson, remainingEmailsJson, campaignJson, IsCampaignData);
+            HttpResponse tokenRes = http.send(tokenReq);
+            
+            String accessToken;
+            if (tokenRes.getStatusCode() == 200) {
+                Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(tokenRes.getBody());
+                accessToken = (String) jsonResponse.get('access_token');
             } else {
-                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'requestNewAccessToken', 'Failed to get new access token: ' + res.getBody() + ' and error at line 94.');
+                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'sendEmail', 'Failed to refresh token: ' + tokenRes.getBody());
+                return;
             }
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'OutlookIntegrationController', 'requestNewAccessToken', 'Error while getting new access token.');
-        }
-    }
-    
-    @future(callout=true)
-    public static void sendEmail(String accessToken, String outlookMailsJson, String remainingEmailsJson, String campaignJson,Boolean IsCampaignData) {
-        try {
+
             String outlookEndpoint = System.label.Outlook_Batch_Url;
             List<EmailWrapper> outlookMails = (List<EmailWrapper>) JSON.deserialize(outlookMailsJson, List<EmailWrapper>.class);
-
-            Map<String, Integer> remainingEmails = new  Map<String, Integer>();
-            Map<String, Marketing_Campaign__c> campaign = new  Map<String, Marketing_Campaign__c>();
-    
-            Map<String, Map<String, String>> consolidatedContactEmailInfoMap = new Map<String, Map<String, String>>();
+            Map<String, Integer> remainingEmails = new Map<String, Integer>();
+            Map<String, Marketing_Campaign__c> campaign = new Map<String, Marketing_Campaign__c>();
     
             if(IsCampaignData){
                 remainingEmails = (Map<String, Integer>) JSON.deserialize(remainingEmailsJson, Map<String, Integer>.class);
                 campaign = (Map<String, Marketing_Campaign__c>) JSON.deserialize(campaignJson, Map<String, Marketing_Campaign__c>.class);
             }
+        
+            Map<String, Map<String, String>> consolidatedContactEmailInfoMap = new Map<String, Map<String, String>>();
         
             HttpRequest req = new HttpRequest();
             req.setEndpoint(outlookEndpoint);
@@ -189,14 +185,13 @@ public with sharing class OutlookIntegrationController {
         
             req.setBody(JSON.serialize(batchRequestBody));
         
-            Http http = new Http();
             HttpResponse res = http.send(req);
         
             if (res.getStatusCode() != 200) {
                 if(IsCampaignData){
                     System.enqueueJob(new CampaignUpdateQueueable(remainingEmails, campaign, outlookMails.size(), 'Failed', res.getBody()));
                 }
-                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'requestNewAccessToken', 'Failed to send batch email: ' + res.getBody() + ' and error at line 199.');
+                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'sendEmail', 'Failed to send batch email: ' + res.getBody() + ' and error at line 199.');
             } else {
                 if(consolidatedContactEmailInfoMap.size() > 0){
                     CreateActivityRecordsFromMail.createCaseEmailMessage(consolidatedContactEmailInfoMap);

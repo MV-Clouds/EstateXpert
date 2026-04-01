@@ -1016,6 +1016,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             .map((mapping, index) => {
                 return { ...mapping, id: index + 1 };
             });
+        this.closeAddConditionModal();
     }
 
     /**

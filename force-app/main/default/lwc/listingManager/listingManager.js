@@ -1,11 +1,11 @@
-import { LightningElement,track,api} from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import designcss from '@salesforce/resourceUrl/listingManagerCss';
-import getListingData from '@salesforce/apex/ListingManagerController.getListingData';
+import MulishFontCss      from '@salesforce/resourceUrl/MulishFontCss';
+import globalTableStyles  from '@salesforce/resourceUrl/GlobalTableCSS';   
+import getListingData     from '@salesforce/apex/ListingManagerController.getListingData';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { NavigationMixin } from 'lightning/navigation';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
-import { errorDebugger } from 'c/globalProperties';
+import { errorDebugger }   from 'c/globalProperties';
 
 export default class ListingManager extends NavigationMixin(LightningElement){
     @api objectName = 'MVEX__Listing__c';
@@ -116,40 +116,39 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     get pageNumbers() {
-        try{
-            const totalPages = this.totalPages;
-            const currentPage = this.currentPage;
+        try {
+            const totalPages   = this.totalPages;
+            const currentPage  = this.currentPage;
             const visiblePages = this.visiblePages;
-        
             let pages = [];
-        
+
             if (totalPages <= visiblePages) {
                 for (let i = 1; i <= totalPages; i++) {
                     pages.push({
-                        number: i,
+                        number    : i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className : `pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
             } else {
                 pages.push({
-                    number: 1,
+                    number    : 1,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
+                    className : `pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
-        
+
                 if (currentPage > 3) {
                     pages.push({ isEllipsis: true });
                 }
-        
-                let start = Math.max(2, currentPage - 1);
-                let end = Math.min(currentPage + 1, totalPages - 1);
-        
+
+                const start = Math.max(2, currentPage - 1);
+                const end   = Math.min(currentPage + 1, totalPages - 1);
+
                 for (let i = start; i <= end; i++) {
                     pages.push({
-                        number: i,
+                        number    : i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className : `pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
 
@@ -158,14 +157,14 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 }
 
                 pages.push({
-                    number: totalPages,
+                    number    : totalPages,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                    className : `pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
-        
+
             return pages;
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'pageNumbers', error, 'warn', 'Error in pageNumbers');
             return null;
         }
@@ -208,89 +207,67 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     get sortDescription() {
-        try{
-            if(this.sortField !== ''){
+        try {
+            if (this.sortField !== '') {
                 const orderDisplayName = this.sortOrder === 'asc' ? 'Ascending' : 'Descending';
-                
-                let field = null;
-                if(this.sortField != 'Name'){
-                    field = this.fields.find(item => item.fieldName === this.sortField);
-                }else{
-                    field = {fieldName:'Name',fieldLabel:'Listing Name'};
-                }
-                if (!field) {
-                    return '';
-                }
+                const field = this.sortField !== 'Name'
+                    ? this.fields.find(item => item.fieldName === this.sortField)
+                    : { fieldName: 'Name', fieldLabel: 'Listing Name' };
 
-                const fieldDisplayName = field.fieldLabel;
-                return `Sorted by : ${fieldDisplayName} (${orderDisplayName})`;
-            }else{
-                return '';
+                if (!field) return '';
+                return `Sorted by : ${field.fieldLabel} (${orderDisplayName})`;
             }
-        }catch(error){
+            return '';
+        } catch (error) {
             errorDebugger('ListingManager', 'sortDescription', error, 'warn', 'Error in sortDescription');
             return null;
         }
     }
 
     /**
-    * Method Name : nameIconClass
-    * @description : compute the icon class for Name column based on sort state
-    * Date: 23/03/2026
-    * Created By:Vyom Soni
-    */
+     * nameIconClass
+     * Maps to globalTableStyles rules:
+     *   .listing-manager-icon           → always occupies space, invisible when idle
+     *   .sort-icon-active               → branded colour, fully visible
+     *   .rotate-asc / .rotate-desc      → smooth CSS rotation, no layout shift
+     */
     get nameIconClass() {
-        const baseClass = 'listing-manager-icon';
+        const base = 'listing-manager-icon';
         if (this.sortField === 'Name') {
-            const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
-            return `${baseClass} sort-icon-active ${rotationClass}`;
+            const dir = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
+            return `${base} sort-icon-active ${dir}`;
         }
-        return baseClass;
+        return base;
     }
 
     /**
-    * Method Name : nameHeaderClass
-    * @description : compute the class for Name column header including sorted-field
-    * Date: 23/03/2026
-    * Created By:Vyom Soni
-    */
+     * nameHeaderClass
+     * Maps to globalTableStyles rule:
+     *   th.sorted-field → subtle highlight on the active sort column
+     */
     get nameHeaderClass() {
-        const baseClass = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
-        if (this.sortField === 'Name') {
-            return `${baseClass} sorted-field`;
-        }
-        return baseClass;
+        const base = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
+        return this.sortField === 'Name' ? `${base} sorted-field` : base;
     }
 
     /**
-    * Method Name : fieldsWithIconClass
-    * @description : return fields array with computed icon classes and header classes
-    * Date: 23/03/2026
-    * Created By:Vyom Soni
-    */
+     * fieldsWithIconClass
+     * Enriches each field descriptor with computed classes that map directly
+     * to globalTableStyles — no inline styles, no DOM queries needed.
+     */
     get fieldsWithIconClass() {
-        if (!this.fields || this.fields.length === 0) {
-            return [];
-        }
+        if (!this.fields || this.fields.length === 0) return [];
+
         return this.fields.map(field => {
-            const baseClass = 'listing-manager-icon';
-            let iconClass = baseClass;
-            const isSorted = this.sortField === field.fieldName;
-            
-            if (isSorted) {
-                const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
-                iconClass = `${baseClass} sort-icon-active ${rotationClass}`;
-            }
-            
-            const headerBaseClass = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
-            const headerClass = isSorted ? `${headerBaseClass} sorted-field` : headerBaseClass;
-            
-            return {
-                ...field,
-                iconClass: iconClass,
-                isSorted: isSorted,
-                headerClass: headerClass
-            };
+            const isSorted    = this.sortField === field.fieldName;
+            const base        = 'listing-manager-icon';
+            const dir         = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
+            const iconClass   = isSorted ? `${base} sort-icon-active ${dir}` : base;
+
+            const headerBase  = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
+            const headerClass = isSorted ? `${headerBase} sorted-field` : headerBase;
+
+            return { ...field, iconClass, isSorted, headerClass };
         });
     }
 
@@ -334,23 +311,31 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         return this.processedListingData.length>1 ? 'Items' :'Item';
     }
 
+    get listingSpinnerLoading() {
+        return !this.spinnerShow && this.listingLoading;
+    }
+
     /**
     * Method Name : connectedCallback
     * @description : retrieve fields name from the field-set and retrieve listing records.
     * * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    connectedCallback(){
-        try{
+    connectedCallback() {
+        try {
+            // 1. Mulish font — always load first so all sheets inherit it
             loadStyle(this, MulishFontCss);
+
+            //
+            loadStyle(this, globalTableStyles);
+
             this.updateScreenWidth();
             if (!import.meta.env.SSR) {
                 window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
             }
-            loadStyle(this, designcss);
-            this.getAccessible();
 
-        }catch(error){
+            this.getAccessible();
+        } catch (error) {
             errorDebugger('ListingManager', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
         }
     }
@@ -367,45 +352,23 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             if (!this.hasInitializedFilter && this.wrapOn) {
                 const toggleBtn = this.template.querySelector('.filter-toggle-btn');
                 const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-                const div1 = this.template.querySelector('.innerDiv1');
-                
+                const div1      = this.template.querySelector('.innerDiv1');
+
                 if (toggleBtn && filterDiv && div1) {
-                    // Filter should be hidden by default
                     filterDiv.classList.add('removeInnerDiv1');
                     div1.classList.add('removeInnerDiv1');
-                    
+
                     if (this.screenWidth >= 900) {
-                        div1.style.width = '0';
+                        div1.style.width   = '0';
                         div1.style.opacity = '0';
                     }
-                    
-                    // Mark as initialized
+
                     this.hasInitializedFilter = true;
                 }
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'renderedCallback', error, 'warn', 'Error in renderedCallback');
         }
-    }
-
-    getAccessible() {
-        getMetadataRecords()
-        .then(data => {
-            const listingManagerFeature = data.find(
-                item => item.DeveloperName === 'Listing_Manager'
-            );
-            this.isAccessible = listingManagerFeature ? Boolean(listingManagerFeature.MVEX__isAvailable__c) : false;
-            if (this.isAccessible) {
-                this.getListingDataMethod();
-            } else {
-                this.spinnerShow = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching accessible fields', error);
-            this.isAccessible = false;
-            this.spinnerShow = false;
-        });
     }
 
     /**
@@ -420,14 +383,25 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         }
     }
 
-    /**
-    * Method Name : updateScreenWidth
-    * @description : update the width variable.
-    * * Date: 3/06/2024
-    * Created By:Vyom Soni
-    */
-    updateScreenWidth =()=> {
-        this.screenWidth = window.innerWidth;
+    // ─── Data Loading ─────────────────────────────────────────────────────────
+
+    getAccessible() {
+        getMetadataRecords()
+            .then(data => {
+                const feature     = data.find(item => item.DeveloperName === 'Listing_Manager');
+                this.isAccessible = feature ? Boolean(feature.MVEX__isAvailable__c) : false;
+
+                if (this.isAccessible) {
+                    this.getListingDataMethod();
+                } else {
+                    this.spinnerShow = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching accessible fields', error);
+                this.isAccessible = false;
+                this.spinnerShow  = false;
+            });
     }
 
     /**
@@ -438,28 +412,30 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     getListingDataMethod(){
         this.spinnerShow = true;
+
         getListingData()
             .then(result => {
-                this.listingData = result.listings;
-                this.propertyMediaUrls = result.medias;this.listingData = result.listings;
+                this.listingData       = result.listings;
                 this.propertyMediaUrls = result.medias;
-                this.pageSize = result.pageSize;
-                this.fields = result.selectedFields.map(field => ({
+                this.pageSize          = result.pageSize;
+                this.fields            = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
-                    fieldName: field.fieldApiname,
-                    cardView: field.cardView,
-                    format : field.format
+                    fieldName : field.fieldApiname,
+                    cardView  : field.cardView,
+                    format    : field.format
                 }));
-        
-                this.listingData.forEach((listing)=>{
-                    const prop_id = listing.MVEX__Property__c;
-                    listing.media_url = this.propertyMediaUrls[prop_id] ? this.propertyMediaUrls[prop_id] : '/resource/MVEX__blankImage';
+
+                this.listingData.forEach(listing => {
+                    const propId      = listing.MVEX__Property__c;
+                    listing.media_url = this.propertyMediaUrls[propId]
+                        ? this.propertyMediaUrls[propId]
+                        : '/resource/MVEX__blankImage';
                     listing.isChecked = false;
-                    listing.isActive = listing.MVEX__Status__c === 'Active' ? true : false;
-                })
+                    listing.isActive  = listing.MVEX__Status__c === 'Active';
+                });
 
                 console.log('Listing Data:', this.listingData);
-                
+
                 this.unchangedListingData = this.listingData;
                 this.processListings();
             })
@@ -478,64 +454,51 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     processListings() {
-        try{
-            this.processedListingData = this.listingData.map(listing => {
-            let orderedFields = this.fields.map(field => {
-                let fieldValue;
+        try {
+            const mapField = field => {
+                let value;
                 if (field.fieldName.includes('.')) {
-                    let fieldParts = field.fieldName.split('.');
-                    let relatedObject = listing[fieldParts[0]];
-                    fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
+                    const [obj, key] = field.fieldName.split('.');
+                    value = listing[obj] ? listing[obj][key] : '-';  // eslint-disable-line no-undef
                 } else {
-                    fieldValue = listing[field.fieldName] || '-';
+                    value = listing[field.fieldName] || '-';  // eslint-disable-line no-undef
                 }
+                if (field.format && value) value = this.applyFieldFormat(value, field.format);
+                return { fieldName: field.fieldName, value };
+            };
 
-                if (field.format && fieldValue) {
-                    fieldValue = this.applyFieldFormat(fieldValue, field.format);
-                }
-
-                return {
-                    fieldName: field.fieldName,
-                    value: fieldValue
-                };
-            });
-
-            let cardViewFields = this.fields
-                .filter(field => field.cardView === 'true')
-                .map(field => {
-                    let fieldValue;
+            this.processedListingData = this.listingData.map(listing => {
+                const mapF = field => {
+                    let value;
                     if (field.fieldName.includes('.')) {
-                        let fieldParts = field.fieldName.split('.');
-                        let relatedObject = listing[fieldParts[0]];
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
+                        const [obj, key] = field.fieldName.split('.');
+                        value = listing[obj] ? listing[obj][key] : '-';
                     } else {
-                        fieldValue = listing[field.fieldName] || '-';
+                        value = listing[field.fieldName] || '-';
                     }
+                    if (field.format && value) value = this.applyFieldFormat(value, field.format);
+                    return { fieldName: field.fieldName, value };
+                };
 
-                    if (field.format && fieldValue) {
-                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
-                    }
+                const orderedFields  = this.fields.map(mapF);
+                const cardViewFields = this.fields.filter(f => f.cardView === 'true').map(mapF);
 
-                    return {
-                        fieldName: field.fieldName,
-                        value: fieldValue
-                    };
-                });
                 return {
-                    Id: listing.Id,
-                    Name: listing.Name,
-                    media_url: listing.media_url,
-                    Listing_Price__c:listing.MVEX__Listing_Price__c,
-                    Bathrooms__c:listing.MVEX__Bathrooms__c,
-                    City__c:listing.MVEX__City__c,
-                    Street__c:listing.MVEX__Street__c,
-                    isChecked: listing.isChecked,
-                    Address__c:listing.MVEX__Address__c,
+                    Id              : listing.Id,
+                    Name            : listing.Name,
+                    media_url       : listing.media_url,
+                    Listing_Price__c: listing.MVEX__Listing_Price__c,
+                    Bathrooms__c    : listing.MVEX__Bathrooms__c,
+                    City__c         : listing.MVEX__City__c,
+                    Street__c       : listing.MVEX__Street__c,
+                    Address__c      : listing.MVEX__Address__c,
+                    isChecked       : listing.isChecked,
+                    isActive        : listing.isActive,
                     cardViewFields,
                     orderedFields,
-                    isActive: listing.isActive,
                 };
             });
+
             this.unchangedProcessListings = this.processedListingData;
             this.sortData();
             this.updateShownData();
@@ -553,43 +516,29 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     applyFieldFormat(fieldValue, format) {
-        let date = new Date(fieldValue);
-        let day = String(date.getDate()).padStart(2, '0');
-        let month = String(date.getMonth() + 1).padStart(2, '0');
-        let year = date.getFullYear();
-        let hours24 = String(date.getHours()).padStart(2, '0');
-        let minutes = String(date.getMinutes()).padStart(2, '0');
-        let hours12 = hours24 > 12 ? String(hours24 - 12).padStart(2, '0') : hours24;
-        let period = hours24 >= 12 ? 'PM' : 'AM';
+        const date    = new Date(fieldValue);
+        const day     = String(date.getDate()).padStart(2, '0');
+        const month   = String(date.getMonth() + 1).padStart(2, '0');
+        const year    = date.getFullYear();
+        const hours24 = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const h24n    = Number(hours24);
+        const hours12 = h24n > 12 ? String(h24n - 12).padStart(2, '0') : hours24;
+        const period  = h24n >= 12 ? 'PM' : 'AM';
 
-        switch (format) {
-            // Date formats
-            case 'ddmmyyyy':
-                return `${day}-${month}-${year}`;
-            case 'mmddyyyy':
-                return `${month}-${day}-${year}`;
-            case 'yyyymmdd':
-                return `${year}-${month}-${day}`;
+        const formats = {
+            ddmmyyyy  : `${day}-${month}-${year}`,
+            mmddyyyy  : `${month}-${day}-${year}`,
+            yyyymmdd  : `${year}-${month}-${day}`,
+            ddmmyyy24 : `${day}-${month}-${year} ${hours24}:${minutes}`,
+            mmddyyyy24: `${month}-${day}-${year} ${hours24}:${minutes}`,
+            yyyymmdd24: `${year}-${month}-${day} ${hours24}:${minutes}`,
+            ddmmyyy12 : `${day}-${month}-${year} ${hours12}:${minutes} ${period}`,
+            mmddyyyy12: `${month}-${day}-${year} ${hours12}:${minutes} ${period}`,
+            yyyymmdd12: `${year}-${month}-${day} ${hours12}:${minutes} ${period}`,
+        };
 
-            // DateTime 24-hour formats
-            case 'ddmmyyy24':
-                return `${day}-${month}-${year} ${hours24}:${minutes}`;
-            case 'mmddyyyy24':
-                return `${month}-${day}-${year} ${hours24}:${minutes}`;
-            case 'yyyymmdd24':
-                return `${year}-${month}-${day} ${hours24}:${minutes}`;
-
-            // DateTime 12-hour formats
-            case 'ddmmyyy12':
-                return `${day}-${month}-${year} ${hours12}:${minutes} ${period}`;
-            case 'mmddyyyy12':
-                return `${month}-${day}-${year} ${hours12}:${minutes} ${period}`;
-            case 'yyyymmdd12':
-                return `${year}-${month}-${day} ${hours12}:${minutes} ${period}`;
-
-            default:
-                return fieldValue;
-        }
+        return formats[format] ?? fieldValue;
     }
 
     /**
@@ -603,26 +552,19 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             this.sortField = 'Name';
             this.sortOrder = 'asc';
 
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+            const resetChecked = item => ({ ...item, isChecked: false });
+            this.processedListingData     = this.processedListingData.map(resetChecked);
+            this.unchangedProcessListings = this.unchangedProcessListings.map(resetChecked);
 
-            const resetCheckedFlag = item => ({ ...item, isChecked: false });
-            this.processedListingData = this.processedListingData.map(resetCheckedFlag);
-            this.unchangedProcessListings = this.unchangedProcessListings.map(resetCheckedFlag);
-
-            const filteredListingIds = new Set(event.detail.filterlistings.map(filtered => filtered.Id));
-            this.processedListingData = this.unchangedProcessListings.filter(processListing =>
-                filteredListingIds.has(processListing.Id)
-            );
-            this.listingData = this.unchangedListingData.filter(processListing =>
-                filteredListingIds.has(processListing.Id)
-            );
+            const ids = new Set(event.detail.filterlistings.map(f => f.Id));
+            this.processedListingData = this.unchangedProcessListings.filter(p => ids.has(p.Id));
+            this.listingData          = this.unchangedListingData.filter(p => ids.has(p.Id));
 
             this.currentPage = 1;
             this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'handleFilteredListings', error, 'warn', 'Error in handleFilteredListings');
         }
     }
@@ -638,21 +580,19 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             if(event.detail.filterlistings == true){
                 this.sortField = 'Name';
                 this.sortOrder = 'asc';
-                const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
 
-                const resetCheckedFlag = item => ({ ...item, isChecked: false });
-                this.processedListingData = this.processedListingData.map(resetCheckedFlag);
-                this.unchangedProcessListings = this.unchangedProcessListings.map(resetCheckedFlag);
-                this.processedListingData = this.unchangedProcessListings;
-                this.listingData = this.unchangedListingData;
-                this.currentPage = 1;
+                const resetChecked = item => ({ ...item, isChecked: false });
+                this.processedListingData     = this.processedListingData.map(resetChecked);
+                this.unchangedProcessListings = this.unchangedProcessListings.map(resetChecked);
+                this.processedListingData     = this.unchangedProcessListings;
+                this.listingData              = this.unchangedListingData;
+                this.currentPage              = 1;
 
                 this.sortData();
                 this.updateShownData();
                 this.updateSelectedProperties();
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'handleReset', error, 'warn', 'Error in handleReset');
         }
     }
@@ -667,9 +607,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         this.fieldsModal = event.detail;
     }
 
-    get listingSpinnerLoading(){
-        return !this.spinnerShow && this.listingLoading;
-    }
     /**
     * Method Name : handleLoading
     * @description : handle the loading event from the filter cmp
@@ -689,26 +626,22 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         try{
             let target = evt.currentTarget.dataset.tabId;
             this.showList = false;
-            this.showMap = false;
-            if(target == "1"){
-                this.showList = true;
-            } else if(target == "2"){
-                this.showMap = true;
-            }
-            this.template.querySelectorAll(".tab-div").forEach(tabEl => {
-                tabEl.classList.remove("active-tab-div");
-                const pathEl = tabEl.querySelector('path');
-                if (pathEl) {
-                    pathEl.style.fill = '#131314';
-                }
+            this.showMap  = false;
+
+            if (target === '1') this.showList = true;
+            else if (target === '2') this.showMap = true;
+
+            this.template.querySelectorAll('.tab-div').forEach(tabEl => {
+                tabEl.classList.remove('active-tab-div');
+                const path = tabEl.querySelector('path');
+                if (path) path.style.fill = '#131314';
             });
-            const selectedTab = this.template.querySelector(`[data-tab-id="${target}"]`);
-            selectedTab.classList.add("active-tab-div");
-            const selectedPath = selectedTab.querySelector('path[data-tab-index="' + target + '"]');
-            if (selectedPath) {
-                selectedPath.style.fill = '#fff';
-            }
-        }catch(error){
+
+            const selectedTab  = this.template.querySelector(`[data-tab-id="${target}"]`);
+            selectedTab.classList.add('active-tab-div');
+            const selectedPath = selectedTab.querySelector(`path[data-tab-index="${target}"]`);
+            if (selectedPath) selectedPath.style.fill = '#fff';
+        } catch (error) {
             errorDebugger('ListingManager', 'handleMenuTabClick', error, 'warn', 'Error in handleMenuTabClick');
         }
     }
@@ -723,30 +656,87 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         try{
             const recordId = event.target.dataset.id;
             this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
+                type      : 'standard__recordPage',
                 attributes: {
-                    recordId: recordId,
+                    recordId     : recordId,
                     objectApiName: 'MVEX__Listing__c',
-                    actionName: 'view'
+                    actionName   : 'view'
                 }
-            })
-        }catch(error){
+            });
+        } catch (error) {
             errorDebugger('ListingManager', 'redirectToRecord', error, 'warn', 'Error in redirectToRecord');
         }
     }
 
-    /**
+    updateScreenWidth = () => {
+        this.screenWidth = window.innerWidth;
+    }
+
+    wrapFilter() {
+        try {
+            const toggleBtn = this.template.querySelector('.filter-toggle-btn');
+            const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+            const div1      = this.template.querySelector('.innerDiv1');
+            const div2      = this.template.querySelector('.innerDiv2');
+
+            if (this.wrapOn) {
+                toggleBtn.classList.add('active');
+                filterDiv.classList.remove('removeInnerDiv1');
+                div1.classList.remove('removeInnerDiv1');
+
+                if (this.screenWidth >= 900) {
+                    div1.style.width   = '22%';
+                    div1.style.opacity = '1';
+                    div2.style.width   = '78%';
+                } else {
+                    div1.style.height  = 'fit-content';
+                    div1.style.width   = '100%';
+                    div1.style.opacity = '1';
+                    div2.style.height  = '30rem';
+                    div2.style.width   = '100%';
+                }
+                this.wrapOn = false;
+            } else {
+                toggleBtn.classList.remove('active');
+
+                if (this.screenWidth >= 900) {
+                    div1.style.width   = '0';
+                    div1.style.opacity = '0';
+                    div2.style.width   = '100%';
+
+                    setTimeout(() => {
+                        if (this.wrapOn) {
+                            filterDiv.classList.add('removeInnerDiv1');
+                            div1.classList.add('removeInnerDiv1');
+                        }
+                    }, 150);
+                } else {
+                    filterDiv.classList.add('removeInnerDiv1');
+                    div1.style.height  = '0';
+                    div1.style.opacity = '0';
+                    div1.style.width   = '100%';
+                    div2.style.height  = '100%';
+                    div2.style.width   = '100%';
+                }
+                this.wrapOn = true;
+            }
+        } catch (error) {
+            errorDebugger('ListingManager', 'wrapFilter', error, 'warn', 'Error in wrapFilter');
+        }
+    }
+
+/**
     * Method Name : updateShownData
     * @description : update the shownProcessedLisitingData when pagination is applied.
     * date: 20/08/2024
     * Created By:Vyom Soni
     */
     updateShownData() {
-        try{
-            const startIndex = (this.currentPage - 1) * this.pageSize;
-            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.shownProcessedListingData = this.processedListingData.slice(startIndex, endIndex);
-        }catch(error){
+        try {
+            const start = (this.currentPage - 1) * this.pageSize;
+            const end   = Math.min(start + this.pageSize, this.totalItems);
+            this.shownProcessedListingData = this.processedListingData.slice(start, end);
+        } catch (error) {
             errorDebugger('ListingManager', 'updateShownData', error, 'warn', 'Error in updateShownData');
         }
     }
@@ -788,119 +778,21 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     handlePageChange(event) {
-        const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
-        if (selectedPage !== this.currentPage) {
-            this.currentPage = selectedPage;
+        const page = parseInt(event.target.getAttribute('data-id'), 10);
+        if (page !== this.currentPage) {
+            this.currentPage = page;
             this.updateShownData();
             this.scrollToTop();
             this.sortData();
         }
     }
 
-    /**
-    * Method Name : checkBoxValueChange
-    * @description : handle the checkbox change
-    * date: 3/06/2024
-    * Created By:Vyom Soni
-    */
-    checkBoxValueChange(event){
-        try{
-            const checkboxId = Number(event.target.dataset.id);
-            this.shownProcessedListingData[checkboxId].isChecked = event.target.checked;
-            this.processedListingData.forEach(item1=>{
-                this.shownProcessedListingData.forEach(item2=>{
-                    if(item1.Id == item2.Id){
-                        item1.isChecked = item2.isChecked;
-                    }
-                })
-               })
-            this.unchangedProcessListings.forEach(item1=>{
-                this.shownProcessedListingData.forEach(item2=>{
-                    if(item1.Id == item2.Id){
-                        item1.isChecked = item2.isChecked;
-                    }
-                })
-               })
-            this.listingData.forEach(item1=>{
-                this.shownProcessedListingData.forEach(item2=>{
-                    if(item1.Id == item2.Id){
-                        item1.isChecked = item2.isChecked;
-                    }
-                })
-               })
-               this.updateSelectedProperties();
-        }catch (error){
-            errorDebugger('ListingManager', 'checkBoxValueChange', error, 'warn', 'Error in checkBoxValueChange');
-        }
-    }
-
-    /**
-    * Method Name : selectAllCheckbox
-    * @description : select the all checkbox
-    * date: 3/06/2024
-    * Created By:Vyom Soni
-    */
-    selectAllCheckbox(event){
-        try{
-            const isChecked = event.target.checked;
-            this.sortField = '';
-            this.sortOrder = 'asc';
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
-            });
-            this.listingData = this.listingData.map(item => {
-                return { ...item, isChecked: isChecked };
-            });
-            this.processedListingData = this.processedListingData.map(item => {
-                return { ...item, isChecked: isChecked };
-            });
-            this.unchangedProcessListings = this.unchangedProcessListings.map(item => {
-                return { ...item, isChecked: isChecked };
-            });
-            
-            this.updateShownData();
-            this.updateSelectedProperties();
-        }catch(error){
-            errorDebugger('ListingManager', 'selectAllCheckbox', error, 'warn', 'Error in selectAllCheckbox');
-        }
-    }
-    
-    /**
-    * Method Name : goTONewListing
-    * @description : Redirect the new listing page
-    * date: 3/06/2024
-    * Created By:Vyom Soni
-    */
-    goTONewListing() {
+    scrollToTop() {
         try {
-            this[NavigationMixin.Navigate]({
-                type: 'standard__objectPage',
-                attributes: {
-                    objectApiName: 'MVEX__Listing__c',
-                    actionName: 'new'
-                },
-                state: {
-                    c__customParam: 'ListingManager'
-                }
-            });
+            const tableDiv = this.template.querySelector('.tableDiv');
+            if (tableDiv) tableDiv.scrollTop = 0;
         } catch (error) {
-            errorDebugger('ListingManager', 'goTONewListing', error, 'warn', 'Error in goTONewListing');
-        }
-    }
-
-    /**
-    * Method Name : updateSelectedProperties
-    * @description : update the properties as selected
-    * date: 3/06/2024
-    * Created By:Vyom Soni
-    */
-    updateSelectedProperties() {
-        try{
-            this.selectedProperties = this.processedListingData.filter(listing => listing.isChecked);
-            this.totalSelected = this.selectedProperties.length;
-        }catch(error){
-            errorDebugger('ListingManager', 'updateSelectedProperties', error, 'warn', 'Error in updateSelectedProperties');
+            errorDebugger('ListingManager', 'scrollToTop', error, 'warn', 'Error in scrollToTop');
         }
     }
 
@@ -911,7 +803,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     sortClick(event) {
-        try{
+        try {
             const fieldName = event.currentTarget.dataset.id;
             if (this.sortField === fieldName) {
                 this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
@@ -921,7 +813,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             }
             this.sortData();
             this.updateShownData();
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'sortClick', error, 'warn', 'Error in sortClick');
         }
     }
@@ -933,118 +825,92 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     sortData() {
-        try{
+        try {
             this.processedListingData = [...this.processedListingData].sort((a, b) => {
-                let aValue, bValue;
-    
-                if (this.sortField === 'Name') {
-                    aValue = a.Name;
-                    bValue = b.Name;
-                } else {
-                    aValue = a.orderedFields.find(field => field.fieldName === this.sortField).value;
-                    bValue = b.orderedFields.find(field => field.fieldName === this.sortField).value;
-                }
-    
-                if (typeof aValue === 'string' && typeof bValue === 'string') {
-                    aValue = aValue.toLowerCase();
-                    bValue = bValue.toLowerCase();
-                }
-    
-                let compare = 0;
-                if (aValue > bValue) {
-                    compare = 1;
-                } else if (aValue < bValue) {
-                    compare = -1;
-                }
-    
-                return this.sortOrder === 'asc' ? compare : -compare;
+                let aVal = this.sortField === 'Name'
+                    ? a.Name
+                    : a.orderedFields.find(f => f.fieldName === this.sortField)?.value;
+                let bVal = this.sortField === 'Name'
+                    ? b.Name
+                    : b.orderedFields.find(f => f.fieldName === this.sortField)?.value;
+
+                if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+                if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+                const cmp = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                return this.sortOrder === 'asc' ? cmp : -cmp;
             });
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'sortData', error, 'warn', 'Error in sortData');
             return null;
         }
     }
 
-    /**
-    * Method Name : scrollToTop
-    * @description : scroll to top in list
-    * * Date: 3/06/2024
-    * Created By:Vyom Soni
-    */
-    scrollToTop() {
-        try{
-            const tableDiv = this.template.querySelector('.tableDiv');
-            if (tableDiv) {
-                tableDiv.scrollTop = 0;
-            }
-        }catch(error){
-            errorDebugger('ListingManager', 'scrollToTop', error, 'warn', 'Error in scrollToTop');
+    // ─── Selection ────────────────────────────────────────────────────────────
+
+    checkBoxValueChange(event) {
+        try {
+            const idx = Number(event.target.dataset.id);
+            this.shownProcessedListingData[idx].isChecked = event.target.checked;
+
+            const sync = arr => arr.forEach(item1 => {
+                const match = this.shownProcessedListingData.find(item2 => item2.Id === item1.Id);
+                if (match) item1.isChecked = match.isChecked;
+            });
+
+            sync(this.processedListingData);
+            sync(this.unchangedProcessListings);
+            sync(this.listingData);
+            this.updateSelectedProperties();
+        } catch (error) {
+            errorDebugger('ListingManager', 'checkBoxValueChange', error, 'warn', 'Error in checkBoxValueChange');
         }
     }
 
-    /**
-    * Method Name : wrapFilter
-    * @description : this method is used for the wrap the filter
-    * date: 3/06/2024
-    * Created By:Vyom Soni
-    */
-    wrapFilter() {
-        try{
-            const toggleBtn = this.template.querySelector('.filter-toggle-btn');
-            const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-            const div1 = this.template.querySelector('.innerDiv1');
-            const div2 = this.template.querySelector('.innerDiv2');
-            
-            if (this.wrapOn) {
-                // Currently hidden, show filter
-                toggleBtn.classList.add('active'); // Blue when filter showing
-                filterDiv.classList.remove('removeInnerDiv1');
-                div1.classList.remove('removeInnerDiv1');
-    
-                if(this.screenWidth >= 900){
-                    div1.style.width = '22%';
-                    div1.style.opacity = '1';
-                    div2.style.width = '78%';
-                }else{
-                    div1.style.height = 'fit-content';
-                    div1.style.width = '100%';
-                    div1.style.opacity = '1';
-                    div2.style.height = '30rem';
-                    div2.style.width = '100%';
-                }
-                this.wrapOn = false;
-            } else {
-                // Currently showing, hide filter
-                toggleBtn.classList.remove('active'); // White when filter hidden
-                
-                if(this.screenWidth >= 900){
-                    div1.style.width = '0';
-                    div1.style.opacity = '0';
-                    div2.style.width = '100%';
-                    
-                    // Hide filter content and remove margin after animation starts
-                    setTimeout(() => {
-                        if (this.wrapOn) {
-                            filterDiv.classList.add('removeInnerDiv1');
-                            div1.classList.add('removeInnerDiv1');
-                        }
-                    }, 150);
-                }else{
-                    filterDiv.classList.add('removeInnerDiv1');
-                    div1.style.height = '0';
-                    div1.style.opacity = '0';
-                    div1.style.width = '100%';
-                    div2.style.height = '100%';
-                    div2.style.width = '100%';
-                }
-                this.wrapOn = true;
-            }
-        }catch(error){
-            errorDebugger('ListingManager', 'wrapFilter', error, 'warn', 'Error in wrapFilter');
+    selectAllCheckbox(event) {
+        try {
+            const isChecked = event.target.checked;
+            this.sortField  = '';
+            this.sortOrder  = 'asc';
+
+            const markAll = arr => arr.map(item => ({ ...item, isChecked }));
+            this.listingData              = markAll(this.listingData);
+            this.processedListingData     = markAll(this.processedListingData);
+            this.unchangedProcessListings = markAll(this.unchangedProcessListings);
+
+            this.updateShownData();
+            this.updateSelectedProperties();
+        } catch (error) {
+            errorDebugger('ListingManager', 'selectAllCheckbox', error, 'warn', 'Error in selectAllCheckbox');
         }
     }
 
-    openConfigureSettings(){
+    updateSelectedProperties() {
+        try {
+            this.selectedProperties = this.processedListingData.filter(l => l.isChecked);
+            this.totalSelected      = this.selectedProperties.length;
+        } catch (error) {
+            errorDebugger('ListingManager', 'updateSelectedProperties', error, 'warn', 'Error in updateSelectedProperties');
+        }
+    }
+
+    // ─── Navigation ───────────────────────────────────────────────────────────
+
+    goTONewListing() {
+        try {
+            this[NavigationMixin.Navigate]({
+                type      : 'standard__objectPage',
+                attributes: { objectApiName: 'MVEX__Listing__c', actionName: 'new' },
+                state     : { c__customParam: 'ListingManager' }
+            });
+        } catch (error) {
+            errorDebugger('ListingManager', 'goTONewListing', error, 'warn', 'Error in goTONewListing');
+        }
+    }
+
+    // ─── Settings Modal ───────────────────────────────────────────────────────
+
+    openConfigureSettings() {
         this.isConfigOpen = true;
     }
 

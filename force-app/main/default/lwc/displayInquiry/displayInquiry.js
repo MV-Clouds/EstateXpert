@@ -2357,39 +2357,56 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     handleRemoveMember(event) {
         try {
-            const memberId = event.target.dataset.id;
+            const button = event.target.closest('button[data-id]');
+            if (!button) {
+                console.warn('Delete button with data-id not found');
+                return;
+            }
+            
+            const memberId = button.dataset.id;
+            
+            // Validate memberId exists
+            if (!memberId) {
+                console.warn('No memberId found in button data-id');
+                return;
+            }
+            
             const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
-
-            if (memberToRemove) {
-                const inquiryId = memberToRemove.InquiryId;
-
-                // 1. Update Inquiry Selection state in main table
-                this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
-                    if (inquiry.id === inquiryId) {
-                        return { ...inquiry, isSelected: false };
-                    }
-                    return inquiry;
-                });
-
-                // 2. Remove from global selected list
-                this.sendMailInquiryDataList = this.sendMailInquiryDataList.filter(inq => inq.id !== inquiryId);
-
-                // 3. Remove from broadcast modal list
-                this.broadcastContactList = this.broadcastContactList.filter(m => m.Id !== memberId);
-                this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
-
-                // 4. Update check-all state
-                this.checkAll = this.pagedFilteredInquiryData.length > 0 &&
-                    this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
-
-                // 5. If no members left, close the modal
-                if (this.broadcastContactList.length === 0) {
-                    this.handleCloseTemplate();
-                    this.showToast('Info', 'All selected inquiries have been removed.', 'info');
+            
+            if (!memberToRemove) {
+                console.warn('Member not found in broadcastContactList');
+                return;
+            }
+            
+            const inquiryId = memberToRemove.InquiryId;
+            
+            // 1. Update Inquiry Selection state in main table
+            this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
+                if (inquiry.id === inquiryId) {
+                    return { ...inquiry, isSelected: false };
                 }
+                return inquiry;
+            });
+
+            // 2. Remove from global selected list
+            this.sendMailInquiryDataList = this.sendMailInquiryDataList.filter(inq => inq.id !== inquiryId);
+
+            // 3. Remove from broadcast modal list
+            this.broadcastContactList = this.broadcastContactList.filter(m => m.Id !== memberId);
+            this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
+
+            // 4. Update check-all state
+            this.checkAll = this.pagedFilteredInquiryData.length > 0 &&
+                this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
+
+            // 5. If no members left, close the modal
+            if (this.broadcastContactList.length === 0) {
+                this.handleCloseTemplate();
+                this.showToast('Info', 'All selected inquiries have been removed.', 'info');
             }
         } catch (error) {
             errorDebugger('displayInquiry', 'handleRemoveMember', error, 'warn', 'Error removing member');
+            this.showToast('Error', 'Error removing member', 'error');
         }
     }
 

@@ -83,7 +83,7 @@
                return errorMessage;
            }
            String accessToken = config[0].Access_Token__c;
-           String endpoint = config[0].API_Endpoint__c + '/' + config[0].API_Version__c + '/' + config[0].Phone_Number_Id__c + '/messages';
+           String endpoint = config[0].APIEndpoint__c + '/' + config[0].APIVersion__c + '/' + config[0].Phone_Number_Id__c + '/messages';
            httpReq.setEndpoint(endpoint);
            httpReq.setMethod('POST');
            httpReq.setHeader('Content-Type', 'application/json');
@@ -422,7 +422,7 @@
 
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             System.debug('payload :: '+payload);
-            String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates';
+            String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates';
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
@@ -479,7 +479,7 @@
     @future(callout=true)
     public static void checkTemplateExistance(String templateName, String serializedWrapper, String payloadWrapper) {
         try {
-            String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + SETTINGS[0].Business_Account_Id__c + '/message_templates?name=' + EncodingUtil.urlEncode(templateName, 'UTF-8');
+            String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + SETTINGS[0].Business_Account_Id__c + '/message_templates?name=' + EncodingUtil.urlEncode(templateName, 'UTF-8');
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
@@ -538,7 +538,7 @@
            payload.put('file_name', fileName);
            payload.put('file_length', fileLength);
            payload.put('file_type', fileType);
-           uploadEndpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/'+SETTINGS[0].Application_Id__c+'/uploads';
+           uploadEndpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/'+SETTINGS[0].Application_Id__c+'/uploads';
 
            HttpRequest req = new HttpRequest();
            Http http = new Http();
@@ -582,7 +582,7 @@
            HttpRequest req = new HttpRequest();
            Http http = new Http();
 
-           String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + 'upload:' + fileWrapper.uploadSessionId;
+           String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + 'upload:' + fileWrapper.uploadSessionId;
            req.setEndpoint(endpoint);
            req.setMethod('POST');            
            req.setHeader('Authorization', 'OAuth ' + accessToken);
@@ -622,7 +622,7 @@
 
            WhatsappTemplate__c wbTempRec = [SELECT Id, Name,Template_Name__c FROM WhatsappTemplate__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
            
-           String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates?name=' + wbTempRec.Template_Name__c;
+           String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates?name=' + wbTempRec.Template_Name__c;
 
            HttpRequest req = new HttpRequest();         
            req.setEndpoint(endpoint);
@@ -665,7 +665,7 @@
 
         try {
             CreateTemplateWrapper.TemplateWrapper templateWrapper = (CreateTemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, CreateTemplateWrapper.TemplateWrapper.class);
-            String editEndpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/'+templateId;
+            String editEndpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/'+templateId;
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             
             HttpRequest req = new HttpRequest();
@@ -725,7 +725,7 @@
            List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
 
            String accessToken = wbConfig[0].Access_Token__c;
-           String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + flowId + '?fields=preview.invalidate(false)';
+           String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + flowId + '?fields=preview.invalidate(false)';
            HttpRequest request = new HttpRequest();
            request.setEndpoint(endpoint);
            request.setMethod('GET');

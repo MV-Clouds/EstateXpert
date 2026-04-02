@@ -15,11 +15,13 @@
                     user-select: none;
                 }
 
+                html,
                 body {
                     height: 100%;
                     width: 100%;
                     margin: 0;
                     padding: unset !important;
+                    overflow: hidden;
                 }
 
                 .smi_container {
@@ -91,9 +93,13 @@
                     border-radius: 12px;
                     padding: 2.5rem;
                     width: 55%;
+                    height: 100%;
+                    max-height: 100%;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(1, 118, 211, 0.1);
                     z-index: 1;
                     border: 1px solid rgba(1, 118, 211, 0.08);
+                    overflow-y: auto;
+                    box-sizing: border-box;
                 }
 
                 .background-image {
@@ -616,6 +622,7 @@
                     }
                     
                     .config-card {
+                        width: 100%;
                         max-width: 100%;
                     }
                 }
@@ -642,7 +649,6 @@
                 <!-- Main Container -->
                 <div class="main_container">
                     <div class="config-card">
-                        
                         <!-- Page Header -->
                         <div class="page-header">
                             <img src="/resource/MVEX__controlcenterimg/whatsapp.png" class="whatsapp-icon" alt="WhatsApp" />
@@ -656,10 +662,7 @@
                         <div id="setup-form-div">
                             <div class="input-group">
                                 <label class="input-label" for="app-id-input">Meta Application ID</label>
-                                <input type="text" 
-                                       id="app-id-input" 
-                                       class="input-field" 
-                                       placeholder="Enter your Meta Application ID" />
+                                <input type="text" id="app-id-input" class="input-field" placeholder="Enter your Meta Application ID" />
                             </div>
                             
                             <div class="info-box">
@@ -721,8 +724,9 @@
                             <div class="details-grid">
                                 <div class="detail-item">
                                     <span class="detail-label">Application ID</span>
-                                    <span class="detail-value">{!appId}</span>                                </div
->                                <div class="detail-item">
+                                    <span class="detail-value">{!appId}</span>                                
+                                </div>                               
+                                <div class="detail-item">
                                     <span class="detail-label">Last Edited</span>
                                     <span class="detail-value" id="last-edited">--</span>
                                 </div>
@@ -863,12 +867,12 @@
             
             <script>
                 let appId = '';
-                let appName = null;
                 let accessToken = '';
+                let apiVersion = '{!apiVersion}';
+                let apiEndpoint = '{!apiEndpoint}';
                 const fbLoginCallback = (response) => {
                     if(response.status === 'connected'){
                         FB.getLoginStatus(function(response) {
-                            
                             if (response.status === 'connected') {
                                 accessToken = response.authResponse.accessToken;
                                 validateAndSubmit();
@@ -882,7 +886,7 @@
                 function validateAndSubmit(){
                     showSpinner('Validating configuration...');
                     appId = document.getElementById("app-id-input").value;
-                    fetch("https://graph.facebook.com/v22.0/" + appId + "?access_token="+ accessToken)
+                    fetch(apiEndpoint + "/" + apiVersion + "/" + appId + "?access_token=" + accessToken)
                         .then(response => response.json())
                         .then(result => {
                             if(result.error){
@@ -931,20 +935,18 @@
                         return;
                     }
                     if(appId){
-                        // if(appName){
-                            document.getElementById("error-message").textContent = "";
-                            // Launch Facebook login
-                            FB.login(fbLoginCallback, {
-                                config_id: '{!configurationId}', // configuration ID goes here
-                                response_type: 'code', // must be set to 'code' for System User access token
-                                override_default_response_type: true, // when true, any response types passed in the "response_type" will take precedence over the default types
-                                extras: {
-                                    setup: {},
-                                    featureType: '',
-                                    sessionInfoVersion: '2',
-                                }
-                            });
-                        // }
+                        document.getElementById("error-message").textContent = "";
+                        // Launch Facebook login
+                        FB.login(fbLoginCallback, {
+                            config_id: '{!configurationId}', // configuration ID goes here
+                            response_type: 'code', // must be set to 'code' for System User access token
+                            override_default_response_type: true, // when true, any response types passed in the "response_type" will take precedence over the default types
+                            extras: {
+                                setup: {},
+                                featureType: '',
+                                sessionInfoVersion: '2',
+                            }
+                        });
                     }else{
                         document.getElementById("error-message").textContent = "Please enter Application Id to login.";
                     }
@@ -983,7 +985,7 @@
                                 
                                 // Change to success state
                                 spinnerIcon.style.borderTopColor = '#2E844A';
-                                spinnerText.textContent = 'WhatsApp integration disconnected successfully!';
+                                spinnerText.textContent = 'WhatsApp integration disconnected successfully! Please wait and refresh the page...';
                                 
                                 // Wait 5 seconds to show success, then reload
                                 setTimeout(() => {

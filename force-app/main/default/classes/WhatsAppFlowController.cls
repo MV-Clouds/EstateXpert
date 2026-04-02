@@ -53,7 +53,7 @@ public with sharing class WhatsAppFlowController {
     public static String createWhatsAppFlow(String flowName, List<String> categories, String flowJson, String templateType) {
         try {
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + wbConfig[0].Business_Account_Id__c + '/flows';
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + wbConfig[0].Business_Account_Id__c + '/flows';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -127,7 +127,7 @@ public with sharing class WhatsAppFlowController {
             Blob bodyBlob = Blob.valueOf(bodyString);
           
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + flowId + '/assets';
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId + '/assets';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -163,7 +163,7 @@ public with sharing class WhatsAppFlowController {
     public static String publishWhatsAppFlow(String flowId) {
         try {
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + flowId + '/publish';
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId + '/publish';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -197,7 +197,7 @@ public with sharing class WhatsAppFlowController {
     public static String deleteWhatsAppFlow(String flowId) {
         try {
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + flowId;
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId;
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('DELETE');
@@ -224,7 +224,7 @@ public with sharing class WhatsAppFlowController {
     public static String deprecateWhatsAppFlow(String flowId) {
         try {
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + flowId + '/deprecate';
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId + '/deprecate';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -252,7 +252,7 @@ public with sharing class WhatsAppFlowController {
     public static String getPreviewURLofWhatsAppFlow(String flowId) {
         try {
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + flowId + '?fields=preview.invalidate(false)';
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId + '?fields=preview.invalidate(false)';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('GET');

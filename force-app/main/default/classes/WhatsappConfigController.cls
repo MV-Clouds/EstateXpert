@@ -4,6 +4,8 @@ public without sharing class WhatsappConfigController {
     public static String businessAccountId {get; set;}
     public static String phoneNumberId {get; set;}
     public static String accessToken {get; set;}
+    public static String apiVersion {get; set;}
+    public static String apiEndpoint {get; set;}
     public static String clientId {get; set;}
     public static String configurationId {get; set;}
     public static String clientSecret {get; set;}
@@ -12,7 +14,7 @@ public without sharing class WhatsappConfigController {
     public WhatsappConfigController() {
         List<WBConnect_Configuration__mdt> metaList = [
             SELECT MasterLabel, MVEX__Application_Id__c, Business_Account_Id__c, MVEX__Phone_Number_Id__c, 
-            MVEX__Access_Token__c, SystemModstamp, MVEX__API_Version__c
+            MVEX__Access_Token__c, SystemModstamp, MVEX__APIVersion__c, MVEX__APIEndpoint__c
             FROM WBConnect_Configuration__mdt WITH USER_MODE
         ];
 
@@ -21,12 +23,16 @@ public without sharing class WhatsappConfigController {
             businessAccountId = metaList[0].Business_Account_Id__c;
             phoneNumberId = metaList[0].MVEX__Phone_Number_Id__c;
             accessToken = metaList[0].MVEX__Access_Token__c;
+            apiVersion = metaList[0].MVEX__APIVersion__c;
+            apiEndpoint = metaList[0].MVEX__APIEndpoint__c;
             lastModifiedDate = metaList[0].SystemModstamp != null ? metaList[0].SystemModstamp.format('MM/dd/yyyy, hh:mm:ss a') : '';
         } else {
             appId = '';
             businessAccountId = '';
             phoneNumberId = '';
             accessToken = '';
+            apiVersion = '';
+            apiEndpoint = '';
             lastModifiedDate = '';
         }
 
@@ -110,13 +116,13 @@ public without sharing class WhatsappConfigController {
             mdata.values.add(instance4);
 
             Metadata.CustomMetadataValue instance5 = new Metadata.CustomMetadataValue();
-            instance5.field = 'MVEX__API_Endpoint__c';
+            instance5.field = 'MVEX__APIEndpoint__c';
             instance5.value = 'https://graph.facebook.com';
             mdata.values.add(instance5);
 
             Metadata.CustomMetadataValue instance6 = new Metadata.CustomMetadataValue();
-            instance6.field = 'MVEX__API_Version__c';
-            instance6.value = 'v22.0';
+            instance6.field = 'MVEX__APIVersion__c';
+            instance6.value = 'v24.0';
             mdata.values.add(instance6);
 
             Metadata.DeployContainer container = new Metadata.DeployContainer();

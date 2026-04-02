@@ -244,11 +244,15 @@ th:not(.sorted-field):hover .listing-manager-icon {
     background-color: var(--gt-row-odd-bg);
 }
 
-/* Row hover */
+/* unified row hover — paint the tr not individual cells to avoid overlapping cell backgrounds */
+.slds-table:not(.slds-no-row-hover) tbody tr:hover {
+    background-color: var(--gt-row-hover-bg) !important;
+    transition: background-color var(--gt-transition-fast);
+}
 .slds-table:not(.slds-no-row-hover) tbody tr:hover > td,
 .slds-table:not(.slds-no-row-hover) tbody tr:hover > th {
-    background-color: var(--gt-row-hover-bg) !important;
-    transition      : background-color var(--gt-transition-fast);
+    /* ensure individual cells don't add a second layer of background */
+    background-color: transparent !important;
 }
 
 /* Cell height & typography */

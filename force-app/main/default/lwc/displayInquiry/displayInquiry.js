@@ -46,6 +46,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track sortOrder = 'asc';
     _renderedCallbackRunOnce = false;
 
+    refNameCache = {};
+    referenceNameMappings = {};
+
     @track isShowModal = false;
 
     @track isMassEmailModalOpen = false;
@@ -535,6 +538,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
                 let displayValue = hasRealValue ? String(value) : '-';
 
+                if (hasRealValue && (col.fieldType || '').toUpperCase() === 'REFERENCE') {
+                    const cachedName = this.refNameCache[value];
+                    if (cachedName) {
+                        displayValue = cachedName;
+                    }
+                }
+
                 // Apply formatting for date/datetime fields if format is provided
                 if (col.format && hasRealValue && (col.type === 'date' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
                     displayValue = this.applyFieldFormat(value, col.format);
@@ -546,7 +556,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     rawValue: value, // Keep original value for type checking
                     hasValue: true, // Always true to display either the value or the hyphen
                     isNameField: key === 'name',
-                    isCurrency: col.type === 'currency'
+                    isCurrency: col.type === 'currency',
+                    isReference: hasRealValue && (col.fieldType || '').toUpperCase() === 'REFERENCE',
+                    recordId: (col.fieldType || '').toUpperCase() === 'REFERENCE' ? value : null
                 };
             });
             return row;
@@ -564,6 +576,30 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
+    /**
+     * Method Name: populateRefNameCacheFromMappings
+     * @description: Populate the unified refNameCache from referenceNameMappings returned by Apex
+     */
+    populateRefNameCacheFromMappings() {
+        try {
+            if (!this.referenceNameMappings || typeof this.referenceNameMappings !== 'object') {
+                return;
+            }
+
+            // Iterate through each field's name mappings
+            Object.keys(this.referenceNameMappings).forEach(fieldName => {
+                const fieldMappings = this.referenceNameMappings[fieldName];
+                if (fieldMappings && typeof fieldMappings === 'object') {
+                    Object.keys(fieldMappings).forEach(recordId => {
+                        this.refNameCache[recordId] = fieldMappings[recordId];
+                    });
+                }
+            });
+        } catch (error) {
+            errorDebugger('displayInquiry', 'populateRefNameCacheFromMappings', error, 'warn', 'Error populating reference name cache');
+        }
+    }
+  
     /**
     * Method Name : applyFieldFormat
     * @description : Method to apply formatting based on the format value from dateOptions and dateTimeOptions
@@ -982,6 +1018,16 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             .map((mapping, index) => {
                 return { ...mapping, id: index + 1 };
             });
+
+        if (!this.mappings || this.mappings.length === 0) {
+            this.logicalExpression = '';
+        } else {
+            if (!this.logicalExpression || this.logicalExpression.trim() === '') {
+                this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
+            }
+        }
+
+        this.closeAddConditionModal();
     }
 
     /**
@@ -996,40 +1042,121 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         return option ? option.label : tempLabel;
     }
 
-    /**
-    * Method Name : applyFiltersData
-    * @description : method to apply filter initially
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
+    normalizeDateValue(value, fieldType) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+            if (fieldType === 'DATE') {
+                return date.toISOString().split('T')[0]; // "2024-09-26"
+            } else {
+                date.setSeconds(0, 0);
+                return date.getTime(); 
+            }
+        }
+        return String(value);
+    }
+
     applyFiltersData(listing) {
         try {
             this.pagedFilteredInquiryData = this.totalinquiry;
 
-            // Mappings are already objects now, no need to parse from strings
-            // But we might need to resolve dynamic values if they are field references
             this.mappings = this.mappings.map(mapping => {
                 let resolvedValue = mapping.valueField;
                 let displayValue = mapping.displayValue || mapping.valueField;
 
                 if (mapping.type !== 'constant') {
-                    // It's a field reference to the Listing object
                     const fieldName = mapping.valueField ? mapping.valueField.toLowerCase() : '';
                     resolvedValue = listing[fieldName] !== undefined ? listing[fieldName] : '';
-                    // Try to find label for display if not set
                     if (!mapping.displayValue) {
                         const listingOption = this.listingFieldOptions.find(opt => opt.value === mapping.valueField);
                         displayValue = listingOption ? listingOption.label : mapping.valueField;
                     }
                 }
 
+                const fieldMeta = this.inquiryFieldOptions?.find(f => f.value === mapping.field);
+                const fieldType = (fieldMeta?.type || mapping.fieldType || '').toUpperCase();
+                if (['DATE', 'DATETIME'].includes(fieldType) && resolvedValue && mapping.type === 'constant') {
+                    resolvedValue = this.normalizeDateValue(resolvedValue, fieldType);
+                }
+
                 return {
                     ...mapping,
-                    resolvedValue: resolvedValue,
-                    displayValue: displayValue
+                    resolvedValue,
+                    displayValue
                 };
             });
 
+            const getComparisonValues = (mapping, inquiry) => {
+                let inquiryValue = inquiry[mapping.field.toLowerCase()];
+                let filterValue = mapping.resolvedValue;
+
+                const fieldMeta = this.inquiryFieldOptions?.find(f => f.value === mapping.field);
+                const fieldType = (fieldMeta?.type || '').toUpperCase();
+
+                let normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
+                let normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
+
+                if (['DATE', 'DATETIME'].includes(fieldType)) {
+                    if (normInquiryValue) normInquiryValue = this.normalizeDateValue(normInquiryValue, fieldType);
+                    if (normFilterValue) normFilterValue = this.normalizeDateValue(normFilterValue, fieldType);
+                }
+
+                return { inquiryValue, normInquiryValue, normFilterValue, fieldType };
+            };
+
+            const evaluateMapping = (mapping, inquiry) => {
+                const { inquiryValue, normInquiryValue, normFilterValue, fieldType } = getComparisonValues(mapping, inquiry);
+
+                const isDateField = ['DATE', 'DATETIME'].includes(fieldType);
+
+                switch (mapping.operator) {
+                    case 'lessThan': {
+                        if (isDateField) {
+                            return normInquiryValue !== '' && normFilterValue !== ''
+                                ? normInquiryValue < normFilterValue
+                                : false;
+                        }
+                        return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue))
+                            ? false
+                            : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
+                    }
+                    case 'greaterThan': {
+                        if (isDateField) {
+                            return normInquiryValue !== '' && normFilterValue !== ''
+                                ? normInquiryValue > normFilterValue
+                                : false;
+                        }
+                        return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue))
+                            ? false
+                            : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
+                    }
+                    case 'equalTo': {
+                        if (isDateField) {
+                            return normInquiryValue !== '' && normFilterValue !== ''
+                                ? normInquiryValue == normFilterValue
+                                : false;
+                        }
+                        return String(normInquiryValue).toLowerCase() == String(normFilterValue).toLowerCase();
+                    }
+                    case 'contains':
+                        return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                    case 'notEqualTo': {
+                        if (isDateField) {
+                            return normInquiryValue !== normFilterValue;
+                        }
+                        return String(normInquiryValue).toLowerCase() != String(normFilterValue).toLowerCase();
+                    }
+                    case 'notContains':
+                        return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
+                    case 'isNull':
+                        if (mapping.valueField === 'true') {
+                            return inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
+                        }
+                        return inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
+                    default:
+                        return false;
+                }
+            };
 
             if (this.conditiontype === 'custom') {
                 this.selectedConditionType = 'Custom Logic Is Met';
@@ -1078,7 +1205,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         return;
                     }
 
-                    // Basic syntax check for balanced parentheses
                     let openParens = 0;
                     for (let char of this.logicalExpression) {
                         if (char === '(') openParens++;
@@ -1114,44 +1240,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
                     let filterResults = [];
                     this.mappings.forEach((mapping, index) => {
-                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.resolvedValue;
-
-                        // Normalize values for comparison
-                        const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
-                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
-
-                        switch (mapping.operator) {
-                            case 'lessThan':
-                                filterResults[index + 1] = isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
-                                break;
-                            case 'greaterThan':
-                                filterResults[index + 1] = isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
-                                break;
-                            case 'equalTo':
-                                // Use soft equality to handle string vs number comparison
-                                filterResults[index + 1] = normInquiryValue == normFilterValue;
-                                break;
-                            case 'contains':
-                                filterResults[index + 1] = String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                                break;
-                            case 'notEqualTo':
-                                filterResults[index + 1] = normInquiryValue != normFilterValue;
-                                break;
-                            case 'notContains':
-                                filterResults[index + 1] = !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                                break;
-                            case 'isNull':
-                                // true value means find null records; false means find non-null records
-                                if (mapping.valueField === 'true') {
-                                    filterResults[index + 1] = inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
-                                } else {
-                                    filterResults[index + 1] = inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
-                                }
-                                break;
-                            default:
-                                filterResults[index + 1] = false;
-                        }
+                        filterResults[index + 1] = evaluateMapping(mapping, inquiry);
                     });
 
                     const evalExpression = this.logicalExpression
@@ -1169,77 +1258,19 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             } else if (this.conditiontype === 'any') {
                 this.selectedConditionType = 'Any Condition Is Met';
                 this.logicalExpression = '';
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    return this.mappings.some(mapping => {
-                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.resolvedValue;
+                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry =>
+                    this.mappings.some(mapping => evaluateMapping(mapping, inquiry))
+                );
 
-                        const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
-                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
-
-                        switch (mapping.operator) {
-                            case 'greaterThan':
-                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
-                            case 'lessThan':
-                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
-                            case 'equalTo':
-                                return normInquiryValue == normFilterValue;
-                            case 'contains':
-                                return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                            case 'notEqualTo':
-                                return normInquiryValue != normFilterValue;
-                            case 'notContains':
-                                return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                            case 'isNull':
-                                // true value means find null records; false means find non-null records
-                                if (mapping.valueField === 'true') {
-                                    return inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
-                                }
-                                return inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
-                            default:
-                                return false;
-                        }
-                    });
-                });
             } else if (this.conditiontype === 'all') {
                 this.selectedConditionType = 'All Condition Are Met';
                 this.logicalExpression = '';
-                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
-                    return this.mappings.every(mapping => {
-                        let inquiryValue = inquiry[mapping.field.toLowerCase()];
-                        let filterValue = mapping.resolvedValue;
+                this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry =>
+                    this.mappings.every(mapping => evaluateMapping(mapping, inquiry))
+                );
 
-                        const normInquiryValue = (inquiryValue !== undefined && inquiryValue !== null) ? inquiryValue : '';
-                        const normFilterValue = (filterValue !== undefined && filterValue !== null) ? filterValue : '';
-
-                        switch (mapping.operator) {
-                            case 'greaterThan':
-                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) > parseFloat(normFilterValue);
-                            case 'lessThan':
-                                return isNaN(parseFloat(normInquiryValue)) || isNaN(parseFloat(normFilterValue)) ? false : parseFloat(normInquiryValue) < parseFloat(normFilterValue);
-                            case 'equalTo':
-                                return normInquiryValue == normFilterValue;
-                            case 'contains':
-                                return String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                            case 'notEqualTo':
-                                return normInquiryValue != normFilterValue;
-                            case 'notContains':
-                                return !String(normInquiryValue).toLowerCase().includes(String(normFilterValue).toLowerCase());
-                            case 'isNull':
-                                // true value means find null records; false means find non-null records
-                                if (mapping.valueField === 'true') {
-                                    return inquiryValue === null || inquiryValue === undefined || String(inquiryValue).trim() === '';
-                                }
-                                return inquiryValue !== null && inquiryValue !== undefined && String(inquiryValue).trim() !== '';
-                            default:
-                                return false;
-                        }
-                    });
-                });
             } else if (this.conditiontype === 'related') {
                 this.selectedConditionType = 'Related List';
-                // For related list, filter client-side using the listing lookup field
-                // Only filter if we haven't already filtered in fetchListings or applyModalFilters
                 if (this.pagedFilteredInquiryData === this.totalinquiry) {
                     this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry =>
                         inquiry.mvex__listing__c === this.recordId
@@ -1247,13 +1278,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 }
             } else if (this.conditiontype === 'linked') {
                 this.selectedConditionType = 'Linked Inquiries';
-                // For linked filter, data is already filtered by the server
-                // No additional client-side filtering needed
                 if (this.pagedFilteredInquiryData === this.totalinquiry) {
                     this.pagedFilteredInquiryData = [...this.totalinquiry];
                 }
-
-                // Show a message if no linked inquiries found
                 if (this.pagedFilteredInquiryData.length === 0) {
                     this.showToast('Info', 'No linked inquiries found for this listing', 'info');
                 }
@@ -1262,8 +1289,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 this.pagedFilteredInquiryData = [...this.totalinquiry];
             }
 
-            this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData]; // Store latest popup filters to state
-
+            this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
             this.totalRecords = this.pagedFilteredInquiryData.length;
             this.currentPage = 1;
@@ -1272,6 +1298,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.checkAll = false;
             this.sendMailInquiryDataList = [];
             this.isLoading = false;
+
         } catch (error) {
             errorDebugger('displayInquiry', 'applyFiltersData', error, 'warn', 'Error applying filters');
             this.showToast('Error', 'Error applying filters', 'error');
@@ -1341,6 +1368,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             .then(result => {
                 console.log('fetchListings result:', result);
 
+                // Store reference name mappings from Apex
+                if (result.referenceNameMappings) {
+                    this.referenceNameMappings = result.referenceNameMappings;
+                    this.populateRefNameCacheFromMappings();
+                }
+
                 let listing = {};
 
                 if (this.objectName === 'MVEX__Listing__c') {
@@ -1358,6 +1391,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         filterType = 'default'; // Reset to get all inquiries
                         getRecords({ recId: this.recordId, objectName: this.objectName, filterType: 'default' })
                             .then(defaultResult => {
+                                // Store reference name mappings from Apex
+                                if (defaultResult.referenceNameMappings) {
+                                    this.referenceNameMappings = defaultResult.referenceNameMappings;
+                                    this.populateRefNameCacheFromMappings();
+                                }
+
                                 if (defaultResult.inquiries && defaultResult.inquiries.length > 0) {
                                     this.totalinquiry = this.convertKeysToLowercase(defaultResult.inquiries);
                                 } else {
@@ -1440,64 +1479,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             return newItem;
         });
     }
-
-    /**
-    * Method Name : handleMappingClick
-    * @description : method to handle mapping click
-    * * Date: 16/10/2024
-    * Created By:Rachit Shah
-    */
-    // handleMappingClick(event) {
-    //     const nameAttribute = event.currentTarget.dataset.name;
-
-    //     if (nameAttribute && nameAttribute !== 'delete') {
-    //         const previouslySelected = this.template.querySelector('.selected');
-    //         if (previouslySelected) {
-    //             previouslySelected.classList.remove('selected');
-    //         }
-
-    //         event.currentTarget.classList.add('selected');
-
-    //         const mappingId = event.currentTarget.dataset.id;
-    //         this.isAddConditionModalVisible = true;
-
-    //         const currentMapping = this.mappings.find(mapping => mapping.id === parseInt(mappingId, 10));
-
-    //         if (currentMapping) {
-    //             this.selectedMappingId = currentMapping.id;
-    //             const selectedField = this.inquiryFieldOptions.find(field => field.value === currentMapping.field);
-
-    //             if (selectedField) {
-    //                 const fieldType = selectedField.type;
-
-    //                 const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
-    //                 const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
-    //                 const referenceFieldTypes = ['REFERENCE'];
-
-    //                 this.inquiryFieldObject.isPrimary = primaryFieldTypes.includes(fieldType);
-    //                 this.inquiryFieldObject.isPicklist = picklistFieldTypes.includes(fieldType);
-    //                 this.inquiryFieldObject.isReference = referenceFieldTypes.includes(fieldType);
-    //                 this.inquiryFieldObject.MVEX__Data_Type__c = fieldType;
-
-    //                 if (fieldType === 'REFERENCE') {
-    //                     this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
-    //                 } else {
-    //                     if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
-    //                         this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
-    //                             return { label: picklistValue, value: picklistValue };
-    //                         });
-    //                     } else {
-    //                         this.inquiryFieldObject.picklistValues = null;
-    //                     }
-    //                 }
-
-    //                 this.inquiryFieldObject.MVEX__Field_Name__c = currentMapping.field;
-    //                 this.selectedConditionOperator = currentMapping.operator;
-    //                 this.selectedListingField = currentMapping.valueField;
-    //             }
-    //         }
-    //     }
-    // }
 
     /**
     * Method Name: handleSearch
@@ -1697,6 +1678,19 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     .catch(error => {
                         errorDebugger('displayInquiry', 'saveConfiguration', error, 'warn', 'Error saving configuration');
                     });
+            }
+
+            if (this.conditiontype === 'custom') {
+                const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
+               
+                // If expression is empty, block apply
+                if (!this.logicalExpression || this.logicalExpression.trim() === '') {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Logical expression is required for Custom Logic.');
+                        inputElement.reportValidity();
+                    }
+                    return;
+                }
             }
 
             // Handle different filter types
@@ -2017,8 +2011,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             let label = this.getValueFromLabel(this.inquiryFieldObject.MVEX__Field_Name__c);
             let displayOperator = this.displayOperator(this.selectedConditionOperator);
 
-            // Determine display value
+            let valueFieldForStorage = this.selectedListingField;
             let displayValue = this.selectedListingField;
+
             if (this.selectedConditionOperator === 'isNull') {
                 // For isNull, display True or False
                 displayValue = this.selectedListingField === 'true' ? 'True' : 'False';
@@ -2031,6 +2026,18 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 displayValue = picklistOption ? picklistOption.label : this.selectedListingField;
             } else if (this.inquiryFieldObject.isReference && this.selectedRecordName) {
                 displayValue = this.selectedRecordName;
+            } else if (this.isConstant && (this.inquiryFieldObject.MVEX__Data_Type__c === 'DATE' || this.inquiryFieldObject.MVEX__Data_Type__c === 'DATETIME')) {
+
+                const fieldType = this.inquiryFieldObject.MVEX__Data_Type__c;
+                const inquiryField = this.inquiryFieldOptions.find(f => f.value === this.inquiryFieldObject.MVEX__Field_Name__c);
+                const format = inquiryField ? inquiryField.format : null;
+
+                if (format) {
+                    displayValue = this.applyFieldFormat(valueFieldForStorage, format);
+                } else {
+                    const defaultFormat = fieldType === 'DATE' ? 'ddmmyyyy' : 'ddmmyyy12';
+                    displayValue = this.applyFieldFormat(valueFieldForStorage, defaultFormat);
+                }
             }
 
             const newMapping = {
@@ -2038,7 +2045,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 field: this.inquiryFieldObject.MVEX__Field_Name__c,
                 operator: this.selectedConditionOperator,
                 displayOperator: displayOperator,
-                valueField: this.selectedListingField,
+                valueField: valueFieldForStorage,
                 type: this.isConstant ? 'constant' : 'field',
                 label: label,
                 displayValue: displayValue
@@ -2350,39 +2357,56 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     handleRemoveMember(event) {
         try {
-            const memberId = event.target.dataset.id;
+            const button = event.target.closest('button[data-id]');
+            if (!button) {
+                console.warn('Delete button with data-id not found');
+                return;
+            }
+            
+            const memberId = button.dataset.id;
+            
+            // Validate memberId exists
+            if (!memberId) {
+                console.warn('No memberId found in button data-id');
+                return;
+            }
+            
             const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
-
-            if (memberToRemove) {
-                const inquiryId = memberToRemove.InquiryId;
-
-                // 1. Update Inquiry Selection state in main table
-                this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
-                    if (inquiry.id === inquiryId) {
-                        return { ...inquiry, isSelected: false };
-                    }
-                    return inquiry;
-                });
-
-                // 2. Remove from global selected list
-                this.sendMailInquiryDataList = this.sendMailInquiryDataList.filter(inq => inq.id !== inquiryId);
-
-                // 3. Remove from broadcast modal list
-                this.broadcastContactList = this.broadcastContactList.filter(m => m.Id !== memberId);
-                this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
-
-                // 4. Update check-all state
-                this.checkAll = this.pagedFilteredInquiryData.length > 0 &&
-                    this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
-
-                // 5. If no members left, close the modal
-                if (this.broadcastContactList.length === 0) {
-                    this.handleCloseTemplate();
-                    this.showToast('Info', 'All selected inquiries have been removed.', 'info');
+            
+            if (!memberToRemove) {
+                console.warn('Member not found in broadcastContactList');
+                return;
+            }
+            
+            const inquiryId = memberToRemove.InquiryId;
+            
+            // 1. Update Inquiry Selection state in main table
+            this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
+                if (inquiry.id === inquiryId) {
+                    return { ...inquiry, isSelected: false };
                 }
+                return inquiry;
+            });
+
+            // 2. Remove from global selected list
+            this.sendMailInquiryDataList = this.sendMailInquiryDataList.filter(inq => inq.id !== inquiryId);
+
+            // 3. Remove from broadcast modal list
+            this.broadcastContactList = this.broadcastContactList.filter(m => m.Id !== memberId);
+            this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
+
+            // 4. Update check-all state
+            this.checkAll = this.pagedFilteredInquiryData.length > 0 &&
+                this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
+
+            // 5. If no members left, close the modal
+            if (this.broadcastContactList.length === 0) {
+                this.handleCloseTemplate();
+                this.showToast('Info', 'All selected inquiries have been removed.', 'info');
             }
         } catch (error) {
             errorDebugger('displayInquiry', 'handleRemoveMember', error, 'warn', 'Error removing member');
+            this.showToast('Error', 'Error removing member', 'error');
         }
     }
 
@@ -2672,6 +2696,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 format: field.format
                             }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
+                        console.log('this.inquiryColumns', JSON.stringify(this.inquiryColumns));
+                        
                     } catch (e) {
                         this.inquiryColumns = this.defaultColumns;
                     }

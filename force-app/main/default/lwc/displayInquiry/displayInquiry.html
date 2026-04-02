@@ -369,12 +369,18 @@
                                                 <a href="javascript:void(0)" data-id={inquiry.id}
                                                     onclick={navigateToRecord}>{field.value}</a>
                                             </template>
+                                            <template if:true={field.isReference}>
+                                                <a href="javascript:void(0)" data-id={field.recordId}
+                                                    onclick={navigateToRecord}>{field.value}</a>
+                                            </template>
                                             <template if:false={field.isNameField}>
-                                                <template if:true={field.isCurrency}>
-                                                    {inquiry.CurrencyIsoCode} {field.value}
-                                                </template>
-                                                <template if:false={field.isCurrency}>
-                                                    {field.value}
+                                                <template if:false={field.isReference}>
+                                                    <template if:true={field.isCurrency}>
+                                                        {inquiry.CurrencyIsoCode} {field.value}
+                                                    </template>
+                                                    <template if:false={field.isCurrency}>
+                                                        {field.value}
+                                                    </template>
                                                 </template>
                                             </template>
                                         </template>

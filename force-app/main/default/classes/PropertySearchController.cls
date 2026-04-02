@@ -19,6 +19,8 @@ public with sharing class PropertySearchController {
         public List<Inquiry__c> inquiries;
         @AuraEnabled
         public Map<Id, String> medias;
+        @AuraEnabled
+        public Map<String, Map<String, String>> referenceNameMappings; 
     }
     
     @AuraEnabled
@@ -179,6 +181,9 @@ public with sharing class PropertySearchController {
 
             wc.listings = listings;
             wc.inquiries = inquiries;
+            
+            // ---------- resolve reference field names ----------
+            wc.referenceNameMappings = resolveInquiryReferenceNames(inquiries);
 
             // ---------- media ----------
             if (!propertyIds.isEmpty()) {
@@ -204,6 +209,81 @@ public with sharing class PropertySearchController {
             ErrorHandler.insertErrorData(e, 'PropertySearchController', 'getRecords', e.getStackTraceString());
             return null;
         }
+    }
+    
+    /**
+     * @description       : Helper method to resolve all reference field IDs in inquiries to their record names
+     * @author            : Kajal Tiwari
+     * @last modified on  : 01-04-2026
+     * @last modified by  : Kajal Tiwari
+     **/
+    private static Map<String, Map<String, String>> resolveInquiryReferenceNames(List<Inquiry__c> inquiries) {
+        Map<String, Map<String, String>> refMappings = new Map<String, Map<String, String>>();
+        
+        if (inquiries == null || inquiries.isEmpty()) {
+            return refMappings;
+        }
+        
+        try {
+            // Get field descriptions for Inquiry__c
+            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.MVEX__Inquiry__c.fields.getMap();
+            Map<String, Set<Id>> refIdsByField = new Map<String, Set<Id>>();
+            
+            // Collect all reference field IDs
+            for (Inquiry__c inq : inquiries) {
+                for (String fieldName : fieldMap.keySet()) {
+                    Schema.DescribeFieldResult fieldDesc = fieldMap.get(fieldName).getDescribe();
+                    
+                    // Check if field is a reference/lookup field
+                    if (fieldDesc.getType() == Schema.DisplayType.REFERENCE) {
+                        Object fieldValue = inq.get(fieldName);
+                        if (fieldValue != null && fieldValue instanceof Id) {
+                            Id refId = (Id)fieldValue;
+                            if (!refIdsByField.containsKey(fieldName)) {
+                                refIdsByField.put(fieldName, new Set<Id>());
+                            }
+                            refIdsByField.get(fieldName).add(refId);
+                        }
+                    }
+                }
+            }
+            
+            // For each reference field, resolve IDs to Names
+            for (String fieldName : refIdsByField.keySet()) {
+                Set<Id> ids = refIdsByField.get(fieldName);
+                if (ids.isEmpty()) continue;
+                
+                Map<String, String> nameMap = new Map<String, String>();
+                
+                try {
+                    // Get the object type for this reference field
+                    Schema.DescribeFieldResult fieldDesc = fieldMap.get(fieldName).getDescribe();
+                    List<Schema.SObjectType> referenceTo = fieldDesc.getReferenceTo();
+                    
+                    if (!referenceTo.isEmpty()) {
+                        String refObjectName = referenceTo[0].getDescribe().getName();
+                        
+                        // Query for names using dynamic SOQL
+                        String soql = 'SELECT Id, Name FROM ' + refObjectName + ' WHERE Id IN :ids WITH USER_MODE';
+                        for (SObject record : Database.query(soql)) {
+                            nameMap.put((String)record.Id, (String)record.get('Name'));
+                        }
+                    }
+                } catch (Exception e) {
+                    // Log but continue processing other fields
+                    ErrorHandler.insertErrorData(e, 'PropertySearchController', 'resolveInquiryReferenceNames', 'Error resolving reference field: ' + fieldName);
+                }
+                
+                if (!nameMap.isEmpty()) {
+                    refMappings.put(fieldName, nameMap);
+                }
+            }
+            
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'resolveInquiryReferenceNames', e.getStackTraceString());
+        }
+        
+        return refMappings;
     }
     
     private static String getAllFields(String objectName) {
@@ -555,4 +635,5 @@ public with sharing class PropertySearchController {
             return false;
         }
     }
+
 }

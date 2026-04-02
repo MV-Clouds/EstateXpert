@@ -189,6 +189,11 @@ button:disabled {
 .custom-data-table td {
     padding: 10px;
     text-align: center;
+    word-break: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+    min-width: 180px;
+    overflow-wrap: break-word;
 }
 
 .custom-data-table tr:nth-child(odd) {
@@ -224,6 +229,20 @@ button:disabled {
 
 .view-more-button:hover {
     background-color: #005fb2;
+}
+
+/* Styling for table links (inquiry names and reference fields) */
+.custom-data-table a {
+    color: #0176D3;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.custom-data-table a:hover {
+    color: #005fb2;
+    text-decoration: underline;
 }
 
 .custom-data-table tr:last-child td {

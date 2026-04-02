@@ -34,46 +34,6 @@
     background-color: #0157a0;
 }
 
-.pagination-container {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-}
-
-.pagination-button {
-    background-color: #ffffff;
-    border: 1px solid #d8d8d8;
-    color: #333;
-    padding: 6px 12px;
-    margin: 0 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 6px;
-    font-size: 12px;
-}
-
-.pagination-button svg {
-    fill: black;
-    width: 0.7rem;
-    height: 0.7rem;
-}
-
-.pagination-button:hover {
-    background-color: #f0f0f0;
-    border-color: #0176D3;
-}
-
-.pagination-button.active {
-    background-color: #0070d2;
-    color: white;
-    border-color: #0070d2;
-}
-
-.pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .results-info {
     margin-left: 15px;
     color: #666;
@@ -100,16 +60,6 @@
 span {
     margin: 0 5px;
 }
-
-/* Specific styles for Back and Next buttons */
-.pagination-button:first-child,
-.pagination-button:last-child {
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
 
 .full-page-container {
     background: #f5f7fa;
@@ -383,72 +333,6 @@ span {
     /* Width when innerDiv1 is expanded */
 }
 
-.main .slds-table td {
-    height: 3.5rem;
-}
-
-.tableDiv {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.tableDiv .fields-names {
-    position: sticky;
-    top: 0;
-    z-index: 97;
-}
-
-.tableDiv .header-checkbox-div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.tableDiv .slds-table_resizable-cols thead th,
-.slds-table--resizable-cols thead th {
-    padding: 0;
-    background: #0376D3;
-    color: white;
-    font-size: 14px;
-    height: 45px;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-
-.tableDiv .colume2 {
-    width: 9rem;
-}
-
-.noresult {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.noresult .tag1 {
-    font-size: 1.1rem;
-    font-weight: 500;
-    line-height: 25px;
-    text-align: center;
-    color: #0176D3;
-}
-
-.noresult .tag2 {
-    font-size: 0.9rem;
-    font-weight: 400;
-    line-height: 25px;
-    text-align: center;
-    color: #636363;
-}
-
 .main .body .innerDiv2 .slds-cell_action-mode .slds-icon_container {
     display: none;
 }
@@ -480,61 +364,6 @@ th.sorted-field .slds-icon_container {
     display: block !important;
 }
 
-.main .body .innerDiv2 .slds-icon-utility-arrowdown svg {
-    height: 0.8rem;
-    fill: white;
-}
-
-.rotate-asc {
-    transform: rotate(0deg);
-    transition: transform 0.3s;
-}
-
-.rotate-desc {
-    transform: rotate(180deg);
-    transition: transform 0.3s;
-}
-
-.paginationDiv {
-    flex-shrink: 0;
-    padding: 0.5rem 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-    border-top: 1px solid rgba(1, 118, 211, 0.08);
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.paginationDiv .btnCover {
-    display: flex;
-    justify-content: center;
-}
-
-.paginationDiv .pageNumberDiv {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.listing-manager-icon {
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-}
-
-.slds-table:not(.slds-no-row-hover) tbody tr:hover>td {
-    background-color: #ebf3f6 !important;
-}
-
-.slds-table:not(.slds-no-row-hover) tbody tr:hover>th {
-    background-color: #ebf3f6 !important;
-    transition: 0.2s;
-}
-
-.conat_cls {
-    transition: unset !important;
-}
 
 @media only screen and (max-width: 900px) {
     * {
@@ -581,21 +410,6 @@ th.sorted-field .slds-icon_container {
         border-radius: 10px;
     }
 
-    .noresult {
-        height: 24rem;
-    }
-
-    .paginationDiv {
-        margin-top: 0.5rem;
-        border-radius: 0 0 10px 10px;
-    }
-
-    .tableDiv {
-        height: 90%;
-        border-radius: 8px;
-        margin: 6px;
-    }
-
     .sub_main_header_css {
         flex-direction: column;
         gap: 0.5rem;
@@ -622,15 +436,6 @@ th.sorted-field .slds-icon_container {
         justify-content: space-between;
     }
 
-    .pagination-button {
-        padding: 3px 5px;
-    }
-
-    .pagination-button:first-child,
-    .pagination-button:last-child {
-        gap: 0;
-        padding: 3px 3px;
-    }
 }
 
 .custom-header .first-row .header-buttons-div {
@@ -656,24 +461,6 @@ th.sorted-field .slds-icon_container {
     justify-content: space-between;
 }
 
-@media only screen and (max-width: 900px) {
-
-    .tableDiv .header-checkbox-div {
-        padding: 0rem 0.5rem;
-    }
-
-    .pagination-button {
-        padding: 3px 5px;
-    }
-
-    .pagination-button:first-child,
-    .pagination-button:last-child {
-        gap: 0rem;
-        padding: 3px 3px;
-    }
-
-}
-
 input[type=checkbox] {
     width: 1rem;
     height: 1rem;
@@ -684,11 +471,11 @@ input[type=checkbox]::before {
     border-color: white;
 }
 
-.tableDiv .checkbox-cell {
+/* .tableDiv .checkbox-cell {
     display: flex;
     justify-content: center;
     align-items: center;
-}
+} */
 
 .slds-modal__header {
     display: flex;
@@ -826,10 +613,6 @@ input[type=checkbox]::before {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-}
-
-.tableDiv tbody tr:nth-child(odd) {
-    background-color: aliceblue;
 }
 
 .closs_icon_css {
@@ -1132,25 +915,6 @@ input[type=checkbox]::before {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-}
-
-.bcTableDiv {
-    border-radius: 0px;
-    width: 50%;
-    ;
-}
-
-.bcTableDiv .slds-table_resizable-cols thead th,
-.slds-table--resizable-cols thead th {
-    height: 30px;
-}
-
-.bcTableDiv .colume1 {
-    width: 2rem;
-}
-
-.bcTableDiv .checkbox-cell {
-    margin: 0px 14px;
 }
 
 .rightDivBc {

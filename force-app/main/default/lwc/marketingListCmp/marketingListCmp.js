@@ -1,6 +1,7 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import designcss from '@salesforce/resourceUrl/listingManagerCss';
+import MulishFontCss      from '@salesforce/resourceUrl/MulishFontCss';
+import globalTableStyles  from '@salesforce/resourceUrl/GlobalTableCSS';  
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
@@ -114,6 +115,52 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     get showEllipsis() {
         return Math.ceil(this.totalItems / this.pageSize) > this.visiblePages;
+    }
+
+    /**
+     * nameIconClass
+     * Maps to globalTableStyles rules:
+     *   .listing-manager-icon           → always occupies space, invisible when idle
+     *   .sort-icon-active               → branded colour, fully visible
+     *   .rotate-asc / .rotate-desc      → smooth CSS rotation, no layout shift
+     */
+    get nameIconClass() {
+        const base = 'listing-manager-icon';
+        if (this.sortField === 'Name') {
+            const dir = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
+            return `${base} sort-icon-active ${dir}`;
+        }
+        return base;
+    }
+
+    /**
+     * nameHeaderClass
+     * Returns the header class for the Name column so it matches dynamic columns.
+     */
+    get nameHeaderClass() {
+        const headerBase = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
+        return this.sortField === 'Name' ? `${headerBase} sorted-field` : headerBase;
+    }
+
+    /**
+     * fieldsWithIconClass
+     * Enriches each field descriptor with computed classes that map directly
+     * to globalTableStyles — no inline styles, no DOM queries needed.
+     */
+    get fieldsWithIconClass() {
+        if (!this.fields || this.fields.length === 0) return [];
+
+        return this.fields.map(field => {
+            const isSorted    = this.sortField === field.fieldName;
+            const base        = 'listing-manager-icon';
+            const dir         = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
+            const iconClass   = isSorted ? `${base} sort-icon-active ${dir}` : base;
+
+            const headerBase  = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
+            const headerClass = isSorted ? `${headerBase} sorted-field` : headerBase;
+
+            return { ...field, iconClass, isSorted, headerClass };
+        });
     }
 
     /**
@@ -324,19 +371,20 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
      * Date: 22/06/2024
      * Created By:Vyom Soni
      */
-    connectedCallback() {
-        this.screenWidth = window?.globalThis?.innerWidth;
-        window?.globalThis?.addEventListener('resize', this.handleResize);
-        loadStyle(this, designcss)
-        .then(() => {
-            console.log('Styles loaded successfully');
-        })
-        .catch(error => {
-            console.error('Error loading styles', error);
-        });
-        this.checkBusinessAccountConfig();
-        this.getAccessible();
-    }
+     connectedCallback() {
+            try {
+                loadStyle(this, MulishFontCss);
+                loadStyle(this, globalTableStyles);
+
+                this.screenWidth = window?.globalThis?.innerWidth;
+                window?.globalThis?.addEventListener('resize', this.handleResize);
+    
+                this.checkBusinessAccountConfig();
+                this.getAccessible();
+            } catch (error) {
+                errorDebugger('MarketingListCmp', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
+            }
+        }
 
     handleLoading(event){
         this.listingLoading = event.detail;
@@ -1091,28 +1139,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     handleModalClose() {
         this.isModalOpen = false;
     }
-
-    /**
-    * Method Name : updateSortIcons
-    * @description : this method update the sort icons in the wrapbutton
-    * Date: 22/06/2024
-    * Created By:Vyom Soni
-    */
-    // updateSortIcons() {
-    //     try {
-    //         const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-    //         allHeaders.forEach(icon => {
-    //             icon.classList.remove('rotate-asc', 'rotate-desc');
-    //         });
-
-    //         const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
-    //         if (currentHeader) {
-    //             currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
-    //         }
-    //     } catch (error) {
-    //         console.log('Error updateSprtIcons->' + error);
-    //     }
-    // }
 
     updateSortIcons() {
         try {

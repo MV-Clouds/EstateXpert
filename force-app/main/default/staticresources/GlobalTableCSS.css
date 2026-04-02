@@ -1,0 +1,508 @@
+
+:root {
+    --gt-font-family      : 'Mulish', sans-serif;
+
+    /* Brand */
+    --gt-brand-primary    : #0176D3;
+    --gt-brand-dark       : #0157a0;
+    --gt-brand-light      : rgba(1, 118, 211, 0.08);
+    --gt-brand-light-mid  : rgba(1, 118, 211, 0.10);
+    --gt-brand-border     : rgba(1, 118, 211, 0.20);
+
+    /* Header */
+    --gt-header-bg        : #0376D3;
+    --gt-header-color     : #ffffff;
+    --gt-header-height    : 45px;
+    --gt-header-font-size : 14px;
+    --gt-header-font-wt   : 500;
+    --gt-header-letter-sp : 0.3px;
+    --gt-header-hover-bg  : #2c89d6;
+
+    /* Sorted column */
+    --gt-sorted-bg        : linear-gradient(
+                                135deg,
+                                rgba(1, 118, 211, 0.08) 0%,
+                                rgba(1, 118, 211, 0.05) 100%
+                            );
+    --gt-sorted-shadow    : inset 0 0 8px rgba(1, 118, 211, 0.10);
+
+    /* Rows */
+    --gt-row-odd-bg       : aliceblue;
+    --gt-row-hover-bg     : #ebf3f6;
+    --gt-row-height       : 3rem;
+    --gt-cell-color       : #585858;
+    --gt-cell-font-size   : 14px;
+    --gt-cell-padding-v   : 0.5rem;
+    --gt-cell-padding-h   : 0.75rem;
+
+    /* Sort icon */
+    --gt-icon-color-idle  : #b0bcc4;
+    --gt-icon-color-active: #0176D3;
+    --gt-icon-size        : 1rem;
+
+    /* Pagination */
+    --gt-page-btn-bg      : #ffffff;
+    --gt-page-btn-border  : #d8d8d8;
+    --gt-page-btn-color   : #333333;
+    --gt-page-active-bg   : #0070d2;
+    --gt-page-active-color: #ffffff;
+    --gt-page-font-size   : 12px;
+    --gt-page-gap         : 2px;
+
+    /* Scrollbar */
+    --gt-scrollbar-thumb  : #0170d27d;
+    --gt-scrollbar-track  : transparent;
+
+    /* Transitions */
+    --gt-transition-fast  : 0.2s ease;
+    --gt-transition-std   : 0.3s ease;
+    --gt-transition-slide : 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/*
+ * Applied to the element that wraps <table> and provides scrolling.
+ * In ListingManager this is  .tableDiv
+ */
+.gt-table-wrapper,
+.tableDiv {
+    flex           : 1;
+    min-height     : 0;
+    overflow       : auto;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gt-scrollbar-thumb) var(--gt-scrollbar-track);
+    box-shadow     : inset 0 2px 4px rgba(0, 0, 0, 0.06),
+                     inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Webkit scrollbar */
+.gt-table-wrapper::-webkit-scrollbar,
+.tableDiv::-webkit-scrollbar {
+    width : 6px;
+    height: 6px;
+}
+.gt-table-wrapper::-webkit-scrollbar-thumb,
+.tableDiv::-webkit-scrollbar-thumb {
+    background   : var(--gt-scrollbar-thumb);
+    border-radius: 3px;
+}
+.gt-table-wrapper::-webkit-scrollbar-track,
+.tableDiv::-webkit-scrollbar-track {
+    background: var(--gt-scrollbar-track);
+}
+
+
+.gt-table-wrapper table,
+.tableDiv table,
+.tableDiv .slds-table {
+    font-family   : var(--gt-font-family);
+    border-collapse: collapse;
+    width         : 100%;
+    table-layout  : fixed;
+}
+
+/* Sticky header */
+.gt-table-wrapper .fields-names,
+.tableDiv .fields-names {
+    position: sticky;
+    top     : 0;
+    z-index : 97;
+}
+
+/* Standard column widths â€” override per-component as needed */
+.gt-col-action  { width: 5.25rem; }   /* image / action column */
+.gt-col-name    { width: 10rem;   }   /* primary name column   */
+.gt-col-data    { width: 9rem;    }   /* generic data columns  */
+.gt-col-narrow  { width: 5rem;    }   /* narrow data columns   */
+
+/* Keep existing class aliases working */
+.imageColume { width: 5.25rem; }
+.colume2     { width: 9rem;    }
+.offer-col   { width: 5rem;    }
+
+
+.tableDiv .slds-table_resizable-cols thead th,
+.tableDiv .slds-table--resizable-cols thead th,
+.gt-table-wrapper thead th {
+    padding       : 0;
+    background    : var(--gt-header-bg);
+    color         : var(--gt-header-color);
+    font-family   : var(--gt-font-family);
+    font-size     : var(--gt-header-font-size);
+    font-weight   : var(--gt-header-font-wt);
+    letter-spacing: var(--gt-header-letter-sp);
+    height        : var(--gt-header-height);
+    white-space   : nowrap;
+    /* Prevent layout shifts when sort icon appears */
+    box-sizing    : border-box;
+}
+
+/*
+ * .sort-cover â€” the full-height clickable region inside each <th>
+ * Uses flex so text + icon never cause reflow when icon appears/hides.
+ */
+.sort-cover {
+    height         : 100%;
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    cursor         : pointer;
+    background     : transparent;
+    transition     : background-color var(--gt-transition-fast);
+    position       : relative;
+    /* Reserve space for icon so text never shifts */
+    padding        : 0 var(--gt-cell-padding-h);
+    gap            : 6px;
+}
+
+.sort-cover:hover {
+    background-color: var(--gt-header-hover-bg);
+}
+
+/* Truncated text + icon row */
+.center-trancate-head {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    gap            : 6px;
+    text-align     : center;
+    font-weight    : var(--gt-header-font-wt);
+    /* Reserve fixed space for icon inline â€” prevents shift */
+    min-width      : 0;
+}
+
+.center-trancate-head .slds-truncate {
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
+    min-width    : 0;
+}
+
+/* Icon wrapper â€” always occupies space even when icon is invisible */
+.slds-icon_container.slds-icon-utility-arrowdown {
+    display        : flex;
+    align-items    : center;
+    flex-shrink    : 0;
+    /* Fixed width = icon width so layout never shifts */
+    width          : var(--gt-icon-size);
+    height         : var(--gt-icon-size);
+}
+
+.slds-icon_container.slds-icon-utility-arrowdown svg {
+    width : var(--gt-icon-size);
+    height: var(--gt-icon-size);
+    fill  : var(--gt-header-color);
+}
+
+/* Sorted column header highlight */
+th.sorted-field {
+    background: var(--gt-sorted-bg);
+    box-shadow: var(--gt-sorted-shadow);
+}
+
+/*
+ * Base state â€” invisible but occupies space (no layout shift).
+ * Applied via JS getter: class="listing-manager-icon"
+ */
+.listing-manager-icon {
+    fill      : var(--gt-icon-color-idle);
+    width     : var(--gt-icon-size);
+    height    : var(--gt-icon-size);
+    cursor    : pointer;
+    /* Always occupies space */
+    flex-shrink: 0;
+    opacity   : 0;
+    transition: fill       var(--gt-transition-fast),
+                opacity    var(--gt-transition-fast),
+                transform  var(--gt-transition-std);
+}
+
+/* Active sorted column â€” always visible, branded color */
+.listing-manager-icon.sort-icon-active {
+    fill   : var(--gt-icon-color-active);
+    opacity: 1;
+    filter : drop-shadow(0 2px 4px rgba(1, 118, 211, 0.30));
+}
+
+/* Show faint arrow on hover for un-sorted columns */
+th:not(.sorted-field):hover .listing-manager-icon {
+    opacity: 0.55;
+}
+
+/* Direction arrows â€” smooth rotation, no layout shift */
+.rotate-asc {
+    transform : rotate(0deg);
+}
+.rotate-desc {
+    transform : rotate(180deg);
+}
+
+/* Alternating row colour */
+.tableDiv tbody tr:nth-child(odd),
+.gt-table-wrapper tbody tr:nth-child(odd) {
+    background-color: var(--gt-row-odd-bg);
+}
+
+/* Row hover */
+.slds-table:not(.slds-no-row-hover) tbody tr:hover > td,
+.slds-table:not(.slds-no-row-hover) tbody tr:hover > th {
+    background-color: var(--gt-row-hover-bg) !important;
+    transition      : background-color var(--gt-transition-fast);
+}
+
+/* Cell height & typography */
+.slds-table td,
+.gt-table-wrapper td {
+    height     : var(--gt-row-height);
+    font-family: var(--gt-font-family);
+    font-size  : var(--gt-cell-font-size);
+    padding    : var(--gt-cell-padding-v) var(--gt-cell-padding-h);
+    box-sizing : border-box;
+}
+
+/* Centred cell text */
+.center-trancate-text {
+    text-align  : center;
+    color       : var(--gt-cell-color);
+    font-family : var(--gt-font-family);
+    overflow    : hidden;
+    text-overflow: ellipsis;
+    white-space : nowrap;
+}
+
+/* Property thumbnail */
+.property-image {
+    width        : 4rem;
+    height       : 3rem;
+    object-fit   : cover;
+    border-radius: 4px;
+    display      : block;
+    margin       : 0 auto;
+}
+
+/* Action / image column */
+.slds-cell_action-mode.imageColume {
+    width: 5.25rem;
+}
+
+/* Absolute sort icon inside cell â€” keep right-aligned without shifting text */
+.slds-cell_action-mode .slds-icon_container {
+    display : flex;
+    position: absolute;
+    right   : 0;
+}
+
+/* Name link cell â€” disable SLDS transition that causes flicker */
+.conat_cls {
+    transition: unset !important;
+}
+.conat_cls svg {
+    cursor: pointer;
+}
+
+/* SLDS small icon override */
+.slds-icon_small,
+.slds-icon--small {
+    height: 1rem;
+}
+
+.gt-no-result,
+.noresult {
+    flex           : 1;
+    min-height     : 0;
+    overflow       : auto;
+    display        : flex;
+    justify-content: center;
+    align-items    : center;
+}
+
+.gt-no-result .tag1,
+.noresult .tag1 {
+    font-family: var(--gt-font-family);
+    font-size  : 1.1rem;
+    font-weight: 500;
+    line-height: 25px;
+    text-align : center;
+    color      : var(--gt-brand-primary);
+}
+
+.gt-no-result .tag2,
+.noresult .tag2 {
+    font-family: var(--gt-font-family);
+    font-size  : 0.9rem;
+    font-weight: 400;
+    line-height: 25px;
+    text-align : center;
+    color      : #636363;
+}
+
+
+.gt-pagination,
+.paginationDiv {
+    flex-shrink    : 0;
+    padding        : 0.5rem 1rem;
+    display        : flex;
+    justify-content: center;
+    align-items    : center;
+    background     : transparent;
+    border-top     : 1px solid rgba(1, 118, 211, 0.08);
+    box-shadow     : 0 -2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.gt-pagination .btnCover,
+.paginationDiv .btnCover {
+    display        : flex;
+    justify-content: center;
+}
+
+.pagination-container {
+    display    : flex;
+    align-items: center;
+    font-size  : var(--gt-page-font-size);
+    gap        : var(--gt-page-gap);
+}
+
+/* Number / prev / next buttons share the same base */
+.pagination-button,
+.pagination-btn-css {
+    background   : var(--gt-page-btn-bg);
+    border       : 1px solid var(--gt-page-btn-border);
+    color        : var(--gt-page-btn-color);
+    padding      : 6px 12px;
+    margin       : 0 var(--gt-page-gap);
+    cursor       : pointer;
+    transition   : all var(--gt-transition-fast);
+    border-radius: 5px;
+    font-family  : var(--gt-font-family);
+    font-size    : var(--gt-page-font-size);
+    font-weight  : 400;
+    line-height  : 1.4;
+}
+
+.pagination-button:hover,
+.pagination-btn-css:hover {
+    background  : #f0f0f0;
+    border-color: var(--gt-brand-primary);
+}
+
+/* Active page number */
+.pagination-button.active {
+    background  : var(--gt-page-active-bg);
+    color       : var(--gt-page-active-color);
+    border-color: var(--gt-page-active-bg);
+}
+
+/* Disabled state */
+.pagination-button:disabled,
+.pagination-btn-css:disabled {
+    opacity       : 0.5;
+    cursor        : not-allowed;
+    pointer-events: none;
+}
+
+/* Prev / Next specific layout */
+.pagination-button:first-child,
+.pagination-button:last-child,
+.pagination-btn-css {
+    font-weight: 500;
+    display    : flex;
+    align-items: center;
+    gap        : 0.5rem;
+}
+
+.pagination-button svg,
+.pagination-btn-css svg {
+    fill  : currentColor;
+    width : 0.7rem;
+    height: 0.7rem;
+    flex-shrink: 0;
+}
+
+/* Ellipsis */
+.pagination-ellipsis {
+    margin    : 0 5px;
+    font-family: var(--gt-font-family);
+    color     : var(--gt-page-btn-color);
+    font-size : var(--gt-page-font-size);
+    line-height: 1;
+    user-select: none;
+}
+
+/* Blue action buttons (New Listing, Configure Settings) */
+.blue-btn-css {
+    display        : flex;
+    justify-content: center;
+    align-items    : center;
+    gap            : 8px;
+    padding        : 8px 14px;
+    line-height    : 20px;
+    font-family    : var(--gt-font-family);
+    font-size      : 14px;
+    font-weight    : 400;
+    border         : none;
+    background     : var(--gt-brand-primary);
+    color          : #ffffff;
+    border-radius  : 5px;
+    min-width      : max-content;
+    cursor         : pointer;
+    transition     : background var(--gt-transition-fast),
+                     transform  var(--gt-transition-fast),
+                     box-shadow var(--gt-transition-fast);
+}
+.blue-btn-css:hover {
+    background : var(--gt-brand-dark);
+    transform  : translateY(-1px);
+    box-shadow : 0 4px 12px rgba(1, 118, 211, 0.40);
+}
+.blue-btn-css:disabled {
+    background  : #DBDBDB;
+    box-shadow  : none;
+    transform   : none;
+    cursor      : not-allowed;
+}
+.blue-btn-css svg {
+    width     : 16px;
+    height    : 16px;
+    flex-shrink: 0;
+}
+
+
+/* â”€â”€â”€ 10. RESPONSIVE OVERRIDES (â‰¤ 900 px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@media only screen and (max-width: 900px) {
+
+    .tableDiv,
+    .gt-table-wrapper {
+        height       : 90%;
+        border-radius: 8px;
+        margin       : 6px;
+    }
+
+    .gt-no-result,
+    .noresult {
+        height: 24rem;
+    }
+
+    .gt-pagination,
+    .paginationDiv {
+        margin-top   : 0.5rem;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .pagination-button,
+    .pagination-btn-css {
+        padding: 3px 5px;
+    }
+
+    .pagination-button:first-child,
+    .pagination-button:last-child,
+    .pagination-btn-css {
+        gap    : 0;
+        padding: 3px 3px;
+    }
+
+    .blue-btn-css {
+        width          : 100%;
+        justify-content: center;
+    }
+}

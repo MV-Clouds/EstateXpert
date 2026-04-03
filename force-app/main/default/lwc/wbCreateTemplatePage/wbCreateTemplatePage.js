@@ -223,6 +223,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     @track isAwsSdkInitialized = true;
     @track selectedFilesToUpload = [];
     @track awsFileName;
+    @track bodyVariablePlacementError = '';
+    @track bodyVariableFormatError = '';
+    @track headerVariableFormatError = '';
     @api activeTab;
     @api selectedTab;
 
@@ -356,7 +359,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     get templateBodyText() {
         // Map body variables into string format
-        return this.variables.map(varItem => `{{${varItem.object}.${varItem.field}}}`);
+        // For Name type variables, use the nameValue
+        return this.variables.map(varItem => {
+            if (varItem.variableType === 'Name' && varItem.nameValue) {
+                return varItem.nameValue;
+            }
+            return `{{${varItem.field}}}`;
+        });
     }
 
     // ============================
@@ -369,27 +378,47 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     get computedVariables() {
-        // Add selection state to fields for each variable
-        return this.variables.map(varItem => ({
-            ...varItem,
-            options: this.fields ? this.fields.map(field => ({
-                ...field,
-                isSelected: field.value === varItem.field
-            })) : []
+        return this.variables.map(varItem => {
+            const computed = this.computeVariableFields(varItem, false);
 
-        }));
+            return {
+                ...varItem,
+                ...computed
+            };
+        });
     }
 
     get computedHeaderVariables() {
-        // Add selection state to fields for each variable
-        return this.header_variables.map(varItem => ({
-            ...varItem,
-            options: this.fields ? this.fields.map(field => ({
+        return this.header_variables.map(varItem => {
+            const objectOptions = this.availableObjectsWithSelection
+                ? this.availableObjectsWithSelection.map(object => ({
+                    ...object,
+                    isSelected: object.value === varItem.object
+                }))
+                : [];
+
+            const computed = this.computeVariableFields(varItem, true);
+
+            return {
+                ...varItem,
+                ...computed,
+                objectOptions
+            };
+        });
+    }
+
+    computeVariableFields(varItem, isHeaderVariable = false) {
+        const fieldOptions = this.fields || [];
+        const selectedField = fieldOptions.find(field => field.value === varItem.field);
+        const fieldLabel = varItem.fieldLabel || selectedField?.label || varItem.field || 'Search fields...';
+        
+        return {
+            fieldLabel,
+            options: fieldOptions.map(field => ({
                 ...field,
                 isSelected: field.value === varItem.field
-            })) : []
-
-        }));
+            }))
+        };
     }
 
     get availableObjectsWithSelection() {
@@ -1651,14 +1680,12 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         this.isImgSelected = false;
         this.isDocFile = false;
         this.isFlowSelected = false;
-
         this.isautofillChecked = false;
         this.isExpiration = false;
         const headerInput = this.template.querySelector('input[name="header"]');
         if (headerInput) {
             headerInput.value = '';
         }
-
     }
 
     handleCustom(event) {
@@ -1693,6 +1720,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     this.tempBody = value.replace(/(\n\s*){3,}/g, '\n\n');
                     this.formatedTempBody = this.formatText(this.tempBody);
                     this.updatePreviewContent(this.formatedTempBody, 'body');
+                    this.updateFormatErrors();
+                    this.checkBodyVariablePlacement();
                     break;
                 case 'btntext':
                     this.updateButtonProperty(index, 'btntext', value);
@@ -1772,6 +1801,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         this.headerError = '';
                         this.updatePreviewContent(this.header, 'header');
                     }
+                    this.updateFormatErrors();
 
                     break;
                 default:
@@ -2153,10 +2183,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             };
             this.variables = [...this.variables, newVariable];
 
+            console.log('this.variables :: ', this.variables);
+
             this.tempBody = `${this.tempBody} {{${this.nextIndex}}} `;
             this.formatedTempBody = this.formatText(this.tempBody);
             this.updateTextarea();
             this.updatePreviewContent(this.formatedTempBody, 'body');
+            this.updateFormatErrors();
+            this.checkBodyVariablePlacement();
             this.nextIndex++;
         } catch (error) {
             console.error('Error in adding variables.', error);
@@ -2271,6 +2305,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 this.nextIndex = 1;
             }
             this.updateTextarea();
+            this.updateFormatErrors();
+            this.checkBodyVariablePlacement();
         } catch (error) {
             console.error('Something wrong while removing the variable.', error);
         }
@@ -2516,6 +2552,40 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    handleMergeFieldSelected(event) {
+        const { fieldPath, fieldLabel } = event.detail;
+        const variableIndex = event.currentTarget.dataset.index;
+        const isHeader = event.currentTarget.dataset.isHeader === 'true';
+        
+        // Update the appropriate variable array
+        if (isHeader) {
+            // Update header variables
+            this.header_variables = this.header_variables.map((varItem) =>
+                String(varItem.index) === variableIndex
+                    ? {
+                        ...varItem,
+                        field: fieldPath,
+                        fieldLabel: fieldLabel
+                    }
+                    : varItem
+            );
+            this.updatePreviewContent(this.header, 'header');
+        } else {
+            // Update body variables
+            this.variables = this.variables.map((varItem) =>
+                String(varItem.index) === variableIndex
+                    ? {
+                        ...varItem,
+                        field: fieldPath,
+                        fieldLabel: fieldLabel
+                    }
+                    : varItem
+            );
+            this.formatedTempBody = this.formatText(this.tempBody);
+            this.updatePreviewContent(this.formatedTempBody, 'body');
+        }
+    }
+
     applyFormattingAfter(text, cursorPos, marker) {
         return text.slice(0, cursorPos) + marker + text.slice(cursorPos);
     }
@@ -2556,6 +2626,19 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
             if (!this.tempBody || this.tempBody.trim() === '') {
                 this.showToastError('Template Body is required');
+                return false;
+            }
+
+            this.updateFormatErrors();
+            this.checkBodyVariablePlacement();
+
+            if (this.bodyVariableFormatError) {
+                this.showToastError(this.bodyVariableFormatError);
+                return false;
+            }
+
+            if (this.bodyVariablePlacementError) {
+                this.showToastError(this.bodyVariablePlacementError);
                 return false;
             }
 
@@ -2622,7 +2705,242 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         this.updateButtonErrors();
     }
 
+    validateVariableFormat(text, variableType, strictMode = false) {
+        if (!text) {
+            return { isValid: true, errorMessage: '' };
+        }
+        
+        // Find all variables in the text
+        const allVariables = text.match(/\{\{([^}]*)\}\}/g) || [];
+        
+        if (allVariables.length === 0) {
+            return { isValid: true, errorMessage: '' };
+        }
+        
+        // Check for empty {{}} - not allowed in strict mode (submission)
+        if (strictMode) {
+            const hasEmptyVars = allVariables.some(v => v === '{{}}');
+            if (hasEmptyVars) {
+                return {
+                    isValid: false,
+                    errorMessage: 'Variable parameters cannot be empty. Please provide a name for all variables).'
+                };
+            }
+        }
+        
+        if (variableType === 'Number' || !variableType) {
+            // For Number type: variables must be whole numbers like {{1}}, {{2}}
+            const numberPattern = /^\{\{\d+\}\}$/;
+            const invalidVars = allVariables.filter(v => !numberPattern.test(v));
+            
+            if (invalidVars.length > 0) {
+                return {
+                    isValid: false,
+                    errorMessage: 'This template contains variable parameters with incorrect formatting. Variable parameters must be whole numbers with two sets of curly brackets (for example, {{1}}, {{2}}).'
+                };
+            }
+        } else if (variableType === 'Name') {
+            const namePattern = /^\{\{([a-zA-Z_][a-zA-Z0-9_]*|)\}\}$/;
+            const pureNumberPattern = /^\{\{\d+\}\}$/;
+            
+            const invalidVars = allVariables.filter(v => {
+                if (v === '{{}}') return false;
+                if (pureNumberPattern.test(v)) return true;
+                return !namePattern.test(v);
+            });
+            
+            if (invalidVars.length > 0) {
+                return {
+                    isValid: false,
+                    errorMessage: 'This template contains variable parameters with incorrect formatting. Variable parameters must be letters, underscores and numbers (not starting with a number) with two sets of curly brackets (for example, {{customer_name}}, {{Name}}).'
+                };
+            }
+        }
+        
+        return { isValid: true, errorMessage: '' };
+    }
+
+    /**
+     * Update body and header format errors based on current variable type
+     * Call this after any change to body/header text or variable type
+     */
+    updateFormatErrors() {
+        const bodyValidation = this.validateVariableFormat(this.tempBody, this.selectedVariableType || 'Number');
+        this.bodyVariableFormatError = bodyValidation.isValid ? '' : bodyValidation.errorMessage;
+        
+        const headerValidation = this.validateVariableFormat(this.header, this.selectedVariableType || 'Number');
+        this.headerVariableFormatError = headerValidation.isValid ? '' : headerValidation.errorMessage;
+    }
+
+    checkBodyVariablePlacement() {
+        if (!this.tempBody || this.tempBody.trim() === '') {
+            this.bodyVariablePlacementError = '';
+            return false;
+        }
+
+        const errors = [];
+
+        // Normalize the body by replacing all whitespace (including newlines) with single spaces and trim
+        const normalizedBody = this.tempBody.replace(/\s+/g, ' ').trim();
+        
+        // Pattern to match variables - handle both {{1}} and {{name}} formats based on type
+        const variableType = this.selectedVariableType || 'Number';
+        const variablePattern = variableType === 'Name' ? /\{\{[^}]*\}\}/ : /\{\{\d+\}\}/;
+        const variablePatternGlobal = variableType === 'Name' ? /\{\{[^}]*\}\}/g : /\{\{\d+\}\}/g;
+        
+        const startsWithVariable = new RegExp(`^${variablePattern.source}`).test(normalizedBody);
+        const endsWithVariable = new RegExp(`${variablePattern.source}$`).test(normalizedBody);
+
+        // Check for back-to-back variables (e.g., {{1}}{{2}} or {{name}}{{other}} without any separator)
+        const backToBackPattern = variableType === 'Name' 
+            ? /\{\{[^}]*\}\}\{\{[^}]*\}\}/ 
+            : /\{\{\d+\}\}\{\{\d+\}\}/;
+        const hasBackToBackVariables = backToBackPattern.test(normalizedBody);
+
+        // Collect all placement errors
+        if (hasBackToBackVariables) {
+            errors.push('Variables cannot be placed directly next to each other. Please add text or a space between variables');
+        }
+        
+        if (startsWithVariable && endsWithVariable) {
+            errors.push('Template body cannot start and end with a variable. Please add static text before and after the variables');
+        } else if (startsWithVariable) {
+            errors.push('Template body cannot start with a variable. Please add static text before the variable');
+        } else if (endsWithVariable) {
+            errors.push('Template body cannot end with a variable. Please add static text after the variable');
+        }
+
+        // Check for variable sequence gaps only for Number type
+        if (variableType !== 'Name') {
+            const sequenceError = this.checkBodyVariableSequence(normalizedBody);
+            if (sequenceError) {
+                errors.push(sequenceError);
+            }
+        }
+
+        // Check variable to word ratio: for x variables, need at least 2x + 1 non-variable words
+        const variableWordRatioError = this.checkVariableToWordRatio(normalizedBody);
+        if (variableWordRatioError) {
+            errors.push(variableWordRatioError);
+        }
+
+        // Combine all errors or clear if none
+        if (errors.length > 0) {
+            this.bodyVariablePlacementError = errors.join('. ');
+            return true;
+        }
+
+        this.bodyVariablePlacementError = '';
+        return false;
+    }
+
+    checkVariableToWordRatio(body) {
+        // Count the number of variables - handle both {{1}} and {{name}} formats
+        const numberedVarMatches = body.match(/\{\{\d+\}\}/g) || [];
+        const namedVarMatches = body.match(/\{\{[^}]*\}\}/g) || [];
+        
+        // Use named vars for Name type, numbered for Number type
+        const variableType = this.selectedVariableType || 'Number';
+        const variableCount = variableType === 'Name' 
+            ? namedVarMatches.length 
+            : numberedVarMatches.length;
+
+        // If no variables, no need to check
+        if (variableCount === 0) {
+            return null;
+        }
+
+        // Remove all variables from the body to get only the text content
+        const textWithoutVariables = body.replace(/\{\{[^}]*\}\}/g, ' ').trim();
+
+        // Split by whitespace and filter out empty strings to get non-variable words
+        const nonVariableWords = textWithoutVariables.split(/\s+/).filter(word => word.length > 0);
+        const nonVariableWordCount = nonVariableWords.length;
+
+        // Required minimum words: 2x + 1 where x is the number of variables
+        const requiredMinWords = (2 * variableCount) + 1;
+
+        if (nonVariableWordCount < requiredMinWords) {
+            return `This template has too many variables for its length. Reduce the number of variables or increase the message length.`;
+        }
+
+        return null;
+    }
+
+    checkBodyVariableSequence(body) {
+        // For Name type, skip sequence check as they use {{name}} format
+        const variableType = this.selectedVariableType || 'Number';
+        if (variableType === 'Name') {
+            return null;
+        }
+        
+        // Extract all unique variable numbers from the body
+        const variableNumbers = new Set();
+        const variablePattern = /\{\{(\d+)\}\}/g;
+        let match;
+
+        while ((match = variablePattern.exec(body)) !== null) {
+            variableNumbers.add(parseInt(match[1], 10));
+        }
+
+        if (variableNumbers.size === 0) return null;
+
+        // Find max and check if all numbers from 1 to max are present
+        const maxVar = Math.max(...variableNumbers);
+        const missingNumbers = [];
+        
+        for (let i = 1; i <= maxVar; i++) {
+            if (!variableNumbers.has(i)) missingNumbers.push(i);
+        }
+
+        if (missingNumbers.length > 0) {
+            const missingVars = missingNumbers.map(n => `\{\{${n}\}\}`).join(', ');
+            return `Variable sequence is incomplete. Missing variable(s): ${missingVars}. Variables must be present from {{1}} to {{${maxVar}}}.`;
+        }
+
+        return null;
+    }
+
     handleConfirm() {
+        const variableType = this.selectedVariableType || 'Number';
+        // Validate variable format with strict mode (empty {{}} not allowed)
+        const bodyFormatValidation = this.validateVariableFormat(this.tempBody, variableType, true);
+        if (!bodyFormatValidation.isValid) {
+            this.showToastError(bodyFormatValidation.errorMessage);
+            return;
+        }
+        
+        // Also validate header if it has content
+        if (this.header) {
+            const headerFormatValidation = this.validateVariableFormat(this.header, variableType, true);
+            if (!headerFormatValidation.isValid) {
+                this.showToastError(headerFormatValidation.errorMessage);
+                return;
+            }
+        }
+        
+        // Check for missing alternate text in header variables (both Name and Number types)
+        const headerMissingAlt = this.header_variables.some(varItem => {
+            // AlternateText is required for both Name and Number types
+            return !varItem.alternateText || varItem.alternateText.trim() === '';
+        });
+        
+        // Check for missing alternate text in body variables (both Name and Number types)
+        const bodyMissingValue = this.variables.some(varItem => {
+            // AlternateText is required for both Name and Number types
+            return !varItem.alternateText || varItem.alternateText.trim() === '';
+        });
+        
+        if (headerMissingAlt) {
+            this.showToastError('Example/Alternative Text value is required for all header variables');
+            return;
+        }
+        
+        if (bodyMissingValue) {
+            this.showToastError('Example/Alternative Text value is required for all body variables');
+            return;
+        }
+        
         this.showReviewTemplate = true;
     }
     handleCloseTemplate() {
@@ -2826,10 +3144,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 isCodeExpiration: this.isExpiration == null ? false : true
 
             };
-
-
+            
             const serializedWrapper = JSON.stringify(template);
             const payload = JSON.stringify(buildPayload(template));
+            console.log(serializedWrapper);
+            console.log(payload);
             if (this.metaTemplateId) {
                 editWhatsappTemplate({ serializedWrapper: serializedWrapper, payloadWrapper: payload, templateId: this.metaTemplateId })
                     .then(result => {

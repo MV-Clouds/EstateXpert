@@ -209,6 +209,9 @@
                                             {headerError}
                                         </div>
                                     </template>
+                                    <template if:true={headerVariableFormatError}>
+                                        <p class="error-text">{headerVariableFormatError}</p>
+                                    </template>
 
                                     <template if:true={addHeaderVar}>
                                         <div class="add-variable">
@@ -222,22 +225,21 @@
                                                 <div key={varItem.id} class="true-div">
                                                     <p class="var">{varItem.index}</p>
 
-                                                    <select class="slds-select" onchange={handleObjectChange} style="border:0;">
-                                                        <template for:each={availableObjectsWithSelection} for:item="obj">
-                                                            <option key={obj.value} value={obj.value} selected={obj.isSelected} class="body-field-option">{obj.label}</option>
-                                                        </template>
-                                                    </select>
+                                                    <!-- Merge Field Selector Component for Header -->
+                                                    <div class="merge-field-selector-container">
+                                                        <c-wb-merge-field-selector
+                                                            selected-object={selectedObject}
+                                                            selected-field-path={varItem.field}
+                                                            selected-field-label={varItem.fieldLabel}
+                                                            max-hierarchy-level={LIMITS.maxHierarchyLevel}
+                                                            placeholder="Search fields..."
+                                                            data-index={varItem.index}
+                                                            data-is-header="true"
+                                                            onfieldselected={handleMergeFieldSelected}>
+                                                        </c-wb-merge-field-selector>
+                                                    </div>
 
-                                                    <!-- Dynamic Field Selection -->
-                                                    <select class="field-dropdown field-header-dd dropdown" data-id={varItem.id} onchange={handleFieldChange} style="border:0;">
-                                                        <template for:each={varItem.options} for:item="field">
-                                                            <option key={field.value} class="header-field-option" value={field.value} selected={field.isSelected}>
-                                                                {field.label}
-                                                            </option>
-                                                        </template>
-                                                    </select>
-
-                                                    <input type="text" class="alternate-text dropdown" style="border:0;" placeholder="Alternate Text" value={varItem.alternateText} data-id={varItem.id} onchange={handleAlternateTextChange} />
+                                                    <input type="text" class="alternate-text border-none" placeholder="Alternate Text" value={varItem.alternateText} data-id={varItem.id} onchange={handleAlternateTextChange} />
 
                                                     <div class="closeButton">
                                                         <lightning-button-icon icon-name="utility:close" alternative-text="Remove" onclick={handleHeaderVarRemove} data-index={index} class="remove-icon"></lightning-button-icon>
@@ -252,6 +254,12 @@
                                 <label for="body" class="body-label">Body</label>
                                 <textarea name="tempBody" class="body-area" oninput={handleInputChange} onkeypress={handleKeyDown} maxlength="1024" rows="4" cols="50">{tempBody}</textarea>
                                 <p class="char-count body-count">{tempBody.length}/{LIMITS.maxTempBodyLength}</p>
+                                <template if:true={bodyVariablePlacementError}>
+                                    <p class="error-text">{bodyVariablePlacementError}</p>
+                                </template>
+                                <template if:true={bodyVariableFormatError}>
+                                    <p class="error-text">{bodyVariableFormatError}</p>
+                                </template>
                             </div>
                             <div class="rich-button">
                                 <template if:true={showEmojis}>
@@ -302,9 +310,9 @@
                                     </div>
 
                                     <div class="true-div">
-                                        <p class="var">Select Object for merge fields :</p>
+                                        <p class="var object-label">Select Object for merge fields :</p>
                                         
-                                        <select class="object-dropdown dropdown" data-name="objectPicklist" onchange={handleObjectChange} value={selectedObject} style="border:0;">
+                                        <select class="object-dropdown dropdown" data-name="objectPicklist" onchange={handleObjectChange}>
                                             <template for:each={availableObjectsWithSelection} for:item="obj">
                                                 <option key={obj.value} value={obj.value} selected={obj.isSelected} class="body-field-option">
                                                     {obj.label}
@@ -317,16 +325,22 @@
                                         <div key={varItem.id} class="true-div">
                                             <p class="var">{varItem.index}</p>
 
-                                            <select class="field-dropdown field-body-dd dropdown" style="border:0;" data-id={varItem.id} data-index={varItem.index} onchange={handleVarFieldChange}>
-                                                <template for:each={varItem.options} for:item="option">
-                                                    <option key={option.value} class="body-field-option" value={option.value} selected={option.isSelected}>
-                                                        {option.label}
-                                                    </option>
-                                                </template>
-                                            </select>
+                                            <!-- Merge Field Selector Component for Body -->
+                                            <div class="merge-field-selector-container">
+                                                <c-wb-merge-field-selector
+                                                    selected-object={selectedObject}
+                                                    selected-field-path={varItem.field}
+                                                    selected-field-label={varItem.fieldLabel}
+                                                    max-hierarchy-level={LIMITS.maxHierarchyLevel}
+                                                    placeholder="Search fields..."
+                                                    data-index={varItem.index}
+                                                    data-is-header="false"
+                                                    onfieldselected={handleMergeFieldSelected}>
+                                                </c-wb-merge-field-selector>
+                                            </div>
 
                                             <!-- Alternate Text Input -->
-                                            <input type="text" class="alternate-text dropdown" style="border:0;" placeholder="Alternate Text" value={varItem.alternateText} data-id={varItem.id} data-index={varItem.index} onchange={handleAlternateVarChange} />
+                                            <input type="text" class="alternate-text border-none" placeholder="Alternate Text" value={varItem.alternateText} data-id={varItem.id} data-index={varItem.index} onchange={handleAlternateVarChange} />
 
                                             <div>
                                                 <lightning-button-icon icon-name="utility:close" alternative-text="Remove" onclick={handleVarRemove} data-index={index} class="remove-icon"></lightning-button-icon>

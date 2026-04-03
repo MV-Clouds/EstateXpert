@@ -21,6 +21,10 @@ import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+const MAX_EDITS_IN_30_DAYS = 10;
+
 export default class WbAllTemplatePage extends NavigationMixin(LightningElement) {
     @track isTemplateVisible = false;
     @track categoryValue='';
@@ -55,7 +59,6 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         ];
     }
 
-
     get filterClass() {
         return this.isFilterVisible ? 'combobox-container visible' : 'combobox-container hidden';
     }
@@ -82,7 +85,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         }
     }
 
-        /**
+    /**
     * Method Name: renderedCallback
     * @description: Ensure sort icons are updated after DOM is rendered
     * Created Date: 25/03/2026
@@ -170,7 +173,9 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             try {
                 if (data) {
                     this.allRecords = data.map((record, index) => {
-                        const isButtonDisabled = record.MVEX__Status__c === 'In-Review';
+                        const editRestriction = this.checkEditRestriction(record);
+                        const isInReview = record.MVEX__Status__c === 'In-Review';
+                        const isButtonDisabled = isInReview || editRestriction.isRestricted;
                         
                         return {
                             ...record,
@@ -182,7 +187,8 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                             MVEX__Status__c: this.handleEmptyValue(record.MVEX__Status__c),
                             LastModifiedDate: this.formatDate(record.LastModifiedDate) || '-',
                             isButtonDisabled,
-                            cssClass: isButtonDisabled ? 'action edit disabled' : 'action edit'
+                            cssClass: isButtonDisabled ? 'action edit disabled' : 'action edit',
+                            editRestrictionMessage: editRestriction.message,
                         };
                     });                    
                     this.filteredRecords = [...this.allRecords];
@@ -267,6 +273,65 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         if (!dateString) return '-';
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+
+    /**
+     * Checks if a template edit is restricted based on:
+     * 1. 24-hour rule: A template can only be edited once within 24 hours after being approved.
+     * 2. 30-day limit: A template can only be edited up to 10 times within a rolling 30-day window.
+     * @param {Object} record - The template record with WB_Template_Histories__r
+     * @returns {Object} - { isRestricted: boolean, message: string }
+     */
+    checkEditRestriction(record) {
+        const result = { isRestricted: false, message: '' };
+        
+        try {
+            // Check if there are any edit history records
+            const editHistories = record.MVEX__WB_Template_Histories__r;
+            
+            if (editHistories && editHistories.length > 0) {
+                const now = new Date();
+                
+                // Check 1: 24-hour restriction (most recent edit)
+                const lastEditTime = new Date(editHistories[0].MVEX__Edited_Time__c);
+                const timeDifference = now.getTime() - lastEditTime.getTime();
+                
+                if (timeDifference < TWENTY_FOUR_HOURS_MS) {
+                    const remainingMs = TWENTY_FOUR_HOURS_MS - timeDifference;
+                    const remainingHours = Math.floor(remainingMs / (1000 * 60 * 60));
+                    const remainingMinutes = Math.floor((remainingMs / (1000 * 60)) % 60);
+                    
+                    result.isRestricted = true;
+                    result.message = `Template was recently edited. You can edit again in ${remainingHours} hours and ${remainingMinutes} minutes.`;
+                    return result;
+                }
+                
+                // Check 2: 30-day rolling window limit (max 10 edits)
+                const thirtyDaysAgo = new Date(now.getTime() - THIRTY_DAYS_MS);
+                const editsInLast30Days = editHistories.filter(history => {
+                    const editTime = new Date(history.MVEX__Edited_Time__c);
+                    return editTime >= thirtyDaysAgo;
+                });
+                
+                if (editsInLast30Days.length >= MAX_EDITS_IN_30_DAYS) {
+                    // Find the oldest edit in the 30-day window to calculate when next edit will be available
+                    const oldestEditInWindow = editsInLast30Days[editsInLast30Days.length - 1];
+                    const oldestEditTime = new Date(oldestEditInWindow.MVEX__Edited_Time__c);
+                    const nextEditAvailable = new Date(oldestEditTime.getTime() + THIRTY_DAYS_MS);
+                    const remainingMs = nextEditAvailable.getTime() - now.getTime();
+                    const remainingDays = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
+                    const remainingHours = Math.floor((remainingMs / (1000 * 60 * 60)) % 24);
+                    
+                    result.isRestricted = true;
+                    result.message = `Edit limit reached (${MAX_EDITS_IN_30_DAYS} edits in 30 days). You can edit again in ${remainingDays} days and ${remainingHours} hours.`;
+                    return result;
+                }
+            }
+        } catch (error) {
+            console.error('Error checking edit restriction:', error);
+        }
+        
+        return result;
     }
 
     filterRecords() {

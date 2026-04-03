@@ -277,6 +277,12 @@ textarea {
     margin-left: 0.2rem;
 }
 
+.error-text {
+    color: #ba0517;
+    font-size: 13px;
+    margin-top: 0.3rem;
+}
+
 .footer-input {
     position: relative;
 }
@@ -312,8 +318,8 @@ textarea {
 
 .true-div {
     display: flex;
-    margin-top: 0.5rem;
-    gap: 1rem;
+    margin-top: 0.75rem;
+    gap: 0.9rem;
     align-items: center;
 }
 
@@ -328,8 +334,37 @@ textarea {
 }
 
 .var {
-    font-size: 14px;
-    margin-top: 0.2rem;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 0;
+    min-width: 78px;
+    color: #303030;
+}
+
+.object-label {
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 300px;
+    line-height: 1.2;
+}
+
+.object-dropdown {
+    width: 100%;
+}
+
+.merge-field-selector-container {
+    flex: 1 1 440px;
+    min-width: 0;
+}
+
+.alternate-text {
+    width: 230px;
+    min-width: 230px;
+    border: 1px solid #c6c6c6;
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    background: #fff;
 }
 
 .templateContent5 {
@@ -730,13 +765,37 @@ textarea {
     padding: 0.5rem;
     border-radius: 5px;
     border-color: #80808087;
-    padding-left: 0.2rem;
-    padding-right: 0;
+    border: 1px solid #c6c6c6;
+    border-radius: 10px;
 }
-.true-div > .var, .closeButton {
-    margin-top: 15px;
-    height: 35px;
 
+.true-div > .var,
+.closeButton {
+    margin-top: 0;
+    height: auto;
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 1024px) {
+    .true-div {
+        flex-wrap: wrap;
+    }
+
+    .object-label {
+        min-width: 100%;
+    }
+
+    .merge-field-selector-container {
+        width: 100%;
+        flex-basis: 100%;
+    }
+
+    .alternate-text {
+        flex: 1;
+        min-width: 180px;
+        width: auto;
+    }
 }
 
 .toolbar-button {

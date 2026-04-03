@@ -8,6 +8,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalTableStyles from '@salesforce/resourceUrl/GlobalTableCSS';
 
 export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningElement) {
     @track data = [];
@@ -126,13 +127,8 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     
     async connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss)
-                .then(() => {
-                    console.log('External Css Loaded');
-                })
-                .catch(error => {
-                    console.log('Error occurring during loading external css', error);
-                });
+            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalTableStyles);
 
             await this.getAccessible();
             if (!this.isAccessible) {

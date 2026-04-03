@@ -179,59 +179,6 @@
     font-weight: 500;
 }
 
-.pagination-container {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    padding-bottom: 14px;
-    justify-content: center;
-}
-
-.pagination-button {
-    background-color: #ffffff;
-    border: 1px solid #d8d8d8;
-    color: #333;
-    padding: 6px 12px;
-    margin: 0 2px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    border-radius: 0.3rem;
-    font-size: 12px;
-}
-
-.pagination-button svg {
-    fill: black;
-    width: 0.7rem;
-    height: 0.7rem;
-}
-
-.pagination-button:hover {
-    background-color: #f0f0f0;
-}
-
-.pagination-button.active {
-    background-color: #0070d2;
-    color: white;
-    border-color: #0070d2;
-}
-
-.pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-span {
-    margin: 0 5px;
-}
-
-.pagination-button:first-child,
-.pagination-button:last-child {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-
 .close-btn{
     border: 1px solid #c7c7c7;
     border-radius: 3px;

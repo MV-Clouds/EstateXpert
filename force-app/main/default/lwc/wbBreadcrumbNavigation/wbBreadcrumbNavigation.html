@@ -1,0 +1,23 @@
+<template>
+    <template if:true={showBreadcrumbs}>
+        <div class="breadcrumb-container">
+            <template for:each={breadcrumbs} for:item="crumb" for:index="crumbIndex">
+                <span key={crumb.id}>
+                    <template if:true={crumb.isClickable}>
+                        <a class="breadcrumb-link" 
+                           data-path={crumb.path}
+                           onclick={handleBreadcrumbClick}>
+                            {crumb.label}
+                        </a>
+                    </template>
+                    <template if:false={crumb.isClickable}>
+                        <span class="breadcrumb-current">{crumb.label}</span>
+                    </template>
+                    <template if:false={crumb.isLast}>
+                        <lightning-icon icon-name="utility:chevronright" size="xx-small" class="breadcrumb-separator"></lightning-icon>
+                    </template>
+                </span>
+            </template>
+        </div>
+    </template>
+</template>

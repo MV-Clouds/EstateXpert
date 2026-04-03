@@ -27,7 +27,6 @@
 .templatePreviewmain1 {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     height: fit-content;
-    width: 21rem;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 8px;
 }
@@ -44,19 +43,18 @@
 }
 
 .createtempdiv2 {
-    width: calc(100% - 22rem);
+    width: 75%;
 }
-
 
 .divcontainer2 {
     width: 100%;
     display: flex;
     position: relative;
+    justify-content: space-between;
 }
 
 .templateContent3 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
@@ -111,7 +109,6 @@ label {
 
 .templateContent4 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
@@ -199,7 +196,6 @@ textarea {
     justify-content: center;
     align-items: center;
     margin-top: 2%;
-    /* position: sticky; */
     bottom: 0;
     border: none;
 }
@@ -215,22 +211,8 @@ textarea {
     justify-content: flex-end;
     position: absolute;
     right: 0;
-    /* float: right; */
     width: 100%;
 }
-
-/* .icon {
-    --sds-c-icon-color-foreground-default: #212529;
-    margin-top: 0.3rem;
-    cursor: pointer;
-    border: none;
-} */
-
-/* .emoji {
-    width: 1.2rem;
-    margin-right: 0.29rem;
-    cursor: pointer;
-} */
 
 .emoji-category-div {
     margin: 4px 8px;
@@ -260,7 +242,6 @@ textarea {
 .emoji:hover {
     background-color: #7e7c7c30;
 }
-
 
 .add-variable {
     border-radius: 8px;
@@ -353,7 +334,6 @@ textarea {
 
 .templateContent5 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    width: 95%;
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
@@ -412,16 +392,12 @@ textarea {
     margin-top: 1.5rem;
 }
 
-.typeaction,
-.btntxt,
-.urltype,
-.webUrl {
+.typeaction, .btntxt, .urltype, .webUrl {
     display: grid;
     width: -webkit-fill-available;
 }
 
-.text-btn,
-.web-url {
+.text-btn, .web-url {
     padding: 0.5rem;
     padding-right: 4.5rem;
     border: 1px solid #80808087;
@@ -431,8 +407,7 @@ textarea {
     border-left-color: #dddbdb87;
 }
 
-.btntxt,
-.webUrl {
+.btntxt, .webUrl {
     position: relative;
 }
 
@@ -445,10 +420,6 @@ textarea {
 .count-input {
     position: relative;
 }
-
-/* .custom-btn{
-    width: -webkit-fill-available;
-} */
 
 .btn-count {
     position: absolute;
@@ -544,10 +515,7 @@ textarea {
     display: none;
 }
 
-.chooseImage,
-.chooseVideo,
-.chooseDoc,
-.chooseFlow {
+.chooseImage, .chooseVideo, .chooseDoc, .chooseFlow {
     display: flex;
     margin-top: 1rem;
     position: relative;
@@ -582,12 +550,6 @@ textarea {
     margin-top: 1.7rem;
 }
 
-/* .img{
-    border: 1px solid #bfbcbc;
-    padding: 0.5rem;
-    border-radius: 4px;
-} */
-
 .remove-button {
     background-color: white;
     border: 1px solid #c7c4c4;
@@ -612,13 +574,11 @@ textarea {
 }
 
 .creattempdiv3 {
-    width: 23%;
+    width: 24%;
 }
 
 .templatetextWP {
     font-size: large;
-    /* display: flex;
-    justify-content: center; */
     padding: 0.2rem;
     margin-bottom: 0.2rem;
 }
@@ -665,7 +625,6 @@ textarea {
     justify-content: flex-end;
     font-size: smaller;
     position: relative;
-    /* top: 10px; */
 }
 
 .imagedivWP {
@@ -717,7 +676,6 @@ textarea {
     border-top: 0px solid white;
     border-right: 18px solid white;
     border-bottom: 17px solid transparent;
-    /* transform: translateY(-50%); */
     transform: translateY(-52%);
 }
 
@@ -743,7 +701,6 @@ textarea {
 
 .main-container {
     overflow: auto;
-    /* background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%); */
     background: #f5f7fa;
     padding: 1rem;
     padding-bottom: 1rem;
@@ -776,8 +733,7 @@ textarea {
     padding-left: 0.2rem;
     padding-right: 0;
 }
-.true-div>.var,
-.closeButton {
+.true-div > .var, .closeButton {
     margin-top: 15px;
     height: 35px;
 
@@ -817,19 +773,6 @@ textarea {
     padding: 0.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
-/* .custom-dropdown {
-    position: absolute;
-    z-index: 10;
-    list-style-type: none;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 0;
-    width: 200px;
-    border: none;
-    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
-} */
 
 .quick-action-head {
     font-weight: 500;
@@ -1128,47 +1071,6 @@ textarea {
     background-color: rgb(189, 189, 189);
 }
 
-
-/* Backdrop covers the entire component */
-.license-error {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8); /* Dark overlay */
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Centered popup */
-.popup-container {
-    background: #b71c1c; /* Dark red for warning */
-    color: white;
-    padding: 24px 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    max-width: 400px;
-    text-align: center;
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* Styling for title */
-.popup-content h2 {
-    font-size: 24px;
-    font-weight: 500;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-
-/* Styling for message */
-.popup-content p {
-    font-size: 16px;
-    margin: 0;
-}
-
 .main_header_cls {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     border-left: 4px solid #0176D3;
@@ -1242,7 +1144,6 @@ textarea {
     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
     transform: translateY(-1px);
 }
-
 
 .btn svg {
     width: 16px;

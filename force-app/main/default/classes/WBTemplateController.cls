@@ -20,6 +20,12 @@
     public static List<WBConnect_Configuration__mdt> SETTINGS = WBConnect_Configuration__mdt.getAll().values(); 
     public static String accessToken = !SETTINGS.isEmpty() ? SETTINGS[0].Access_Token__c : null;
     public static String uploadEndpoint;
+    // List of allowed fields for polymorphic relationships (like Owner which can be User or Queue)
+    public static List<String> polymorphismObjAllowedFields = new List<String>{
+        'Alias', 'Email', 'FirstName', 'IsActive', 'LastName', 
+        'LastReferencedDate', 'LastViewedDate', 'MiddleName', 'Name', 'Phone', 
+        'Profile', 'Suffix', 'Title', 'Type', 'Username', 'UserRole', 'UserRoleId'
+    };
 
 
      /*
@@ -83,7 +89,7 @@
                return errorMessage;
            }
            String accessToken = config[0].Access_Token__c;
-           String endpoint = config[0].API_Endpoint__c + '/' + config[0].API_Version__c + '/' + config[0].Phone_Number_Id__c + '/messages';
+           String endpoint = config[0].APIEndpoint__c + '/' + config[0].APIVersion__c + '/' + config[0].Phone_Number_Id__c + '/messages';
            httpReq.setEndpoint(endpoint);
            httpReq.setMethod('POST');
            httpReq.setHeader('Content-Type', 'application/json');
@@ -422,7 +428,7 @@
 
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             System.debug('payload :: '+payload);
-            String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates';
+            String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates';
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
@@ -479,7 +485,7 @@
     @future(callout=true)
     public static void checkTemplateExistance(String templateName, String serializedWrapper, String payloadWrapper) {
         try {
-            String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + SETTINGS[0].Business_Account_Id__c + '/message_templates?name=' + EncodingUtil.urlEncode(templateName, 'UTF-8');
+            String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + SETTINGS[0].Business_Account_Id__c + '/message_templates?name=' + EncodingUtil.urlEncode(templateName, 'UTF-8');
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
@@ -538,7 +544,7 @@
            payload.put('file_name', fileName);
            payload.put('file_length', fileLength);
            payload.put('file_type', fileType);
-           uploadEndpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/'+SETTINGS[0].Application_Id__c+'/uploads';
+           uploadEndpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/'+SETTINGS[0].Application_Id__c+'/uploads';
 
            HttpRequest req = new HttpRequest();
            Http http = new Http();
@@ -582,7 +588,7 @@
            HttpRequest req = new HttpRequest();
            Http http = new Http();
 
-           String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + 'upload:' + fileWrapper.uploadSessionId;
+           String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + 'upload:' + fileWrapper.uploadSessionId;
            req.setEndpoint(endpoint);
            req.setMethod('POST');            
            req.setHeader('Authorization', 'OAuth ' + accessToken);
@@ -622,7 +628,7 @@
 
            WhatsappTemplate__c wbTempRec = [SELECT Id, Name,Template_Name__c FROM WhatsappTemplate__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
            
-           String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates?name=' + wbTempRec.Template_Name__c;
+           String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + SETTINGS[0].Business_Account_Id__c+'/message_templates?name=' + wbTempRec.Template_Name__c;
 
            HttpRequest req = new HttpRequest();         
            req.setEndpoint(endpoint);
@@ -665,7 +671,7 @@
 
         try {
             CreateTemplateWrapper.TemplateWrapper templateWrapper = (CreateTemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, CreateTemplateWrapper.TemplateWrapper.class);
-            String editEndpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/'+templateId;
+            String editEndpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/'+templateId;
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             
             HttpRequest req = new HttpRequest();
@@ -725,7 +731,7 @@
            List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
 
            String accessToken = wbConfig[0].Access_Token__c;
-           String endpoint = SETTINGS[0].API_Endpoint__c + '/' + SETTINGS[0].API_Version__c + '/' + flowId + '?fields=preview.invalidate(false)';
+           String endpoint = SETTINGS[0].APIEndpoint__c + '/' + SETTINGS[0].APIVersion__c + '/' + flowId + '?fields=preview.invalidate(false)';
            HttpRequest request = new HttpRequest();
            request.setEndpoint(endpoint);
            request.setMethod('GET');
@@ -778,6 +784,242 @@
         }
     
         return objectList;
+    }
+
+    /*
+    *********************************************************
+    @description     : Method to fetch fields for objects with optional relationship paths.
+                      : Handles all cases:
+                      : 1. Multiple objects at root level (relationshipPaths empty/null)
+                      : 2. Single object with single relationship path
+                      : 3. Single object with multiple relationship paths (bulk fetch - avoids loop callouts)
+    @param           : objectNames - List of object API names to fetch fields for
+                      : relationshipPaths - Optional list of relationship paths (empty/null for root level)
+    @return          : Map<String, List<FieldOption>> - Map where key is objectName (for root) or path (for relationships)
+    ********************************************************
+    */
+    @AuraEnabled
+    public static Map<String, List<FieldOption>> getObjectFieldsWithRelationships(List<String> objectNames, List<String> relationshipPaths) {
+        Map<String, List<FieldOption>> resultMap = new Map<String, List<FieldOption>>();
+        
+        try {
+            if (objectNames == null || objectNames.isEmpty()) {
+                return resultMap;
+            }
+            
+            // Remove duplicates from objects
+            Set<String> uniqueObjects = new Set<String>(objectNames);
+            
+            // Check if relationship paths are provided
+            Boolean hasRelationshipPaths = relationshipPaths != null && !relationshipPaths.isEmpty();
+            
+            if (hasRelationshipPaths && uniqueObjects.size() == 1) {
+                // CASE: Single object with relationship path(s) - key by path
+                String objectName = new List<String>(uniqueObjects)[0];
+                Set<String> uniquePaths = new Set<String>(relationshipPaths);
+                
+                for (String path : uniquePaths) {
+                    try {
+                        if (String.isBlank(path)) {
+                            continue;
+                        }
+                        List<FieldOption> fieldOptions = getFieldsAtPath(objectName, path);
+                        resultMap.put(path, fieldOptions);
+                    } catch (Exception e) {
+                        System.debug('Error fetching fields for path ' + path + ': ' + e.getMessage());
+                        resultMap.put(path, new List<FieldOption>());
+                    }
+                }
+            } else {
+                // CASE: Multiple objects OR single object at root level - key by objectName
+                for (String objectName : uniqueObjects) {
+                    try {
+                        if (String.isBlank(objectName)) {
+                            continue;
+                        }
+                        List<FieldOption> fields = getFieldsAtPath(objectName, '');
+                        resultMap.put(objectName, fields);
+                    } catch (Exception e) {
+                        System.debug('Error fetching fields for object ' + objectName + ': ' + e.getMessage());
+                        resultMap.put(objectName, new List<FieldOption>());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.debug('Error in getObjectFieldsWithRelationships: ' + e.getMessage());
+            ErrorHandler.insertErrordata(e, 'WBTemplateController', 'getObjectFieldsWithRelationships', e.getMessage());
+            throw new AuraHandledException('Error fetching fields: ' + e.getMessage());
+        }
+        
+        return resultMap;
+    }
+
+    /*
+    *********************************************************
+    @description     : Helper method to get fields at a specific relationship path
+    @param           : objectName - The starting object API name
+                      : relationshipPath - The relationship path to navigate
+    @return          : List<FieldOption> - List of field options at the target object
+    ********************************************************
+    */
+
+    private static List<FieldOption> getFieldsAtPath(String objectName, String relationshipPath) {
+        String[] pathParts = relationshipPath.split('\\.');
+        String currentObjectName = objectName;
+        Boolean isPolymorphicPath = false;
+        
+        // Navigate through the path to find the target object
+        for (String part : pathParts) {
+            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(currentObjectName).getDescribe();
+            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
+            
+            // Find the relationship field
+            for (String fieldName : fieldsMap.keySet()) {
+                Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
+                String relationshipName = fieldDescribe.getRelationshipName();
+                
+                if (relationshipName == part) {
+                    List<Schema.sObjectType> referenceTo = fieldDescribe.getReferenceTo();
+                    if (!referenceTo.isEmpty()) {
+                        // Check if this relationship is polymorphic (points to multiple objects)
+                        if (referenceTo.size() > 1) {
+                            isPolymorphicPath = true;
+                        }
+                        currentObjectName = referenceTo[0].getDescribe().getName();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Get immediate fields of the target object
+        return getFieldsImmediate(currentObjectName, relationshipPath, isPolymorphicPath);
+    }
+
+    /*
+    *********************************************************
+    @description     : Helper method to get immediate fields of an object
+    @param           : objectName - The object API name
+                      : prefix - The relationship path prefix for field values
+                      : isPolymorphicParent - Whether the parent relationship is polymorphic
+    @return          : List<FieldOption> - List of immediate field options
+    ********************************************************
+    */
+    private static List<FieldOption> getFieldsImmediate(String objectName, String prefix, Boolean isPolymorphicParent) {
+        List<FieldOption> fieldOptions = new List<FieldOption>();
+        
+        // Convert allowed fields to a Set for faster lookup
+        Set<String> allowedFieldsSet = new Set<String>(polymorphismObjAllowedFields);
+        
+        try {
+            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectName).getDescribe();
+            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
+            
+            for (String fieldName : fieldsMap.keySet()) {
+                Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
+                String fieldApiName = fieldDescribe.getName();
+                String fieldLabel = fieldDescribe.getLabel();
+                Schema.DisplayType fieldType = fieldDescribe.getType();
+                
+                // If parent is polymorphic, only show allowed fields and no relationships
+                if (isPolymorphicParent) {
+                    // Only add fields that are in the allowed list
+                    if (allowedFieldsSet.contains(fieldApiName)) {
+                        String fullPath = String.isNotBlank(prefix) ? prefix + '.' + fieldApiName : fieldApiName;
+                        FieldOption option = new FieldOption();
+                        option.label = fieldLabel;
+                        option.value = fullPath;
+                        option.apiName = fieldApiName;
+                        option.type = String.valueOf(fieldType);
+                        option.isRelationship = false;
+                        option.level = 0;
+                        option.hasChildren = false;
+                        fieldOptions.add(option);
+                    }
+                    continue; // Skip relationship processing for polymorphic parents
+                }
+                
+                // Regular fields
+                String fullPath = String.isNotBlank(prefix) ? prefix + '.' + fieldApiName : fieldApiName;
+                FieldOption option = new FieldOption();
+                option.label = fieldLabel;
+                option.value = fullPath;
+                option.apiName = fieldApiName;
+                option.type = String.valueOf(fieldType);
+                option.isRelationship = false;
+                option.level = 0;
+                option.hasChildren = false;
+                fieldOptions.add(option);
+                
+                // Check for lookup/master-detail relationships
+                if (fieldType == Schema.DisplayType.REFERENCE) {
+                    List<Schema.sObjectType> referenceTo = fieldDescribe.getReferenceTo();
+                    if (!referenceTo.isEmpty()) {
+                        String relationshipName = fieldDescribe.getRelationshipName();
+                        if (String.isNotBlank(relationshipName)) {
+                            String relatedObjectName = referenceTo[0].getDescribe().getName();
+                            String relatedObjectLabel = referenceTo[0].getDescribe().getLabel();
+                            
+                            // Check if this is a polymorphic relationship (points to multiple objects)
+                            Boolean isPolymorphic = referenceTo.size() > 1;
+                            
+                            // Create relationship node (will be loaded lazily)
+                            FieldOption relOption = new FieldOption();
+                            relOption.label = fieldLabel + ' (' + relatedObjectLabel + ')';
+                            relOption.value = String.isNotBlank(prefix) ? prefix + '.' + relationshipName : relationshipName;
+                            relOption.apiName = relationshipName;
+                            relOption.relationshipName = relationshipName; // Add explicit relationshipName property
+                            relOption.type = 'RELATIONSHIP';
+                            relOption.isRelationship = true;
+                            relOption.level = 0;
+                            relOption.hasChildren = true;
+                            relOption.relatedObject = relatedObjectName;
+                            relOption.isPolymorphic = isPolymorphic;
+                            relOption.children = new List<FieldOption>(); // Empty, will be loaded on demand
+                            
+                            fieldOptions.add(relOption);
+                        }
+                    }
+                }
+            }
+            
+            // Sort all fields together to maintain alphabetical order
+            fieldOptions.sort();
+            
+        } catch (Exception e) {
+            System.debug('Error in getFieldsImmediate: ' + e.getMessage());
+        }
+        
+        return fieldOptions;
+    }
+
+    // Wrapper class for field options
+    public class FieldOption implements Comparable {
+        @AuraEnabled public String label { get; set; }
+        @AuraEnabled public String value { get; set; }
+        @AuraEnabled public String apiName { get; set; }
+        @AuraEnabled public String type { get; set; }
+        @AuraEnabled public Boolean isRelationship { get; set; }
+        @AuraEnabled public Integer level { get; set; }
+        @AuraEnabled public Boolean hasChildren { get; set; }
+        @AuraEnabled public String relatedObject { get; set; }
+        @AuraEnabled public String relationshipName { get; set; }
+        @AuraEnabled public Boolean isPolymorphic { get; set; }
+        @AuraEnabled public List<FieldOption> children { get; set; }
+        
+        public FieldOption() {
+            this.children = new List<FieldOption>();
+            this.hasChildren = false;
+            this.isRelationship = false;
+            this.isPolymorphic = false;
+        }
+        
+        public Integer compareTo(Object compareTo) {
+            FieldOption compareToField = (FieldOption)compareTo;
+            if (label == compareToField.label) return 0;
+            if (label > compareToField.label) return 1;
+            return -1;
+        }
     }
 
     @AuraEnabled(cacheable=true)

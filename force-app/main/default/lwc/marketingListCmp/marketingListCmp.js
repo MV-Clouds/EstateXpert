@@ -480,7 +480,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
                     cardView: field.cardView,
-                    format: field.format
+                    format: field.format,
+                    referenceObjectName: field.referenceObjectName,
+                    relationshipName: field.relationshipName
                 }));
 
                 this.contactData.forEach((con) => {
@@ -552,24 +554,35 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         try {
             this.processedContactData = this.contactData.map(con => {
                 let orderedFields = this.fields.map(field => {
-                    // Handle reference fields (e.g., Contact_r.LastName)
+                    let isRedirectable = false;
+                    let lookupId = null;
+                    let objectApiName = null;
                     let fieldValue;
+
                     if (field.fieldName.includes('.')) {
-                        // Split the reference field name into relationship and field (e.g., Contact_r.LastName)
                         let fieldParts = field.fieldName.split('.');
-                        let relatedObject = con[fieldParts[0]]; // Get the related object (e.g., Contact_r)
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-'; // Get the related field (e.g., LastName)
+                        let relatedObject = con[fieldParts[0]];
+                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
+                        
+                        if (relatedObject && fieldParts[1] === 'Name') {
+                            isRedirectable = true;
+                            lookupId = relatedObject.Id;
+                            objectApiName = field.referenceObjectName;
+                        }
                     } else {
-                        fieldValue = con[field.fieldName] || '-'; // Regular field
+                        fieldValue = con[field.fieldName] || '-';
                     }
 
                     if (field.format && fieldValue) {
-                        fieldValue = this.applyFieldFormat(fieldValue, field.format); // Apply the appropriate format
+                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
                     }
 
                     return {
                         fieldName: field.fieldName,
-                        value: fieldValue // Use the calculated field value
+                        value: fieldValue,
+                        isRedirectable: isRedirectable,
+                        lookupId: lookupId,
+                        objectApiName: objectApiName
                     };
                 });
 
@@ -841,27 +854,32 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     redirectToRecord(event) {
-        const recordId = event.target.dataset.id;
-        if (this.screenWidth > 900) {
-            this[NavigationMixin.GenerateUrl]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: recordId,
-                    objectApiName: 'Contact',
-                    actionName: 'view'
-                }
-            }).then(url => {
-                window?.globalThis?.open(url, '_blank');
-            });
-        } else {
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: recordId,
-                    objectApiName: 'Contact', // Object API Name
-                    actionName: 'view'
-                }
-            });
+        try {
+            const recordId = event.target.dataset.id;
+            const objectApiName = event.target.dataset.object ||'Contact';
+            if (this.screenWidth > 900) {
+                this[NavigationMixin.GenerateUrl]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: recordId,
+                        objectApiName: objectApiName,
+                        actionName: 'view'
+                    }
+                }).then(url => {
+                    window?.globalThis?.open(url, '_blank');
+                });
+            } else {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: recordId,
+                        objectApiName: objectApiName,
+                        actionName: 'view'
+                    }
+                });
+            }
+        } catch (error) {
+            console.log('Error redirectToRecord->' + error);
         }
     }
 
@@ -1376,7 +1394,7 @@ openConfigureSettings(){
     }
     handleCloseModal() {
         this.isConfigOpen = false;
-        // this.getContactDataMethod();
+        this.getContactDataMethod();
     }
 
     /**

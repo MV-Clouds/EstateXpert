@@ -12,6 +12,7 @@ import getCampaigns from '@salesforce/apex/EmailCampaignController.getCampaigns'
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalTableStyles from '@salesforce/resourceUrl/GlobalTableCSS';
 
 export default class DisplayCampaigns extends NavigationMixin(LightningElement) {
     @track campaigns = [];
@@ -198,8 +199,10 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     connectedCallback() {
         this.isLoading = true;
+        // Load fonts + shared table styles
         Promise.all([
-            loadStyle(this, MulishFontCss)
+            loadStyle(this, MulishFontCss),
+            loadStyle(this, globalTableStyles)
         ])
         .then(() => {
             console.log('External Css Loaded');
@@ -837,20 +840,26 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
-            // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            // Remove active class from all headers and remove sorted-field if present
+            const allHeaders = this.template.querySelectorAll('.sorting_header, th');
             allHeaders.forEach(header => {
                 header.classList.remove('active-sort');
+                header.classList.remove('sorted-field');
             });
 
-            // Set active header
+            // Set active header (add sorted-field to match GlobalTableCSS)
             const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
+                currentHeader.classList.add('sorted-field');
 
                 const icon = currentHeader.querySelector('svg');
                 if (icon) {
+                    // Ensure the icon has the listing-manager-icon base class
+                    icon.classList.add('listing-manager-icon');
                     icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                    // make icon visible (GlobalTableCSS will show when .sort-icon-active is present)
+                    icon.classList.add('sort-icon-active');
                 }
             }
 

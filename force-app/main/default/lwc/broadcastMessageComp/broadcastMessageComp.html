@@ -19,6 +19,14 @@
                     </div>
                 </div>
                 <div class="header">
+                    <div class="filter-toolbar">
+                        <div class="header-search-bar-css">
+                        <lightning-input type="search" class='searchInput' label="Search Contact" variant='label-hidden' placeholder="Search by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
+                        </div>
+                        <div class="header-combobox">
+                        <lightning-combobox label="Select List View" class='listView' variant='label-hidden' value={selectedListView} placeholder="Select List View"  options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
+                        </div>
+                    </div>
                     <!-- Single Step View: Show Save Group immediately -->
                     <button class="blue-btn-css" onclick={handleModalOpen} disabled={isBtnDisabled}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,11 +46,10 @@
                 <!-- LEFT SECTION (Search/Filters + Table) -->
                 <div class="left-section">
                     <!-- Filter Toolbar -->
-                    <div class="filter-toolbar">
+                    <!-- <div class="filter-toolbar">
                         <lightning-input type="search" label="Search Contact" placeholder="Search by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
-                        <!-- <lightning-combobox label="Select Object" value={selectedObject} options={objectOptions} onchange={handleObjectChange}></lightning-combobox> -->
                         <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
-                    </div>
+                    </div> -->
 
                     <!-- Custom Table -->
                     <template if:true={paginatedData.length}>
@@ -115,32 +122,36 @@
                     </template>
 
                     <template if:true={paginatedData.length}>
-                        <div class="pagination-container">
-                            <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                    <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                </svg>
-                                Previous
-                            </button>
-
-                            <template for:each={pageNumbers} for:item="page">
-                                <template if:false={page.isEllipsis}>
-                                    <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
-                                        {page.number}
+                        <div class="paginationDiv">
+                            <div class="btnCover">
+                                <div class="pagination-container">
+                                    <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                            <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                        </svg>
+                                        Previous
                                     </button>
-                                </template>
-                                <template if:true={page.isEllipsis}>
-                                    <span key={page.number} class="pagination-ellipsis">...</span>
-                                </template>
-                            </template>
 
-                            <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                                Next
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                    <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                </svg>
-                            </button>
-                        </div>
+                                    <template for:each={pageNumbers} for:item="page">
+                                        <template if:false={page.isEllipsis}>
+                                            <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
+                                                {page.number}
+                                            </button>
+                                        </template>
+                                        <template if:true={page.isEllipsis}>
+                                            <span key={page.number} class="pagination-ellipsis">...</span>
+                                        </template>
+                                    </template>
+
+                                    <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                        Next
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                            <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>        
                     </template>
                 </div>
 

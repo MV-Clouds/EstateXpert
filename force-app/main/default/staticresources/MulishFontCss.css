@@ -223,6 +223,22 @@
     cursor: not-allowed;
 }
 
+.header-search-bar-css .slds-form-element__help {
+    display: none;
+}
+
+.header-search-bar-css .slds-input {
+    min-height: 36px;
+}
+
+.header-combobox .slds-form-element__help {
+    display: none;
+}
+
+.header-combobox .slds-combobox__input{
+  min-height: 36px;
+  align-items: center;
+}
 /* cyrillic-ext */
 @font-face {
   font-family: 'Mulish';

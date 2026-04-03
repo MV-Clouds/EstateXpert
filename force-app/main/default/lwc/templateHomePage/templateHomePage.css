@@ -37,7 +37,7 @@
 }
 
 .search-input {
-    flex-grow: 1;
+    width: 22rem;
     --sds-c-input-radius-border: 6px;
     color: #000000;
 }
@@ -107,15 +107,13 @@
 }
 
 .table-content {
+      flex: 1;
+    min-height: 0;
     overflow: auto;
-    border-radius: 8px;
-    height: 100%;
-    background-color: white;
-    margin: 16px;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .table-content .slds-table th{
@@ -244,12 +242,27 @@
     stroke: #0176d3;
 }
 
+.paginationDiv {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border-top: 1px solid rgba(1, 118, 211, 0.08);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.paginationDiv .btnCover {
+    display: flex;
+    justify-content: center;
+}
+
 .pagination-container {
     display: flex;
     align-items: center;
     font-size: 14px;
     justify-content: center;
-    padding-bottom: 10px;
 }
 
 .pagination-button {
@@ -390,6 +403,12 @@
     /* overflow: hidden; */
 }
 
+.header{
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .sub_main_header_css {
     display: flex;
     flex-direction: row;
@@ -527,8 +546,8 @@
 
 .filter-icon-container {
     cursor: pointer;
-    width: 34px;
-    height: 33px;
+    width: 36px;
+    height: 36px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -538,13 +557,18 @@
     color: #0176D3;
     box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
     transition: all 0.2s ease;
-    z-index: 1000;
+    z-index: 10;
 }
 
 .filter-icon-container:hover {
     background: #F3F6F9;
     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
     transform: translateY(-1px);
+}
+
+/* Increase z-index when filter modal is open */
+.main_header_cls:has(.filter-dropdown-box) .filter-icon-container {
+    z-index: 1001;
 }
 
 .filter-trigger-icon {
@@ -582,7 +606,8 @@
     margin-top: 40px;
     z-index: 1000;
     position: absolute;
-    right: 0;
+    right: 15px;
+    top: 1.2rem;
     width: 100%;
     max-width: 600px;
     max-height: 80vh;

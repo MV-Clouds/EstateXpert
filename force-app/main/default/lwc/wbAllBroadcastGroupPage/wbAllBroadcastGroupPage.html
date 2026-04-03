@@ -12,6 +12,20 @@
                         </div>
                     </div>
                     <div class="header">
+                        <div class="header-search-bar-css">
+                            <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
+                                value={searchTerm} type="search" placeholder="Search by Name"
+                                onchange={handleSearch}></lightning-input>
+                        </div>
+
+                        <div class="header-combobox">
+                            <lightning-combobox variant="label-hidden" class="filter-combobox"
+                                value={selectedCommunicationTypeFilter} placeholder="Filter by Type"
+                                options={communicationTypeOptions} onchange={handleCommunicationTypeFilter}>
+                            </lightning-combobox>
+                        </div>
+
+
                         <button class="blue-btn-css" onclick={handleNewGroupClick}>
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -19,24 +33,20 @@
                             </svg>
                             New Group
                         </button>
+
+                        <button class="refresh-btn" onclick={handleRefresh} title="Refresh">
+                            <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                size="x-small"></lightning-icon>
+                        </button>
                     </div>
                 </div>
             </div>
 
 
             <div class="main_content_cls">
-                <div class="filterdiv slds-m-around_medium">
-                    <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" value={searchTerm} type="search"
-                        placeholder="Search by Name" onchange={handleSearch}></lightning-input>
-                    <lightning-combobox variant="label-hidden" class="filter-combobox"
-                        value={selectedCommunicationTypeFilter} placeholder="Filter by Type"
-                        options={communicationTypeOptions} onchange={handleCommunicationTypeFilter}>
-                    </lightning-combobox>
-                    <button class="refresh-btn" onclick={handleRefresh} title="Refresh">
-                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
-                            size="x-small"></lightning-icon>
-                    </button>
-                </div>
+                <!-- <div class="filterdiv slds-m-around_medium">
+                   
+                </div> -->
 
                 <!-- Custom Table -->
                 <template if:true={paginatedData.length}>
@@ -47,11 +57,11 @@
                                     <th scope="col" class="sno">
                                         <div>No.</div>
                                     </th>
-                                    <th data-id="Name" onclick={sortClick}
-                                        aria-sort="none"
+                                    <th data-id="Name" onclick={sortClick} aria-sort="none"
                                         class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                         scope="col">
-                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                            role="button" tabindex="0">
                                             <span class="slds-truncate" title="Group Name">Group Name</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                 <svg data-index="Name" class="listing-manager-icon"
@@ -62,11 +72,11 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th data-id="MVEX__Count_of_Members__c" onclick={sortClick}
-                                        aria-sort="none"
+                                    <th data-id="MVEX__Count_of_Members__c" onclick={sortClick} aria-sort="none"
                                         class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                         scope="col">
-                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                            role="button" tabindex="0">
                                             <span class="slds-truncate" title="Count of Members">Count of Members</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                 <svg data-index="MVEX__Count_of_Members__c" class="listing-manager-icon"
@@ -77,26 +87,28 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th data-id="MVEX__Communication_Type__c" onclick={sortClick}
-                                        aria-sort="none"
+                                    <th data-id="MVEX__Communication_Type__c" onclick={sortClick} aria-sort="none"
                                         class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                         scope="col">
-                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                            <span class="slds-truncate" title="Communication Type">Communication Type</span>
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                            role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Communication Type">Communication
+                                                Type</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg data-index="MVEX__Communication_Type__c" class="listing-manager-icon"
-                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <svg data-index="MVEX__Communication_Type__c"
+                                                    class="listing-manager-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
                                                     <path
                                                         d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
                                             </span>
                                         </div>
                                     </th>
-                                    <th data-id="MVEX__Description__c" onclick={sortClick}
-                                        aria-sort="none"
+                                    <th data-id="MVEX__Description__c" onclick={sortClick} aria-sort="none"
                                         class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                         scope="col">
-                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                            role="button" tabindex="0">
                                             <span class="slds-truncate" title="Description">Description</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                 <svg data-index="MVEX__Description__c" class="listing-manager-icon"
@@ -176,36 +188,40 @@
                 </template>
 
                 <template if:true={paginatedData.length}>
-                    <div class="pagination-container">
-                        <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                fill="#fff">
-                                <path
-                                    d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                            </svg>
-                            Previous
-                        </button>
-
-                        <template for:each={pageNumbers} for:item="page">
-                            <template if:false={page.isEllipsis}>
-                                <button key={page.number} data-id={page.number} class={page.className}
-                                    onclick={handlePageChange}>
-                                    {page.number}
+                    <div class="paginationDiv">
+                        <div class="btnCover">
+                            <div class="pagination-container">
+                                <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                    </svg>
+                                    Previous
                                 </button>
-                            </template>
-                            <template if:true={page.isEllipsis}>
-                                <span key={page.number} class="pagination-ellipsis">...</span>
-                            </template>
-                        </template>
 
-                        <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                            Next
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                fill="#fff">
-                                <path
-                                    d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                            </svg>
-                        </button>
+                                <template for:each={pageNumbers} for:item="page">
+                                    <template if:false={page.isEllipsis}>
+                                        <button key={page.number} data-id={page.number} class={page.className}
+                                            onclick={handlePageChange}>
+                                            {page.number}
+                                        </button>
+                                    </template>
+                                    <template if:true={page.isEllipsis}>
+                                        <span key={page.number} class="pagination-ellipsis">...</span>
+                                    </template>
+                                </template>
+
+                                <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                    Next
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </template>
             </div>
@@ -236,8 +252,8 @@
                         <div class="content_body">
                             <div class="radio-group">
                                 <label class="radio-option">
-                                    <input type="radio" name="communicationType" value="Email"
-                                        checked={isEmailChecked} onchange={handleCommunicationTypeChange} />
+                                    <input type="radio" name="communicationType" value="Email" checked={isEmailChecked}
+                                        onchange={handleCommunicationTypeChange} />
                                     <span>Email <span class="option-description">(Send marketing messages via
                                             email)</span></span>
                                 </label>
@@ -248,8 +264,8 @@
                                             WhatsApp)</span></span>
                                 </label>
                                 <label class="radio-option">
-                                    <input type="radio" name="communicationType" value="Both"
-                                        checked={isBothChecked} onchange={handleCommunicationTypeChange} />
+                                    <input type="radio" name="communicationType" value="Both" checked={isBothChecked}
+                                        onchange={handleCommunicationTypeChange} />
                                     <span>Both <span class="option-description">(Send marketing messages via both
                                             Email and WhatsApp)</span></span>
                                 </label>
@@ -267,9 +283,11 @@
                             </button>
                             <button class="blue-btn-css" onclick={handlePopupContinue}>
                                 Continue
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="white" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
                             </button>
                         </div>
                     </div>

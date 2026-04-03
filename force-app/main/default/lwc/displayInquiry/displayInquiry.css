@@ -67,7 +67,8 @@ button:disabled {
 }
 
 .custom-data-table {
-    max-width: 100%;
+    width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     background-color: #fff;
     font-size: 14px;
@@ -107,6 +108,9 @@ button:disabled {
     z-index: 1;
     height: 45px;
     position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .sorting_header .slds-icon_container {
@@ -189,11 +193,10 @@ button:disabled {
 .custom-data-table td {
     padding: 10px;
     text-align: center;
-    word-break: break-word;
-    word-wrap: break-word;
-    white-space: normal;
-    min-width: 180px;
-    overflow-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 180px;
 }
 
 .custom-data-table tr:nth-child(odd) {

@@ -448,7 +448,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
                     cardView: field.cardView,
-                    format : field.format
+                    format : field.format,
+                    referenceObjectName: field.referenceObjectName,
+                    relationshipName: field.relationshipName
                 }));
         
                 this.listingData.forEach((listing)=>{
@@ -480,25 +482,38 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     processListings() {
         try{
             this.processedListingData = this.listingData.map(listing => {
-            let orderedFields = this.fields.map(field => {
-                let fieldValue;
-                if (field.fieldName.includes('.')) {
-                    let fieldParts = field.fieldName.split('.');
-                    let relatedObject = listing[fieldParts[0]];
-                    fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
-                } else {
-                    fieldValue = listing[field.fieldName] || '-';
-                }
+                let orderedFields = this.fields.map(field => {
+                    let isRedirectable = false;
+                    let lookupId = null;
+                    let objectApiName = null;
+                    let fieldValue;
 
-                if (field.format && fieldValue) {
-                    fieldValue = this.applyFieldFormat(fieldValue, field.format);
-                }
+                    if (field.fieldName.includes('.')) {
+                        let fieldParts = field.fieldName.split('.');
+                        let relatedObject = listing[fieldParts[0]];
+                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
+                        
+                        if (relatedObject && fieldParts[1] === 'Name') {
+                            isRedirectable = true;
+                            lookupId = relatedObject.Id;
+                            objectApiName = field.referenceObjectName;
+                        }
+                    } else {
+                        fieldValue = listing[field.fieldName] || '-';
+                    }
 
-                return {
-                    fieldName: field.fieldName,
-                    value: fieldValue
-                };
-            });
+                    if (field.format && fieldValue) {
+                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
+                    }
+
+                    return {
+                        fieldName: field.fieldName,
+                        value: fieldValue,
+                        isRedirectable: isRedirectable,
+                        lookupId: lookupId,
+                        objectApiName: objectApiName
+                    };
+                });
 
             let cardViewFields = this.fields
                 .filter(field => field.cardView === 'true')
@@ -722,11 +737,12 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     redirectToRecord(event){
         try{
             const recordId = event.target.dataset.id;
+            const objectApiName = event.target.dataset.object || 'MVEX__Listing__c';
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
                     recordId: recordId,
-                    objectApiName: 'MVEX__Listing__c',
+                    objectApiName: objectApiName,
                     actionName: 'view'
                 }
             })

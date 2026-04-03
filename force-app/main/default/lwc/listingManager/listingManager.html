@@ -163,7 +163,13 @@
                                                             <td key={field.fieldName} class="slds-cell_action-mode"
                                                                 role="gridcell">
                                                                 <div class="slds-truncate center-trancate-text">
-                                                                    {field.value}
+                                                                    <template if:true={field.isRedirectable}>
+                                                                        <a data-id={field.lookupId} data-object={field.objectApiName} 
+                                                                            onclick={redirectToRecord}>{field.value}</a>
+                                                                    </template>
+                                                                    <template if:false={field.isRedirectable}>
+                                                                        {field.value}
+                                                                    </template>
                                                                 </div>
                                                             </td>
                                                         </template>

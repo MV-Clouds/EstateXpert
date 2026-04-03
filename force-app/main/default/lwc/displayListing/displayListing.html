@@ -362,11 +362,18 @@
                                                                 onclick={navigateToRecord}>{field.value}</a>
                                                         </template>
                                                         <template if:false={field.isNameField}>
-                                                            <template if:true={field.isCurrency}>
-                                                                {property.CurrencyIsoCode} {field.value}
+                                                            <template if:true={field.isRedirectable}>
+                                                                <a href="javascript:void(0)" data-id={field.lookupId}
+                                                                    data-object={field.objectApiName}
+                                                                    onclick={navigateToRecord}>{field.value}</a>
                                                             </template>
-                                                            <template if:false={field.isCurrency}>
-                                                                {field.value}
+                                                            <template if:false={field.isRedirectable}>
+                                                                <template if:true={field.isCurrency}>
+                                                                    {property.currencyisocode} {field.value}
+                                                                </template>
+                                                                <template if:false={field.isCurrency}>
+                                                                    {field.value}
+                                                                </template>
                                                             </template>
                                                         </template>
                                                     </template>

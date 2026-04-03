@@ -54,8 +54,8 @@
 
 .modalbody {
     background-color: #F9FAFB !important;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 160px);

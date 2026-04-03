@@ -490,7 +490,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 * Created By: Rachit Shah
 */
     fetchListingConfiguration() {
-        return getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters' })
+        return getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Fields' })
             .then(result => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {

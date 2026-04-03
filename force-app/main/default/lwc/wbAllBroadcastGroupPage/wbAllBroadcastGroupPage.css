@@ -39,8 +39,8 @@
 }
 
 .search-div {
-    flex: 1;
-    --sds-c-input-radius-border: 8px;
+    width: 20rem;
+    --sds-c-input-radius-border: 6px;
 }
 
 .search-div .slds-input {
@@ -60,7 +60,7 @@
 
 .filter-combobox {
     width: 200px;
-    --sds-c-input-radius-border: 8px;
+    --sds-c-input-radius-border: 6px;
 }
 
 .filter-combobox .slds-combobox__input {
@@ -80,14 +80,14 @@
 
 .refresh-btn {
     cursor: pointer;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #0176D3;
     box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
     transition: all 0.2s ease;
@@ -101,7 +101,7 @@
 }
 
 .main_content_cls {
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+     background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -179,11 +179,26 @@
     font-weight: 500;
 }
 
+.paginationDiv {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border-top: 1px solid rgba(1, 118, 211, 0.08);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.paginationDiv .btnCover {
+    display: flex;
+    justify-content: center;
+}
+
 .pagination-container {
     display: flex;
     align-items: center;
     font-size: 14px;
-    padding-bottom: 14px;
     justify-content: center;
 }
 
@@ -312,6 +327,12 @@ span {
     position: relative;
 }
 
+.header{
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .sub_main_header_css {
     display: flex;
     flex-direction: row;
@@ -361,15 +382,13 @@ span {
 }
 
 .table-content {
+      flex: 1;
+    min-height: 0;
     overflow: auto;
-    border-radius: 8px;
-    height: 100%;
-    background-color: white;
-    margin: 16px;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .table-content .slds-table th {

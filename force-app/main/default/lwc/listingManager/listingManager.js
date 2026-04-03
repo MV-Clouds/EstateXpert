@@ -1,7 +1,6 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss      from '@salesforce/resourceUrl/MulishFontCss';
-import globalTableStyles  from '@salesforce/resourceUrl/GlobalTableCSS';   
 import getListingData     from '@salesforce/apex/ListingManagerController.getListingData';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { NavigationMixin } from 'lightning/navigation';
@@ -326,8 +325,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             // 1. Mulish font — always load first so all sheets inherit it
             loadStyle(this, MulishFontCss);
 
-            //
-            loadStyle(this, globalTableStyles);
 
             this.updateScreenWidth();
             if (!import.meta.env.SSR) {

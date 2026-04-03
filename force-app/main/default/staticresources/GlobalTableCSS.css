@@ -1,7 +1,5 @@
 
 :root {
-    --gt-font-family      : 'Mulish', sans-serif;
-
     /* Brand */
     --gt-brand-primary    : #0176D3;
     --gt-brand-dark       : #0157a0;
@@ -433,46 +431,6 @@ th:not(.sorted-field):hover .listing-manager-icon {
     user-select: none;
 }
 
-/* Blue action buttons (New Listing, Configure Settings) */
-.blue-btn-css {
-    display        : flex;
-    justify-content: center;
-    align-items    : center;
-    gap            : 8px;
-    padding        : 8px 14px;
-    line-height    : 20px;
-    font-family    : var(--gt-font-family);
-    font-size      : 14px;
-    font-weight    : 400;
-    border         : none;
-    background     : var(--gt-brand-primary);
-    color          : #ffffff;
-    border-radius  : 5px;
-    min-width      : max-content;
-    cursor         : pointer;
-    transition     : background var(--gt-transition-fast),
-                     transform  var(--gt-transition-fast),
-                     box-shadow var(--gt-transition-fast);
-}
-.blue-btn-css:hover {
-    background : var(--gt-brand-dark);
-    transform  : translateY(-1px);
-    box-shadow : 0 4px 12px rgba(1, 118, 211, 0.40);
-}
-.blue-btn-css:disabled {
-    background  : #DBDBDB;
-    box-shadow  : none;
-    transform   : none;
-    cursor      : not-allowed;
-}
-.blue-btn-css svg {
-    width     : 16px;
-    height    : 16px;
-    flex-shrink: 0;
-}
-
-
-/* â”€â”€â”€ 10. RESPONSIVE OVERRIDES (â‰¤ 900 px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media only screen and (max-width: 900px) {
 
     .tableDiv,

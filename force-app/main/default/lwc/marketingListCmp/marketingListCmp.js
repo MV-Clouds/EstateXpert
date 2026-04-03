@@ -1,7 +1,6 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss      from '@salesforce/resourceUrl/MulishFontCss';
-import globalTableStyles  from '@salesforce/resourceUrl/GlobalTableCSS';  
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
@@ -374,7 +373,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
      connectedCallback() {
             try {
                 loadStyle(this, MulishFontCss);
-                loadStyle(this, globalTableStyles);
 
                 this.screenWidth = window?.globalThis?.innerWidth;
                 window?.globalThis?.addEventListener('resize', this.handleResize);

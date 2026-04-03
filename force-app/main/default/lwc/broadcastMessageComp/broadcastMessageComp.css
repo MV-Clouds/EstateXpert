@@ -79,12 +79,27 @@
     width: 100%;
 }
 
+.paginationDiv {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border-top: 1px solid rgba(1, 118, 211, 0.08);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.paginationDiv .btnCover {
+    display: flex;
+    justify-content: center;
+}
+
 .pagination-container {
     display: flex;
     align-items: center;
     font-size: 14px;
     justify-content: center;
-    padding-bottom: 1rem;
 }
 
 .pagination-container-review {
@@ -350,6 +365,13 @@ span {
     position: relative;
 }
 
+
+.header{
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .details_cls {
     padding: 0 42px;
     font-size: 16px;
@@ -398,15 +420,13 @@ span {
 }
 
 .table-content {
+      flex: 1;
+    min-height: 0;
     overflow: auto;
-    border-radius: 8px;
-    height: 80%;
-    background-color: white;
-    margin: 0 16px 16px 16px;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .table-content .checkbox,
@@ -683,16 +703,23 @@ span {
 /* Filter Toolbar UI */
 .filter-toolbar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin: 16px 16px 14px 16px;
+    /* flex-wrap: wrap; */
+    gap: 0.5rem;
+    /* margin: 16px 16px 14px 16px; */
 }
 
-.filter-toolbar>* {
+/* .filter-toolbar>* {
     flex: 1 1 250px;
-}
+} */
 
 .filter-toolbar lightning-combobox,
 .filter-toolbar lightning-input {
     --sds-c-input-radius-border: 6px;
+}
+
+.filter-toolbar .searchInput {
+    width: 22rem;
+}
+.filter-toolbar .listView {
+    width: 15rem;
 }

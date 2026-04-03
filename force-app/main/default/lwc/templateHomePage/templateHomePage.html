@@ -250,7 +250,7 @@
                                     </td>
                                     <td data-label="Actions">
                                         <div class="action-btn">
-                                            <button class="action-div" onclick={handlePreview} data-id={template.Id}
+                                            <button class="preview-icon-css" onclick={handlePreview} data-id={template.Id}
                                                 data-objectapi={template.MVEX__Object_API_Name__c}
                                                 data-status={template.isActive}
                                                 data-type={template.MVEX__Template_pattern__c}>
@@ -265,7 +265,7 @@
                                                     </path>
                                                 </svg>
                                             </button>
-                                            <button class="action-div" onclick={handleEdit} data-id={template.Id}
+                                            <button class="edit-icon-css" onclick={handleEdit} data-id={template.Id}
                                                 data-objectapi={template.MVEX__Object_API_Name__c}
                                                 data-type={template.MVEX__Template_pattern__c}>
                                                 <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
@@ -276,7 +276,7 @@
                                                         stroke-linejoin="round" />
                                                 </svg>
                                             </button>
-                                            <button class="delete-div" onclick={handleDelete} data-id={template.Id}>
+                                            <button class="delete-icon-css" onclick={handleDelete} data-id={template.Id}>
                                                 <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path

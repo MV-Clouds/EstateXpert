@@ -167,6 +167,78 @@
     gap: 0.5rem;
 }
 
+.edit-icon-css,
+.preview-icon-css,
+.delete-icon-css {
+  padding: 6px;
+  border: 1.5px solid #8a8c8e;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.delete-icon-css:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.delete-icon-css:hover svg{
+    fill: #dc2626;
+}
+
+.delete-icon-css:hover svg path {
+    stroke: #dc2626;
+}
+
+.edit-icon-css:hover,
+.preview-icon-css:hover {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #0176D3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
+}
+
+.edit-icon-css:hover svg,
+.preview-icon-css:hover svg {
+    fill: #0176d3;
+}
+
+.edit-icon-css:hover svg path,
+.preview-icon-css:hover svg path {
+    stroke: #0176d3;
+}
+
+.edit-icon-css:disabled,
+.preview-icon-css:disabled,
+.delete-icon-css:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.header-search-bar-css .slds-form-element__help {
+    display: none;
+}
+
+.header-search-bar-css .slds-input {
+    min-height: 36px;
+}
+
+.header-combobox .slds-form-element__help {
+    display: none;
+}
+
+.header-combobox .slds-combobox__input{
+  min-height: 36px;
+  align-items: center;
+}
 /* cyrillic-ext */
 @font-face {
   font-family: 'Mulish';

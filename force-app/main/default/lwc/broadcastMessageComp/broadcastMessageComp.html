@@ -20,8 +20,12 @@
                 </div>
                 <div class="header">
                     <div class="filter-toolbar">
+                        <div class="header-search-bar-css">
                         <lightning-input type="search" class='searchInput' label="Search Contact" variant='label-hidden' placeholder="Search by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
+                        </div>
+                        <div class="header-combobox">
                         <lightning-combobox label="Select List View" class='listView' variant='label-hidden' value={selectedListView} placeholder="Select List View"  options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
+                        </div>
                     </div>
                     <!-- Single Step View: Show Save Group immediately -->
                     <button class="blue-btn-css" onclick={handleModalOpen} disabled={isBtnDisabled}>

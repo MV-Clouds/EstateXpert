@@ -76,24 +76,6 @@ public class WBTemplateControllerTest {
             // ExceptionHandler.logException(new Map<String, Object>{ 'className' => 'WBTemplateControllerTest', 'methodName' => 'testFetchWhatsAppTemplates', 'exceptionObj' => e, 'isApiException' => false, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null });
         }
     }
-    
-    @isTest
-    static void testRestrictTemplate() {
-        try{
-            List<WhatsappTemplate__c> templatesToInsert = new List<WhatsappTemplate__c>{
-                new WhatsappTemplate__c(
-                    Template_Name__c = 'Template6',
-                    Template_Category__c = 'Marketing',
-                    Status__c = 'Active-Quality Pending',
-                    Template_Id__c = 'testId'
-                )
-            };
-    
-            WBTemplateController.restrictTemplates(templatesToInsert);
-        } catch (Exception e) {
-            // ExceptionHandler.logException(new Map<String, Object>{ 'className' => 'WBTemplateControllerTest', 'methodName' => 'testRestrictTemplate', 'exceptionObj' => e, 'isApiException' => false, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null });
-        }
-    }
 
       @isTest
     static void testGetDynamicObjectData_Success() {
@@ -377,7 +359,7 @@ public class WBTemplateControllerTest {
         String serializedWrapper = JSON.serialize(wrapper);
         String payload = '{ "name": "simple_template", "language": "en_US", "category": "UTILITY", "components": [ { "type": "BODY", "text": "Hello {{1}}, your order {{2}} is confirmed." } ] }';
         Test.startTest();
-        Map<String, Object> response = WBTemplateController.editWhatsappTemplate(serializedWrapper,payload, templateId);
+        Map<String, Object> response = WBTemplateController.editWhatsappTemplate(serializedWrapper,payload, templateId,'simple_template');
         Test.stopTest();
 
         // System.assertEquals(true, response.get('success'));
@@ -399,7 +381,7 @@ public class WBTemplateControllerTest {
         String serializedWrapper = JSON.serialize(wrapper);
 
         Test.startTest();
-        Map<String, Object> response = WBTemplateController.editWhatsappTemplate(serializedWrapper,payload ,templateId);
+        Map<String, Object> response = WBTemplateController.editWhatsappTemplate(serializedWrapper,payload ,templateId,'simple_template');
         Test.stopTest();
         // System.assertEquals(false, response.get('success'));
         // System.assertNotEquals(null, response.get('errorMessage'));
@@ -413,7 +395,7 @@ public class WBTemplateControllerTest {
         String invalidSerializedWrapper = '{"invalid":"data"}';
         String payload = '{ "name": "simple_template", "language": "en_US", "category": "UTILITY", "components": [ { "type": "BODY", "text": "Hello {{1}}, your order {{2}} is confirmed." } ] }';
         Test.startTest();
-        Map<String, Object> response = WBTemplateController.editWhatsappTemplate(invalidSerializedWrapper, payload,templateId);
+        Map<String, Object> response = WBTemplateController.editWhatsappTemplate(invalidSerializedWrapper, payload,templateId,'simple_template');
         Test.stopTest();
         System.assertEquals('error', response.get('status'));
         System.assertNotEquals(null, response.get('message'));

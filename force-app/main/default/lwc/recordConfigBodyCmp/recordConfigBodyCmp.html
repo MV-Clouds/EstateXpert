@@ -124,57 +124,9 @@
                                                                                 </li>
                                                                             </template>
                                                                         </template>
-                                                                        <template if:true={option1.showRightRef}>
-                                                                            <li key={option1.value}
-                                                                                data-index={index}
-                                                                                data-label={option1.relationshipName}
-                                                                                data-id={option1.value}
-                                                                                onclick={clickOnRef}
-                                                                                class="slds-listbox__item">
-                                                                                <div
-                                                                                    class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center picklist-option">
-                                                                                    <span class="slds-media__body">
-                                                                                        <span class="slds-truncate"
-                                                                                            title={option1.label}>{option1.label}</span>
-                                                                                    </span>
-                                                                                    <span
-                                                                                        class="slds-media__figure slds-media__figure_reverse">
-                                                                                        <lightning-icon
-                                                                                            icon-name="utility:chevronright"
-                                                                                            alternative-text="Lookup Field"
-                                                                                            size="x-small"></lightning-icon>
-                                                                                    </span>
-                                                                                </div>
-                                                                            </li>
-                                                                        </template>
                                                                     </template>
                                                                 </ul>
                                                             </div>
-                                                            <template if:true={showParentDropDown}>
-                                                                <div class="options-box option-box-parent">
-                                                                    <ul class="options-cover"
-                                                                        onmousedown={handlePreventDefault}>
-                                                                        <template for:each={parentFieldsOption}
-                                                                            for:item="option1">
-                                                                            <template
-                                                                                if:false={option1.showRightIcon}>
-                                                                                <li key={option1.value}
-                                                                                    data-index={index}
-                                                                                    data-label={option1.label}
-                                                                                    data-type={option1.fieldType}
-                                                                                    data-id={option1.value}
-                                                                                    onclick={selectOptionParent}
-                                                                                    class="options-value">
-                                                                                    <span class="slds-media__body">
-                                                                                        <span
-                                                                                            class="_entity">{option1.label}</span>
-                                                                                    </span>
-                                                                                </li>
-                                                                            </template>
-                                                                        </template>
-                                                                    </ul>
-                                                                </div>
-                                                            </template>
                                                         </template>
                                                     </div>
                                                 </div>

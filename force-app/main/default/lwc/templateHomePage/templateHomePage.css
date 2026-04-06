@@ -257,18 +257,17 @@
     cursor: pointer;
 }
 
-.main_content_cls {
+/* .main_content_cls {
     background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(1, 118, 211, 0.1); */
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border: 1px solid rgba(1, 118, 211, 0.1);
     position: relative;
-}
+} */
 
 .container {
     position: relative;

@@ -77,56 +77,6 @@
   border-bottom-right-radius: 5px;
 }
 
-.tableContainer {
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: calc(100% - 3.25rem);
-  width: 100%;
-  border: 1px solid #e5e7eb;
-  box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 5px -1px, rgba(15, 23, 42, 0.12) 0px 1px 3px -1px;
-}
-
-.portalMapping_header-row {
-  display: grid;
-  grid-template-columns: 0.5fr 0.5fr 0.5fr;
-  padding: 1rem;
-  background: #0176D3;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 16px;
-  text-align: left;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  gap: 0.5rem;
-}
-
-.portalMapping_recordValues {
-  overflow: auto;
-  height: 100%;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  background: white;
-  scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: #0170d27d transparent;
-}
-
-.portalMapping_data-row {
-  display: grid;
-  grid-template-columns: 0.5fr 0.5fr 0.5fr;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem 0.5rem 1rem;
-  /* border-bottom: 1px solid #00000045; */
-  align-items: center;
-}
-
-.portalMapping_data-row:nth-child(odd) {
-  background: aliceblue;
-}
-
 .slds-col {
   width: 90%;
   word-break: break-word;
@@ -244,14 +194,6 @@
   gap: 15px;
 }
 
-.portal_mapping {
-  font-size: 24px;
-  font-weight: 500;
-  /* line-height: 40.16px; */
-  text-align: left;
-  color: #131314;
-}
-
 .svg_back_icon {
   display: flex;
   justify-content: center;
@@ -288,133 +230,12 @@
 .font_styles2 {
   font-size: 14px;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 22px;
   text-align: center;
   color: #35353A;
-}
-
-.btn_in_blue {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
-  border: 1px solid #0176D3;
-  padding: 0px 20px;
-  background: #0176D3;
-  color: white;
-  border-radius: 5px;
-}
-
-.btn_in_white {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
-  padding: 0px 20px;
-  background: #FFFFFF;
-  border: 1px solid #0176D3;
-  color: #0176D3;
-  border-radius: 5px;
-}
-
-/* Modern Button Styling */
-.btn-save {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  text-align: center;
-  border: none;
-  padding: 0.5rem 1.5rem;
-  background: #0176D3;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-save:hover:not(:disabled) {
-  background: #0156A3;
-  box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-  transform: translateY(-1px);
-}
-
-.btn-save:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-save:disabled {
-  background: #c9c9c9 !important;
-  border: 1px solid #c9c9c9 !important;
-  color: white !important;
-  cursor: not-allowed;
-}
-
-/* Revert Button Styling (Orange) */
-.btn-revert {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  text-align: center;
-  border: none;
-  padding: 0.5rem 1.5rem;
-  background: #f59e0b;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-revert:hover:not(:disabled) {
-  background: #d97706;
-  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.25);
-  transform: translateY(-1px);
-}
-
-.btn-revert:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-revert:disabled {
-  background: #c9c9c9 !important;
-  border: 1px solid #c9c9c9 !important;
-  color: white !important;
-  cursor: not-allowed;
-}
-
-/* View Listings Button (White/Outline) */
-.btn-view {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  text-align: center;
-  padding: 0.5rem 1.5rem;
-  background: #FFFFFF;
-  border: 1.5px solid #0176D3;
-  color: #0176D3;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-view:hover {
-  background: #F3F6F9;
-  box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
-}
-
-.btn-view:active {
-  transform: translateY(0);
+  white-space: normal; 
+  overflow-wrap: anywhere; 
+  word-break: break-word;
 }
 
 .action {
@@ -441,10 +262,6 @@
 
 .header-text {
   text-align: center;
-}
-
-.portalMapping_data-row:hover {
-  background-color: #ebf3f6 !important;
 }
 
 /* Hide back button when used in control center (breadcrumb handles navigation) */

@@ -476,53 +476,7 @@
     height: 2.2rem;
 }
 
-.main .body .innerDiv2 .colume1:hover .slds-icon_container {
-    display: flex;
-}
 
-.main .body .innerDiv2 .colume2:hover .slds-icon_container {
-    display: flex;
-}
-
-.main .body .innerDiv2 .slds-icon-utility-arrowdown svg {
-    height: 0.8rem;
-    fill: white;
-}
-
-.rotate-asc {
-    transform: rotate(0deg);
-    transition: transform 0.3s;
-}
-
-.rotate-desc {
-    transform: rotate(180deg);
-    transition: transform 0.3s;
-}
-
-.listing-manager-icon {
-    fill: #b0bcc4;
-    transition: fill 0.2s ease, opacity 0.2s ease;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.listing-manager-icon.sort-icon-active {
-    fill: #0176D3;
-    opacity: 1;
-    filter: drop-shadow(0 2px 4px rgba(1, 118, 211, 0.3));
-}
-
-/* Show arrow on hover for non-sorted columns only */
-th:not(.sorted-field):hover .listing-manager-icon {
-    opacity: 0.6;
-}
-
-/* Sorted column header styling */
-th.sorted-field {
-    background: linear-gradient(135deg, rgba(1, 118, 211, 0.08) 0%, rgba(1, 118, 211, 0.05) 100%);
-    /* border-left: 3px solid #0176D3; */
-    box-shadow: inset 0 0 8px rgba(1, 118, 211, 0.1);
-}
 
 .main .sort-cover {
     height: 100%;

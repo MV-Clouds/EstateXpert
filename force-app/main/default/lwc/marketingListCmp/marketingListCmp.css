@@ -449,9 +449,7 @@ span {
     color: #636363;
 }
 
-.main .body .innerDiv2 .slds-cell_action-mode .slds-icon_container {
-    display: none;
-}
+
 
 .main .body .innerDiv2 .colume1 {
     width: 3.25rem
@@ -466,34 +464,7 @@ span {
     height: 3rem;
 }
 
-.main .body .innerDiv2 .colume1:hover .slds-icon_container {
-    display: block;
-    /* transform: rotate(180deg); */
-}
 
-.main .body .innerDiv2 .colume2:hover .slds-icon_container {
-    display: block;
-}
-
-/* show active sorted column */
-th.sorted-field .slds-icon_container {
-    display: block !important;
-}
-
-.main .body .innerDiv2 .slds-icon-utility-arrowdown svg {
-    height: 0.8rem;
-    fill: white;
-}
-
-.rotate-asc {
-    transform: rotate(0deg);
-    transition: transform 0.3s;
-}
-
-.rotate-desc {
-    transform: rotate(180deg);
-    transition: transform 0.3s;
-}
 
 .paginationDiv {
     flex-shrink: 0;
@@ -517,11 +488,7 @@ th.sorted-field .slds-icon_container {
     align-items: center;
 }
 
-.listing-manager-icon {
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-}
+
 
 .slds-table:not(.slds-no-row-hover) tbody tr:hover>td {
     background-color: #ebf3f6 !important;

@@ -1134,34 +1134,31 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     updateSortIcons() {
         try {
-            // Reset all icons
+            // Remove icon rotation
             const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
-            // Remove sorted class from all headers
-            const allHeaders = this.template.querySelectorAll('th');
-            allHeaders.forEach(th => {
-                th.classList.remove('sorted-field');
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
             });
 
-            // Apply rotation
-            const currentIcon = this.template.querySelector(`[data-index="${this.sortField}"]`);
-            if (currentIcon) {
-                currentIcon.classList.add(
-                    this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc'
-                );
-            }
-
-            // ✅ Mark active column
-            const currentHeader = this.template.querySelector(`th[data-id="${this.sortField}"]`);
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
             if (currentHeader) {
-                currentHeader.classList.add('sorted-field');
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
             }
 
         } catch (error) {
-            console.log('Error updateSortIcons -> ' + error);
+            console.log('Error in updateSortIcons --> ' + error);
         }
     }
 

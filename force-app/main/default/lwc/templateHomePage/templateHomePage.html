@@ -105,188 +105,138 @@
         </div>
 
         <div class="main_content_cls">
-            <!-- <div class="slds-m-around_medium navbar">
-               
-            </div> -->
-
             <template if:true={visibleTemplates.length}>
                 <div class="table-content">
                     <table class="slds-table slds-table_fixed-layout">
                         <thead>
                             <tr class="table_tr_cls">
-                                <th scope="col" class="sno">
-                                    <div>No.</div>
-                                </th>
-                                <th data-id="MVEX__Template_Name__c" onclick={sortClick}
-                                    aria-sort="none"
-                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
-                                    scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                        <span class="slds-truncate" title="Title">Template Name</span>
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg data-index="MVEX__Template_Name__c" class="listing-manager-icon"
-                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="status">
-                                    <div>Status</div>
-                                </th>
-                                <th data-id="MVEX__Object_Name__c" onclick={sortClick}
-                                    aria-sort="none"
-                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
-                                    scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                        <span class="slds-truncate" title="Title">Object Name</span>
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg data-index="MVEX__Object_Name__c" class="listing-manager-icon"
-                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </th>
-                                <th data-id="MVEX__Template_pattern__c" onclick={sortClick}
-                                    aria-sort="none"
-                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
-                                    scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                        <span class="slds-truncate" title="Title">Template Type</span>
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg data-index="MVEX__Template_pattern__c" class="listing-manager-icon"
-                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="subject">
-                                    <div class="min_width_css">Subject</div>
-                                </th>
-                                <th scope="col" class="description">
-                                    <div class="min_width_css">Description</div>
-                                </th>
-                                <th data-id="CreatedDateformatted" onclick={sortClick}
-                                    aria-sort="none"
-                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
-                                    scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                        <span class="slds-truncate" title="Title">Created Date</span>
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg data-index="CreatedDateformatted" class="listing-manager-icon"
-                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </th>
-                                <th data-id="LastModifiedDate" onclick={sortClick}
-                                    aria-sort="none"
-                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
-                                    scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                        <span class="slds-truncate" title="Title">Last Modified Date</span>
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg data-index="LastModifiedDate" class="listing-manager-icon"
-                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="actions">
-                                    <div class="min_width_css">Action</div>
-                                </th>
+                                <template for:each={tableColumns} for:item="column" for:index="colIndex">
+                                    <template if:true={column.isSortable}>
+                                        <th key={column.key} data-id={column.key} onclick={sortClick}
+                                            aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header {column.class}"
+                                            scope="col">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                <span class="slds-truncate" title={column.label}>{column.label}</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index={column.key} class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
+                                    </template>
+                                    <template if:false={column.isSortable}>
+                                        <th key={column.key} scope="col" class={column.class}>
+                                            <div>
+                                                <template if:true={column.class}>
+                                                    <div class="min_width_css">{column.label}</div>
+                                                </template>
+                                                <template if:false={column.class}>
+                                                    {column.label}
+                                                </template>
+                                            </div>
+                                        </th>
+                                    </template>
+                                </template>
                             </tr>
                         </thead>
                         <tbody>
-                            <template for:each={visibleTemplates} for:item="template" for:index="index">
+                            <template for:each={enhancedVisibleTemplates} for:item="template">
                                 <tr key={template.Id}>
-                                    <td data-label="S.No.">
-                                        <div>{template.rowIndex}</div>
-                                    </td>
-                                    <td data-label="Template Name" class="truncate_css">
-                                        <div>{template.MVEX__Template_Name__c}</div>
-                                    </td>
-                                    <td data-label="Status">
-                                        <div class="tableStatusCol">
-                                            <div class="slds-truncate">
-                                                <div class="container">
-                                                    <div class="content">
-                                                        <label class="switch">
-                                                            <input type="checkbox" checked={template.isActive}
-                                                                onchange={handleStatusChange} data-id={template.Id} />
-                                                            <small></small>
-                                                        </label>
+                                    <template for:each={tableColumns} for:item="column">
+                                        <!-- Text and Date columns -->
+                                        <template if:true={column.isTextOrDate}>
+                                            <td key={column.key} data-label={column.dataLabel} class={column.class}>
+                                                <template if:true={column.isRowIndex}>
+                                                    <div>{template.col_rowIndex}</div>
+                                                </template>
+                                                <template if:true={column.isTemplateName}>
+                                                    <div>{template.col_MVEX__Template_Name__c}</div>
+                                                </template>
+                                                <template if:true={column.isObjectName}>
+                                                    <div>{template.col_MVEX__Object_Name__c}</div>
+                                                </template>
+                                                <template if:true={column.isTemplatePattern}>
+                                                    <div>{template.col_MVEX__Template_pattern__c}</div>
+                                                </template>
+                                                <template if:true={column.isSubject}>
+                                                    <div>{template.col_MVEX__Subject__c}</div>
+                                                </template>
+                                                <template if:true={column.isDescription}>
+                                                    <div>{template.col_MVEX__Description__c}</div>
+                                                </template>
+                                                <template if:true={column.isCreatedDate}>
+                                                    <div>{template.col_CreatedDateformatted}</div>
+                                                </template>
+                                                <template if:true={column.isLastModifiedDate}>
+                                                    <div>{template.col_LastModifiedDate}</div>
+                                                </template>
+                                            </td>
+                                        </template>
+                                        <!-- Status column -->
+                                        <template if:true={column.isStatus}>
+                                            <td key={column.key} data-label={column.dataLabel}>
+                                                <div class="tableStatusCol">
+                                                    <div class="slds-truncate">
+                                                        <div class="container">
+                                                            <div class="content">
+                                                                <label class="switch">
+                                                                    <input type="checkbox" checked={template.isActive}
+                                                                        onchange={handleStatusChange} data-id={template.Id} />
+                                                                    <small></small>
+                                                                </label>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td data-label="Object Name">
-                                        <div>{template.MVEX__Object_Name__c}</div>
-                                    </td>
-                                    <td data-label="Template Type">
-                                        <div>{template.MVEX__Template_pattern__c}</div>
-                                    </td>
-                                    <td data-label="Subject" class="truncate_css">
-                                        <div>{template.MVEX__Subject__c}</div>
-                                    </td>
-                                    <td data-label="Description" class="truncate_css">
-                                        <div>{template.MVEX__Description__c}</div>
-                                    </td>
-                                    <td data-label="Created Date">
-                                        <div>{template.CreatedDateformatted}</div>
-                                    </td>
-                                    <td data-label="Last Modified Date">
-                                        <div>{template.LastModifiedDateformatted}</div>
-                                    </td>
-                                    <td data-label="Actions">
-                                        <div class="action-btn">
-                                            <button class="preview-icon-css" onclick={handlePreview} data-id={template.Id}
-                                                data-objectapi={template.MVEX__Object_API_Name__c}
-                                                data-status={template.isActive}
-                                                data-type={template.MVEX__Template_pattern__c}>
-                                                <svg width="15" height="15" fill="#000000"
-                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                                                    enable-background="new 0 0 52 52" xml:space="preserve">
-                                                    <path
-                                                        d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
-                                                    </path>
-                                                    <path
-                                                        d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
-                                                    </path>
-                                                </svg>
-                                            </button>
-                                            <button class="edit-icon-css" onclick={handleEdit} data-id={template.Id}
-                                                data-objectapi={template.MVEX__Object_API_Name__c}
-                                                data-type={template.MVEX__Template_pattern__c}>
-                                                <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                        stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                        stroke-linejoin="round" />
-                                                </svg>
-                                            </button>
-                                            <button class="delete-icon-css" onclick={handleDelete} data-id={template.Id}>
-                                                <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                        stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                        stroke-linejoin="round" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
+                                            </td>
+                                        </template>
+                                        <!-- Action column -->
+                                        <template if:true={column.isAction}>
+                                            <td key={column.key} data-label={column.dataLabel}>
+                                                <div class="action-btn">
+                                                    <button class="preview-icon-css" onclick={handlePreview} data-id={template.Id}
+                                                        data-objectapi={template.MVEX__Object_API_Name__c}
+                                                        data-status={template.isActive}
+                                                        data-type={template.MVEX__Template_pattern__c}>
+                                                        <svg width="15" height="15" fill="#000000"
+                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                                                            enable-background="new 0 0 52 52" xml:space="preserve">
+                                                            <path
+                                                                d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
+                                                            </path>
+                                                            <path
+                                                                d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                    <button class="edit-icon-css" onclick={handleEdit} data-id={template.Id}
+                                                        data-objectapi={template.MVEX__Object_API_Name__c}
+                                                        data-type={template.MVEX__Template_pattern__c}>
+                                                        <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                                stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                                stroke-linejoin="round" />
+                                                        </svg>
+                                                    </button>
+                                                    <button class="delete-icon-css" onclick={handleDelete} data-id={template.Id}>
+                                                        <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                                stroke-linejoin="round" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </template>
+                                    </template>
                                 </tr>
                             </template>
                         </tbody>

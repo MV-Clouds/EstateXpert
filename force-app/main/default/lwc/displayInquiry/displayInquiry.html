@@ -120,9 +120,12 @@
                                             </lightning-combobox>
                                         </div>
                                         <template if:true={showAddConditionIcon}>
-                                            <button class="add-condition-icon-btn" onclick={addCondition} title="Add Condition">
-                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                            <button class="add-condition-icon-btn" onclick={addCondition}
+                                                title="Add Condition">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" />
                                                 </svg>
                                             </button>
                                         </template>
@@ -216,14 +219,12 @@
                                                 </div>
 
                                                 <template if:true={isNullOperatorSelected}>
-                                                    <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
+                                                    <div
+                                                        class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                         <label><span class="red">*</span>Value</label>
-                                                        <lightning-combobox
-                                                            value={selectedListingField}
-                                                            data-field="MVEX__Value__c"
-                                                            options={isNullPicklistOptions}
-                                                            onchange={handleListingFieldChange}
-                                                            variant="label-hidden"
+                                                        <lightning-combobox value={selectedListingField}
+                                                            data-field="MVEX__Value__c" options={isNullPicklistOptions}
+                                                            onchange={handleListingFieldChange} variant="label-hidden"
                                                             placeholder="Select True or False">
                                                         </lightning-combobox>
                                                     </div>
@@ -231,12 +232,14 @@
 
                                                 <template if:false={isNullOperatorSelected}>
                                                     <template if:true={isConstant}>
-                                                        <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
+                                                        <div
+                                                            class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
                                                             <label><span class="red">*</span>Value</label>
                                                             <template if:true={inquiryFieldObject.isPrimary}>
                                                                 <lightning-input
                                                                     type={inquiryFieldObject.MVEX__Data_Type__c}
-                                                                    value={selectedListingField} data-field="MVEX__Value__c"
+                                                                    value={selectedListingField}
+                                                                    data-field="MVEX__Value__c"
                                                                     onchange={handleListingFieldChange}
                                                                     variant="label-hidden"></lightning-input>
                                                             </template>
@@ -258,9 +261,11 @@
                                                     </template>
 
                                                     <template if:false={isConstant}>
-                                                        <div class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
-                                                            <lightning-combobox name="listingField" label="Listing Field"
-                                                                value={selectedListingField} options={listingFieldOptions}
+                                                        <div
+                                                            class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
+                                                            <lightning-combobox name="listingField"
+                                                                label="Listing Field" value={selectedListingField}
+                                                                options={listingFieldOptions}
                                                                 onchange={handleListingFieldChange} required>
                                                             </lightning-combobox>
                                                         </div>
@@ -268,16 +273,21 @@
                                                 </template>
                                             </div>
                                             <div class="condition-div-footer">
-                                                <button class="white-btn-css"
-                                                    onclick={closeAddConditionModal}>
-                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                                <button class="white-btn-css" onclick={closeAddConditionModal}>
+                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                            fill="currentColor" />
                                                     </svg>
                                                     Cancel
                                                 </button>
                                                 <button class="blue-btn-css" onclick={saveCondition}>
-                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                                            fill="currentColor" />
                                                     </svg>
                                                     Save
                                                 </button>
@@ -288,14 +298,20 @@
                                 </div>
                                 <div class="custom__footer">
                                     <button class="white-btn-css" onclick={hideModalBox}>
-                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                fill="currentColor" />
                                         </svg>
                                         Cancel
                                     </button>
-                                    <button class="blue-btn-css" onclick={applyModalFilters} disabled={isApplyButtonDisabled}>
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                    <button class="blue-btn-css" onclick={applyModalFilters}
+                                        disabled={isApplyButtonDisabled}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                                fill="currentColor" />
                                         </svg>
                                         Apply
                                     </button>
@@ -308,93 +324,105 @@
             </div>
         </div>
 
-        <div class="slds-col slds-theme_default data-table-container">
+        <div class="main_content_cls">
             <template if:true={pagedInquries.length}>
-                <table class="custom-data-table">
-                    <thead>
-                        <tr>
-                            <th class="header-cell slds-text-align_right slds-cell_action-mode colume1" scope="col">
-                                <span id="column-group-header" class="slds-assistive-text">Choose a row</span>
-                                <div class="header-checkbox-div">
-                                    <label class="custom-checkbox">
-                                        <input type="checkbox" onchange={selectAllCheckbox} checked={checkAll}>
-                                        <span class="checkmark"></span>
-                                    </label>
-                                </div>
-                            </th>
+                <div class="table-content" id="table-content">
+                    <table aria-multiselectable="true"
+                        class="slds-table"
+                        aria-label="Example advanced table of Opportunities in actionable mode">
+                        <thead>
+                            <tr class="slds-line-height_reset fields-names table_tr_cls">
+                                <th class="header-cell slds-text-align_right slds-cell_action-mode colume1" scope="col">
+                                    <span id="column-group-header" class="slds-assistive-text">Choose a row</span>
+                                    <div class="header-checkbox-div">
+                                        <label class="custom-checkbox">
+                                            <input type="checkbox" onchange={selectAllCheckbox} checked={checkAll}>
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </div>
+                                </th>
 
 
-                                <th class="header-cell slds-truncate sorting_header" data-id="Name" onclick={sortClick}>
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header" data-id="Name" onclick={sortClick}>
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                        tabindex="0">
                                         Inquiry Name
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="slds-icon slds-icon_x-small slds-icon-text-default listing-manager-icon" aria-hidden="true" viewBox="0 0 384 512">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            <svg class="listing-manager-icon"
+                                                aria-hidden="true" viewBox="0 0 384 512">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
                                 <template for:each={tableColumns} for:item="column">
-                                    <th key={column.fieldName} class="header-cell slds-truncate sorting_header" data-id={column.fieldName} onclick={sortClick}>
-                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                        {column.label}
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="slds-icon slds-icon_x-small slds-icon-text-default listing-manager-icon" aria-hidden="true" viewBox="0 0 384 512">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
+                                    <th key={column.fieldName} class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header"
+                                        data-id={column.fieldName} onclick={sortClick}>
+                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                            role="button" tabindex="0">
+                                            {column.label}
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg class="listing-manager-icon"
+                                                    aria-hidden="true" viewBox="0 0 384 512">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
                                         </div>
                                     </th>
                                 </template>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template for:each={pagedInquries} for:item="inquiry">
-                            <tr key={inquiry.id}>
-                                <td class="slds-text-align_right slds-cell_action-mode checkbox-cell" role="gridcell">
-                                    <label class="custom-checkbox custom-checkbox-body">
-                                        <input data-id={inquiry.id} type="checkbox" checked={inquiry.isSelected}
-                                            value={inquiry.isSelected} onchange={checkBoxValueChange}>
-                                        <span class="checkmark"></span>
-                                    </label>
-                                </td>
-                                <td class="slds-truncate">
-                                    <a href="javascript:void(0)" data-id={inquiry.id}
-                                        onclick={navigateToRecord}>{inquiry.name}</a>
-                                </td>
-                                <template for:each={inquiry.displayFields} for:item="field">
-                                    <td key={field.key} class="slds-truncate">
-                                        <template if:true={field.hasValue}>
-                                            <template if:true={field.isNameField}>
-                                                <a href="javascript:void(0)" data-id={inquiry.id}
-                                                    onclick={navigateToRecord}>{field.value}</a>
-                                            </template>
-                                            <template if:true={field.isReference}>
-                                                <a href="javascript:void(0)" data-id={field.recordId}
-                                                    onclick={navigateToRecord}>{field.value}</a>
-                                            </template>
-                                            <template if:false={field.isNameField}>
-                                                <template if:false={field.isReference}>
-                                                    <template if:true={field.isCurrency}>
-                                                        {inquiry.CurrencyIsoCode} {field.value}
-                                                    </template>
-                                                    <template if:false={field.isCurrency}>
-                                                        {field.value}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={pagedInquries} for:item="inquiry">
+                                <tr key={inquiry.id}>
+                                    <td class="slds-text-align_right slds-cell_action-mode checkbox-cell"
+                                        role="gridcell">
+                                        <label class="custom-checkbox custom-checkbox-body">
+                                            <input data-id={inquiry.id} type="checkbox" checked={inquiry.isSelected}
+                                                value={inquiry.isSelected} onchange={checkBoxValueChange}>
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </td>
+                                    <td class="slds-truncate">
+                                        <a href="javascript:void(0)" data-id={inquiry.id}
+                                            onclick={navigateToRecord}>{inquiry.name}</a>
+                                    </td>
+                                    <template for:each={inquiry.displayFields} for:item="field">
+                                        <td key={field.key} class="slds-truncate">
+                                            <template if:true={field.hasValue}>
+                                                <template if:true={field.isNameField}>
+                                                    <a href="javascript:void(0)" data-id={inquiry.id}
+                                                        onclick={navigateToRecord}>{field.value}</a>
+                                                </template>
+                                                <template if:true={field.isReference}>
+                                                    <a href="javascript:void(0)" data-id={field.recordId}
+                                                        onclick={navigateToRecord}>{field.value}</a>
+                                                </template>
+                                                <template if:false={field.isNameField}>
+                                                    <template if:false={field.isReference}>
+                                                        <template if:true={field.isCurrency}>
+                                                            {inquiry.CurrencyIsoCode} {field.value}
+                                                        </template>
+                                                        <template if:false={field.isCurrency}>
+                                                            {field.value}
+                                                        </template>
                                                     </template>
                                                 </template>
                                             </template>
-                                        </template>
-                                        <template if:false={field.hasValue}>
-                                            <template if:true={field.isCurrency}>
-                                                TBD
+                                            <template if:false={field.hasValue}>
+                                                <template if:true={field.isCurrency}>
+                                                    TBD
+                                                </template>
                                             </template>
-                                        </template>
-                                    </td>
-                                </template>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
+                                        </td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
             </template>
             <template if:false={pagedInquries.length}>
                 <div class="no-prop">
@@ -402,39 +430,42 @@
                     <p>No Inquiry found. Please change your search filters and try again.</p>
                 </div>
             </template>
+             <template if:true={pagedInquries.length}>
+                <div class="paginationDiv">
+                    <div class="btnCover">
+                        <div class="pagination-container">
+                            <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                    <path
+                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                </svg>
+                                Previous
+                            </button>
+
+                            <template for:each={pageNumbers} for:item="page">
+                                <template if:false={page.isEllipsis}>
+                                    <button key={page.number} data-id={page.number} class={page.className}
+                                        onclick={handlePageChange}>
+                                        {page.number}
+                                    </button>
+                                </template>
+                                <template if:true={page.isEllipsis}>
+                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                </template>
+                            </template>
+
+                            <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                Next
+                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                    <path
+                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
-
-        <template if:true={pagedInquries.length}>
-            <div class="pagination-container">
-                <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                        <path
-                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                    </svg>
-                    Previous
-                </button>
-
-                <template for:each={pageNumbers} for:item="page">
-                    <template if:false={page.isEllipsis}>
-                        <button key={page.number} data-id={page.number} class={page.className}
-                            onclick={handlePageChange}>
-                            {page.number}
-                        </button>
-                    </template>
-                    <template if:true={page.isEllipsis}>
-                        <span key={page.number} class="pagination-ellipsis">...</span>
-                    </template>
-                </template>
-
-                <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                    Next
-                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                        <path
-                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                    </svg>
-                </button>
-            </div>
-        </template>
     </div>
 
     <template if:true={isMassEmailModalOpen}>
@@ -483,7 +514,8 @@
 
 
                             <div class="input-box" if:true={isForSingle}>
-                                <legend class="slds-form-element__legend slds-form-element__label">Select Listing Template
+                                <legend class="slds-form-element__legend slds-form-element__label">Select Listing
+                                    Template
                                 </legend>
                                 <lightning-combobox name="listingTemplate" value={selectedListingTemplate}
                                     placeholder="Select a template" options={listingTemplateOptions}
@@ -504,8 +536,8 @@
                                     </div>
                                 </template>
                             </div>
-                            <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC} width="0%"
-                                height="0%"></iframe>
+                            <iframe lwc:if={vfGeneratePageSRC} class="generate_iframe" src={vfGeneratePageSRC}
+                                width="0%" height="0%"></iframe>
                         </template>
                     </div>
 
@@ -513,21 +545,27 @@
                         <template if:true={isFirstScreen}>
                             <button class="blue-btn-css" onclick={handleFooterButtonClick}>
                                 Next
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 11V13H16.17L10.58 18.59L12 20L20 12L12 4L10.59 5.41L16.17 11H4Z" fill="currentColor"/>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 11V13H16.17L10.58 18.59L12 20L20 12L12 4L10.59 5.41L16.17 11H4Z"
+                                        fill="currentColor" />
                                 </svg>
                             </button>
                         </template>
                         <template if:false={isFirstScreen}>
                             <button class="white-btn-css" onclick={handleBack}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor"/>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z"
+                                        fill="currentColor" />
                                 </svg>
                                 Back
                             </button>
                             <button class="blue-btn-css" onclick={handleFooterButtonClick}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                        fill="currentColor" />
                                 </svg>
                                 Send
                             </button>
@@ -597,9 +635,9 @@
                                         class="contact-search">
                                     </lightning-input>
 
-                                    <div class="selected-contacts-section">
-                                        <div class="contacts-table-wrapper">
-                                            <table class="contacts-table">
+                                    <div class="main_content_cls contact-table">
+                                        <div class="table-content">
+                                            <table class="slds-table">
                                                 <thead>
                                                     <tr>
                                                         <th>Name</th>
@@ -614,9 +652,15 @@
                                                                 <td>{member.Name}</td>
                                                                 <td>{member.Phone}</td>
                                                                 <td>
-                                                                    <button class="table-delete-btn" data-id={member.Id} onclick={handleRemoveMember} title="Remove">
-                                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                    <button class="delete-icon-css" data-id={member.Id}
+                                                                        onclick={handleRemoveMember} title="Remove">
+                                                                        <svg width="14" height="14" viewBox="0 0 14 14"
+                                                                            fill="none">
+                                                                            <path
+                                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                                stroke="#212529" stroke-width="1.25"
+                                                                                stroke-linecap="round"
+                                                                                stroke-linejoin="round" />
                                                                         </svg>
                                                                     </button>
                                                                 </td>
@@ -642,14 +686,19 @@
                             </div>
                             <div class="popUpFooter">
                                 <button class="blue-btn-css" onclick={handleConfirmPopup}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                            fill="currentColor" />
                                     </svg>
                                     Send
                                 </button>
                                 <button class="blue-btn-css" onclick={handleSchedulePopup}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z" />
                                     </svg>
                                     Schedule
                                 </button>
@@ -705,14 +754,19 @@
 
                         <div class="schedule-modal-footer">
                             <button class="white-btn-css" onclick={handlePreviousLastPage}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
                                 </svg>
                                 Cancel
                             </button>
                             <button class="blue-btn-css" onclick={handleSchedule}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                        fill="currentColor" />
                                 </svg>
                                 Confirm & Send
                             </button>
@@ -749,14 +803,19 @@
 
                         <div class="schedule-modal-footer">
                             <button class="white-btn-css" onclick={handlePreviousLastPage}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
                                 </svg>
                                 Cancel
                             </button>
                             <button class="blue-btn-css" onclick={handleSendOnPopup}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                        fill="currentColor" />
                                 </svg>
                                 Confirm & Send
                             </button>

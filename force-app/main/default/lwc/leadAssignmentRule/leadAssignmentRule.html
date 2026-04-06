@@ -108,75 +108,124 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <div class="condition-heading">
                                 <label class="slds-form-element__label">Conditions</label>
-                                <div class="conditions-list">
-                                    <template for:each={currentRule.conditions} for:item="condition"
-                                        for:index="conditionIndex">
-                                        <div key={condition.Id} class="condition-row">
-                                            <div class="count-label-css">
-                                                <label>{condition.order}</label>
-                                            </div>
-                                            <div class="input-div-css">
-                                                <lightning-combobox options={sortedFieldOptions}
-                                                    value={condition.selectedField}
-                                                    data-condition-index={conditionIndex} onchange={handleFieldChange}
-                                                    placeholder="Select Field"
-                                                    variant="label-hidden"></lightning-combobox>
-                                            </div>
-                                            <div class="input-div-css">
-                                                <lightning-combobox options={condition.conditionOptions}
-                                                    value={condition.selectedCondition}
-                                                    data-condition-index={conditionIndex}
-                                                    onchange={handleConditionChange} placeholder="Select Condition"
-                                                    variant="label-hidden"></lightning-combobox>
-                                            </div>
-                                            <div class="input-div-css">
-                                                <template if:true={condition.isCombobox}>
-                                                    <lightning-combobox options={condition.valueOptions}
-                                                        value={condition.selectedValue}
-                                                        data-condition-index={conditionIndex}
-                                                        onchange={handleValueChange} placeholder="Select Value"
-                                                        variant="label-hidden"></lightning-combobox>
-                                                </template>
-                                                <template if:true={condition.isReference}>
-                                                    <lightning-record-picker object-api-name={condition.referenceObject}
-                                                        value={condition.selectedValue}
-                                                        data-condition-index={conditionIndex}
-                                                        onchange={handleValueChange} placeholder="Select Record"
-                                                        label="Reference"
-                                                        variant="label-hidden"></lightning-record-picker>
-                                                </template>
-                                                <template if:false={condition.isCombobox}>
-                                                    <template if:false={condition.isReference}>
-                                                        <lightning-input type={condition.inputType}
-                                                            value={condition.selectedValue}
-                                                            data-condition-index={conditionIndex}
-                                                            onchange={handleValueChange}
-                                                            placeholder={condition.placeholder}
-                                                            variant="label-hidden"></lightning-input>
-                                                    </template>
-                                                </template>
-                                            </div>
-                                            <button class="delete-div" data-condition-index={conditionIndex}
-                                                onclick={deleteCondition}>
-                                                <svg width="16" height="16" viewBox="0 0 14 14" fill="none"
-                                                    class="delete-svg">
-                                                    <path
-                                                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                        stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                        stroke-linejoin="round" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
                                 <button class="blue-btn-css" onclick={addNewCondition}>
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
                                     </svg>
                                     Add Condition
                                 </button>
+                                </div>
+                                <template if:true={currentRule.conditions.length}>
+                                    <div class="main_content_cls">
+                                        <div class="table-content popup-table-content">
+                                            <table class="slds-table slds-table_cell-buffer">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">
+                                                            <div>No.</div>
+                                                        </th>
+                                                        <th scope="col">
+                                                            <div>Lead Field</div>
+                                                        </th>
+                                                        <th scope="col">
+                                                            <div>Condition</div>
+                                                        </th>
+                                                        <th scope="col">
+                                                            <div>Value</div>
+                                                        </th>
+                                                        <th scope="col" class="actions">
+                                                            <div>Action</div>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template for:each={currentRule.conditions} for:item="condition" for:index="conditionIndex">
+                                                        <tr key={condition.Id}>
+                                                            <td data-label="No.">
+                                                                <div class="index-display">{condition.order}</div>
+                                                            </td>
+                                                            <td data-label="Lead Field">
+                                                                <div class="combobox_cls">
+                                                                    <lightning-combobox 
+                                                                        options={sortedFieldOptions} 
+                                                                        value={condition.selectedField} 
+                                                                        data-condition-index={conditionIndex}
+                                                                        onchange={handleFieldChange}
+                                                                        placeholder="Select Field"
+                                                                        dropdown-alignment="auto"
+                                                                        variant="label-hidden">
+                                                                    </lightning-combobox>
+                                                                </div>
+                                                            </td>
+                                                            <td data-label="Condition">
+                                                                <div class="combobox_cls">
+                                                                    <lightning-combobox 
+                                                                        options={condition.conditionOptions} 
+                                                                        value={condition.selectedCondition} 
+                                                                        data-condition-index={conditionIndex}
+                                                                        onchange={handleConditionChange}
+                                                                        placeholder="Select Condition"
+                                                                        dropdown-alignment="auto"
+                                                                        variant="label-hidden">
+                                                                    </lightning-combobox>
+                                                                </div>
+                                                            </td>
+                                                            <td data-label="Value">
+                                                                <div class="combobox_cls">
+                                                                    <template if:true={condition.isCombobox}>
+                                                                        <lightning-combobox 
+                                                                            options={condition.valueOptions}
+                                                                            value={condition.selectedValue}
+                                                                            data-condition-index={conditionIndex}
+                                                                            onchange={handleValueChange}
+                                                                            placeholder="Select Value"
+                                                                            dropdown-alignment="auto"
+                                                                            variant="label-hidden">
+                                                                        </lightning-combobox>
+                                                                    </template>
+                                                                    <template if:true={condition.isReference}>
+                                                                        <lightning-record-picker 
+                                                                            object-api-name={condition.referenceObject}
+                                                                            value={condition.selectedValue}
+                                                                            data-condition-index={conditionIndex}
+                                                                            onchange={handleValueChange}
+                                                                            placeholder="Select Record"
+                                                                            label="Reference"
+                                                                            variant="label-hidden">
+                                                                        </lightning-record-picker>
+                                                                    </template>
+                                                                    <template if:false={condition.isCombobox}>
+                                                                        <template if:false={condition.isReference}>
+                                                                            <lightning-input 
+                                                                                type={condition.inputType}
+                                                                                value={condition.selectedValue}
+                                                                                data-condition-index={conditionIndex}
+                                                                                onchange={handleValueChange}
+                                                                                placeholder={condition.placeholder}
+                                                                                variant="label-hidden">
+                                                                            </lightning-input>
+                                                                        </template>
+                                                                    </template>
+                                                                </div>
+                                                            </td>
+                                                            <td data-label="Actions">
+                                                                <div class="action-btn">
+                                                                    <button class="delete-icon-css" data-condition-index={conditionIndex} onclick={deleteCondition}>
+                                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                               </template>
                             </div>
                             <div class="form-group">
                                 <label class="slds-form-element__label">Custom Logic</label>

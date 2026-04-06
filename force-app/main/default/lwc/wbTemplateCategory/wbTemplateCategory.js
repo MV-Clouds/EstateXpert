@@ -127,7 +127,7 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
         "authenticationPasscodeSelected": {
             "hey": "<b>123456</b> is your verification code. For your security, do not share this code.",
             "time": "11:59",
-            "buttons": [],
+            "buttons": [{ "icon": "/resource/MVEX__copy", "label": "Copy code" }],
             "goodFor": "One-time password, account recovery code, account verification, integrity challenges",
             "customizable": "Code delivery method"
         }

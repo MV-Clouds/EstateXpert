@@ -2366,74 +2366,79 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     handlePrevclick() {
-        if (this.contentVersionId != null) {
-            this.handleDelete();
-        }
-
-        this.clearEditTemplateData();
-
-        if( this.isTemplateClone || this.isEditTemplate){
-            this.closeAndReturnToTemplateList();
-            return;
-        } 
-
-        const previousEvent = new CustomEvent('previous', {
-            detail: {
-                selectedTab: this.selectedTab,
-                selectedOption: this.selectedOption,
-                activeTab: this.activeTab
+        try {
+            if (this.contentVersionId != null) {
+                this.handleDelete();
             }
-        });
-        this.dispatchEvent(previousEvent);   
-
+    
+            this.clearEditTemplateData();
+    
+            if( this.isTemplateClone || this.isEditTemplate){
+                this.closeAndReturnToTemplateList();
+                return;
+            } 
+    
+            const previousEvent = new CustomEvent('previous', {
+                detail: {
+                    selectedTab: this.selectedTab,
+                    selectedOption: this.selectedOption,
+                    activeTab: this.activeTab
+                }
+            });
+            this.dispatchEvent(previousEvent);   
+        } catch (error) {
+            console.error('Error in handlePrevclick: ', error);
+        }
     }
 
 
     clearEditTemplateData() {
-
-        this.templateName = '';
-        this.selectedContentType = 'None';
-        this.header = '';
-        this.addHeaderVar = false;
-        this.content = '';
-        this.tempBody = 'Hello';
-        this.addVar = false;
-        this.footer = '';
-        var tempList = [];
-        this.buttonList = tempList;
-        this.customButtonList = [];
-        this.variables = [];
-        this.header_variables = [];
-        this.buttonDisabled = false;
-        this.originalHeader = [];
-        this.nextIndex = 1;
-        this.headIndex = 1;
-        this.createButton = false;
-        this.IsHeaderText = false;
-        this.isCustom = false;
-        this.formatedTempBody = this.tempBody;
-        this.visitWebsiteCount = 0;
-        this.callPhoneNumber = 0;
-        this.copyOfferCode = 0;
-        this.flowCount = 0;
-        this.marketingOpt = 0;
-        this.selectContent = 'Add security recommendation';
-        this.addMedia = false;
-        this.isDocSelected = false;
-        this.isVidSelected = false;
-        this.isImgSelected = false;
-        this.isDocFile = false;
-        this.isFlowSelected = false;
-
-        this.isautofillChecked = false;
-        this.isExpiration = false;
-        // Reset original content version ID
-        this.originalContentVersionId = null;
-        const headerInput = this.template.querySelector('input[name="header"]');
-        if (headerInput) {
-            headerInput.value = '';
+        try {
+            this.templateName = '';
+            this.selectedContentType = 'None';
+            this.header = '';
+            this.addHeaderVar = false;
+            this.content = '';
+            this.tempBody = 'Hello';
+            this.addVar = false;
+            this.footer = '';
+            var tempList = [];
+            this.buttonList = tempList;
+            this.customButtonList = [];
+            this.variables = [];
+            this.header_variables = [];
+            this.buttonDisabled = false;
+            this.originalHeader = [];
+            this.nextIndex = 1;
+            this.headIndex = 1;
+            this.createButton = false;
+            this.IsHeaderText = false;
+            this.isCustom = false;
+            this.formatedTempBody = this.tempBody;
+            this.visitWebsiteCount = 0;
+            this.callPhoneNumber = 0;
+            this.copyOfferCode = 0;
+            this.flowCount = 0;
+            this.marketingOpt = 0;
+            this.selectContent = 'Add security recommendation';
+            this.addMedia = false;
+            this.isDocSelected = false;
+            this.isVidSelected = false;
+            this.isImgSelected = false;
+            this.isDocFile = false;
+            this.isFlowSelected = false;
+    
+            this.isautofillChecked = false;
+            this.isExpiration = false;
+            // Reset original content version ID
+            this.originalContentVersionId = null;
+            const headerInput = this.template.querySelector('input[name="header"]');
+            if (headerInput) {
+                headerInput.value = '';
+            }
+        } catch (error) {
+            console.error('Error in clearEditTemplateData: ', error);
         }
-
     }
 
     handleCustom(event) {
@@ -4482,9 +4487,22 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     closeAndReturnToTemplateList() {
-        // Dispatch close event to parent to return to template list without navigation
-        const closeEvent = new CustomEvent('close');
-        this.dispatchEvent(closeEvent);
+        try {
+            let componentDef = {
+                componentDef: "MVEX:wbAllTemplatePage"
+            };
+
+            let encodedComponentDef = btoa(JSON.stringify(componentDef));
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedComponentDef
+                }
+            });
+        } catch (error) {
+            console.error('Error in closeAndReturnToTemplateList: ', error);
+        }
     }
 
     disconnectedCallback() {

@@ -1,32 +1,162 @@
+/* ==================== CSS CUSTOM PROPERTIES ==================== */
+:host {
+    --color-primary: #0176D3;
+    --color-primary-hover: rgb(54, 125, 238);
+    --color-primary-light: rgba(58, 176, 205, 0.1);
+    --color-background: #ffffff;
+    --color-border: #d8d8d8;
+    --button-text: #FFFFFF;
+    --button-disabled-bg: #c7c7c7;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --radius-md: 0.4rem;
+}
+
 .slds-modal__container {
     max-width: 900px !important;
+    border-radius: var(--radius-md);
+}
+
+/* Custom Header */
+.custom-header {
+    background: var(--color-primary) !important;
+    color: var(--button-text) !important;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    justify-content: center !important;
+}
+
+.custom-header h2 {
+    color: var(--button-text) !important;
+    font-weight: 500;
 }
 
 .search-box {
     width: 100%;
 }
 
-.flow-list {
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    padding: 10px;
-    background: #f9f9f9;
+.flow-list-container {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-background);
+    max-height: 386px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-border);
+}
+
+.flow-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.flow-list-container::-webkit-scrollbar-track {
+    background: var(--color-border);
+    border-radius: 10px;
+}
+
+.flow-list-container::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 10px;
+}
+
+.flow-list-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary-hover);
 }
 
 .flow-item {
     display: flex;
     align-items: center;
-    padding: 8px;
-    border-bottom: 1px solid #eee;
+    padding: 12px 16px;
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    position: relative;
+}
+
+.flow-item:nth-child(even) {
+    background-color: #f6f7fb;
+}
+
+.flow-item:hover {
+    background-color: var(--color-primary-light);
+}
+
+.flow-item:last-child {
+    border-bottom: none;
+}
+
+/* Custom Radio Button */
+.flow-radio {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.flow-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    width: 100%;
+    user-select: none;
+}
+
+.flow-radio-circle {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 2px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-background);
+    transition: all 0.2s ease-in-out;
+}
+
+.flow-radio:checked + .flow-label .flow-radio-circle {
+    border-color: var(--color-primary);
+    background: var(--color-background);
+}
+
+.flow-radio:checked + .flow-label .flow-radio-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-primary);
+}
+
+.flow-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
 }
 
 .flow-name {
     font-weight: 600;
+    font-size: 14px;
+    color: #333;
 }
 
 .flow-date {
     font-size: 12px;
-    color: gray;
+    color: #b2b2b2;
+}
+
+.flow-empty-message {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #b2b2b2;
+}
+
+.flow-empty-message p {
+    margin: 0;
+    font-size: 14px;
 }
 
 .preview-pane {
@@ -35,22 +165,14 @@
     align-items: center;
 }
 
-.preview-container {
-    width: 280px;
-    height: 500px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
 .slds-gutters{
     margin-left: 0px;
     margin-right: 0px;
 }
+
 .preview-container {
-    width: 280px; /* Fixed width */
-    height: 500px; /* Adjust as needed */
+    width: 280px;
+    height: 500px;
     border: 1px solid #ccc;
     border-radius: 8px;
     overflow: hidden;
@@ -69,4 +191,51 @@
     margin-top: 360px;
     margin-left: 190px;
     border: none;
+}
+
+/* Custom Footer */
+.custom-footer {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-background);
+}
+
+.flow-btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.flow-btn-cancel {
+    border: 1px solid var(--color-primary);
+    background: var(--color-background);
+    color: var(--color-primary);
+}
+
+.flow-btn-cancel:hover {
+    background-color: var(--color-primary-light);
+}
+
+.flow-btn-submit {
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--button-text);
+}
+
+.flow-btn-submit:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.flow-btn-submit:disabled {
+    background-color: var(--button-disabled-bg);
+    border-color: var(--button-disabled-bg);
+    cursor: not-allowed;
+    opacity: 0.6;
 }

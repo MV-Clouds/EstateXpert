@@ -41,8 +41,8 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     @track isFilterVisible = false;
     @track editTemplateId='';
     @track subscription = null;
-    @track sortField = 'MVEX__Template_Name__c';
-    @track sortOrder = 'asc';
+    @track sortField = 'LastModifiedDate';
+    @track sortOrder = 'desc';
     showFilters = false;
     channelName = '/event/MVEX__Template_Update__e';
 
@@ -190,7 +190,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                             cssClass: isButtonDisabled ? 'action edit disabled' : 'action edit',
                             editRestrictionMessage: editRestriction.message,
                         };
-                    });                    
+                    });
                     this.filteredRecords = [...this.allRecords];
                     this.sortData();
                     this.filterRecords();
@@ -279,7 +279,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
      * Checks if a template edit is restricted based on:
      * 1. 24-hour rule: A template can only be edited once within 24 hours after being approved.
      * 2. 30-day limit: A template can only be edited up to 10 times within a rolling 30-day window.
-     * @param {Object} record - The template record with WB_Template_Histories__r
+     * @param {Object} record - The template record with MVEX__Template_Edit_Histories__r
      * @returns {Object} - { isRestricted: boolean, message: string }
      */
     checkEditRestriction(record) {
@@ -287,7 +287,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         
         try {
             // Check if there are any edit history records
-            const editHistories = record.MVEX__WB_Template_Histories__r;
+            const editHistories = record.MVEX__Template_Edit_Histories__r;
             
             if (editHistories && editHistories.length > 0) {
                 const now = new Date();

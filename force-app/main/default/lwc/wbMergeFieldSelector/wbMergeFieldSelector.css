@@ -19,17 +19,17 @@
     color: #444444;
     transition: all 0.2s ease;
     border: 1px solid #c6c6c6;
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 .field-picker-button:hover:not(:disabled) {
-    border-color: #3ab0cd;
-    box-shadow: 0 0 0 1px #3ab0cd;
+    border-color: #0176D3;
+    box-shadow: 0 0 0 1px #0176D3;
 }
 
 .field-picker-button:focus:not(:disabled) {
     outline: none;
-    border-color: #3ab0cd;
+    border-color: #0176D3;
     box-shadow: 0 0 0 2px rgba(58, 176, 205, 0.2);
 }
 
@@ -123,16 +123,16 @@
 }
 
 .field-list-item-selected:hover {
-    background-color: #e8f4fd;
+    background-color: #d1deff;
 }
 
 .field-list-item-selected .field-item-label {
     font-weight: 600;
-    color: #3ab0cd;
+    color: #0176D3;
 }
 
 .field-list-item-selected .field-item-icon {
-    color: #3ab0cd;
+    color: #0176D3;
 }
 
 .field-list-item:last-child {

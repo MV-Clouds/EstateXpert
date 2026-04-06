@@ -185,7 +185,6 @@
     height: fit-content;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
-    padding: 0.75rem;
 }
 
 .divcontainer {
@@ -207,13 +206,13 @@
 .divcontainer2 {
     width: 100%;
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
+    align-items: flex-start;
 }
 
 .templateContent3 {
     padding: var(--spacing-md);
     padding-bottom: 2.5rem;
-    margin-top: var(--spacing-md);
     border: none;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
@@ -295,7 +294,7 @@ label {
 }
 
 .conInput {
-    width: 100%;
+    width: 25%;
     padding: 0.5rem;
     border-radius: 5px;
     border: 1px solid #80808087;
@@ -379,6 +378,14 @@ textarea {
     width: 100%;
 }
 
+.header-variable-btn-container {
+    display: flex;
+    margin-top: 5px;
+    align-items: center;
+    justify-content: flex-end;
+    background: transparent;
+}
+
 .emoji-category-div {
     margin: 4px 8px;
     user-select: none;
@@ -410,12 +417,17 @@ textarea {
 
 
 .add-variable {
-    border-radius: 5px;
-    border: 1px solid #80808087;
     padding: 1rem;
-    background-color: #F5F5F5;
+    background-color: #f7f7f7;
     margin-bottom: 1.5rem;
-    margin-top: 1.2rem;
+    margin-top: 3rem;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    border-radius: 12px;
+}
+
+.richtext:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .add-variable .body-title {
@@ -533,9 +545,12 @@ textarea {
 }
 
 .var {
+    width: 100px;
     font-size: 14px;
     margin-top: 0;
     line-height: 1.4;
+    border: 1px solid #d8dde1;
+    background: #f1f4f7;
 }
 
 .templateContent5 {
@@ -708,7 +723,6 @@ textarea {
     color: var(--color-text-muted);
     cursor: not-allowed;
     border: 1px solid #c0c0c0;
-    pointer-events: none;
 }
 
 .custom-button:disabled:hover {
@@ -794,24 +808,25 @@ textarea {
 }
 
 .creattempdiv3 {
-    margin-top: 1%;
-    width: 23%;
+    width: 24%;
+    position: sticky;
+    top: 1rem;
+    align-self: flex-start;
 }
 
 .templatetextWP {
     font-size: large;
     padding: 0.2rem;
-    margin-bottom: 0.2rem;
 }
 
 .PreviewtemplateWP {
     background-color: #EBE8E2;
     height: fit-content;
     padding-top: 4%;
-    padding-left: 6%;
+    padding-left: 9%;
     padding-bottom: 9%;
-    padding-right: 5%;
-    border-radius: 3px;
+    padding-right: 4%;
+    border-radius: 0px 0px 12px 12px;
     background-image: url('/resource/MVEX__wbiBg');
     background-repeat: no-repeat;
     background-size: cover;
@@ -868,7 +883,8 @@ textarea {
 
 .templateheadWP {
     background-color: white;
-    border-radius: 4px;
+    border-radius: 12px 12px 0px 0px;
+    padding: 0.5rem;
 }
 
 .chatWP-bubble {
@@ -960,7 +976,6 @@ textarea {
     min-width: 50px;
     text-align: center;
     font-weight: 600;
-    background-color: var(--color-background-light);
     border-radius: 4px;
     color: var(--color-text-primary);
 }
@@ -1007,10 +1022,6 @@ textarea {
     width: 24px;
     margin: 0;
     padding: 0;
-}
-
-.rich-icon {
-    border-right: 1px solid #80808040;
 }
 
 .dropdown-visible{
@@ -1305,12 +1316,14 @@ textarea {
 
 .iframe-preview {
     border: none;
+    width: 700px;
+    height: 970px;
 }
 
 /* Override iframe scaling when inside modal */
 .modal-preview-container .iframe-preview {
-    width: 100%;
-    height: 100%;
+    width: 700px;
+    height: 970px;
     min-height: unset;
     min-width: unset;
     transform: none;
@@ -1557,7 +1570,6 @@ textarea {
 }
 
 .preview-box {
-    width: 60%;
     height: 560px;
     border: 1px solid #ddd;
     border-radius: 12px;
@@ -1785,8 +1797,8 @@ textarea {
 }
 
 .native-close-button {
-    background: none;
-    border: none;
+    background: #f1f4f7;
+    border: 1px solid #d8dde1;
     cursor: pointer;
     padding: 4px;
     display: inline-flex;

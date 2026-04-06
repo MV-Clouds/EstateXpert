@@ -91,7 +91,7 @@
         </div>
 
         <div class="main_content_cls">
-            <template if:true={visibleMembers}>
+            <template if:true={visibleMembers.length}>
                 <div class="table-content">
                     <table class="slds-table">
                         <thead>
@@ -99,20 +99,74 @@
                                 <th scope="col" class="sno">
                                     <div>No.</div>
                                 </th>
-                                <th scope="col" class="contact-name">
-                                    <div class="slds-truncate" title="Contact Name">Contact Name</div>
+                                <th data-id="contactName" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header contact-name"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Contact Name">Contact Name</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="contactName" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="contact-email">
-                                    <div class="slds-truncate" >Contact Email</div>
+                                <th data-id="contactEmail" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header contact-email"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Contact Email">Contact Email</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="contactEmail" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="email-name">
-                                    <div class="slds-truncate" >Email Name</div>
+                                <th data-id="emailName" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header email-name"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Email Name">Email Name</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="emailName" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="send-time">
-                                    <div class="slds-truncate" >Send Date</div>
+                                <th data-id="sendTimeFormatted" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header send-time"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Send Date">Send Date</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="sendTimeFormatted" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="status">
-                                    <div class="status_cls slds-truncate">Status</div>
+                                <th data-id="status" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header status"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Status">Status</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="status" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
                             </tr>
                         </thead>
@@ -180,7 +234,7 @@
 
                 </div>
             </template>
-            <template if:false={visibleMembers}>
+            <template if:false={visibleMembers.length}>
                 <div class="no-data-container">
                     <div class="no-data-message">
                         No Campaign Members Found

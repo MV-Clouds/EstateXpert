@@ -276,7 +276,7 @@
 }
 
 .combobox_cls lightning-combobox {
-    width: 30rem;
+    width: 100%
 }
 
 .custom-checkbox input[type="checkbox"] {

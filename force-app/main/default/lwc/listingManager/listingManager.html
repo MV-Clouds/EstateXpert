@@ -82,21 +82,19 @@
                             </template>
                             <template if:true={showList}>
                                 <template if:false={showSection}>
-                                    <div class="tableDiv" id="tableDiv">
+                                    <div class="table-content" id="table-content">
                                         <table aria-multiselectable="true"
                                             class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
                                             role="grid"
                                             aria-label="Example advanced table of Opportunities in actionable mode">
                                             <thead>
-                                                <tr class="slds-line-height_reset fields-names">
+                                                <tr class="slds-line-height_reset fields-names table_tr_cls">
                                                     <th class="slds-cell_action-mode imageColume" scope="col">
                                                         <div class="slds-truncate slds-assistive-text" title="Actions">
                                                             Actions</div>
                                                     </th>
                                                     <th key={listing.fieldName} aria-sort="none" data-id="Name"
-                                                        onclick={sortClick}
-                                                        class={nameHeaderClass}
-                                                        scope="col">
+                                                        onclick={sortClick} class={nameHeaderClass} scope="col">
                                                         <div class="slds-text-link_reset sort-cover" role="button"
                                                             tabindex="0">
                                                             <span class="slds-assistive-text">Sort by: </span>
@@ -115,11 +113,11 @@
                                                             </div>
                                                         </div>
                                                     </th>
-                                                    <template for:each={fieldsWithIconClass} for:item="listing" for:index="index">
+                                                    <template for:each={fieldsWithIconClass} for:item="listing"
+                                                        for:index="index">
                                                         <th key={listing.fieldName} data-id={listing.fieldName}
                                                             onclick={sortClick} aria-sort="none"
-                                                            class={listing.headerClass}
-                                                            scope="col">
+                                                            class={listing.headerClass} scope="col">
                                                             <div class="sort-cover" role="button" tabindex="0">
                                                                 <span class="slds-assistive-text">Sort by: </span>
                                                                 <div
@@ -152,19 +150,20 @@
                                                                     alt="Listing Image" draggable="false" />
                                                             </div>
                                                         </td>
-                                                        <th class="slds-cell_action-mode conat_cls" scope="row">
+                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
                                                             <div class="slds-truncate center-trancate-text">
                                                                 <a data-id={listing.Id} onclick={redirectToRecord}
                                                                     tabindex="0">{listing.Name}</a>
                                                             </div>
-                                                        </th>
+                                                        </td>
                                                         <template for:each={listing.orderedFields} for:item="field"
                                                             for:index="index2">
                                                             <td key={field.fieldName} class="slds-cell_action-mode"
                                                                 role="gridcell">
                                                                 <div class="slds-truncate center-trancate-text">
                                                                     <template if:true={field.isRedirectable}>
-                                                                        <a data-id={field.lookupId} data-object={field.objectApiName} 
+                                                                        <a data-id={field.lookupId}
+                                                                            data-object={field.objectApiName}
                                                                             onclick={redirectToRecord}>{field.value}</a>
                                                                     </template>
                                                                     <template if:false={field.isRedirectable}>

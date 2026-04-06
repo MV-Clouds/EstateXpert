@@ -989,7 +989,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     scrollToTop() {
         try{
-            const tableDiv = this.template.querySelector('.tableDiv');
+            const tableDiv = this.template.querySelector('.table-content');
             if (tableDiv) {
                 tableDiv.scrollTop = 0;
             }

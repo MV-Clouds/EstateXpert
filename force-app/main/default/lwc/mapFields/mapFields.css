@@ -241,7 +241,7 @@
 }
 
 .combobox_cls lightning-combobox {
-    width: 30rem;
+    width: 100%;
 }
 
 .custom-checkbox input[type="checkbox"] {
@@ -265,13 +265,13 @@
     transition: 0.3s;
 }
 
-.custom-checkbox input[type="checkbox"]:checked + .checkmark {
+.custom-checkbox input[type="checkbox"]:checked+.checkmark {
     background-color: #0376D3;
     border-color: white;
     transition: 0.3s;
 }
 
-.custom-checkbox-body input[type="checkbox"]:checked + .checkmark {
+.custom-checkbox-body input[type="checkbox"]:checked+.checkmark {
     border-color: #0376D3;
     transition: 0.3s;
 }
@@ -289,7 +289,7 @@
     transform: translate(-42%, -61%) rotate(45deg);
 }
 
-.custom-checkbox input[type="checkbox"]:checked + .checkmark::before {
+.custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
     display: block;
 }
 
@@ -500,7 +500,14 @@
 .table-content .slds-table .property-field,
 .table-content .slds-table .actions {
     text-align: center;
-    width: auto;
+}
+
+.table-content .slds-table .actions {
+    width: 5rem;
+}
+
+.table-content .slds-table td {
+    text-align: left;
 }
 
 .action-btn {
@@ -542,7 +549,7 @@
     stroke: #dc2626;
 }
 
-.delete-div:disabled{
+.delete-div:disabled {
     background-color: rgb(243 243 243);
     cursor: not-allowed;
 }
@@ -687,15 +694,15 @@
     .invalid-access {
         padding: 2rem 1.5rem;
     }
-    
+
     .invalid-access h1 {
         font-size: 24px;
     }
-    
+
     .invalid-access p {
         font-size: 16px;
     }
-    
+
     .invalid-access svg {
         width: 64px;
         height: 64px;

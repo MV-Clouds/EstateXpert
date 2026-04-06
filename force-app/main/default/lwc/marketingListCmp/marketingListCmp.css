@@ -387,7 +387,7 @@ span {
     height: 3.5rem;
 }
 
-.tableDiv {
+.table-content {
     flex: 1;
     min-height: 0;
     overflow: auto;
@@ -397,19 +397,19 @@ span {
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.tableDiv .fields-names {
+.table-content .fields-names {
     position: sticky;
     top: 0;
     z-index: 97;
 }
 
-.tableDiv .header-checkbox-div {
+.table-content .header-checkbox-div {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.tableDiv .slds-table_resizable-cols thead th,
+.table-content .slds-table_resizable-cols thead th,
 .slds-table--resizable-cols thead th {
     padding: 0;
     background: #0376D3;
@@ -420,7 +420,7 @@ span {
     letter-spacing: 0.3px;
 }
 
-.tableDiv .colume2 {
+.table-content .colume2 {
     width: 9rem;
 }
 
@@ -590,7 +590,7 @@ th.sorted-field .slds-icon_container {
         border-radius: 0 0 10px 10px;
     }
 
-    .tableDiv {
+    .table-content {
         height: 90%;
         border-radius: 8px;
         margin: 6px;
@@ -658,7 +658,7 @@ th.sorted-field .slds-icon_container {
 
 @media only screen and (max-width: 900px) {
 
-    .tableDiv .header-checkbox-div {
+    .table-content .header-checkbox-div {
         padding: 0rem 0.5rem;
     }
 
@@ -684,7 +684,7 @@ input[type=checkbox]::before {
     border-color: white;
 }
 
-.tableDiv .checkbox-cell {
+.table-content .checkbox-cell {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -828,7 +828,7 @@ input[type=checkbox]::before {
     cursor: pointer;
 }
 
-.tableDiv tbody tr:nth-child(odd) {
+.table-content tbody tr:nth-child(odd) {
     background-color: aliceblue;
 }
 

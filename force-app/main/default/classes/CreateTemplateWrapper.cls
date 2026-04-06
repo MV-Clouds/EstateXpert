@@ -13,8 +13,8 @@
  * Change Description : Store actual variable {{1}} in the name field of template variable.
  ***********************************************************************/
 
- public with sharing class CreateTemplateWrapper {
-
+public without sharing class CreateTemplateWrapper {
+    
     /*
     *********************************************************
     @description     : Handle response and store all in the template and template variable record.

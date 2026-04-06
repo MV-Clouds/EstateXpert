@@ -15,18 +15,21 @@ import { LightningElement, track, api } from 'lwc';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
-import wbCreateTempStyle from '@salesforce/resourceUrl/wbCreateTempStyle';
 import richTextZip from '@salesforce/resourceUrl/richTextZip';
 import buttonIconsZip from '@salesforce/resourceUrl/buttonIconsZip';
 import emojiData from '@salesforce/resourceUrl/emojis_data';
-import CountryJson from '@salesforce/resourceUrl/CountryJson';
+import COUNTRY_PHONE_LENGTHS from '@salesforce/resourceUrl/CountryPhoneLengths';
+import wbCreateTempStyle from '@salesforce/resourceUrl/wbCreateTempStyle';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import LanguageJson from '@salesforce/resourceUrl/LanguageJson';
 import createWhatsappTemplate from '@salesforce/apex/WBTemplateController.createWhatsappTemplate';
 import editWhatsappTemplate from '@salesforce/apex/WBTemplateController.editWhatsappTemplate';
 import startUploadSession from '@salesforce/apex/WBTemplateController.startUploadSession';
 import uploadFileChunk from '@salesforce/apex/WBTemplateController.uploadFileChunk';
 import getObjectFields from '@salesforce/apex/WBTemplateController.getObjectFields';
+import getObjectFieldsWithRelationships from '@salesforce/apex/WBTemplateController.getObjectFieldsWithRelationships';
 import getWhatsAppTemplates from '@salesforce/apex/WBTemplateController.getWhatsAppTemplates';
+import checkTemplateExistance from '@salesforce/apex/WBTemplateController.checkTemplateExistance';
 import getDynamicObjectData from '@salesforce/apex/WBTemplateController.getDynamicObjectData';
 import tempLocationIcon from '@salesforce/resourceUrl/tempLocationIcon';
 import tempVideoIcon from '@salesforce/resourceUrl/tempVideoIcon';
@@ -39,9 +42,80 @@ import getObjectsWithPhoneField from '@salesforce/apex/WBTemplateController.getO
 import getCompanyName from '@salesforce/apex/WBTemplateController.getCompanyName';
 import getS3ConfigSettings from '@salesforce/apex/AWSFilesController.getS3ConfigSettings';
 import deleteImagesFromS3 from '@salesforce/apex/AWSFilesController.deleteImagesFromS3';
+import getPreviewURLofWhatsAppFlow from '@salesforce/apex/WBTemplateController.getPreviewURLofWhatsAppFlow';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import buildPayload from './wbCreateTemplateWrapper'
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import getAllFlowScreenIds from '@salesforce/apex/WBTemplateController.getAllFlowScreenIds';
+import getMetaHeaderHandler from '@salesforce/apex/WBTemplateController.getMetaHeaderHandler';
+
+
+// ============================
+// MODULE-LEVEL CONSTANTS
+// ============================
+const EXPIRE_TIME_OPTIONS = [
+    { label: '1 minute', value: '1 minute' },
+    { label: '2 minutes', value: '2 minutes' },
+    { label: '3 minutes', value: '3 minutes' },
+    { label: '5 minutes', value: '5 minutes' },
+    { label: '10 minutes', value: '10 minutes' }
+];
+
+const CONTENT_OPTIONS = [
+    { label: 'Add security recommendation', value: 'Add security recommendation' },
+    { label: 'Add expiry time for the code', value: 'Add expiry time for the code' }
+];
+
+const VARIABLE_TYPE_OPTIONS = [
+    { label: 'Name', value: 'Name' },
+    { label: 'Number', value: 'Number' }
+];
+
+const TYPE_OPTIONS = [
+    { label: 'None', value: 'None' },
+    { label: 'Text', value: 'Text' },
+    { label: 'Image', value: 'Image' },
+    { label: 'Video', value: 'Video' },
+    { label: 'Document', value: 'Document' }
+];
+
+const TYPE_ACTION_OPTIONS = [
+    { label: 'Call Phone Number', value: 'PHONE_NUMBER' },
+    { label: 'Visit Website', value: 'URL' },
+    { label: 'Copy Offer Code', value: 'COPY_CODE' }
+];
+
+const CUSTOM_OPTIONS = [
+    { label: 'Custom', value: 'QUICK_REPLY' },
+    { label: 'Marketing opt-out', value: 'Marketing opt-out' }
+];
+
+const URL_TYPE_OPTIONS = [
+    { label: 'Static', value: 'Static' }
+];
+
+const TIME_TO_SECONDS_MAP = {
+    '1 minute': 60,
+    '2 minutes': 120,
+    '3 minutes': 180,
+    '5 minutes': 300,
+    '10 minutes': 600
+};
+
+const BUTTON_ICON_MAP = {
+    'QUICK_REPLY': 'utility:reply',
+    'Marketing opt-out': 'utility:reply',
+    'PHONE_NUMBER': 'utility:call',
+    'URL': 'utility:new_window',
+    'COPY_CODE': 'utility:copy',
+    'FLOW': 'utility:file'
+};
+
+const TOAST_TITLES = {
+    error: 'Error',
+    warning: 'Information',
+    success: 'Success',
+    info: 'Information'
+};
 
 export default class WbCreateTemplatePage extends NavigationMixin(LightningElement) {
     LIMITS = {
@@ -54,9 +128,20 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         maxCodetxt: 15,
         maxPackTxt: 224,
         maxHashTxt: 11,
-        chunkSize: 3145728
+        chunkSize: 3145728,
+        maxHierarchyLevel: 5
     };
+
+    // ============================
+    // INSTANCE PROPERTIES
+    // ============================
     _edittemplateid;
+    _boundHandleOutsideClick; // Stored bound reference for event listener cleanup
+    _cachedToolbarButtons; // Cached toolbar buttons with classes
+    _cachedQuickReplyOptions; // Cached quick reply options
+    _cachedCallToActionOptions; // Cached call to action options
+    _lastActiveTab; // Track activeTab for cache invalidation
+    
     file;
     fileName = '';
     fileSize = 0;
@@ -69,8 +154,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         { title: 'Marketing Opt-Out', value: 'Marketing opt-out', iconName: 'marketing', description: 'Maximum 1 button can be added' },
         { title: 'Call Phone Number', value: 'PHONE_NUMBER', iconName: 'phone', description: 'Maximum 1 button can be added' },
         { title: 'Visit Website', value: 'URL', iconName: 'site', description: 'Maximum 2 buttons can be added' },
-        { title: 'Copy Offer Code', value: 'COPY_CODE', iconName: 'copy', description: 'Maximum 1 button can be added' },
-        // { title: 'Complete flow', value: 'FLOW', iconName: 'flow', description: 'Maximum 1 button can be added' }
+        { title: 'Copy Offer Code', value: 'COPY_CODE', iconName: 'copy', description: 'Maximum 1 button can be added' }
     ];
 
     toolbarButtons = [
@@ -80,213 +164,215 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         { title: 'codeIcon', iconName: 'code' }
     ];
 
-    @track contentVersionId;
-    @track isNewTemplate = true;
-    @track isEditTemplate = false;
-    @track totalButtonsCount = 0;
-    @track visitWebsiteCount = 0;
-    @track callPhoneNumber = 0;
-    @track copyOfferCode = 0;
-    @track flowCount = 0;
-    @track marketingOpt = 0;
-    @track iseditTemplatevisible = false;
-    @track isPreviewTemplate = false;
-    @track showReviewTemplate = false;
-    @track IsHeaderText = false;
-    @track addHeaderVar = false;
-    @track addMedia = false;
-    @track isImageFile = false;
-    @track isImageFileUploader = false;
-    @track isImgSelected = false;
-    @track isDocSelected = false;
-    @track isVidSelected = false;
-    @track isVideoFile = false;
-    @track isDocFile = false;
-    @track isVideoFileUploader = false;
-    @track isDocFileUploader = false;
-    @track isLocation = false;
-    @track isCallPhone = false;
-    @track isOfferCode = false;
-    @track isVisitSite = false;
-    @track isFlow = false;
-    @track isCustom = false;
-    @track createButton = false;
-    @track isButtonDisabled = false;
-    @track isStopMarketing = false;
-    @track buttonDisabled = false;
-    @track isRefreshEnabled = true;
-    @track isLoading = false;
-    @track templateExists = false;
-    @track showEmojis = false;
-    @track isCheckboxChecked = false;
-    @track showDefaultBtn = true;
-    @track templateName = '';
-    @track header = '';
-    @track footer = '';
-    @track tempBody = 'Hello';
-    @track formatedTempBody = this.tempBody;
-    @track previewBody = 'Hello';
-    @track previewHeader = '';
-    @track btntext = '';
-    @track webURL = '';
-    @track Cbtntext = '';
-    @track selectedAction = '';
-    @track selectedUrlType = 'Static';
+    // Primitives - auto-tracked by LWC (no @track needed)
+    contentVersionId;
+    isNewTemplate = true;
+    isEditTemplate = false;
+    totalButtonsCount = 0;
+    visitWebsiteCount = 0;
+    callPhoneNumber = 0;
+    copyOfferCode = 0;
+    flowCount = 0;
+    marketingOpt = 0;
+    iseditTemplatevisible = false;
+    showReviewTemplate = false;
+    IsHeaderText = false;
+    addHeaderVar = false;
+    addMedia = false;
+    isImageFile = false;
+    isImageFileUploader = false;
+    isImgSelected = false;
+    isDocSelected = false;
+    isVidSelected = false;
+    isVideoFile = false;
+    isDocFile = false;
+    isVideoFileUploader = false;
+    isDocFileUploader = false;
+    isLocation = false;
+    isCallPhone = false;
+    isOfferCode = false;
+    isVisitSite = false;
+    isFlow = false;
+    isCustom = false;
+    createButton = false;
+    isButtonDisabled = false;
+    isStopMarketing = false;
+    buttonDisabled = false;
+    isRefreshEnabled = true;
+    isLoading = false;
+    templateExists = false;
+    showEmojis = false;
+    isCheckboxChecked = false;
+    showDefaultBtn = true;
+    templateName = '';
+    header = '';
+    footer = '';
+    tempBody = 'Hello';
+    formatedTempBody = this.tempBody;
+    previewBody = 'Hello';
+    previewHeader = '';
+    btntext = '';
+    webURL = '';
+    Cbtntext = '';
+    selectedUrlType = 'Static';
+    nextIndex = 1;
+    headIndex = 1;
+    selectedOption = 'Custom';
+    activeSection = 'section1';
+    selectedContentType = 'None';
+    selectedLanguage = 'en_US';
+    selectedActionType = '';
+    selectedCountryType = '+971';
+    selectedCountryTypeLabel = 'United Arab Emirates (+971)';
+    phonePattern = '^[0-9]+$';
+    phoneErrorMessage = 'Enter a valid phone number';
+    originalTempBody = '';
+    originalHeader = '';
+    menuButtonSelected;
+    headerHandle = '';
+    isfilename = false;
+    NoFileSelected = true;
+    filePreview = '';
+    selectedObject = '';
+    richTextZip = richTextZip;
+    buttonIconsZip = buttonIconsZip;
+    isDropdownOpen = false;
+    dropdownClass = 'dropdown-hidden';
+    metaTemplateId = '';
+    headerError = '';
+    isRendered = false;
+    showLicenseError = false;
+    utilityOrderStatusSelected = false;
+    defaultPreview = true;
+    authenticationPasscodeSelected = false;
+    UtilityCustomSelected = false;
+    isDefault = true;
+    ifAuthentication = false;
+    isAppSetup = true;
+    showAutofill = true;
+    showAuthBtn = false;
+    authZeroTab = true;
+    isautofillChecked = false;
+    showOneTap = false;
+    autofilLabel = 'Autofill';
+    autoCopyCode = 'Copy Code';
+    value = 'zero_tap';
+    expirationTime = 300;
+    isExpiration = false;
+    prevContent = true;
+    maxPackages = 5;
+    showMsgValidity = false;
+    authPrevBody = `{{1}}`;
+    isAddCallPhoneNumber = false;
+    isAddVisitWebsiteCount = false;
+    isAddCopyOfferCode = false;
+    isAddFlow = false;
+    tempLocationIcon = tempLocationIcon;
+    tempVideoIcon = tempVideoIcon;
+    imageUploadPreview = imageUploadPreview;
+    docUploadPreviewImg = docUploadPreview;
+    NoPreviewAvailableImg = NoPreviewAvailable;
+    isFeatureEnabled = false;
+    selectedTime = '5 minutes';
+    isFlowMarketing = false;
+    isFlowUtility = false;
+    isFlowSelected = false;
+    isModalOpen = false;
+    selectedFlowId = '';
+    selectedFlow;
+    iframeSrc;
+    isModalPreview = false;
+    isAWSEnabled = false;
+    confData;
+    s3;
+    isAwsSdkInitialized = true;
+    awsFileName;
+    flowScreenIds;
+    originalContentVersionId = null;
+    ifUtilty = false;
+    appError = false;
+    orderStatusBody = '';
+    catalogName = '';
+    locationNameMerge = '';
+    locationAddressMerge = '';
+    selectedVariableType = 'Number'; // Default variable type (Name or Number)
+
+    // Arrays and Objects - need @track for deep reactivity
     @track variables = [];
     @track header_variables = [];
-    @track nextIndex = 1;
-    @track headIndex = 1;
-    @track selectedOption = 'Custom';
-    @track activeSection = 'section1';
-    @track selectedLabel = 'Add button';
-    @track selectedContentType = 'None';
-    @track selectedLanguage = 'en_US';
-    @track selectedActionType = '';
-    @track selectedCountryType = '+971';
-    @track originalTempBody = '';
-    @track placeholderMap = {};
+    @track countryPhoneMap = {};
+    @track countryLabelToCodeMap = {};
+    @track countryCodeToLabelMap = {};
     @track buttonList = [];
     @track customButtonList = [];
-    @track emojis;
-    @track originalHeader = '';
-    @track menuButtonSelected;
-    @track headerHandle = '';
-    @track isfilename = false;
-    @track NoFileSelected = true;
-    @track filePreview = '';
     @track languageOptions = [];
     @track countryType = [];
     @track availableObjects = [];
-    @track selectedObject = '';
     @track fields = [];
     @track chatMessages = [];
-    @track richTextZip = richTextZip;
-    @track buttonIconsZip = buttonIconsZip;
-    @track isDropdownOpen = false;
-    @track dropdownClass = 'dropdown-hidden';
     @track emojiCategories = [];
-    @track templateId = '';
-    @track metaTemplateId = '';
     @track allTemplates = [];
-    @track headerError = '';
-    @track imageurl = '';
-    @track contentDocumentId = '';
-    @track isRendered = false;
-    @track utilityOrderStatusSelected = false;
-    @track defaultPreview = true;
-    @track authenticationPasscodeSelected = false;
-    @track UtilityCustomSelected = false;
-    @track isDefault = true;
-    @track ifAuthentication = false;
-    @track isAppSetup = true;
-    @track showAutofill = true;
-    @track showAuthBtn = false;
-    @track authZeroTab = true;
-    @track isautofillChecked = false;
-    @track selectContent = ['Add security recommendation'];
-    @track showOneTap = false;
-    @track autofilLabel = 'Autofill';
-    @track autoCopyCode = 'Copy Code';
-    @track value = 'zero_tap';
-    @track packages = [
-        { id: 1, packagename: '', signature: '', curPackageName: 0, curHashCode: 0 }
-    ];
-    @track expirationTime = 300;
-    @track isExpiration = false;
-    @track prevContent = true;
-    @track maxPackages = 5;
-    @track showMsgValidity = false;
-    @track authPrevBody = `{{1}}`;
-    @track isAddCallPhoneNumber = false;
-    @track isAddVisitWebsiteCount = false;
-    @track isAddCopyOfferCode = false;
-    @track isAddFlow = false;
-    @track tempLocationIcon = tempLocationIcon;
-    @track tempVideoIcon = tempVideoIcon;
-    @track imageUploadPreview = imageUploadPreview;
-    @track docUploadPreviewImg = docUploadPreview;
-    @track NoPreviewAvailableImg = NoPreviewAvailable;
-    @track isFeatureEnabled = false;
-    @track selectedTime = '5 minutes';
-    @track isFlowMarketing = false;
-    @track isFlowUtility = false;
-    @track isFlowSelected = false;
-    @track isModalOpen = false;
-    @track selectedFlowId = '';
-    @track selectedFlow;
-    @track iframeSrc;
-    @track isModalPreview = false;
-    @track showCategoryPage = true;
-    @track isAWSEnabled = false;
-    @track confData;
-    @track s3;
-    @track isAwsSdkInitialized = true;
-    @track selectedFilesToUpload = [];
-    @track awsFileName;
+    @track headerVarAlternateTextErrors = {};
+    @track bodyVarAlternateTextErrors = {};
     @track bodyVariablePlacementError = '';
     @track bodyVariableFormatError = '';
     @track headerVariableFormatError = '';
+    @track selectContent = ['Add security recommendation'];
+    @track packages = [
+        { id: 1, packagename: '', signature: '', curPackageName: 0, curHashCode: 0 }
+    ];
+    @track selectedFilesToUpload = [];
+    @track objectFieldMap = {};
+    @track fieldOptionsWithRelationships = [];
+    @track allObjectFieldsMap = {};
+    @track uniqueErrorMessages = { packageErrors: [], signatureErrors: [] };
+
     @api activeTab;
     @api selectedTab;
+    @api selectedOption;
+    @track addVar = false;
+    @api isTemplateClone = false;
 
     // ============================
     // OPTIONS PROVIDERS (Dropdown values)
     // ============================
 
     get expireTime() {
-        // Options for expiration times
-        return [
-            { label: '1 minute', value: '1 minute' },
-            { label: '2 minutes', value: '2 minutes' },
-            { label: '3 minutes', value: '3 minutes' },
-            { label: '5 minutes', value: '5 minutes' },
-            { label: '10 minutes', value: '10 minutes' }
-        ];
+        return EXPIRE_TIME_OPTIONS;
     }
 
     get contentOption() {
-        // Options for content actions
-        return [
-            { label: 'Add security recommendation', value: 'Add security recommendation' },
-            { label: 'Add expiry time for the code', value: 'Add expiry time for the code' },
-        ];
+        return CONTENT_OPTIONS;
     }
 
     get typeOptions() {
-        // Options for content types
-        return [
-            { label: 'None', value: 'None' },
-            { label: 'Text', value: 'Text' },
-            { label: 'Image', value: 'Image' },
-            { label: 'Video', value: 'Video' },
-            { label: 'Document', value: 'Document' }
-        ];
+        return TYPE_OPTIONS;
     }
 
     get typeactionOption() {
-        // Options for call-to-action buttons
-
-        return [
-            { label: 'Call Phone Number', value: 'PHONE_NUMBER' },
-            { label: 'Visit Website', value: 'URL' },
-            { label: 'Copy Offer Code', value: 'COPY_CODE' },
-            { label: 'Complete flow', value: 'FLOW' }
-        ];
+        return TYPE_ACTION_OPTIONS;
     }
 
     get customOption() {
-        // Options for custom quick reply buttons
-        return [
-            { label: 'Custom', value: 'QUICK_REPLY' },
-            { label: 'Marketing opt-out', value: 'Marketing opt-out' }
-        ];
+        return CUSTOM_OPTIONS;
     }
 
     get urlType() {
-        // Options for URL types
-        return [
-            { label: 'Static', value: 'Static' }
-        ];
+        return URL_TYPE_OPTIONS;
+    }
+
+    get variableTypeOptions() {
+        return VARIABLE_TYPE_OPTIONS;
+    }
+
+    // Getter to check if Number type is selected (for showing object selector)
+    get isNumberTypeSelected() {
+        return this.selectedVariableType === 'Number';
+    }
+
+    // Getter to check if Name type is selected
+    get isNameTypeSelected() {
+        return this.selectedVariableType === 'Name';
     }
 
     // ============================
@@ -343,6 +429,10 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         return this.marketingOpt >= 1;
     }
 
+    get maxtelephonelength(){
+        return this.countryPhoneMap[this.selectedCountryType] || 15;
+    }
+
     get buttonClass() {
         // Class for buttons depending on disabled state
         return this.isButtonDisabled ? 'select-button disabled' : 'select-button';
@@ -354,7 +444,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     get tempHeaderExample() {
         // Map header variables into string format
-        return this.header_variables.map(varItem => `{{${varItem.object}.${varItem.field}}}`);
+        return this.header_variables.map(varItem => `{{${varItem.field}}}`);
     }
 
     get templateBodyText() {
@@ -380,13 +470,32 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     get computedVariables() {
         return this.variables.map(varItem => {
             const computed = this.computeVariableFields(varItem, false);
+            const hasAlternateTextError = !!this.bodyVarAlternateTextErrors[varItem.id];
+            const isNameType = varItem.variableType === 'Name';
+            const isNumberType = varItem.variableType === 'Number';
+            
+            // For Name type, display the content from nameValue; for Number type, show {{1}}, {{2}} etc.
+            const displayIndex = isNameType 
+                ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
+                : varItem.index;
+
+            // Dynamic placeholder based on variable type
+            const placeholderText = isNameType ? 'Enter example' : 'Enter alternative text';
 
             return {
                 ...varItem,
-                ...computed
+                ...computed,
+                index: displayIndex, // Override index for display
+                placeholderText, // Dynamic placeholder text
+                hasAlternateTextError,
+                isNameType, // Flag to show name value input
+                isNumberType, // Flag to show field picker and alternate text
+                showNameValueInput: isNameType, // Show name value input for Name type
+                showAlternateTextInput: isNumberType // Show alternate text for Number type
             };
         });
     }
+
 
     get computedHeaderVariables() {
         return this.header_variables.map(varItem => {
@@ -398,28 +507,31 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 : [];
 
             const computed = this.computeVariableFields(varItem, true);
-
+            const hasAlternateTextError = !!this.headerVarAlternateTextErrors[varItem.id];
+            const isNameType = varItem.variableType === 'Name';
+            const isNumberType = varItem.variableType === 'Number' || !varItem.variableType;
+            
+            // For Name type, display the content from nameValue
+            const displayIndex = isNameType 
+                ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
+                : varItem.index;
+            
+            // Dynamic placeholder based on variable type
+            const placeholderText = isNameType ? 'Enter example' : 'Enter alternative text';
+            
             return {
                 ...varItem,
                 ...computed,
+                index: displayIndex,
+                placeholderText, // Dynamic placeholder text
+                hasAlternateTextError,
+                isNameType,
+                isNumberType,
                 objectOptions
             };
         });
     }
 
-    computeVariableFields(varItem, isHeaderVariable = false) {
-        const fieldOptions = this.fields || [];
-        const selectedField = fieldOptions.find(field => field.value === varItem.field);
-        const fieldLabel = varItem.fieldLabel || selectedField?.label || varItem.field || 'Search fields...';
-        
-        return {
-            fieldLabel,
-            options: fieldOptions.map(field => ({
-                ...field,
-                isSelected: field.value === varItem.field
-            }))
-        };
-    }
 
     get availableObjectsWithSelection() {
         // Highlight the selected object
@@ -430,13 +542,16 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     get toolbarButtonsWithClasses() {
-        // Set icon paths and classes for toolbar buttons
-        return this.toolbarButtons.map(button => ({
-            ...button,
-            iconUrl: this.getIconPath(button.iconName),
-            classes: `toolbar-button ${button.title.toLowerCase()}`,
-            imgClasses: `custom-icon ${button.iconName.toLowerCase()}`
-        }));
+        // Cache toolbar buttons since they never change after initial computation
+        if (!this._cachedToolbarButtons) {
+            this._cachedToolbarButtons = this.toolbarButtons.map(button => ({
+                ...button,
+                iconUrl: this.getIconPath(button.iconName),
+                classes: `toolbar-button ${button.title.toLowerCase()}`,
+                imgClasses: `custom-icon ${button.iconName.toLowerCase()}`
+            }));
+        }
+        return this._cachedToolbarButtons;
     }
 
     // ============================
@@ -453,13 +568,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const hasCustomButtonError = this.customButtonList.some(button => button.hasError);
         const hasButtonListError = this.buttonList.some(button => button.hasError);
 
-        // Header validation
-        const headerImageNotSelected = this.selectedContentType === 'Image' && !this.headerHandle;
+        // Header validation        
+        const headerImageNotSelected = this.selectedContentType === 'Image' && !this.headerHandle;        
         const headerVideoNotSelected = this.selectedContentType === 'Video' && !this.headerHandle;
         const headerDocumentNotSelected = this.selectedContentType === 'Document' && !this.headerHandle;
         const headerTextNotSelected = this.selectedContentType === 'Text' && !this.header;
+        
         const hasHeaderError = !!this.headerError;
-
+                
         let headerFileNotSelected = false;
         if (this.selectedContentType === 'Document') {
             headerFileNotSelected = headerDocumentNotSelected;
@@ -473,12 +589,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             switch (currentTemplate) {
                 case 'Marketing':
                 case 'Utility':
-                    if (this.flowBooleanCheck) {
+                
+                    if (this.flowBooleanCheck) {                        
                         return !(this.selectedFlow !== undefined && this.templateName && this.tempBody &&
                             areButtonFieldsFilled && areCustomButtonFilled && !this.templateExists &&
                             !hasCustomButtonError && !hasButtonListError && !headerFileNotSelected &&
                             !hasHeaderError && !headerTextNotSelected);
                     }
+
                     return !(this.templateName && this.tempBody && areButtonFieldsFilled && areCustomButtonFilled &&
                         !this.templateExists && !hasCustomButtonError && !hasButtonListError &&
                         !headerFileNotSelected && !hasHeaderError && !headerTextNotSelected);
@@ -496,8 +614,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 default:
                     return true;
             }
+
         })();
+        
         return result;
+    }
+
+    get templateNameDisabled() {
+        return this.isEditTemplate && (this.isTemplateClone == false);
     }
 
     // ============================
@@ -510,27 +634,34 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     get quickReplyOptions() {
-        // Dropdown options for quick replies
-        return this.dropdownOptions
-            .filter(option => this.activeTab == 'Utility' ?
-                option.value === 'QUICK_REPLY' :
-                option.value === 'QUICK_REPLY' || option.value === 'Marketing opt-out')
-            .map(option => ({
-                ...option,
-                iconUrl: this.getButtonPath(option.iconName),
-                classes: `dropdown-item ${option.title.toLowerCase().replace(/\s+/g, '-')}`
-            }));
+        // Cache with invalidation when activeTab changes
+        if (!this._cachedQuickReplyOptions || this._lastActiveTabForQuickReply !== this.activeTab) {
+            this._lastActiveTabForQuickReply = this.activeTab;
+            this._cachedQuickReplyOptions = this.dropdownOptions
+                .filter(option => this.activeTab == 'Utility' ?
+                    option.value === 'QUICK_REPLY' :
+                    option.value === 'QUICK_REPLY' || option.value === 'Marketing opt-out')
+                .map(option => ({
+                    ...option,
+                    iconUrl: this.getButtonPath(option.iconName),
+                    classes: `dropdown-item ${option.title.toLowerCase().replace(/\s+/g, '-')}`
+                }));
+        }
+        return this._cachedQuickReplyOptions;
     }
 
     get callToActionOptions() {
-        // Dropdown options for call-to-actions
-        return this.dropdownOptions
-            .filter(option => ['PHONE_NUMBER', 'URL', 'FLOW', 'COPY_CODE'].includes(option.value))
-            .map(option => ({
-                ...option,
-                iconUrl: this.getButtonPath(option.iconName),
-                classes: `dropdown-item ${option.title.toLowerCase().replace(/\s+/g, '-')}`
-            }));
+        // Cache call-to-action options (static, never changes)
+        if (!this._cachedCallToActionOptions) {
+            this._cachedCallToActionOptions = this.dropdownOptions
+                .filter(option => ['PHONE_NUMBER', 'URL', 'FLOW', 'COPY_CODE'].includes(option.value))
+                .map(option => ({
+                    ...option,
+                    iconUrl: this.getButtonPath(option.iconName),
+                    classes: `dropdown-item ${option.title.toLowerCase().replace(/\s+/g, '-')}`
+                }));
+        }
+        return this._cachedCallToActionOptions;
     }
 
     get isZeroTapSelected() {
@@ -562,13 +693,406 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             this.isNewTemplate = false;
             this.isEditTemplate = true;
 
-            // this.isAllTemplate = false;
             this.fetchTemplateData(); // Load template data when ID is set
         }
     }
 
     getIconPath(iconName) {
         return `${richTextZip}/rich-texticon/${iconName}.png`;
+    }
+
+    connectedCallback() {
+        try {
+            loadStyle(this, MulishFontCss)
+            .then(() => {
+                console.log('External Css Loaded');
+            })
+            .catch(error => {
+                console.log('Error occuring during loading external css', error);
+            });
+
+            this.isLoading = true;
+            this.iseditTemplatevisible = true;
+            if (this.selectedTab != undefined && this.selectedOption != undefined) {
+                this.handleTabClick(this.selectedTab);
+                this.handleRadioChange(this.selectedOption);
+            }
+
+            // Generate synchronous data first
+            this.generateEmojiCategories();
+
+            // Execute independent async operations in parallel for better performance
+            Promise.all([
+                this.getS3ConfigDataAsync(),
+                this.fetchCountries(),
+                this.fetchLanguages(),
+                this.fetchUpdatedTemplates(false),
+                this.fetchObjectsWithPhoneField(),
+                getCompanyName()
+            ]).then(results => {
+                // getCompanyName result is the last one
+                this.companyName = results[5] || '';
+            }).catch(error => {
+                console.error('Error in parallel initialization:', error);
+            });
+        } catch (e) {
+            console.error('Error in connectedCallback:', e.message);
+        }
+        
+        // Store bound reference for proper cleanup in disconnectedCallback
+        this._boundHandleOutsideClick = this.handleOutsideClick.bind(this);
+        document.addEventListener('click', this._boundHandleOutsideClick);
+    }
+
+    renderedCallback() {
+        try {
+            loadStyle(this, wbCreateTempStyle).then().catch(error => {
+                console.error("Error in loading the colors", error);
+            })
+            if (this.isRendered) return;
+            this.isRendered = true;
+            let headerEls = this.template.querySelectorAll('.field-header-dd');
+            if (headerEls != null && this.addHeaderVar) {
+                for (let i = 0; i < this.header_variables.length; i++) {
+                    this.header_variables.forEach((hv, i) => {
+                        headerEls[i].value = hv.field;
+                    })
+                }
+                this.addHeaderVar = false;
+            }
+            let bodyEls = this.template.querySelectorAll('.field-body-dd');
+            if (bodyEls != null && this.addVar) {
+                this.variables.forEach((bv, i) => {
+                    bodyEls[i].value = bv.field;
+                })
+                this.addVar = false;
+            }
+
+            if (this.isAwsSdkInitialized) {
+                Promise.all([loadScript(this, AWS_SDK)])
+                    .then(() => {
+                        // Script loaded successfully
+                    })
+                    .catch((error) => {
+                        console.error("error -> ", error);
+                    });
+
+                this.isAwsSdkInitialized = false;
+            }
+        } catch (error) {
+            console.error('Error in function renderedCallback:::', error.message);
+        }
+    }
+
+    getAllFlowScreens() {
+        getAllFlowScreenIds({
+            flowId: this.selectedFlowId
+        }).then(result => {
+            this.flowScreenIds = result;
+        }).catch(error => {
+            console.error('Error fetching flow screen ids:', error);
+        });
+    }
+
+    /**
+     * Shared helper to compute variable field options with selection state
+     * Simplified version since wbMergeFieldSelector component now handles the picker logic
+     */
+    computeVariableFields(varItem, isHeaderVariable = false) {
+        const fieldOptions = this.fields || [];
+        const selectedField = fieldOptions.find(field => field.value === varItem.field);
+        const fieldLabel = varItem.fieldLabel || selectedField?.label || varItem.field || 'Search fields...';
+        
+        return {
+            fieldLabel,
+            options: fieldOptions.map(field => ({
+                ...field,
+                isSelected: field.value === varItem.field
+            }))
+        };
+    }
+
+    /**x
+     * Shared method to reset media/content type flags
+     */
+    resetMediaFlags() {
+        this.isImgSelected = false;
+        this.isDocSelected = false;
+        this.isVidSelected = false;
+        this.isImageFileUploader = false;
+        this.isVideoFileUploader = false;
+        this.isDocFileUploader = false;
+        this.isLocation = false;
+        this.addMedia = false;
+        this.isImageFile = false;
+        this.isVideoFile = false;
+        this.isDocFile = false;
+    }
+
+    /**
+     * Shared method to reset radio/option selection flags
+     */
+    resetOptionFlags() {
+        this.utilityOrderStatusSelected = false;
+        this.authenticationPasscodeSelected = false;
+        this.UtilityCustomSelected = false;
+        this.defaultPreview = false;
+        this.isFlowMarketing = false;
+        this.isFlowUtility = false;
+        this.showDefaultBtn = true;
+    }
+
+    /**
+     * Unified handler for object selection changes (both header and body)
+     */
+    async handleObjectChange(event) {
+        const selectedObject = event.target.value;
+        this.isLoading = true;
+        this.selectedObject = selectedObject;
+
+        try {
+            const fieldOptions = await this.loadObjectFields(selectedObject);
+            const simpleFields = this.flattenFieldsForDropdown(fieldOptions);
+            const firstField = simpleFields[0] || fieldOptions[0];
+
+            this.fields = simpleFields;
+
+            // Update body variables
+            if (this.variables.length > 0) {
+                this.variables = this.variables.map(varItem => ({
+                    ...varItem,
+                    object: selectedObject,
+                    field: firstField?.value || '',
+                    fieldLabel: firstField?.label || 'Search fields...',
+                    options: simpleFields
+                }));
+                this.formatedTempBody = this.formatText(this.tempBody);
+                this.updateTextarea();
+                this.updatePreviewContent(this.formatedTempBody, 'body');
+            }
+
+            // Update header variables
+            if (this.header_variables.length > 0) {
+                this.header_variables = this.header_variables.map(varItem_1 => ({
+                    ...varItem_1,
+                    object: selectedObject,
+                    field: firstField?.value || '',
+                    fieldLabel: firstField?.label || 'Search fields...',
+                    options: simpleFields
+                }));
+                this.updatePreviewContent(this.header, 'header');
+            }
+        } catch (error) {
+            console.error('Error fetching fields with relationships: ', error);
+        }
+        finally {
+            this.isLoading = false;
+        }
+}
+
+    /**
+     * Extract all unique object names from a field path
+     * Example: "Account.Owner.Profile.Name" -> ["Account", "User", "Profile"]
+     */
+    extractObjectsFromFieldPath(objectName, fieldPath) {
+        const objects = [objectName];
+        
+        if (!fieldPath || !fieldPath.includes('.')) {
+            return objects;
+        }
+
+        // Split by dots and process each relationship
+        const parts = fieldPath.split('.');
+        let currentObject = objectName;
+        
+        for (let i = 0; i < parts.length - 1; i++) {
+            const fieldName = parts[i];
+            
+            // Try to find the field in our cached object field map
+            const cachedFields = this.allObjectFieldsMap[currentObject];
+            if (cachedFields) {
+                const field = cachedFields.find(f => f.value === fieldName || f.value === fieldName + '.');
+                if (field && field.relatedObject) {
+                    currentObject = field.relatedObject;
+                    objects.push(currentObject);
+                }
+            }
+        }
+        
+        return objects;
+    }
+
+    /**
+     * Get all unique objects needed for the current template variables
+     */
+    getAllRequiredObjects() {
+        const objectSet = new Set();
+        
+        // Add the main selected object
+        if (this.selectedObject) {
+            objectSet.add(this.selectedObject);
+        }
+        
+        // Extract objects from body variables
+        if (this.variables && this.variables.length > 0) {
+            this.variables.forEach(variable => {
+                if (variable.object) {
+                    objectSet.add(variable.object);
+                    
+                    // Extract objects from nested field paths
+                    if (variable.field && variable.field.includes('.')) {
+                        const objects = this.extractObjectsFromFieldPath(variable.object, variable.field);
+                        objects.forEach(obj => objectSet.add(obj));
+                    }
+                }
+            });
+        }
+
+        // Extract objects from header variables
+        if (this.header_variables && this.header_variables.length > 0) {
+            this.header_variables.forEach(variable => {
+                if (variable.object) {
+                    objectSet.add(variable.object);
+                    
+                    // Extract objects from nested field paths
+                    if (variable.field && variable.field.includes('.')) {
+                        const objects = this.extractObjectsFromFieldPath(variable.object, variable.field);
+                        objects.forEach(obj => objectSet.add(obj));
+                    }
+                }
+            });
+        }
+
+        return Array.from(objectSet);
+    }
+
+    /**
+     * Pre-fetch all object fields for edit mode
+     */
+    async prefetchAllObjectFields() {
+        const requiredObjects = this.getAllRequiredObjects();
+        
+        if (requiredObjects.length === 0) {
+            return;
+        }        
+        
+        try {
+            // Use the unified method with multiple objects and empty relationship paths
+            const result = await getObjectFieldsWithRelationships({ 
+                objectNames: requiredObjects,
+                relationshipPaths: []
+            });
+            
+            // Store all fields in the map
+            this.allObjectFieldsMap = result || {};
+            
+            // Now load relationship children for nested field paths and regenerate labels
+            this.loadRelationshipChildrenForVariables();
+        } catch (error) {
+            console.error('Error pre-fetching object fields:', error);
+            this.showToast('Error loading field data: ' + (error.body?.message || error.message), 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async loadRelationshipChildrenForVariables() {
+
+        try {
+            // Collect all unique relationship paths from variables
+            const relationshipPaths = new Set();
+            
+            const processVariable = (variable) => {
+                if (variable.field && variable.field.includes('.')) {
+                    const parts = variable.field.split('.');
+                    for (let i = 0; i < parts.length - 1; i++) {
+                        const path = parts.slice(0, i + 1).join('.');
+                        relationshipPaths.add(path);
+                    }
+                }
+            };
+            
+            // Process body variables
+            if (this.variables && this.variables.length > 0) {
+                this.variables.forEach(processVariable);
+            }
+            
+            // Process header variables
+            if (this.header_variables && this.header_variables.length > 0) {
+                this.header_variables.forEach(processVariable);
+            }
+            
+            if (relationshipPaths.size === 0) {
+                return;
+            }
+            
+            const resultMap = await getObjectFieldsWithRelationships({
+                objectNames: [this.selectedObject],
+                relationshipPaths: Array.from(relationshipPaths)
+            });
+            
+            for (const [path, childFields] of Object.entries(resultMap)) {
+                if (childFields && childFields.length > 0) {
+                    this.updateFieldOptionsTree(path, childFields);
+                }
+            }
+
+            this.regenerateVariableLabels();
+            
+        } catch (error) {
+            console.error('Error loading relationship children:', error.stack);
+        }
+        
+        // After loading all children, regenerate labels for variables
+    }
+
+    /**
+     * Regenerate field labels for all variables after relationship children are loaded
+     */
+    regenerateVariableLabels() {
+        // Regenerate labels for body variables
+        if (this.variables && this.variables.length > 0) {
+            this.variables = this.variables.map(variable => {
+                const fieldLabel = this.generateFieldLabelFromPath(variable.field);
+                return {
+                    ...variable,
+                    fieldLabel: fieldLabel
+                };
+            });
+        }
+        
+        // Regenerate labels for header variables
+        if (this.header_variables && this.header_variables.length > 0) {
+            this.header_variables = this.header_variables.map(variable => {
+                const fieldLabel = this.generateFieldLabelFromPath(variable.field);
+                return {
+                    ...variable,
+                    fieldLabel: fieldLabel
+                };
+            });
+        }
+    }
+
+    /**
+     * Update the field options tree with loaded children for a relationship path
+     */
+    updateFieldOptionsTree(relationshipPath, childFields) {
+        const updateChildren = (fields, path) => {
+            return fields.map(field => {
+                if (field.value === path) {
+                    return { ...field, children: childFields };
+                }
+                if (field.children && field.children.length > 0) {
+                    return { ...field, children: updateChildren(field.children, path) };
+                }
+                return field;
+            });
+        };
+
+        this.fieldOptionsWithRelationships = updateChildren(
+            this.fieldOptionsWithRelationships, 
+            relationshipPath
+        );
     }
 
     openModal() {
@@ -589,41 +1113,76 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         this.selectedFlowId = selectedFlow; // Get selected Flow ID
         this.iframeSrc = iframeSrc;
         this.selectedFlow = flows; // Store the entire list of flows
-
+        setTimeout(()=>{
+            this.getAllFlowScreens();
+        },400);
 
         this.isFlowSelected = true; // Hide "Choose Flow" button after selection
         this.NoFileSelected = false; // Hide text after selection
+        
+        // Add flow button if it doesn't exist in buttonList
+        const hasFlowButton = this.buttonList.some(button => button.isFlow);
+        if (!hasFlowButton && this.flowCount < 1) {
+            // Create and add flow button
+            const newFlowButton = {
+                id: this.buttonList.length + 1,
+                selectedActionType: 'FLOW',
+                iconName: this.getButtonIcon('FLOW'),
+                btntext: 'View flow',
+                webURL: '',
+                phonenum: '',
+                offercode: '',
+                selectedUrlType: 'Static',
+                selectedCountryType: '',
+                selectedCountryTypeLabel: '',
+                isCallPhone: false,
+                isVisitSite: false,
+                isOfferCode: false,
+                isFlow: true,
+                hasError: false,
+                errorMessage: ''
+            };
+            
+            this.buttonList.push(newFlowButton);
+            this.flowCount++;
+            this.totalButtonsCount++;
+            this.createButton = true;
+            
+            this.updateButtonErrors();
+            this.updateButtonDisabledState();
+        }
+        
         this.closeModal();
     }
 
-    handleFlowDeleteClick() {
+    handleFlowDeleteClick(event) {
+        // Remove the flow selection
         this.isFlowSelected = false;
-        this.selectedFlowId = ''; // Get selected Flow ID
+        this.selectedFlowId = '';
         this.selectedFlow = undefined;
         this.NoFileSelected = true;
+        
+        // Also remove any FLOW button from buttonList
+        const flowButtonIndex = this.buttonList.findIndex(button => button.isFlow);
+        if (flowButtonIndex !== -1) {
+            this.buttonList = this.buttonList.filter((_, i) => i !== flowButtonIndex);
+            this.flowCount--;
+            this.totalButtonsCount--;
+            
+            if (this.buttonList.length === 0) {
+                this.createButton = false;
+            }
+            
+            this.updateButtonDisabledState();
+        }
     }
 
     convertTimeToSeconds(label) {
-        const timeMap = {
-            '1 minute': 60,
-            '2 minutes': 120,
-            '3 minutes': 180,
-            '5 minutes': 300,
-            '10 minutes': 600
-        };
-        return timeMap[label] || 300; // Default to 5 minutes if not found
+        return TIME_TO_SECONDS_MAP[label] || 300; // Default to 5 minutes if not found
     }
 
     getButtonIcon(type) {
-        const iconMap = {
-            'QUICK_REPLY': 'utility:reply',
-            'Marketing opt-out': 'utility:reply',
-            'PHONE_NUMBER': 'utility:call',
-            'URL': 'utility:new_window',
-            'COPY_CODE': 'utility:copy',
-            'FLOW': 'utility:file'
-        };
-        return iconMap[type] || 'utility:question';
+        return BUTTON_ICON_MAP[type] || 'utility:question';
     }
 
     handleTabClick(sectionname) {
@@ -644,14 +1203,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     handleDefaultValues() {
-        this.utilityOrderStatusSelected = false;
-        this.authenticationPasscodeSelected = false;
-        this.UtilityCustomSelected = false;
-        this.defaultPreview = false;
-
-        this.isFlowMarketing = false;
-        this.isFlowUtility = false;
-        this.showDefaultBtn = true;
+        this.resetOptionFlags();
 
         switch (this.selectedOption) {
             case 'ORDER_STATUS':
@@ -681,19 +1233,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     handleRadioChange(optionname) {
-        // this.selectedOption = '';
         this.selectedOption = optionname;
-
-
         this.ifUtilty = false;
-        // this.showDefaultBtn = false;
-        this.utilityOrderStatusSelected = false;
-        this.authenticationPasscodeSelected = false;
-        this.UtilityCustomSelected = false;
-        this.defaultPreview = false;
-        this.isFlowMarketing = false;
-        this.isFlowUtility = false;
-        this.showDefaultBtn = true;
+        this.resetOptionFlags();
 
         switch (this.selectedOption) {
             case 'ORDER_STATUS':
@@ -767,150 +1309,238 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    addOutsideClickListener() {
-        document.addEventListener('click', this.handleOutsideClick.bind(this));
-    }
-
-    connectedCallback() {
-        try {
-            loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('External Css Loaded');
-            })
-            .catch(error => {
-                console.log('Error occuring during loading external css', error);
-            });
-
-            this.iseditTemplatevisible = true;
-            if (this.selectedTab != undefined && this.selectedOption != undefined) {
-                this.handleTabClick(this.selectedTab);
-                this.handleRadioChange(this.selectedOption);
-            }
-
-            this.getS3ConfigDataAsync();
-            this.fetchCountries();
-            this.fetchLanguages();
-            this.generateEmojiCategories();
-            this.fetchUpdatedTemplates(false);
-            this.fetchObjectsWithPhoneField();
-            getCompanyName()
-                .then(result => {
-                    this.companyName = result;
-                })
-                .catch(error => {
-                    console.error('Error fetching company name:', error);
-                });
-        } catch (e) {
-            console.error('Error in connectedCallback:::', e.message);
-        }
-    }
-
     getS3ConfigDataAsync() {
-        try {
-            getS3ConfigSettings()
-                .then(result => {
-                    if (result != null) {
-                        this.confData = result;
-                        this.isAWSEnabled = true;
-                    }
-                }).catch(error => {
-                    console.error('error in apex -> ', error.stack);
-                });
-        } catch (error) {
-            console.error('error in getS3ConfigDataAsync -> ', error.stack);
-        }
-    }
-
-    removeOutsideClickListener() {
-        document.removeEventListener('click', this.handleOutsideClick.bind(this));
-    }
-
-    disconnectedCallback() {
-        this.removeOutsideClickListener();
+        return getS3ConfigSettings()
+            .then(result => {
+                if (result != null) {
+                    this.confData = result;
+                    this.isAWSEnabled = true;
+                }
+                return result;
+            }).catch(error => {
+                console.error('error in getS3ConfigDataAsync -> ', error?.stack || error);
+                return null;
+            });
     }
 
     handleOutsideClick(event) {
-        const emojiContainer = this.template.querySelector('.toolbar-button');
-        const button = this.template.querySelector('button');
-        if (
-            (emojiContainer && !emojiContainer.contains(event.target)) &&
-            (button && !button.contains(event.target))
-        ) {
-            this.showEmojis = false;
-            this.removeOutsideClickListener();
+        const target = event.target;
+        
+        // Handle emoji picker close
+        if (this.showEmojis) {
+            const emojiContainer = this.template.querySelector('.toolbar-button');
+            const button = this.template.querySelector('button');
+            if (
+                (emojiContainer && !emojiContainer.contains(target)) &&
+                (button && !button.contains(target))
+            ) {
+                this.showEmojis = false;
+            }
         }
-        if (this.template.querySelector('.dropdown-container') && !this.template.querySelector('.dropdown-container').contains(event.target)) {
-            if (this.isDropdownOpen) {
+        
+        // Note: Field picker dropdown closing is now handled by wbMergeFieldSelector component
+        
+        // Close button dropdown when clicking outside
+        if (this.isDropdownOpen) {
+            const dropdownContainer = this.template.querySelector('.dropdown-container');
+            if (dropdownContainer && !dropdownContainer.contains(target)) {
                 this.isDropdownOpen = false;
                 this.dropdownClass = 'dropdown-hidden';
             }
         }
     }
 
+    // Helper method to flatten fields for dropdown display
+    flattenFieldsForDropdown(fields, parentLabel = '') {
+        let result = [];
+        if (!fields || !Array.isArray(fields)) return result;
+        
+        fields.forEach(field => {
+            const displayLabel = parentLabel ? `${parentLabel} > ${field.label}` : field.label;
+            const displayValue = parentLabel ? `${parentLabel.replace(/ > /g, '.')}.${field.value}` : field.value;
+            
+            if (!field.isRelationship) {
+                result.push({ label: displayLabel, value: displayValue });
+            }
+            
+            if (field.children && field.children.length > 0) {
+                result = result.concat(this.flattenFieldsForDropdown(field.children, displayLabel));
+            }
+        });
+        return result;
+    }
+
+    // Generate a display label from a field path (e.g., "Account.Owner.Name" -> "Account (Account) > Owner (User) > Name")
+    generateFieldLabelFromPath(fieldPath) {
+        if (!fieldPath) return 'Search fields...';
+        
+        // If it's a simple field (no dots), just return it
+        if (!fieldPath.includes('.')) {
+            // Try to find the label from fieldOptionsWithRelationships - use exact match only
+            const field = this.fieldOptionsWithRelationships?.find(f => f.value === fieldPath || f.apiName === fieldPath);
+            return field?.label || fieldPath;
+        }
+        
+        // For relationship paths, build the label from the path parts
+        const pathParts = fieldPath.split('.');
+        let labelParts = [];
+        let currentFields = this.fieldOptionsWithRelationships || [];
+        
+        for (let i = 0; i < pathParts.length; i++) {
+            const part = pathParts[i];
+            const isLastPart = i === pathParts.length - 1;
+            
+            if (isLastPart) {
+                // Last part is the field name - find it in current fields using EXACT match only
+                const field = currentFields.find(f => {
+                    // Use strict exact matching to avoid selecting wrong fields
+                    // e.g., "Name" should not match "CompanyName"
+                    return f.apiName === part || f.value === part;
+                });
+                if (field && !field.isRelationship) {
+                    labelParts.push(field.label);
+                } else {
+                    labelParts.push(part);
+                }
+            } else {
+                // Intermediate parts are relationships - use exact match for apiName/relationshipName/value
+                const relationshipField = currentFields.find(f => {
+                    if (!f.isRelationship) return false;
+                    // Use strict matching for relationships
+                    return f.apiName === part || 
+                           f.relationshipName === part ||
+                           f.value === part;
+                });
+                if (relationshipField) {
+                    labelParts.push(relationshipField.label);
+                    currentFields = relationshipField.children || [];
+                } else {
+                    // Fallback - just use the part name
+                    labelParts.push(part);
+                    currentFields = [];
+                }
+            }
+        }
+        
+        return labelParts.join(' > ') || fieldPath;
+    }
+
+    // Load and process fields for a given object
+    async loadObjectFields(objectName, relationshipPath = '') {
+        // Check if we already have cached fields for this object at root level
+        if (!relationshipPath && this.allObjectFieldsMap[objectName]) {
+            const cachedFields = this.allObjectFieldsMap[objectName];
+            this.fieldOptionsWithRelationships = cachedFields;
+            const simpleFields = this.flattenFieldsForDropdown(cachedFields);
+            this.objectFieldMap[objectName] = simpleFields;
+            this.fields = simpleFields;
+            
+            // Update any existing variables with empty fields
+            this.updateVariablesWithDefaultFields(simpleFields, objectName);
+            
+            return cachedFields;
+        }
+        
+        // Call the unified method with list parameter
+        const resultMap = await getObjectFieldsWithRelationships({ 
+            objectNames: [objectName], 
+            relationshipPaths: relationshipPath ? [relationshipPath] : []
+        });
+        
+        // Extract the field options for the requested object (key is path if provided, else objectName)
+        const fieldOptions = relationshipPath ? (resultMap[relationshipPath] || []) : (resultMap[objectName] || []);
+        
+        if (!relationshipPath) {
+            // Root level - store in main cache
+            this.fieldOptionsWithRelationships = fieldOptions;
+            const simpleFields = this.flattenFieldsForDropdown(fieldOptions);
+            this.objectFieldMap[objectName] = simpleFields;
+            this.fields = simpleFields;
+            // Also cache in allObjectFieldsMap
+            this.allObjectFieldsMap[objectName] = fieldOptions;
+            
+            // Update any existing variables with empty fields
+            this.updateVariablesWithDefaultFields(simpleFields, objectName);
+        }
+        
+        return fieldOptions;
+    }
+
+    /**
+     * Update variables that have empty field values with the first field from the loaded fields
+     * This ensures that when fields are loaded after variables are created (e.g., paste body then fields load),
+     * the variables get proper default field values
+     */
+    updateVariablesWithDefaultFields(fields, objectName) {
+        if (!fields || fields.length === 0) return;
+        
+        const firstField = fields[0];
+        let variablesUpdated = false;
+        let headerVariablesUpdated = false;
+        
+        // Update body variables with empty field values
+        if (this.variables.length > 0) {
+            this.variables = this.variables.map(varItem => {
+                // Only update if field is empty and object matches
+                if ((!varItem.field || varItem.field === '') && varItem.object === objectName) {
+                    variablesUpdated = true;
+                    return {
+                        ...varItem,
+                        field: firstField.value || '',
+                        fieldLabel: firstField.label || 'Search fields...',
+                        options: fields
+                    };
+                }
+                return varItem;
+            });
+            
+            if (variablesUpdated) {
+                this.formatedTempBody = this.formatText(this.tempBody);
+                this.updateTextarea();
+                this.updatePreviewContent(this.formatedTempBody, 'body');
+            }
+        }
+        
+        // Update header variables with empty field values
+        if (this.header_variables.length > 0) {
+            this.header_variables = this.header_variables.map(varItem => {
+                if ((!varItem.field || varItem.field === '') && varItem.object === objectName) {
+                    headerVariablesUpdated = true;
+                    return {
+                        ...varItem,
+                        field: firstField.value || '',
+                        fieldLabel: firstField.label || 'Search fields...',
+                        options: fields
+                    };
+                }
+                return varItem;
+            });
+            
+            if (headerVariablesUpdated) {
+                this.updatePreviewContent(this.header, 'header');
+            }
+        }
+    }
+
     fetchObjectsWithPhoneField() {
-        this.isLoading = true;
         getObjectsWithPhoneField()
             .then((result) => {
                 this.availableObjects = result;
-                const showingObject = {"label":"Showing","value":"MVEX__Showing__c"};
-                this.availableObjects = [showingObject, ...this.availableObjects];
-                this.selectedObject = this.availableObjects[0].value;
-                this.fetchFields(this.selectedObject);
+                // Only set default selectedObject for new templates, not in edit/clone mode
+                if (!this.isEditTemplate && !this.isTemplateClone) {
+                    this.selectedObject = this.availableObjects[0].value;
+                    this.isLoading = false;
+                    return this.loadObjectFields(this.selectedObject);
+                }
+                return Promise.resolve();
             })
             .catch((error) => {
-                console.error('Error fetching objects with phone field: ', error);
-                this.showToastError('Error fetching objects with phone field: ' + error.message);
+                this.showToast('Error fetching objects with phone field: ' + error.message, 'error');
             })
-            .finally(() => {
-                this.isLoading = false;
-            });
-    }
-
-    renderedCallback() {
-        try {
-            loadStyle(this, wbCreateTempStyle).then().catch(error => {
-                console.error("Error in loading the colors", error);
-            })
-
-
-            if (this.isRendered) return;
-            this.isRendered = true;
-            let headerEls = this.template.querySelectorAll('.field-header-dd');
-            if (headerEls != null && this.addHeaderVar) {
-                for (let i = 0; i < this.header_variables.length; i++) {
-                    this.header_variables.forEach((hv, i) => {
-                        headerEls[i].value = hv.field;
-                    })
-                }
-                this.addHeaderVar = false;
-            }
-            let bodyEls = this.template.querySelectorAll('.field-body-dd');
-            if (bodyEls != null && this.addVar) {
-                this.variables.forEach((bv, i) => {
-                    bodyEls[i].value = bv.field;
-                })
-                this.addVar = false;
-            }
-
-            if (this.isAwsSdkInitialized) {
-                Promise.all([loadScript(this, AWS_SDK)])
-                    .then(() => {
-                        // console.log('Script loaded successfully');
-                    })
-                    .catch((error) => {
-                        console.error("error -> ", error);
-                    });
-
-                this.isAwsSdkInitialized = false;
-            }
-        } catch (error) {
-            console.error('Error in function renderedCallback:::', error.message);
-        }
     }
 
     fetchTemplateData() {
         try {
-            this.isLoading = true;
             getDynamicObjectData({ templateId: this.edittemplateid })
                 .then((data) => {
                     const { template, templateVariables } = data;
@@ -927,12 +1557,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
                     this.handleTabClick(this.selectedTab);
                     this.handleRadioChange(this.selectedOption);
-                    setTimeout(() => {
-                        this.handleObjectChange({ target: { value: templateVariables[0].objName } });
-                    }, 700);
+
                     setTimeout(() => {
 
                         this.templateName = template.MVEX__Template_Name__c || '';
+                        this.templateName += this.isTemplateClone ? '_clone' : '';
                         this.metaTemplateId = template.MVEX__Template_Id__c || '';
                         const headerBody = template.MVEX__WBHeader_Body__c || '';
 
@@ -951,37 +1580,40 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
                         try {
                             const templateMiscellaneousData = JSON.parse(template.MVEX__Template_Miscellaneous_Data__c);
-                            this.contentVersionId = templateMiscellaneousData.contentVersionId
-                            this.isImageFile = templateMiscellaneousData.isImageFile
-                            this.isImgSelected = templateMiscellaneousData.isImgSelected
-                            this.isDocSelected = templateMiscellaneousData.isDocSelected
-                            this.isVidSelected = templateMiscellaneousData.isVidSelected
-                            this.IsHeaderText = templateMiscellaneousData.isHeaderText
-                            this.addHeaderVar = templateMiscellaneousData.addHeaderVar
-                            this.addMedia = templateMiscellaneousData.addMedia
-                            this.isImageFileUploader = templateMiscellaneousData.isImageFileUploader
-                            this.isVideoFileUploader = templateMiscellaneousData.isVideoFileUploader
-                            this.isDocFileUploader = templateMiscellaneousData.isDocFileUploader
-                            this.isVideoFile = templateMiscellaneousData.isVideoFile
-                            this.isDocFile = templateMiscellaneousData.isDocFile
-                            this.prevContent = templateMiscellaneousData.isSecurityRecommedation
-                            this.isExpiration = templateMiscellaneousData.isCodeExpiration
-                            this.expirationTime = templateMiscellaneousData.expireTime
-                            this.value = templateMiscellaneousData.authRadioButton
-                            this.isautofillChecked = templateMiscellaneousData.autofillCheck
-                            this.isVisitSite = templateMiscellaneousData.isVisitSite
-                            this.isCheckboxChecked = templateMiscellaneousData.isCheckboxChecked
-                            // this.flowBooleanCheck = templateMiscellaneousData.flowBooleanCheck
-                            this.isFlowMarketing = templateMiscellaneousData.isFlowMarketing
-                            this.isFlowUtility = templateMiscellaneousData.isFlowUtility
-                            this.isFlowSelected = templateMiscellaneousData.isFlowSelected
-                            this.selectedFlow = templateMiscellaneousData.isFlowSelected
-                            this.isFeatureEnabled = templateMiscellaneousData.isFeatureEnabled
-                            this.awsFileName = templateMiscellaneousData.awsFileName
-
-                            if (this.awsFileName && !this.isAWSEnabled) {
-                                this.showToastError('AWS Configration missing')
+                            this.contentVersionId = templateMiscellaneousData?.contentVersionId
+                            this.originalContentVersionId = templateMiscellaneousData?.contentVersionId
+                            this.isImageFile = templateMiscellaneousData?.isImageFile
+                            this.isImgSelected = templateMiscellaneousData?.isImgSelected
+                            this.isDocSelected = templateMiscellaneousData?.isDocSelected
+                            this.isVidSelected = templateMiscellaneousData?.isVidSelected
+                            this.IsHeaderText = templateMiscellaneousData?.isHeaderText
+                            this.addHeaderVar = templateMiscellaneousData?.addHeaderVar
+                            this.addMedia = templateMiscellaneousData?.addMedia
+                            this.isImageFileUploader = templateMiscellaneousData?.isImageFileUploader
+                            this.isVideoFileUploader = templateMiscellaneousData?.isVideoFileUploader
+                            this.isDocFileUploader = templateMiscellaneousData?.isDocFileUploader
+                            this.isVideoFile = templateMiscellaneousData?.isVideoFile
+                            this.isDocFile = templateMiscellaneousData?.isDocFile
+                            this.prevContent = templateMiscellaneousData?.isSecurityRecommedation
+                            this.isExpiration = templateMiscellaneousData?.isCodeExpiration
+                            this.expirationTime = templateMiscellaneousData?.expireTime
+                            this.value = templateMiscellaneousData?.authRadioButton
+                            this.isautofillChecked = templateMiscellaneousData?.autofillCheck
+                            this.isVisitSite = templateMiscellaneousData?.isVisitSite
+                            this.isCheckboxChecked = templateMiscellaneousData?.isCheckboxChecked
+                            this.isFlowMarketing = templateMiscellaneousData?.isFlowMarketing
+                            this.isFlowUtility = templateMiscellaneousData?.isFlowUtility
+                            this.isFlowSelected = templateMiscellaneousData?.isFlowSelected
+                            this.selectedFlow = templateMiscellaneousData?.selectedFlow
+                            this.isFeatureEnabled = templateMiscellaneousData?.isFeatureEnabled
+                            this.awsFileName = templateMiscellaneousData?.awsFileName
+                            this.catalogName = templateMiscellaneousData?.selectedCatalog
+                            this.flowScreenIds = templateMiscellaneousData?.flowNavigationScreen
+                                
+                            if(this.awsFileName && !this.isAWSEnabled){
+                                this.showToast('AWS Configration missing.', 'warning');
                             }
+
                         }
                         catch (error) {
                             console.error('templateMiscellaneousData Error ::: ', error)
@@ -996,56 +1628,141 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                             this.handleChange(event);
                         }
 
-                        // const parser = new DOMParser();
-                        // const doc = parser.parseFromString(template?.WBHeader_Body__c, "text/html");
-                        // this.previewHeader = doc.documentElement.textContent;
-                        if (template.MVEX__Header_Type__c == 'Image' || template.MVEX__Header_Type__c == 'Video' || template.MVEX__Header_Type__c == 'Document') {
+                        if (template?.MVEX__Header_Type__c == 'Image' || template?.MVEX__Header_Type__c == 'Video' || template?.MVEX__Header_Type__c == 'Document') {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(template?.MVEX__WBHeader_Body__c, "text/html");
                             this.previewHeader = doc.documentElement.textContent || "";
+                            this.fileName = template?.MVEX__File_Name__c;
+                            this.fileType = template?.MVEX__Header_Type__c;
+                            this.filePreview = template?.MVEX__WBHeader_Body__c;
+                            this.headerHandle = template?.MVEX__Header_Handle__c || '';
 
-                            this.fileName = template.MVEX__File_Name__c;
-                            this.fileType = template.MVEX__Header_Type__c;
-
-                            this.filePreview = template.MVEX__WBHeader_Body__c;
-
+                            if ((this.headerHandle == '' || this.headerHandle == null) && this.isEditTemplate == true) {
+                                getMetaHeaderHandler({ fileUrlOrContentVersionId: this.previewHeader, contentVersionId: this.contentVersionId })
+                                    .then((result) => {
+                                        if (!result || !result.trim()) {
+                                            this.showToast('Header handle missing, please reupload file.', 'warning');
+                                        }
+                                        this.headerHandle = result
+                                    }).catch((error) => {
+                                        console.error('Error fetching header handler: ', error);
+                                    });
+                            }
+                            else {
+                                if (this.filePreview) {
+                                    this.handleFileFromUrl(this.filePreview, this.fileName || 'headerfile');
+                                }
+                            }
                         } else {
                             this.previewHeader = this.formatText(headerBody) || '';
                         }
 
 
-                        // this.previewHeader= this.formatText(headerBody) ||'';
                         this.selectedContentType = template.MVEX__Header_Type__c || 'None';
+                        
+                        // Set IsHeaderText flag and header value when header type is Text
+                        if (this.selectedContentType === 'Text') {
+                            this.IsHeaderText = true;
+                            this.header = headerBody || '';
+                        }
+                        
                         this.btntext = template.MVEX__Button_Label__c || '';
-                        let tvs = templateVariables.map(tv => {
-                            let temp = {
-                                object: tv.objName,
-                                field: tv.fieldName,
-                                alternateText: tv.alternateText ? tv.alternateText : '',
-                                id: tv.variable.slice(2, 3),
-                                index: tv.variable,
-                                type: tv.type
-                            };
-                            return temp;
-                        })
-                        // this.fields = tvs.map(tv => tv.field);
-                        const tempfieldsBody = tvs.filter(tv => tv.type == 'Body').map(tv => tv.field);
-                        this.variables = tvs.filter(tv => tv.type == 'Body') || [];
-                        this.variables = this.variables.map((variable, index) => ({
-                            ...variable,
-                            field: tempfieldsBody[index] || variable.field // fallback to original field if index is missing
+
+                        const tvs = templateVariables.map(tv => ({
+                            object: tv.objName,
+                            field: tv.fieldName,
+                            alternateText: tv.alternateText ? tv.alternateText : '',
+                            id: tv.variable.slice(2, 3),
+                            index: tv.variable,
+                            type: tv.type
                         }));
 
-                        const tempfieldsHead = tvs.filter(tv => tv.type == 'Header').map(tv => tv.field);
-                        this.header_variables = tvs.filter(tv => tv.type == 'Header') || [];
-                        this.header_variables = this.header_variables.map((variable, index) => ({
-                            ...variable,
-                            field: tempfieldsHead[index] || variable.field // fallback to original field if index is missing
-                        }));
-                        this.updatePreviewContent(this.previewHeader, 'header');
-                        this.updatePreviewContent(this.previewBody, 'body');
-                        this.addHeaderVar = this.header_variables?.length > 0 ? true : false;
-                        this.addVar = this.variables?.length > 0 ? true : false;
+                        // Identify all unique objects
+                        const uniqueObjects = [...new Set(tvs.map(tv => tv.object))];
+                        
+                        // Set the selectedObject from template variables for Body type
+                        const bodyVariables = tvs.filter(tv => tv.type === 'Body');
+                        if (bodyVariables.length > 0 && bodyVariables[0].object) {
+                            this.selectedObject = bodyVariables[0].object;
+                        }
+
+                        // Fetch field maps for all unique objects (if not already cached)
+                        const fieldFetchPromises = uniqueObjects.map(obj => {
+                            return this.objectFieldMap[obj]
+                                ? Promise.resolve()
+                                : this.fetchFields(obj); // this must return a Promise
+                        });
+
+                        Promise.all(fieldFetchPromises)
+                            .then(() => {
+                                // Load fields with relationships for the selected object (for the field picker)
+                                if (this.selectedObject) {
+                                    return this.loadObjectFields(this.selectedObject);
+                                }
+                                return Promise.resolve();
+                            })
+                            .then(() => {
+                                // Split variables into body and header groups
+                                const tempfieldsBody = tvs.filter(tv => tv.type === 'Body').map(tv => tv.field);
+                                const tempfieldsHead = tvs.filter(tv => tv.type === 'Header').map(tv => tv.field);
+                                
+                                // Body variables with individual field options and proper fieldLabel
+                                this.variables = tvs
+                                    .filter(tv => tv.type === 'Body')
+                                    .map((variable, index) => {
+                                        const objectFields = this.objectFieldMap[variable.object] || [];
+                                        const fieldValue = tempfieldsBody[index] || variable.field;
+                                        
+                                        // Generate fieldLabel from field path (e.g., "Account.Owner.Name" -> "Account (Account) > Owner (User) > Name")
+                                        const fieldLabel = this.generateFieldLabelFromPath(fieldValue);
+                                        
+                                        return {
+                                            ...variable,
+                                            field: fieldValue,
+                                            fieldLabel: fieldLabel,
+                                            variableType: variable.variableType || 'Number', // Default to 'Number' type
+                                            nameValue: variable.nameValue || variable.alternateText || '', // Use alternateText as nameValue for backward compatibility
+                                            options: objectFields
+                                        };
+                                    });
+                                
+                             
+
+                                // Header variables with individual field options and proper fieldLabel
+                                this.header_variables = tvs
+                                    .filter(tv => tv.type === 'Header')
+                                    .map((variable, index) => {
+                                        const objectFields = this.objectFieldMap[variable.object] || [];
+                                        const fieldValue = tempfieldsHead[index] || variable.field;
+                                        
+                                        // Generate fieldLabel from field path for header variables too
+                                        const fieldLabel = this.generateFieldLabelFromPath(fieldValue);
+                                        
+                                        return {
+                                            ...variable,
+                                            field: fieldValue,
+                                            fieldLabel: fieldLabel,
+                                            variableType: variable.variableType || 'Number', // Default to 'Number' type
+                                            nameValue: variable.nameValue || variable.alternateText || '',
+                                            options: objectFields
+                                        };
+                                    });                            
+
+                                // Toggle flags
+                                this.addHeaderVar = this.header_variables.length > 0;
+                                this.addVar = this.variables.length > 0;
+
+                                // Update preview
+                                this.updatePreviewContent(this.previewHeader, 'header');
+                                this.updatePreviewContent(this.previewBody, 'body');
+                                
+                                // Pre-fetch all required object fields for edit mode (after variables are set)
+                                return this.prefetchAllObjectFields();
+                            })
+                            .catch(error => {
+                                console.error('Error while loading field data for editing:', error);
+                                this.isLoading = false;
+                            });
                         if (this.addHeaderVar) {
                             this.buttonDisabled = true;
                         }
@@ -1087,24 +1804,61 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                     });
                                 } else {
 
+                                    // Handle phone number parsing
+                                    let parsedPhoneNum = '';
+                                    let parsedCountryCode = '';
+                                    let parsedCountryLabel = 'India (+91)';
+                                    
+                                    if(button?.type === 'PHONE_NUMBER' && button?.phone_number) {
+                                        const phone = button.phone_number;
+                                        
+                                        // If phone starts with +, find matching country code
+                                        if (phone.startsWith('+')) {
+                                            const countryCodes = Object.keys(this.countryCodeToLabelMap).sort((a, b) => b.length - a.length); // Sort by length descending
+                                            const matchedCode = countryCodes.find(code => phone.startsWith(code));
+                                            
+                                            if (matchedCode) {
+                                                parsedCountryCode = matchedCode;
+                                                parsedCountryLabel = this.countryCodeToLabelMap[matchedCode] || parsedCountryLabel;
+                                                parsedPhoneNum = phone.slice(matchedCode.length).trim();
+                                            } else {
+                                                parsedPhoneNum = phone;
+                                            }
+                                        } else {
+                                            // Phone doesn't start with +, check if it's already formatted as "code number"
+                                            const parts = phone.split(' ');
+                                            if (parts.length >= 2 && parts[0].startsWith('+')) {
+                                                parsedCountryCode = parts[0];
+                                                parsedCountryLabel = this.countryCodeToLabelMap[parts[0]] || parsedCountryLabel;
+                                                parsedPhoneNum = parts.slice(1).join(' ');
+                                            } else {
+                                                parsedPhoneNum = phone;
+                                            }
+                                        }
+                                    }
+                                    
                                     // Handle regular buttons
                                     let newButton = {
                                         id: index + 1, // Unique ID for button
-                                        selectedActionType: button.type || '',
-                                        iconName: this.getButtonIcon(button.type),
-                                        btntext: button.text || '',
-                                        webURL: button.url || '',
-                                        phonenum: button.phone_number || '',
-                                        offercode: button.example || '',
-                                        selectedUrlType: button.type === 'URL' ? 'Static' : '',
-                                        selectedCountryType: button.phone_number ? button.phone_number.split(' ')[0] : '',
-                                        isCallPhone: button.type === 'PHONE_NUMBER',
-                                        isVisitSite: button.type === 'URL',
-                                        isOfferCode: button.type === 'COPY_CODE',
-                                        isFlow: button.type === 'FLOW',
+                                        selectedActionType: button?.type || '',
+                                        iconName: this.getButtonIcon(button?.type),
+                                        btntext: button?.text || '',
+                                        webURL: button?.url || '',
+                                        phonenum: parsedPhoneNum,
+                                        offercode: button?.example || '',
+                                        selectedUrlType: button?.type === 'URL' ? 'Static' : '',
+                                        selectedCountryType: parsedCountryCode || '+91',
+                                        selectedCountryTypeLabel: parsedCountryLabel,
+                                        isCallPhone: button?.type === 'PHONE_NUMBER',
+                                        isVisitSite: button?.type === 'URL',
+                                        isOfferCode: button?.type === 'COPY_CODE',
+                                        isFlow: button?.type === 'FLOW',
                                         hasError: false,
                                         errorMessage: ''
                                     };
+
+                                    this.selectedCountryType = newButton.selectedCountryType; 
+                                    this.selectedCountryTypeLabel = newButton.selectedCountryTypeLabel;
 
                                     // Call handleMenuSelect() to process button creation correctly
                                     this.handleMenuSelect({
@@ -1120,7 +1874,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
                         }
 
-
                         if (headerType.toLowerCase() == 'image' || headerType.toLowerCase() == 'video') {
                             this.headerHandle = template.MVEX__WBImage_Header_Handle__c;
                             this.imageurl = template.MVEX__WBHeader_Body__c;
@@ -1134,25 +1887,57 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         else {
                             this.header = headerBody.trim().replace(/^\*\*|\*\*$/g, '');
                         }
-                        this.loading = false;
+                        this.fetchFlowPreviewId();
                     }, 2000);
                 })
                 .catch((error) => {
                     console.error('Error fetching fields: ', error);
-                    this.isLoading = false;
-                });
+                })
         } catch (error) {
             console.error('Error fetching template data: ', error);
             this.isLoading = false;
         }
     }
 
-    //fetch object related fields
+    fetchFlowPreviewId() {
+        try {
+            if (this.isFlowSelected && this.selectedFlow && (this.selectedFlow.id || this.selectedFlow.flow_id)) {
+                let selectedId = this.selectedFlow.id || this.selectedFlow.flow_id;
+                
+                getPreviewURLofWhatsAppFlow({ flowId: this.flowId })
+                .then((data) => {
+                    if (data && data.status !== 'failed') {
+                        const urlValue = typeof data === 'object' ? data.previewUrl : data;
+                        if (urlValue) {
+                            this.iframeSrc = urlValue;
+                        } else {
+                            console.error('URL key not found in the returned Map:', data);
+                        }
+                    } else {
+                        console.error('Error: Backend returned "failed" or empty data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error in getting Flow Preview URL:', error);
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+            }
+        } catch (error) {
+            console.error('Error in fetchFlowPreviewId :', error);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
     fetchFields(objectName) {
         try {
             getObjectFields({ objectName: objectName })
                 .then((result) => {
-                    this.fields = result.map((field) => ({ label: field, value: field }));
+                    const fields = result.map((field) => ({ label: field, value: field }));
+                    this.fields = fields;
+                    this.objectFieldMap[objectName] = fields;
                 })
                 .catch((error) => {
                     console.error('Error fetching fields: ', error);
@@ -1178,23 +1963,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 let maxSize = 4;
                 let fileSizeMB = Math.floor(file.size / (1024 * 1024));
                 isValid = fileSizeMB <= maxSize;
-                // if (this.fileType.startsWith('image/')) {
-                //     maxSize = 5;
-                //     isValid = fileSizeMB <= maxSize;
-                // } else if (this.fileType.startsWith('video/')) {
-                //     maxSize = 16;
-                //     isValid = fileSizeMB <= maxSize;
-                // } else if (this.fileType.includes('application/') || this.fileType.includes('text/')) {
-                //     maxSize = 100;
-                //     isValid = fileSizeMB <= maxSize;
-                // }
-                // else {
-                //     // console.log('Else OUT');
-                // }
 
                 if (isValid) {
                     this.selectedFilesToUpload.push(file);
-                    // this.fileName = file.name;
                     this.isLoading = true;
                     if (this.isAWSEnabled) {
                         await this.uploadToAWS(this.selectedFilesToUpload);
@@ -1202,28 +1973,17 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         const reader = new FileReader();
                         reader.onload = () => {
                             this.fileData = reader.result.split(',')[1];
-                            // this.generatePreview(file);
-                            this.handleUpload(); // Auto-upload
+                            this.handleUpload();
                         };
                         reader.readAsDataURL(file);
                     }
                 } else {
-                    // this.isLoading = false;
-                    this.showToastError(`${file.name} exceeds the ${maxSize}MB limit`);
+                    this.showToast(`${file.name} exceeds the ${maxSize}MB limit`, 'error');
                 }
-                // }
-                // else {
-                // const reader = new FileReader();
-                // reader.onload = () => {
-                //     this.fileData = reader.result.split(',')[1];
-                //     // this.generatePreview(file);
-                //     this.handleUpload(); // Auto-upload
-                // };
-                // reader.readAsDataURL(file);
-                // }
-
+                this.isLoading = false;
             }
         } catch (error) {
+            this.isLoading = false;
             console.error('Error in file upload:', error);
         }
     }
@@ -1251,20 +2011,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // renameFileName(filename) {
-    //     try {
-    //         let originalFileName = filename;
-    //         let extensionIndex = originalFileName.lastIndexOf('.');
-    //         let baseFileName = originalFileName.substring(0, extensionIndex);
-    //         let extension = originalFileName.substring(extensionIndex + 1);
-
-    //         let objKey = `${baseFileName}.${extension}`
-    //             .replace(/\s+/g, "_");
-    //         return objKey;
-    //     } catch (error) {
-    //         console.error('error in renameFileName -> ', error.stack);
-    //     }
-    // }
     renameFileName(filename) {
         try {
             let extensionIndex = filename.lastIndexOf('.');
@@ -1316,9 +2062,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
                     this.awsFileName = objKey;
                     this.generatePreview(awsFileUrl);
-                    // this.
 
-                    this.uploadFile();
+                    this.uploadFileToMeta();
                 }
             });
 
@@ -1373,7 +2118,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     this.isImgSelected = false;
                     this.isDocSelected = false;
                     this.isVidSelected = false;
-                    this.showToastError('Unsupported file type! Please select an image, PDF, or video.');
+                    this.showToast('Unsupported file type! Please select an image, PDF, or video.', 'error');
                     break;
             }
 
@@ -1383,7 +2128,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             console.error('Error in generatePreview: ', error);
         }
     }
-
 
     // Upload file to Apex
     handleUpload() {
@@ -1397,43 +2141,54 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     // Replace '/sfc/p/#' with '/sfc/p/' if needed
                     this.generatePreview(publicUrl.replace('/sfc/p/#', '/sfc/p/'));
 
-                    this.uploadFile(); // If this is a different method, otherwise consider renaming
+                    this.uploadFileToMeta(); // Upload to Meta to get header handle
                 })
                 .catch((error) => {
-                    console.error('❌ Error uploading file: ', error);
                     this.isLoading = false;
-                    this.showToastError('Error uploading file!');
+                    this.showToast('Error uploading file!', 'error');
                 });
         } else {
-            this.showToastError('Please select a file first!');
+            this.showToast('Please select a file first!', 'error');
 
         }
     }
 
     // Delete file from ContentVersion
     handleDelete() {
+        const isOriginalFileInEditMode = (this.isEditTemplate || this.isTemplateClone) && 
+                                          this.originalContentVersionId !== null && 
+                                          this.contentVersionId === this.originalContentVersionId;
 
-        if (this.contentVersionId) {
-            deleteFile({ contentVersionId: this.contentVersionId })
-                .then(() => {
-                    this.showToastSuccess('File deleted successfully');
-                    this.resetFileData(); // Reset file data after deletion
-                })
-                .catch((error) => {
-                    console.error('Error deleting file: ', error);
-                    this.showToastError('Error deleting file!');
-                });
+        if (isOriginalFileInEditMode) {
+            this.resetFileData();
+            return;
         }
-        else if (this.isAWSEnabled) {
+
+        // Delete the file based on storage location
+        // When AWS is enabled, file is stored in S3, otherwise in Salesforce ContentVersion
+        if (this.isAWSEnabled && this.awsFileName) {
+            // AWS S3 deletion - file is stored in S3
             deleteImagesFromS3({ fileNames: [this.awsFileName] })
                 .then(() => {
-                    this.showToastSuccess('File deleted successfully');
-                    this.resetFileData(); // Reset file data after deletion
+                    this.showToast('File deleted successfully', 'success');
+                    this.resetFileData();
                 })
                 .catch((error) => {
-                    console.error('Error deleting file: ', error);
-                    this.showToastError('Error deleting file!');
+                    this.showToast('Error deleting file!', 'error');
                 });
+        } else if (this.contentVersionId) {
+            // Local Salesforce ContentVersion deletion
+            deleteFile({ contentVersionId: this.contentVersionId })
+                .then((result) => {
+                    this.showToast('File deleted successfully', 'success');
+                    this.resetFileData();
+                })
+                .catch((error) => {
+                    this.showToast('Error deleting file!', 'error');
+                });
+        } else {
+            // No file to delete, just reset
+            this.resetFileData();
         }
     }
 
@@ -1470,13 +2225,16 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         this.awsFileName = '';
     }
 
-    uploadFile() {
+    /**
+     * Uploads file to Meta to get header handle for WhatsApp template creation.
+     * This is called after file is uploaded to AWS (if AWS enabled) or after local upload.
+     */
+    uploadFileToMeta() {
         try {
             this.isLoading = true;
             if (!this.file) {
                 this.isLoading = false;
-                this.showToastError('Please select a file to upload.');
-
+                this.showToast('Please select a file to upload.', 'error');
                 return;
             }
 
@@ -1485,27 +2243,37 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 fileLength: this.fileSize,
                 fileType: this.fileType
             })
-                .then(result => {
-                    if (result) {
-                        this.uploadSessionId = result;
-                        this.uploadChunks();
-                    } else {
-                        console.error('Failed to start upload session.');
-                        this.showToastError('Failed to start upload session.');
-                        this.isLoading = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Failed upload session.', error.body);
+            .then(result => {
+                if (result) {
+                    this.uploadSessionId = result;
+                    console.log('Upload seesion Id ::',result);
+                    console.log('Upload seesion Id ::',this.uploadSessionId);
+                    
+                    this.uploadChunksToMeta();
+                    console.log('After chunk');
+                    
+                } else {
+                    this.showToast('Failed to start upload session.', 'error');
                     this.isLoading = false;
-                })
+                }
+            })
+            .catch(error => {
+                console.error('Failed upload session.', error.body);
+                this.isLoading = false;
+            });
         } catch (error) {
             console.error('Error starting upload session: ', error);
         }
     }
 
-    uploadChunks() {
+    /**
+     * Uploads file chunks to Meta to get header handle for WhatsApp template.
+     * Called by uploadFileToMeta() after getting upload session ID.
+     */
+    uploadChunksToMeta() {
         try {
+            console.log('INside upload chunk');
+            
             let chunkStart = 0;
             const uploadNextChunk = () => {
 
@@ -1513,7 +2281,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 const chunk = this.file.slice(chunkStart, chunkEnd);
                 const reader = new FileReader();
                 const isLastChunk = (chunkEnd >= this.fileSize);
-
 
                 reader.onloadend = async () => {
                     const base64Data = reader.result.split(',')[1];
@@ -1526,13 +2293,19 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         isLastChunk: isLastChunk
                     };
                     const serializedWrapper = JSON.stringify(fileChunkWrapper);
-
+                    console.log('Serialized File Chunk Wrapper ::', serializedWrapper);
+                    console.log('Is AWS Enabled :: ',this.isAWSEnabled);
+                    
+                    // Pass isAWSEnabled to backend - it will skip ContentVersion creation when AWS is enabled
                     uploadFileChunk({ serializedWrapper: serializedWrapper, isAWSEnabled: this.isAWSEnabled })
                         .then(result => {
                             if (result) {
                                 let serializeResult = JSON.parse(result);
                                 this.headerHandle = serializeResult.headerHandle;
-                                if (!this.isAWSEnabled) {
+                                console.log('Header Handle :::',this.headerHandle);
+                                
+                                // Only set contentDocumentId when NOT using AWS (local Salesforce storage)
+                                if (!this.isAWSEnabled && serializeResult.contentDocumentId) {
                                     this.contentDocumentId = serializeResult.contentDocumentId;
                                 }
 
@@ -1541,19 +2314,18 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                     uploadNextChunk();
                                 } else {
                                     this.isLoading = false;
-                                    this.showToastSuccess('File upload successfully.');
+                                    this.showToast('File upload successfully.', 'success');
                                 }
                             } else {
-                                console.error('Failed to upload file chunk.');
                                 this.isLoading = false;
-                                this.showToastError('Failed to upload file chunk.');
+                                this.showToast('Failed to upload file chunk.', 'error');
                             }
                         })
                         .catch(error => {
-                            console.error('Failed upload session.', error);
                             this.isLoading = false;
-                            this.showToastError(error.body.message || 'An error occurred while uploading image.');
-                        })
+                            console.error('Error uploading file chunk: ', error.body);
+                            this.showToast(error.body?.message || 'An error occurred while uploading image.', 'error');
+                        });
                 };
 
                 reader.readAsDataURL(chunk);
@@ -1571,76 +2343,48 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             this.NoFileSelected = true;
             this.isfilename = false;
             this.selectedContentType = event.target.value;
+            this.IsHeaderText = this.selectedContentType === 'Text';
 
-            // Check if the content type is 'Text'
-            if (this.selectedContentType === 'Text') {
-                this.IsHeaderText = true;
-            } else {
-                this.IsHeaderText = false;
-            }
+            // Reset all media flags first
+            this.resetMediaFlags();
 
-            // Reset all flags
-            const resetFlags = () => {
-                this.isImgSelected = false;
-                this.isDocSelected = false;
-                this.isVidSelected = false;
-                this.isImageFileUploader = false;
-                this.isVideoFileUploader = false;
-                this.isDocFileUploader = false;
-                this.isLocation = false;
-                this.addMedia = false;
-                this.isImageFile = false;
-                this.isVideoFile = false;
-                this.isDocFile = false;
+            // Set flags based on content type
+            const contentTypeConfig = {
+                'Image': { isImageFile: true, isImageFileUploader: true, addMedia: true },
+                'Video': { isVideoFile: true, isVideoFileUploader: true, addMedia: true },
+                'Document': { isDocFile: true, isDocFileUploader: true, addMedia: true },
+                'Location': { isLocation: true }
             };
 
-            // Handle the different content types
-            if (['Image', 'Video', 'Document', 'Location'].includes(this.selectedContentType)) {
-                resetFlags();
-
-                if (this.selectedContentType === 'Image') {
-                    this.isImageFile = true;
-                    this.isImageFileUploader = true;
-                    this.addMedia = true;
-                } else if (this.selectedContentType === 'Video') {
-                    this.isVideoFile = true;
-                    this.isVideoFileUploader = true;
-                    this.addMedia = true;
-                } else if (this.selectedContentType === 'Document') {
-                    this.isDocFile = true;
-                    this.isDocFileUploader = true;
-                    this.addMedia = true;
-                } else if (this.selectedContentType === 'Location') {
-                    this.isLocation = true;
-                }
-            } else {
-                // If the selected content type is invalid or none of the above
-                resetFlags();
+            const config = contentTypeConfig[this.selectedContentType];
+            if (config) {
+                Object.assign(this, config);
             }
-
         } catch (error) {
             console.error('Something went wrong while selecting content type: ', JSON.stringify(error));
         }
     }
 
     handlePrevclick() {
-        if (this.contentVersionId != null && !this.isEditTemplate) {
+        if (this.contentVersionId != null) {
             this.handleDelete();
         }
+
         this.clearEditTemplateData();
 
-        if (!this.isEditTemplate) {
-            const previousEvent = new CustomEvent('previous', {
-                detail: {
-                    selectedTab: this.selectedTab,
-                    selectedOption: this.selectedOption,
-                    activeTab: this.activeTab
-                }
-            });
-            this.dispatchEvent(previousEvent);
-        } else {
-            this.navigateToAllTemplatePage();
-        }
+        if( this.isTemplateClone || this.isEditTemplate){
+            this.closeAndReturnToTemplateList();
+            return;
+        } 
+
+        const previousEvent = new CustomEvent('previous', {
+            detail: {
+                selectedTab: this.selectedTab,
+                selectedOption: this.selectedOption,
+                activeTab: this.activeTab
+            }
+        });
+        this.dispatchEvent(previousEvent);   
 
     }
 
@@ -1680,132 +2424,120 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         this.isImgSelected = false;
         this.isDocFile = false;
         this.isFlowSelected = false;
+
         this.isautofillChecked = false;
         this.isExpiration = false;
+        // Reset original content version ID
+        this.originalContentVersionId = null;
         const headerInput = this.template.querySelector('input[name="header"]');
         if (headerInput) {
             headerInput.value = '';
         }
+
     }
 
     handleCustom(event) {
         this.selectedCustomType = event.target.value;
     }
 
+    // Input change handler map for cleaner code organization
+    inputChangeHandlers = {
+        templateName: (value) => {
+            this.templateName = value.replace(/\s+/g, '_').toLowerCase();
+            this.checkTemplateExistence();
+        },
+        language: (value) => {
+            this.selectedLanguage = value;
+            this.languageOptions = this.languageOptions.map(option => ({
+                ...option,
+                isSelected: option.value === this.selectedLanguage
+            }));
+        },
+        footer: (value) => {
+            this.footer = value;
+        },
+        tempBody: (value) => {
+            this.tempBody = value.replace(/(\n\s*){3,}/g, '\n\n');
+            this.formatedTempBody = this.formatText(this.tempBody);
+            this.updatePreviewContent(this.formatedTempBody, 'body');
+            // Validate variable format in real-time
+            this.updateFormatErrors();
+            // Validate variable placement immediately on change
+            this.checkBodyVariablePlacement();
+            // Sync variables from body text for both types
+            this.syncVariablesFromBody();
+        },
+        btntext: (value, index) => {
+            this.updateButtonProperty(index, 'btntext', value);
+            this.validateButtonText(index, value);
+        },
+        isCheckboxChecked: (value, index, checked) => {
+            this.isCheckboxChecked = checked;
+        },
+        isautofillChecked: (value, index, checked) => {
+            this.isautofillChecked = checked;
+        },
+        prevContent: () => {
+            this.prevContent = !this.prevContent;
+        },
+        isExpiration: () => {
+            this.isExpiration = !this.isExpiration;
+        },
+        autofill: (value) => {
+            this.autofilLabel = value;
+        },
+        expirationTime: (value) => {
+            this.expirationTime = value;
+        },
+        selectedTime: (value) => {
+            this.selectedTime = value;
+            this.expirationTime = this.convertTimeToSeconds(value);
+        },
+        autoCopyCode: (value) => {
+            this.autoCopyCode = value;
+        },
+        toggle: (value, index, checked) => {
+            this.isFeatureEnabled = this.isFeatureEnabled ? false : checked;
+        },
+        header: (value) => {
+            this.header = value;
+            // Check variable count based on type
+            const allVariableMatches = (value.match(/\{\{[^}]*\}\}/g) || []).length;
+            if (allVariableMatches > 1) {
+                this.headerError = 'Only one variable is allowed in the header.';
+            } else {
+                this.headerError = '';
+                this.updatePreviewContent(this.header, 'header');
+            }
+            // Validate variable format in real-time
+            this.updateFormatErrors();
+            // Sync header variables from header text
+            this.syncHeaderVariablesFromText();
+        }
+    };
+
     handleInputChange(event) {
         try {
             const { name, value, checked, dataset } = event.target;
             const index = dataset.index;
 
+            // Handle button-related fields that need special processing
+            const buttonFields = ['selectedUrlType', 'webURL', 'selectedCountryTypeLabel', 'phonenum', 'offercode'];
+            if (buttonFields.includes(name)) {
+                if (name === 'selectedCountryTypeLabel') {
+                    this.updateButtonProperty(index, 'selectedCountryType', this.countryLabelToCodeMap[value] || value);
+                    this.selectedCountryTypeLabel = value;
+                }
+                this.updateButtonProperty(index, name, value);
+                this.selectedCountryType = this.countryLabelToCodeMap[this.selectedCountryTypeLabel];
+                this.updatePhonePattern(this.selectedCountryType);
+                return;
+            }
 
-
-            switch (name) {
-                case 'templateName':
-
-                    this.templateName = value.replace(/\s+/g, '_').toLowerCase();
-
-                    this.checkTemplateExistence();
-                    break;
-                case 'language':
-                    this.selectedLanguage = value;
-                    this.languageOptions = this.languageOptions.map(option => ({
-                        ...option,
-                        isSelected: option.value === this.selectedLanguage
-                    }));
-                    break;
-                case 'footer':
-                    this.footer = value;
-                    break;
-                case 'tempBody':
-                    this.tempBody = value.replace(/(\n\s*){3,}/g, '\n\n');
-                    this.formatedTempBody = this.formatText(this.tempBody);
-                    this.updatePreviewContent(this.formatedTempBody, 'body');
-                    this.updateFormatErrors();
-                    this.checkBodyVariablePlacement();
-                    break;
-                case 'btntext':
-                    this.updateButtonProperty(index, 'btntext', value);
-                    this.validateButtonText(index, value);
-                    break;
-                case 'selectedUrlType':
-                    this.updateButtonProperty(index, 'selectedUrlType', value);
-                    break;
-                case 'webURL':
-                    this.updateButtonProperty(index, 'webURL', value);
-                    break;
-                case 'selectedCountryType':
-                    this.updateButtonProperty(index, 'selectedCountryType', value);
-                    this.selectedCountryType = value;
-                    break;
-                case 'phonenum':
-                    this.updateButtonProperty(index, 'phonenum', value);
-                    break;
-                case 'offercode':
-                    this.updateButtonProperty(index, 'offercode', value);
-                    break;
-                case 'isCheckboxChecked':
-                    this.isCheckboxChecked = checked;
-                    break;
-                case 'isautofillChecked':
-                    this.isautofillChecked = checked;
-                    break;
-                // Change
-                case 'prevContent':
-                    if (this.prevContent) {
-                        this.prevContent = false;
-                    }
-                    else {
-                        this.prevContent = true;
-                    }
-                    break;
-
-                case 'isExpiration':
-                    if (this.isExpiration) {
-                        this.isExpiration = false;
-                    }
-                    else {
-                        this.isExpiration = true;
-                    }
-                    break;
-
-                case 'autofill':
-                    this.autofilLabel = value;
-                    break;
-
-                case 'expirationTime':
-                    this.expirationTime = value;
-                    break;
-
-                case 'selectedTime':
-                    this.selectedTime = value;
-                    this.expirationTime = this.convertTimeToSeconds(value); // Convert selected time to seconds
-                    break;
-                case 'autoCopyCode':
-                    this.autoCopyCode = value;
-                    break;
-
-                case 'toggle':
-                    if (this.isFeatureEnabled) {
-                        this.isFeatureEnabled = false;
-                    }
-                    else {
-                        this.isFeatureEnabled = checked;
-                    }
-                    break;
-                case 'header':
-                    this.header = value;
-                    const variableMatches = (value.match(/\{\{\d+\}\}/g) || []).length;
-                    if (variableMatches > 1) {
-                        this.headerError = 'Only one variable is allowed in the header.';
-                    } else {
-                        this.headerError = '';
-                        this.updatePreviewContent(this.header, 'header');
-                    }
-                    this.updateFormatErrors();
-
-                    break;
-                default:
-                    break;
+            // Use handler map for other fields
+            const handler = this.inputChangeHandlers[name];
+            if (handler) {
+                handler(value, index, checked);
             }
         } catch (error) {
             console.error('Something went wrong: ', error);
@@ -1828,8 +2560,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 this.templateExists = false;
             }
         } catch (error) {
-            console.error(error.message);
-            this.showToastError(error.message || 'An error occurred while checking template existence.');
+            this.showToast(error.message || 'An error occurred while checking template existence.', 'error');
         }
 
     }
@@ -1847,6 +2578,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             }
             else if (removedButton && removedButton.isFlow) {
                 this.flowCount--;
+                // Also remove the flow selection when flow button is removed
+                this.isFlowSelected = false;
+                this.selectedFlowId = '';
+                this.selectedFlow = undefined;
+                this.NoFileSelected = true;
             }
             this.buttonList = this.buttonList.filter((_, i) => i !== parseInt(index));
             if (this.buttonList.length == 0) {
@@ -1865,6 +2601,10 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const selectedValue = event.currentTarget.dataset.value;
             this.menuButtonSelected = selectedValue;
             let buttonData = event.currentTarget.dataset.buttonData;
+            
+            // Check if this is edit mode (buttonData exists and already has button configured)
+            const isEditMode = buttonData && (buttonData.isCallPhone || buttonData.isVisitSite || buttonData.isOfferCode || buttonData.isFlow);
+            
             let newButton = buttonData ? buttonData : {
                 id: this.buttonList.length + 1,
                 selectedActionType: selectedValue,
@@ -1875,6 +2615,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 offercode: '',
                 selectedUrlType: 'Static',
                 selectedCountryType: '',
+                selectedCountryTypeLabel: '',
                 isCallPhone: false,
                 isVisitSite: false,
                 isOfferCode: false,
@@ -1882,8 +2623,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 hasError: false,
                 errorMessage: ''
             };
-
-
 
             this.isAddCallPhoneNumber = false;
             this.isAddVisitWebsiteCount = false;
@@ -1909,52 +2648,70 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     }
                     break;
                 case 'PHONE_NUMBER':
-                    if (this.callPhoneNumber < 1) {
+                    if (isEditMode || this.callPhoneNumber < 1) {
                         this.createButton = true;
                         newButton.isCallPhone = true;
                         newButton.btntext = buttonData?.btntext || 'Call Phone Number';
                         this.btntext = buttonData?.btntext || 'Call Phone Number';
-                        this.callPhoneNumber++;
+                        
+                        if (!isEditMode) {
+                            this.callPhoneNumber++;
+                        } else {
+                            this.callPhoneNumber = 1;
+                        }
                         this.isAddCallPhoneNumber = true;
                     }
                     break;
                 case 'URL':
-                    if (this.visitWebsiteCount < 2) {
+                    if (isEditMode || this.visitWebsiteCount < 2) {
                         this.createButton = true;
                         newButton.isVisitSite = true;
                         this.isVisitSite = true;
                         newButton.btntext = buttonData?.btntext || 'Visit Website';
                         this.btntext = buttonData?.btntext || 'Visit Website';
-                        this.visitWebsiteCount++;
+                        
+                        if (!isEditMode) {
+                            this.visitWebsiteCount++;
+                        } else {
+                            // In edit mode, count how many URL buttons exist
+                            const existingUrlCount = this.buttonList.filter(b => b.isVisitSite).length;
+                            this.visitWebsiteCount = existingUrlCount + 1;
+                        }
                         this.isAddVisitWebsiteCount = true;
                     }
                     break;
                 case 'COPY_CODE':
-                    if (this.copyOfferCode < 1) {
-
+                    if (isEditMode || this.copyOfferCode < 1) {
                         this.createButton = true;
                         newButton.isOfferCode = true;
                         newButton.btntext = buttonData?.btntext || 'Copy Offer Code';
-                        this.btntext = buttonData?.btntext || 'Copy Offer Code';
-
-                        // newButton.btntext = buttonData?.btntext || 'Copy Offer Code';
-                        // this.btntext = buttonData?.btntext || 'Copy Offer Code';
-                        this.copyOfferCode++;
+                        this.btntext = newButton.btntext;
+                        
+                        if (!isEditMode) {
+                            this.copyOfferCode++;
+                        } else {
+                            this.copyOfferCode = 1;
+                        }
                         this.isAddCopyOfferCode = true;
                     }
                     break;
                 case 'FLOW':
 
-                    if (this.flowCount < 1) {
+                    // In edit mode, always add the flow button if it exists in the data
+                    // In create mode, check if we haven't added a flow button yet
+                    if (isEditMode || this.flowCount < 1) {
 
                         this.createButton = true;
                         newButton.isFlow = true;
                         newButton.btntext = buttonData?.btntext || 'View flow';
                         this.btntext = buttonData?.btntext || 'View flow';
-
-                        // newButton.btntext = buttonData?.btntext || 'Copy Offer Code';
-                        // this.btntext = buttonData?.btntext || 'Copy Offer Code';
-                        this.flowCount++;
+                        
+                        // Only increment if not in edit mode (to avoid double counting)
+                        if (!isEditMode) {
+                            this.flowCount++;
+                        } else {
+                            this.flowCount = 1; // Set to 1 in edit mode
+                        }
                         this.isAddFlow = true;
                     }
                     break;
@@ -1976,6 +2733,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
                     this.buttonList.push(newButton);
                     this.totalButtonsCount++;
+                    
                 }
             }
 
@@ -2172,24 +2930,43 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             }, 0);
 
             this.nextIndex = maxId + 1;
-            const defaultField = this.fields[0].value;
+            const defaultField = this.fields[0]?.value || '';
+            const defaultFieldLabel = this.fields[0]?.label || 'Select Field';
+
+            // Use the currently selected variable type from the dropdown
+            const currentVariableType = this.selectedVariableType || 'Name';
+
+            // For Name type, use empty placeholder; for Number type, use numbered placeholder
+            const placeholderIndex = currentVariableType === 'Name' ? '' : this.nextIndex;
+            const displayIndex = currentVariableType === 'Name' ? `{{}}` : `{{${this.nextIndex}}}`;
 
             const newVariable = {
                 id: this.nextIndex,
                 object: this.selectedObject,
                 field: defaultField,
+                fieldLabel: defaultFieldLabel,
                 alternateText: '',
-                index: `{{${this.nextIndex}}}`,
+                variableType: currentVariableType, // Use selected type (Name or Number)
+                nameValue: '', // Store the content inside {{}} for Name type
+                index: displayIndex,
+                options: this.fields
             };
+
             this.variables = [...this.variables, newVariable];
+            
+            // Initialize error for both Name and Number types - alternate text is required for both
+            this.bodyVarAlternateTextErrors = {
+                ...this.bodyVarAlternateTextErrors,
+                [this.nextIndex]: 'This field is required'
+            };
 
-            console.log('this.variables :: ', this.variables);
-
-            this.tempBody = `${this.tempBody} {{${this.nextIndex}}} `;
+            // Add placeholder to body text
+            const placeholderToAdd = currentVariableType === 'Name' ? '{{}}' : `{{${this.nextIndex}}}`;
+            this.tempBody = `${this.tempBody} ${placeholderToAdd} `;
             this.formatedTempBody = this.formatText(this.tempBody);
             this.updateTextarea();
             this.updatePreviewContent(this.formatedTempBody, 'body');
-            this.updateFormatErrors();
+            // Validate variable placement after adding
             this.checkBodyVariablePlacement();
             this.nextIndex++;
         } catch (error) {
@@ -2216,54 +2993,397 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    handleObjectChange(event) {
-        try {
-            const selectedObject = event.target.value;
-            this.selectedObject = selectedObject;
+    /**
+     * Handle field selection from wbMergeFieldSelector component
+     */
+    handleMergeFieldSelected(event) {
+        const { fieldPath, fieldLabel } = event.detail;
+        const variableIndex = event.currentTarget.dataset.index;
+        const isHeader = event.currentTarget.dataset.isHeader === 'true';
+        
+        // Update the appropriate variable array
+        if (isHeader) {
+            // Update header variables
+            this.header_variables = this.header_variables.map((varItem) =>
+                String(varItem.index) === variableIndex
+                    ? {
+                        ...varItem,
+                        field: fieldPath,
+                        fieldLabel: fieldLabel
+                    }
+                    : varItem
+            );
+            this.updatePreviewContent(this.header, 'header');
+        } else {
+            // Update body variables
+            this.variables = this.variables.map((varItem) =>
+                String(varItem.index) === variableIndex
+                    ? {
+                        ...varItem,
+                        field: fieldPath,
+                        fieldLabel: fieldLabel
+                    }
+                    : varItem
+            );
+            this.formatedTempBody = this.formatText(this.tempBody);
+            this.updatePreviewContent(this.formatedTempBody, 'body');
+        }
+    }
 
-            // Update all object dropdowns to show the same selected value
-            this.template.querySelectorAll('[data-name="objectPicklist"]').forEach(dropdown => {
-                dropdown.value = selectedObject;
+    handleNameValueChange(event) {
+        const variableIndex = String(event.target.dataset.index);
+        const variableId = String(event.target.dataset.id);
+        const nameValue = event.target.value.trim();
+        
+        // Update the variables array with nameValue
+        this.variables = this.variables.map(varItem =>
+            String(varItem.index) === variableIndex
+                ? { ...varItem, nameValue }
+                : varItem
+        );
+        
+        // Validate name value
+        if (!nameValue) {
+            this.bodyVarAlternateTextErrors = {
+                ...this.bodyVarAlternateTextErrors,
+                [variableId]: 'Name value is required'
+            };
+        } else {
+            // Remove error if name value is provided
+            const updatedErrors = { ...this.bodyVarAlternateTextErrors };
+            delete updatedErrors[variableId];
+            this.bodyVarAlternateTextErrors = updatedErrors;
+        }
+        
+        // Update the preview with the new name value
+        this.updatePreviewContentWithNameValue();
+    }
+
+    handleGlobalVariableTypeChange(event) {
+        const newVariableType = event.detail.value;
+        
+        // Simply switch the type - errors will update automatically
+        this.selectedVariableType = newVariableType;
+        
+        // Re-validate format errors with the new type
+        this.updateFormatErrors();
+        
+        // Update all existing body variables to use the new type
+        this.variables = this.variables.map(varItem => ({
+            ...varItem,
+            variableType: newVariableType
+        }));
+        
+        // Update all existing header variables to use the new type
+        this.header_variables = this.header_variables.map(varItem => ({
+            ...varItem,
+            variableType: newVariableType
+        }));
+
+        // Sync variables from body after type change
+        this.syncVariablesFromBody();
+        
+        // Sync header variables after type change
+        this.syncHeaderVariablesFromText();
+
+        // Update error messages based on new type
+        const updatedErrors = {};
+        this.variables.forEach(varItem => {
+            if (newVariableType === 'Name') {
+                // For Name type, only validate field selection
+                if (!varItem.field || varItem.field.trim() === '') {
+                    updatedErrors[varItem.id] = 'Field selection is required';
+                }
+            } else {
+                // For Number type, validate alternate text
+                if (!varItem.alternateText || varItem.alternateText.trim() === '') {
+                    updatedErrors[varItem.id] = 'Alternate text is required';
+                }
+            }
+        });
+        this.bodyVarAlternateTextErrors = updatedErrors;
+
+        // Update preview
+        this.updatePreviewContent(this.formatedTempBody, 'body');
+        
+        // Revalidate body placement
+        this.checkBodyVariablePlacement();
+    }
+
+    /**
+     * Validate variable format in text based on variable type
+     * @param {string} text - The text to validate
+     * @param {string} variableType - 'Name' or 'Number'
+     * @param {boolean} strictMode - If true, empty {{}} is not allowed (used for submission)
+     * @returns {object} - { isValid: boolean, errorMessage: string }
+     */
+    validateVariableFormat(text, variableType, strictMode = false) {
+        if (!text) {
+            return { isValid: true, errorMessage: '' };
+        }
+        
+        // Find all variables in the text
+        const allVariables = text.match(/\{\{([^}]*)\}\}/g) || [];
+        
+        if (allVariables.length === 0) {
+            return { isValid: true, errorMessage: '' };
+        }
+        
+        // Check for empty {{}} - not allowed in strict mode (submission)
+        if (strictMode) {
+            const hasEmptyVars = allVariables.some(v => v === '{{}}');
+            if (hasEmptyVars) {
+                return {
+                    isValid: false,
+                    errorMessage: 'Variable parameters cannot be empty. Please provide a name for all variables).'                };
+            }
+        }
+        
+        if (variableType === 'Number') {
+            // For Number type: variables must be whole numbers like {{1}}, {{2}}
+            const numberPattern = /^\{\{\d+\}\}$/;
+            const invalidVars = allVariables.filter(v => !numberPattern.test(v));
+            
+            if (invalidVars.length > 0) {
+                return {
+                    isValid: false,
+                    errorMessage: 'This template contains variable parameters with incorrect formatting. Variable parameters must be whole numbers with two sets of curly brackets (for example, {{1}}, {{2}}).'
+                };
+            }
+        } else if (variableType === 'Name') {
+            const namePattern = /^\{\{([a-zA-Z_][a-zA-Z0-9_]*|)\}\}$/;
+            const pureNumberPattern = /^\{\{\d+\}\}$/;
+            
+            const invalidVars = allVariables.filter(v => {
+                if (v === '{{}}') return false;
+                if (pureNumberPattern.test(v)) return true;
+                return !namePattern.test(v);
+            });
+            
+            if (invalidVars.length > 0) {
+                return {
+                    isValid: false,
+                    errorMessage: 'This template contains variable parameters with incorrect formatting. Variable parameters must be letters, underscores and numbers (not starting with a number) with two sets of curly brackets (for example, {{customer_name}}, {{Name}}).'
+                };
+            }
+        }
+        
+        return { isValid: true, errorMessage: '' };
+    }
+
+    /**
+     * Update body and header format errors based on current variable type
+     * Call this after any change to body/header text or variable type
+     */
+    updateFormatErrors() {
+        const bodyValidation = this.validateVariableFormat(this.tempBody, this.selectedVariableType);
+        this.bodyVariableFormatError = bodyValidation.isValid ? '' : bodyValidation.errorMessage;
+        
+        const headerValidation = this.validateVariableFormat(this.header, this.selectedVariableType);
+        this.headerVariableFormatError = headerValidation.isValid ? '' : headerValidation.errorMessage;
+    }
+
+    handleVariableTypeChange(event) {
+        const variableIndex = String(event.target.dataset.index);
+        const variableType = event.target.value;
+        
+        // Update the variables array with the new variable type
+        this.variables = this.variables.map(varItem =>
+            String(varItem.index) === variableIndex
+                ? { ...varItem, variableType }
+                : varItem
+        );
+    }
+
+    updatePreviewContentWithNameValue() {
+        try {
+            let updatedContent = this.tempBody;
+            
+            this.variables.forEach(varItem => {
+                const variablePlaceholder = varItem.index;
+                // Use nameValue for display in preview when variableType is 'Name'
+                const replacementValue = varItem.variableType === 'Name' && varItem.nameValue 
+                    ? `{{${varItem.nameValue}}}` 
+                    : `{{${varItem.object}.${varItem.field}}}`;
+
+                let index = updatedContent.indexOf(variablePlaceholder);
+                while (index !== -1) {
+                    updatedContent = updatedContent.slice(0, index) + replacementValue + updatedContent.slice(index + variablePlaceholder.length);
+                    index = updatedContent.indexOf(variablePlaceholder, index + replacementValue.length);
+                }
             });
 
-            getObjectFields({ objectName: selectedObject })
-                .then((result) => {
-                    this.fields = result.map((field) => ({ label: field, value: field }));
-
-                    // Update variables for both header and body
-                    this.variables = this.variables.map(varItem => ({
-                        ...varItem,
-                        object: selectedObject,
-                        field: this.fields[0].value
-                    }));
-
-                    this.header_variables = this.header_variables.map(varItem => ({
-                        ...varItem,
-                        object: selectedObject,
-                        field: this.fields[0].value
-                    }));
-
-                    this.formatedTempBody = this.formatText(this.tempBody);
-                    this.updateTextarea();
-                    this.updatePreviewContent(this.header, 'header');
-                    this.updatePreviewContent(this.formatedTempBody, 'body');
-                })
-                .catch((error) => {
-                    console.error('Error fetching fields: ', error);
-                });
+            this.previewBody = updatedContent;
         } catch (error) {
-            console.error('Something went wrong while updating variable object.', error);
+            console.error('Something wrong while updating preview with name value.', error);
+        }
+    }
+
+    /**
+     * Sync variables from body text for both Name and Number types
+     * Parses {{content}} from body and updates variables array sequentially
+     */
+    syncVariablesFromBody() {
+        try {
+            // Match all {{...}} patterns including empty {{}}
+            const variablePattern = /\{\{([^}]*)\}\}/g;
+            const matches = [...this.tempBody.matchAll(variablePattern)];
+            
+            if (matches.length === 0) {
+                // No variables in body, clear all variables
+                this.variables = [];
+                this.addVar = false;
+                return;
+            }
+
+            // Extract the content inside each {{}}
+            const bodyVariables = matches.map((match, idx) => ({
+                position: idx,
+                content: match[1].trim(), // Content inside {{}}
+                fullMatch: match[0]
+            }));
+
+            const isNameType = this.selectedVariableType === 'Name';
+            const defaultField = this.fields[0]?.value || '';
+            const defaultFieldLabel = this.fields[0]?.label || 'Select Field';
+
+            // Update existing variables or create new ones based on body content
+            const updatedVariables = bodyVariables.map((bodyVar, idx) => {
+                const existingVar = this.variables[idx];
+
+                if (existingVar) {
+                    // Update existing variable with the content from body
+                    if (isNameType) {
+                        return {
+                            ...existingVar,
+                            nameValue: bodyVar.content,
+                            index: bodyVar.content ? `{{${bodyVar.content}}}` : `{{}}`
+                        };
+                    } else {
+                        // For Number type, the index is the number
+                        return {
+                            ...existingVar,
+                            index: `{{${bodyVar.content}}}`
+                        };
+                    }
+                } else {
+                    // Create new variable
+                    return {
+                        id: idx + 1,
+                        object: this.selectedObject,
+                        field: defaultField,
+                        fieldLabel: defaultFieldLabel,
+                        alternateText: '',
+                        variableType: this.selectedVariableType,
+                        nameValue: isNameType ? bodyVar.content : '',
+                        index: bodyVar.content ? `{{${bodyVar.content}}}` : `{{}}`,
+                        options: this.fields
+                    };
+                }
+            });
+
+            this.variables = updatedVariables;
+            
+            // Show the variable section if there are variables
+            if (this.variables.length > 0) {
+                this.addVar = true;
+            }
+        } catch (error) {
+            console.error('Error syncing variables from body:', error);
+        }
+    }
+
+    /**
+     * Sync header variables from header text for both Name and Number types
+     */
+    syncHeaderVariablesFromText() {
+        try {
+            if (!this.header) {
+                return;
+            }
+            
+            // Match all {{...}} patterns including empty {{}}
+            const variablePattern = /\{\{([^}]*)\}\}/g;
+            const matches = [...this.header.matchAll(variablePattern)];
+            
+            if (matches.length === 0) {
+                // No variables in header, clear header variables
+                this.header_variables = [];
+                this.addHeaderVar = false;
+                return;
+            }
+
+            const isNameType = this.selectedVariableType === 'Name';
+            const defaultField = this.fields[0]?.value || '';
+            const defaultFieldLabel = this.fields[0]?.label || 'Select Field';
+
+            // Update existing header variables or create new ones
+            const updatedHeaderVariables = matches.map((match, idx) => {
+                const content = match[1].trim();
+                const existingVar = this.header_variables[idx];
+
+                if (existingVar) {
+                    if (isNameType) {
+                        return {
+                            ...existingVar,
+                            nameValue: content,
+                            index: content ? `{{${content}}}` : `{{}}`
+                        };
+                    } else {
+                        return {
+                            ...existingVar,
+                            index: `{{${content}}}`
+                        };
+                    }
+                } else {
+                    return {
+                        id: idx + 1,
+                        object: this.selectedObject,
+                        field: defaultField,
+                        fieldLabel: defaultFieldLabel,
+                        alternateText: '',
+                        variableType: this.selectedVariableType,
+                        nameValue: isNameType ? content : '',
+                        index: content ? `{{${content}}}` : `{{}}`
+                    };
+                }
+            });
+
+            this.header_variables = updatedHeaderVariables;
+            
+            // Show the header variable section if there are variables
+            if (this.header_variables.length > 0) {
+                this.addHeaderVar = true;
+            }
+        } catch (error) {
+            console.error('Error syncing header variables from text:', error);
         }
     }
 
     handleAlternateVarChange(event) {
         const variableIndex = String(event.target.dataset.index);
-        const alternateText = event.target.value;
+        const variableId = String(event.target.dataset.id);
+        const alternateText = event.target.value.trim();
+        
+        // Update the variables array - store in alternateText field for both Name and Number types
         this.variables = this.variables.map(varItem =>
             String(varItem.index) === variableIndex
                 ? { ...varItem, alternateText }
                 : varItem
         );
+        
+        // Validate alternate text - required for both Name and Number types
+        if (!alternateText) {
+            this.bodyVarAlternateTextErrors = {
+                ...this.bodyVarAlternateTextErrors,
+                [variableId]: 'This field is required'
+            };
+        } else {
+            // Remove error if alternate text is provided
+            const updatedErrors = { ...this.bodyVarAlternateTextErrors };
+            delete updatedErrors[variableId];
+            this.bodyVarAlternateTextErrors = updatedErrors;
+        }
     }
 
     updateTextarea() {
@@ -2277,27 +3397,62 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     handleVarRemove(event) {
         try {
             const index = event.currentTarget.dataset.index;
-            const varIndexToRemove = parseInt(index, 10) + 1;
-            const variableToRemove = `{{${varIndexToRemove}}}`;
-            let updatedTempBody = this.tempBody.replace(variableToRemove, '');
-            this.variables = this.variables.filter((_, i) => i !== parseInt(index));
-            this.variables = this.variables.map((varItem, idx) => {
-                const newIndex = idx + 1;
-                return {
+            const varToRemove = this.variables[parseInt(index)];
+            
+            if (this.selectedVariableType === 'Name') {
+                // For Name type, remove the variable by its content or empty placeholder
+                const variableToRemove = varToRemove.nameValue 
+                    ? `{{${varToRemove.nameValue}}}` 
+                    : `{{}}`;
+                let updatedTempBody = this.tempBody.replace(variableToRemove, '');
+                this.variables = this.variables.filter((_, i) => i !== parseInt(index));
+                
+                // Re-index remaining variables
+                this.variables = this.variables.map((varItem, idx) => ({
                     ...varItem,
-                    id: newIndex,
-                    index: `{{${newIndex}}}`
-                };
+                    id: idx + 1
+                }));
+                
+                this.tempBody = updatedTempBody.trim();
+                this.originalTempBody = this.tempBody;
+                this.formatedTempBody = this.formatText(this.tempBody);
+                
+                // Sync variables from body after removal
+                this.syncVariablesFromBody();
+            } else {
+                // For Number type, use existing logic
+                const varIndexToRemove = parseInt(index, 10) + 1;
+                const variableToRemove = `{{${varIndexToRemove}}}`;
+                let updatedTempBody = this.tempBody.replace(variableToRemove, '');
+                this.variables = this.variables.filter((_, i) => i !== parseInt(index));
+                this.variables = this.variables.map((varItem, idx) => {
+                    const newIndex = idx + 1;
+                    return {
+                        ...varItem,
+                        id: newIndex,
+                        index: `{{${newIndex}}}`
+                    };
+                });
+                
+                let placeholders = updatedTempBody.match(/\{\{\d+\}\}/g) || [];
+                placeholders.forEach((placeholder, idx) => {
+                    const newIndex = `{{${idx + 1}}}`;
+                    updatedTempBody = updatedTempBody.replace(placeholder, newIndex);
+                });
+                this.tempBody = updatedTempBody.trim();
+                this.originalTempBody = this.tempBody;
+                this.formatedTempBody = this.originalTempBody;
+            }
+            
+            // Clear errors and rebuild for remaining variables
+            const updatedErrors = {};
+            this.variables.forEach(varItem => {
+                if (this.bodyVarAlternateTextErrors[varItem.id]) {
+                    updatedErrors[varItem.id] = this.bodyVarAlternateTextErrors[varItem.id];
+                }
             });
+            this.bodyVarAlternateTextErrors = updatedErrors;
 
-            let placeholders = updatedTempBody.match(/\{\{\d+\}\}/g) || [];
-            placeholders.forEach((placeholder, idx) => {
-                const newIndex = `{{${idx + 1}}}`;
-                updatedTempBody = updatedTempBody.replace(placeholder, newIndex);
-            });
-            this.tempBody = updatedTempBody.trim();
-            this.originalTempBody = this.tempBody;
-            this.formatedTempBody = this.originalTempBody;
             this.updatePreviewContent(this.tempBody, 'body');
             this.nextIndex = this.variables.length + 1;
             if (this.variables.length === 0) {
@@ -2305,7 +3460,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 this.nextIndex = 1;
             }
             this.updateTextarea();
-            this.updateFormatErrors();
+            // Validate variable placement after removing
             this.checkBodyVariablePlacement();
         } catch (error) {
             console.error('Something wrong while removing the variable.', error);
@@ -2316,17 +3471,37 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     addheadervariable() {
         try {
             this.addHeaderVar = true;
-            const defaultField = this.fields[0].value;
+            const defaultField = this.fields[0]?.value || '';
+            const defaultFieldLabel = this.fields[0]?.label || 'Search fields...';
+            
+            // Use the currently selected variable type
+            const currentVariableType = this.selectedVariableType || 'Name';
+            const isNameType = currentVariableType === 'Name';
+            
+            // For Name type, use empty placeholder; for Number type, use numbered placeholder
+            const displayIndex = isNameType ? `{{}}` : `{{${this.headIndex}}}`;
+            const placeholderToAdd = isNameType ? '{{}}' : `{{${this.headIndex}}}`;
+            
             const newVariable = {
                 id: this.headIndex,
                 object: this.selectedObject,
                 field: defaultField,
+                fieldLabel: defaultFieldLabel,
                 alternateText: '',
-                index: `{{${this.headIndex}}}`,
+                variableType: currentVariableType,
+                nameValue: '',
+                index: displayIndex,
             };
 
             this.header_variables = [...this.header_variables, newVariable];
-            this.originalHeader = (this.originalHeader || this.header || '') + ` {{${this.headIndex}}}`;
+            
+            // Initialize error for new variable - alternate text is required for both Name and Number types
+            this.headerVarAlternateTextErrors = {
+                ...this.headerVarAlternateTextErrors,
+                [this.headIndex]: 'This field is required'
+            };
+            
+            this.originalHeader = (this.originalHeader || this.header || '') + ` ${placeholderToAdd}`;
             this.header = this.originalHeader;
             this.updatePreviewContent(this.header, 'header');
             this.headIndex++;
@@ -2357,12 +3532,27 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     handleAlternateTextChange(event) {
         const variableId = String(event.target.dataset.id);
-        const alternateText = event.target.value;
+        const alternateText = event.target.value.trim();
+        
+        // Update the header_variables array
         this.header_variables = this.header_variables.map(varItem =>
             String(varItem.id) === variableId
                 ? { ...varItem, alternateText }
                 : varItem
         );
+        
+        // Validate alternate text - required for both Name and Number types
+        if (!alternateText) {
+            this.headerVarAlternateTextErrors = {
+                ...this.headerVarAlternateTextErrors,
+                [variableId]: 'This field is required'
+            };
+        } else {
+            // Remove error if alternate text is provided
+            const updatedErrors = { ...this.headerVarAlternateTextErrors };
+            delete updatedErrors[variableId];
+            this.headerVarAlternateTextErrors = updatedErrors;
+        }
     }
 
     updatePreviewContent(inputContent, type) {
@@ -2372,7 +3562,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const variables = type === 'header' ? this.header_variables : this.variables;
             variables.forEach(varItem => {
                 const variablePlaceholder = varItem.index;
-                const replacementValue = `{{${varItem.object}.${varItem.field}}}`;
+                // For Name type variables, use nameValue if available
+                let replacementValue;
+                if (varItem.variableType === 'Name' && varItem.nameValue) {
+                    replacementValue = `{{${varItem.nameValue}}}`;
+                } else {
+                    replacementValue = `{{${varItem.object}.${varItem.field}}}`;
+                }
 
                 let index = updatedContent.indexOf(variablePlaceholder);
                 while (index !== -1) {
@@ -2394,24 +3590,64 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     handleHeaderVarRemove(event) {
         try {
             const index = event.currentTarget.dataset.index;
-            const varIndexToRemove = parseInt(index, 10) + 1;
-            const variableToRemove = `{{${varIndexToRemove}}}`;
-            let updatedHeader = this.header.replace(variableToRemove, '');
+            const varToRemove = this.header_variables[parseInt(index)];
+            const isNameType = this.selectedVariableType === 'Name';
+            
+            let updatedHeader = this.header;
+            
+            if (isNameType) {
+                // For Name type, remove by nameValue or empty placeholder
+                const variableToRemove = varToRemove.nameValue 
+                    ? `{{${varToRemove.nameValue}}}` 
+                    : `{{}}`;
+                updatedHeader = this.header.replace(variableToRemove, '');
+            } else {
+                // For Number type, use existing logic
+                const varIndexToRemove = parseInt(index, 10) + 1;
+                const variableToRemove = `{{${varIndexToRemove}}}`;
+                updatedHeader = this.header.replace(variableToRemove, '');
+            }
+            
+            // Get the variable ID before removing it
+            const removedVarId = this.header_variables[parseInt(index)]?.id;
+            
             this.header_variables = this.header_variables.filter((_, i) => i !== parseInt(index));
-            this.header_variables = this.header_variables.map((varItem, idx) => {
-                const newIndex = idx + 1;
-                return {
+            
+            if (isNameType) {
+                // Re-index remaining variables for Name type
+                this.header_variables = this.header_variables.map((varItem, idx) => ({
                     ...varItem,
-                    id: newIndex,
-                    index: `{{${newIndex}}}`,
-                    placeholder: `Enter content for {{${newIndex}}}`
-                };
+                    id: idx + 1
+                }));
+            } else {
+                // Re-index for Number type
+                this.header_variables = this.header_variables.map((varItem, idx) => {
+                    const newIndex = idx + 1;
+                    return {
+                        ...varItem,
+                        id: newIndex,
+                        index: `{{${newIndex}}}`,
+                        placeholder: `Enter content for {{${newIndex}}}`
+                    };
+                });
+                
+                // Renumber placeholders in header text
+                let placeholders = updatedHeader.match(/\{\{\d+\}\}/g) || [];
+                placeholders.forEach((placeholder, idx) => {
+                    const newIndex = `{{${idx + 1}}}`;
+                    updatedHeader = updatedHeader.replace(placeholder, newIndex);
+                });
+            }
+            
+            // Clear error for removed variable and rebuild errors object for remaining variables
+            const updatedErrors = {};
+            this.header_variables.forEach(varItem => {
+                if (this.headerVarAlternateTextErrors[varItem.id]) {
+                    updatedErrors[varItem.id] = this.headerVarAlternateTextErrors[varItem.id];
+                }
             });
-            let placeholders = updatedHeader.match(/\{\{\d+\}\}/g) || [];
-            placeholders.forEach((placeholder, idx) => {
-                const newIndex = `{{${idx + 1}}}`;
-                updatedHeader = updatedHeader.replace(placeholder, newIndex);
-            });
+            this.headerVarAlternateTextErrors = updatedErrors;
+            
             this.header = updatedHeader.trim();
             this.originalHeader = this.header;
             this.updatePreviewContent(this.originalHeader, 'header');
@@ -2445,17 +3681,48 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             })
             .catch((e) => console.error('There was an error fetching the emoji.', e));
     }
-    fetchCountries() {
-        fetch(CountryJson)
-            .then((response) => response.json())
-            .then((data) => {
-                this.countryType = data.map(country => {
-                    return { label: `${country.name} (${country.callingCode})`, value: country.callingCode };
-                });
-            })
-            .catch((e) => console.error('Error fetching country data:', e));
 
+    fetchCountries(){
+        try{
+            fetch(COUNTRY_PHONE_LENGTHS)
+                .then(response => response.json())
+                .then(data => {
+                    // Build options for combobox
+                    this.countryType = data.map(item => ({
+                        label: item?.label,
+                        value: item?.label
+                    }));
+
+                    // Map code → length for validation
+                    data.forEach(item => {
+                        this.countryLabelToCodeMap[item?.label] = item?.code;
+                        this.countryCodeToLabelMap[item?.code] = item?.label;
+                        this.countryPhoneMap[item?.code] = item.lengths;
+                    });
+                    
+                    this.updatePhonePattern(this.selectedCountryType);
+                })
+                .catch(error => console.error('Error loading country codes', error));
+        }
+        catch(e){
+            console.error('Something wrong while fetching country data:', e);
+        }
     }
+        
+    updatePhonePattern(code) {
+        const validLengths = this.countryPhoneMap[code];
+        if (validLengths && validLengths.length > 0) {
+            // Build regex: only digits, allowed lengths only
+            const lengths = validLengths.join('|');
+            this.phonePattern = `^\\d{${lengths.replace(/,/g, '}$|^\\d{')}}$`;
+            this.phoneErrorMessage = `Phone number must be ${validLengths.join(' or ')} digits long.`;
+        } else {
+            // fallback: at least 1 digit
+            this.phonePattern = '^\\d+$';
+            this.phoneErrorMessage = 'Enter a valid phone number';
+        }
+    }
+
 
     fetchLanguages() {
 
@@ -2479,12 +3746,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     handleEmoji(event) {
         event.stopPropagation();
         this.showEmojis = !this.showEmojis;
-
-        if (this.showEmojis) {
-            this.addOutsideClickListener();
-        } else {
-            this.removeOutsideClickListener();
-        }
     }
 
     handleEmojiSelection(event) {
@@ -2552,40 +3813,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    handleMergeFieldSelected(event) {
-        const { fieldPath, fieldLabel } = event.detail;
-        const variableIndex = event.currentTarget.dataset.index;
-        const isHeader = event.currentTarget.dataset.isHeader === 'true';
-        
-        // Update the appropriate variable array
-        if (isHeader) {
-            // Update header variables
-            this.header_variables = this.header_variables.map((varItem) =>
-                String(varItem.index) === variableIndex
-                    ? {
-                        ...varItem,
-                        field: fieldPath,
-                        fieldLabel: fieldLabel
-                    }
-                    : varItem
-            );
-            this.updatePreviewContent(this.header, 'header');
-        } else {
-            // Update body variables
-            this.variables = this.variables.map((varItem) =>
-                String(varItem.index) === variableIndex
-                    ? {
-                        ...varItem,
-                        field: fieldPath,
-                        fieldLabel: fieldLabel
-                    }
-                    : varItem
-            );
-            this.formatedTempBody = this.formatText(this.tempBody);
-            this.updatePreviewContent(this.formatedTempBody, 'body');
-        }
-    }
-
     applyFormattingAfter(text, cursorPos, marker) {
         return text.slice(0, cursorPos) + marker + text.slice(cursorPos);
     }
@@ -2615,30 +3842,23 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     validateTemplate() {
         try {
             if (!this.templateName || this.templateName.trim() === '') {
-                this.showToastError('Template Name is required');
+                this.showToast('Template Name is required', 'error');
                 return false;
             }
 
             if (!this.selectedLanguage) {
-                this.showToastError('Please select a language');
+                this.showToast('Please select a language', 'error');
                 return false;
             }
 
             if (!this.tempBody || this.tempBody.trim() === '') {
-                this.showToastError('Template Body is required');
+                this.showToast('Template Body is required', 'error');
                 return false;
             }
-
-            this.updateFormatErrors();
-            this.checkBodyVariablePlacement();
-
-            if (this.bodyVariableFormatError) {
-                this.showToastError(this.bodyVariableFormatError);
-                return false;
-            }
-
-            if (this.bodyVariablePlacementError) {
-                this.showToastError(this.bodyVariablePlacementError);
+            
+            // Check if body starts or ends with a variable
+            if (this.checkBodyVariablePlacement()) {
+                this.showToast(this.bodyVariablePlacementError, 'error');
                 return false;
             }
 
@@ -2646,25 +3866,26 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             for (let button of buttonData) {
                 if (button.isVisitSite) {
                     if (!button.selectedUrlType || !button.webURL || !this.validateUrl(button.webURL)) {
-                        this.showToastError('Please provide a valid URL that should be properly formatted (e.g., https://example.com)');
+                        this.showToast('Please provide a valid URL that should be properly formatted (e.g., https://example.com)', 'error');
                         return false;
                     }
                 } else if (button.isCallPhone) {
                     if (!button.selectedCountryType || !button.phonenum || !this.validatePhoneNumber(button.phonenum)) {
-                        this.showToastError('Please provide a valid country and phone number for the "Call Phone Number" button');
+                        this.showToast('Please provide a valid country and phone number for the "Call Phone Number" button', 'error');
                         return false;
                     }
                 } else if (button.isOfferCode) {
                     const alphanumericPattern = /^[a-zA-Z0-9]+$/;
-                    if (!alphanumericPattern.test(button.offercode.trim())) {
-                        this.showToastError('Offer code must only contain alphanumeric characters (letters and numbers)');
+                    const offerButton = Array.isArray(button?.offercode) ? button?.offercode[0] : button?.offercode;
+                    if (!alphanumericPattern.test(offerButton?.trim())) {
+                        this.showToast('Offer code must only contain alphanumeric characters (letters and numbers)', 'error');
                         return false;
                     }
                 }
 
                 if (button.isCustom) {
                     if (!button.Cbtntext || button.Cbtntext.trim() === '') {
-                        this.showToastError('Button text is required for the custom button');
+                        this.showToast('Button text is required for the custom button', 'error');
                         return false;
                     }
                 }
@@ -2690,88 +3911,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         return phonePattern.test(value);
     }
 
-    validateButtonText(index, newValue) {
-        const isDuplicate = this.buttonList.some((button, idx) => button.btntext === newValue && idx !== parseInt(index));
-
-        if (index === 0) {
-            this.buttonList[index].hasError = false;
-            this.buttonList[index].errorMessage = '';
-        } else {
-            this.buttonList[index].hasError = isDuplicate;
-            this.buttonList[index].errorMessage = isDuplicate ? 'You have entered the same text for multiple buttons.' : '';
-        }
-
-        this.btntext = newValue;
-        this.updateButtonErrors();
-    }
-
-    validateVariableFormat(text, variableType, strictMode = false) {
-        if (!text) {
-            return { isValid: true, errorMessage: '' };
-        }
-        
-        // Find all variables in the text
-        const allVariables = text.match(/\{\{([^}]*)\}\}/g) || [];
-        
-        if (allVariables.length === 0) {
-            return { isValid: true, errorMessage: '' };
-        }
-        
-        // Check for empty {{}} - not allowed in strict mode (submission)
-        if (strictMode) {
-            const hasEmptyVars = allVariables.some(v => v === '{{}}');
-            if (hasEmptyVars) {
-                return {
-                    isValid: false,
-                    errorMessage: 'Variable parameters cannot be empty. Please provide a name for all variables).'
-                };
-            }
-        }
-        
-        if (variableType === 'Number' || !variableType) {
-            // For Number type: variables must be whole numbers like {{1}}, {{2}}
-            const numberPattern = /^\{\{\d+\}\}$/;
-            const invalidVars = allVariables.filter(v => !numberPattern.test(v));
-            
-            if (invalidVars.length > 0) {
-                return {
-                    isValid: false,
-                    errorMessage: 'This template contains variable parameters with incorrect formatting. Variable parameters must be whole numbers with two sets of curly brackets (for example, {{1}}, {{2}}).'
-                };
-            }
-        } else if (variableType === 'Name') {
-            const namePattern = /^\{\{([a-zA-Z_][a-zA-Z0-9_]*|)\}\}$/;
-            const pureNumberPattern = /^\{\{\d+\}\}$/;
-            
-            const invalidVars = allVariables.filter(v => {
-                if (v === '{{}}') return false;
-                if (pureNumberPattern.test(v)) return true;
-                return !namePattern.test(v);
-            });
-            
-            if (invalidVars.length > 0) {
-                return {
-                    isValid: false,
-                    errorMessage: 'This template contains variable parameters with incorrect formatting. Variable parameters must be letters, underscores and numbers (not starting with a number) with two sets of curly brackets (for example, {{customer_name}}, {{Name}}).'
-                };
-            }
-        }
-        
-        return { isValid: true, errorMessage: '' };
-    }
-
     /**
-     * Update body and header format errors based on current variable type
-     * Call this after any change to body/header text or variable type
+     * Check if the template body starts or ends with a variable
+     * Variables cannot be at the start or end - there must be static text surrounding them
+     * @returns {boolean} true if there's a placement error, false otherwise
      */
-    updateFormatErrors() {
-        const bodyValidation = this.validateVariableFormat(this.tempBody, this.selectedVariableType || 'Number');
-        this.bodyVariableFormatError = bodyValidation.isValid ? '' : bodyValidation.errorMessage;
-        
-        const headerValidation = this.validateVariableFormat(this.header, this.selectedVariableType || 'Number');
-        this.headerVariableFormatError = headerValidation.isValid ? '' : headerValidation.errorMessage;
-    }
-
     checkBodyVariablePlacement() {
         if (!this.tempBody || this.tempBody.trim() === '') {
             this.bodyVariablePlacementError = '';
@@ -2784,15 +3928,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const normalizedBody = this.tempBody.replace(/\s+/g, ' ').trim();
         
         // Pattern to match variables - handle both {{1}} and {{name}} formats based on type
-        const variableType = this.selectedVariableType || 'Number';
-        const variablePattern = variableType === 'Name' ? /\{\{[^}]*\}\}/ : /\{\{\d+\}\}/;
-        const variablePatternGlobal = variableType === 'Name' ? /\{\{[^}]*\}\}/g : /\{\{\d+\}\}/g;
+        const variablePattern = this.selectedVariableType === 'Name' ? /\{\{[^}]*\}\}/ : /\{\{\d+\}\}/;
+        const variablePatternGlobal = this.selectedVariableType === 'Name' ? /\{\{[^}]*\}\}/g : /\{\{\d+\}\}/g;
         
         const startsWithVariable = new RegExp(`^${variablePattern.source}`).test(normalizedBody);
         const endsWithVariable = new RegExp(`${variablePattern.source}$`).test(normalizedBody);
 
         // Check for back-to-back variables (e.g., {{1}}{{2}} or {{name}}{{other}} without any separator)
-        const backToBackPattern = variableType === 'Name' 
+        const backToBackPattern = this.selectedVariableType === 'Name' 
             ? /\{\{[^}]*\}\}\{\{[^}]*\}\}/ 
             : /\{\{\d+\}\}\{\{\d+\}\}/;
         const hasBackToBackVariables = backToBackPattern.test(normalizedBody);
@@ -2811,7 +3954,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
 
         // Check for variable sequence gaps only for Number type
-        if (variableType !== 'Name') {
+        if (this.selectedVariableType !== 'Name') {
             const sequenceError = this.checkBodyVariableSequence(normalizedBody);
             if (sequenceError) {
                 errors.push(sequenceError);
@@ -2840,8 +3983,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const namedVarMatches = body.match(/\{\{[^}]*\}\}/g) || [];
         
         // Use named vars for Name type, numbered for Number type
-        const variableType = this.selectedVariableType || 'Number';
-        const variableCount = variableType === 'Name' 
+        const variableCount = this.selectedVariableType === 'Name' 
             ? namedVarMatches.length 
             : numberedVarMatches.length;
 
@@ -2869,8 +4011,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     checkBodyVariableSequence(body) {
         // For Name type, skip sequence check as they use {{name}} format
-        const variableType = this.selectedVariableType || 'Number';
-        if (variableType === 'Name') {
+        if (this.selectedVariableType === 'Name') {
             return null;
         }
         
@@ -2894,27 +4035,41 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
 
         if (missingNumbers.length > 0) {
-            const missingVars = missingNumbers.map(n => `\{\{${n}\}\}`).join(', ');
+            const missingVars = missingNumbers.map(n => `{{${n}}}`).join(', ');
             return `Variable sequence is incomplete. Missing variable(s): ${missingVars}. Variables must be present from {{1}} to {{${maxVar}}}.`;
         }
 
         return null;
     }
 
+    validateButtonText(index, newValue) {
+        const isDuplicate = this.buttonList.some((button, idx) => button.btntext === newValue && idx !== parseInt(index));
+
+        if (index === 0) {
+            this.buttonList[index].hasError = false;
+            this.buttonList[index].errorMessage = '';
+        } else {
+            this.buttonList[index].hasError = isDuplicate;
+            this.buttonList[index].errorMessage = isDuplicate ? 'You have entered the same text for multiple buttons.' : '';
+        }
+
+        this.btntext = newValue;
+        this.updateButtonErrors();
+    }
+
     handleConfirm() {
-        const variableType = this.selectedVariableType || 'Number';
         // Validate variable format with strict mode (empty {{}} not allowed)
-        const bodyFormatValidation = this.validateVariableFormat(this.tempBody, variableType, true);
+        const bodyFormatValidation = this.validateVariableFormat(this.tempBody, this.selectedVariableType, true);
         if (!bodyFormatValidation.isValid) {
-            this.showToastError(bodyFormatValidation.errorMessage);
+            this.showToast(bodyFormatValidation.errorMessage, 'error');
             return;
         }
         
         // Also validate header if it has content
         if (this.header) {
-            const headerFormatValidation = this.validateVariableFormat(this.header, variableType, true);
+            const headerFormatValidation = this.validateVariableFormat(this.header, this.selectedVariableType, true);
             if (!headerFormatValidation.isValid) {
-                this.showToastError(headerFormatValidation.errorMessage);
+                this.showToast(headerFormatValidation.errorMessage, 'error');
                 return;
             }
         }
@@ -2932,12 +4087,12 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         });
         
         if (headerMissingAlt) {
-            this.showToastError('Example/Alternative Text value is required for all header variables');
+            this.showToast('Example/Alternative Text value is required for all header variables', 'error');
             return;
         }
         
         if (bodyMissingValue) {
-            this.showToastError('Example/Alternative Text value is required for all body variables');
+            this.showToast('Example/Alternative Text value is required for all body variables', 'error');
             return;
         }
         
@@ -2965,14 +4120,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const isDuplicate = this.packages.some((pkg, i) => i < index && pkg.packagename === value);
 
         if (isDuplicate) {
-            this.showToastError('Package name must be unique');
+            this.showToast('Package name must be unique', 'error');
 
         }
         this.updateErrorMessages();
 
 
     }
-
 
     handleSignaturehash(event) {
         const index = parseInt(event.target.dataset.index, 10);
@@ -2990,7 +4144,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const isDuplicate = this.packages.some((pkg, i) => i < index && pkg.signature === value);
 
         if (isDuplicate) {
-            this.showToastError('Signature hash must be unique');
+            this.showToast('Signature hash must be unique', 'error');
 
         }
         this.updateErrorMessages();
@@ -3023,9 +4177,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 curHashCode: 0
             };
             this.packages = [...this.packages, newPackage];
-            // this.addAppBtn=true;
-        } else {
-            console.warn('Maximum number of packages reached.');
         }
     }
 
@@ -3039,15 +4190,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 ...pkg,
                 id: i + 1
             }));
-        } else {
-            console.warn('Invalid package index for removal.');
         }
     }
 
     handleSubmit() {
         try {
             if ((this.activeTab == 'Marketing' || this.activeTab == 'Utiltiy') && !this.isCheckboxChecked && this.visitWebsiteCount > 0) {
-                this.showToastError('Please select check-box to report website clicks.');
+                this.showToast('Please select check-box to report website clicks.', 'error');
                 return;
             }
             this.isLoading = true;
@@ -3077,12 +4226,20 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 fileUrl = this.filePreview; // Use ContentVersion if available
             }
 
-
-            // Change
             if (this.activeTab == 'Authentication') {
                 this.tempBody = ' is your verification code';
             }
 
+            // Extract marketingOptText from customButtonList if Marketing opt-out button exists
+            let marketingOptText = null;
+            if (this.customButtonList && this.customButtonList.length > 0) {
+                const marketingOptButton = this.customButtonList.find(btn => btn.selectedCustomType === 'Marketing opt-out');
+                if (marketingOptButton) {
+                    marketingOptText = marketingOptButton.Cbtntext;
+                }
+            }
+
+            // Miscellaneous data for UI state restoration during edit
             const templateMiscellaneousData = {
                 contentVersionId: this.contentVersionId,
                 isImageFile: this.isImageFile,
@@ -3109,69 +4266,102 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 isFlowSelected: this.isFlowSelected,
                 selectedFlow: this.selectedFlow,
                 isFeatureEnabled: this.isFeatureEnabled,
-                awsFileName: this.awsFileName
-            }
+                awsFileName: this.awsFileName,
+                catalogName: this.catalogName,
+                flowNavigationScreen: this.flowScreenIds
+            };
 
-
-
+            // Template object with only fields required by Apex TemplateWrapper
             const template = {
-                templateName: this.templateName ? this.templateName : null,
-                templateCategory: this.activeTab ? this.activeTab : null,
-                templateType: this.selectedOption ? this.selectedOption : null,
-                tempHeaderHandle: this.headerHandle ? this.headerHandle : null,
-                tempHeaderFormat: this.selectedContentType ? this.selectedContentType : null,
-                tempImgUrl: this.filePreview ? this.filePreview : null,
-                tempImgId: this.contentVersionId ? this.contentVersionId : null,
-                tempImgName: this.fileName ? this.fileName : null,
-                tempLanguage: this.selectedLanguage ? this.selectedLanguage : null,
-                tempHeaderText: this.header ? this.header : '',
-                varAlternateTexts: (this.templateCategory === 'Authentication')
-                    ? [null]  // Placeholder {{1}} is automatically handled, so no alternate text required
-                    : this.variables.map(varItem => varItem.alternateText || null),
+                // Required for template record creation
+                templateName: this.templateName || null,
+                templateCategory: this.activeTab || null,
+                templateType: this.selectedOption || null,
+                tempLanguage: this.selectedLanguage || null,
+                
+                // Header fields
+                tempHeaderFormat: this.selectedContentType || null,
+                tempHeaderHandle: this.headerHandle || null,
+                tempHeaderText: this.header || '',
                 tempHeaderExample: (this.tempHeaderExample && this.tempHeaderExample.length > 0) ? this.tempHeaderExample : null,
-                headAlternateTexts: this.header_variables.map(varItem => varItem.alternateText || null),
-                templateBody: this.tempBody ? this.tempBody : '',
+                
+                // Media header fields
+                tempImgUrl: this.filePreview || null,
+                tempImgId: this.contentVersionId || null,
+                tempImgName: this.fileName || null,
+                
+                // Body fields
+                templateBody: this.tempBody || '',
                 templateBodyText: (this.templateBodyText && this.templateBodyText.length > 0) ? this.templateBodyText : null,
-                tempFooterText: this.footer ? this.footer : null,
+                
+                // Footer field
+                tempFooterText: (this.activeTab === 'Authentication') ? '' : (this.footer || null),
+                
+                // Button fields
                 typeOfButton: buttonData.length > 0 ? JSON.stringify(buttonData) : null,
-                autofillCheck: this.isautofillChecked ? this.isautofillChecked : null,
-                expireTime: this.expirationTime ? this.expirationTime : 300,
+                marketingOptText: marketingOptText,
+                
+                // Authentication template fields
                 packagename: formData.length > 0 ? formData.map(pkg => pkg.packagename) : null,
                 signaturename: formData.length > 0 ? formData.map(pkg => pkg.signaturename) : null,
-                selectedFlow: this.selectedFlow ? JSON.stringify(this.selectedFlow) : null,
+                
+                // Miscellaneous data (for UI state restoration)
                 templateMiscellaneousData: templateMiscellaneousData ? JSON.stringify(templateMiscellaneousData) : null,
-                isSecurityRecommedation: this.prevContent ? this.prevContent : null,
-                isCodeExpiration: this.isExpiration == null ? false : true
-
+                
+                // Variable mappings for Template_Variable__c records
+                variables: this.variables ? this.variables.map(v => ({
+                    placeholder: v.index,
+                    alternateText: v.alternateText,
+                    objectName: v.object,
+                    fieldName: v.field,
+                    variableType: v.variableType
+                })) : [],
+                header_variables: this.header_variables ? this.header_variables.map(v => ({
+                    placeholder: v.index,
+                    alternateText: v.alternateText,
+                    objectName: v.object,
+                    fieldName: v.field,
+                    variableType: v.variableType
+                })) : [],
+                
+                // Fields needed by buildPayload for Meta API (not stored in Apex)
+                selectedVariableType: this.selectedVariableType || 'Name',
+                isSecurityRecommedation: this.prevContent || null,
+                isCodeExpiration: this.isExpiration != null,
+                expireTime: this.expirationTime || 300,
+                selectedFlow: this.selectedFlow ? JSON.stringify(this.selectedFlow) : null
             };
-            
+
+
             const serializedWrapper = JSON.stringify(template);
             const payload = JSON.stringify(buildPayload(template));
-            console.log(serializedWrapper);
-            console.log(payload);
-            if (this.metaTemplateId) {
+            
+            if (this.metaTemplateId && !this.isTemplateClone) {
                 editWhatsappTemplate({ serializedWrapper: serializedWrapper, payloadWrapper: payload, templateId: this.metaTemplateId })
                     .then(result => {
                         if (result && result.success) {
-                            this.showToastSuccess('Template successfully edited.');
-                            // this.isAllTemplate=true;
-                            // this.iseditTemplatevisible=false;
-                            // this.isLoading=false;
-                            // const templateId = result.templateId;  
-                            // this.templateId = templateId;
-                            // this.fetchUpdatedTemplates();
-                            this.navigateToAllTemplatePage();
+                            this.showToast('Template successfully edited.', 'success');
+                            this.isLoading = false;
+                            this.clearEditTemplateData();
+                            this.closeAndReturnToTemplateList();
+                        } else if (result && result.success == false && result.status == 'warning') {
+                            this.showToast('Template updation taking too much time, please wait for few minutes and refresh the page to see the updated template.', 'warning');
+                            this.isLoading = false;
+                            setTimeout(() => {
+                                checkTemplateExistance({ templateName: this.templateName, serializedWrapper: serializedWrapper, payloadWrapper: payload, metaTempId: this.metaTemplateId, isCreate: false });
+                            }, 60000);
+                            this.isLoading = false;
+                            this.clearEditTemplateData();
+                            this.closeAndReturnToTemplateList();
                         } else {
                             const errorResponse = JSON.parse(result.errorMessage);
                             const errorMsg = errorResponse.error.error_user_msg || 'Due to unknown error';
 
-                            this.showToastError('Template updation failed, reason - ' + errorMsg);
+                            this.showToast('Template updation failed, reason - ' + errorMsg, 'error');
                             this.isLoading = false;
                         }
                     })
                     .catch(error => {
-                        console.error('Error creating template', error);
-                        const errorTitle = 'Template creation failed: ';
                         let errorMsg;
                         if (error.body && error.body.message) {
                             if (error.body.message.includes('Read timed out')) {
@@ -3183,33 +4373,35 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                             errorMsg = 'An unknown error occurred';
                         }
 
-                        this.showToastError(errorTitle, errorMsg);
+                        this.showToast('Template edition failed: ' + errorMsg, 'error');
                         this.isLoading = false;
                     });
 
             } else {
+                
                 createWhatsappTemplate({ serializedWrapper: serializedWrapper, payloadWrapper: payload, templateName: this.templateName })
                     .then(result => {
 
                         if (result && result.success) {
-                            this.showToastSuccess('Template successfully created');
-
-                            this.navigateToAllTemplatePage();
-                        } else if (result && result.success == false && result.status == 'warning') {
-                            this.showToastWarning('Template creation taking too much time, please wait for few minutes and refresh the page to see the template.');
-                            this.navigateToAllTemplatePage();
+                            this.showToast('Template successfully created', 'success');
                             this.isLoading = false;
+                            this.clearEditTemplateData();
+                            this.closeAndReturnToTemplateList();
+                        } else if (result && result.success == false && result.status == 'warning') {
+                            this.showToast('Template creation taking too much time, please wait for few minutes and refresh the page to see the template.', 'warning');
+                            this.isLoading = false;
+                            this.clearEditTemplateData();
+                            this.closeAndReturnToTemplateList();
                         } else {
                             const errorResponse = JSON.parse(result.errorMessage);
                             const errorMsg = errorResponse.error.error_user_msg || errorResponse.error.message || 'Due to unknown error';
 
-                            this.showToastError('Template creation failed, reason - ' + errorMsg);
+                            this.showToast('Template creation failed, reason - ' + errorMsg, 'error');
                             this.isLoading = false;
                         }
                     })
                     .catch(error => {
                         console.error('Error creating template', error);
-                        const errorTitle = 'Template creation failed: ';
                         let errorMsg;
                         if (error.body && error.body.message) {
                             if (error.body.message.includes('Read timed out')) {
@@ -3221,7 +4413,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                             errorMsg = 'An unknown error occurred';
                         }
 
-                        this.showToastError(errorTitle, errorMsg);
+                        this.showToast('Template creation failed: ' + errorMsg, 'error');
                         this.isLoading = false;
                     });
 
@@ -3229,8 +4421,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
 
         } catch (error) {
-            console.error('Unexpected error occurred', error);
-            this.showToastError('An unexpected error occurred while submitting the template.');
+            this.showToast('An unexpected error occurred while submitting the template.', 'error');
             this.isLoading = false;
         }
     }
@@ -3245,40 +4436,20 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 }
             })
             .catch(error => {
-                console.error('Error fetching templates:', error);
-                this.showToastError('Failed to fetch updated templates.');
+                this.showToast('Failed to fetch updated templates.', 'error');
             });
     }
 
-    showToastError(message) {
-        const toastEvent = new ShowToastEvent({
-            title: 'Error',
+    showToast(message, variant = 'info', title = null) {
+        this.dispatchEvent(new ShowToastEvent({
+            title: title || TOAST_TITLES[variant] || 'Notification',
             message,
-            variant: 'error'
-        });
-        this.dispatchEvent(toastEvent);
-    }
-
-    showToastWarning(message) {
-        const toastEvent = new ShowToastEvent({
-            title: 'Information',
-            message,
-            variant: 'warning'
-        });
-        this.dispatchEvent(toastEvent);
-    }
-
-    showToastSuccess(message) {
-        const toastEvent = new ShowToastEvent({
-            title: 'Success',
-            message,
-            variant: 'success'
-        });
-        this.dispatchEvent(toastEvent);
+            variant
+        }));
     }
 
     closePreview() {
-        this.navigateToAllTemplatePage();
+        this.closeAndReturnToTemplateList();
     }
 
     getButtonPath(iconName) {
@@ -3286,19 +4457,18 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     toggleDropdown(event) {
-        event.stopPropagation();
-        this.isDropdownOpen = !this.isDropdownOpen;
-        if (this.isDropdownOpen) {
-            this.addOutsideClickListener();
-        } else {
-            this.removeOutsideClickListener();
+        try {
+            event.stopPropagation();
+            this.isDropdownOpen = !this.isDropdownOpen;
+            this.dropdownClass = this.isDropdownOpen ? 'dropdown-visible' : 'dropdown-hidden';
+        } catch(error) {
+            console.error('Error in toggleDropdown:', error);
         }
-        this.dropdownClass = this.isDropdownOpen ? 'dropdown-visible' : 'dropdown-hidden';
     }
 
     navigateToAllTemplatePage() {
         let cmpDef = {
-            componentDef: 'MVEX:wbAllTemplatePage',
+            componentDef: 'MVWB:wbAllTemplatePage',
 
         };
 
@@ -3309,5 +4479,19 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 url: "/one/one.app#" + encodedDef
             }
         });
+    }
+
+    closeAndReturnToTemplateList() {
+        // Dispatch close event to parent to return to template list without navigation
+        const closeEvent = new CustomEvent('close');
+        this.dispatchEvent(closeEvent);
+    }
+
+    disconnectedCallback() {
+        // Use stored bound reference to properly remove the event listener
+        if (this._boundHandleOutsideClick) {
+            document.removeEventListener('click', this._boundHandleOutsideClick);
+            this._boundHandleOutsideClick = null;
+        }
     }
 }

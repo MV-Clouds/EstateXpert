@@ -1,46 +1,68 @@
+/**
+ * Method Name: buildPayload 
+ * @description Constructs the complete payload object for creating or updating a WhatsApp template.
+ */
 function buildPayload(templateWrapper) {
     try {
+        // Start with the top-level properties of the payload.
         const payload = {
             name: templateWrapper.templateName,
             language: templateWrapper.tempLanguage,
             category: templateWrapper.templateCategory
         };
 
+        // Add parameter_format based on variable type (Name = named, Number = positional)
+        if (templateWrapper.selectedVariableType === 'Name') {
+            payload.parameter_format = 'named';
+        }
+
+        // Build the 'components' array (header, body, footer, buttons) using a helper function.
         const components = buildMarketingOrUtilityComponents(templateWrapper);
         if (components.length > 0) {
             payload.components = components;
         }
 
-        if (templateWrapper.templateCategory === 'Authentication' || templateWrapper.templateCategory === 'Utility') {
+        // Add a Time-To-Live (TTL) setting for specific template categories.
+        // if (templateWrapper.templateCategory === 'Authentication' || templateWrapper.templateCategory === 'Utility') {
+        if (templateWrapper.templateCategory === 'Authentication') {
             payload.message_send_ttl_seconds = templateWrapper.expireTime || 300;
         }
         
         return payload;
     } catch (e) {
-        logException('buildPayload', e);
+        console.error('Error in buildPayload:', e);
         return {};
     }
 }
 
+/**
+ * Method Name: buildMarketingOrUtilityComponents 
+ * @description Constructs the 'components' array for Marketing or Utility templates.
+ */
 function buildMarketingOrUtilityComponents(templateWrapper) {
     try {
         const components = [];
 
+        // Build the HEADER component and add it if it's not empty.
         const headerComponent = buildHeaderComponent(templateWrapper);
         if (Object.keys(headerComponent).length > 0) {
             components.push(headerComponent);
         }
 
+        // Build the BODY component if body text exists.
         if (templateWrapper.templateBody) {
             components.push(buildBodyComponent(templateWrapper));
         }
 
+        // Build the FOOTER component with conditional logic.
         if (templateWrapper.tempFooterText) {
+            // Standard text footer.
             components.push({
                 type: 'FOOTER',
                 text: templateWrapper.tempFooterText
             });
         } else if (templateWrapper.templateCategory === 'Authentication' && templateWrapper.isCodeExpiration) {
+            // Special footer for Authentication templates with a code expiration time.
             const expirationMinutes = Math.floor(templateWrapper.expireTime / 60);
             components.push({
                 type: 'FOOTER',
@@ -48,6 +70,7 @@ function buildMarketingOrUtilityComponents(templateWrapper) {
             });
         }
 
+        // Build the BUTTONS component if any buttons are defined.
         const buttonComponents = buildButtonComponent(templateWrapper);
         if (buttonComponents.length > 0) {
             components.push({
@@ -56,67 +79,136 @@ function buildMarketingOrUtilityComponents(templateWrapper) {
             });
         }
 
+        console.log('Components ==> ', components);
+        
+
         return components;
     } catch (e) {
-        logException('buildMarketingOrUtilityComponents', e);
+        console.error('Error in buildMarketingOrUtilityComponents:', e);
         return [];
     }
 }
 
+/**
+ * Method Name: buildHeaderComponent 
+ * @description Constructs the HEADER component object.
+ */
 function buildHeaderComponent(templateWrapper) {
     const headerComponent = {};
-
     try {
+        // If there's no header format specified, return an empty object.
         if (!templateWrapper.tempHeaderFormat || templateWrapper.tempHeaderFormat === 'None') {
             return headerComponent;
         }
 
         headerComponent.type = 'HEADER';
-        headerComponent.format = templateWrapper.tempHeaderFormat;
+        headerComponent.format = templateWrapper.tempHeaderFormat.toUpperCase();
 
+        // Handle TEXT format headers, including example text if provided.
         if (templateWrapper.tempHeaderFormat === 'Text' && templateWrapper.tempHeaderText) {
             headerComponent.text = templateWrapper.tempHeaderText;
             if (templateWrapper.tempHeaderExample && templateWrapper.tempHeaderExample.length > 0) {
-                headerComponent.example = {
-                    header_text: templateWrapper.tempHeaderExample
-                };
+                // For Name type (named parameters), use header_text_named_params format
+                if (templateWrapper.selectedVariableType === 'Name') {
+                    // Extract variable names from header text
+                    const variablePattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
+                    const matches = [...templateWrapper.tempHeaderText.matchAll(variablePattern)];
+                    
+                    if (matches.length > 0) {
+                        // Build header_text_named_params array using alternateText from variable objects
+                        const namedParams = matches.map((match) => {
+                            const paramName = match[1];
+                            // Find the variable object with matching nameValue (not name)
+                            const variable = templateWrapper.header_variables?.find(v => v.nameValue === paramName);
+                            const exampleValue = variable?.alternateText?.trim() || '';
+                            if (!exampleValue) {
+                                console.error(`Header variable "${paramName}" has no example value`);
+                            }
+                            return {
+                                param_name: paramName,
+                                example: exampleValue
+                            };
+                        });
+                        
+                        headerComponent.example = {
+                            header_text_named_params: namedParams
+                        };
+                    }
+                } else {
+                    // For Number type (positional parameters), use header_text format
+                    headerComponent.example = {
+                        header_text: templateWrapper.tempHeaderExample
+                    };
+                }
             }
-        } else if (
-            ['Image', 'Video', 'Document'].includes(templateWrapper.tempHeaderFormat) &&
-            templateWrapper.tempHeaderHandle
-        ) {
+        // Handle MEDIA format headers (Image, Video, Document) by providing the media handle.
+        } else if (['Image', 'Video', 'Document'].includes(templateWrapper.tempHeaderFormat) && templateWrapper.tempHeaderHandle) {
             headerComponent.example = {
-                header_handle: templateWrapper.tempHeaderHandle
+                header_handle: [templateWrapper.tempHeaderHandle]
             };
         }
     } catch (e) {
-        logException('buildHeaderComponent', e);
+        console.error('Error in buildHeaderComponent:', e);
     }
-
     return headerComponent;
 }
 
+/**
+ * Method Name: buildBodyComponent 
+ * @description Constructs the BODY component object.
+ */
 function buildBodyComponent(templateWrapper) {
     try {
-        let bodyComponent = {
-            type: 'BODY'
-        };
+        let bodyComponent = { type: 'BODY' };
 
+        // Authentication templates have a special body structure.
         if (templateWrapper.templateCategory === 'Authentication') {
             bodyComponent.add_security_recommendation = templateWrapper.isSecurityRecommedation;
         } else {
+            // For other types, set the main text content.
             bodyComponent.text = templateWrapper.templateBody.replace(/\\n/g, '\n');
-        }
+            
+            // Add example text for variables if provided.
+            if (templateWrapper.templateBodyText && templateWrapper.templateBodyText.length > 0) {
+                // For Name type (named parameters), use body_text_named_params format
+                if (templateWrapper.selectedVariableType === 'Name') {
+                    // Extract variable names from the body text
+                    const variablePattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
+                    const matches = [...templateWrapper.templateBody.matchAll(variablePattern)];
+                    
+                    if (matches.length > 0) {
+                        // Build body_text_named_params array using alternateText from variable objects
+                        const namedParams = matches.map((match) => {
+                            const paramName = match[1];
+                            // Find the variable object with matching nameValue (not name)
+                            const variable = templateWrapper.variables?.find(v => v.nameValue === paramName);
+                            const exampleValue = variable?.alternateText?.trim() || '';
+                            if (!exampleValue) {
+                                console.error(`Body variable "${paramName}" has no example value`);
+                            }
+                            return {
+                                param_name: paramName,
+                                example: exampleValue
+                            };
+                        });
+                        
+                        bodyComponent.example = {
+                            body_text_named_params: namedParams
+                        };
+                    }
+                } else {
+                    // For Number type (positional parameters), use body_text format
+                    bodyComponent.example = {
+                        body_text: [templateWrapper.templateBodyText]
+                    };
+                }
+            }
 
-        if (templateWrapper.templateBodyText && templateWrapper.templateBodyText.length > 0) {
-            bodyComponent.example = {
-                body_text: [templateWrapper.templateBodyText]
-            };
         }
 
         return bodyComponent;
     } catch (e) {
-        logException('buildBodyComponent', e);
+        console.error('Error in buildBodyComponent:', e);
         return {};
     }
 }
@@ -128,7 +220,6 @@ function buildButtonComponent(templateWrapper) {
         if (templateWrapper.templateCategory === 'Authentication') {
             buttonComponents.push({
                 type: 'OTP',
-                text: 'Verify Code',
                 otp_type: 'COPY_CODE'
             });
             return buttonComponents;
@@ -175,7 +266,9 @@ function buildButtonComponent(templateWrapper) {
                 Object.assign(buttonComponent, {
                     type: 'FLOW',
                     text: item.btntext,
-                    flow_id: selectedFlowMap.id
+                    flow_id: selectedFlowMap.id,
+                    flow_action: 'navigate',
+                    'navigate_screen': templateWrapper.selectedNavigationScreen
                 });
             }
             else if (actionType === 'CATALOG') {
@@ -205,9 +298,6 @@ function buildButtonComponent(templateWrapper) {
     return buttonComponents;
 }
 
-// Simple logger simulating Apex ExceptionHandler
-function logException(methodName, error) {
-    console.error(`[ERROR] ${methodName}:`, error.message || error);
-}
 
+// Export the main builder function as the default export of this module.
 export default buildPayload;

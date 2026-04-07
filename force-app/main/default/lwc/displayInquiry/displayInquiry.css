@@ -1285,18 +1285,3 @@ span {
     position: sticky;
     bottom: 0;
 }
-
-/* Ensure popup table sort icons always visible */
-.contact-table .listing-manager-icon {
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-.contact-table .active-sort .listing-manager-icon {
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-.contact-table .sorting_header:hover .listing-manager-icon {
-    opacity: 1 !important;
-}

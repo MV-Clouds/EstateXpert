@@ -2979,26 +2979,30 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
      */
     updatePopupSortIcons() {
         try {
-            // Scope to popup table only
-            const popupHeaders = this.template.querySelectorAll('.contact-table .sorting_header');
-            popupHeaders.forEach(header => {
-                header.classList.remove('active-sort');
-            });
-            const activeHeader = this.template.querySelector(`.contact-table .sorting_header[data-id="${this.popupSortField}"]`);
-            if (activeHeader) {
-                activeHeader.classList.add('active-sort');
-                const icon = activeHeader.querySelector('.listing-manager-icon');
-                if (icon) {
-                    icon.classList.remove('rotate-asc', 'rotate-desc');
-                    if (this.popupSortOrder === 'asc') {
-                        icon.classList.add('rotate-asc');
-                    } else {
-                        icon.classList.add('rotate-desc');
+            // Force update after small delay to ensure DOM rendered
+            setTimeout(() => {
+                // Scope to popup table only
+                const popupHeaders = this.template.querySelectorAll('.contact-table .sorting_header');
+                popupHeaders.forEach(header => {
+                    header.classList.remove('active-sort');
+                });
+                const activeHeader = this.template.querySelector(`.contact-table .sorting_header[data-id="${this.popupSortField}"]`);
+                if (activeHeader) {
+                    activeHeader.classList.add('active-sort');
+                    const icon = activeHeader.querySelector('.listing-manager-icon');
+                    if (icon) {
+                        icon.classList.remove('rotate-asc', 'rotate-desc');
+                        if (this.popupSortOrder === 'asc') {
+                            icon.classList.add('rotate-asc');
+                        } else {
+                            icon.classList.add('rotate-desc');
+                        }
+                        icon.style.opacity = '1';
+                        icon.style.visibility = 'visible';
+                        icon.style.display = 'block';
                     }
-                    icon.style.opacity = '1';
-                    icon.style.visibility = 'visible';
                 }
-            }
+            }, 100);
         } catch (error) {
             errorDebugger('displayInquiry', 'updatePopupSortIcons', error, 'warn', 'Error updating popup sort icons');
         }

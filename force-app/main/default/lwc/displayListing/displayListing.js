@@ -503,7 +503,9 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
                                 type: this.getColumnType(field.fieldType),
                                 fieldType: field.fieldType,
-                                format: field.format
+                                format: field.format,
+                                referenceObjectName: field.referenceObjectName,
+                                relationshipName: field.relationshipName
                             })),
                             // { label: 'Actions', fieldName: 'actions', type: 'action' }
                         ];
@@ -622,21 +624,75 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         return (listings || []).map(listing => {
             const row = { ...listing };
             row.displayFields = cols.map(col => {
-                let fieldValue = listing[col.fieldName.toLowerCase()];
-                // Check if value exists, otherwise default to '-'
-                const hasRealValue = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
-                let displayValue = hasRealValue ? fieldValue : '-';
+                let fieldValue = '-';
+                let isRedirectable = false;
+                let lookupId = null;
+                let objectApiName = null;
+
+                const fieldPath = col.fieldName.toLowerCase();
+                if (fieldPath.includes('.')) {
+                    // Extract value from relationship (e.g. mvex__property__r.name)
+                    const parts = fieldPath.split('.');
+                    let current = listing;
+                    for (let i = 0; i < parts.length; i++) {
+                        if (current && typeof current === 'object') {
+                            // Find key case-insensitively
+                            const key = Object.keys(current).find(k => k.toLowerCase() === parts[i]);
+                            current = key ? current[key] : null;
+                        } else {
+                            current = null;
+                            break;
+                        }
+                    }
+                    fieldValue = (current !== null && current !== undefined && current !== '') ? current : '-';
+
+                    // Check for redirection (if specifically targeting a record name)
+                    if (parts[parts.length - 1] === 'name') {
+                        let foundId = null;
+                        
+                        // First, try to get ID from standard lookup field on the main record (e.g. mvex__property__c)
+                        const lookupField = parts[0].replace(/__r$/i, '__c').toLowerCase();
+                        if (listing[lookupField] && typeof listing[lookupField] === 'string') {
+                            foundId = listing[lookupField];
+                        } else {
+                            // Fallback: check nested object for Id
+                            let parent = listing;
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                const key = Object.keys(parent).find(k => k.toLowerCase() === parts[i]);
+                                parent = key ? parent[key] : null;
+                            }
+                            if (parent && typeof parent === 'object') {
+                                const idKey = Object.keys(parent).find(k => k.toLowerCase() === 'id');
+                                if (idKey && typeof parent[idKey] === 'string') {
+                                    foundId = parent[idKey];
+                                }
+                            }
+                        }
+
+                        if (foundId && typeof foundId === 'string' && !foundId.includes('[object')) {
+                            isRedirectable = true;
+                            lookupId = foundId;
+                            objectApiName = col.referenceObjectName;
+                        }
+                    }
+                } else {
+                    fieldValue = listing[fieldPath] !== null && listing[fieldPath] !== undefined && listing[fieldPath] !== '' ? listing[fieldPath] : '-';
+                }
 
                 // Apply formatting for date/datetime fields if format is provided
+                const hasRealValue = fieldValue !== '-';
                 if (col.format && hasRealValue && (col.type === 'date' || col.type === 'datetime' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
-                    displayValue = this.applyFieldFormat(fieldValue, col.format);
+                    fieldValue = this.applyFieldFormat(fieldValue, col.format);
                 }
 
                 return {
                     key: col.fieldName,
-                    value: displayValue,
-                    hasValue: true, // Always true to display either the value or the hyphen
+                    value: fieldValue,
+                    hasValue: true,
                     isNameField: col.fieldName === 'name',
+                    isRedirectable: isRedirectable,
+                    lookupId: lookupId,
+                    objectApiName: objectApiName,
                     isCurrency: col.type === 'currency',
                     isImage: col.type === 'image' || col.fieldName === 'media_url',
                     isAction: col.type === 'action' || col.fieldName === 'actions'
@@ -1176,18 +1232,30 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     navigateToRecord(event) {
-        const propertyId = event.target.dataset.id;
-        this[NavigationMixin.GenerateUrl]({
-            type: 'standard__recordPage',
-            attributes: {
-                recordId: propertyId,
-                actionName: 'view'
+        try {
+            const recordId = event.currentTarget.dataset.id;
+            const objectApiName = event.currentTarget.dataset.object; // Optional dynamic object name
+            
+            const navConfig = {
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: recordId,
+                    actionName: 'view'
+                }
+            };
+            
+            if (objectApiName) {
+                navConfig.attributes.objectApiName = objectApiName;
             }
-        }).then(url => {
-            window?.globalThis?.open(url, '_blank');
-        }).catch(error => {
-            errorDebugger('DisplayListing', 'navigateToRecord', error, 'warn', 'Error in navigateToRecord');
-        });
+
+            this[NavigationMixin.GenerateUrl](navConfig).then(url => {
+                window?.globalThis?.open(url, '_blank');
+            }).catch(error => {
+                errorDebugger('DisplayListing', 'navigateToRecord', error, 'warn', 'Error in navigateToRecord');
+            });
+        } catch (error) {
+            errorDebugger('DisplayListing', 'navigateToRecord', error, 'warn', 'Error in navigateToRecord wrapper');
+        }
     }
 
     /**

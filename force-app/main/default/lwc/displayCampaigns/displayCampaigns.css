@@ -778,3 +778,7 @@ span {
     transform: scaleY(1.05);
     transition: all 0.3s ease;
 }
+
+.table-content .slds-table td{
+    max-width: none !important;
+}

@@ -381,64 +381,6 @@ span {
     cursor: pointer;
 }
 
-.table-content {
-      flex: 1;
-    min-height: 0;
-    overflow: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.table-content .slds-table th {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-    height: 45px;
-}
-
-.table-content .slds-table td {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-    height: 3.5rem;
-}
-
-.table-content .slds-table th {
-    background: #0176D3;
-    color: white;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    padding: 0;
-}
-
-.table-content tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.table-content table thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 98;
-}
-
-.table-content table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    border: none;
-}
-
-.table-content .slds-table_resizable-cols thead th,
-.table-content .slds-table--resizable-cols thead th {
-    padding: 0;
-    background: #0376D3;
-    color: white;
-    font-size: 14px;
-    height: 45px;
-}
-
 .truncate_css {
     white-space: nowrap;
     overflow: hidden;

@@ -1,4 +1,4 @@
-<template>           
+<template>
     <template if:true={isLoading}>
         <c-spinner-component></c-spinner-component>
     </template>
@@ -21,188 +21,231 @@
                 <div class="header">
                     <div class="filter-toolbar">
                         <div class="header-search-bar-css">
-                        <lightning-input type="search" class='searchInput' label="Search Contact" variant='label-hidden' placeholder="Search by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
+                            <lightning-input type="search" class='searchInput' label="Search Contact"
+                                variant='label-hidden' placeholder="Search by Name, Phone or Email..."
+                                onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
                         </div>
                         <div class="header-combobox">
-                        <lightning-combobox label="Select List View" class='listView' variant='label-hidden' value={selectedListView} placeholder="Select List View"  options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
+                            <lightning-combobox label="Select List View" class='listView' variant='label-hidden'
+                                value={selectedListView} placeholder="Select List View" options={listViewOptions}
+                                onchange={handleListViewChange}
+                                disabled={isListViewDropdownDisabled}></lightning-combobox>
                         </div>
                     </div>
                     <!-- Single Step View: Show Save Group immediately -->
                     <button class="blue-btn-css" onclick={handleModalOpen} disabled={isBtnDisabled}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path
+                                d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
+                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         Save Group
                     </button>
                 </div>
             </div>
         </div>
+        <div class="out-div">
+            <div class="main_content_cls">
 
-        <div class="main_content_cls">
-            
-            <div class="content-wrapper-grid">
-                <!-- LEFT SECTION (Search/Filters + Table) -->
-                <div class="left-section">
-                    <!-- Filter Toolbar -->
-                    <!-- <div class="filter-toolbar">
-                        <lightning-input type="search" label="Search Contact" placeholder="Search by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
-                        <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
-                    </div> -->
+                <div class="content-wrapper-grid">
+                    <!-- LEFT SECTION (Search/Filters + Table) -->
+                    <div class="left-section">
+                        <!-- Filter Toolbar -->
+                        <!-- <div class="filter-toolbar">
+                            <lightning-input type="search" label="Search Contact" placeholder="Search by Name, Phone or Email..." onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
+                            <lightning-combobox label="Select List View" value={selectedListView} options={listViewOptions} onchange={handleListViewChange} disabled={isListViewDropdownDisabled}></lightning-combobox>
+                        </div> -->
 
-                    <!-- Custom Table -->
-                    <template if:true={paginatedData.length}>
-                        <div class="table-content">
-                            <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols">
-                                <thead>
-                                    <tr class="table_tr_cls slds-line-height_reset">
-                                        <th scope="col" class="checkbox sno">
-                                            <lightning-input type="checkbox" checked={isAllSelected} onchange={handleSelectAll} indeterminate={isIndeterminate}></lightning-input>
-                                        </th>
-                                        <th scope="col" class="sno">
-                                            <div class="slds-truncate">No.</div>
-                                        </th>
-                                        <th aria-sort="none" data-id="name" onclick={sortClick} class="name slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Name">Name</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg data-index="name" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </th>
-                                        <template if:true={showPhoneColumn}>
-                                            <th aria-sort="none" data-id="phone" onclick={sortClick} class="phone slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                                <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                    <span class="slds-truncate" title="Phone">Phone</span>
+                        <!-- Custom Table -->
+                        <template if:true={paginatedData.length}>
+                            <div class="table-content">
+                                <table aria-multiselectable="true"
+                                    class="slds-table slds-table_fixed-layout slds-table_resizable-cols">
+                                    <thead>
+                                        <tr class="table_tr_cls slds-line-height_reset">
+                                            <th scope="col" class="checkbox sno">
+                                                <lightning-input type="checkbox" checked={isAllSelected}
+                                                    onchange={handleSelectAll}
+                                                    indeterminate={isIndeterminate}></lightning-input>
+                                            </th>
+                                            <th scope="col" class="sno">
+                                                <div class="slds-truncate">No.</div>
+                                            </th>
+                                            <th aria-sort="none" data-id="name" onclick={sortClick}
+                                                class="name slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                scope="col">
+                                                <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Name">Name</span>
                                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="phone" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        <svg data-index="name" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                         </svg>
                                                     </span>
                                                 </div>
                                             </th>
-                                        </template>
-                                        <template if:true={showEmailColumn}>
-                                            <th aria-sort="none" data-id="email" onclick={sortClick} class="email slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                                <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                                    <span class="slds-truncate" title="Email">Email</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="email" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
-                                                </div>
-                                            </th>
-                                        </template>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={paginatedData} for:item="row" for:index="index">
-                                        <tr key={row.Id}>
-                                            <td data-label="Checkbox">
-                                                <lightning-input type="checkbox" checked={row.isSelected} data-recordid={row.Id} onchange={handleRecordSelection}></lightning-input>
-                                            </td>
-                                            <td data-label="S.No." class="truncate_css">
-                                                <div>{row.index}</div>
-                                            </td>
-                                            <td data-label="Name">
-                                                <div>{row.name}</div>
-                                            </td>
                                             <template if:true={showPhoneColumn}>
-                                                <td data-label="Phone">
-                                                    <div>{row.phone}</div>
-                                                </td>
+                                                <th aria-sort="none" data-id="phone" onclick={sortClick}
+                                                    class="phone slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                    scope="col">
+                                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                        role="button" tabindex="0">
+                                                        <span class="slds-truncate" title="Phone">Phone</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="phone" class="listing-manager-icon"
+                                                                viewBox="0 0 384 512"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                </th>
                                             </template>
                                             <template if:true={showEmailColumn}>
-                                                <td data-label="Email">
-                                                    <div>{row.email}</div>
-                                                </td>
+                                                <th aria-sort="none" data-id="email" onclick={sortClick}
+                                                    class="email slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                    scope="col">
+                                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                        role="button" tabindex="0">
+                                                        <span class="slds-truncate" title="Email">Email</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="email" class="listing-manager-icon"
+                                                                viewBox="0 0 384 512"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                </th>
                                             </template>
                                         </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </template>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={paginatedData} for:item="row" for:index="index">
+                                            <tr key={row.Id}>
+                                                <td data-label="Checkbox">
+                                                    <lightning-input type="checkbox" checked={row.isSelected}
+                                                        data-recordid={row.Id}
+                                                        onchange={handleRecordSelection}></lightning-input>
+                                                </td>
+                                                <td data-label="S.No." class="truncate_css">
+                                                    <div>{row.index}</div>
+                                                </td>
+                                                <td data-label="Name">
+                                                    <div>{row.name}</div>
+                                                </td>
+                                                <template if:true={showPhoneColumn}>
+                                                    <td data-label="Phone">
+                                                        <div>{row.phone}</div>
+                                                    </td>
+                                                </template>
+                                                <template if:true={showEmailColumn}>
+                                                    <td data-label="Email">
+                                                        <div>{row.email}</div>
+                                                    </td>
+                                                </template>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
 
-                    <!-- No Records Message -->
-                    <template if:true={showNoRecordsMessage}>
-                        <div class="no-records-message">
-                            <div class="empty-state">
-                                <div class="empty-state__content">
-                                    <div class="empty-state__icon">
-                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                        <!-- No Records Message -->
+                        <template if:true={showNoRecordsMessage}>
+                            <div class="no-records-message">
+                                <div class="empty-state">
+                                    <div class="empty-state__content">
+                                        <div class="empty-state__icon">
+                                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                        </div>
+                                        <div class="empty-state__message">No Data Available to Show.</div>
                                     </div>
-                                    <div class="empty-state__message">No Data Available to Show.</div>
                                 </div>
                             </div>
-                        </div>
-                    </template>
+                        </template>
 
-                    <template if:true={paginatedData.length}>
-                        <div class="paginationDiv">
-                            <div class="btnCover">
-                                <div class="pagination-container">
-                                    <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                            <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                        </svg>
-                                        Previous
-                                    </button>
-
-                                    <template for:each={pageNumbers} for:item="page">
-                                        <template if:false={page.isEllipsis}>
-                                            <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
-                                                {page.number}
+                        <template if:true={paginatedData.length}>
+                            <template if:true={showPagination}>
+                                <div class="paginationDiv">
+                                    <div class="btnCover">
+                                        <div class="pagination-container">
+                                            <button class="pagination-btn-css" disabled={isFirstPage}
+                                                onclick={handlePrevious}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c-6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                                </svg>
+                                                Previous
                                             </button>
-                                        </template>
-                                        <template if:true={page.isEllipsis}>
-                                            <span key={page.number} class="pagination-ellipsis">...</span>
-                                        </template>
-                                    </template>
 
-                                    <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                                        Next
-                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                            <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                        </svg>
-                                    </button>
+                                            <template for:each={pageNumbers} for:item="page">
+                                                <template if:false={page.isEllipsis}>
+                                                    <button key={page.number} data-id={page.number}
+                                                        class={page.className} onclick={handlePageChange}>
+                                                        {page.number}
+                                                    </button>
+                                                </template>
+                                                <template if:true={page.isEllipsis}>
+                                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                                </template>
+                                            </template>
+
+                                            <button class="pagination-btn-css" disabled={isLastPage}
+                                                onclick={handleNext}>
+                                                Next
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>        
-                    </template>
-                </div>
-
-                <!-- RIGHT SECTION (Sliding Panel for Selected Records) -->
-                <div class={selectedRecordsPanelClass}>
-                    <div class="selected-contacts-container">
-                        <h3 class="selected-heading">Selected Records ({selectedRecordsList.length})</h3>
-                        <div class="pill-container slds-m-top_small slds-m-bottom_small">
-                            <template for:each={selectedRecordsList} for:item="rec">
-                                <span key={rec.Id} class="custom-pill slds-pill" title={rec.name}>
-                                    <span class="slds-icon_container slds-icon-standard-contact" title="Contact">
-                                        <lightning-icon icon-name="standard:contact" alternative-text="Contact" size="small"></lightning-icon>
-                                    </span>
-                                    <span class="slds-pill__label">{rec.name}</span>
-                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" name={rec.Id} data-id={rec.Id} onclick={handleRemoveRecord}>
-                                        <lightning-icon icon-name="utility:close" alternative-text="Remove"></lightning-icon>
-                                        <span class="slds-assistive-text">Remove</span>
-                                    </button>
-                                </span>
                             </template>
-                        </div>
+                        </template>
+                    </div>
+                </div> <!-- END content-wrapper-grid -->
+            </div>
+            <!-- RIGHT SECTION (Sliding Panel for Selected Records) -->
+            <div class={selectedRecordsPanelClass}>
+                <div class="selected-contacts-container">
+                    <h3 class="selected-heading">Selected Records ({selectedRecordsList.length})</h3>
+                    <div class="pill-container slds-m-top_small slds-m-bottom_small">
+                        <template for:each={selectedRecordsList} for:item="rec">
+                            <span key={rec.Id} class="custom-pill slds-pill" title={rec.name}>
+                                <span class="slds-icon_container slds-icon-standard-contact" title="Contact">
+                                    <lightning-icon icon-name="standard:contact" alternative-text="Contact"
+                                        size="small"></lightning-icon>
+                                </span>
+                                <span class="slds-pill__label">{rec.name}</span>
+                                <button class="slds-button slds-button_icon slds-pill__remove" title="Remove"
+                                    name={rec.Id} data-id={rec.Id} onclick={handleRemoveRecord}>
+                                    <lightning-icon icon-name="utility:close"
+                                        alternative-text="Remove"></lightning-icon>
+                                    <span class="slds-assistive-text">Remove</span>
+                                </button>
+                            </span>
+                        </template>
                     </div>
                 </div>
-
-            </div> <!-- END content-wrapper-grid -->
+            </div>
         </div>
 
         <!-- ═══════════════════════════════ Save Modal ═══════════════════════════════ -->
         <template if:true={isCreateBroadcastModalOpen}>
-            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+                aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
                     <div class="slds-modal__close close-icon-css" onclick={closePopUp}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -219,13 +262,19 @@
                     <div class="slds-modal__content modalbody" id="modal-content-id-2">
                         <div class="content_body">
                             <div class="modal-body-content">
-                                <lightning-input placeholder="Enter Name Here" type="text" label="Name" name="name" onchange={handleInputChange} value={broadcastGroupName} class="slds-m-bottom_medium" required message-when-value-missing=" "></lightning-input>
-                                <lightning-textarea name="message" label="Description" placeholder="Enter Descriptive Message Here" class="slds-m-bottom_medium" value={messageText} required message-when-value-missing=" " onchange={handleInputChange}></lightning-textarea>
+                                <lightning-input placeholder="Enter Name Here" type="text" label="Name" name="name"
+                                    onchange={handleInputChange} value={broadcastGroupName} class="slds-m-bottom_medium"
+                                    required message-when-value-missing=" "></lightning-input>
+                                <lightning-textarea name="message" label="Description"
+                                    placeholder="Enter Descriptive Message Here" class="slds-m-bottom_medium"
+                                    value={messageText} required message-when-value-missing=" "
+                                    onchange={handleInputChange}></lightning-textarea>
                             </div>
                         </div>
                         <div class="popUpFooter footerbtns">
                             <button class="white-btn-css" onclick={closePopUp}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                         fill="currentColor" />
@@ -233,8 +282,10 @@
                                 Close
                             </button>
                             <button class="blue-btn-css" onclick={handleSave}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
+                                        fill="currentColor" />
                                 </svg>
                                 Save Group
                             </button>
@@ -243,6 +294,6 @@
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>
-        </template>        
+        </template>
     </div>
 </template>

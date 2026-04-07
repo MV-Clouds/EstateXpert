@@ -182,7 +182,7 @@ public with sharing class ChatWindowController {
                 return resultMap;
             }
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
             httpReq.setEndpoint(endpoint);
             httpReq.setMethod('POST');
             httpReq.setHeader('Content-Type', 'application/json');
@@ -337,7 +337,7 @@ public with sharing class ChatWindowController {
         List<Chat__c> chats = new List<Chat__c>();
         chats = [SELECT Id, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id IN :messageIds WITH USER_MODE];
         String accessToken = wbConfig[0].Access_Token__c;
-        String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
+        String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
 
         try {
             for (Chat__c chat : chats) {

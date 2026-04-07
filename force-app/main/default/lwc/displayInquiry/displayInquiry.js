@@ -43,7 +43,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track conditiontype = 'related';
     @track checkAll = false;
     @track sortField = 'Name';
-    @track sortOrder = 'asc';
+@track sortOrder = 'asc';
+    @track popupSortField = 'Name';
+    @track popupSortOrder = 'asc';
     _renderedCallbackRunOnce = false;
 
     refNameCache = {};
@@ -269,6 +271,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+     get showPagination() {
+        return this.pagedInquries.length > 0 && this.totalPages > 1;
     }
 
     /**
@@ -2313,9 +2319,17 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         Phone: record.Phone,
                         GroupName: record.InquiryName // For display in 3rd column
                     }));
-                    this.filteredGroupMembers = [...this.broadcastContactList];
+                this.filteredGroupMembers = [...this.broadcastContactList];
 
-                    this.showTemplate = true;
+                // Apply default popup sort (Name ASC) when popup opens
+                if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
+                    this.popupSortField = 'Name';
+                    this.popupSortOrder = 'asc';
+                    this.sortPopupData();
+                    this.updatePopupSortIcons();
+                }
+
+                this.showTemplate = true;
                     this.popUpFirstPage = false;
                     this.popUpSecondPage = true;
                     this.popUpConfirmPage = false;
@@ -2775,7 +2789,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     sortClick(event) {
         try {
-            const fieldName = event.currentTarget.dataset.id;
+            const rawField = event.currentTarget.dataset.id || '';
+            // Normalize header field to match data keys (everything is stored lowercase)
+            const fieldName = rawField.toLowerCase() === 'name' ? 'name' : rawField.toLowerCase();
             if (this.sortField === fieldName) {
                 this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
             } else {
@@ -2789,6 +2805,23 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
+    // Sorting for popup contact table
+    sortPopupClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.popupSortField === fieldName) {
+                this.popupSortOrder = this.popupSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.popupSortField = fieldName;
+                this.popupSortOrder = 'asc';
+            }
+            this.sortPopupData();
+            this.updatePopupSortIcons();
+        } catch (error) {
+            errorDebugger('displayInquiry', 'sortPopupClick', error, 'warn', 'Error in sortPopupClick');
+        }
+    }
+
     /**
     * Method Name : sortData
     * @description : Method used to apply sorting on the data
@@ -2797,13 +2830,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     sortData() {
         try {
-            // Only sort if we have data
-            if (!this.pagedFilteredInquiryData || this.pagedFilteredInquiryData.length === 0) {
+            // Only sort if we have data in the full filtered dataset
+            if (!this.modalFilteredInquiryData || this.modalFilteredInquiryData.length === 0) {
                 return;
             }
 
-            // Sort the full dataset (not just the current page)
-            const sortedData = [...this.pagedFilteredInquiryData].sort((a, b) => {
+            // Sort the full filtered dataset (not just the current page)
+            const sortedData = [...this.modalFilteredInquiryData].sort((a, b) => {
                 let aValue = a[this.sortField];
                 let bValue = b[this.sortField];
 
@@ -2836,10 +2869,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return this.sortOrder === 'asc' ? compare : -compare;
             });
 
-            // Update the pagedFilteredInquiryData with sorted data
-            this.pagedFilteredInquiryData = sortedData;
+            // Persist sorted order in the source (full) list
+            this.modalFilteredInquiryData = sortedData;
 
-            // Update the displayed data for current page
+            // Recompute the displayed data for current page
             this.updateShownData();
 
         } catch (error) {
@@ -2887,6 +2920,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     } else {
                         icon.classList.add('rotate-desc');
                     }
+                    // Force inline visibility to ensure it shows in popup headers
+                    try {
+                        icon.style.opacity = '1';
+                        icon.style.visibility = 'visible';
+                    } catch (e) {
+                        // ignore
+                    }
                 }
             }
         } catch (error) {
@@ -2903,11 +2943,74 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     updateShownData() {
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
-            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            // Update the pagedFilteredInquiryData with sorted data
-            this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
+            const endIndex = startIndex + this.pageSize;
+            // Derive the page slice from the full filtered dataset
+            this.pagedFilteredInquiryData = (this.modalFilteredInquiryData || []).slice(startIndex, endIndex);
         } catch (error) {
             errorDebugger('displayInquiry', 'updateShownData', error, 'warn', 'Error in updateShownData');
+        }
+    }
+
+    /**
+     * Sort popup contact table data (Name/Phone columns)
+     */
+    sortPopupData() {
+        try {
+            if (!this.filteredGroupMembers || this.filteredGroupMembers.length === 0) {
+                return;
+            }
+            this.filteredGroupMembers.sort((a, b) => {
+                let aValue = a[this.popupSortField];
+                let bValue = b[this.popupSortField];
+                if (aValue === undefined || aValue === null) aValue = '';
+                if (bValue === undefined || bValue === null) bValue = '';
+                if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+                if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+                if (!isNaN(aValue) && !isNaN(bValue)) {
+                    aValue = Number(aValue);
+                    bValue = Number(bValue);
+                }
+                let compare = 0;
+                if (aValue > bValue) compare = 1;
+                else if (aValue < bValue) compare = -1;
+                return this.popupSortOrder === 'asc' ? compare : -compare;
+            });
+        } catch (error) {
+            errorDebugger('displayInquiry', 'sortPopupData', error, 'warn', 'Error sorting popup data');
+        }
+    }
+
+    /**
+     * Update sort icons in popup contact table
+     */
+    updatePopupSortIcons() {
+        try {
+            // Force update after small delay to ensure DOM rendered
+            setTimeout(() => {
+                // Scope to popup table only
+                const popupHeaders = this.template.querySelectorAll('.contact-table .sorting_header');
+                popupHeaders.forEach(header => {
+                    header.classList.remove('active-sort');
+                });
+                const activeHeader = this.template.querySelector(`.contact-table .sorting_header[data-id="${this.popupSortField}"]`);
+                if (activeHeader) {
+                    activeHeader.classList.add('active-sort');
+                    const icon = activeHeader.querySelector('.listing-manager-icon');
+                    if (icon) {
+                        icon.classList.remove('rotate-asc', 'rotate-desc');
+                        if (this.popupSortOrder === 'asc') {
+                            icon.classList.add('rotate-asc');
+                        } else {
+                            icon.classList.add('rotate-desc');
+                        }
+                        icon.style.opacity = '1';
+                        icon.style.visibility = 'visible';
+                        icon.style.display = 'block';
+                    }
+                }
+            }, 100);
+        } catch (error) {
+            errorDebugger('displayInquiry', 'updatePopupSortIcons', error, 'warn', 'Error updating popup sort icons');
         }
     }
 }

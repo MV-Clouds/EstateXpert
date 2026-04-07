@@ -15,11 +15,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="main_content_cls">
-            <div class="slds-m-around_medium navbar">
-                <div class="search-input">
+             <div class="header">
+                <div class="search-input header-search-bar-css">
                     <lightning-input type="search" value={searchInput} onchange={handleSearch}
                         placeholder="Search Members" class="input-members" variant="label-hidden"></lightning-input>
                 </div>
@@ -91,8 +88,10 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <template if:true={visibleMembers}>
+        <div class="main_content_cls">
+            <template if:true={visibleMembers.length}>
                 <div class="table-content">
                     <table class="slds-table">
                         <thead>
@@ -100,20 +99,74 @@
                                 <th scope="col" class="sno">
                                     <div>No.</div>
                                 </th>
-                                <th scope="col" class="contact-name">
-                                    <div>Contact Name</div>
+                                <th data-id="contactName" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header contact-name"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Contact Name">Contact Name</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="contactName" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="contact-email">
-                                    <div>Contact Email</div>
+                                <th data-id="contactEmail" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header contact-email"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Contact Email">Contact Email</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="contactEmail" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="email-name">
-                                    <div>Email Name</div>
+                                <th data-id="emailName" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header email-name"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Email Name">Email Name</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="emailName" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="send-time">
-                                    <div>Send Date</div>
+                                <th data-id="sendTimeFormatted" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header send-time"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Send Date">Send Date</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="sendTimeFormatted" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="status">
-                                    <div class="status_cls">Status</div>
+                                <th data-id="status" onclick={sortClick}
+                                    aria-sort="none"
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header status"
+                                    scope="col">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Status">Status</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg data-index="status" class="listing-manager-icon"
+                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
                             </tr>
                         </thead>
@@ -144,39 +197,46 @@
                     </table>
                 </div>
 
-                <div class="pagination-container">
-                    <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                            fill="#fff">
-                            <path
-                                d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                        </svg>
-                        Previous
-                    </button>
+                <template if:true={showPagination}>
+                    <div class="paginationDiv">
+                        <div class="btnCover">
+                            <div class="pagination-container">
+                                <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                    </svg>
+                                    Previous
+                                </button>
 
-                    <template for:each={pageNumbers} for:item="page">
-                        <template if:false={page.isEllipsis}>
-                            <button key={page.number} data-id={page.number} class={page.className}
-                                onclick={handlePageChange}>
-                                {page.number}
-                            </button>
-                        </template>
-                        <template if:true={page.isEllipsis}>
-                            <span key={page.number} class="pagination-ellipsis">...</span>
-                        </template>
-                    </template>
+                                <template for:each={pageNumbers} for:item="page">
+                                    <template if:false={page.isEllipsis}>
+                                        <button key={page.number} data-id={page.number} class={page.className}
+                                            onclick={handlePageChange}>
+                                            {page.number}
+                                        </button>
+                                    </template>
+                                    <template if:true={page.isEllipsis}>
+                                        <span key={page.number} class="pagination-ellipsis">...</span>
+                                    </template>
+                                </template>
 
-                    <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                        Next
-                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                            fill="#fff">
-                            <path
-                                d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                        </svg>
-                    </button>
-                </div>
+                                <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                    Next
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </template>
             </template>
-            <template if:false={visibleMembers}>
+            <template if:false={visibleMembers.length}>
                 <div class="no-data-container">
                     <div class="no-data-message">
                         No Campaign Members Found

@@ -87,8 +87,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track sortOrder = 'asc';
     hasUpdatedSortIcons = false;
 
-    @track defaultColumns = [
-        { label: 'Image', fieldName: 'media_url', type: 'image' },
+@track defaultColumns = [
+        { label: '', fieldName: 'media_url', type: 'image', sortable: false },
         { label: 'Name', fieldName: 'name', type: 'text' },
         { label: 'Listing Type', fieldName: 'mvex__listing_type__c', type: 'text' },
         { label: 'City', fieldName: 'mvex__city__c', type: 'text' },
@@ -223,6 +223,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     */
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    get showPagination() {
+        return this.pagedProperties.length > 0 && this.totalPages > 1;
     }
 
     /**
@@ -490,20 +494,23 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 * Created By: Rachit Shah
 */
     fetchListingConfiguration() {
-        return getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Filters' })
+        return getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Fields' })
             .then(result => {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
                         const fieldsData = JSON.parse(result.metadataRecords[0]);
                         // Always include image column first and actions column last
                         this.listingColumns = [
-                            { label: 'Image', fieldName: 'media_url', type: 'image' },
+                            { label: '', fieldName: 'media_url', type: 'image', sortable: false },
                             ...fieldsData.map(field => ({
                                 label: field.label || field.fieldLabel,
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
                                 type: this.getColumnType(field.fieldType),
                                 fieldType: field.fieldType,
-                                format: field.format
+                                format: field.format,
+                                referenceObjectName: field.referenceObjectName,
+                                relationshipName: field.relationshipName,
+                                sortable: true
                             })),
                             // { label: 'Actions', fieldName: 'actions', type: 'action' }
                         ];
@@ -622,21 +629,75 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         return (listings || []).map(listing => {
             const row = { ...listing };
             row.displayFields = cols.map(col => {
-                let fieldValue = listing[col.fieldName.toLowerCase()];
-                // Check if value exists, otherwise default to '-'
-                const hasRealValue = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
-                let displayValue = hasRealValue ? fieldValue : '-';
+                let fieldValue = '-';
+                let isRedirectable = false;
+                let lookupId = null;
+                let objectApiName = null;
+
+                const fieldPath = col.fieldName.toLowerCase();
+                if (fieldPath.includes('.')) {
+                    // Extract value from relationship (e.g. mvex__property__r.name)
+                    const parts = fieldPath.split('.');
+                    let current = listing;
+                    for (let i = 0; i < parts.length; i++) {
+                        if (current && typeof current === 'object') {
+                            // Find key case-insensitively
+                            const key = Object.keys(current).find(k => k.toLowerCase() === parts[i]);
+                            current = key ? current[key] : null;
+                        } else {
+                            current = null;
+                            break;
+                        }
+                    }
+                    fieldValue = (current !== null && current !== undefined && current !== '') ? current : '-';
+
+                    // Check for redirection (if specifically targeting a record name)
+                    if (parts[parts.length - 1] === 'name') {
+                        let foundId = null;
+                        
+                        // First, try to get ID from standard lookup field on the main record (e.g. mvex__property__c)
+                        const lookupField = parts[0].replace(/__r$/i, '__c').toLowerCase();
+                        if (listing[lookupField] && typeof listing[lookupField] === 'string') {
+                            foundId = listing[lookupField];
+                        } else {
+                            // Fallback: check nested object for Id
+                            let parent = listing;
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                const key = Object.keys(parent).find(k => k.toLowerCase() === parts[i]);
+                                parent = key ? parent[key] : null;
+                            }
+                            if (parent && typeof parent === 'object') {
+                                const idKey = Object.keys(parent).find(k => k.toLowerCase() === 'id');
+                                if (idKey && typeof parent[idKey] === 'string') {
+                                    foundId = parent[idKey];
+                                }
+                            }
+                        }
+
+                        if (foundId && typeof foundId === 'string' && !foundId.includes('[object')) {
+                            isRedirectable = true;
+                            lookupId = foundId;
+                            objectApiName = col.referenceObjectName;
+                        }
+                    }
+                } else {
+                    fieldValue = listing[fieldPath] !== null && listing[fieldPath] !== undefined && listing[fieldPath] !== '' ? listing[fieldPath] : '-';
+                }
 
                 // Apply formatting for date/datetime fields if format is provided
+                const hasRealValue = fieldValue !== '-';
                 if (col.format && hasRealValue && (col.type === 'date' || col.type === 'datetime' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
-                    displayValue = this.applyFieldFormat(fieldValue, col.format);
+                    fieldValue = this.applyFieldFormat(fieldValue, col.format);
                 }
 
                 return {
                     key: col.fieldName,
-                    value: displayValue,
-                    hasValue: true, // Always true to display either the value or the hyphen
+                    value: fieldValue,
+                    hasValue: true,
                     isNameField: col.fieldName === 'name',
+                    isRedirectable: isRedirectable,
+                    lookupId: lookupId,
+                    objectApiName: objectApiName,
                     isCurrency: col.type === 'currency',
                     isImage: col.type === 'image' || col.fieldName === 'media_url',
                     isAction: col.type === 'action' || col.fieldName === 'actions'
@@ -651,7 +712,20 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * @description : getter for table columns for list view
     */
     get tableColumns() {
-        return this.listingColumns.length > 0 ? this.listingColumns : this.defaultColumns;
+        return (this.listingColumns.length > 0 ? this.listingColumns : this.defaultColumns).map(col => {
+            const column = {
+                ...col,
+                sortable: col.sortable !== false
+            };
+            
+            if (!column.sortable) {
+                column.className = 'slds-is-resizable slds-cell_action-mode header-cell slds-truncate image-column';
+            } else {
+                column.className = 'slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header colume2';
+            }
+            
+            return column;
+        });
     }
 
     /**
@@ -1176,18 +1250,30 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     navigateToRecord(event) {
-        const propertyId = event.target.dataset.id;
-        this[NavigationMixin.GenerateUrl]({
-            type: 'standard__recordPage',
-            attributes: {
-                recordId: propertyId,
-                actionName: 'view'
+        try {
+            const recordId = event.currentTarget.dataset.id;
+            const objectApiName = event.currentTarget.dataset.object; // Optional dynamic object name
+            
+            const navConfig = {
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: recordId,
+                    actionName: 'view'
+                }
+            };
+            
+            if (objectApiName) {
+                navConfig.attributes.objectApiName = objectApiName;
             }
-        }).then(url => {
-            window?.globalThis?.open(url, '_blank');
-        }).catch(error => {
-            errorDebugger('DisplayListing', 'navigateToRecord', error, 'warn', 'Error in navigateToRecord');
-        });
+
+            this[NavigationMixin.GenerateUrl](navConfig).then(url => {
+                window?.globalThis?.open(url, '_blank');
+            }).catch(error => {
+                errorDebugger('DisplayListing', 'navigateToRecord', error, 'warn', 'Error in navigateToRecord');
+            });
+        } catch (error) {
+            errorDebugger('DisplayListing', 'navigateToRecord', error, 'warn', 'Error in navigateToRecord wrapper');
+        }
     }
 
     /**
@@ -1731,6 +1817,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
      */
     sortClick(event) {
         const fieldName = event.currentTarget.dataset.id;
+        const column = this.tableColumns.find(col => col.fieldName === fieldName);
+        if (!column || !column.sortable) {
+            return; // Don't sort non-sortable columns
+        }
         if (this.sortField === fieldName) {
             this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
         } else {
@@ -1768,55 +1858,60 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 ? aValue.localeCompare(bValue)
                 : bValue.localeCompare(aValue);
         });
+
     }
 
     /**
      * Method Name : updateSortIcons
      * @description : Update visual sort indicators on headers
      */
-    updateSortIcons() {
-        // Remove active class from all headers
-        const allHeaders = this.template.querySelectorAll('.header-cell.sortable-header');
-        allHeaders.forEach(header => {
-            header.classList.remove('sorted-field');
-            const icon = header.querySelector('.listing-manager-icon');
-            if (icon) {
-                icon.classList.remove('sort-icon-active', 'rotate-asc', 'rotate-desc');
-            }
-        });
+     updateSortIcons() {
+        try {
+            // Get all header cells with sorting capability
+            const headers = this.template.querySelectorAll('[data-id]');
 
-        // Set active header and icon
-        const currentHeader = this.template.querySelector(`[data-id="${this.sortField}"]`);
-        if (currentHeader) {
-            currentHeader.classList.add('sorted-field');
-            const icon = currentHeader.querySelector('.listing-manager-icon');
-            if (icon) {
-                icon.classList.add('sort-icon-active');
-                icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+            // Remove active class from all headers
+            headers.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            console.log('currentHeader', currentHeader);
+            console.log('currentHeader.classList', currentHeader.classList);
+
+
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+                console.log('currentHeader.classList', currentHeader.classList);
+
+
+                // Find the sort icon within this header
+                // Updated selector to match our new HTML structure
+                const icon = currentHeader.querySelector('.listing-manager-icon');
+                if (icon) {
+                    // Remove existing rotation classes
+                    icon.classList.remove('rotate-asc', 'rotate-desc');
+
+                    // Add appropriate rotation class based on sort order
+                    if (this.sortOrder === 'asc') {
+                        icon.classList.add('rotate-asc');
+                    } else {
+                        icon.classList.add('rotate-desc');
+                    }
+                    // Force inline visibility to ensure it shows in popup headers
+                    try {
+                        icon.style.opacity = '1';
+                        icon.style.visibility = 'visible';
+                    } catch (e) {
+                        // ignore
+                    }
+                }
             }
+        } catch (error) {
+            errorDebugger('displaylisting', 'updateSortIcons', error, 'warn', 'Error in updateSortIcons');
         }
     }
 
-    get fieldsWithIconClass() {
-        return this.tableColumns.map(field => {
-            const baseIconClass = 'listing-manager-icon';
-            let iconClass = baseIconClass;
-            const isSorted = this.sortField === field.fieldName.toLowerCase();
-            
-            if (isSorted) {
-                const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
-                iconClass = `${baseIconClass} sort-icon-active ${rotationClass}`;
-            }
-            
-            const headerBaseClass = 'header-cell sortable-header';
-            const headerClass = isSorted ? `${headerBaseClass} sorted-field` : headerBaseClass;
-            
-            return {
-                ...field,
-                iconClass: iconClass,
-                isSorted: isSorted,
-                headerClass: headerClass
-            };
-        });
-    }
+
 }

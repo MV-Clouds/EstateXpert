@@ -63,6 +63,8 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     @track isAwsSdkInitialized = true;
     @track FileNameInAWS;
     @track fileListToDelete = [];
+    @track sortBy;
+    @track sortDirection = 'asc';
 
     /**
     * Method Name: showMobileView
@@ -158,6 +160,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
                 Promise.all([loadScript(this, AWS_SDK)]);
                 this.isAwsSdkInitialized = false;
             }
+            this.updateSortIcons();
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'renderedCallback', error, 'warn', 'Error while loading AWS SDK');
         }
@@ -244,6 +247,88 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
             this.template.querySelector('[data-tab-id="' + target + '"]').classList.add("feed-tab-active");
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'handleMenuTabClick', error, 'warn', 'Error while handling the menu clicks');
+        }
+    }
+
+    /**
+    * Method Name : sortClick
+    * @description : handle sorting when column header is clicked
+    */
+    sortClick(event) {
+        try {
+            let sortField = event.currentTarget.dataset.id;
+            this.sortBy = sortField;
+            if (this.sortDirection === 'asc') {
+                this.sortDirection = 'desc';
+            } else {
+                this.sortDirection = 'asc';
+            }
+            this.updateSortIcons(event);
+            this.sortData();
+        } catch (error) {
+            errorDebugger('ImagesAndMedia', 'sortClick', error, 'warn', 'Error while sorting items');
+        }
+    }
+
+    /**
+    * Method Name : sortData
+    * @description : performs data sorting based on current sortBy and sortDirection
+    */
+    sortData() {
+        try {
+            let dataArr = [...this.data];
+            let reverse = this.sortDirection === 'asc' ? 1 : -1;
+            dataArr.sort((a, b) => {
+                let valueA = a[this.sortBy] ? a[this.sortBy].toLowerCase() : '';
+                let valueB = b[this.sortBy] ? b[this.sortBy].toLowerCase() : '';
+                
+                // Size column parsing specifically 
+                if(this.sortBy === 'MVEX__Size__c') {
+                    valueA = a[this.sortBy] && a[this.sortBy] !== 'External' ? parseFloat(a[this.sortBy]) : 0;
+                    valueB = b[this.sortBy] && b[this.sortBy] !== 'External' ? parseFloat(b[this.sortBy]) : 0;
+                }
+                
+                return valueA > valueB ? 1 * reverse : -1 * reverse;
+            });
+            this.data = dataArr;
+        } catch (error) {
+            errorDebugger('ImagesAndMedia', 'sortData', error, 'warn', 'Error while sorting data');
+        }
+    }
+
+    /**
+    * Method Name : updateSortIcons
+    * @description : handles visual rotation state of sorting SVG icons
+    */
+    updateSortIcons(event) {
+        try {
+            let svgElements = this.template.querySelectorAll('svg.listing-manager-icon');
+            let clickedSortField = event ? event.currentTarget.dataset.id : this.sortBy;
+            
+            this.template.querySelectorAll('.sorting_header').forEach(el => {
+                el.classList.remove('active-sort');
+            });
+            
+            if (event) {
+                event.currentTarget.classList.add('active-sort');
+            } else if (this.sortBy) {
+                let activeHeader = this.template.querySelector(`th[data-id="${this.sortBy}"]`);
+                if (activeHeader) activeHeader.classList.add('active-sort');
+            }
+
+            svgElements.forEach(svg => {
+                const sortFieldParent = svg.dataset.index;
+                svg.classList.remove('rotate-asc', 'rotate-desc');
+                if (sortFieldParent === clickedSortField) {
+                    if (this.sortDirection === 'asc') {
+                        svg.classList.add('rotate-asc');
+                    } else {
+                        svg.classList.add('rotate-desc');
+                    }
+                }
+            });
+        } catch (error) {
+            errorDebugger('ImagesAndMedia', 'updateSortIcons', error, 'warn', 'Error while updating sort icons');
         }
     }
 

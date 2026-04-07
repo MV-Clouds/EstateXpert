@@ -1286,7 +1286,7 @@ global without sharing class WhatsAppWebhook{
             }
 
             String accessToken = config[0].Access_Token__c;
-            String endpoint = config[0].API_Endpoint__c + '/' + config[0].API_Version__c + '/' + config[0].Phone_Number_Id__c + '/messages';
+            String endpoint = config[0].APIEndpoint__c + '/' + config[0].APIVersion__c + '/' + config[0].Phone_Number_Id__c + '/messages';
 
             HttpRequest httpReq = new HttpRequest();
             httpReq.setEndpoint(endpoint);

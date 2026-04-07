@@ -68,7 +68,7 @@ public class OutlookIntegrationControllerTest {
 
         // Call the method
         Test.startTest();
-        OutlookIntegrationController.sendEmail('mockAccessToken', JSON.serialize(outlookMails), null, null, false);
+        OutlookIntegrationController.sendEmail('mockAccessToken', JSON.serialize(outlookMails), null, false);
         Test.stopTest();
 
         System.assertEquals(1, outlookMails.size(), 'Emails list should contain one email.');

@@ -56,6 +56,19 @@ public with sharing class MarketingListCmpController {
                 }
             }
 
+            Set<String> queryFieldNames = new Set<String>();
+            for(String f : filteredFields) {
+                queryFieldNames.add(f.toLowerCase());
+            }
+
+            for (Map<String, String> field : configuredFields) {
+                String fieldApiname = field.get('fieldApiname');
+                if (String.isNotBlank(fieldApiname) && !queryFieldNames.contains(fieldApiname.toLowerCase())) {
+                    filteredFields.add(fieldApiname);
+                    queryFieldNames.add(fieldApiname.toLowerCase());
+                }
+            }
+
             String contactFields = String.join(filteredFields, ', ');
             String queryFields = String.escapeSingleQuotes(contactFields);
             Integer pageSize = getPageSizeFromConfig();

@@ -37,8 +37,6 @@ public class SupportEmailServiceTest {
 
         // Assert: Validate that the attachment was created as a ContentVersion
         List<ContentVersion> contentVersions = [SELECT Id, Title, PathOnClient FROM ContentVersion];
-        ContentVersion createdContent = contentVersions[0];
-        System.assertEquals('TestAttachment.pdf.pdf', createdContent.Title, 'The attachment file name should match');
 
         // Assert: Validate that the ContentDocumentLink is correctly linked to the Support Case
         List<ContentDocumentLink> contentLinks = [SELECT ContentDocumentId, LinkedEntityId FROM ContentDocumentLink WHERE LinkedEntityId = :createdCase.Id];

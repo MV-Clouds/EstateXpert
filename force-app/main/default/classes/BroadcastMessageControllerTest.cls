@@ -564,4 +564,230 @@ private class BroadcastMessageControllerTest {
         System.assertNotEquals(null, result, 'Result should not be null');
     }
 
+    @isTest
+    static void testGetAllBroadcastGroups_CoversAllCommunicationTypes() {
+        insert new List<Broadcast_Group__c>{
+            new Broadcast_Group__c(
+                Name = 'WA Group',
+                Object_Name__c = 'Contact',
+                Phone_Field__c = 'Phone',
+                Communication_Type__c = 'WhatsApp'
+            ),
+            new Broadcast_Group__c(
+                Name = 'Both Group',
+                Object_Name__c = 'Contact',
+                Phone_Field__c = 'Phone',
+                Email_Field__c = 'Email',
+                Communication_Type__c = 'Both'
+            ),
+            new Broadcast_Group__c(
+                Name = 'Email Group A',
+                Object_Name__c = 'Contact',
+                Email_Field__c = 'Email',
+                Communication_Type__c = 'Email'
+            )
+        };
+
+        Test.startTest();
+        List<Broadcast_Group__c> groups = BroadcastMessageController.getAllBroadcastGroups();
+        Test.stopTest();
+
+        System.assert(groups.size() >= 3, 'Should return all supported communication types');
+    }
+
+    @isTest
+    static void testGetBroadcastEmailGroups_ExcludesWhatsAppOnly() {
+        insert new List<Broadcast_Group__c>{
+            new Broadcast_Group__c(
+                Name = 'WA Only Group',
+                Object_Name__c = 'Contact',
+                Phone_Field__c = 'Phone',
+                Communication_Type__c = 'WhatsApp'
+            ),
+            new Broadcast_Group__c(
+                Name = 'Email Group B',
+                Object_Name__c = 'Contact',
+                Email_Field__c = 'Email',
+                Communication_Type__c = 'Email'
+            )
+        };
+
+        Test.startTest();
+        List<Broadcast_Group__c> groups = BroadcastMessageController.getBroadcastEmailGroups();
+        Test.stopTest();
+
+        System.assertEquals(true, groups.size() > 0, 'Should return email-capable groups');
+    }
+
+    @isTest
+    static void testGetActiveCampaignsForGroup_CoversBroadcastAndCampaignMatching() {
+        Broadcast_Group__c groupForCampaign = new Broadcast_Group__c(
+            Name = 'Active Link Group',
+            Object_Name__c = 'Contact',
+            Phone_Field__c = 'Phone',
+            Communication_Type__c = 'Both',
+            Email_Field__c = 'Email'
+        );
+        insert groupForCampaign;
+
+        insert new Broadcast__c(
+            Status__c = 'Pending',
+            Broadcast_Group_IDs__c = groupForCampaign.Id + ',dummy'
+        );
+
+        insert new Broadcast__c(
+            Status__c = 'Pending',
+            Broadcast_Group_IDs__c = null
+        );
+
+        Marketing_Campaign__c mc = new Marketing_Campaign__c(
+            Label__c = 'Open Campaign',
+            Is_Marketing_Campaign_Template__c = true,
+            Email_Type__c = 'single',
+            Schedule_Type__c = 'Specific Date',
+            Start_Date__c = Date.today(),
+            Campaign_Start_Date__c = Date.today(),
+            RelatedObject__c = 'Contact',
+            Status__c = 'New',
+            Selected_Broadcast_Groups__c = groupForCampaign.Id + '@@@other'
+        );
+        insert mc;
+
+        Test.startTest();
+        List<String> activeNames = BroadcastMessageController.getActiveCampaignsForGroup(groupForCampaign.Id);
+        Test.stopTest();
+
+        System.assertEquals(2, activeNames.size(), 'Should include one matching broadcast and one matching campaign');
+    }
+
+    @isTest
+    static void testGetBroadcastRecord_CoversStatusAndReplies() {
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+
+        Broadcast__c broadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Completed'
+        );
+        insert broadcast;
+
+        List<Chat__c> chats = new List<Chat__c>{
+            new Chat__c(
+                Phone__c = '7000000001',
+                Type_of_Message__c = 'Outbound Messages',
+                Message_Status__c = 'Sent',
+                WB_Broadcast__c = broadcast.Id
+            ),
+            new Chat__c(
+                Phone__c = '7000000002',
+                Type_of_Message__c = 'Outbound Messages',
+                Message_Status__c = 'Delivered',
+                WB_Broadcast__c = broadcast.Id
+            ),
+            new Chat__c(
+                Phone__c = '7000000003',
+                Type_of_Message__c = 'Outbound Messages',
+                Message_Status__c = 'Seen',
+                WB_Broadcast__c = broadcast.Id
+            ),
+            new Chat__c(
+                Phone__c = '7000000004',
+                Type_of_Message__c = 'Outbound Messages',
+                Message_Status__c = 'failed',
+                WB_Broadcast__c = broadcast.Id
+            ),
+            new Chat__c(
+                Phone__c = '7000000003',
+                Type_of_Message__c = 'Inbound Messages',
+                Message_Status__c = 'Seen'
+            )
+        };
+        insert chats;
+
+        Test.startTest();
+        Map<String, Object> result = BroadcastMessageController.getBroadcastRecord(broadcast.Id);
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testGetAllBroadcastMembers_BlankGroupIdsReturnsEmptyMap() {
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+        Broadcast__c emptyBroadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Pending'
+        );
+        insert emptyBroadcast;
+
+        Test.startTest();
+        Map<String, List<BroadcastMessageController.BroadcastMemberWrapper>> result =
+            BroadcastMessageController.getAllBroadcastMembers(emptyBroadcast.Id);
+        Test.stopTest();
+
+        System.assertEquals(0, result.size(), 'Should return empty map when no group ids are present');
+    }
+
+    @isTest
+    static void testGetAllBroadcastMembers_WithPhoneAndEmailGroups() {
+        Contact phoneContact = new Contact(FirstName = 'Phone', LastName = 'Member', Phone = '8111111111', Email = 'phone.member@example.com');
+        Contact emailContact = new Contact(FirstName = 'Email', LastName = 'Member', Phone = '8222222222', Email = 'email.member@example.com');
+        insert new List<Contact>{phoneContact, emailContact};
+
+        Broadcast_Group__c phoneGroup = new Broadcast_Group__c(
+            Name = 'Phone Members Group',
+            Object_Name__c = 'Contact',
+            Phone_Field__c = 'Phone',
+            Communication_Type__c = 'WhatsApp'
+        );
+        Broadcast_Group__c emailGroup = new Broadcast_Group__c(
+            Name = 'Email Members Group',
+            Object_Name__c = 'Contact',
+            Email_Field__c = 'Email',
+            Communication_Type__c = 'Email'
+        );
+        insert new List<Broadcast_Group__c>{phoneGroup, emailGroup};
+
+        insert new List<Broadcast_Group_Member__c>{
+            new Broadcast_Group_Member__c(
+                Broadcast_Group_ID__c = phoneGroup.Id,
+                Member_Record_Id__c = phoneContact.Id,
+                Phone_Number__c = phoneContact.Phone,
+                Status__c = 'Sent'
+            ),
+            new Broadcast_Group_Member__c(
+                Broadcast_Group_ID__c = emailGroup.Id,
+                Member_Record_Id__c = emailContact.Id,
+                Email__c = emailContact.Email,
+                Status__c = 'Sent'
+            )
+        };
+
+        WhatsappTemplate__c template = [SELECT Id FROM WhatsappTemplate__c LIMIT 1];
+        Broadcast__c broadcast = new Broadcast__c(
+            WhatsappTemplate__c = template.Id,
+            Status__c = 'Completed',
+            Broadcast_Group_IDs__c = phoneGroup.Id + ',' + emailGroup.Id
+        );
+        insert broadcast;
+
+        insert new List<Chat__c>{
+            new Chat__c(
+                Phone__c = phoneContact.Phone,
+                Type_of_Message__c = 'Outbound Messages',
+                Message_Status__c = 'Delivered',
+                WB_Broadcast__c = broadcast.Id
+            ),
+            new Chat__c(
+                Phone__c = phoneContact.Phone,
+                Type_of_Message__c = 'Inbound Messages',
+                Message_Status__c = 'Seen'
+            )
+        };
+
+        Test.startTest();
+        Map<String, List<BroadcastMessageController.BroadcastMemberWrapper>> result =
+            BroadcastMessageController.getAllBroadcastMembers(broadcast.Id);
+        Test.stopTest();
+
+        System.assertEquals(2, result.size(), 'Should return wrappers for both groups');
+    }
+
 }

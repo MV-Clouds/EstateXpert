@@ -233,66 +233,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
         }
     }
 
-    /**
-    * Method Name : nameIconClass
-    * @description : compute the icon class for Name column based on sort state
-    * Date: 23/03/2026
-    * Created By:Vyom Soni
-    */
-    get nameIconClass() {
-        const baseClass = 'listing-manager-icon';
-        if (this.sortField === 'Name') {
-            const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
-            return `${baseClass} sort-icon-active ${rotationClass}`;
-        }
-        return baseClass;
-    }
 
-    /**
-    * Method Name : nameHeaderClass
-    * @description : compute the class for Name column header including sorted-field
-    * Date: 23/03/2026
-    * Created By:Vyom Soni
-    */
-    get nameHeaderClass() {
-        const baseClass = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
-        if (this.sortField === 'Name') {
-            return `${baseClass} sorted-field`;
-        }
-        return baseClass;
-    }
-
-    /**
-    * Method Name : fieldsWithIconClass
-    * @description : return fields array with computed icon classes and header classes
-    * Date: 23/03/2026
-    * Created By:Vyom Soni
-    */
-    get fieldsWithIconClass() {
-        if (!this.fields || this.fields.length === 0) {
-            return [];
-        }
-        return this.fields.map(field => {
-            const baseClass = 'listing-manager-icon';
-            let iconClass = baseClass;
-            const isSorted = this.sortField === field.fieldName;
-            
-            if (isSorted) {
-                const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
-                iconClass = `${baseClass} sort-icon-active ${rotationClass}`;
-            }
-            
-            const headerBaseClass = 'slds-is-resizable slds-is-sortable slds-cell_action-mode colume2';
-            const headerClass = isSorted ? `${headerBaseClass} sorted-field` : headerBaseClass;
-            
-            return {
-                ...field,
-                iconClass: iconClass,
-                isSorted: isSorted,
-                headerClass: headerClass
-            };
-        });
-    }
 
     /**
     * Method Name : totalListings
@@ -363,6 +304,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     renderedCallback(){
         try{
+            if (this.listingData && this.listingData.length > 0) {
+                this.updateSortIcons();
+            }
             // Only initialize filter state once on first render
             if (!this.hasInitializedFilter && this.wrapOn) {
                 const toggleBtn = this.template.querySelector('.filter-toggle-btn');
@@ -448,7 +392,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
                     cardView: field.cardView,
-                    format : field.format
+                    format : field.format,
+                    referenceObjectName: field.referenceObjectName,
+                    relationshipName: field.relationshipName
                 }));
         
                 this.listingData.forEach((listing)=>{
@@ -480,25 +426,38 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     processListings() {
         try{
             this.processedListingData = this.listingData.map(listing => {
-            let orderedFields = this.fields.map(field => {
-                let fieldValue;
-                if (field.fieldName.includes('.')) {
-                    let fieldParts = field.fieldName.split('.');
-                    let relatedObject = listing[fieldParts[0]];
-                    fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
-                } else {
-                    fieldValue = listing[field.fieldName] || '-';
-                }
+                let orderedFields = this.fields.map(field => {
+                    let isRedirectable = false;
+                    let lookupId = null;
+                    let objectApiName = null;
+                    let fieldValue;
 
-                if (field.format && fieldValue) {
-                    fieldValue = this.applyFieldFormat(fieldValue, field.format);
-                }
+                    if (field.fieldName.includes('.')) {
+                        let fieldParts = field.fieldName.split('.');
+                        let relatedObject = listing[fieldParts[0]];
+                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
+                        
+                        if (relatedObject && fieldParts[1] === 'Name') {
+                            isRedirectable = true;
+                            lookupId = relatedObject.Id;
+                            objectApiName = field.referenceObjectName;
+                        }
+                    } else {
+                        fieldValue = listing[field.fieldName] || '-';
+                    }
 
-                return {
-                    fieldName: field.fieldName,
-                    value: fieldValue
-                };
-            });
+                    if (field.format && fieldValue) {
+                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
+                    }
+
+                    return {
+                        fieldName: field.fieldName,
+                        value: fieldValue,
+                        isRedirectable: isRedirectable,
+                        lookupId: lookupId,
+                        objectApiName: objectApiName
+                    };
+                });
 
             let cardViewFields = this.fields
                 .filter(field => field.cardView === 'true')
@@ -603,8 +562,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             this.sortField = 'Name';
             this.sortOrder = 'asc';
 
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+            this.sortField = 'Name';
+            this.sortOrder = 'asc';
 
             const resetCheckedFlag = item => ({ ...item, isChecked: false });
             this.processedListingData = this.processedListingData.map(resetCheckedFlag);
@@ -638,8 +597,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             if(event.detail.filterlistings == true){
                 this.sortField = 'Name';
                 this.sortOrder = 'asc';
-                const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+                this.sortField = 'Name';
+                this.sortOrder = 'asc';
 
                 const resetCheckedFlag = item => ({ ...item, isChecked: false });
                 this.processedListingData = this.processedListingData.map(resetCheckedFlag);
@@ -722,11 +681,12 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     redirectToRecord(event){
         try{
             const recordId = event.target.dataset.id;
+            const objectApiName = event.target.dataset.object || 'MVEX__Listing__c';
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
                     recordId: recordId,
-                    objectApiName: 'MVEX__Listing__c',
+                    objectApiName: objectApiName,
                     actionName: 'view'
                 }
             })
@@ -845,10 +805,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             const isChecked = event.target.checked;
             this.sortField = '';
             this.sortOrder = 'asc';
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
-            });
+            this.sortField = 'Name';
+            this.sortOrder = 'asc';
             this.listingData = this.listingData.map(item => {
                 return { ...item, isChecked: isChecked };
             });
@@ -921,8 +879,39 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             }
             this.sortData();
             this.updateShownData();
+            this.updateSortIcons();
         }catch(error){
             errorDebugger('ListingManager', 'sortClick', error, 'warn', 'Error in sortClick');
+        }
+    }
+
+    updateSortIcons() {
+        try {
+            // Remove icon rotation
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
+            }
+
+        } catch (error) {
+            console.log('Error in updateSortIcons --> ' + error);
         }
     }
 
@@ -973,7 +962,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     scrollToTop() {
         try{
-            const tableDiv = this.template.querySelector('.tableDiv');
+            const tableDiv = this.template.querySelector('.table-content');
             if (tableDiv) {
                 tableDiv.scrollTop = 0;
             }

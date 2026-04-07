@@ -1,5 +1,15 @@
-@IsTest
+@IsTest(isParallel=false)
 public class SupportRequestControllerTest {
+    private static ContentVersion createTestContentVersion(String extension) {
+        String uniqueToken = String.valueOf(DateTime.now().getTime()) + '_' + String.valueOf(Math.abs(Crypto.getRandomInteger()));
+        ContentVersion contentVersion = new ContentVersion();
+        contentVersion.Title = 'Test_Document_' + uniqueToken;
+        contentVersion.PathOnClient = 'TestPath_' + uniqueToken + '.' + extension;
+        contentVersion.VersionData = Blob.valueOf('Test Data ' + uniqueToken);
+        contentVersion.IsMajorVersion = true;
+        return contentVersion;
+    }
+
     @IsTest
     static void testSendEmailSuccess() {
         // Setup test data
@@ -10,11 +20,7 @@ public class SupportRequestControllerTest {
         String priority = 'High';
 
         // Create a ContentVersion for testing
-        ContentVersion contentVersion = new ContentVersion();
-        contentVersion.Title = 'Test Document';
-        contentVersion.PathOnClient = 'TestPath.png';
-        contentVersion.VersionData = Blob.valueOf('Test Data');
-        contentVersion.IsMajorVersion = true;
+        ContentVersion contentVersion = createTestContentVersion('png');
         insert contentVersion;
 
         // Retrieve the ContentDocumentId from the inserted ContentVersion
@@ -38,11 +44,7 @@ public class SupportRequestControllerTest {
         String priority = 'High';
 
         // Create a ContentVersion for testing
-        ContentVersion contentVersion = new ContentVersion();
-        contentVersion.Title = 'Test Document';
-        contentVersion.PathOnClient = 'TestPath.jpg';
-        contentVersion.VersionData = Blob.valueOf('Test Data');
-        contentVersion.IsMajorVersion = true;
+        ContentVersion contentVersion = createTestContentVersion('jpg');
         insert contentVersion;
 
         // Retrieve the ContentDocumentId from the inserted ContentVersion
@@ -66,11 +68,7 @@ public class SupportRequestControllerTest {
         String priority = 'High';
 
         // Create a ContentVersion for testing
-        ContentVersion contentVersion = new ContentVersion();
-        contentVersion.Title = 'Test Document';
-        contentVersion.PathOnClient = 'TestPath.webp';
-        contentVersion.VersionData = Blob.valueOf('Test Data');
-        contentVersion.IsMajorVersion = true;
+        ContentVersion contentVersion = createTestContentVersion('webp');
         insert contentVersion;
 
         // Retrieve the ContentDocumentId from the inserted ContentVersion
@@ -87,11 +85,7 @@ public class SupportRequestControllerTest {
     @IsTest
     static void testDeleteContentVersion() {
         // Create a ContentVersion for testing
-        ContentVersion contentVersion = new ContentVersion();
-        contentVersion.Title = 'Test Document';
-        contentVersion.PathOnClient = 'TestPath.png';
-        contentVersion.VersionData = Blob.valueOf('Test Data');
-        contentVersion.IsMajorVersion = true;
+        ContentVersion contentVersion = createTestContentVersion('png');
         insert contentVersion;
 
         // Retrieve the ContentDocumentId from the inserted ContentVersion
@@ -112,11 +106,7 @@ public class SupportRequestControllerTest {
     @IsTest
     static void testDeleteContentDocument() {
         // Create a ContentVersion for testing
-        ContentVersion contentVersion = new ContentVersion();
-        contentVersion.Title = 'Test Document';
-        contentVersion.PathOnClient = 'TestPath.png';
-        contentVersion.VersionData = Blob.valueOf('Test Data');
-        contentVersion.IsMajorVersion = true;
+        ContentVersion contentVersion = createTestContentVersion('png');
         insert contentVersion;
 
         // Retrieve the ContentDocumentId from the inserted ContentVersion

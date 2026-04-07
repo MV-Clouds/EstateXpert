@@ -1,52 +1,48 @@
 <template>
     <div class="main_div_portal_mapping_container">
-        <!-- <div class="main_header_cls">
-            <div slot="title" class="header_block_css">
-                <div class="svg_back_icon" onclick={backToControlCenter}>
-                    <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
-                            fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <div class="portal_mapping">
-                    Portal Integration
-                </div>
-            </div>
-        </div> -->
         <div class="main_body">
             <div class="body_1">
-                <div class="card-header" slot="title">
-                    Available Portals
+                <div class="section-header section-header--available">
+                    <div class="section-header__left">
+                        <span class="section-header__dot"></span>
+                        <p class="section-header__title">Available Portals</p>
+                    </div>
+                    <p class="section-header__subtitle">Pick a portal and add a new connection</p>
                 </div>
 
                 <div class="grid-style available-portals">
                     <template for:each={portals} for:item="portal">
                         <div key={portal.Id} class="portal-box">
-                            <div class="count_p_css">
-                                <p>{portal.recordCount}</p>
-                                <span class="helptext">Integration Count : {portal.recordCount}</span>
+                            <div class="available-card-top">
+                                <p class="portal-name">{portal.portalName}</p>
+                                <button class="preview-icon-css add_icon_css" onclick={handleNew}
+                                    data-portalname={portal.portalName} data-portaliconurl={portal.logoURL}
+                                    type="button" title="Add Integration">
+                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </button>
                             </div>
-                            <div class="add_icon_css" onclick={handleNew} data-portalname={portal.portalName}
-                                data-portaliconurl={portal.logoURL}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M10 2V18M2 10H18" stroke="#0176D3" stroke-width="3"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </div>
+
                             <div class="portal_img_cls">
                                 <img src={portal.logoURL} alt={portal.portalName} class="portal-logo"
                                     draggable="false">
                             </div>
+
                         </div>
                     </template>
                 </div>
             </div>
 
             <div class="body_2">
-                <div class="card-header" slot="title">
-                    Connected Portals
+                <div class="section-header section-header--connected">
+                    <div class="section-header__left">
+                        <span class="section-header__dot"></span>
+                        <p class="section-header__title">Connected Portals</p>
+                    </div>
+                    <p class="section-header__subtitle">Manage mapped portals and status</p>
                 </div>
                 <template if:true={isPortalData}>
                     <div class="field-mapping-container">
@@ -76,7 +72,7 @@
                                         </div>
                                     </div>
                                     <div class="action-btn">
-                                        <button class="action-div" data-portalname={record.val.Name}
+                                        <button class="preview-icon-css" data-portalname={record.val.Name}
                                             data-portaliconurl={record.val.MVEX__Endpoint__c}
                                             data-portalstatus={record.val.MVEX__Is_Active__c}
                                             data-portalgen={record.val.MVEX__Generator__c} data-portalid={record.val.Id}
@@ -92,7 +88,7 @@
                                                 </path>
                                             </svg>
                                         </button>
-                                        <button class="action-div" onclick={handleEditPortal}
+                                        <button class="edit-icon-css" onclick={handleEditPortal}
                                             data-portal-id={record.val.Id}
                                             data-portaliconurl={record.val.MVEX__Endpoint__c}
                                             data-portalgen={record.val.MVEX__Generator__c}>
@@ -104,7 +100,7 @@
                                                     stroke-linejoin="round" />
                                             </svg>
                                         </button>
-                                        <button class="delete-div" onclick={handleDelete}
+                                        <button class="delete-icon-css" onclick={handleDelete}
                                             data-portal-id={record.val.Id} data-portal-name={record.val.Name}>
                                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">

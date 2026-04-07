@@ -27,44 +27,62 @@
                     View Listings
                 </button>
             </div>
+
             <template if:true={isRecordAvailable}>
-                <div class="tableContainer">
-                    <div class="portalMapping_header-row">
-                        <div class="slds-col">
-                            <p class="header-text">Listing Fields</p>
-                        </div>
-                        <div class="slds-col">
-                            <p class="header-text">Portals Fields</p>
-                        </div>
-                        <div class="slds-col">
-                            <p class="header-text">Example</p>
-                        </div>
-                    </div>
-                    <div class="portalMapping_recordValues">
-                        <template for:each={finalList} for:item="val" for:index="index">
-                            <div key={val.id} class="portalMapping_data-row">
-                                <div class="slds-col position_css">
-                                    <div if:true={val.isRequired} class="red_css">*</div>
-                                    <lightning-combobox label="" options={val.listingFields} data-index={index} data-datatype={val.dataType} variant="label-hidden"
-                                        value={val.listingFieldAPIName} onchange={handleComboboxChange}>
-                                    </lightning-combobox>
-                                </div>
-                                <div class="slds-col view_input slds-input_faux font_styles1">
-                                    <div class="portal_label_truncate_css">
-                                        {val.portalLabel}
-                                    </div>
-                                    <template if:true={val.description}>
-                                        <lightning-helptext content={val.description}></lightning-helptext>
-                                    </template>
-                                </div>
-                                <div class="slds-col font_styles2">
-                                    {val.example}
-                                </div>
-                            </div>
-                        </template>
+                <div class="main_content_cls">
+                    <div class="table-content">
+                        <table class="slds-table slds-table_fixed-layout">
+                            <thead>
+                                <tr class="table_tr_cls">
+                                    <th scope="col" class="column1">
+                                        <div class="min_width_css header-text">Listing Fields</div>
+                                    </th>
+                                    <th scope="col" class="column1">
+                                        <div class="min_width_css header-text">Portals Fields</div>
+                                    </th>
+                                    <th scope="col" class="column1">
+                                        <div class="min_width_css header-text">Example</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={finalList} for:item="val" for:index="index">
+                                    <tr key={val.id}>
+                                        <td data-label="Listing Fields">
+                                            <div class="slds-col position_css">
+                                                <div if:true={val.isRequired} class="red_css">*</div>
+                                                <lightning-combobox
+                                                    label=""
+                                                    options={val.listingFields}
+                                                    data-index={index}
+                                                    data-datatype={val.dataType}
+                                                    variant="label-hidden"
+                                                    value={val.listingFieldAPIName}
+                                                    onchange={handleComboboxChange}>
+                                                </lightning-combobox>
+                                            </div>
+                                        </td>
+                                        <td data-label="Portals Fields">
+                                            <div class="slds-col view_input slds-input_faux font_styles1 portal_label_truncate_css">
+                                                {val.portalLabel}
+                                                <template if:true={val.description}>
+                                                    <lightning-helptext content={val.description}></lightning-helptext>
+                                                </template>
+                                            </div>
+                                        </td>
+                                        <td data-label="Example">
+                                            <div class="slds-col font_styles2">
+                                                {val.example}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </template>
+
             <template if:false={isRecordAvailable}>
                 <div class="empty-state">
                     <div class="empty-state__content">

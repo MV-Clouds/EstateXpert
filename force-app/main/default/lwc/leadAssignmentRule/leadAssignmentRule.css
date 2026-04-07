@@ -589,3 +589,78 @@
         flex-wrap: wrap;
     }
 }
+
+/* Table styles for conditions (borrowed from googleLeadFieldMapping) */
+.table-content {
+    margin: 0;
+    height: auto;
+    max-height: 45vh;
+    overflow: auto;
+}
+
+.condition-heading{
+    display: flex;
+    justify-content: space-between;
+}
+
+.popup-table-content {
+    margin: 0;
+    height: auto;
+    max-height: 45vh;
+    overflow: auto;
+}
+
+.slds-table .index-display {
+    text-align: center;
+}
+
+.combobox_cls {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.action-btn {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Ensure inputs inside table fill cell */
+.slds-table td .combobox_cls lightning-combobox,
+.slds-table td .combobox_cls lightning-input,
+.slds-table td .combobox_cls lightning-record-picker {
+    width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .slds-table thead { display: none; }
+    .slds-table, .slds-table tbody, .slds-table tr, .slds-table td { display: block; width: 100%; }
+    .slds-table tr { margin-bottom: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem; background: #fff; }
+    .slds-table td { padding: 0.25rem 0; display: flex; justify-content: space-between; align-items: center; }
+    .slds-table td[data-label]::before { content: attr(data-label)": "; font-weight: 600; margin-right: 0.5rem; color: #374151; }
+}
+
+/* Fix combobox dropdown alignment to left */
+.combobox_cls {
+  text-align: left !important;
+}
+
+.combobox_cls lightning-combobox,
+.combobox_cls .slds-combobox {
+  text-align: left !important;
+}
+
+.combobox_cls lightning-combobox .slds-combobox__input,
+.combobox_cls .slds-input {
+  text-align: left !important;
+}
+
+lightning-combobox .slds-dropdown,
+.slds-dropdown {
+  text-align: left !important;
+  left: 0 !important;
+  right: auto !important;
+  margin-left: 0 !important;
+}

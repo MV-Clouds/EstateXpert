@@ -9,7 +9,7 @@ import updateTemplateStatus from '@salesforce/apex/TemplateBuilderController.upd
 import NoDataImage from '@salesforce/resourceUrl/NoDataImage';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 export default class TemplateHomePage extends NavigationMixin(LightningElement) {
     @track currentPage = 1;
@@ -36,10 +36,120 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     @track dateField = '';
     @track dateFrom = '';
     @track dateTo = '';
+    @track tableColumns = [
+        {
+            key: 'rowIndex',
+            label: 'No.',
+            fieldName: 'rowIndex',
+            type: 'text',
+            isSortable: false,
+            class: 'sno',
+            dataLabel: 'S.No.'
+        },
+        {
+            key: 'MVEX__Template_Name__c',
+            label: 'Template Name',
+            fieldName: 'MVEX__Template_Name__c',
+            type: 'text',
+            isSortable: true,
+            class: 'truncate_css',
+            dataLabel: 'Template Name'
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            fieldName: 'isActive',
+            type: 'status',
+            isSortable: false,
+            class: 'status',
+            dataLabel: 'Status'
+        },
+        {
+            key: 'MVEX__Object_Name__c',
+            label: 'Object Name',
+            fieldName: 'MVEX__Object_Name__c',
+            type: 'text',
+            isSortable: true,
+            class: '',
+            dataLabel: 'Object Name'
+        },
+        {
+            key: 'MVEX__Template_pattern__c',
+            label: 'Template Type',
+            fieldName: 'MVEX__Template_pattern__c',
+            type: 'text',
+            isSortable: true,
+            class: '',
+            dataLabel: 'Template Type'
+        },
+        {
+            key: 'MVEX__Subject__c',
+            label: 'Subject',
+            fieldName: 'MVEX__Subject__c',
+            type: 'text',
+            isSortable: false,
+            class: 'min_width_css',
+            dataLabel: 'Subject'
+        },
+        {
+            key: 'MVEX__Description__c',
+            label: 'Description',
+            fieldName: 'MVEX__Description__c',
+            type: 'text',
+            isSortable: false,
+            class: 'min_width_css',
+            dataLabel: 'Description'
+        },
+        {
+            key: 'CreatedDateformatted',
+            label: 'Created Date',
+            fieldName: 'CreatedDateformatted',
+            type: 'date',
+            isSortable: true,
+            class: '',
+            dataLabel: 'Created Date'
+        },
+        {
+            key: 'LastModifiedDate',
+            label: 'Last Modified Date',
+            fieldName: 'LastModifiedDate',
+            type: 'date',
+            isSortable: true,
+            class: '',
+            dataLabel: 'Last Modified Date'
+        },
+        {
+            key: 'actions',
+            label: 'Action',
+            fieldName: 'actions',
+            type: 'action',
+            isSortable: false,
+            class: 'min_width_css',
+            dataLabel: 'Actions'
+        }
+    ];
 
     constructor() {
         super();
         this.handleOutsideClick = this.handleOutsideClick.bind(this);
+        // Add type flags to tableColumns
+        this.tableColumns = this.tableColumns.map((col, index) => ({
+            ...col,
+            isText: col.type === 'text',
+            isDate: col.type === 'date',
+            isTextOrDate: col.type === 'text' || col.type === 'date',
+            isStatus: col.type === 'status',
+            isAction: col.type === 'action',
+            // Add specific column flags for field value access in template
+            isRowIndex: col.key === 'rowIndex',
+            isTemplateName: col.key === 'MVEX__Template_Name__c',
+            isObjectName: col.key === 'MVEX__Object_Name__c',
+            isTemplatePattern: col.key === 'MVEX__Template_pattern__c',
+            isSubject: col.key === 'MVEX__Subject__c',
+            isDescription: col.key === 'MVEX__Description__c',
+            isCreatedDate: col.key === 'CreatedDateformatted',
+            isLastModifiedDate: col.key === 'LastModifiedDate'
+        }));
     }
     
     get filterIconName() {
@@ -90,6 +200,11 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     */
     get totalPages() {
         return Math.ceil(this.filteredTemplates.length / this.pageSize);
+    }
+
+    // New getter to indicate when pagination has more than one page
+    get totalPagesGreaterThanOne() {
+        return this.totalPages > 1;
     }
 
     /**
@@ -241,12 +356,23 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
         }
     }
 
-    /**
-    * Method Name: connectedCallback
-    * @description: Method to load static resource css and call fetchTemplates method
-    * Created Date: 12/06/2024
-    * Created By: Karan Singh
-    */
+    get enhancedVisibleTemplates() {
+        return this.visibleTemplates.map(template => {
+            const enhanced = { ...template };
+            // For each column, add a pre-computed property with the field value
+            enhanced.col_rowIndex = template.rowIndex;
+            enhanced.col_MVEX__Template_Name__c = template.MVEX__Template_Name__c;
+            enhanced.col_MVEX__Object_Name__c = template.MVEX__Object_Name__c;
+            enhanced.col_MVEX__Template_pattern__c = template.MVEX__Template_pattern__c;
+            enhanced.col_MVEX__Subject__c = template.MVEX__Subject__c;
+            enhanced.col_MVEX__Description__c = template.MVEX__Description__c;
+            enhanced.col_CreatedDateformatted = template.CreatedDateformatted;
+            enhanced.col_LastModifiedDate = template.LastModifiedDateformatted;
+            enhanced.col_actions = template.actions;
+            return enhanced;
+        });
+    }
+
     updateShownData() {
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
@@ -907,6 +1033,55 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
         this.updateShownData();
         this.showMoreFilters = false;
         document.removeEventListener('click', this.handleOutsideClick);
+    }
+
+    isColumnTypeText(columnType) {
+        return columnType === 'text';
+    }
+
+    isColumnTypeDate(columnType) {
+        return columnType === 'date';
+    }
+
+    isColumnTypeStatus(columnType) {
+        return columnType === 'status';
+    }
+
+    isColumnTypeAction(columnType) {
+        return columnType === 'action';
+    }
+
+    isTextType(columnType) {
+        return columnType === 'text';
+    }
+
+    isDateType(columnType) {
+        return columnType === 'date';
+    }
+
+    isStatusType(columnType) {
+        return columnType === 'status';
+    }
+
+    isActionType(columnType) {
+        return columnType === 'action';
+    }
+
+    getTableRowsWithTypes() {
+        return this.visibleTemplates.map(template => {
+            const columns = this.tableColumns.map(col => ({
+                ...col,
+                columnId: col.key,
+                isTextOrDate: col.type === 'text' || col.type === 'date',
+                isStatus: col.type === 'status',
+                isAction: col.type === 'action',
+                value: template[col.fieldName]
+            }));
+            return {
+                ...template,
+                columns: columns
+            };
+        });
     }
 
     disconnectedCallback() {

@@ -271,13 +271,12 @@
     flex-direction: row;
     gap: 10px;
     width: 100%;
-    padding: 5px;
     justify-content: center;
     align-items: center;
 }
 
 .combobox_cls lightning-combobox {
-    width: 30rem;
+    width: 100%
 }
 
 .custom-checkbox input[type="checkbox"] {
@@ -433,16 +432,9 @@
 }
 
 .main_header_cls {
-    background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    padding: 1rem;
+    position: relative;
+    height: 100%;
 }
 
 .header_block_css {
@@ -501,29 +493,7 @@
 }
 
 .main_content_cls {
-    background-color: #f5f7fa;
-    /* background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg'); */
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-}
-
-.table-content {
-    overflow: auto;
-    border-radius: 8px;
-    height: 100%;
-    background-color: white;
-    margin: 16px;
-    border: 1px solid #e5e7eb;
-    box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 5px -1px, rgba(15, 23, 42, 0.12) 0px 1px 3px -1px;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
+    height:90%;
 }
 
 .popup-table-content {
@@ -532,38 +502,9 @@
     max-height: 45vh;
 }
 
-.table-content .slds-table th,
-.table-content .slds-table td {
-    /* text-align: center; */
-    font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-}
-
 .display_cls,
 .index-display {
     text-align: center;
-}
-
-.table-content .slds-table th {
-    background-color: #0176D3;
-    color: white;
-    padding: 0.6rem;
-    height: 45px;
-}
-
-.table-content .slds-table td {
-    /* padding: 0.4rem; */
-    height: 45px;
-}
-
-
-.table-content .slds-table .sno,
-.table-content .slds-table .salesforce-field,
-.table-content .slds-table .google-field,
-.table-content .slds-table .actions {
-    text-align: center;
-    width: auto;
 }
 
 .action-btn {
@@ -620,17 +561,6 @@
     stroke: currentColor;
 }
 
-
-.table-content tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.table-content table thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 98;
-}
-
 .no-data-container {
     display: flex;
     flex-direction: column;
@@ -658,13 +588,9 @@
     align-items: center;
     flex-direction: row;
     gap: 1rem;
-    margin-bottom: 0;
-}
-
-.table-content table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    /* cursor: pointer; */
-    border: none;
+    margin: 1rem;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
 }
 
 .closs_icon_css {
@@ -690,4 +616,27 @@
 
 .custom-field{
     width: 30rem;
+}
+
+/* Fix combobox dropdown alignment to left */
+.combobox_cls {
+  text-align: left !important;
+}
+
+.combobox_cls lightning-combobox,
+.combobox_cls .slds-combobox {
+  text-align: left !important;
+}
+
+.combobox_cls lightning-combobox .slds-combobox__input,
+.combobox_cls .slds-input {
+  text-align: left !important;
+}
+
+lightning-combobox .slds-dropdown,
+.slds-dropdown {
+  text-align: left !important;
+  left: 0 !important;
+  right: auto !important;
+  margin-left: 0 !important;
 }

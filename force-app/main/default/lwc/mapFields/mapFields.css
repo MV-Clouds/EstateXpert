@@ -241,7 +241,7 @@
 }
 
 .combobox_cls lightning-combobox {
-    width: 30rem;
+    width: 100%;
 }
 
 .custom-checkbox input[type="checkbox"] {
@@ -265,13 +265,13 @@
     transition: 0.3s;
 }
 
-.custom-checkbox input[type="checkbox"]:checked + .checkmark {
+.custom-checkbox input[type="checkbox"]:checked+.checkmark {
     background-color: #0376D3;
     border-color: white;
     transition: 0.3s;
 }
 
-.custom-checkbox-body input[type="checkbox"]:checked + .checkmark {
+.custom-checkbox-body input[type="checkbox"]:checked+.checkmark {
     border-color: #0376D3;
     transition: 0.3s;
 }
@@ -289,7 +289,7 @@
     transform: translate(-42%, -61%) rotate(45deg);
 }
 
-.custom-checkbox input[type="checkbox"]:checked + .checkmark::before {
+.custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
     display: block;
 }
 
@@ -457,50 +457,30 @@
     overflow: hidden;
 }
 
-.table-content {
-    overflow: auto;
-    border-radius: 8px;
-    height: 100%;
-    background-color: white;
-    margin: 16px;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-}
-
-.table-content .slds-table th,
-.table-content .slds-table td {
-    /* text-align: center; */
-    font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-}
-
 .display_cls,
 .index-display {
     text-align: center;
 }
 
-.table-content .slds-table th {
-    background-color: #0176D3;
-    color: white;
-    padding: 0.6rem;
-    height: 45px;
+.table-content {
+    border-radius: 8px;
+    margin: 1rem;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
 }
-
-.table-content .slds-table td {
-    /* padding: 0.4rem; */
-    height: 45px;
-}
-
 
 .table-content .slds-table .sno,
 .table-content .slds-table .listing-field,
 .table-content .slds-table .property-field,
 .table-content .slds-table .actions {
     text-align: center;
-    width: auto;
+}
+
+.table-content .slds-table .actions {
+    width: 5rem;
+}
+
+.table-content .slds-table td {
+    text-align: left;
 }
 
 .action-btn {
@@ -542,19 +522,9 @@
     stroke: #dc2626;
 }
 
-.delete-div:disabled{
+.delete-div:disabled {
     background-color: rgb(243 243 243);
     cursor: not-allowed;
-}
-
-.table-content tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.table-content table thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 98;
 }
 
 .no-data-container {
@@ -585,12 +555,6 @@
     flex-direction: row;
     gap: 1rem;
     margin-bottom: 0;
-}
-
-.table-content table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    /* cursor: pointer; */
-    border: none;
 }
 
 .closs_icon_css {
@@ -687,15 +651,15 @@
     .invalid-access {
         padding: 2rem 1.5rem;
     }
-    
+
     .invalid-access h1 {
         font-size: 24px;
     }
-    
+
     .invalid-access p {
         font-size: 16px;
     }
-    
+
     .invalid-access svg {
         width: 64px;
         height: 64px;

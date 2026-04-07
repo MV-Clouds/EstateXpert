@@ -62,7 +62,7 @@ public with sharing class WBTemplateController {
         }
     }
 
-       /*
+    /*
     *********************************************************
     @description     : Send preview message.
     @param           : 
@@ -673,6 +673,7 @@ public with sharing class WBTemplateController {
 
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             System.debug('payload :: '+payload);
+
             String endpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/' + SETTINGS[0].MVEX__Business_Account_Id__c+'/message_templates';
             
             HttpRequest req = new HttpRequest();
@@ -959,7 +960,9 @@ public with sharing class WBTemplateController {
 
         try {
             CreateTemplateWrapper.TemplateWrapper templateWrapper = (CreateTemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, CreateTemplateWrapper.TemplateWrapper.class);
+
             String editEndpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/'+templateId;
+
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             
             HttpRequest req = new HttpRequest();

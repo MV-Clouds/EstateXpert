@@ -30,8 +30,8 @@
 }
 
 .search-input {
-    flex-grow: 1;
-    --sds-c-input-radius-border: 8px;
+    width: 20rem;
+    --sds-c-input-radius-border: 6px;
     color: #000000;
 }
 
@@ -48,48 +48,6 @@
     border-color: #0176D3;
     box-shadow: 0 3px 12px rgba(1, 118, 211, 0.2);
     background: #ffffff;
-}
-
-.table-content {
-    overflow: auto;
-    border-radius: 8px;
-    height: 100%;
-    background-color: white;
-    margin: 16px;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-}
-
-.table-content .slds-table th,
-.table-content .slds-table td {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-}
-
-.table-content .slds-table th {
-    background: #0176D3;
-    color: white;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    padding: 0.6rem;
-    height: 45px;
-}
-
-.table-content .slds-table td {
-    height: 45px;
-}
-
-.table-content .slds-table .sno,
-.table-content .slds-table .contact-name,
-.table-content .slds-table .contact-email,
-.table-content .slds-table .email-name,
-.table-content .slds-table .send-time,
-.table-content .slds-table .status {
-    width: auto;
 }
 
 .no-data-container {
@@ -110,67 +68,8 @@
     letter-spacing: 0.3px;
 }
 
-.pagination-container {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    justify-content: center;
-    padding-bottom: 1rem;
-}
-
-.pagination-button {
-    background-color: #ffffff;
-    border: 1px solid #d8d8d8;
-    color: #333;
-    padding: 6px 12px;
-    margin: 0 2px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    border-radius: 0.3rem;
-    font-size: 12px;
-    font-weight: 400;
-}
-
-.pagination-button svg {
-    fill: black;
-    width: 0.7rem;
-    height: 0.7rem;
-}
-
-.pagination-button:hover {
-    background-color: #f0f0f0;
-}
-
-.pagination-button.active {
-    background-color: #0070d2;
-    color: white;
-    border-color: #0070d2;
-}
-
-.pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 span {
     margin: 0 5px;
-}
-
-.pagination-button:first-child,
-.pagination-button:last-child {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.table-content tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.table-content table thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 98;
 }
 
 .main_header_cls {
@@ -179,10 +78,16 @@ span {
     border-radius: 12px;
     padding: 1rem;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     gap: 8px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     position: relative;
+}
+
+.main_header_cls .header{
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .details_cls {
@@ -224,18 +129,6 @@ span {
     cursor: pointer;
 }
 
-.main_content_cls {
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    border: 1px solid rgba(1, 118, 211, 0.1);
-    position: relative;
-}
-
 .truncate_css {
     white-space: nowrap;
     overflow: hidden;
@@ -265,17 +158,22 @@ span {
     align-items: center;
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #0176D3;
     box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
-    transition: all 0.2s ease;
-    z-index: 1000;
+    transition: all 0.1s ease;
+    z-index: 10;
 }
 
 .filter-icon-container:hover {
     background: #F3F6F9;
     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
     transform: translateY(-1px);
+}
+
+/* Increase z-index when filter modal is open */
+.main_header_cls:has(.filter-dropdown-box) .filter-icon-container {
+    z-index: 1001;
 }
 
 .filter-trigger-icon {
@@ -292,7 +190,7 @@ span {
     align-items: center;
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #0176D3;
     box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
     transition: all 0.2s ease;
@@ -342,7 +240,8 @@ span {
     margin-top: 40px;
     z-index: 1000;
     position: absolute;
-    right: 43px;
+     right: 58px;
+    top: 18px;
     width: 100%;
     max-width: 600px;
     max-height: 80vh;

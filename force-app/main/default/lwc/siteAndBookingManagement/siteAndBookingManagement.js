@@ -378,19 +378,33 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         }
     }
 
-    updateSortIcons() {
+    updateSortIcons(event) {
         try {
-            // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => {
-                icon.classList.remove('sort-icon-active', 'rotate-asc', 'rotate-desc');
+            let svgElements = this.template.querySelectorAll('svg.listing-manager-icon');
+            let clickedSortField = event ? event.currentTarget.dataset.id : this.sortField;
+            
+            this.template.querySelectorAll('.sorting_header').forEach(el => {
+                el.classList.remove('active-sort');
             });
-            // Set active header
-            const currentHeader = this.template.querySelector(`[data-id="${this.sortField}"] .slds-icon-utility-arrowdown svg`);
-            if (currentHeader) {
-                currentHeader.classList.add('sort-icon-active');
-                currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+            
+            if (event) {
+                event.currentTarget.classList.add('active-sort');
+            } else if (this.sortField) {
+                let activeHeader = this.template.querySelector(`th[data-id="${this.sortField}"]`);
+                if (activeHeader) activeHeader.classList.add('active-sort');
             }
+
+            svgElements.forEach(svg => {
+                const sortFieldParent = svg.dataset.index;
+                svg.classList.remove('rotate-asc', 'rotate-desc');
+                if (sortFieldParent === clickedSortField) {
+                    if (this.sortOrder === 'asc') {
+                        svg.classList.add('rotate-asc');
+                    } else {
+                        svg.classList.add('rotate-desc');
+                    }
+                }
+            });
         } catch (error) {
             console.error('Error in updateSortIcons:', error);
         }

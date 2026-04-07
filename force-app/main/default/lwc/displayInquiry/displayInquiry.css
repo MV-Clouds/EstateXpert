@@ -5,6 +5,7 @@
 
 .main-card {
     min-height: 550px;
+    gap: 1rem;
     display: flex;
     flex-direction: column;
     background: #f5f7fa;
@@ -33,15 +34,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 1rem;
-    gap: 4px;
-}
-
 .no-prop {
     font-size: 20px;
     display: flex;
@@ -66,35 +58,6 @@ button:disabled {
     min-width: 12rem;
 }
 
-.custom-data-table {
-    max-width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    font-size: 14px;
-    overflow: scroll;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-.data-table-container {
-    margin-top: 16px;
-    max-width: 100%;
-    overflow: auto;
-    border-radius: 8px;
-    flex: 1;
-    background: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    margin-bottom: 1rem;
-    position: relative;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-}
-
 .header-cell {
     background-color: #f4f6f9;
     font-weight: 500;
@@ -109,115 +72,6 @@ button:disabled {
     position: relative;
 }
 
-.sorting_header .slds-icon_container {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-    /* padding-left: 0.5rem; */
-    position: absolute;
-    right: 0;
-}
-
-.sorting_header:hover .slds-icon_container {
-    opacity: 1;
-    visibility: visible;
-}
-
-.sorting_header.active-sort .slds-icon_container {
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-.rotate-asc {
-    transform: rotate(0deg);
-    transition: transform 0.3s;
-}
-
-.rotate-desc {
-    transform: rotate(180deg);
-    transition: transform 0.3s;
-}
-
-/* Sort icon styling */
-.sorting_header .slds-icon_container.slds-icon-utility-arrowdown {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    /* padding-left: 0.5rem; */
-}
-
-.sorting_header:hover .slds-icon_container.slds-icon-utility-arrowdown {
-    opacity: 1;
-    visibility: visible;
-}
-
-.sorting_header.active-sort .slds-icon_container.slds-icon-utility-arrowdown {
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-.header-cell .slds-icon-utility-arrowdown svg {
-    height: 0.8rem;
-    fill: white;
-}
-
-.listing-manager-icon {
-    width: 0.9rem;
-    height: 0.9rem;
-    cursor: pointer;
-     fill: white;
-     stroke: white;
-}
-
-.header-cell .sort-cover {
-    height: 100%;
-    border-radius: 6px;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.5s ease;
-    justify-content: center;
-    padding-inline: 21px;
-    /* position: relative; */
-}
-
-.header-cell .sort-cover:hover {
-    background-color: #2c89d6;
-}
-
-.custom-data-table td {
-    padding: 10px;
-    text-align: center;
-    word-break: break-word;
-    word-wrap: break-word;
-    white-space: normal;
-    min-width: 180px;
-    overflow-wrap: break-word;
-}
-
-.custom-data-table tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-/* Add hover effect for table rows */
-.custom-data-table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    border: none;
-}
-
-/* Add hover effect for table headers */
-.sorting_header:hover {
-    background-color: #2c89d6;
-    transition: background-color 0.3s ease;
-}
-
-/* Add hover effect for sort cover */
-.header-cell .sort-cover:hover {
-    background-color: #2c89d6;
-    transition: background-color 0.3s ease;
-}
-
 .view-more-button {
     background-color: #0070d2;
     color: #fff;
@@ -229,24 +83,6 @@ button:disabled {
 
 .view-more-button:hover {
     background-color: #005fb2;
-}
-
-/* Styling for table links (inquiry names and reference fields) */
-.custom-data-table a {
-    color: #0176D3;
-    text-decoration: none;
-    cursor: pointer;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.custom-data-table a:hover {
-    color: #005fb2;
-    text-decoration: underline;
-}
-
-.custom-data-table tr:last-child td {
-    border-bottom: none;
 }
 
 .edit-btn {
@@ -314,6 +150,11 @@ button:disabled {
     background-color: #E1F1FE;
     color: #0176D3;
     border: 1px solid #0176D3;
+}
+
+.main_content_cls{
+    max-height: 420px;
+    min-height: 420px;
 }
 
 .mapping-item-inactive {
@@ -388,6 +229,12 @@ button:disabled {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
 }
+
+.action-icon-div{
+display: flex;
+    justify-content: center;
+    align-items: center;
+}
 /* 
 .mapping-btn:hover {
     background-color: #005fb2;
@@ -455,45 +302,6 @@ button:disabled {
     box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
-/* .btn:not(:disabled):hover {
-    background-color: #0066b9;
-    color: white;
-} */
-
-
-.pagination-button {
-    background-color: #ffffff;
-    border: 1px solid #d8d8d8;
-    color: #333;
-    padding: 6px 12px;
-    margin: 0 2px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    border-radius: 0.3rem;
-    font-size: 12px;
-}
-
-.pagination-button svg {
-    fill: black;
-    width: 0.7rem;
-    height: 0.7rem;
-}
-
-.pagination-button:hover {
-    background-color: #f0f0f0;
-}
-
-.pagination-button.active {
-    background-color: #0070d2;
-    color: white;
-    border-color: #0070d2;
-}
-
-.pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .results-info {
     margin-left: 15px;
     color: #666;
@@ -519,14 +327,6 @@ button:disabled {
 /* Style for the ellipsis */
 span {
     margin: 0 5px;
-}
-
-/* Specific styles for Back and Next buttons */
-.pagination-button:first-child,
-.pagination-button:last-child {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .open-mapping-div {
@@ -563,7 +363,7 @@ span {
     position: absolute;
     right: 0;
     top: 120%;
-    z-index: 97;
+    z-index: 100;
     border-radius: 8px;
     background-color: #ffffff;
     box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
@@ -1164,19 +964,6 @@ span {
     visibility: hidden;
 }
 
-.bcTableDiv {
-    border-radius: 0px;
-    width: 60%;
-}
-
-.bcTableDiv .colume1 {
-    width: 2rem;
-}
-
-.bcTableDiv .checkbox-cell {
-    margin: 0px 14px;
-}
-
 .rightDivBc {
     width: 38%;
     padding: 1.5rem;
@@ -1267,7 +1054,7 @@ span {
 
 .preview-box-container {
     background: white;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 1.5rem 3rem;
     border: 1px solid #E5E7EB;
     overflow-y: auto;
@@ -1318,65 +1105,9 @@ span {
     padding-top: 23px;
 }
 
-.selected-contacts-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    flex: 1;
-    min-height: 0;
-}
-
-.contacts-table-wrapper {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    border-radius: 8px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    background: #ffffff;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-}
-
-.contacts-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    background-color: #fff;
-}
-
-.contacts-table thead {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.contacts-table thead tr {
-    background: #0176D3;
-}
-
-.contacts-table thead th {
-    padding: 10px;
-    background: #0176D3;
-    color: white;
-    text-align: center;
-    font-weight: 500;
-    position: sticky;
-    top: 0;
-}
-
-.contacts-table tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.contacts-table tbody tr:nth-child(even) {
-    background-color: #ffffff;
-}
-
-.contacts-table td {
-    padding: 10px;
-    text-align: center;
-    color: #585858;
+.contact-table{
+    min-height: 300px;
+    max-height: 300px;
 }
 
 .no-results-cell {
@@ -1390,39 +1121,6 @@ span {
     justify-content: center;
     gap: 0.5rem;
     color: #6b7280;
-}
-
-.table-delete-btn {
-    padding: 6px;
-    border: 1px solid #e5e7eb;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    margin: 0 auto;
-}
-
-.table-delete-btn:hover {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #ef4444;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-}
-
-.table-delete-btn:hover svg {
-    fill: #dc2626;
-}
-
-.table-delete-btn:hover svg path {
-    stroke: #dc2626;
-}
-
-.table-delete-btn:hover svg path {
-    stroke: #dc2626;
 }
 
 /* Schedule Modal Styles */

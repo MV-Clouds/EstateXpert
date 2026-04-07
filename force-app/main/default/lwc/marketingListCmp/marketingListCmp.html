@@ -105,13 +105,13 @@
                                 </template>
                                 <template if:true={showList}>
                                     <template if:false={showSection}>
-                                        <div class="tableDiv" id="tableDiv">
+                                        <div class="table-content" id="table-content">
                                             <table aria-multiselectable="true"
                                                 class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
                                                 role="grid"
                                                 aria-label="Example advanced table of Opportunities in actionable mode">
                                                 <thead>
-                                                    <tr class="slds-line-height_reset fields-names">
+                                                    <tr class="slds-line-height_reset fields-names table_tr_cls">
                                                         <th class="slds-text-align_right slds-cell_action-mode colume1"
                                                             scope="col">
                                                             <span id="column-group-header"
@@ -125,7 +125,7 @@
                                                             </div>
                                                         </th>
                                                         <th aria-sort="none" data-id="Name" onclick={sortClick}
-                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
                                                             scope="col">
                                                             <div class="slds-text-link_reset sort-cover" role="button"
                                                                 tabindex="0">
@@ -151,7 +151,7 @@
                                                             for:index="index">
                                                             <th key={contact.fieldName} data-id={contact.fieldName}
                                                                 onclick={sortClick} aria-sort="none"
-                                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode colume2"
+                                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
                                                                 scope="col">
                                                                 <div class="slds-text-link_reset sort-cover"
                                                                     role="button" tabindex="0">
@@ -190,12 +190,12 @@
                                                                     <span class="checkmark"></span>
                                                                 </label>
                                                             </td>
-                                                            <th class="slds-cell_action-mode conat_cls" scope="row">
+                                                            <td class="slds-cell_action-mode conat_cls" scope="row">
                                                                 <div class="slds-truncate center-trancate-text">
                                                                     <a data-id={contact.Id} onclick={redirectToRecord}
                                                                         tabindex="0">{contact.Name}</a>
                                                                 </div>
-                                                            </th>
+                                                            </td>
                                                             <template for:each={contact.orderedFields} for:item="field"
                                                                 for:index="index2">
                                                                 <td key={field.fieldName} class="slds-cell_action-mode"

@@ -1,20 +1,21 @@
 public without sharing class AWSFilesController {
 
-    public static List<AWS_Config__c> configList = [SELECT Id, AWS_Access_Key__c, AWS_Secret_Access_Key__c, S3_Bucket_Name__c, S3_Region_Name__c, CreatedDate, LastModifiedDate FROM AWS_Config__c WITH USER_MODE LIMIT 1];
+    public static List<MVEX__AWS_Config__c> configList = [SELECT Id, MVEX__AWS_Access_Key__c, MVEX__AWS_Secret_Access_Key__c, MVEX__S3_Bucket_Name__c, MVEX__S3_Region_Name__c, CreatedDate, LastModifiedDate FROM MVEX__AWS_Config__c LIMIT 1];
     
     public static String uploadFileToS3(String fileName, Blob fileBody, String contentType) {
         String publicURL = '';
         try {
-            AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
+            MVEX__AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
             
             if(configData != null) {
-                String endpoint = 'https://' + configData.S3_Bucket_Name__c + '.s3.amazonaws.com/' + fileName;
+                String host = getS3Host(configData.MVEX__S3_Bucket_Name__c, configData.MVEX__S3_Region_Name__c);
+                String endpoint = 'https://' + host + '/' + fileName;
                 
                 // Calculate Content-MD5
                 String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', fileBody));
                 String payloadHash = EncodingUtil.convertToHex(Crypto.generateDigest('SHA-256', fileBody));
                 
-                Map<String, String> headers = generateAWSUploadHeaders(fileName, contentMD5, payloadHash, contentType, configData.AWS_Access_Key__c, configData.AWS_Secret_Access_Key__c, configData.S3_Region_Name__c, configData.S3_Bucket_Name__c);
+                Map<String, String> headers = generateAWSUploadHeaders(fileName, contentMD5, payloadHash, contentType, configData.MVEX__AWS_Access_Key__c, configData.MVEX__AWS_Secret_Access_Key__c, configData.MVEX__S3_Region_Name__c, configData.MVEX__S3_Bucket_Name__c);
                 
                 HttpRequest req = new HttpRequest();
                 req.setEndpoint(endpoint);
@@ -33,7 +34,7 @@ public without sharing class AWSFilesController {
                 HttpResponse res = http.send(req);
                 
                 if(res.getStatusCode() == 200) {
-                    publicUrl = 'https://' + configData.S3_Bucket_Name__c + '.s3.' + configData.S3_Region_Name__c + '.amazonaws.com/' + fileName;
+                    publicUrl = 'https://' + host + '/' + fileName;
                     System.debug('File successfully uploaded to S3. Public URL: ' + publicUrl);
                 } else {
                     System.debug('Failed to upload file: ' + res.getStatusCode() + ' - ' + res.getBody());
@@ -50,7 +51,7 @@ public without sharing class AWSFilesController {
     public static Map<String, String> generateAWSUploadHeaders(String fileName, String contentMD5, String payloadHash, String contentType, String awsAccessKey, String awsSecretKey, String awsRegion, String awsBucketName) {
         try {
             String service = 's3';
-            String host = awsBucketName + '.s3.amazonaws.com';
+            String host = getS3Host(awsBucketName, awsRegion);
             String algorithm = 'AWS4-HMAC-SHA256';
             
             Datetime now = Datetime.now();
@@ -101,10 +102,11 @@ public without sharing class AWSFilesController {
     @AuraEnabled
     public static void deleteImagesFromS3(List<String> fileNames) {
         try {
-            AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
+            MVEX__AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
 
             if(configData != null){
-                String endpoint = 'https://' + configData.S3_Bucket_Name__c + '.s3.amazonaws.com/';
+                String host = getS3Host(configData.MVEX__S3_Bucket_Name__c, configData.MVEX__S3_Region_Name__c);
+                String endpoint = 'https://' + host + '/';
                 String payload = '<Delete><Quiet>true</Quiet>';
                 
                 for(String fileName : fileNames) {
@@ -113,8 +115,9 @@ public without sharing class AWSFilesController {
                 payload += '</Delete>';
                 
                 String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', Blob.valueOf(payload)));
+                String payloadHash = EncodingUtil.convertToHex(Crypto.generateDigest('SHA-256', Blob.valueOf(payload)));
                 
-                Map<String, String> headers = generateAWSHeaders(payload, contentMD5, configData.AWS_Access_Key__c, configData.AWS_Secret_Access_Key__c, configData.S3_Region_Name__c, configData.S3_Bucket_Name__c);
+                Map<String, String> headers = generateAWSHeaders(payload, contentMD5, configData.MVEX__AWS_Access_Key__c, configData.MVEX__AWS_Secret_Access_Key__c, configData.MVEX__S3_Region_Name__c, configData.MVEX__S3_Bucket_Name__c);
                 
                 HttpRequest req = new HttpRequest();
                 req.setEndpoint(endpoint + '?delete');
@@ -125,6 +128,7 @@ public without sharing class AWSFilesController {
                 for(String key : headers.keySet()){
                     req.setHeader(key, headers.get(key));
                 }
+                req.setHeader('x-amz-content-sha256', payloadHash);
                 
                 req.setBody(payload);
                 
@@ -147,7 +151,7 @@ public without sharing class AWSFilesController {
     public static Map<String, String> generateAWSHeaders(String payload, String contentMD5, String awsAccessKey, String awsSecretKey, String awsRegion, String awsBucketName) {
         try {
             String service = 's3';
-            String host = awsBucketName + '.s3.amazonaws.com';
+            String host = getS3Host(awsBucketName, awsRegion);
             String algorithm = 'AWS4-HMAC-SHA256';
         
             Datetime now = Datetime.now();
@@ -156,12 +160,12 @@ public without sharing class AWSFilesController {
         
             String canonicalUri = '/';
             String canonicalQueryString = 'delete=';
+            String payloadHash = EncodingUtil.convertToHex(Crypto.generateDigest('SHA-256', Blob.valueOf(payload)));
             String canonicalHeaders = 'content-md5:' + contentMD5 + '\n' +
                                     'host:' + host + '\n' + 
-                                    'x-amz-content-sha256:UNSIGNED-PAYLOAD\n' +
+                                    'x-amz-content-sha256:' + payloadHash + '\n' +
                                     'x-amz-date:' + amzDate + '\n';
             String signedHeaders = 'content-md5;host;x-amz-content-sha256;x-amz-date';
-            String payloadHash = 'UNSIGNED-PAYLOAD';
         
             String canonicalRequest = 'POST\n' + 
                                     canonicalUri + '\n' +
@@ -184,7 +188,7 @@ public without sharing class AWSFilesController {
             Map<String, String> headers = new Map<String, String>();
             headers.put('Authorization', authorizationHeader);
             headers.put('x-amz-date', amzDate);
-            headers.put('x-amz-content-sha256', 'UNSIGNED-PAYLOAD');
+            headers.put('x-amz-content-sha256', payloadHash);
             headers.put('Content-MD5', contentMD5);
         
             return headers;
@@ -192,6 +196,13 @@ public without sharing class AWSFilesController {
             ErrorHandler.insertErrordata(e, 'AWSFilesController', 'generateAWSHeaders', e.getMessage());
             return null;
         }
+    }
+
+    public static String getS3Host(String bucketName, String awsRegion) {
+        if(String.isBlank(awsRegion) || awsRegion == 'us-east-1') {
+            return bucketName + '.s3.amazonaws.com';
+        }
+        return bucketName + '.s3.' + awsRegion + '.amazonaws.com';
     }
     
     public static Blob getSignatureKey(String key, String dateStamp, String regionName, String serviceName) {
@@ -210,7 +221,7 @@ public without sharing class AWSFilesController {
     @AuraEnabled
     public static AWS_Config__c getS3ConfigSettings(){
         try {
-            AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
+            MVEX__AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
             return configData;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'AWSFilesController', 'getS3ConfigSettings', e.getMessage());

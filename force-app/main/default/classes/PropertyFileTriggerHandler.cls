@@ -14,7 +14,7 @@ public with sharing class PropertyFileTriggerHandler {
     public static void handleAfterDelete(List<Property__c> deletedPropertyFiles) {
 
         try {
-            List<AWS_Config__c> awsSettingsList = [SELECT Id, AWS_Access_Key__c, AWS_Secret_Access_Key__c, S3_Bucket_Name__c, S3_Region_Name__c, Payloadhash__c FROM AWS_Config__c WHERE SetupOwnerId = :UserInfo.getOrganizationId() WITH USER_MODE LIMIT 1];
+            List<AWS_Config__c> awsSettingsList = [SELECT Id, AWS_Access_Key__c, AWS_Secret_Access_Key__c, S3_Bucket_Name__c, S3_Region_Name__c FROM AWS_Config__c WHERE SetupOwnerId = :UserInfo.getOrganizationId() WITH USER_MODE LIMIT 1];
 
             if (awsSettingsList.isEmpty()) {
                 return;
@@ -25,7 +25,6 @@ public with sharing class PropertyFileTriggerHandler {
             String awsKey = settings.AWS_Access_Key__c;
             String awsSecret = settings.AWS_Secret_Access_Key__c;
             String awsRegion = settings.S3_Region_Name__c;
-            String payloadHash = settings.Payloadhash__c;
 
             Set<Id> propertyIds = new Set<Id>();
              
@@ -42,7 +41,7 @@ public with sharing class PropertyFileTriggerHandler {
             }
             
             if(fileNames.isEmpty() == false){
-                deleteImagesFromS3(fileNames, awsBucket, awsKey, awsSecret, awsRegion, payloadHash);
+                deleteImagesFromS3(fileNames, awsBucket, awsKey, awsSecret, awsRegion);
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'PropertyFileTriggerHandler', 'handleAfterDelete', 'Error while deleting property files from S3.');
@@ -57,12 +56,12 @@ public with sharing class PropertyFileTriggerHandler {
      * @param awsKey AWS access key.
      * @param awsSecret AWS secret access key.
      * @param awsRegion AWS region name.
-     * @param payloadHash Payload hash for the request.
      */
     @future(callout=true)
-    public static void deleteImagesFromS3(List<String> fileNames, String awsBucket, String awsKey, String awsSecret, String awsRegion, String payloadHash) {
+    public static void deleteImagesFromS3(List<String> fileNames, String awsBucket, String awsKey, String awsSecret, String awsRegion) {
         try {
-            String endpoint = 'https://' + awsBucket + '.s3.amazonaws.com/';
+            String host = getS3Host(awsBucket, awsRegion);
+            String endpoint = 'https://' + host + '/';
             String payload = '<Delete><Quiet>true</Quiet>';
             
             for(String fileName : fileNames) {
@@ -71,8 +70,9 @@ public with sharing class PropertyFileTriggerHandler {
             payload += '</Delete>';
             
             String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', Blob.valueOf(payload)));
+            String payloadHash = EncodingUtil.convertToHex(Crypto.generateDigest('SHA-256', Blob.valueOf(payload)));
             
-            Map<String, String> headers = generateAWSHeaders(payload, contentMD5, awsBucket, awsKey, awsSecret, awsRegion, payloadHash);
+            Map<String, String> headers = generateAWSHeaders(contentMD5, host, awsKey, awsSecret, awsRegion, payloadHash);
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint + '?delete');
@@ -96,19 +96,17 @@ public with sharing class PropertyFileTriggerHandler {
     /**
      * Method Name : generateAWSHeaders
      * @description : Generates AWS headers for the request.
-     * @param payload The request payload.
      * @param contentMD5 MD5 hash of the payload.
-     * @param awsBucket AWS S3 bucket name.
+     * @param host AWS S3 host used in the request.
      * @param awsKey AWS access key.
      * @param awsSecret AWS secret access key.
      * @param awsRegion AWS region name.
      * @param payloadHash Payload hash for the request.
      * @return Map of headers to be used in the request.
      */
-    public static Map<String, String> generateAWSHeaders(String payload, String contentMD5, String awsBucket, String awsKey, String awsSecret, String awsRegion, String payloadHash) {
+    public static Map<String, String> generateAWSHeaders(String contentMD5, String host, String awsKey, String awsSecret, String awsRegion, String payloadHash) {
         try {
             String service = 's3';
-            String host = awsBucket + '.s3.amazonaws.com';
             String algorithm = 'AWS4-HMAC-SHA256';
         
             Datetime now = Datetime.now();
@@ -119,7 +117,7 @@ public with sharing class PropertyFileTriggerHandler {
             String canonicalQueryString = 'delete=';
             String canonicalHeaders = 'content-md5:' + contentMD5 + '\n' +
                                     'host:' + host + '\n' + 
-                                    'x-amz-content-sha256:UNSIGNED-PAYLOAD\n' +
+                                    'x-amz-content-sha256:' + payloadHash + '\n' +
                                     'x-amz-date:' + amzDate + '\n';
             String signedHeaders = 'content-md5;host;x-amz-content-sha256;x-amz-date';
         
@@ -149,7 +147,7 @@ public with sharing class PropertyFileTriggerHandler {
             Map<String, String> headers = new Map<String, String>();
             headers.put('Authorization', authorizationHeader);
             headers.put('x-amz-date', amzDate);
-            headers.put('x-amz-content-sha256', 'UNSIGNED-PAYLOAD');
+            headers.put('x-amz-content-sha256', payloadHash);
             headers.put('Content-MD5', contentMD5);
         
             return headers;
@@ -157,6 +155,20 @@ public with sharing class PropertyFileTriggerHandler {
             ErrorHandler.insertErrordata(e, 'PropertyFileTriggerHandler', 'generateAWSHeaders', 'Error while generating AWS headers.');
             return null;
         }
+    }
+
+    /**
+     * Method Name : getS3Host
+     * @description : Returns the region-aware S3 host used for SigV4 signing and callout endpoint.
+     * @param awsBucket AWS S3 bucket name.
+     * @param awsRegion AWS region name.
+     * @return Hostname for S3 virtual-hosted style requests.
+     */
+    public static String getS3Host(String awsBucket, String awsRegion) {
+        if (String.isBlank(awsRegion) || awsRegion == 'us-east-1') {
+            return awsBucket + '.s3.amazonaws.com';
+        }
+        return awsBucket + '.s3.' + awsRegion + '.amazonaws.com';
     }
 
     /**

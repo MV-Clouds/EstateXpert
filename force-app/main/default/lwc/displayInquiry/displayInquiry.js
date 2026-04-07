@@ -2315,6 +2315,14 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     }));
                     this.filteredGroupMembers = [...this.broadcastContactList];
 
+                    // Apply default sort (Name asc) when popup opens
+                    if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
+                        this.sortField = 'Name';
+                        this.sortOrder = 'asc';
+                        // reuse sort logic to apply ordering
+                        this.sortPopupClick({ currentTarget: { dataset: { id: 'Name' } } });
+                    }
+
                     this.showTemplate = true;
                     this.popUpFirstPage = false;
                     this.popUpSecondPage = true;
@@ -2789,6 +2797,43 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
+    // Sorting for popup contact table
+    sortPopupClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            // Toggle sort field/order similar to main table
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+
+            // Perform sorting on filteredGroupMembers
+            if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
+                const sorted = [...this.filteredGroupMembers].sort((a, b) => {
+                    let aValue = a[fieldName];
+                    let bValue = b[fieldName];
+                    if (aValue === undefined || aValue === null) aValue = '';
+                    if (bValue === undefined || bValue === null) bValue = '';
+                    if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+                    if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+                    if (!isNaN(aValue) && !isNaN(bValue)) {
+                        aValue = Number(aValue);
+                        bValue = Number(bValue);
+                    }
+                    let compare = 0;
+                    if (aValue > bValue) compare = 1;
+                    else if (aValue < bValue) compare = -1;
+                    return this.sortOrder === 'asc' ? compare : -compare;
+                });
+                this.filteredGroupMembers = sorted;
+            }
+        } catch (error) {
+            errorDebugger('displayInquiry', 'sortPopupClick', error, 'warn', 'Error in sortPopupClick');
+        }
+    }
+
     /**
     * Method Name : sortData
     * @description : Method used to apply sorting on the data
@@ -2886,6 +2931,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         icon.classList.add('rotate-asc');
                     } else {
                         icon.classList.add('rotate-desc');
+                    }
+                    // Force inline visibility to ensure it shows in popup headers
+                    try {
+                        icon.style.opacity = '1';
+                        icon.style.visibility = 'visible';
+                    } catch (e) {
+                        // ignore
                     }
                 }
             }

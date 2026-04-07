@@ -271,6 +271,7 @@
   font-weight: 400;
   color: #585858;
   height: 3rem;
+  max-width: 25rem;
 }
 
 .table-content .slds-table_resizable-cols thead th,
@@ -347,7 +348,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 1px;
+  max-width: 150px;
 }
 
 .truncate_css div {
@@ -456,6 +457,7 @@
   width: 1rem;
   height: 1rem;
   cursor: pointer;
+  fill: white;
 }
 
 .rotate-asc {

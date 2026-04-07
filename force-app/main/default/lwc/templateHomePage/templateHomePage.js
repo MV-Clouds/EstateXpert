@@ -9,7 +9,7 @@ import updateTemplateStatus from '@salesforce/apex/TemplateBuilderController.upd
 import NoDataImage from '@salesforce/resourceUrl/NoDataImage';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 export default class TemplateHomePage extends NavigationMixin(LightningElement) {
     @track currentPage = 1;

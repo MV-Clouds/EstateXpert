@@ -297,17 +297,6 @@ span {
     color: #0176D3;
 }
 
-.main .sort-cover {
-    height: 100%;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.25s;
-    justify-content: center;
-    position: relative;
-}
-
 .main .sort-cover:hover {
     background-color: #2c89d6;
     transition: 0.25s;
@@ -383,33 +372,13 @@ span {
     /* Width when innerDiv1 is expanded */
 }
 
-.main .slds-table td {
-    height: 3.5rem;
-}
-
-.tableDiv {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.tableDiv .fields-names {
-    position: sticky;
-    top: 0;
-    z-index: 97;
-}
-
-.tableDiv .header-checkbox-div {
+.table-content .header-checkbox-div {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.tableDiv .slds-table_resizable-cols thead th,
+.table-content .slds-table_resizable-cols thead th,
 .slds-table--resizable-cols thead th {
     padding: 0;
     background: #0376D3;
@@ -420,7 +389,7 @@ span {
     letter-spacing: 0.3px;
 }
 
-.tableDiv .colume2 {
+.table-content .colume2 {
     width: 9rem;
 }
 
@@ -449,9 +418,7 @@ span {
     color: #636363;
 }
 
-.main .body .innerDiv2 .slds-cell_action-mode .slds-icon_container {
-    display: none;
-}
+
 
 .main .body .innerDiv2 .colume1 {
     width: 3.25rem
@@ -466,34 +433,7 @@ span {
     height: 3rem;
 }
 
-.main .body .innerDiv2 .colume1:hover .slds-icon_container {
-    display: block;
-    /* transform: rotate(180deg); */
-}
 
-.main .body .innerDiv2 .colume2:hover .slds-icon_container {
-    display: block;
-}
-
-/* show active sorted column */
-th.sorted-field .slds-icon_container {
-    display: block !important;
-}
-
-.main .body .innerDiv2 .slds-icon-utility-arrowdown svg {
-    height: 0.8rem;
-    fill: white;
-}
-
-.rotate-asc {
-    transform: rotate(0deg);
-    transition: transform 0.3s;
-}
-
-.rotate-desc {
-    transform: rotate(180deg);
-    transition: transform 0.3s;
-}
 
 .paginationDiv {
     flex-shrink: 0;
@@ -517,11 +457,7 @@ th.sorted-field .slds-icon_container {
     align-items: center;
 }
 
-.listing-manager-icon {
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-}
+
 
 .slds-table:not(.slds-no-row-hover) tbody tr:hover>td {
     background-color: #ebf3f6 !important;
@@ -590,7 +526,7 @@ th.sorted-field .slds-icon_container {
         border-radius: 0 0 10px 10px;
     }
 
-    .tableDiv {
+    .table-content {
         height: 90%;
         border-radius: 8px;
         margin: 6px;
@@ -658,7 +594,7 @@ th.sorted-field .slds-icon_container {
 
 @media only screen and (max-width: 900px) {
 
-    .tableDiv .header-checkbox-div {
+    .table-content .header-checkbox-div {
         padding: 0rem 0.5rem;
     }
 
@@ -684,7 +620,7 @@ input[type=checkbox]::before {
     border-color: white;
 }
 
-.tableDiv .checkbox-cell {
+.table-content .checkbox-cell {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -828,7 +764,7 @@ input[type=checkbox]::before {
     cursor: pointer;
 }
 
-.tableDiv tbody tr:nth-child(odd) {
+.table-content tbody tr:nth-child(odd) {
     background-color: aliceblue;
 }
 
@@ -1543,7 +1479,8 @@ c-template-preview {
 /* Schedule modal backdrop - higher z-index */
 .schedule-modal-backdrop {
     z-index: 9100;
-    background-color: rgba(0, 0, 0, 0.6); /* Darker backdrop for schedule modal */
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Darker backdrop for schedule modal */
 }
 
 /* Schedule modal */

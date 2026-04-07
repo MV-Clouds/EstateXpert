@@ -324,9 +324,9 @@
     overflow: hidden;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border: 1px solid rgba(1, 118, 211, 0.1);
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s ease,
-                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease,
+        margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     margin-left: 0.75rem;
 }
 
@@ -379,7 +379,7 @@
 }
 
 /* ===== TABLE ===== */
-.tableDiv {
+.table-content {
     flex: 1;
     min-height: 0;
     overflow: auto;
@@ -392,25 +392,19 @@
     /* margin: 10px; */
 }
 
-.tableDiv .fields-names {
-    position: sticky;
-    top: 0;
-    z-index: 97;
-}
-
-.tableDiv .header-checkbox-div {
+.table-content .header-checkbox-div {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.tableDiv .list-view-checkbox {
+.table-content .list-view-checkbox {
     align-items: center;
     display: flex;
     justify-content: center;
 }
 
-.tableDiv .slds-table_resizable-cols thead th,
+.table-content .slds-table_resizable-cols thead th,
 .slds-table--resizable-cols thead th {
     padding: 0;
     background: #0376D3;
@@ -421,15 +415,15 @@
     letter-spacing: 0.3px;
 }
 
-.tableDiv .colume2 {
+.table-content .colume2 {
     width: 9rem;
 }
 
-.tableDiv .offer-col {
+.table-content .offer-col {
     width: 5rem;
 }
 
-.tableDiv tbody tr:nth-child(odd) {
+.table-content tbody tr:nth-child(odd) {
     background-color: aliceblue;
 }
 
@@ -469,12 +463,6 @@
 }
 
 /* ===== TABLE ACTION CELLS ===== */
-.main .body .innerDiv2 .slds-cell_action-mode .slds-icon_container {
-    display: flex;
-    position: absolute;
-    right: 0;
-}
-
 .main .body .innerDiv2 .colume1 {
     width: 3.25rem;
 }
@@ -484,57 +472,11 @@
 }
 
 .main .body .innerDiv2 .property-image {
-    width: 4rem;
-    height: 3rem;
+    width: 3.3rem;
+    height: 2.2rem;
 }
 
-.main .body .innerDiv2 .colume1:hover .slds-icon_container {
-    display: flex;
-}
 
-.main .body .innerDiv2 .colume2:hover .slds-icon_container {
-    display: flex;
-}
-
-.main .body .innerDiv2 .slds-icon-utility-arrowdown svg {
-    height: 0.8rem;
-    fill: white;
-}
-
-.rotate-asc {
-    transform: rotate(0deg);
-    transition: transform 0.3s;
-}
-
-.rotate-desc {
-    transform: rotate(180deg);
-    transition: transform 0.3s;
-}
-
-.listing-manager-icon {
-    fill: #b0bcc4;
-    transition: fill 0.2s ease, opacity 0.2s ease;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.listing-manager-icon.sort-icon-active {
-    fill: #0176D3;
-    opacity: 1;
-    filter: drop-shadow(0 2px 4px rgba(1, 118, 211, 0.3));
-}
-
-/* Show arrow on hover for non-sorted columns only */
-th:not(.sorted-field):hover .listing-manager-icon {
-    opacity: 0.6;
-}
-
-/* Sorted column header styling */
-th.sorted-field {
-    background: linear-gradient(135deg, rgba(1, 118, 211, 0.08) 0%, rgba(1, 118, 211, 0.05) 100%);
-    /* border-left: 3px solid #0176D3; */
-    box-shadow: inset 0 0 8px rgba(1, 118, 211, 0.1);
-}
 
 .main .sort-cover {
     height: 100%;
@@ -789,8 +731,15 @@ span {
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
 }
 
 /* ===== RESPONSIVE ===== */
@@ -847,7 +796,7 @@ span {
         border-radius: 0 0 10px 10px;
     }
 
-    .tableDiv {
+    .table-content {
         height: 90%;
         border-radius: 8px;
         margin: 6px;

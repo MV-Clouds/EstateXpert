@@ -114,11 +114,12 @@ export default class RecordConfigBodyCmp extends LightningElement {
                      return;
                 }
                 this.fieldOptions = result.fieldDetailsList;
-                // Exclude OwnerId and map lookup flags
-                this.fieldOptions = this.fieldOptions.map(option => ({
-                    ...option,
-                    showRightRef: false
-                })).filter(option => option.value !== 'OwnerId');
+                this.fieldOptions = result.fieldDetailsList
+                    .filter(option => option.value !== 'OwnerId')
+                    .map(option => ({
+                        ...option,
+                        showRightRef: false
+                    }));
 
                 if (result.metadataRecords && result.metadataRecords.length > 0) {
                     // Check if JSON exists
@@ -156,26 +157,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
         return fieldType === 'REFERENCE' || fieldType === 'Lookup';
     }
 
-    fetchObjectFieldsWithoutReference(objectApiName) {
-        getListingFieldsParent({ objectApiName })
-            .then(fields => {
-                if (fields) {
-                    let filteredFields = fields.filter(field => field.fieldType !== 'REFERENCE');
-                    this.parentFieldsOption = filteredFields.map(field => {
-                        return {
-                            label: field.label,
-                            value: field.value,
-                            fieldType: field.fieldType,
-                            referenceObjectName: field.referenceFields || [],
-                            objectApiName: field.referenceObjectName || ''
-                        };
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching parent fields', error);
-            });
-    }
 
     /* ================= UI INTERACTION (SEARCH, PICKLIST) ================= */
 
@@ -204,7 +185,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
                 }
                 return item;
             });
-            this.parentFieldsOption = [];
             this.filteredFieldOptions = [...this.fieldOptions];
         } catch (error) {
             console.error(error);
@@ -249,7 +229,13 @@ export default class RecordConfigBodyCmp extends LightningElement {
             const label = event.currentTarget.dataset.label;
             const type = event.currentTarget.dataset.type;
 
-            this.updateChecklistItem(index, selectedOptionValue, selectedOptionValue, label, type);
+            const selectedField = this.fieldOptions.find(opt => opt.value === selectedOptionValue);
+            let finalValue = selectedOptionValue;
+            if (selectedField && this.isLookupField(selectedField.fieldType) && selectedField.relationshipName) {
+                finalValue = selectedField.relationshipName + '.Name';
+            }
+
+            this.updateChecklistItem(index, finalValue, finalValue, label, type, selectedField?.referenceObjectName, selectedField?.relationshipName);
             
             requestAnimationFrame(() => {
                 this.handleBlur(index);
@@ -259,31 +245,15 @@ export default class RecordConfigBodyCmp extends LightningElement {
         }
     }
 
-    selectOptionParent(event){
-        try{
-            const index = event.currentTarget.dataset.index;
-            const selectedOptionValue = event.currentTarget.dataset.id;
-            const label = event.currentTarget.dataset.label;
-            const type = event.currentTarget.dataset.type;
 
-            const fullValue = this.checklistItems[index].relationshipName + '.' + selectedOptionValue;
-            
-            this.updateChecklistItem(index, fullValue, fullValue, label, type);
-
-            requestAnimationFrame(() => {
-                this.handleBlur(index);
-            });
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    updateChecklistItem(index, fieldName, value, label, type) {
+    updateChecklistItem(index, fieldName, value, label, type, referenceObjectName, relationshipName) {
         let item = this.checklistItems[index];
         item.fieldName = fieldName;
         item.value = value;
         item.label = label;
         item.fieldType = type;
+        item.referenceObjectName = referenceObjectName;
+        item.relationshipName = relationshipName;
 
         if (type === 'DATE') {
             item.isDisable = false;
@@ -311,17 +281,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
         this.filteredFieldOptions = [...this.fieldOptions];
     }
 
-    clickOnRef(event){
-        const selectedValue = event.currentTarget.dataset.id;
-        const index = event.currentTarget.dataset.index;
-        const relationShip = event.currentTarget.dataset.label;
-        this.checklistItems[index].relationshipName = relationShip;
-        
-        const selectedField = this.fieldOptions.find(option => option.value === selectedValue);
-        if (selectedField != null) {
-            this.fetchObjectFieldsWithoutReference(selectedField.referenceObjectName);
-        }
-    }
 
     handleFormatChange(event){
         const value = event.detail.value;
@@ -458,7 +417,9 @@ export default class RecordConfigBodyCmp extends LightningElement {
                 value: item.fieldName,
                 label: item.label,
                 fieldType: item.fieldType,
-                format: item.format
+                format: item.format,
+                referenceObjectName: item.referenceObjectName,
+                relationshipName: item.relationshipName
             }));
             
             const checklistData = JSON.stringify(itemsToSave);

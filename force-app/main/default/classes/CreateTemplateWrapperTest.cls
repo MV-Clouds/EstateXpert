@@ -8,8 +8,6 @@ public class CreateTemplateWrapperTest {
         templateWrapper.tempLanguage = 'en';
         templateWrapper.templateCategory = 'Marketing';
         templateWrapper.templateType = 'Custom';
-        templateWrapper.headAlternateTexts = new List<String>{'Sender Name'};
-        templateWrapper.varAlternateTexts = new List<String>{'Recipient Name', 'Phone'};
         templateWrapper.templateBody = 'Hello {{1}}, This is an invitation for the annual event for 8 years of journey. Contact us for more details: {{2}}';
         templateWrapper.marketingOptText = 'Quick reply';
 
@@ -73,10 +71,7 @@ public class CreateTemplateWrapperTest {
         templateWrapper.tempLanguage = 'en';
         templateWrapper.templateCategory = 'Authentication';
         templateWrapper.templateType = 'One-time passcode';
-        templateWrapper.expireTime = 301;
         templateWrapper.templateBody = 'Hello {{1}}, Please use the following OTP for verification: {{2}}';
-        templateWrapper.headAlternateTexts = new List<String>{'Header Email'};
-        templateWrapper.varAlternateTexts = new List<String>{'Contact Name', 'OTP Code'};
 
         HttpResponse res = new HttpResponse();
         res.setStatusCode(200);

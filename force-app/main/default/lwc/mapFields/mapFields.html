@@ -17,20 +17,26 @@
                     </div>
                     <div class="save-btn">
                         <button disabled={isAutoSyncEnabled} onclick={addNewPair} class="blue-btn-css">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
                             </svg>
                             Add
                         </button>
                         <button disabled={savebutton} onclick={handleAddPairClick} class="blue-btn-css">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
+                                    fill="currentColor" />
                             </svg>
                             Save Mapping
                         </button>
                         <button disabled={isRevertDisabled} onclick={revertChanges} class="blue-btn-css">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 5V1L7 6L12 11V7C15.31 7 18 9.69 18 13C18 16.31 15.31 19 12 19C8.69 19 6 16.31 6 13H4C4 17.42 7.58 21 12 21C16.42 21 20 17.42 20 13C20 8.58 16.42 5 12 5Z" fill="currentColor" />
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 5V1L7 6L12 11V7C15.31 7 18 9.69 18 13C18 16.31 15.31 19 12 19C8.69 19 6 16.31 6 13H4C4 17.42 7.58 21 12 21C16.42 21 20 17.42 20 13C20 8.58 16.42 5 12 5Z"
+                                    fill="currentColor" />
                             </svg>
                             Revert Changes
                         </button>
@@ -39,7 +45,7 @@
 
                 <template if:true={isDropDownpairAvailable}>
                     <div class="table-content">
-                        <table class="slds-table">
+                        <table class="slds-table slds-table_fixed-layout">
                             <thead>
                                 <tr class="table_tr_cls">
                                     <th scope="col" class="sno">
@@ -62,13 +68,13 @@
                                         <td data-label="S.No.">
                                             <div class="index-display">{pair.displayIndex}</div>
                                         </td>
-                                        <td data-label="Template Name" class="truncate_css">
+                                        <td data-label="Template Name">
                                             <div class="combobox_cls">
                                                 <lightning-combobox label="Listing Field" options={pair.listingOptions}
                                                     placeholder="Select Listing Field" data-index={index}
                                                     value={pair.selectedListing} onchange={handleSourceFieldChange}
-                                                    disabled={isAutoSyncEnabled} class="disabled" variant="label-hidden"
-                                                    dropdown-alignment="auto">
+                                                    disabled={isAutoSyncEnabled} class="disabled"
+                                                    variant="label-hidden">
                                                 </lightning-combobox>
                                             </div>
                                         </td>
@@ -78,15 +84,15 @@
                                                     options={pair.propertyOptions} data-index={index}
                                                     value={pair.selectedProperty} placeholder="Select Property Field"
                                                     onchange={handleDestinationFieldChange} disabled={isAutoSyncEnabled}
-                                                    variant="label-hidden" class="disabled" dropdown-alignment="auto">
+                                                    variant="label-hidden" class="disabled">
                                                 </lightning-combobox>
                                             </div>
                                         </td>
                                         <td data-label="Actions">
                                             <div class="action-btn">
-                                                <button class="delete-div" data-id={index} onclick={deletePair}
+                                                <button class="delete-icon-css" data-id={index} onclick={deletePair}
                                                     disabled={isAutoSyncEnabled}>
-                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
@@ -136,14 +142,19 @@
                         </div>
                         <div class="footerbtns">
                             <button class="white-btn-css" onclick={closeConfirmationModal}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
                                 </svg>
                                 Cancel
                             </button>
                             <button class="blue-btn-css" onclick={handleConfirmAddPair}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                        fill="currentColor" />
                                 </svg>
                                 Save
                             </button>

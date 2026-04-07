@@ -66,8 +66,43 @@ public with sharing class PropertySearchController {
             WrapperClass wc = new WrapperClass();
             Set<Id> propertyIds = new Set<Id>();
 
-            String listingFields = getAllFields('MVEX__Listing__c');
-            String inquiryFields = getAllFields('MVEX__Inquiry__c');
+            // Get configured fields to include in SOQL
+            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c 
+                                                            WHERE MVEX__Feature_Name__c = 'Suggested_Listing_Fields' WITH USER_MODE LIMIT 1];
+            
+            Set<String> extraListingFields = new Set<String>();
+            Set<String> extraInquiryFields = new Set<String>();
+            
+            if (!configs.isEmpty() && String.isNotBlank(configs[0].MVEX__Fields_Data__c)) {
+                List<Object> fieldsData = (List<Object>)JSON.deserializeUntyped(configs[0].MVEX__Fields_Data__c);
+                for (Object obj : fieldsData) {
+                    Map<String, Object> field = (Map<String, Object>)obj;
+                    String fieldName = (String)field.get('fieldApiname');
+                    if (String.isNotBlank(fieldName)) {
+                        extraListingFields.add(fieldName.toLowerCase());
+                        extraInquiryFields.add(fieldName.toLowerCase());
+                    }
+                }
+            }
+
+            String listingFieldsStr = getAllFields('MVEX__Listing__c');
+            String inquiryFieldsStr = getAllFields('MVEX__Inquiry__c');
+            
+            Set<String> listingFieldsSet = new Set<String>(listingFieldsStr.toLowerCase().split(','));
+            Set<String> inquiryFieldsSet = new Set<String>(inquiryFieldsStr.toLowerCase().split(','));
+
+            for (String f : extraListingFields) {
+                if (!listingFieldsSet.contains(f)) {
+                    listingFieldsStr += ',' + f;
+                    listingFieldsSet.add(f);
+                }
+            }
+            for (String f : extraInquiryFields) {
+                if (!inquiryFieldsSet.contains(f)) {
+                    inquiryFieldsStr += ',' + f;
+                    inquiryFieldsSet.add(f);
+                }
+            }
 
             List<Listing__c> listings = new List<Listing__c>();
             List<Inquiry__c> inquiries = new List<Inquiry__c>();
@@ -78,13 +113,13 @@ public with sharing class PropertySearchController {
 
             if (objectName == 'MVEX__Listing__c') {
                 List<Listing__c> temp = Database.query(
-                    'SELECT ' + listingFields + ' FROM MVEX__Listing__c WHERE Id = :recId',AccessLevel.USER_MODE);
+                    'SELECT ' + listingFieldsStr + ' FROM MVEX__Listing__c WHERE Id = :recId',AccessLevel.USER_MODE);
                 if (!temp.isEmpty()) currentListing = temp[0];
             }
 
             if (objectName == 'MVEX__Inquiry__c') {
                 List<Inquiry__c> temp = Database.query(
-                    'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE Id = :recId',AccessLevel.USER_MODE);
+                    'SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquiry__c WHERE Id = :recId',AccessLevel.USER_MODE);
                 if (!temp.isEmpty()) currentInquiry = temp[0];
             }
 
@@ -94,7 +129,7 @@ public with sharing class PropertySearchController {
                 if (objectName == 'MVEX__Listing__c') {
 
                     inquiries = Database.query(
-                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE Id IN ' + '(SELECT MVEX__Inquiry__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Listing__c = :recId)',
+                        'SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquiry__c WHERE Id IN ' + '(SELECT MVEX__Inquiry__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Listing__c = :recId)',
                         AccessLevel.USER_MODE);
 
                     if (currentListing != null) {
@@ -105,7 +140,7 @@ public with sharing class PropertySearchController {
                 else if (objectName == 'MVEX__Inquiry__c') {
 
                     listings = Database.query(
-                        'SELECT ' + listingFields +
+                        'SELECT ' + listingFieldsStr +
                         ' FROM MVEX__Listing__c WHERE Id IN ' + '(SELECT MVEX__Listing__c FROM MVEX__Listing_Inquiry__c WHERE MVEX__Inquiry__c = :recId)',
                         AccessLevel.USER_MODE);
 
@@ -121,7 +156,7 @@ public with sharing class PropertySearchController {
                 if (objectName == 'MVEX__Listing__c') {
 
                     inquiries = Database.query(
-                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c WHERE MVEX__Listing__c = :recId',
+                        'SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquiry__c WHERE MVEX__Listing__c = :recId',
                         AccessLevel.USER_MODE);
 
                     if (currentListing != null) {
@@ -135,7 +170,7 @@ public with sharing class PropertySearchController {
 
                     if (listingId != null) {
                         listings = Database.query(
-                            'SELECT ' + listingFields + ' FROM MVEX__Listing__c WHERE Id = :listingId',
+                            'SELECT ' + listingFieldsStr + ' FROM MVEX__Listing__c WHERE Id = :listingId',
                             AccessLevel.USER_MODE);
                     }
 
@@ -151,12 +186,12 @@ public with sharing class PropertySearchController {
                 if (objectName == 'MVEX__Listing__c') {
 
                     listings = Database.query(
-                        'SELECT ' + listingFields +
-                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c WHERE Id = :recId',
+                        'SELECT ' + listingFieldsStr +
+                        ', (SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c WHERE Id = :recId',
                         AccessLevel.USER_MODE);
 
                     inquiries = Database.query(
-                        'SELECT ' + inquiryFields + ' FROM MVEX__Inquiry__c',AccessLevel.USER_MODE);
+                        'SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquiry__c',AccessLevel.USER_MODE);
                 }
 
                 else if (objectName == 'MVEX__Inquiry__c') {
@@ -166,8 +201,8 @@ public with sharing class PropertySearchController {
                     }
 
                     listings = Database.query(
-                        'SELECT ' + listingFields +
-                        ', (SELECT ' + inquiryFields + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c',
+                        'SELECT ' + listingFieldsStr +
+                        ', (SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c',
                         AccessLevel.USER_MODE);
                 }
             }

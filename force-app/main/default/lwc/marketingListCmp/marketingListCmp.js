@@ -480,7 +480,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
                     cardView: field.cardView,
-                    format: field.format
+                    format: field.format,
+                    referenceObjectName: field.referenceObjectName,
+                    relationshipName: field.relationshipName
                 }));
 
                 this.contactData.forEach((con) => {
@@ -552,24 +554,35 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         try {
             this.processedContactData = this.contactData.map(con => {
                 let orderedFields = this.fields.map(field => {
-                    // Handle reference fields (e.g., Contact_r.LastName)
+                    let isRedirectable = false;
+                    let lookupId = null;
+                    let objectApiName = null;
                     let fieldValue;
+
                     if (field.fieldName.includes('.')) {
-                        // Split the reference field name into relationship and field (e.g., Contact_r.LastName)
                         let fieldParts = field.fieldName.split('.');
-                        let relatedObject = con[fieldParts[0]]; // Get the related object (e.g., Contact_r)
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-'; // Get the related field (e.g., LastName)
+                        let relatedObject = con[fieldParts[0]];
+                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
+                        
+                        if (relatedObject && fieldParts[1] === 'Name') {
+                            isRedirectable = true;
+                            lookupId = relatedObject.Id;
+                            objectApiName = field.referenceObjectName;
+                        }
                     } else {
-                        fieldValue = con[field.fieldName] || '-'; // Regular field
+                        fieldValue = con[field.fieldName] || '-';
                     }
 
                     if (field.format && fieldValue) {
-                        fieldValue = this.applyFieldFormat(fieldValue, field.format); // Apply the appropriate format
+                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
                     }
 
                     return {
                         fieldName: field.fieldName,
-                        value: fieldValue // Use the calculated field value
+                        value: fieldValue,
+                        isRedirectable: isRedirectable,
+                        lookupId: lookupId,
+                        objectApiName: objectApiName
                     };
                 });
 
@@ -841,27 +854,32 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     redirectToRecord(event) {
-        const recordId = event.target.dataset.id;
-        if (this.screenWidth > 900) {
-            this[NavigationMixin.GenerateUrl]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: recordId,
-                    objectApiName: 'Contact',
-                    actionName: 'view'
-                }
-            }).then(url => {
-                window?.globalThis?.open(url, '_blank');
-            });
-        } else {
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: recordId,
-                    objectApiName: 'Contact', // Object API Name
-                    actionName: 'view'
-                }
-            });
+        try {
+            const recordId = event.target.dataset.id;
+            const objectApiName = event.target.dataset.object ||'Contact';
+            if (this.screenWidth > 900) {
+                this[NavigationMixin.GenerateUrl]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: recordId,
+                        objectApiName: objectApiName,
+                        actionName: 'view'
+                    }
+                }).then(url => {
+                    window?.globalThis?.open(url, '_blank');
+                });
+            } else {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: recordId,
+                        objectApiName: objectApiName,
+                        actionName: 'view'
+                    }
+                });
+            }
+        } catch (error) {
+            console.log('Error redirectToRecord->' + error);
         }
     }
 
@@ -1116,34 +1134,31 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     updateSortIcons() {
         try {
-            // Reset all icons
+            // Remove icon rotation
             const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
-            // Remove sorted class from all headers
-            const allHeaders = this.template.querySelectorAll('th');
-            allHeaders.forEach(th => {
-                th.classList.remove('sorted-field');
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
             });
 
-            // Apply rotation
-            const currentIcon = this.template.querySelector(`[data-index="${this.sortField}"]`);
-            if (currentIcon) {
-                currentIcon.classList.add(
-                    this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc'
-                );
-            }
-
-            // ✅ Mark active column
-            const currentHeader = this.template.querySelector(`th[data-id="${this.sortField}"]`);
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
             if (currentHeader) {
-                currentHeader.classList.add('sorted-field');
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
             }
 
         } catch (error) {
-            console.log('Error updateSortIcons -> ' + error);
+            console.log('Error in updateSortIcons --> ' + error);
         }
     }
 
@@ -1155,7 +1170,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     scrollToTop() {
         try {
-            const tableDiv = this.template.querySelector('.tableDiv');
+            const tableDiv = this.template.querySelector('.table-content');
             if (tableDiv) {
                 tableDiv.scrollTop = 0;
             }
@@ -1376,7 +1391,7 @@ openConfigureSettings(){
     }
     handleCloseModal() {
         this.isConfigOpen = false;
-        // this.getContactDataMethod();
+        this.getContactDataMethod();
     }
 
     /**

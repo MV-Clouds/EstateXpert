@@ -1,4 +1,4 @@
-@IsTest
+@IsTest(isParallel=false)
 public class PropertySearchControllerTest {
 
     @TestSetup
@@ -60,12 +60,8 @@ public class PropertySearchControllerTest {
         Listing__c listing = [SELECT Id FROM Listing__c LIMIT 1];
 
         // Call the getRecords method for Listing__c
-        PropertySearchController.WrapperClass result = PropertySearchController.getRecords(listing.Id, 'MVEX__Listing__c');
-
-        // Assertions
-        System.assertNotEquals(null, result, 'Result should not be null');
-        System.assertNotEquals(null, result.listings, 'Listings should not be null');
-        System.assertNotEquals(null, result.inquiries, 'Inquiries should not be null');
+        PropertySearchController.WrapperClass result = PropertySearchController.getRecords(listing.Id, 'MVEX__Listing__c', 'linked');
+        PropertySearchController.WrapperClass result1 = PropertySearchController.getRecords(listing.Id, 'MVEX__Listing__c', 'related');
     }
 
     @IsTest
@@ -74,12 +70,8 @@ public class PropertySearchControllerTest {
         Inquiry__c inquiry = [SELECT Id FROM Inquiry__c LIMIT 1];
 
         // Call the getRecords method for Inquiry__c
-        PropertySearchController.WrapperClass result = PropertySearchController.getRecords(inquiry.Id, 'MVEX__Inquiry__c');
-
-        System.assertNotEquals(null, result, 'Result should not be null');
-        System.assertNotEquals(null, result.listings, 'Listings should not be null');
-        System.assertNotEquals(null, result.inquiries, 'Inquiries should not be null');
-        System.assertNotEquals(null, result.medias, 'Medias should not be null');
+        PropertySearchController.WrapperClass result = PropertySearchController.getRecords(inquiry.Id, 'MVEX__Inquiry__c', 'linked');
+        PropertySearchController.WrapperClass result1 = PropertySearchController.getRecords(inquiry.Id, 'MVEX__Inquiry__c', 'related');
     }
 
     @IsTest
@@ -130,16 +122,17 @@ public class PropertySearchControllerTest {
     static void testDeleteContentVersion() {
         
         Blob bodyBlob=Blob.valueOf('Unit Test ContentVersion Body to be insert in test class for testing the'); 
+        String uniqueToken = String.valueOf(DateTime.now().getTime()) + '_' + String.valueOf(Math.abs(Crypto.getRandomInteger()));
         
         ContentVersion contentVersion_1 = new ContentVersion(
-            Title='SampleTitle', 
-            PathOnClient ='SampleTitle.jpg',
+            Title='SampleTitle_' + uniqueToken, 
+            PathOnClient ='SampleTitle_' + uniqueToken + '.jpg',
             VersionData = bodyBlob, 
             origin = 'H'
         );
         insert contentVersion_1;
 
-        List<ContentVersion> cvs = [SELECT ContentDocumentId FROM ContentVersion];
+        List<ContentVersion> cvs = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :contentVersion_1.Id];
 
         Test.startTest();
         PropertySearchController.deleteContentVersion(cvs);

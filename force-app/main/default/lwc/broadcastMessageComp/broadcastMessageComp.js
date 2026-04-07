@@ -49,8 +49,11 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     @track sessionId;
     @track broadcastHeading = 'New Group';
     @track createBtnLabel = 'Save Group';
+    @track createBtnLabel = 'Save Group';
     @track showPhoneColumn = false;
     @track showEmailColumn = false;
+    @track sortBy;
+    @track sortDirection = 'asc';
 
     // ── Side Panel CSS Class ────────────────────────────────────
     get selectedRecordsPanelClass() {
@@ -187,6 +190,10 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         this.loadListViews(); // Load Contact List views initially
     }
 
+    renderedCallback() {
+        this.updateSortIcons();
+    }
+
     // ── Column visibility ──────────────────────────────────────
     setColumnVisibility() {
         if(!this.selectedObject) return;
@@ -286,6 +293,72 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             }));
         } catch (error) {
             this.showToast('Error', 'Error updating shown data', 'error');
+        }
+    }
+
+    // ── Sorting ────────────────────────────────────────────────
+    sortClick(event) {
+        try {
+            let sortField = event.currentTarget.dataset.id;
+            this.sortBy = sortField;
+            if (this.sortDirection === 'asc') {
+                this.sortDirection = 'desc';
+            } else {
+                this.sortDirection = 'asc';
+            }
+            this.updateSortIcons(event);
+            this.sortData();
+        } catch (error) {
+            console.error('Error in sortClick: ', error);
+        }
+    }
+
+    sortData() {
+        try {
+            let dataArr = [...this.filteredData];
+            let reverse = this.sortDirection === 'asc' ? 1 : -1;
+            dataArr.sort((a, b) => {
+                let valueA = a[this.sortBy] ? a[this.sortBy].toLowerCase() : '';
+                let valueB = b[this.sortBy] ? b[this.sortBy].toLowerCase() : '';
+                return valueA > valueB ? 1 * reverse : -1 * reverse;
+            });
+            this.filteredData = dataArr;
+            this.currentPage = 1;
+            this.updateShownData();
+        } catch (error) {
+            console.error('Error in sortData: ', error);
+        }
+    }
+
+    updateSortIcons(event) {
+        try {
+            let svgElements = this.template.querySelectorAll('svg.listing-manager-icon');
+            let clickedSortField = event ? event.currentTarget.dataset.id : this.sortBy;
+            
+            this.template.querySelectorAll('.sorting_header').forEach(el => {
+                el.classList.remove('active-sort');
+            });
+            
+            if (event) {
+                event.currentTarget.classList.add('active-sort');
+            } else if (this.sortBy) {
+                let activeHeader = this.template.querySelector(`th[data-id="${this.sortBy}"]`);
+                if (activeHeader) activeHeader.classList.add('active-sort');
+            }
+
+            svgElements.forEach(svg => {
+                const sortFieldParent = svg.dataset.index;
+                svg.classList.remove('rotate-asc', 'rotate-desc');
+                if (sortFieldParent === clickedSortField) {
+                    if (this.sortDirection === 'asc') {
+                        svg.classList.add('rotate-asc');
+                    } else {
+                        svg.classList.add('rotate-desc');
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error in updateSortIcons: ', error);
         }
     }
 

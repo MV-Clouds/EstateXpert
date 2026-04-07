@@ -70,6 +70,9 @@ button:disabled {
     z-index: 1;
     height: 45px;
     position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .view-more-button {

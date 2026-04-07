@@ -366,7 +366,7 @@ span {
 }
 
 
-.header{
+.header {
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -420,13 +420,9 @@ span {
 }
 
 .table-content {
-      flex: 1;
-    min-height: 0;
-    overflow: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    margin: 1rem;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .table-content .checkbox,
@@ -438,109 +434,6 @@ span {
 .table-content .phone,
 .table-content .email {
     width: 30%;
-}
-
-.table-content .slds-table th,
-.table-content .slds-table td {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-    height: 45px;
-}
-
-.table-content .slds-table th {
-    background: #0176D3;
-    color: white;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-
-.table-content tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.table-content table thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 98;
-}
-
-.table-content table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    border: none;
-}
-
-.table-content .slds-table_resizable-cols thead th,
-.table-content .slds-table--resizable-cols thead th {
-    padding: 0;
-    background: #0376D3;
-    color: white;
-    font-size: 14px;
-    height: 45px;
-}
-
-.table-content-review {
-    overflow: auto;
-    border-radius: 8px;
-    height: 80%;
-    background-color: white;
-    margin: 20px 16px 16px 16px;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-}
-
-.table-content-review .checkbox,
-.table-content-review .sno {
-    width: 10%;
-}
-
-.table-content-review .name,
-.table-content-review .phone,
-.table-content-review .email {
-    width: 30%;
-}
-
-.table-content-review .slds-table th,
-.table-content-review .slds-table td {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 400;
-    color: #585858;
-    height: 45px;
-}
-
-.table-content-review .slds-table th {
-    background: #0176D3;
-    color: white;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-
-.table-content-review tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.table-content-review table thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 98;
-}
-
-.table-content-review table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    border: none;
-}
-
-.table-content-review .slds-table_resizable-cols thead th,
-.table-content-review .slds-table--resizable-cols thead th {
-    padding: 0;
-    background: #0376D3;
-    color: white;
-    font-size: 14px;
-    height: 45px;
 }
 
 .truncate_css {
@@ -567,6 +460,7 @@ span {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px
 }
 
 .selected-heading {
@@ -720,6 +614,7 @@ span {
 .filter-toolbar .searchInput {
     width: 22rem;
 }
+
 .filter-toolbar .listView {
     width: 15rem;
 }

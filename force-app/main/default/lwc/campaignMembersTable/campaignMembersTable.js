@@ -38,6 +38,10 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         return Math.ceil(this.totalItems / this.pageSize);
     }
 
+     get showPagination(){
+        return this.totalPages > 1;
+    }
+
     get showEllipsis() {
         return this.totalPages > this.visiblePages;
     }

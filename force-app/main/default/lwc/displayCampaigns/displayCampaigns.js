@@ -63,6 +63,9 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         return Math.ceil(this.totalItems / this.pageSize);
     }
 
+    get showPagination(){
+        return this.totalPages > 1;
+    }
     /**
     * Method Name : showEllipsis
     * @description : show the elipsis when the total pages is gretaer then the visible pages.

@@ -191,7 +191,7 @@
                                                                 </label>
                                                             </td>
                                                             <td class="slds-cell_action-mode conat_cls" scope="row">
-                                                                <div class="slds-truncate center-trancate-text">
+                                                                <div class="slds-truncate">
                                                                     <a data-id={contact.Id} onclick={redirectToRecord}
                                                                         tabindex="0">{contact.Name}</a>
                                                                 </div>
@@ -200,7 +200,7 @@
                                                                 for:index="index2">
                                                                 <td key={field.fieldName} class="slds-cell_action-mode"
                                                                     role="gridcell">
-                                                                    <div class="slds-truncate center-trancate-text">
+                                                                    <div class="slds-truncate">
                                                                         <template if:true={field.isRedirectable}>
                                                                             <a data-id={field.lookupId} data-object={field.objectApiName} 
                                                                                 onclick={redirectToRecord}>{field.value}</a>
@@ -225,9 +225,10 @@
                                             </div>
                                         </div>
                                     </template>
-                                    <div class="paginationDiv slds-var-p-around_medium">
-                                        <div class="btnCover">
-                                            <div class="pagination-container">
+                                    <template if:true={showPagination}>
+                                        <div class="paginationDiv slds-var-p-around_medium">
+                                            <div class="btnCover">
+                                                <div class="pagination-container">
                                                 <button class="pagination-btn-css" disabled={isFirstPage}
                                                     onclick={handlePrevious}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
@@ -262,6 +263,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    </template>
                                 </template>
                             </div>
                         </template>
@@ -387,35 +389,65 @@
 
                             <div class="selected-contacts-section">
                                 <!-- <p class="contacts-table-label">Selected Contacts</p> -->
-                                <div class="contacts-table-wrapper">
-                                    <table class="contacts-table">
+                                <div class="table-content popup-table">
+                                    <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid">
                                         <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Phone</th>
-                                                <th>Action</th>
+                                            <tr class="slds-line-height_reset fields-names table_tr_cls">
+                                                <th aria-sort="none" data-id="Name" onclick={sortSelectedContact} class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2" scope="col">
+                                                    <div class="slds-text-link_reset sort-cover" role="button" tabindex="0">
+                                                        <span class="slds-assistive-text">Sort by: </span>
+                                                        <div class="slds-has-flexi-truncate center-trancate-head">
+                                                            <span class="slds-truncate" title="Name">Name</span>
+                                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                <svg data-index="Name" class="selected-contacts-icon listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                </svg>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                                <th aria-sort="none" data-id="Phone" onclick={sortSelectedContact} class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2" scope="col">
+                                                    <div class="slds-text-link_reset sort-cover" role="button" tabindex="0">
+                                                        <span class="slds-assistive-text">Sort by: </span>
+                                                        <div class="slds-has-flexi-truncate center-trancate-head">
+                                                            <span class="slds-truncate" title="Phone">Phone</span>
+                                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                <svg data-index="Phone" class="selected-contacts-icon listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                </svg>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                                <th class="slds-is-resizable slds-cell_action-mode colume2" scope="col">
+                                                    <div class="slds-has-flexi-truncate center-trancate-head">
+                                                        <span class="slds-truncate" title="Action">Action</span>
+                                                    </div>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <template if:true={filteredSelectedContacts.length}>
-                                                <template for:each={filteredSelectedContacts} for:item="contact"
-                                                    for:index="index">
-                                                    <tr key={contact.Id}>
-                                                        <td>{contact.Name}</td>
-                                                        <td>{contact.Phone}</td>
-                                                        <td>
-                                                            <button class="contacts-action-delete"
-                                                                onclick={handleRemoveContact} data-id={contact.Id}
-                                                                data-index={index} title="Remove">
-                                                                <svg width="15" height="15" viewBox="0 0 14 14"
-                                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path
-                                                                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                        stroke="#212529" stroke-width="1.25"
-                                                                        stroke-linecap="round"
-                                                                        stroke-linejoin="round" />
-                                                                </svg>
-                                                            </button>
+                                                <template for:each={filteredSelectedContacts} for:item="contact" for:index="index">
+                                                    <tr key={contact.Id} class="table-tr">
+                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
+                                                            <div class="slds-truncate">
+                                                                {contact.Name}
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
+                                                            <div class="slds-truncate">
+                                                                {contact.Phone}
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
+                                                            <div class="slds-truncate center-trancate-text">
+                                                                <button class="delete-icon-css" onclick={handleRemoveContact} data-id={contact.Id} data-index={index} title="Remove">
+                                                                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 </template>
@@ -424,8 +456,7 @@
                                                 <tr>
                                                     <td colspan="3" class="no-results-cell">
                                                         <div class="no-results-container">
-                                                            <lightning-icon icon-name="utility:search"
-                                                                size="small"></lightning-icon>
+                                                            <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
                                                             <span>No matching contacts found</span>
                                                         </div>
                                                     </td>

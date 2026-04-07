@@ -60,6 +60,14 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     }
 
     /**
+    * Method Name : showPagination
+    * @description : show the pagination only if totalpages are greater than 1.
+    */
+    get showPagination() {
+        return this.totalPages > 1;
+    }
+
+    /**
     * Method Name : showEllipsis
     * @description : show the elipsis when the total pages is gretaer then the visible pages.
     * * Date: 20/08/2024

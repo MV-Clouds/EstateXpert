@@ -70,9 +70,6 @@ button:disabled {
     z-index: 1;
     height: 45px;
     position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .view-more-button {
@@ -1057,7 +1054,7 @@ span {
 
 .preview-box-container {
     background: white;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 1.5rem 3rem;
     border: 1px solid #E5E7EB;
     overflow-y: auto;

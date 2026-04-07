@@ -261,36 +261,38 @@
                     </table>
                 </div>
 
-                <div class="paginationDiv">
-                    <div class="btnCover">
-                        <div class="pagination-container">
-                            <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                    <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z"/>
-                                </svg> 
-                                Previous
-                            </button>
-                            
-                            <template for:each={pageNumbers} for:item="page">
-                                <template if:false={page.isEllipsis}>
-                                    <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
-                                        {page.number}
-                                    </button>
+                <template if:true={showPagination}>
+                    <div class="paginationDiv">
+                        <div class="btnCover">
+                            <div class="pagination-container">
+                                <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                        <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z"/>
+                                    </svg> 
+                                    Previous
+                                </button>
+                                
+                                <template for:each={pageNumbers} for:item="page">
+                                    <template if:false={page.isEllipsis}>
+                                        <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
+                                            {page.number}
+                                        </button>
+                                    </template>
+                                    <template if:true={page.isEllipsis}>
+                                        <span key={page.number} class="pagination-ellipsis">...</span>
+                                    </template>
                                 </template>
-                                <template if:true={page.isEllipsis}>
-                                    <span key={page.number} class="pagination-ellipsis">...</span>
-                                </template>
-                            </template>
-                            
-                            <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                                Next 
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                    <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z"/>
-                                </svg>
-                            </button>
+                                
+                                <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                    Next 
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                        <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </template>
 
             </template>
             <template if:false={visibleCampaigns.length}>

@@ -62,7 +62,7 @@
                                 <div class="conditions-list">
                                     <p>Logic: {group.displayLogicalExpression}</p>
                                     <template for:each={group.conditions} for:item="condition">
-                                        <div key={condition.Id} class="condition-item slds-p-around_small">
+                                        <div key={condition.Id} class="condition-item slds-p-around_medium">
                                             <span class="slds-text-body_regular">{condition.order}.
                                                 {condition.displayCondition}</span>
                                         </div>
@@ -83,7 +83,7 @@
         <!-- Rule Popup (Add/Edit) -->
         <template if:true={showRulePopup}>
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
-                class="slds-modal slds-fade-in-open slds-modal_small">
+                class="slds-modal slds-fade-in-open slds-modal_medium">
                 <div class="slds-modal__container">
                     <div class="slds-modal__close close-icon-css" onclick={closeRulePopup}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

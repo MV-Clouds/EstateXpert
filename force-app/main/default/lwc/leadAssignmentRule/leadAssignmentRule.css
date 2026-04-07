@@ -641,3 +641,26 @@
     .slds-table td { padding: 0.25rem 0; display: flex; justify-content: space-between; align-items: center; }
     .slds-table td[data-label]::before { content: attr(data-label)": "; font-weight: 600; margin-right: 0.5rem; color: #374151; }
 }
+
+/* Fix combobox dropdown alignment to left */
+.combobox_cls {
+  text-align: left !important;
+}
+
+.combobox_cls lightning-combobox,
+.combobox_cls .slds-combobox {
+  text-align: left !important;
+}
+
+.combobox_cls lightning-combobox .slds-combobox__input,
+.combobox_cls .slds-input {
+  text-align: left !important;
+}
+
+lightning-combobox .slds-dropdown,
+.slds-dropdown {
+  text-align: left !important;
+  left: 0 !important;
+  right: auto !important;
+  margin-left: 0 !important;
+}

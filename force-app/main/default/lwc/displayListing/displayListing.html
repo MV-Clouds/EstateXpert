@@ -324,20 +324,22 @@
                             <thead>
                                 <tr class="slds-line-height_reset fields-names table_tr_cls">
                                     <template for:each={tableColumns} for:item="column">
-                                        <th key={column.fieldName}
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header colume2"
-                                            data-id={column.fieldName} onclick={sortClick} scope="col">
-                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
-                                                role="button" tabindex="0">
-                                                <span class="slds-truncate" title={column.label}>{column.label}</span>
-                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                    <svg class="listing-manager-icon" aria-hidden="true"
-                                                        viewBox="0 0 384 512">
-                                                        <path
-                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
+                                        <th key={column.fieldName} class={column.className} data-id={column.fieldName}
+                                            scope="col" onclick={sortClick}>
+                                            <template if:true={column.sortable}>
+                                                <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate"
+                                                        title={column.label}>{column.label}</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg class="listing-manager-icon" aria-hidden="true"
+                                                            viewBox="0 0 384 512">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </template>
                                         </th>
                                     </template>
                                 </tr>
@@ -405,7 +407,7 @@
                 </div>
             </template>
 
-            <template if:true={pagedProperties.length}>
+            <template if:true={showPagination}>
                 <div class="paginationDiv">
                     <div class="btnCover">
                         <div class="pagination-container">

@@ -489,3 +489,7 @@
     text-align: left;
     padding-left: 10px;
 }
+
+.table-content .column2{
+    width: 9rem;
+}

@@ -107,14 +107,14 @@
         <div class="main_content_cls">
             <template if:true={visibleTemplates.length}>
                 <div class="table-content">
-                    <table class="slds-table slds-table_fixed-layout">
+                    <table class="slds-table">
                         <thead>
                             <tr class="table_tr_cls">
                                 <template for:each={tableColumns} for:item="column" for:index="colIndex">
                                     <template if:true={column.isSortable}>
                                         <th key={column.key} data-id={column.key} onclick={sortClick}
                                             aria-sort="none"
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header {column.class}"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header column2 {column.class}"
                                             scope="col">
                                             <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                                 <span class="slds-truncate" title={column.label}>{column.label}</span>
@@ -243,41 +243,43 @@
                     </table>
                 </div>
 
-                <div class="paginationDiv">
-                    <div class="btnCover">
-                        <div class="pagination-container">
-                            <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                    fill="#fff">
-                                    <path
-                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                </svg>
-                                Previous
-                            </button>
+                <template if:true={totalPagesGreaterThanOne}>
+                    <div class="paginationDiv">
+                        <div class="btnCover">
+                            <div class="pagination-container">
+                                <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                    </svg>
+                                    Previous
+                                </button>
 
-                            <template for:each={pageNumbers} for:item="page">
-                                <template if:false={page.isEllipsis}>
-                                    <button key={page.number} data-id={page.number} class={page.className}
-                                        onclick={handlePageChange}>
-                                        {page.number}
-                                    </button>
+                                <template for:each={pageNumbers} for:item="page">
+                                    <template if:false={page.isEllipsis}>
+                                        <button key={page.number} data-id={page.number} class={page.className}
+                                            onclick={handlePageChange}>
+                                            {page.number}
+                                        </button>
+                                    </template>
+                                    <template if:true={page.isEllipsis}>
+                                        <span key={page.number} class="pagination-ellipsis">...</span>
+                                    </template>
                                 </template>
-                                <template if:true={page.isEllipsis}>
-                                    <span key={page.number} class="pagination-ellipsis">...</span>
-                                </template>
-                            </template>
 
-                            <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                                Next
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                    fill="#fff">
-                                    <path
-                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                </svg>
-                            </button>
+                                <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                    Next
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </template>
             </template>
 
             <template if:false={visibleTemplates.length}>

@@ -76,6 +76,13 @@ public with sharing class ChatWindowController {
         ];
     }
 
+    /*
+    *********************************************************
+    @description     : Method is used to create a new chat message
+    @param           : chatData - {Map<String, String>} - Map containing all the data to create a new chat
+    @return          : chat - {Chat__c} - the newly created chat
+    ********************************************************
+    */
     @AuraEnabled
     public static Chat__c createChat(Map<String, String> chatData ){
         try {
@@ -163,6 +170,16 @@ public with sharing class ChatWindowController {
         return isSuccess;
     }
 
+    /*
+    *********************************************************
+    @description     : Method to send the messages from the chat window
+    @param           : jsonData - {String} - The JSON Data to send as a request body
+    @param           : chatId - {String} - Id of the related Chat
+    @param           : isReaction - {String} - to specify if the action is for a reaction
+    @param           : reaction - {String} - reaction string if the action is for a reaction
+    @return          : resultMap - {Map<String, Object>} - containing errorMessage and a chat record
+    ********************************************************
+    */
     @AuraEnabled
     public static Map<String, Object> sendWhatsappMessage(String jsonData, String chatId, Boolean isReaction, String reaction) {
         Map<String, Object> resultMap = new Map<String, Object>{};
@@ -182,7 +199,7 @@ public with sharing class ChatWindowController {
                 return resultMap;
             }
             String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
+            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
             httpReq.setEndpoint(endpoint);
             httpReq.setMethod('POST');
             httpReq.setHeader('Content-Type', 'application/json');
@@ -206,7 +223,21 @@ public with sharing class ChatWindowController {
                 if(!isReaction){
                     chat.Message_Status__c = 'Failed';
                 }
-                resultMap.put('errorMessage', 'API_ERROR');
+                ErrorHandler.insertErrordata(null, 'ChatWindowController', 'sendWhatsappMessage', 'API Exception while sending a message');
+            }
+
+            // Step 1: Deserialize full JSON
+            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(jsonData);
+
+            // Step 2: Persist template / interactive payload details for preview
+            if (jsonMap.containsKey('template')) {
+                // Standard template message – store only the components array
+                Map<String, Object> templateMap = (Map<String, Object>) jsonMap.get('template');
+                if (templateMap != null && templateMap.containsKey('components')) {
+                    List<Object> componentsList = (List<Object>) templateMap.get('components');
+                    String componentsJsonString = JSON.serialize(componentsList);
+                    chat.Sent_Template_Details__c = componentsJsonString;
+                }
             }
 
             update as user chat;
@@ -337,7 +368,7 @@ public with sharing class ChatWindowController {
         List<Chat__c> chats = new List<Chat__c>();
         chats = [SELECT Id, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id IN :messageIds WITH USER_MODE];
         String accessToken = wbConfig[0].Access_Token__c;
-        String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
+        String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
 
         try {
             for (Chat__c chat : chats) {

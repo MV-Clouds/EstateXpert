@@ -15,11 +15,8 @@
     padding: 0;
     border-radius: 8px !important;
     width: 100%;
-    overflow: hidden;
-    /* background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center; */
+    overflow: auto;
+    max-height: calc(100vh - 9rem);
 }
 
 .create-disabled {

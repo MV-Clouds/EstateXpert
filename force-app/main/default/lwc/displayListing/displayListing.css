@@ -929,3 +929,7 @@ button:disabled {
     max-height: 420px;
     min-height: 420px;
 }
+
+.table-content .colume2 {
+    width: 9rem;
+}

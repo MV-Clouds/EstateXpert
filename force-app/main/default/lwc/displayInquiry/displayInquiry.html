@@ -637,19 +637,21 @@
 
                                     <div class="main_content_cls contact-table">
                                         <div class="table-content">
-                                            <table class="slds-table">
+                                            <table class="slds-table slds-table_fixed-layout">
                                                 <thead>
-                                                    <tr>
-                                                        <th class="slds-is-sortable header-cell sorting_header" data-id="Name" onclick={sortPopupClick}>
+                                                    <tr class="slds-line-height_reset fields-names table_tr_cls">
+                                                        <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header" data-id="Name" onclick={sortClick}>
                                                             <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">Name
                                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                    <svg class="listing-manager-icon" aria-hidden="true" viewBox="0 0 384 512">
-                                                                        <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                    <svg class="listing-manager-icon"
+                                                                        aria-hidden="true" viewBox="0 0 384 512">
+                                                                        <path
+                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                                     </svg>
                                                                 </span>
                                                             </div>
                                                         </th>
-                                                        <th class="slds-is-sortable header-cell sorting_header" data-id="Phone" onclick={sortPopupClick}>
+                                                        <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header" data-id="Phone" onclick={sortPopupClick}>
                                                             <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">Phone
                                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                                     <svg class="listing-manager-icon" aria-hidden="true" viewBox="0 0 384 512">
@@ -659,6 +661,7 @@
                                                             </div>
                                                         </th>
                                                         <th class="header-cell">Action</th>
+                                                       
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -667,7 +670,7 @@
                                                             <tr key={member.Id}>
                                                                 <td>{member.Name}</td>
                                                                 <td>{member.Phone}</td>
-                                                                <td>
+                                                                <td class="action-icon-div">
                                                                     <button class="delete-icon-css" data-id={member.Id}
                                                                         onclick={handleRemoveMember} title="Remove">
                                                                         <svg width="14" height="14" viewBox="0 0 14 14"

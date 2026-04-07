@@ -229,6 +229,12 @@ button:disabled {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
 }
+
+.action-icon-div{
+display: flex;
+    justify-content: center;
+    align-items: center;
+}
 /* 
 .mapping-btn:hover {
     background-color: #005fb2;

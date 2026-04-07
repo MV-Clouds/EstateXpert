@@ -87,8 +87,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track sortOrder = 'asc';
     hasUpdatedSortIcons = false;
 
-    @track defaultColumns = [
-        { label: 'Image', fieldName: 'media_url', type: 'image' },
+@track defaultColumns = [
+        { label: '', fieldName: 'media_url', type: 'image', sortable: false },
         { label: 'Name', fieldName: 'name', type: 'text' },
         { label: 'Listing Type', fieldName: 'mvex__listing_type__c', type: 'text' },
         { label: 'City', fieldName: 'mvex__city__c', type: 'text' },
@@ -497,7 +497,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                         const fieldsData = JSON.parse(result.metadataRecords[0]);
                         // Always include image column first and actions column last
                         this.listingColumns = [
-                            { label: 'Image', fieldName: 'media_url', type: 'image' },
+                            { label: '', fieldName: 'media_url', type: 'image', sortable: false },
                             ...fieldsData.map(field => ({
                                 label: field.label || field.fieldLabel,
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
@@ -505,7 +505,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 fieldType: field.fieldType,
                                 format: field.format,
                                 referenceObjectName: field.referenceObjectName,
-                                relationshipName: field.relationshipName
+                                relationshipName: field.relationshipName,
+                                sortable: true
                             })),
                             // { label: 'Actions', fieldName: 'actions', type: 'action' }
                         ];
@@ -707,7 +708,20 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * @description : getter for table columns for list view
     */
     get tableColumns() {
-        return this.listingColumns.length > 0 ? this.listingColumns : this.defaultColumns;
+        return (this.listingColumns.length > 0 ? this.listingColumns : this.defaultColumns).map(col => {
+            const column = {
+                ...col,
+                sortable: col.sortable !== false
+            };
+            
+            if (!column.sortable) {
+                column.className = 'slds-is-resizable slds-cell_action-mode header-cell slds-truncate image-column';
+            } else {
+                column.className = 'slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header colume2';
+            }
+            
+            return column;
+        });
     }
 
     /**
@@ -1799,6 +1813,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
      */
     sortClick(event) {
         const fieldName = event.currentTarget.dataset.id;
+        const column = this.tableColumns.find(col => col.fieldName === fieldName);
+        if (!column || !column.sortable) {
+            return; // Don't sort non-sortable columns
+        }
         if (this.sortField === fieldName) {
             this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
         } else {

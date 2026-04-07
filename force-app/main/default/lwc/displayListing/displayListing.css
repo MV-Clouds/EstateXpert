@@ -933,3 +933,16 @@ button:disabled {
 .table-content .colume2 {
     width: 9rem;
 }
+
+.image-column {
+    width: 80px !important;
+    min-width: 80px !important;
+}
+
+.image-column .slds-truncate {
+    display: none;
+}
+
+.image-column .slds-icon_container {
+    display: none !important;
+}

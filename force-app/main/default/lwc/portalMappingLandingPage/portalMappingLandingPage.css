@@ -291,3 +291,7 @@ lightning-combobox .slds-dropdown,
 .svg_back_icon {
   display: none;
 }
+
+.table-content .column1{
+  width: 9rem;
+}

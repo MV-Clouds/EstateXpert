@@ -73,71 +73,13 @@
             </div>
 
         <div class="main_content_cls">
-            <!-- <div class="slds-m-around_medium navbar">
-                <div class="search-input">
-                    <lightning-input type="search" onchange={handleSearch} placeholder="Search Campaign..." class="input-campaign" variant="label-hidden"></lightning-input>
-                </div>
-                <div class="icon-button-container">
-                    <div class="filter-icon-container" onclick={handleFilterClick}>
-                        <template if:false={isFilterModalOpen}>
-                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Show filters">
-                                <path d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z" fill="currentColor"/>
-                            </svg>
-                        </template>
-                        <template if:true={isFilterModalOpen}>
-                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hide filters">
-                                <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
-                            </svg>
-                        </template>
-                    </div>
-                    <div class="refresh-icon-container" onclick={handleRefresh}>
-                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh" size="x-small"></lightning-icon>
-                    </div>
-                </div>
-                <div if:true={isFilterModalOpen} class="filter-backdrop" onclick={closeFilterModal}></div>
-                <div if:true={isFilterModalOpen} class="filter-dropdown-box">
-                    <div class="filter-container" onclick={handleFilterContainerClick}>
-                        <div class="filter-row">
-                            <div class="filter-item">
-                                <label for="statusFilter" class="filter-label">Status</label>
-                                <lightning-combobox name="statusFilter" placeholder="Select a status" options={statusOptions} onchange={handleFilterChange} data-id="statusFilter" value={statusFilter} variant="label-hidden"></lightning-combobox>
-                            </div>
-                        </div>
-                        <div class="filter-row">
-                            <div class="filter-item">
-                                <label for="createdDateStart" class="filter-label">Created Date Start</label>
-                                <lightning-input type="date" name="createdDateStart" onchange={handleFilterChange} value={createdDateStart} data-id="createdDateStart" variant="label-hidden"></lightning-input>
-                            </div>
-                            <div class="filter-item">
-                                <label for="createdDateEnd" class="filter-label">Created Date End</label>
-                                <lightning-input type="date" name="createdDateEnd" onchange={handleFilterChange} value={createdDateEnd} data-id="createdDateEnd" variant="label-hidden"></lightning-input>
-                            </div>
-                        </div>
-                        <div class="filter-actions">
-                            <button class="white-btn-css" onclick={clearFilterModal}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M12.25 1.75L1.75 12.25M1.75 1.75L12.25 12.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Clear
-                            </button>
-                            <button class="blue-btn-css" onclick={applyFilter}>
-                                <svg width="18" height="18" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M2.33331 7.58333L5.24998 10.5L11.6666 4.08333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Apply
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            
             <template if:true={visibleCampaigns.length}>
                 <div class="table-content">
                     <table class="slds-table">
                         <thead>
                             <tr class="table_tr_cls">
-                                <th scope="col" class="sno">
-                                    <div>No.</div>
+                                <th scope="col" >
+                                    <div class="sno">No.</div>
                                 </th>
                                 <th data-id="MVEX__Label__c" onclick={sortClick}
                                     aria-sort="none"
@@ -301,12 +243,12 @@
                                     </td>
                                     <td data-label="Actions">
                                         <div class="action-btn">
-                                            <button class="action-div" onclick={handleEdit} data-id={campaign.Id} disabled={campaign.canEdit}>
+                                            <button class="edit-icon-css" onclick={handleEdit} data-id={campaign.Id} disabled={campaign.canEdit}>
                                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
                                                 </svg>                                                    
                                             </button>
-                                            <button class="delete-div" onclick={handleDelete} data-id={campaign.Id} disabled={campaign.canDelete}>
+                                            <button class="delete-icon-css" onclick={handleDelete} data-id={campaign.Id} disabled={campaign.canDelete}>
                                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
                                                 </svg>

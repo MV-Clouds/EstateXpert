@@ -19,6 +19,8 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     @track currentPage = 1;
     @track pageSize = 20;
     @track visiblePages = 5;
+    @track sortField = 'contactName';
+    @track sortOrder = 'asc';
     searchInput = '';
 
     @track statusOptions = [
@@ -133,14 +135,15 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
                     statusClass: this.getStatusClass(email.status),
                     sendTimeFormatted: this.formatDate(email.sendTime)
                 }));
-                console.log('Member Emails:', this.memberEmails);
-                this.filteredMembers = this.memberEmails;
+                this.filteredMembers = [...this.memberEmails];
+                // Apply initial sort and then paginate
+                this.sortData();
                 this.updateShownData();
                 this.isLoading = false;
             })
             .catch(error => {
                 this.isLoading = false;
-                this.showToast('Error', 'Failed to load campaign members: ' + error.body.message, 'error');
+                this.showToast('Error', 'Failed to load campaign members: ' + (error?.body?.message || error), 'error');
             });
     }
 
@@ -175,6 +178,8 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
                 ...member,
                 rowIndex: startIndex + idx + 1
             }));
+            // After pagination render, update sort icons on next tick
+            Promise.resolve().then(() => this.updateSortIcons());
         } catch (error) {
             console.log('Error updateShownData->' + error);
         }
@@ -203,7 +208,7 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     }
 
     handleSearch(event) {
-        const searchKey = event.target.value.toLowerCase();
+        const searchKey = (event.target.value || '').toLowerCase();
         this.searchInput = searchKey;
         this.filteredMembers = this.memberEmails.filter(member => 
             (member.contactName && member.contactName.toLowerCase().includes(searchKey)) ||
@@ -215,8 +220,8 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         this.statusFilter = '';
         this.sendTimeStart = '';
         this.sendTimeEnd = '';
+        this.sortData();
         this.updateShownData();
-
     }
 
     handleFilterClick() {
@@ -284,12 +289,8 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
             const startDate = this.sendTimeStart ? new Date(this.sendTimeStart) : null;
             const endDate = this.sendTimeEnd ? new Date(this.sendTimeEnd) : null;
 
-            if (startDate) {
-                startDate.setHours(0, 0, 0, 0);
-            }
-            if (endDate) {
-                endDate.setHours(23, 59, 59, 999);
-            }
+            if (startDate) startDate.setHours(0, 0, 0, 0);
+            if (endDate) endDate.setHours(23, 59, 59, 999);
 
             const isStatusMatch = this.statusFilterList.length === 0 || this.statusFilterList.includes(member.status);
             const isDateMatch = (!startDate || !sendTime || sendTime >= startDate) && (!endDate || !sendTime || sendTime <= endDate);
@@ -298,6 +299,7 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         });
         this.currentPage = 1;
         this.isFilterModalOpen = false;
+        this.sortData();
         this.updateShownData();
         this.clearSearchInput();
     }
@@ -338,5 +340,104 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         this.sendTimeStart = '';
         this.sendTimeEnd = '';
         this.clearSearchInput();
+    }
+
+    /**
+    * Method Name : sortClick
+    * @description : toggles sort state and applies sorting (mirrors displayCampaigns)
+    */
+    sortClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+            this.sortData();
+            this.updateSortIcons();
+        } catch (error) {
+            // no-op
+        }
+    }
+
+    /**
+    * Method Name : sortData
+    * @description : Applies sorting on filteredMembers and refreshes pagination
+    */
+    sortData() {
+        try {
+            let dataToSort = [...this.filteredMembers];
+
+            dataToSort.sort((a, b) => {
+                let aValue = a[this.sortField];
+                let bValue = b[this.sortField];
+
+                if (aValue === undefined || aValue === null) aValue = '';
+                if (bValue === undefined || bValue === null) bValue = '';
+
+                // Date handling: sendTimeFormatted is a dd/MM/yyyy string; prefer raw date if available
+                if (this.sortField === 'sendTimeFormatted') {
+                    // Convert from dd/MM/yyyy -> Date for proper comparison
+                    const parseDMY = (val) => {
+                        if (!val || typeof val !== 'string') return new Date(0);
+                        const [d, m, y] = val.split('/');
+                        return new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+                    };
+                    aValue = parseDMY(aValue);
+                    bValue = parseDMY(bValue);
+                }
+
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                let compare = 0;
+                if (aValue > bValue) compare = 1;
+                else if (aValue < bValue) compare = -1;
+
+                return this.sortOrder === 'asc' ? compare : -compare;
+            });
+
+            this.filteredMembers = dataToSort.map((record, index) => ({
+                ...record,
+                rowIndex: index + 1
+            }));
+
+            this.updateShownData();
+        } catch (error) {
+            // no-op
+        }
+    }
+
+    /**
+    * Method Name : updateSortIcons
+    * @description : Updates header icon rotation and active state
+    */
+    updateSortIcons() {
+        try {
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
+            }
+        } catch (error) {
+            // no-op
+        }
     }
 }

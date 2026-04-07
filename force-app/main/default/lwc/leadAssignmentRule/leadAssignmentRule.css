@@ -435,8 +435,8 @@
 
 .modalbody {
     background: linear-gradient(180deg, #F9FAFB 0%, #F3F6F9 100%) !important;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 160px);

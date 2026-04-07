@@ -202,6 +202,11 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
         return Math.ceil(this.filteredTemplates.length / this.pageSize);
     }
 
+    // New getter to indicate when pagination has more than one page
+    get totalPagesGreaterThanOne() {
+        return this.totalPages > 1;
+    }
+
     /**
     * Method Name : showEllipsis
     * @description : show the elipsis when the total pages is gretaer then the visible pages.

@@ -2785,7 +2785,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     sortClick(event) {
         try {
-            const fieldName = event.currentTarget.dataset.id;
+            const rawField = event.currentTarget.dataset.id || '';
+            // Normalize header field to match data keys (everything is stored lowercase)
+            const fieldName = rawField.toLowerCase() === 'name' ? 'name' : rawField.toLowerCase();
             if (this.sortField === fieldName) {
                 this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
             } else {
@@ -2824,13 +2826,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     sortData() {
         try {
-            // Only sort if we have data
-            if (!this.pagedFilteredInquiryData || this.pagedFilteredInquiryData.length === 0) {
+            // Only sort if we have data in the full filtered dataset
+            if (!this.modalFilteredInquiryData || this.modalFilteredInquiryData.length === 0) {
                 return;
             }
 
-            // Sort the full dataset (not just the current page)
-            const sortedData = [...this.pagedFilteredInquiryData].sort((a, b) => {
+            // Sort the full filtered dataset (not just the current page)
+            const sortedData = [...this.modalFilteredInquiryData].sort((a, b) => {
                 let aValue = a[this.sortField];
                 let bValue = b[this.sortField];
 
@@ -2863,10 +2865,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return this.sortOrder === 'asc' ? compare : -compare;
             });
 
-            // Update the pagedFilteredInquiryData with sorted data
-            this.pagedFilteredInquiryData = sortedData;
+            // Persist sorted order in the source (full) list
+            this.modalFilteredInquiryData = sortedData;
 
-            // Update the displayed data for current page
+            // Recompute the displayed data for current page
             this.updateShownData();
 
         } catch (error) {
@@ -2937,9 +2939,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     updateShownData() {
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
-            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            // Update the pagedFilteredInquiryData with sorted data
-            this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.slice(startIndex, endIndex);
+            const endIndex = startIndex + this.pageSize;
+            // Derive the page slice from the full filtered dataset
+            this.pagedFilteredInquiryData = (this.modalFilteredInquiryData || []).slice(startIndex, endIndex);
         } catch (error) {
             errorDebugger('displayInquiry', 'updateShownData', error, 'warn', 'Error in updateShownData');
         }

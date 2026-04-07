@@ -225,6 +225,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         return Math.ceil(this.totalItems / this.pageSize);
     }
 
+    get showPagination() {
+        return this.pagedProperties.length > 0 && this.totalPages > 1;
+    }
+
     /**
     * Method Name : showEllipsis
     * @description : show the elipsis when the total pages is gretaer then the visible pages.

@@ -2,37 +2,47 @@
     <div class="main_div_portal_mapping_container">
         <div class="main_body">
             <div class="body_1">
-                <div class="card-header" slot="title">
-                    Available Portals
+                <div class="section-header section-header--available">
+                    <div class="section-header__left">
+                        <span class="section-header__dot"></span>
+                        <p class="section-header__title">Available Portals</p>
+                    </div>
+                    <p class="section-header__subtitle">Pick a portal and add a new connection</p>
                 </div>
 
                 <div class="grid-style available-portals">
                     <template for:each={portals} for:item="portal">
                         <div key={portal.Id} class="portal-box">
-                            <div class="count_p_css">
-                                <p>{portal.recordCount}</p>
-                                <span class="helptext">Integration Count : {portal.recordCount}</span>
+                            <div class="available-card-top">
+                                <p class="portal-name">{portal.portalName}</p>
+                                <button class="preview-icon-css add_icon_css" onclick={handleNew}
+                                    data-portalname={portal.portalName} data-portaliconurl={portal.logoURL}
+                                    type="button" title="Add Integration">
+                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </button>
                             </div>
-                            <div class="preview-icon-css add_icon_css" onclick={handleNew} data-portalname={portal.portalName}
-                                data-portaliconurl={portal.logoURL}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M10 2V18M2 10H18" stroke="#0176D3" stroke-width="3"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </div>
+
                             <div class="portal_img_cls">
                                 <img src={portal.logoURL} alt={portal.portalName} class="portal-logo"
                                     draggable="false">
                             </div>
+
                         </div>
                     </template>
                 </div>
             </div>
 
             <div class="body_2">
-                <div class="card-header" slot="title">
-                    Connected Portals
+                <div class="section-header section-header--connected">
+                    <div class="section-header__left">
+                        <span class="section-header__dot"></span>
+                        <p class="section-header__title">Connected Portals</p>
+                    </div>
+                    <p class="section-header__subtitle">Manage mapped portals and status</p>
                 </div>
                 <template if:true={isPortalData}>
                     <div class="field-mapping-container">

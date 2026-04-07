@@ -465,6 +465,7 @@
 .table-content {
     border-radius: 8px;
     margin: 1rem;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .table-content .slds-table .sno,

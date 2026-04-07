@@ -264,6 +264,29 @@
   text-align: center;
 }
 
+/* Fix combobox dropdown alignment to left */
+.position_css {
+  text-align: left !important;
+}
+
+.position_css lightning-combobox,
+.position_css .slds-combobox {
+  text-align: left !important;
+}
+
+.position_css lightning-combobox .slds-combobox__input,
+.position_css .slds-input {
+  text-align: left !important;
+}
+
+lightning-combobox .slds-dropdown,
+.slds-dropdown {
+  text-align: left !important;
+  left: 0 !important;
+  right: auto !important;
+  margin-left: 0 !important;
+}
+
 /* Hide back button when used in control center (breadcrumb handles navigation) */
 .svg_back_icon {
   display: none;

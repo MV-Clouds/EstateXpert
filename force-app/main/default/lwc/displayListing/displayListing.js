@@ -1836,55 +1836,60 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 ? aValue.localeCompare(bValue)
                 : bValue.localeCompare(aValue);
         });
+
     }
 
     /**
      * Method Name : updateSortIcons
      * @description : Update visual sort indicators on headers
      */
-    updateSortIcons() {
-        // Remove active class from all headers
-        const allHeaders = this.template.querySelectorAll('.header-cell.sortable-header');
-        allHeaders.forEach(header => {
-            header.classList.remove('sorted-field');
-            const icon = header.querySelector('.listing-manager-icon');
-            if (icon) {
-                icon.classList.remove('sort-icon-active', 'rotate-asc', 'rotate-desc');
-            }
-        });
+     updateSortIcons() {
+        try {
+            // Get all header cells with sorting capability
+            const headers = this.template.querySelectorAll('[data-id]');
 
-        // Set active header and icon
-        const currentHeader = this.template.querySelector(`[data-id="${this.sortField}"]`);
-        if (currentHeader) {
-            currentHeader.classList.add('sorted-field');
-            const icon = currentHeader.querySelector('.listing-manager-icon');
-            if (icon) {
-                icon.classList.add('sort-icon-active');
-                icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+            // Remove active class from all headers
+            headers.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            console.log('currentHeader', currentHeader);
+            console.log('currentHeader.classList', currentHeader.classList);
+
+
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+                console.log('currentHeader.classList', currentHeader.classList);
+
+
+                // Find the sort icon within this header
+                // Updated selector to match our new HTML structure
+                const icon = currentHeader.querySelector('.listing-manager-icon');
+                if (icon) {
+                    // Remove existing rotation classes
+                    icon.classList.remove('rotate-asc', 'rotate-desc');
+
+                    // Add appropriate rotation class based on sort order
+                    if (this.sortOrder === 'asc') {
+                        icon.classList.add('rotate-asc');
+                    } else {
+                        icon.classList.add('rotate-desc');
+                    }
+                    // Force inline visibility to ensure it shows in popup headers
+                    try {
+                        icon.style.opacity = '1';
+                        icon.style.visibility = 'visible';
+                    } catch (e) {
+                        // ignore
+                    }
+                }
             }
+        } catch (error) {
+            errorDebugger('displaylisting', 'updateSortIcons', error, 'warn', 'Error in updateSortIcons');
         }
     }
 
-    get fieldsWithIconClass() {
-        return this.tableColumns.map(field => {
-            const baseIconClass = 'listing-manager-icon';
-            let iconClass = baseIconClass;
-            const isSorted = this.sortField === field.fieldName.toLowerCase();
-            
-            if (isSorted) {
-                const rotationClass = this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc';
-                iconClass = `${baseIconClass} sort-icon-active ${rotationClass}`;
-            }
-            
-            const headerBaseClass = 'header-cell sortable-header';
-            const headerClass = isSorted ? `${headerBaseClass} sorted-field` : headerBaseClass;
-            
-            return {
-                ...field,
-                iconClass: iconClass,
-                isSorted: isSorted,
-                headerClass: headerClass
-            };
-        });
-    }
+
 }

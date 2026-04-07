@@ -156,13 +156,12 @@
                                                         </div>
                                                         <div class="delete-div" title="Delete" data-id={mapping.id}
                                                             onclick={handleDeleteMapping} data-name="delete">
-                                                            <svg width="15" height="15"
-                                                                viewBox="0 0 14 14" fill="none"
+                                                            <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
                                                                 <path
                                                                     d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                                    stroke-linejoin="round" />
+                                                                    stroke="#212529" stroke-width="1.25"
+                                                                    stroke-linecap="round" stroke-linejoin="round" />
                                                             </svg>
 
                                                             <span class="slds-assistive-text">Delete</span>
@@ -298,7 +297,8 @@
                                             </svg>
                                             Cancel
                                         </button>
-                                        <button class="blue-btn-css" onclick={applyModalFilters} disabled={isApplyButtonDisabled}>
+                                        <button class="blue-btn-css" onclick={applyModalFilters}
+                                            disabled={isApplyButtonDisabled}>
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
@@ -320,26 +320,23 @@
             <template if:true={pagedProperties.length}>
                 <template if:true={isListView}>
                     <div class="table-content" id="table-content">
-                        <table aria-multiselectable="true"
-                        class="slds-table">
+                        <table aria-multiselectable="true" class="slds-table">
                             <thead>
-                                 <tr class="slds-line-height_reset fields-names table_tr_cls">
-                                    <template for:each={fieldsWithIconClass} for:item="column">
-                                        <th key={column.fieldName} 
-                                            data-id={column.fieldName} 
-                                            onclick={sortClick}
-                                            aria-sort="none"
+                                <tr class="slds-line-height_reset fields-names table_tr_cls">
+                                    <template for:each={tableColumns} for:item="column">
+                                        <th key={column.fieldName}
                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            data-id={column.fieldName} onclick={sortClick} scope="col">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                role="button" tabindex="0">
                                                 <span class="slds-truncate" title={column.label}>{column.label}</span>
                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg class="listing-manager-icon"
-                                                    aria-hidden="true" viewBox="0 0 384 512">
-                                                    <path
-                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                </svg>
-                                            </span>
+                                                    <svg class="listing-manager-icon" aria-hidden="true"
+                                                        viewBox="0 0 384 512">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
                                             </div>
                                         </th>
                                     </template>
@@ -351,8 +348,8 @@
                                         <template for:each={property.displayFields} for:item="field">
                                             <td key={field.key} class="slds-truncate">
                                                 <template if:true={field.isImage}>
-                                                    <img src={property.media_url} alt="Property image" class="listing-image"
-                                                        draggable="false" />
+                                                    <img src={property.media_url} alt="Property image"
+                                                        class="listing-image" draggable="false" />
                                                 </template>
                                                 <template if:false={field.isImage}>
                                                     <template if:false={field.isAction}>
@@ -363,7 +360,8 @@
                                                             </template>
                                                             <template if:false={field.isNameField}>
                                                                 <template if:true={field.isRedirectable}>
-                                                                    <a href="javascript:void(0)" data-id={field.lookupId}
+                                                                    <a href="javascript:void(0)"
+                                                                        data-id={field.lookupId}
                                                                         data-object={field.objectApiName}
                                                                         onclick={navigateToRecord}>{field.value}</a>
                                                                 </template>
@@ -410,35 +408,37 @@
             <template if:true={pagedProperties.length}>
                 <div class="paginationDiv">
                     <div class="btnCover">
-                            <div class="pagination-container">
-                                <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                        <path
-                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                    </svg>
-                                    Previous
-                                </button>
+                        <div class="pagination-container">
+                            <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                    fill="#fff">
+                                    <path
+                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                </svg>
+                                Previous
+                            </button>
 
-                                <template for:each={pageNumbers} for:item="page">
-                                    <template if:false={page.isEllipsis}>
-                                        <button key={page.number} data-id={page.number} class={page.className}
-                                            onclick={handlePageChange}>
-                                            {page.number}
-                                        </button>
-                                    </template>
-                                    <template if:true={page.isEllipsis}>
-                                        <span key={page.number} class="pagination-ellipsis">...</span>
-                                    </template>
+                            <template for:each={pageNumbers} for:item="page">
+                                <template if:false={page.isEllipsis}>
+                                    <button key={page.number} data-id={page.number} class={page.className}
+                                        onclick={handlePageChange}>
+                                        {page.number}
+                                    </button>
                                 </template>
+                                <template if:true={page.isEllipsis}>
+                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                </template>
+                            </template>
 
-                                <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                                    Next
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                        <path
-                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                    </svg>
-                                </button>
-                            </div>
+                            <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                Next
+                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                    fill="#fff">
+                                    <path
+                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </template>

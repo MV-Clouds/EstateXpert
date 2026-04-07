@@ -19,13 +19,14 @@
 
 .portal-syndication {
     background: #f5f7fa;
-    padding: 1rem 1rem 0rem 1rem;
+    padding: 1rem 1rem 1rem 1rem;
     border-radius: 8px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     display: flex;
     flex-direction: column;
     height: 100%;
     position: relative;
+    gap: 1rem;
 }
 
 .portal-syndication h2 {
@@ -39,47 +40,7 @@
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
-.data-table-container {
-    margin-top: 16px;
-    margin-bottom: 1rem;
-    max-width: 100%;
-    max-height: 400px;
-    overflow: auto;
-    border-radius: 8px;
-    flex: 1;
-    background: #ffffff;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-}
-
-.data-table-container::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.data-table-container::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.data-table-container::-webkit-scrollbar-thumb {
-    background: #0170d27d;
-    border-radius: 4px;
-}
-
-.data-table-container::-webkit-scrollbar-thumb:hover {
-    background: #0176D3;
-}
-
-.custom-data-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    font-size: 14px;
-}
-
-.portal_syndication_table .inactive_cls {
+.table-content .inactive_cls {
     background-color: #dcdcdc;
     color: #1f2937;
     border-radius: 15px;
@@ -88,7 +49,7 @@
     font-weight: 400;
 }
 
-.portal_syndication_table .active_cls {
+.table-content .active_cls {
     background-color: #2e844a;
     color: white;
     border-radius: 15px;
@@ -97,7 +58,7 @@
     font-weight: 400;
 }
 
-.portal_syndication_table .publish_css {
+.table-content .publish_css {
     background-color: #0176D3;
     color: white;
     padding: 8px 16px;
@@ -115,17 +76,17 @@
      box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
 }
 
-.portal_syndication_table .publish_css:hover {
+.table-content .publish_css:hover {
     background: #0157a0;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
 }
 
-.portal_syndication_table .publish_css svg {
+.table-content .publish_css svg {
     pointer-events: none;
 }
 
-.portal_syndication_table .unpublish_css {
+.table-content .unpublish_css {
     background-color: #ba0517;
     color: white;
     padding: 8px 16px;
@@ -142,13 +103,13 @@
     transition: all 0.3s ease;
 }
 
-.portal_syndication_table .unpublish_css:hover {
+.table-content .unpublish_css:hover {
     background-color: rgb(138, 4, 17);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(138, 4, 17, 0.4);
 }
 
-.portal_syndication_table .unpublish_css svg {
+.table-content .unpublish_css svg {
     pointer-events: none;
 }
 

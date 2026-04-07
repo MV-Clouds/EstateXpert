@@ -2,9 +2,10 @@
     <div class="portal-syndication">
         <h2>Portal Syndication</h2>
         <template if:true={isDataAvailable}>
-            <div class="data-table-container">
-                <div class="portal_syndication_table">
-                    <table class="custom-data-table">
+            <div class="main_content_cls">
+                <div class="table-content">
+                    <table aria-multiselectable="true"
+                        class="slds-table">
                     <thead>
                         <tr class="table_tr_cls">
                             <th scope="col" class="header-cell">
@@ -22,7 +23,7 @@
                         <template for:each={portals} for:item="portal" for:index="index">
                             <tr key={portal.id}>
                                 <td data-label="Name">
-                                    <div class="name_truncate_css">{portal.name}</div>
+                                    <div class="slds-truncate">{portal.name}</div>
                                 </td>
                                 <td data-label="Status">
                                     <span class={portal.badgeColor}>

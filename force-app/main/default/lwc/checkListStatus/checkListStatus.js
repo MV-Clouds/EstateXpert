@@ -182,7 +182,7 @@ export default class CheckListStatus extends LightningElement {
 
                 if (value === null || value === undefined || value === '') {
                     value = '-';
-                } else if (item.fieldType === 'CURRENCY') {
+                } else if (item.type === 'CURRENCY') {
                     const num = Number(value);
                     value = !isNaN(num)
                         ? new Intl.NumberFormat(USER_LOCALE, {

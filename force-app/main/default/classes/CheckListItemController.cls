@@ -57,7 +57,7 @@ public with sharing class CheckListItemController {
                 fieldInfo.value = fieldName;
 
                 List<String> textFields = new List<String>{'STRING', 'TEXTAREA', 'ID'};
-                List<String> numberFields = new List<String>{'CURRENCY', 'DOUBLE', 'PHONE'};
+                List<String> numberFields = new List<String>{'DOUBLE', 'PHONE'};
 
                 String fieldType = fieldDescribe.getType().name();
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Opt-In</label>
+    <protected>false</protected>
+    <values>
+        <field>Element_Icon__c</field>
+        <value xsi:type="xsd:string">utility:toggle_on</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Options__c</field>
+        <value xsi:type="xsd:string">{
+&quot;jsonType&quot;: &quot;OptIn&quot;,
+&quot;category&quot;: &quot;Input&quot;,
+&quot;defaults&quot;: {
+&quot;label&quot;: &quot;I agree to receive updates&quot;,
+&quot;required&quot;: true
+},
+&quot;uiFields&quot;: {
+&quot;showTypeSwitch&quot;: false,
+&quot;showLabel&quot;: true,
+&quot;showText&quot;: false,
+&quot;showRequired&quot;: true,
+&quot;showHelperText&quot;: false,
+&quot;showInputType&quot;: false,
+&quot;showOptions&quot;: false,
+&quot;showImageProps&quot;: false,
+&quot;showReadMoreLink&quot;: true
+},
+&quot;constraints&quot;: {
+&quot;labelMaxLength&quot;: 300
+}
+}</value>
+    </values>
+    <values>
+        <field>Type_Icon__c</field>
+        <value xsi:type="xsd:string">utility:list</value>
+    </values>
+    <values>
+        <field>Type__c</field>
+        <value xsi:type="xsd:string">Selection</value>
+    </values>
+</CustomMetadata>

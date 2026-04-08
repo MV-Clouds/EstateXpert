@@ -3,9 +3,6 @@
  */
 
 .breadcrumb-container {
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid #e5e5e5;
-    background-color: #fafaf9;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -13,7 +10,7 @@
 }
 
 .breadcrumb-link {
-    color: var(--color-primary);
+    color: #0176D3;
     cursor: pointer;
     text-decoration: none;
     font-size: 13px;

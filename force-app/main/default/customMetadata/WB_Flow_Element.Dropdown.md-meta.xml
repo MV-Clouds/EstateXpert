@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Dropdown</label>
+    <protected>false</protected>
+    <values>
+        <field>Element_Icon__c</field>
+        <value xsi:type="xsd:string">utility:list</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Options__c</field>
+        <value xsi:type="xsd:string">{
+&quot;jsonType&quot;: &quot;Dropdown&quot;,
+&quot;category&quot;: &quot;Selection&quot;,
+&quot;defaults&quot;: {
+&quot;label&quot;: &quot;Select an option&quot;,
+&quot;required&quot;: true,
+&quot;options&quot;: [
+{ &quot;id&quot;: &quot;0_option_1&quot;, &quot;title&quot;: &quot;Option 1&quot; },
+{ &quot;id&quot;: &quot;1_option_2&quot;, &quot;title&quot;: &quot;Option 2&quot; }
+]
+},
+&quot;uiFields&quot;: {
+&quot;showTypeSwitch&quot;: false,
+&quot;showLabel&quot;: true,
+&quot;showText&quot;: false,
+&quot;showRequired&quot;: true,
+&quot;showHelperText&quot;: false,
+&quot;showInputType&quot;: false,
+&quot;showOptions&quot;: true,
+&quot;showImageProps&quot;: false
+},
+&quot;constraints&quot;: {
+&quot;labelMaxLength&quot;: 60,
+&quot;minOptions&quot;: 1,
+&quot;maxOptions&quot;: 30,
+&quot;optionTitleMaxLength&quot;: 80
+}
+}</value>
+    </values>
+    <values>
+        <field>Type_Icon__c</field>
+        <value xsi:type="xsd:string">utility:list</value>
+    </values>
+    <values>
+        <field>Type__c</field>
+        <value xsi:type="xsd:string">Selection</value>
+    </values>
+</CustomMetadata>

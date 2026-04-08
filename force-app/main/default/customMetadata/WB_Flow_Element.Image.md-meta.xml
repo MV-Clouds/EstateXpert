@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Image</label>
+    <protected>false</protected>
+    <values>
+        <field>Element_Icon__c</field>
+        <value xsi:type="xsd:string">utility:image</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Options__c</field>
+        <value xsi:type="xsd:string">{
+&quot;jsonType&quot;: &quot;Image&quot;,
+&quot;category&quot;: &quot;Media&quot;,
+&quot;defaults&quot;: {
+&quot;src&quot;: &quot;&quot;,
+&quot;height&quot;: 400,
+&quot;scaleType&quot;: &quot;contain&quot;
+},
+&quot;uiFields&quot;: {
+&quot;showTypeSwitch&quot;: false,
+&quot;showLabel&quot;: false,
+&quot;showText&quot;: false,
+&quot;showRequired&quot;: false,
+&quot;showHelperText&quot;: false,
+&quot;showInputType&quot;: false,
+&quot;showOptions&quot;: false,
+&quot;showImageProps&quot;: true
+},
+&quot;constraints&quot;: {
+&quot;maxFileSize&quot;: 300,
+&quot;allowedFileTypes&quot;: [&quot;image/jpeg&quot;, &quot;image/png&quot;],
+&quot;heightMin&quot;: 100,
+&quot;heightMax&quot;: 800
+},
+&quot;imageScaleTypes&quot;: [
+{ &quot;label&quot;: &quot;Cover&quot;, &quot;value&quot;: &quot;cover&quot; },
+{ &quot;label&quot;: &quot;Contain&quot;, &quot;value&quot;: &quot;contain&quot; }
+]
+}</value>
+    </values>
+    <values>
+        <field>Type_Icon__c</field>
+        <value xsi:type="xsd:string">utility:image</value>
+    </values>
+    <values>
+        <field>Type__c</field>
+        <value xsi:type="xsd:string">Media</value>
+    </values>
+</CustomMetadata>

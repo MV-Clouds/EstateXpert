@@ -596,9 +596,50 @@ global without sharing class WhatsAppWebhook{
             System.debug('FlowList: ' + flowList);
     
             Flow__c flow = flowList[0];
-            // Step 5: Return map with both flow JSON and Flow__c Id
+        
+            // Step 5: Reconstruct full flow JSON with screens
+            String flowJsonWithScreens = flow.Flow_JSON__c;
+            
+            try {
+                Map<String, Object> flowData = (Map<String, Object>) JSON.deserializeUntyped(flow.Flow_JSON__c);
+                List<Object> screenIds = (List<Object>) flowData.get('screens');
+                
+                if (screenIds != null && !screenIds.isEmpty()) {
+                    // Query screen data from Flow_Screen__c
+                    List<Flow_Screen__c> screenRecords = [
+                        SELECT Screen_Id__c, Screen_Flow_Json__c 
+                        FROM Flow_Screen__c 
+                        WHERE Flow__c = :flow.Id
+                    ];
+                    
+                    // Build screen map
+                    Map<String, Object> screenMap = new Map<String, Object>();
+                    for (Flow_Screen__c screenRec : screenRecords) {
+                        if (String.isNotBlank(screenRec.Screen_Flow_Json__c)) {
+                            screenMap.put(screenRec.Screen_Id__c, JSON.deserializeUntyped(screenRec.Screen_Flow_Json__c));
+                        }
+                    }
+                    
+                    // Replace screen IDs with actual screen data
+                    List<Object> fullScreens = new List<Object>();
+                    for (Object screenIdObj : screenIds) {
+                        String screenId = (String) screenIdObj;
+                        if (screenMap.containsKey(screenId)) {
+                            fullScreens.add(screenMap.get(screenId));
+                        }
+                    }
+                    
+                    // Update flow data with full screens
+                    flowData.put('screens', fullScreens);
+                    flowJsonWithScreens = JSON.serialize(flowData);
+                }
+            } catch (Exception ex) {
+                System.debug('Error reconstructing flow JSON with screens: ' + ex.getMessage());
+                // If reconstruction fails, return original JSON
+            }
+
             return new Map<String, Object>{
-                'flowJson' => flow.Flow_JSON__c,
+                'flowJson' => flowJsonWithScreens,
                 'flowId'   => flow.Id
             };
         } catch (Exception e){
@@ -1286,7 +1327,7 @@ global without sharing class WhatsAppWebhook{
             }
 
             String accessToken = config[0].Access_Token__c;
-            String endpoint = config[0].APIEndpoint__c + '/' + config[0].APIVersion__c + '/' + config[0].Phone_Number_Id__c + '/messages';
+            String endpoint = config[0].API_Endpoint__c + '/' + config[0].API_Version__c + '/' + config[0].Phone_Number_Id__c + '/messages';
 
             HttpRequest httpReq = new HttpRequest();
             httpReq.setEndpoint(endpoint);

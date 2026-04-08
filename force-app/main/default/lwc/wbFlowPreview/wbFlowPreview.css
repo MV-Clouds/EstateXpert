@@ -1,10 +1,16 @@
+* {
+    font-family: 'Mulish';
+}
+
 .main-container{
-    box-shadow: 2px 2px 10px rgba(0,0,0, 0.1);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    border-radius: 12px;
     background-color: transparent;
-    height: calc(100vh - 220px);
+    height: max-content;
     width: 100%;
-    /* margin-right: 1rem; */
-    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
 }
 
 .preview {
@@ -32,66 +38,64 @@
 }
 
 .currentPreview{
-    width: 130px;
-    min-width: 130px;
-    max-width: 130px;
-}
-
-.heading{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2%;
-    font-size: small;
-    font-weight: 500;
-}
-
-.name {
-    color: black;
-    font-weight: 500;
-    font-size: 1.2rem;
-}
-
-.subtitle {
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #666;
+    width: 120px;
+    min-width: 100px;
+    max-width: 150px;
+    flex-shrink: 0;
 }
 
 .preview-main{
     background-color: white;
-    border-radius: 5px;
+    border-radius: 12px;
     border: 1px solid #eee;
-    height: calc(100vh - 220px);
+    height: 100%;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .menu-bar {
     border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 0.5rem;
+    padding: 0.5rem;
     margin-bottom: 0.5rem;
     align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .menu-heading{
     font-size: medium;
 }
 
+.menu-heading-container {
+    min-width: 60px;
+    flex-shrink: 0;
+}
+
 .preview-container {
-    margin-top: 1rem;
-    padding-bottom: 1rem;
-    margin-left: 1rem;
+    padding: 1rem;
     text-align: center;
-    height: calc(100vh - 290px);
+    flex: 1;
     display: flex;
     justify-content: center;
+    align-items: center;
     flex-direction: column;
+    overflow: auto;
+    min-height: 0;
 }
 
 .phone-frame {
-    width: 310px;
-    height: 500px;
+    width: 100%;
+    max-width: 310px;
+    height: auto;
+    min-height: 500px;
+    max-height: 600px;
     background: #f1ebe3;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
     border-radius: 20px;
     box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
     display: flex;
@@ -241,4 +245,592 @@
 
 .preview-container.dark-theme .preview-btn {
     color: #1e90ff; /* Brighter blue for button */
+}
+
+.toggle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    border-radius: 50px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.toggle-wrapper {
+    width: 51px;
+    height: 24px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+/* Day Mode */
+.day {
+    background-color: #74b9ff;
+}
+
+.circle {
+    background-color: white;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.circle.large {
+    width: 16px;
+    height: 16px;
+    left: 4px;
+    top: 4.4px;
+}
+
+.circle.medium {
+    width: 4px;
+    height: 4px;
+    left: 27px;
+    top: 11px;
+}
+
+.circle.small {
+    width: 6px;
+    height: 6px;
+    left: 36px;
+    top: 4px;
+}
+
+/* Night Mode */
+.night {
+    background-color: #222;
+}
+
+.moon {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    top: 4.4px;
+    right: 4px;
+    box-shadow: -6px 0 0 0 #222;
+}
+
+/* Star Styles */
+.star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.star.small {
+    width: 3px;
+    height: 3px;
+    left: 10px;
+    top: 17px;
+}
+
+.star.medium {
+    width: 5px;
+    height: 5px;
+    left: 22px;
+    top: 10.5px;
+}
+
+.star.large {
+    width: 6px;
+    height: 6px;
+    left: 12px;
+    top: 5.5px;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+/* whatsappFlowPreviewer.css styles (prefixed) */
+.whatsapp-flow-previewer-main-container {
+    background: var(--main-bg-color, white);
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.whatsapp-flow-previewer-container {
+    background: var(--container-bg-color, white);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    position: relative;
+    font-family: system-ui, sans-serif;
+    overflow: scroll;
+    width: 100%; /* Changed from 310px to 100% to fill its parent */
+    height: 100%; /* Added height to fill its parent */
+    color: var(--text-color, #333);
+}
+
+.whatsapp-flow-previewer-header-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    height: 15%;
+    left: 0;
+    background: inherit;
+    padding: 5% 1%;
+    z-index: 2; /* Ensure header is above scrolling content */
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+.whatsapp-flow-previewer-icon-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--icon-button-color, #000);
+    position: absolute;
+    left: 0;
+}
+
+.whatsapp-flow-previewer-menu {
+    transform: rotate(180deg);
+}
+
+.whatsapp-flow-previewer-header-welcome h2 {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--header-text-color, #333);
+    max-width: 200px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.whatsapp-flow-previewer-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+    text-align: left;
+    background-color: white;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+    height: var(--content-height, 86%);
+    overflow-y: scroll;
+    position: absolute; /* Changed to absolute to position relative to its parent (whatsapp-flow-previewer-container) */
+    top: 15%; /* Adjusted from 14% based on header height */
+    left: 0;
+    width: 100%;
+    background-color: var(--content-bg-color, white);
+    border-top: 1px solid var(--border-color, #eee);
+    box-sizing: border-box; /* Include padding in the element's total width and height */
+    padding-bottom: 15%; /* Add space for footer if present, or just general padding */
+}
+
+.whatsapp-flow-previewer-heading {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--heading-color, #333);
+}
+
+.whatsapp-flow-previewer-subheading {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--subheading-color, #333);
+}
+
+.whatsapp-flow-previewer-body-text {
+    font-size: 0.9rem;
+    color: var(--body-text-color, #333);
+    margin-bottom: 1rem;
+}
+
+.whatsapp-flow-previewer-caption-text {
+    font-size: 0.75rem;
+    color: var(--caption-text-color, #666);
+    margin-bottom: 0.75rem;
+    font-style: italic;
+}
+
+.whatsapp-flow-previewer-image-container {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.whatsapp-flow-previewer-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.whatsapp-flow-previewer-footer2 {
+    padding: 5%;
+    text-align: center;
+    font-size: 0.8rem;
+    width: 100%;
+    color: var(--footer-text-color, #5c5c5c);
+    border-top: 1px solid var(--border-color, #eee);
+    position: absolute; /* Changed to absolute to position relative to its parent */
+    bottom: 20px; /* Changed from top: 80% to bottom: 0 */
+    left: 0;
+    background-color: var(--footer-bg-color, white);
+    z-index: 2; /* Ensure footer is above scrolling content */
+    box-sizing: border-box;
+}
+
+.whatsapp-flow-previewer-continue {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--continue-btn-bg, #4CAF50);
+    border: none;
+    border-radius: 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+}
+
+.whatsapp-flow-previewer-floating-label {
+    position: relative;
+    margin-top: 10px;
+}
+
+.whatsapp-flow-previewer-floating-label select+label {
+    top: 1.1rem;
+}
+
+.whatsapp-flow-previewer-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--input-border-color, #ccc);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+    background: var(--input-bg-color, white);
+    color: var(--input-text-color, #333);
+    margin-bottom: 0.5rem;
+}
+
+/* Error state for inputs */
+.whatsapp-flow-previewer-input.error,
+.whatsapp-flow-previewer-input.error-border {
+    border-color: #d32f2f !important;
+}
+
+.whatsapp-flow-previewer-error-message {
+    color: #d32f2f;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.whatsapp-flow-previewer-helper-text {
+    color: #666;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+/* Remove autofill background color */
+.whatsapp-flow-previewer-input:-webkit-autofill,
+.whatsapp-flow-previewer-input:-webkit-autofill:hover,
+.whatsapp-flow-previewer-input:-webkit-autofill:focus,
+.whatsapp-flow-previewer-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--input-bg-color, white) inset !important;
+    -webkit-text-fill-color: var(--input-text-color, #333) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.whatsapp-flow-previewer-input.active {
+    border-color: var(--input-border-active-color, #28a745);
+}
+
+.whatsapp-flow-previewer-floating-label label {
+    position: absolute;
+    left: 0.6rem;
+    top: 0.7rem;
+    color: var(--label-color, #777);
+    background: var(--label-bg-color, white);
+    padding: 0 0.2rem;
+    transition: 0.2s ease all;
+    pointer-events: none;
+}
+
+.whatsapp-flow-previewer-input.active+label,
+.whatsapp-flow-previewer-input:focus+label {
+    top: -0.6rem;
+    font-size: 0.75rem;
+    color: var(--label-active-color, #28a745);
+}
+
+.whatsapp-flow-previewer-floating-label input[type="date"].whatsapp-flow-previewer-input {
+    color-scheme: light;
+}
+
+.whatsapp-flow-previewer-floating-label input[type="date"].whatsapp-flow-previewer-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+.whatsapp-flow-previewer-floating-label input[type="date"].whatsapp-flow-previewer-input:not(.active) {
+    color: transparent;
+}
+
+.whatsapp-flow-previewer-floating-label input[type="date"].whatsapp-flow-previewer-input.active,
+.whatsapp-flow-previewer-floating-label input[type="date"].whatsapp-flow-previewer-input:focus {
+    color: var(--input-text-color, #333);
+}
+
+.whatsapp-flow-previewer-floating-label input[type="date"].whatsapp-flow-previewer-input.active+label,
+.whatsapp-flow-previewer-floating-label input[type="date"].whatsapp-flow-previewer-input:focus+label {
+    top: -0.6rem;
+    font-size: 0.75rem;
+    color: var(--label-active-color, #28a745);
+}
+
+.whatsapp-flow-previewer-floating-label select.whatsapp-flow-previewer-input.active+label,
+.whatsapp-flow-previewer-floating-label select.whatsapp-flow-previewer-input:focus+label {
+    top: -0.6rem;
+    font-size: 0.75rem;
+    color: var(--label-active-color, #28a745);
+}
+
+.whatsapp-flow-previewer-checkbox-group {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.whatsapp-flow-previewer-checkbox-group-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.whatsapp-flow-previewer-checkbox-container {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.whatsapp-flow-previewer-checkbox-label {
+    font-size: 0.8rem;
+    color: var(--checkbox-label-color, #333);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.whatsapp-flow-previewer-radio-container {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.whatsapp-flow-previewer-checkbox-group input[type="checkbox"] {
+    accent-color: var(--checkbox-accent-color, #1a73e8);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide spinners in Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.whatsapp-flow-previewer-read-more {
+    color: var(--read-more-color, green);
+    text-decoration: underline;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: 8px;
+    display: inline-block;
+}
+
+.whatsapp-flow-previewer-read-more:hover {
+    opacity: 0.8;
+}
+
+.whatsapp-flow-previewer-label {
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--label-text-color, #333);
+}
+
+.whatsapp-flow-previewer-radio-row {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.whatsapp-flow-previewer-radio-label {
+    font-size: 0.8rem;
+    color: var(--radio-label-color, #333);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    cursor: pointer;
+    position: relative;
+    justify-content: space-between;
+}
+
+.whatsapp-flow-previewer-radio-container input[type="radio"] {
+    accent-color: var(--radio-accent-color, #1a73e8);
+}
+
+.whatsapp-flow-previewer-menu-section {
+    display: var(--menu-display, none); /* Controlled by JS `showMenu` now, and removed `display` from here */
+    position: absolute;
+    top: 2.5rem;
+    right: 1.6rem;
+    background: var(--menu-bg-color, #fff);
+    border: 1px solid var(--menu-border-color, #ccc);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    width: 150px;
+}
+
+.whatsapp-flow-previewer-menu-section ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+}
+
+.whatsapp-flow-previewer-menu-section li {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--menu-item-color, #333);
+    cursor: pointer;
+}
+
+.whatsapp-flow-previewer-menu-section li:hover {
+    background: var(--menu-item-hover-bg, #f0f0f0);
+}
+
+/* Theme-specific variables for the embedded whatsapp flow previewer */
+.whatsapp-flow-previewer-main-container[data-theme="dark"] {
+    --main-bg-color: black;
+    --container-bg-color: #2d2c2c;
+    --text-color: #ddd;
+    --icon-button-color: #bbb;
+    --header-text-color: #ddd;
+    --content-bg-color: #2d2c2c;
+    --border-color: #444;
+    --heading-color: #ddd;
+    --subheading-color: #ccc;
+    --body-text-color: #ccc;
+    --footer-text-color: #999;
+    --footer-bg-color: #2d2c2c;
+    --continue-btn-bg: #388e3c;
+    --input-border-color: #555;
+    --input-bg-color: #2c2c2c;
+    --input-text-color: #ddd;
+    --input-border-active-color: #66bb6a;
+    --label-color: #999;
+    --label-bg-color: #2c2c2c;
+    --label-active-color: #66bb6a;
+    --checkbox-label-color: #ddd;
+    --radio-label-color: #ddd;
+    --checkbox-accent-color: #4a90e2;
+    --radio-accent-color: #4a90e2;
+    --read-more-color: #81c784;
+    --label-text-color: #ddd;
+    --menu-bg-color: #3a3a3a;
+    --menu-border-color: #555;
+    --menu-item-color: #ddd;
+    --menu-item-hover-bg: #4a4a4a;
+}
+
+/* Responsive Media Queries */
+@media screen and (max-width: 1200px) {
+    .phone-frame {
+        max-width: 280px;
+        min-height: 450px;
+        max-height: 550px;
+    }
+    
+    .menu-heading {
+        font-size: medium;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .main-container {
+        min-height: 400px;
+    }
+    
+    .phone-frame {
+        max-width: 260px;
+        min-height: 400px;
+        max-height: 500px;
+    }
+    
+    .menu-bar {
+        padding: 0.25rem;
+        gap: 0.25rem;
+    }
+    
+    .menu-heading {
+        font-size: small;
+    }
+    
+    .currentPreview {
+        width: 100px;
+        min-width: 80px;
+        max-width: 120px;
+    }
+    
+    .preview-container {
+        padding: 0.5rem;
+    }
+    
+    .whatsapp-flow-previewer-header-welcome h2 {
+        font-size: 1rem;
+        max-width: 180px;
+    }
+    
+    .whatsapp-flow-previewer-content {
+        padding: 0.75rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .phone-frame {
+        max-width: 240px;
+        min-height: 380px;
+        max-height: 450px;
+    }
+    
+    .menu-bar {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .toggle-wrapper {
+        order: 3;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
 }

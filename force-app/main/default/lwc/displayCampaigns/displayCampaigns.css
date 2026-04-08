@@ -121,15 +121,6 @@
 .sno{
     width: 4rem;
 }
-.action-btn {
-    display: flex;
-    justify-content: center;
-    gap: 5%;
-}
-
-.action-btn .slds-button {
-    border: 1px solid black !important;
-}
 
 .no-data-container {
     display: flex;
@@ -502,12 +493,6 @@ span {
 
 .action_cls {
     min-width: 7rem;
-}
-
-.table-content table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    /* cursor: pointer; */
-    border: none;
 }
 
 @media only screen and (max-width: 900px) {

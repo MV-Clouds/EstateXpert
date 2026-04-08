@@ -22,7 +22,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     @track isLoading = false;
     @track isPreviewModal = false;
     @track visiblePages = 5;
-    @track pageSize = 10;
+    @track pageSize = 20;
     @track pageNumber = 1;
     @track templateType = '';
     @track selectedTempStatus = '';
@@ -61,7 +61,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'isActive',
             type: 'status',
             isSortable: false,
-            class: 'status',
+            class: 'truncate_css',
             dataLabel: 'Status'
         },
         {
@@ -70,7 +70,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'MVEX__Object_Name__c',
             type: 'text',
             isSortable: true,
-            class: '',
+            class: 'truncate_css',
             dataLabel: 'Object Name'
         },
         {
@@ -79,7 +79,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'MVEX__Template_pattern__c',
             type: 'text',
             isSortable: true,
-            class: '',
+            class: 'truncate_css',
             dataLabel: 'Template Type'
         },
         {
@@ -88,7 +88,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'MVEX__Subject__c',
             type: 'text',
             isSortable: false,
-            class: 'min_width_css',
+            class: 'truncate_css',
             dataLabel: 'Subject'
         },
         {
@@ -97,7 +97,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'MVEX__Description__c',
             type: 'text',
             isSortable: false,
-            class: 'min_width_css',
+            class: 'truncate_css',
             dataLabel: 'Description'
         },
         {
@@ -106,7 +106,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'CreatedDateformatted',
             type: 'date',
             isSortable: true,
-            class: '',
+            class: 'truncate_css',
             dataLabel: 'Created Date'
         },
         {
@@ -115,7 +115,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'LastModifiedDate',
             type: 'date',
             isSortable: true,
-            class: '',
+            class: 'truncate_css',
             dataLabel: 'Last Modified Date'
         },
         {
@@ -124,7 +124,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'actions',
             type: 'action',
             isSortable: false,
-            class: 'min_width_css',
+            class: 'truncate_css',
             dataLabel: 'Actions'
         }
     ];

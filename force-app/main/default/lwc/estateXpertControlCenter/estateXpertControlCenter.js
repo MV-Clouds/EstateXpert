@@ -2,6 +2,7 @@ import { LightningElement, track, wire } from "lwc";
 import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import { NavigationMixin } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
+import FORM_FACTOR from "@salesforce/client/formFactor";
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
@@ -90,6 +91,10 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         return this.isChildComponentView 
             ? 'control-center-layout with-breadcrumb' 
             : 'control-center-layout';
+    }
+
+    get showRightSidebar() {
+        return FORM_FACTOR === 'Large';
     }
 
     // Component type getters for in-place rendering

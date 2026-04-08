@@ -1,0 +1,523 @@
+<template>
+    <div class="editor-container" ondragover={handleContainerDragOver}>
+        <h3 class="editor-title">Edit content</h3>
+
+        <!-- Screen Title Section - Always Expanded -->
+        <div class={screenTitleContainerClass}>
+            <div class="section-header" data-section="screenTitle" onclick={toggleSection}>
+                <div class="section-header-left">
+                    <span class="section-label">Screen title</span>
+                </div>
+                <lightning-icon icon-name={screenTitleIcon} size="x-small" class="toggle-icon"></lightning-icon>
+            </div>
+            <template if:true={isScreenTitleExpanded}>
+                <div class="section-content">
+                    <div class="field-group">
+                        <div class="input-wrapper">
+                            <input
+                                type="text"
+                                value={screenTitle}
+                                class="native-input"
+                                maxlength="80"
+                                placeholder="Enter screen title..."
+                                oninput={handleScreenTitleChange}
+                            />
+                            <span class="char-counter-inside">{screenTitleCharCount}/80</span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Dynamic Content Sections -->
+        <div class="draggable-sections-container" ondragover={handleContainerDragOver}>
+        <template for:each={processedSections} for:item="section">
+            <div key={section.id} 
+                class={section.containerClass}
+                data-section-id={section.id}
+                draggable={section.isDraggable}
+                ondragstart={handleDragStart}
+                ondragover={handleDragOver}
+                ondrop={handleDrop}
+                ondragend={handleDragEnd}
+                ondragenter={handleDragEnter}
+                ondragleave={handleDragLeave}>
+                <div class="section-header" data-section={section.id} onclick={toggleSection}>
+                    <div class="section-header-left">
+                    <template if:true={section.isDraggable}>
+                    <svg class="drag-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <circle cx="3" cy="3" r="1.2"></circle>
+                        <circle cx="8" cy="3" r="1.2"></circle>
+                        <circle cx="13" cy="3" r="1.2"></circle>
+                        <circle cx="3" cy="8" r="1.2"></circle>
+                        <circle cx="8" cy="8" r="1.2"></circle>
+                        <circle cx="13" cy="8" r="1.2"></circle>
+                        <circle cx="3" cy="13" r="1.2"></circle>
+                        <circle cx="8" cy="13" r="1.2"></circle>
+                        <circle cx="13" cy="13" r="1.2"></circle>
+                    </svg>
+                    </template>                        
+                    <span class="section-type">{section.typeLabel}</span>
+                        <template if:false={section.isExpanded}>
+                            <span class="section-preview">· {section.previewText}</span>
+                        </template>
+                    </div>
+                    <lightning-icon icon-name={section.toggleIcon} size="x-small" class="toggle-icon"></lightning-icon>
+                </div>
+                <template if:true={section.isExpanded}>
+                    <div class="section-content">
+                        <div class="field-group">
+                            <!-- Type Switch Dropdown (for text elements with showTypeSwitch) -->
+                            <template if:true={section.showTypeSwitch}>
+                                <div class="field-label-row">
+                                    <lightning-combobox
+                                        value={section.itemName}
+                                        variant="label-hidden"
+                                        options={section.typeOptions}
+                                        class="type-dropdown"
+                                        data-section-id={section.id}
+                                        onchange={handleTypeChange}>
+                                    </lightning-combobox>
+                                </div>
+                            </template>
+
+                            <!-- Text Elements (TextHeading, TextSubheading, TextBody, TextCaption) -->
+                            <template if:true={section.isTextElement}>
+                                <div class="input-wrapper">
+                                    <textarea
+                                        class={section.textareaClass}
+                                        maxlength={section.maxLength}
+                                        placeholder=""
+                                        data-id={section.id}
+                                        data-field="value"
+                                        oninput={handleContentChange}>{section.value}</textarea>
+                                    <span class={section.charCounterClass}>
+                                        {section.value.length}/{section.maxLength}
+                                        <template if:true={section.hasError}>
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-left: 4px; vertical-align: middle;">
+                                                <path d="M8 1.5C4.42 1.5 1.5 4.42 1.5 8s2.92 6.5 6.5 6.5 6.5-2.92 6.5-6.5-2.92-6.5-6.5-6.5zm0 12c-3.04 0-5.5-2.46-5.5-5.5S4.96 2.5 8 2.5s5.5 2.46 5.5 5.5-2.46 5.5-5.5 5.5zm.5-8.5h-1v5h1v-5zm0 6h-1v1h1v-1z"/>
+                                            </svg>
+                                        </template>
+                                    </span>
+                                    <template if:true={section.hasError}>
+                                        <div class="error-message">{section.errorMessage}</div>
+                                    </template>
+
+                                </div>
+                            </template>
+
+                            <!-- TextInput (Short Answer) -->
+                            <template if:true={section.isTextInput}>
+                                <!-- Label Input -->
+                                <template if:true={section.showLabel}>
+                                    <div class="field-row">
+                                        <label class="field-label">Label</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.value}
+                                                class="native-input"
+                                                maxlength={section.maxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="value"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.value.length}/{section.maxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Input Type Dropdown -->
+                                <template if:true={section.showInputType}>
+                                    <div class="field-row">
+                                        <label class="field-label">Type</label>
+                                        <lightning-combobox
+                                            value={section.inputType}
+                                            variant="label-hidden"
+                                            options={section.inputTypeOptions}
+                                            data-section-id={section.id}
+                                            data-field="inputType"
+                                            onchange={handleFieldChange}>
+                                        </lightning-combobox>
+                                    </div>
+                                </template>
+
+                                <!-- Instructions (optional) -->
+                                <template if:true={section.showHelperText}>
+                                    <div class="field-row">
+                                        <label class="field-label field-label-optional">Instructions</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.helperText}
+                                                class="native-input"
+                                                maxlength={section.helperTextMaxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="helperText"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.helperText.length}/{section.helperTextMaxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- TextArea (Paragraph) -->
+                            <template if:true={section.isTextArea}>
+                                <!-- Label Input -->
+                                <template if:true={section.showLabel}>
+                                    <div class="field-row">
+                                        <label class="field-label">Label</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.value}
+                                                class="native-input"
+                                                maxlength={section.maxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="value"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.value.length}/{section.maxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Instructions (optional) -->
+                                <template if:true={section.showHelperText}>
+                                    <div class="field-row">
+                                        <label class="field-label field-label-optional">Instructions</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.helperText}
+                                                class="native-input"
+                                                maxlength={section.helperTextMaxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="helperText"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.helperText.length}/{section.helperTextMaxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- Selection Elements (RadioButtonsGroup, CheckboxGroup, Dropdown) -->
+                            <template if:true={section.isSelection}>
+                                <!-- Label Input -->
+                                <template if:true={section.showLabel}>
+                                    <div class="field-row">
+                                        <label class="field-label">Label</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.value}
+                                                class="native-input"
+                                                maxlength={section.maxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="value"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.value.length}/{section.maxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Options List -->
+                                <template if:true={section.showOptions}>
+                                    <div class="field-row">
+                                        <label class="field-label">Options</label>
+                                        <div class="selection-options">
+                                            <template for:each={section.options} for:item="option">
+                                                <div key={option.id} class="selection-option">
+                                                    <div class="input-wrapper option-input-wrapper">
+                                                        <input
+                                                            type="text"
+                                                            value={option.label}
+                                                            class="native-input option-input"
+                                                            maxlength={section.optionMaxLength}
+                                                            placeholder=""
+                                                            data-section-id={section.id}
+                                                            data-option-id={option.id}
+                                                            oninput={handleOptionChange}
+                                                        />
+                                                        <span class="char-counter-inside">{option.label.length}/{section.optionMaxLength}</span>
+                                                    </div>
+                                                    <button
+                                                        class="delete-option-btn"
+                                                        data-section-id={section.id}
+                                                        data-option-id={option.id}
+                                                        onclick={deleteOption}
+                                                        title="Delete option">
+                                                       <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 477 511.64"><path d="M127.56 511.64h221.89c37.54 0 66.41-30.75 68.25-68.26l13.53-274.48H45.77L59.3 443.38c1.84 37.46 30.71 68.26 68.26 68.26zM32.51 81.77h411.98c17.88 0 32.51 14.63 32.51 32.51v34.43H0v-34.43C0 96.4 14.63 81.77 32.51 81.77zM206.44 0h64.13c15.89 0 30.33 6.5 40.78 16.95C321.8 27.4 328.3 41.84 328.3 57.73v3.85h-26.92v-3.85c0-8.46-3.47-16.17-9.06-21.76-5.58-5.58-13.3-9.06-21.75-9.06h-64.13c-8.2 0-15.68 3.24-21.22 8.48l-.54.58c-5.59 5.59-9.06 13.3-9.06 21.76v3.85H148.7v-3.85c0-15.89 6.5-30.33 16.95-40.78l.83-.77C176.87 6.18 190.97 0 206.44 0zm23.31 245.52c0-5.57 4.52-10.09 10.1-10.09 5.57 0 10.09 4.52 10.09 10.09v169.31c0 5.57-4.52 10.09-10.09 10.09-5.58 0-10.1-4.52-10.1-10.09V245.52zm95.08.04c-.01-5.55 4.47-10.07 10.02-10.09 5.55-.02 10.07 4.47 10.09 10.02l1.54 169.3c.02 5.55-4.47 10.07-10.02 10.09-5.55.02-10.07-4.46-10.09-10.01l-1.54-169.31zm-194.31 0c-.01-5.55 4.47-10.07 10.02-10.09 5.55-.02 10.07 4.47 10.09 10.02l1.54 169.3c.01 5.55-4.47 10.07-10.02 10.09-5.55.02-10.07-4.46-10.09-10.01l-1.54-169.31z"/></svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <button 
+                                                class="add-option-btn" 
+                                                data-section-id={section.id} 
+                                                onclick={addOption}
+                                                disabled={section.isMaxOptionsReached}
+                                                title={section.addOptionButtonTitle}>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                </svg>
+                                                Add option
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- DatePicker -->
+                            <template if:true={section.isDatePicker}>
+                                <!-- Label Input -->
+                                <template if:true={section.showLabel}>
+                                    <div class="field-row">
+                                        <label class="field-label">Label</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.value}
+                                                class="native-input"
+                                                maxlength={section.maxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="value"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.value.length}/{section.maxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Instructions (optional) -->
+                                <template if:true={section.showHelperText}>
+                                    <div class="field-row">
+                                        <label class="field-label field-label-optional">Instructions</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.helperText}
+                                                class="native-input"
+                                                maxlength={section.helperTextMaxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="helperText"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.helperText.length}/{section.helperTextMaxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- OptIn -->
+                            <template if:true={section.isOptIn}>
+                                <!-- Label Input -->
+                                <template if:true={section.showLabel}>
+                                    <div class="field-row">
+                                        <label class="field-label">Label</label>
+                                        <div class="input-wrapper">
+                                            <input
+                                                type="text"
+                                                value={section.value}
+                                                class="native-input"
+                                                maxlength={section.maxLength}
+                                                placeholder=""
+                                                data-id={section.id}
+                                                data-field="value"
+                                                oninput={handleContentChange}
+                                            />
+                                            <span class="char-counter-inside">{section.value.length}/{section.maxLength}</span>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Read More Link -->
+                                <template if:true={section.showReadMoreLink}>
+                                    <div class="field-row">
+                                        <label class="field-label field-label-optional">Read more link</label>
+                                        <template if:true={section.hasReadMoreScreen}>
+                                            <div class="read-more-actions">
+                                                <button class="edit-content-btn" data-section-id={section.id} onclick={handleEditReadMore}>
+                                                    Edit content
+                                                </button>
+                                                <button class="delete-link-btn" data-section-id={section.id} onclick={handleDeleteReadMoreLink}>
+                                                    Delete link
+                                                </button>
+                                            </div>
+                                        </template>
+                                        <template if:false={section.hasReadMoreScreen}>
+                                            <button class="add-read-more-btn" data-section-id={section.id} onclick={handleEditReadMore}>
+                                                Add "Read More" Screen
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- Image -->
+                            <template if:true={section.isImage}>
+                                <template if:true={section.showImageProps}>
+                                    <!-- Image Upload -->
+                                    <div class="field-row">
+                                        <label class="field-label">Choose JPG or PNG file</label>
+                                        
+                                        <!-- Show upload area if no image -->
+                                        <template if:false={section.imageUrl}>
+                                            <div class="image-upload-container">
+                                                <input
+                                                    type="file"
+                                                    accept="image/jpeg,image/png"
+                                                    data-section-id={section.id}
+                                                    onchange={handleImageUpload}
+                                                    class="file-input-hidden"
+                                                    id={section.fileInputId}
+                                                />
+                                                <label for={section.fileInputId} class="image-upload-placeholder">
+                                                    <template if:false={section.isUploading}>
+                                                        <div class="upload-link">Choose file on your device</div>
+                                                    </template>
+                                                    <template if:true={section.isUploading}>
+                                                        <div class="upload-text">Uploading...</div>
+                                                        <lightning-spinner alternative-text="Uploading" size="small"></lightning-spinner>
+                                                    </template>
+                                                </label>
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Show uploaded image with delete option -->
+                                        <template if:true={section.imageUrl}>
+                                            <div class="image-preview-container">
+                                                <template if:false={section.isLoading}>
+                                                    <img src={section.imageUrl} alt="Uploaded image" class="uploaded-image-preview" />
+                                                    <button 
+                                                        class="delete-image-btn" 
+                                                        data-section-id={section.id} 
+                                                        onclick={handleImageDelete}
+                                                        title="Delete image">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                        </svg>
+                                                    </button>
+                                                </template>
+                                                <template if:true={section.isLoading}>
+                                                    <div class="image-deleting-spinner">
+                                                        <lightning-spinner alternative-text="Deleting" size="small"></lightning-spinner>
+                                                        <div class="deleting-text">Deleting image...</div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Error Message -->
+                                        <template if:true={section.uploadError}>
+                                            <div class="image-validation-error">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                                </svg>
+                                                <span>{section.uploadError}</span>
+                                            </div>
+                                        </template>
+                                        
+                                        <div class="image-info-text">
+                                            <div>Maximum file size: 300kb</div>
+                                            <div>Acceptable file types: JPG, PNG</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image Height -->
+                                    <template if:true={section.imageUrl}>
+                                        <div class="field-row">
+                                            <label class="field-label">Image height</label>
+                                            <div class="input-wrapper">
+                                                <input
+                                                    type="number"
+                                                    value={section.height}
+                                                    class="native-input native-input-height"
+                                                    min="1"
+                                                    placeholder="200"
+                                                    data-section-id={section.id}
+                                                    oninput={handleHeightChange}
+                                                />
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </template>
+
+                            <!-- Required Toggle & Delete - At the end of field-group -->
+                            <template if:true={section.showRequired}>
+                                <div class="section-footer-row">
+                                    <span class="required-label">Required</span>
+                                    <div class="section-footer-actions">
+                                        <label class="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={section.required}
+                                                data-section-id={section.id}
+                                                data-field="required"
+                                                onchange={handleFieldChange}
+                                            />
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <button class="delete-btn" data-section-id={section.id} onclick={deleteSection} title="Delete section">
+                                           <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 477 511.64"><path d="M127.56 511.64h221.89c37.54 0 66.41-30.75 68.25-68.26l13.53-274.48H45.77L59.3 443.38c1.84 37.46 30.71 68.26 68.26 68.26zM32.51 81.77h411.98c17.88 0 32.51 14.63 32.51 32.51v34.43H0v-34.43C0 96.4 14.63 81.77 32.51 81.77zM206.44 0h64.13c15.89 0 30.33 6.5 40.78 16.95C321.8 27.4 328.3 41.84 328.3 57.73v3.85h-26.92v-3.85c0-8.46-3.47-16.17-9.06-21.76-5.58-5.58-13.3-9.06-21.75-9.06h-64.13c-8.2 0-15.68 3.24-21.22 8.48l-.54.58c-5.59 5.59-9.06 13.3-9.06 21.76v3.85H148.7v-3.85c0-15.89 6.5-30.33 16.95-40.78l.83-.77C176.87 6.18 190.97 0 206.44 0zm23.31 245.52c0-5.57 4.52-10.09 10.1-10.09 5.57 0 10.09 4.52 10.09 10.09v169.31c0 5.57-4.52 10.09-10.09 10.09-5.58 0-10.1-4.52-10.1-10.09V245.52zm95.08.04c-.01-5.55 4.47-10.07 10.02-10.09 5.55-.02 10.07 4.47 10.09 10.02l1.54 169.3c.02 5.55-4.47 10.07-10.02 10.09-5.55.02-10.07-4.46-10.09-10.01l-1.54-169.31zm-194.31 0c-.01-5.55 4.47-10.07 10.02-10.09 5.55-.02 10.07 4.47 10.09 10.02l1.54 169.3c.01 5.55-4.47 10.07-10.02 10.09-5.55.02-10.07-4.46-10.09-10.01l-1.54-169.31z"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                            <!-- Delete Button Only (when no required toggle) -->
+                            <template if:false={section.showRequired}>
+                                <div class="section-footer-row">
+                                    <button class="delete-btn" data-section-id={section.id} onclick={deleteSection} title="Delete section">
+                                       <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 477 511.64"><path d="M127.56 511.64h221.89c37.54 0 66.41-30.75 68.25-68.26l13.53-274.48H45.77L59.3 443.38c1.84 37.46 30.71 68.26 68.26 68.26zM32.51 81.77h411.98c17.88 0 32.51 14.63 32.51 32.51v34.43H0v-34.43C0 96.4 14.63 81.77 32.51 81.77zM206.44 0h64.13c15.89 0 30.33 6.5 40.78 16.95C321.8 27.4 328.3 41.84 328.3 57.73v3.85h-26.92v-3.85c0-8.46-3.47-16.17-9.06-21.76-5.58-5.58-13.3-9.06-21.75-9.06h-64.13c-8.2 0-15.68 3.24-21.22 8.48l-.54.58c-5.59 5.59-9.06 13.3-9.06 21.76v3.85H148.7v-3.85c0-15.89 6.5-30.33 16.95-40.78l.83-.77C176.87 6.18 190.97 0 206.44 0zm23.31 245.52c0-5.57 4.52-10.09 10.1-10.09 5.57 0 10.09 4.52 10.09 10.09v169.31c0 5.57-4.52 10.09-10.09 10.09-5.58 0-10.1-4.52-10.1-10.09V245.52zm95.08.04c-.01-5.55 4.47-10.07 10.02-10.09 5.55-.02 10.07 4.47 10.09 10.02l1.54 169.3c.02 5.55-4.47 10.07-10.02 10.09-5.55.02-10.07-4.46-10.09-10.01l-1.54-169.31zm-194.31 0c-.01-5.55 4.47-10.07 10.02-10.09 5.55-.02 10.07 4.47 10.09 10.02l1.54 169.3c.01 5.55-4.47 10.07-10.02 10.09-5.55.02-10.07-4.46-10.09-10.01l-1.54-169.31z"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        </div>
+
+        <!-- Button Section - Always Visible (unless in read more mode) -->
+        <template if:true={showButtonSection}>
+        <div class={buttonContainerClass}>
+            <div class="section-header" data-section="button" onclick={toggleSection}>
+                <div class="section-header-left">
+                    <span class="section-label">Button</span>
+                </div>
+                <lightning-icon icon-name={buttonSectionIcon} size="x-small" class="toggle-icon"></lightning-icon>
+            </div>
+            <template if:true={isButtonSectionExpanded}>
+                <div class="section-content">
+                    <div class="field-group">
+                        <div class="input-wrapper">
+                            <input
+                                type="text"
+                                value={buttonLabel}
+                                class="native-input"
+                                maxlength="30"
+                                placeholder="Enter button label..."
+                                oninput={handleButtonLabelChange}
+                            />
+                            <span class="char-counter-inside">{buttonCharCount}/30</span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        </template>
+    </div>
+</template>

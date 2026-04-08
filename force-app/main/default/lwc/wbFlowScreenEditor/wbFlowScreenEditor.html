@@ -1,0 +1,68 @@
+<template>
+    <!-- Flow Content Editor as Child -->
+    <c-wb-flow-content-editor 
+        metadata-map={metadataMap}
+        parent-flow-id={parentFlowId}
+        is-parent-flow={isParentFlow}
+        oncontentupdate={handleContentUpdate}
+        oneditreadmore={handleEditReadMore}
+        ondeletereadmore={handleDeleteReadMore}>
+    </c-wb-flow-content-editor>
+    
+    <!-- Add Content Dropdown -->
+    <div class="add-content-section">
+        <div class="dropdown-container">
+            <button onclick={handleAddContent} class="add-content-footer-btn" disabled={isMaxContentReached} title={addContentButtonTitle}>
+                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="16" height="16">
+                    <path d="M16 2 L16 30 M2 16 L30 16"></path>
+                </svg>
+                Add content
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24"
+                    height="24">
+                    <path d="M7 10l5 5 5-5"></path>
+                </svg>
+            </button>
+
+            <template if:true={showDropdown}>
+                <div class="dropdown-menu">
+                    <template for:each={categories} for:item="category">
+                        <div key={category.name} class="dropdown-item" data-category={category.name}
+                            onmouseenter={handleCategoryHover}
+                            onclick={handleCategoryClick}>
+                            <lightning-icon icon-name={category.icon} size="x-small" class="item-icon">
+                            </lightning-icon>
+                            <span class="item-label">{category.label}</span>
+                            <lightning-icon icon-name="utility:chevronright" size="xx-small"
+                                class="chevron-icon">
+                            </lightning-icon>
+
+                            <template if:true={category.items}>
+                                <div class={category.name} data-active={activeCategory}>
+                                    <template if:true={activeCategory}>
+                                        <template if:true={category.name}>
+                                            <div class={category.submenuClass} data-category={category.name}
+                                                data-show={activeCategory}>
+                                                <template for:each={category.items} for:item="item">
+                                                    <div key={item.developerName} class="submenu-item"
+                                                        data-category={category.name}
+                                                        data-item={item.developerName}
+                                                        onclick={handleItemSelect}>
+                                                        <lightning-icon icon-name={item.elementIcon}
+                                                            size="x-small" class="submenu-icon">
+                                                        </lightning-icon>
+                                                        <span class="submenu-label">{item.label}</span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

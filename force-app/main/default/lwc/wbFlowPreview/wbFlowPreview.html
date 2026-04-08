@@ -1,46 +1,35 @@
 <template>
     <div class="main-container">
-        <!-- <div class="heading">
-            <div>
-                <p class="name">Preview Flow</p>
-                <p class="subtitle">{flowname}</p>
-            </div>
-            <div>
-                <lightning-button 
-                  variant="neutral"
-                  label="Documentation"
-                  onclick={handleDocumentClick} 
-                ></lightning-button>
-            </div>
-        </div> -->
-
         <div class="preview-main">
             <div class="menu-bar slds-grid slds-align_absolute-center slds-p-around_small">
-                <!-- Left side - Preview label -->
-                <div class="slds-m-right_medium">
-                    <p class="menu-heading">Preview</p>
+                <div class="slds-m-right_medium menu-heading-container">
+                    <p class="menu-heading"><strong>Preview</strong></p>
                 </div>
 
-                <!-- Refresh Icon Button -->
-                <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh"
-                    onclick={handleRefreshAll} class="slds-m-right_small"></lightning-button-icon>
+                <lightning-combobox value={detailsValue} options={detailsOptions} variant="label-hidden" onchange={handleDetailsChange} class="slds-m-right_small currentPreview" disabled={disableDetailsCombobox}></lightning-combobox>
 
-                <!-- DETAILS Dropdown -->
-                <lightning-combobox value={detailsValue} options={detailsOptions} variant="label-hidden"
-                    onchange={handleDetailsChange} class="slds-m-right_small currentPreview"></lightning-combobox>
+                <div class="toggle-wrapper" onclick={toggleMode}>
+                    <div class={modeClass}>
+                        <template if:true={isNight}>
+                            <div class="moon"></div>
+                            <div class="star small"></div>
+                            <div class="star medium"></div>
+                            <div class="star large"></div>
+                        </template>
+                        <template if:false={isNight}>
+                            <div class="circle large"></div>
+                            <div class="circle medium"></div>
+                            <div class="circle small"></div>
+                        </template>
+                    </div>
+                </div>
 
-                <!-- Settings Icon Dropdown -->
-                <lightning-button-menu icon-name="utility:settings" alternative-text="Settings" menu-alignment="right"
-                    variant="border-filled" class="slds-m-right_small" onselect={handleSettingsMenuSelect}>
-                    <lightning-menu-item value="light" label="Light"></lightning-menu-item>
-                    <lightning-menu-item value="dark" label="Dark"></lightning-menu-item>
-                </lightning-button-menu>
+                <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh" onclick={handleRefreshAll}></lightning-button-icon>
             </div>
             <div class={previewContainerClass}>
                 <div class="phone-frame">
                     <div class="header">
-                        <lightning-icon icon-name="utility:store" alternative-text="Store" size="medium"
-                            class="store-icon"></lightning-icon>
+                        <lightning-icon icon-name="utility:store" alternative-text="Store" size="medium" class="store-icon"></lightning-icon>
                         <div class="header-bar"></div>
                     </div>
                     <div class="chat-window">
@@ -56,8 +45,163 @@
                     <div class="input-bar"></div>
                     <template if:true={showPreview}>
                         <div class={previewClass}>
-                            <c-whatsapp-flow-previewer jsondata={jsonstringdata} selectedtheme={theme}
-                                currentscreenid={detailsValue} onclosepreview={handleClose}></c-whatsapp-flow-previewer>
+                            <div class="whatsapp-flow-previewer-main-container" data-theme={selectedtheme}>
+                                <section class="whatsapp-flow-previewer-container">
+                                    <div class="whatsapp-flow-previewer-header-preview">
+                                        <template if:true={showBackButton}>
+                                            <button class="whatsapp-flow-previewer-icon-button" onclick={handleBackClick} aria-label="Back">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template if:false={showBackButton}>
+                                            <button class="whatsapp-flow-previewer-icon-button" onclick={handleCloseClick} aria-label="Close">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <div class="whatsapp-flow-previewer-header-welcome">
+                                            <h2>{screenTitle}</h2>
+                                        </div>
+                                    </div>
+
+                                    <div class="whatsapp-flow-previewer-content">
+                                        <div class="whatsapp-flow-previewer-content-inner">
+                                            <template for:each={screenChildren} for:item="child">
+                                                <div key={child.name}>
+                                                    <template if:true={child.isTextHeading}>
+                                                        <h3 class="whatsapp-flow-previewer-heading">{child.text}</h3>
+                                                    </template>
+                                                    <template if:true={child.isTextSubheading}>
+                                                        <p class="whatsapp-flow-previewer-subheading">{child.text}</p>
+                                                    </template>
+                                                    <template if:true={child.isTextBody}>
+                                                        <p class="whatsapp-flow-previewer-body-text">{child.text}</p>
+                                                    </template>
+                                                    <template if:true={child.isTextCaption}>
+                                                        <p class="whatsapp-flow-previewer-caption-text">{child.text}</p>
+                                                    </template>
+                                                    <template if:true={child.isTextInput}>
+                                                        <div class="whatsapp-flow-previewer-floating-label">
+                                                            <input type={child.inputType} name={child.name} id={child.name} class={child.inputClass} value={child.value} placeholder={child.placeholder} oninput={handleInputChange} onfocus={handleInputFocus} onblur={handleInputBlur} />
+                                                            <label for={child.name}><p class="truncate">{child.label}</p></label>
+                                                            <template if:true={child.helperText}>
+                                                                <p class="whatsapp-flow-previewer-helper-text">{child.helperText}</p>
+                                                            </template>
+                                                            <template if:true={child.errorMessage}>
+                                                                <p class="whatsapp-flow-previewer-error-message">{child.errorMessage}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={child.isTextArea}>
+                                                        <div class="whatsapp-flow-previewer-floating-label">
+                                                            <textarea name={child.name} id={child.name} class={child.inputClass} value={child.value} placeholder={child.placeholder} oninput={handleInputChange} onfocus={handleInputFocus} onblur={handleInputBlur} rows="4"></textarea>
+                                                            <label for={child.name}><p class="truncate">{child.label}</p></label>
+                                                            <template if:true={child.helperText}>
+                                                                <p class="whatsapp-flow-previewer-helper-text">{child.helperText}</p>
+                                                            </template>
+                                                            <template if:true={child.errorMessage}>
+                                                                <p class="whatsapp-flow-previewer-error-message">{child.errorMessage}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={child.isRadioButtonsGroup}>
+                                                        <div class="whatsapp-flow-previewer-radio-container">
+                                                            <label class="whatsapp-flow-previewer-label">{child.label}</label>
+                                                            <template for:each={child.dataSource} for:item="option">
+                                                                <div class="whatsapp-flow-previewer-radio-row" key={option.id}>
+                                                                    <label class="whatsapp-flow-previewer-radio-label">
+                                                                        <p class="truncate">{option.title}</p>
+                                                                        <input type="radio" name={child.name} value={option.id} checked={option.checked} onchange={handleInputChange} />
+                                                                    </label>
+                                                                </div>
+                                                            </template>
+                                                            <template if:true={child.errorMessage}>
+                                                                <p class="whatsapp-flow-previewer-error-message">{child.errorMessage}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={child.isCheckboxGroup}>
+                                                        <div class="whatsapp-flow-previewer-checkbox-container">
+                                                            <label class="whatsapp-flow-previewer-label">{child.label}</label>
+                                                            <template for:each={child.dataSource} for:item="option">
+                                                                <label class="whatsapp-flow-previewer-checkbox-label" key={option.id}>
+                                                                    <input type="checkbox" name={child.name} value={option.id} checked={option.checked} onchange={handleInputChange} />
+                                                                    {option.title}
+                                                                </label>
+                                                            </template>
+                                                            <template if:true={child.errorMessage}>
+                                                                <p class="whatsapp-flow-previewer-error-message">{child.errorMessage}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={child.isOptIn}>
+                                                        <div class="whatsapp-flow-previewer-checkbox-group">
+                                                            <div class="whatsapp-flow-previewer-checkbox-group-row">
+                                                                <input type="checkbox" id={child.name} name={child.name} checked={child.checked} onchange={handleInputChange} />
+                                                                <label for={child.name}>
+                                                                    <span>{child.label}</span>
+                                                                    <template if:true={child.hasReadMore}>
+                                                                        <a class="whatsapp-flow-previewer-read-more" href="#" data-screen-id={child.readMoreScreenId} onclick={handleReadMoreClick}>Read more</a>
+                                                                    </template>
+                                                                </label>
+                                                            </div>
+                                                            <template if:true={child.errorMessage}>
+                                                                <p class="whatsapp-flow-previewer-error-message">{child.errorMessage}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={child.isDropdown}>
+                                                        <div class="whatsapp-flow-previewer-floating-label">
+                                                            <select name={child.name} id={child.name} class={child.inputClass} onchange={handleDropdownChange} onfocus={handleInputFocus} onblur={handleInputBlur}>
+                                                                <option value="" disabled selected={isOptionSelected}></option>
+                                                                <template for:each={child.dataSource} for:item="option">
+                                                                    <option key={option.id} value={option.id} selected={option.selected}>
+                                                                        <p class="truncate">{option.title}</p>
+                                                                    </option>
+                                                                </template>
+                                                            </select>
+                                                            <label for={child.name}><p class="truncate">{child.label}</p></label>
+                                                            <template if:true={child.errorMessage}>
+                                                                <p class="whatsapp-flow-previewer-error-message">{child.errorMessage}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={child.isDatePicker}>
+                                                        <div class="whatsapp-flow-previewer-floating-label">
+                                                            <input type="date" name={child.name} id={child.name} class={child.inputClass} value={child.value} oninput={handleInputChange} onfocus={handleInputFocus} onblur={handleInputBlur} />
+                                                            <label for={child.name}><p class="truncate">{child.label}</p></label>
+                                                            <template if:true={child.errorMessage}>
+                                                                <p class="whatsapp-flow-previewer-error-message">{child.errorMessage}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={child.isImage}>
+                                                        <template if:true={child.src}>
+                                                            <div class="whatsapp-flow-previewer-image-container">
+                                                                <img src={child.src} alt={child.alt} class="whatsapp-flow-previewer-image" style={child.imageStyle} />
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={hasFooter}>
+                                        <div class="whatsapp-flow-previewer-footer2">
+                                            <button class="whatsapp-flow-previewer-continue" data-action={footerAction} onclick={handleContinueClick}>
+                                                {footerLabel}
+                                            </button>
+                                            <p>Managed by the business. <a href="https://example.com/about" target="_blank">Learn more</a></p>
+                                        </div>
+                                    </template>
+                                </section>
+                            </div>
                         </div>
                     </template>
                 </div>

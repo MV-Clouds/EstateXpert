@@ -8,15 +8,15 @@
  *==============================================================================
  * Date Modified - Developer Name - Description
  * 18 Nov, 2024  - ChangeMeIn@UserSettingsUnder.SFDoc  -  Initial Version
- * 26 Mar, 2025  - Rachit Shah - Updated naming convention for files and made changes for saving files wih correct extentions
+ * 26 Mar, 2025  - Harsh Gandhi - Updated naming convention for files and made changes for saving files wih correct extentions
  **/
 @RestResource(urlMapping = '/EXPDEMO/webhooks/v1/*')
 global without sharing class WhatsAppWebhook{
     public static String currentTime = System.now().format('yyyy-MM-dd HH:mm:ss');
     public static String phoneNumberId = '';
     public static List<Object> messages = new List<Object>();
-    public static List<AWS_Config__c> configList = [SELECT Id, AWS_Access_Key__c, AWS_Secret_Access_Key__c, S3_Bucket_Name__c, S3_Region_Name__c, CreatedDate, LastModifiedDate FROM AWS_Config__c LIMIT 1];
-    public static AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
+    public static List<MVEX__AWS_Config__c> configList = [SELECT Id, MVEX__AWS_Access_Key__c, MVEX__AWS_Secret_Access_Key__c, MVEX__S3_Bucket_Name__c, MVEX__S3_Region_Name__c, CreatedDate, LastModifiedDate FROM MVEX__AWS_Config__c LIMIT 1];
+    public static MVEX__AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
 
     @HttpGet // GET
     global static void doGet(){
@@ -41,6 +41,7 @@ global without sharing class WhatsAppWebhook{
         try{
             processWhatsAppPayload(jsonString);
         } catch (Exception e){
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'doPost', e.getMessage());
             System.debug('Error processing WhatsApp payload: ' + e.getMessage());
         }
     }
@@ -85,15 +86,14 @@ global without sharing class WhatsAppWebhook{
                 processSingleMessage(message, sender);
             }
         } catch (Exception e){
-            // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'processWhatsAppPayload', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'processWhatsAppPayload', e.getMessage());
             System.debug('Error in processWhatsAppPayload: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
     }
 
-    private static void processSingleMessage(Map<String, Object> message, Map<String, Object> sender){
+    public static void processSingleMessage(Map<String, Object> message, Map<String, Object> sender){
 
         try{
-
             String senderId = (String) message.get('from');
             String messageType = (String) message.get('type');
             String whatsAppMessageID = (String) message.get('id');
@@ -130,17 +130,23 @@ global without sharing class WhatsAppWebhook{
             Integer offsetMinutes = Math.abs(offsetMillis / (1000 * 60) - offsetHours * 60);
             DateTime currentISTDateTime = currentUTCDateTime.addHours(offsetHours).addMinutes(offsetMinutes);
             String formattedTime2 = currentISTDateTime.format('h:mm a');
+            System.debug(formattedTime2);
+            System.debug('whatsAppMessageID ==> ' + whatsAppMessageID);
+            System.debug('senderId ==> ' + senderId);
+            System.debug('messageType ==> ' + messageType);
 
             // Query to check if the message has already been processed
             List<Chat__c> existingChatRecords = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :whatsAppMessageID LIMIT 1];
             if (!existingChatRecords.isEmpty()){
+                System.debug('Message already processed: ' + whatsAppMessageID);
                 return;
             }
 
             if (!senderId.contains('+')){
                 senderId = '+' + senderId;
             }
-            String formattedNumber = senderId.substring(0, 3) + senderId.substring(3);
+            // Normalize phone number to remove spaces and formatting characters
+            String formattedNumber = normalizePhoneNumber(senderId);
 
             Map<String, Object> profile = (Map<String, Object>) sender.get('profile');
             String senderName = (String) profile.get('name');
@@ -153,21 +159,29 @@ global without sharing class WhatsAppWebhook{
             SObject record;
 
             // Fetch metadata record from Object_Config__mdt
-            List<Object_Config__mdt> objectConfigList = [SELECT Id, ObjectConfigInfo__c, ChatWindowConfigInfo__c FROM Object_Config__mdt LIMIT 1];
+            List<MVEX__Object_Config__mdt> objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt LIMIT 1];
             if(objectConfigList.size() <= 0) {
+                System.debug('Object Config not found!');
                 return;
             } else {
                 // Deserialize the JSON string from ObjectConfigInfo__c
-                Map<String, Object> configData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].ObjectConfigInfo__c);
-                Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].ChatWindowConfigInfo__c);
-                    
+                Map<String, Object> configData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ObjectConfigInfo__c);
+                Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
+                
+                System.debug('configData'+ configData);
+                System.debug('chatConfigData'+ chatConfigData);
+    
                 // Extract values from deserialized data
                 objectApiName = (String) configData.get('objectApiName'); // e.g., 'Account'
                 String phoneField = (String) configData.get('phoneField'); // e.g., 'Fax'
+                System.debug('phoneField'+ phoneField);
                 
                 Map<String, Object> chatConfig = (Map<String, Object>) chatConfigData.get(objectApiName);
                 String nameField = (String) chatConfig.get('nameField'); // e.g., 'Name'
+                System.debug('nameField'+ nameField);
                 
+                System.debug('requiredFields'+ configData.get('requiredFields'));
+
                 List<Object> requiredFieldsList = (List<Object>) configData.get('requiredFields'); 
 
                 Map<String, Object> requiredFieldsMap = new Map<String, Object>();
@@ -186,6 +200,7 @@ global without sharing class WhatsAppWebhook{
                     recordName = (String) record.get('Name');
                     recordPhone = (String) record.get(phoneField);
                 } else if (userRecs.isEmpty()) {
+                    System.debug('inside debug --- ');
                     // Create a new record for the object specified in objectApiName
                     SObject newRecord = Schema.getGlobalDescribe().get(objectApiName).newSObject();
                     
@@ -216,10 +231,30 @@ global without sharing class WhatsAppWebhook{
                                 newRecord.put(fieldName, myDate);
                                 // newRecord.put(fieldName, Datetime.valueOf(value));
                             }
+                        } else if(fieldType == 'Time'){
+                            if (value != null && value != '') {
+                                // Split the time components
+                                List<String> parts = value.split(':');
+                                Integer hour = Integer.valueOf(parts[0]);
+                                Integer minute = Integer.valueOf(parts[1]);
+                                
+                                List<String> secMillis = parts[2].split('\\.');
+                                Integer second = Integer.valueOf(secMillis[0]);
+                                Integer millisecond = Integer.valueOf(secMillis[1]);
+                                
+                                // Now create Time instance
+                                Time myTime = Time.newInstance(hour, minute, second, millisecond);
+                                newRecord.put(fieldName, myTime);
+                            }
                         } else if (fieldType == 'Boolean') {
                             // Convert string to Boolean
                             if (value != null && value != '') {
                                 newRecord.put(fieldName, Boolean.valueOf(value));
+                            }
+                        } else if (fieldType == 'Double' || fieldType == 'Percent') {
+                            // Convert string to Decimal
+                            if (value != null && value != '') {
+                                newRecord.put(fieldName, Decimal.valueOf(value));
                             }
                         } else {
                             // Handle String, Reference, Picklist, etc. as direct string assignment
@@ -419,18 +454,17 @@ global without sharing class WhatsAppWebhook{
                 }
 
                 if (messageType.equalsIgnoreCase('interactive')) {
-                    System.debug('Interactive');
                     Map<String, Object> interactive = (Map<String, Object>)message.get('interactive');
+                    System.debug('interactive: ' + interactive);
                     if (interactive != null) { 
                         String interactiveType = (String)interactive.get('type');
                         if (interactiveType == 'nfm_reply') {
                             Map<String, Object> nfmReply = (Map<String, Object>)interactive.get('nfm_reply');
+                            System.debug('nfmReply : ' + nfmReply);
                             if (nfmReply != null) { 
-                                System.debug('nfmReply');
                                 String responseJson = (String)nfmReply.get('response_json');
+                                System.debug('responseJson: ' + responseJson);
                                 if (responseJson != null && contextId != null) {
-                                    System.debug('responseJson :'+responseJson);
-                                    System.debug('contextId :'+contextId);
                                     whatsappChat.Flow_Response_JSON__c = responseJson;
 
                                     Map<String, Object> flowData = getFlowJsonFromContextId(contextId);
@@ -438,7 +472,9 @@ global without sharing class WhatsAppWebhook{
                                         String flowJson = (String) flowData.get('flowJson');
                                         Id flowRecordId = (Id) flowData.get('flowId');
 
+                                        System.debug('Flow JSON associated with this response: ' + flowJson);
                                         String labelToValueJson = mapResponseToLabels(flowJson, responseJson);
+                                        System.debug('Label-Value Mapped JSON: ' + labelToValueJson);
 
                                         createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
                                         Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(responseJson);
@@ -510,211 +546,338 @@ global without sharing class WhatsAppWebhook{
             }
 
         } catch (Exception e){
-            // // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'processSingleMessage', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'processSingleMessage', e.getMessage());
             System.debug('Error in processSingleMessage: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
     }
 
     public static Map<String,Object> getFlowJsonFromContextId(String contextId) {
-        if (String.isBlank(contextId)) return null;
-
-        // Step 1: Get Chat__c record using contextId
-        List<Chat__c> chatList = [SELECT Id, WhatsappTemplate__c FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
-
-        if (chatList.isEmpty()) return null;
-
-        Id whatsappTemplateId = chatList[0].WhatsappTemplate__c;
-        if (whatsappTemplateId == null) return null;
-
-        // Step 2: Get WhatsappTemplate__c record
-        List<WhatsappTemplate__c> templateList = [SELECT Id, WBButton_Body__c FROM WhatsappTemplate__c WHERE Id = :whatsappTemplateId LIMIT 1];
-
-        if (templateList.isEmpty()) return null;
-
-        String buttonBodyJson = templateList[0].WBButton_Body__c;
-        if (String.isBlank(buttonBodyJson)) return null;
-
-        // Step 3: Parse WBButton_Body__c JSON to extract flow_id
-        List<Object> buttonArray = (List<Object>) JSON.deserializeUntyped(buttonBodyJson);
-
-        String flowId;
-        for (Object obj : buttonArray) {
-            Map<String, Object> buttonObj = (Map<String, Object>) obj;
-            if ((String) buttonObj.get('type') == 'FLOW' && buttonObj.containsKey('flow_id')) {
-                flowId = (String) buttonObj.get('flow_id');
-                break;
+        try {
+            if (String.isBlank(contextId)) return null;
+    
+            // Step 1: Get Chat__c record using contextId
+            List<Chat__c> chatList = [SELECT Id, WhatsappTemplate__c FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
+    
+            if (chatList.isEmpty()) return null;
+            System.debug('ChatList: ' + chatList);
+    
+            Id whatsappTemplateId = chatList[0].WhatsappTemplate__c;
+            if (whatsappTemplateId == null) return null;
+    
+            // Step 2: Get WhatsappTemplate__c record
+            List<WhatsappTemplate__c> templateList = [SELECT Id, WBButton_Body__c FROM WhatsappTemplate__c WHERE Id = :whatsappTemplateId LIMIT 1];
+    
+            if (templateList.isEmpty()) return null;
+            System.debug('TemplateList: ' + templateList);
+    
+            String buttonBodyJson = templateList[0].WBButton_Body__c;
+            if (String.isBlank(buttonBodyJson)) return null;
+    
+            System.debug('Button Body JSON: ' + buttonBodyJson);
+    
+            // Step 3: Parse WBButton_Body__c JSON to extract flow_id
+            List<Object> buttonArray = (List<Object>) JSON.deserializeUntyped(buttonBodyJson);
+    
+            String flowId;
+            for (Object obj : buttonArray) {
+                Map<String, Object> buttonObj = (Map<String, Object>) obj;
+                if ((String) buttonObj.get('type') == 'FLOW' && buttonObj.containsKey('flow_id')) {
+                    flowId = (String) buttonObj.get('flow_id');
+                    break;
+                }
             }
+    
+            if (String.isBlank(flowId)) return null;
+    
+            // Step 4: Query Flow__c using flowId
+            List<Flow__c> flowList = [SELECT Id, Flow_JSON__c FROM Flow__c WHERE Flow_Id__c = :flowId LIMIT 1];
+    
+            if (flowList.isEmpty()) return null;
+            System.debug('FlowList: ' + flowList);
+    
+            Flow__c flow = flowList[0];
+            // Step 5: Return map with both flow JSON and Flow__c Id
+            return new Map<String, Object>{
+                'flowJson' => flow.Flow_JSON__c,
+                'flowId'   => flow.Id
+            };
+        } catch (Exception e){
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'getFlowJsonFromContextId', e.getMessage());
+            System.debug('Error in getFlowJsonFromContextId: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
+            return null;
         }
-
-        if (String.isBlank(flowId)) return null;
-
-        // Step 4: Query Flow__c using flowId
-        List<Flow__c> flowList = [SELECT Id, Flow_JSON__c FROM Flow__c WHERE Flow_Id__c = :flowId LIMIT 1];
-
-        if (flowList.isEmpty()) return null;
-
-        Flow__c flow = flowList[0];
-        // Step 5: Return map with both flow JSON and Flow__c Id
-        return new Map<String, Object>{
-            'flowJson' => flow.Flow_JSON__c,
-            'flowId'   => flow.Id
-        };
     }
 
     public static void createFlowSubmissionRecord(String senderPhone, Id flowRecordId, String labelToValueJson) {
-
-        // Step 1: Fetch config
-        Object_Config__mdt configMdt = [SELECT ChatWindowConfigInfo__c FROM Object_Config__mdt WHERE DeveloperName = 'objectConfigInfo' LIMIT 1];
-        Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(configMdt.ChatWindowConfigInfo__c);
-
-        // Step 2: Dynamically construct SOSL RETURNING part
-        List<String> returningParts = new List<String>();
-        Map<String, String> objectToPhoneFieldMap = new Map<String, String>();
-
-        for (String objectName : configMap.keySet()) {
-            Map<String, Object> objConfig = (Map<String, Object>) configMap.get(objectName);
-            String phoneField = (String) objConfig.get('phoneField');
-
-            returningParts.add(objectName + '(Id, ' + phoneField + ')');
-            objectToPhoneFieldMap.put(objectName, phoneField);
-        }
-
-        String soslQuery = 'FIND \'' + senderPhone + '\' IN PHONE FIELDS RETURNING ' + String.join(returningParts, ', ');
-
-        // Step 3: Execute SOSL
-        List<List<SObject>> results = Search.query(soslQuery);
-
-        // Step 4: Detect matched object
-        String matchedObject = null;
-        SObject matchedRecord = null;
-
-        for (List<SObject> resultList : results) {
-            if (!resultList.isEmpty()) {
-                matchedRecord = resultList[0];
-                matchedObject = matchedRecord.getSObjectType().getDescribe().getName();
-                break;
+        try {
+            // Step 1: Fetch config
+            MVEX__Object_Config__mdt configMdt = [SELECT MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WHERE DeveloperName = 'objectConfigInfo' LIMIT 1];
+            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(configMdt.MVEX__ChatWindowConfigInfo__c);
+    
+            // Step 2: Dynamically construct SOSL RETURNING part
+            List<String> returningParts = new List<String>();
+            Map<String, String> objectToPhoneFieldMap = new Map<String, String>();
+    
+            for (String objectName : configMap.keySet()) {
+                Map<String, Object> objConfig = (Map<String, Object>) configMap.get(objectName);
+                String phoneField = (String) objConfig.get('phoneField');
+    
+                returningParts.add(objectName + '(Id, ' + phoneField + ')');
+                objectToPhoneFieldMap.put(objectName, phoneField);
             }
+    
+            // Normalize phone number before search
+            String normalizedPhone = normalizePhoneNumber(senderPhone);
+            String soslQuery = 'FIND \'' + normalizedPhone + '\' IN PHONE FIELDS RETURNING ' + String.join(returningParts, ', ');
+            System.debug('Dynamic SOSL Query: ' + soslQuery);
+    
+            // Step 3: Execute SOSL
+            List<List<SObject>> results = Search.query(soslQuery);
+            System.debug('SOSL Results: ' + results);
+    
+            // Step 4: Detect matched object
+            String matchedObject = null;
+            SObject matchedRecord = null;
+    
+            for (List<SObject> resultList : results) {
+                if (!resultList.isEmpty()) {
+                    matchedRecord = resultList[0];
+                    matchedObject = matchedRecord.getSObjectType().getDescribe().getName();
+                    break;
+                }
+            }
+    
+            System.debug('Matched object: ' + matchedObject);
+            System.debug('Matched record: ' + matchedRecord);
+    
+            // Step 1: Get config for matched object
+            Map<String, Object> matchedConfig = (Map<String, Object>) configMap.get(matchedObject);
+            if (matchedConfig == null) {
+                System.debug('No configuration found for matched object: ' + matchedObject);
+                return;
+            }
+            
+            String nameField = (String) matchedConfig.get('nameField');
+            String phoneField = (String) matchedConfig.get('phoneField');
+    
+            // Step 2: Build dynamic query
+            String normalizedPhoneForQuery = normalizePhoneNumber(senderPhone);
+            String soql = 'SELECT ' + nameField + ' FROM ' + matchedObject + ' WHERE ' + phoneField + ' = :normalizedPhoneForQuery LIMIT 1';
+    
+            // Step 3: Execute dynamic query
+            SObject matchedRecord1 = Database.query(soql);
+    
+            // Step 4: Access name
+            String senderName = (String) matchedRecord1.get(nameField);
+            System.debug('Name: ' + senderName);
+    
+            // Create and insert Flow_Submission__c record
+            Flow_Submission__c submission = new Flow_Submission__c(
+                WB_Flow__c = flowRecordId,
+                Flow_Response_Mapping__c = labelToValueJson,
+                Submitter_Phone__c = senderPhone,
+                Submitter_Name__c = senderName
+            );
+            insert submission;
+        } Catch (Exception e) {
+            System.debug('Error in createFlowSubmissionRecord: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
+             ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'createFlowSubmissionRecord', e.getMessage());
         }
-
-        // Step 1: Get config for matched object
-        Map<String, Object> matchedConfig = (Map<String, Object>) configMap.get(matchedObject);
-        if (matchedConfig == null) {
-            return;
-        }
-        
-        String nameField = (String) matchedConfig.get('nameField');
-        String phoneField = (String) matchedConfig.get('phoneField');
-
-        // Step 2: Build dynamic query
-        String soql = 'SELECT ' + nameField + ' FROM ' + matchedObject + ' WHERE ' + phoneField + ' = :senderPhone LIMIT 1';
-
-        // Step 3: Execute dynamic query
-        SObject matchedRecord1 = Database.query(soql);
-
-        // Step 4: Access name
-        String senderName = (String) matchedRecord1.get(nameField);
-
-        // Create and insert Flow_Submission__c record
-        Flow_Submission__c submission = new Flow_Submission__c(
-            WB_Flow__c = flowRecordId,
-            Flow_Response_Mapping__c = labelToValueJson,
-            Submitter_Phone__c = senderPhone,
-            Submitter_Name__c = senderName
-        );
-        insert submission;
     }
 
     public static String mapResponseToLabels(String flowJsonStr, String responseJsonStr) {
-        // Parse the flow definition and response JSON
-        Map<String, Object> flowJson = (Map<String, Object>) JSON.deserializeUntyped(flowJsonStr);
-        Map<String, Object> responseJson = (Map<String, Object>) JSON.deserializeUntyped(responseJsonStr);
-        Map<String, Object> finalLabelToValueMap = new Map<String, Object>();
+        try {
 
-        // Extract screens array
-        List<Object> screens = (List<Object>) flowJson.get('screens');
-        Integer screenIndex = 0;
+            System.debug('flowJsonStr received in mapping method: ' + flowJsonStr);
+            System.debug('responseJsonStr received in mapping method: ' + responseJsonStr);
 
-        for (Object screenObj : screens) {
-            Map<String, Object> screen = (Map<String, Object>) screenObj;
-            Map<String, Object> layout = (Map<String, Object>) screen.get('layout');
-            List<Object> layoutChildren = (List<Object>) layout.get('children');
+            // Parse the flow definition and response JSON
+            Map<String, Object> flowJson = (Map<String, Object>) JSON.deserializeUntyped(flowJsonStr);
+            Map<String, Object> responseJson = (Map<String, Object>) JSON.deserializeUntyped(responseJsonStr);
+            Map<String, Object> finalLabelToValueMap = new Map<String, Object>();
 
-            Integer formIndex = 0;
-
-            for (Object childObj : layoutChildren) {
-                Map<String, Object> child = (Map<String, Object>) childObj;
-                if (child.get('type') == 'Form') {
-                    List<Object> formChildren = (List<Object>) child.get('children');
-                    Integer fieldIndex = 0;
-
-                    for (Object formFieldObj : formChildren) {
-                        Map<String, Object> formField = (Map<String, Object>) formFieldObj;
-
-                        if (formField.containsKey('name') && formField.containsKey('label')) {
-                            String name = (String) formField.get('name');
-                            String label = (String) formField.get('label');
-
-                            List<String> possibleKeys = new List<String>{
-                                name,
-                                'screen_' + screenIndex + '_' + name + '_' + fieldIndex,
-                                'screen_' + screenIndex + '_' + name
-                            };
-
-                            Object matchedValue = null;
-                            for (String key : possibleKeys) {
-                                if (responseJson.containsKey(key)) {
-                                    matchedValue = responseJson.get(key);
-                                    break;
-                                }
+            System.debug('Flow JSON: ' + flowJson);
+            System.debug('Response JSON: ' + responseJson);
+            System.debug('Response JSON Keys Available: ' + String.join(new List<String>(responseJson.keySet()), ', '));
+  
+            // Extract screens array
+            List<Object> screens = (List<Object>) flowJson.get('screens');
+            Integer screenIndex = 0;
+            
+            // Track all field names that couldn't be matched for debugging
+            List<String> unmatchedFields = new List<String>();
+            
+            // Check if response JSON might have nested structure by screen
+            Boolean hasNestedStructure = false;
+            for (String key : responseJson.keySet()) {
+                if (key.startsWith('screen_') && responseJson.get(key) instanceof Map<String, Object>) {
+                    hasNestedStructure = true;
+                    break;
+                }
+            }
+            System.debug('Response has nested screen structure: ' + hasNestedStructure);
+    
+            for (Object screenObj : screens) {
+                Map<String, Object> screen = (Map<String, Object>) screenObj;
+                String screenId = (String) screen.get('id');
+                String screenTitle = screen.containsKey('title') ? (String)screen.get('title') : 'Screen ' + screenIndex;
+                Map<String, Object> layout = (Map<String, Object>) screen.get('layout');
+                Map<String, Object> screenData = (Map<String, Object>) screen.get('data');
+                
+                if (layout == null) {
+                    System.debug('Warning: Screen at index ' + screenIndex + ' has no layout. Skipping.');
+                    screenIndex++;
+                    continue;
+                }
+                
+                // Build a map of field name to expected data key from the screen's data section
+                Map<String, String> fieldNameToDataKey = new Map<String, String>();
+                if (screenData != null && !screenData.isEmpty()) {
+                    for (String dataKey : screenData.keySet()) {
+                        // Data keys follow pattern: screen_X_FIELDNAME_Y
+                        // Extract FIELDNAME from the key
+                        if (dataKey.startsWith('screen_' + screenIndex + '_')) {
+                            String remaining = dataKey.substring(('screen_' + screenIndex + '_').length());
+                            // Find the last underscore to separate field name from index
+                            Integer lastUnderscore = remaining.lastIndexOf('_');
+                            if (lastUnderscore > 0) {
+                                String fieldName = remaining.substring(0, lastUnderscore);
+                                fieldNameToDataKey.put(fieldName, dataKey);
+                                System.debug('Screen ' + screenIndex + ': Mapped field "' + fieldName + '" to data key "' + dataKey + '"');
                             }
-
-                            if (matchedValue != null) {
-                                // Handle Dropdown or CheckboxGroup
-                                if (formField.containsKey('data-source')) {
-                                    List<Object> dataSource = (List<Object>) formField.get('data-source');
-
-                                    // If the value is a List → CheckboxGroup
-                                    if (matchedValue instanceof List<Object>) {
-                                        List<Object> selectedTitles = new List<Object>();
-                                        for (Object val : (List<Object>) matchedValue) {
-                                            for (Object optionObj : dataSource) {
-                                                Map<String, Object> option = (Map<String, Object>) optionObj;
-                                                if (String.valueOf(option.get('id')) == String.valueOf(val)) {
-                                                    selectedTitles.add(option.get('title'));
+                        }
+                    }
+                }
+                
+                List<Object> layoutChildren = (List<Object>) layout.get('children');
+    
+                for (Object childObj : layoutChildren) {
+                    Map<String, Object> child = (Map<String, Object>) childObj;
+                    if (child.get('type') == 'Form') {
+                        List<Object> formChildren = (List<Object>) child.get('children');
+                        Integer fieldIndex = 0;
+    
+                        for (Object formFieldObj : formChildren) {
+                            Map<String, Object> formField = (Map<String, Object>) formFieldObj;
+    
+                            if (formField.containsKey('name') && formField.containsKey('label')) {
+                                String name = (String) formField.get('name');
+                                String label = (String) formField.get('label');
+    
+                                Object matchedValue = null;
+                                String matchedKey = null;
+                                
+                                // First, try to use the data key mapping from screen's data section
+                                if (fieldNameToDataKey.containsKey(name)) {
+                                    String dataKey = fieldNameToDataKey.get(name);
+                                    if (responseJson.containsKey(dataKey)) {
+                                        matchedValue = responseJson.get(dataKey);
+                                        matchedKey = dataKey;
+                                        System.debug('✓ Matched field "' + name + '" using data key "' + dataKey + '" with value: ' + matchedValue);
+                                    }
+                                }
+                                
+                                // If not found via data mapping, try other possible key patterns
+                                if (matchedValue == null) {
+                                    List<String> possibleKeys = new List<String>{
+                                        name,                                                           // Direct name
+                                        'screen_' + screenIndex + '_' + name + '_' + fieldIndex,       // Indexed pattern
+                                        'screen_' + screenIndex + '_' + name,                          // Screen indexed
+                                        screenId + '_' + name,                                         // Screen ID based
+                                        name.toLowerCase(),                                            // Lowercase
+                                        name.toUpperCase()                                             // Uppercase
+                                    };
+                                    
+                                    // First, check if response has nested structure by screen
+                                    if (hasNestedStructure) {
+                                        List<String> nestedKeys = new List<String>{
+                                            'screen_' + screenIndex,
+                                            screenId
+                                        };
+                                        for (String nestedKey : nestedKeys) {
+                                            if (responseJson.containsKey(nestedKey) && responseJson.get(nestedKey) instanceof Map<String, Object>) {
+                                                Map<String, Object> nestedScreenData = (Map<String, Object>) responseJson.get(nestedKey);
+                                                if (nestedScreenData.containsKey(name)) {
+                                                    matchedValue = nestedScreenData.get(name);
+                                                    matchedKey = nestedKey + '.' + name;
                                                     break;
                                                 }
                                             }
                                         }
-                                        matchedValue = selectedTitles;
                                     }
-                                    // If the value is a single item → Dropdown
-                                    else {
-                                        for (Object optionObj : dataSource) {
-                                            Map<String, Object> option = (Map<String, Object>) optionObj;
-                                            if (String.valueOf(option.get('id')) == String.valueOf(matchedValue)) {
-                                                matchedValue = option.get('title');
+                                    
+                                    // If not found in nested structure, try flat structure
+                                    if (matchedValue == null) {
+                                        for (String key : possibleKeys) {
+                                            if (responseJson.containsKey(key)) {
+                                                matchedValue = responseJson.get(key);
+                                                matchedKey = key;
+                                                System.debug('✓ Matched field "' + name + '" using key "' + key + '" with value: ' + matchedValue);
                                                 break;
                                             }
                                         }
                                     }
                                 }
-
-                                String screenTitle = screen.containsKey('title') ? (String)screen.get('title') : 'Screen ' + screenIndex;
-                                String keyLabel = screenTitle + ' - ' + label;
-                                finalLabelToValueMap.put(keyLabel, matchedValue);
-
-                                finalLabelToValueMap.put(keyLabel, matchedValue);
+    
+                                if (matchedValue != null) {
+                                    // Handle Dropdown or CheckboxGroup
+                                    if (formField.containsKey('data-source')) {
+                                        List<Object> dataSource = (List<Object>) formField.get('data-source');
+    
+                                        // If the value is a List → CheckboxGroup
+                                        if (matchedValue instanceof List<Object>) {
+                                            List<Object> selectedTitles = new List<Object>();
+                                            for (Object val : (List<Object>) matchedValue) {
+                                                for (Object optionObj : dataSource) {
+                                                    Map<String, Object> option = (Map<String, Object>) optionObj;
+                                                    if (String.valueOf(option.get('id')) == String.valueOf(val)) {
+                                                        selectedTitles.add(option.get('title'));
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            matchedValue = selectedTitles;
+                                        }
+                                        // If the value is a single item → Dropdown
+                                        else {
+                                            for (Object optionObj : dataSource) {
+                                                Map<String, Object> option = (Map<String, Object>) optionObj;
+                                                if (String.valueOf(option.get('id')) == String.valueOf(matchedValue)) {
+                                                    matchedValue = option.get('title');
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+    
+                                    String keyLabel = screenTitle + ' - ' + label;
+                                    
+                                    // Handle duplicate labels by appending field name if key already exists
+                                    if (finalLabelToValueMap.containsKey(keyLabel)) {
+                                        keyLabel = screenTitle + ' - ' + label + ' (' + name + ')';
+                                    }
+                                    
+                                    finalLabelToValueMap.put(keyLabel, matchedValue);
+                                    System.debug('Added to final map: ' + keyLabel + ' = ' + matchedValue);
+                                } else {
+                                    // Track unmatched fields for debugging
+                                    unmatchedFields.add(screenTitle + ' - ' + label + ' (field: ' + name + ')');
+                                    System.debug('✗ Could not find value for field "' + name + '" (label: "' + label + '") in screen "' + screenTitle + '"');
+                                }
+                                fieldIndex++;
                             }
                         }
-                        fieldIndex++;
                     }
-                    formIndex++;
                 }
+                screenIndex++;
             }
-            screenIndex++;
+    
+            return JSON.serialize(finalLabelToValueMap);
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'mapResponseToLabels', e.getMessage());
+            System.debug('Error in mapResponseToLabels: ' + e.getMessage() + ' at line ' + e.getLineNumber());
+            return null;
         }
-
-        return JSON.serialize(finalLabelToValueMap);
     }
 
     public static String getFileExtension(String mimeType){
@@ -759,9 +922,9 @@ global without sharing class WhatsAppWebhook{
     public static Blob handleMediaAttachment(String documentId){
         try{
             String accessToken = '';
-            List<WBConnect_Configuration__mdt> config = WBConnect_Configuration__mdt.getAll().values();
-            accessToken = config[0].Access_Token__c;
-            String mediaUrl = config[0].APIEndpoint__c + '/' + config[0].APIVersion__c + '/' + documentId;
+            List<MVEX__WBConnect_Configuration__mdt> config = MVEX__WBConnect_Configuration__mdt.getAll().values();
+            accessToken = config[0].MVEX__Access_Token__c;
+            String mediaUrl = config[0].MVEX__APIEndpoint__c + '/' + config[0].MVEX__APIVersion__c + '/' + documentId;
             
             if (accessToken != ''){
                 HttpRequest req = new HttpRequest();
@@ -773,25 +936,34 @@ global without sharing class WhatsAppWebhook{
                 try{
                     Http http = new Http();
                     res = http.send(req);
+                    System.debug('res:- '+res);
 
                     if (res.getStatusCode() == 200){
                         // Parse the metadata response
                         Map<String, Object> mediaMetadata = (Map<String, Object>)JSON.deserializeUntyped(res.getBody());
                         String downloadUrl = (String) mediaMetadata.get('url'); // Retrieve download URL from metadata
+                        system.debug('mediaid url===> ' + downloadUrl);
 
                         // Download the media content
                         return downloadMediaContent(downloadUrl, accessToken);
                     } else{
+                        ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'handleMediaAttachment', 'Failed to retrieve media metadata. Status: ' + res.getStatus() + ', Response: ' + res.getBody());
+                        System.debug('Failed to retrieve media metadata. Status: ' + res.getStatus() + ', Response: ' + res.getBody());
                         return null;
                     }
                 } catch (Exception e){
+                    ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'handleMediaAttachment', e.getMessage());
+                    System.debug('Error in handleMediaAttachment: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
                     return null;
                 }
             } else{
+                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'handleMediaAttachment', 'Failed to fetch access token or endpoint.');
+                System.debug('Failed fetched access token and endpoint from custom labels');
                 return null;
             }
         } catch (Exception e){
-            // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'processSingleMessage', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'processSingleMessage', e.getMessage());
+            System.debug('Error in handleMediaAttachment: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
             return null;
         }
     }
@@ -811,10 +983,13 @@ global without sharing class WhatsAppWebhook{
                 // Return the binary data
                 return res.getBodyAsBlob();
             } else{
+                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'downloadMediaContent', res.getBody());
+                System.debug('Failed to download media. Status: ' + res.getStatus() + ', Response: ' + res.getBody());
                 return null;
             }
         } catch (Exception e){
-            // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'downloadMediaContent', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'downloadMediaContent', e.getMessage());
+            System.debug('Error in downloadMediaContent: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
             return null;
         }
     }
@@ -829,6 +1004,7 @@ global without sharing class WhatsAppWebhook{
             SObject record = records[0];
 
             // Create ContentVersion with Contact's OwnerId
+            System.debug('filename--> '+ filename);
             ContentVersion contentVersion = new ContentVersion(
                 Title = filename, 
                 VersionData = mediaBlob, 
@@ -847,11 +1023,15 @@ global without sharing class WhatsAppWebhook{
 
             sendEmail(body);
 
+
+            System.debug('Media file saved as ContentDocument Id: ' + contentDocumentId);
+
             // Construct fileData object
             fileData = new Map<String, Object>{ 'fileName' => filename, 'documentId' => contentDocumentId, 'contentVersionId' => contentVersion.Id, 'mimeType' => mimeType };
 
         } catch (Exception e){
-            // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'saveMediaToSalesforce', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'saveMediaToSalesforce', e.getMessage());
+            System.debug('Error in saveMediaToSalesforce: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
         return filedata;
     }
@@ -880,7 +1060,7 @@ global without sharing class WhatsAppWebhook{
             customNotificationObj.send(addressee);
 
         } catch (Exception e){
-            // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'sendNotificationForContact', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'sendNotificationForContact', e.getMessage());
         }
     }
 
@@ -904,33 +1084,38 @@ global without sharing class WhatsAppWebhook{
                                 for (Object statusObj : statuses){
                                     Map<String, Object> statusMap = (Map<String, Object>)statusObj;
                                     String status = (String) statusMap.get('status');
-                                    String waMessageId = (String) statusMap.get('id'); // This is WhatsAppMessageId__c
+                                    String waid = statusMap!= null ? (String) statusMap.get('id') : null;
 
-                                    // Find the ORIGINAL outbound Chat__c that sent this message
-                                    List<Chat__c> originalChats = [SELECT Id, Phone__c, WB_Broadcast__c, Message_Status__c FROM Chat__c WHERE WhatsAppMessageId__c = :waMessageId AND Type_of_Message__c = 'Outbound Messages' LIMIT 1];
-
-                                    if (originalChats.isEmpty()) continue;
-
-                                    Chat__c originalChat = originalChats[0];
-                                    String newStatus = status == 'read' ? 'Seen' : 
-                                                    status == 'delivered' ? 'Delivered' : 
-                                                    status == 'sent' ? 'Sent' : 'Failed';
-
-                                    // Only update if status improved
-                                    if (newStatus == 'Seen' || 
-                                        (newStatus == 'Delivered' && originalChat.Message_Status__c != 'Seen') ||
-                                        (newStatus == 'Sent' && originalChat.Message_Status__c == null)) {
-                                        
-                                        originalChat.Message_Status__c = newStatus;
-                                        update originalChat;
-
-                                        // Fire event
-                                        Chat_Message__e evt = new Chat_Message__e();
-                                        evt.Chat_Data__c = JSON.serialize(originalChat);
-                                        evt.Type__c = 'status';
-                                        evt.ContactId__c = originalChat.Phone__c;
-                                        EventBus.publish(evt);
+                                    List<Chat__c> waChats = [SELECT Id, Message_Status__c, WhatsAppMessageId__c, Phone__c FROM Chat__c WHERE WhatsAppMessageId__c = :waid LIMIT 1];
+                                    if(waChats.size() > 0){
+                                        Chat__c waChat = waChats[0];
+                                        if (status == 'sent' && waChat.Message_Status__c != 'Delivered' && waChat.Message_Status__c != 'Seen'){
+                                            waChat.Message_Status__c = 'Sent';
+                                        } else if (status == 'delivered' && waChat.Message_Status__c != 'Seen'){
+                                            waChat.Message_Status__c = 'Delivered';
+                                        } else if (status == 'read'){
+                                            waChat.Message_Status__c = 'Seen';
+                                        } else if (status == 'failed') {
+                                            waChat.Message_Status__c = 'Failed';
+                                            // Extract error details and log the exception
+                                            List<Object> errors = (List<Object>) statusMap.get('errors');
+                                            if (errors != null && !errors.isEmpty()) {
+                                                Map<String, Object> errorDetails = (Map<String, Object>) errors[0];
+                                                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'parseMessages', 'Message failed to send. Error details: ' + JSON.serialize(errorDetails));
+                                            } else {
+                                                // Fallback if 'errors' object is missing
+                                                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'parseMessages', 'Message failed to send. Error details: ' + JSON.serialize(statusMap));
+                                            }
+                                        }
+                                        update waChat;
+                                        Chat_Message__e statusChangeEvent = new Chat_Message__e();
+                                        statusChangeEvent.Chat_Data__c = JSON.serialize(waChat);
+                                        // statusChangeEvent.ContactId__c = waChat.Contact__c;
+                                        statusChangeEvent.ContactId__c = waChat.Phone__c;
+                                        statusChangeEvent.Type__c = 'status';
+                                        EventBus.publish(statusChangeEvent);
                                     }
+
                                 }
                             }
 
@@ -944,7 +1129,8 @@ global without sharing class WhatsAppWebhook{
                 }
             }
         } catch (Exception e){
-            // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'parseMessages', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'parseMessages', e.getMessage());
+            System.debug('Error in parseMessages: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
     }
 
@@ -965,9 +1151,9 @@ global without sharing class WhatsAppWebhook{
                 }
                 update waTemplate;
 
-                Template_Update__e templateStatusEvent = new Template_Update__e();
-                templateStatusEvent.Template_Id__c = waTemplate.Id;
-                templateStatusEvent.Template_Status__c = waTemplate.Status__c;
+                MVEX__Template_Update__e templateStatusEvent = new MVEX__Template_Update__e();
+                templateStatusEvent.MVEX__Template_Id__c = waTemplate.Id;
+                templateStatusEvent.MVEX__Template_Status__c = waTemplate.Status__c;
                 EventBus.publish(templateStatusEvent);
 
             } else{
@@ -996,7 +1182,7 @@ global without sharing class WhatsAppWebhook{
 
 
         } catch (Exception e){
-            // ExceptionHandler.logException(new Map<String, Object>{'className' => 'WhatsAppWebhook', 'methodName' => 'sendEmail', 'exceptionObj' => e, 'isApiException' => False, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null});
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'sendEmail', e.getMessage());
             System.debug('Error in sendEmailViaGmail: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
     }
@@ -1008,6 +1194,18 @@ global without sharing class WhatsAppWebhook{
             this.linkedEntityId = linkedEntityId;
             this.contentDocumentId = contentDocumentId;
         }
+    }
+
+    /**
+     * Normalize phone number by removing spaces, dashes, parentheses, and other formatting characters
+     * This ensures consistent phone number comparison regardless of formatting
+     */
+    public static String normalizePhoneNumber(String phoneNumber) {
+        if (String.isBlank(phoneNumber)) {
+            return phoneNumber;
+        }
+        // Remove all spaces, dashes, parentheses, and dots
+        return phoneNumber.replaceAll('[\\s\\-\\(\\)\\.]+', '');
     }
 
     public static void sendWhatsAppResponse(String showingId, String status, String phoneNumber, String contextId) {
@@ -1057,8 +1255,8 @@ global without sharing class WhatsAppWebhook{
 
             // Call the asynchronous method to send the WhatsApp message
             sendWhatsAppMessageAsync(chat.Id, showingId, phoneNumber, message, contextId);
-
         } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'sendWhatsAppResponse', e.getMessage());
             System.debug('Error in sendWhatsAppResponse: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
     }
@@ -1088,7 +1286,7 @@ global without sharing class WhatsAppWebhook{
             }
 
             String accessToken = config[0].Access_Token__c;
-            String endpoint = config[0].APIEndpoint__c + '/' + config[0].APIVersion__c + '/' + config[0].Phone_Number_Id__c + '/messages';
+            String endpoint = config[0].API_Endpoint__c + '/' + config[0].API_Version__c + '/' + config[0].Phone_Number_Id__c + '/messages';
 
             HttpRequest httpReq = new HttpRequest();
             httpReq.setEndpoint(endpoint);
@@ -1114,17 +1312,8 @@ global without sharing class WhatsAppWebhook{
             }
 
             update chat;
-
-            // Publish updated chat event
-            // Chat__c chatToSend = [SELECT Id, Type_of_Message__c, WhatsAppMessageId__c, Message__c, Message_Status__c, Message_Type__c, Reply_To__c, Reaction__c, WhatsappTemplate__c, WhatsappTemplate__r.Name, CreatedDate, Last_Interaction_Date__c, Phone__c, File_Data__c 
-            //                     FROM Chat__c WHERE Id = :chat.Id LIMIT 1];
-            // Chat_Message__e statusChangeEvent = new Chat_Message__e();
-            // statusChangeEvent.Chat_Data__c = JSON.serialize(chatToSend);
-            // statusChangeEvent.Type__c = 'status';
-            // statusChangeEvent.ContactId__c = chatToSend.Phone__c;
-            // EventBus.publish(statusChangeEvent);
-
         } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'sendWhatsAppMessageAsync', e.getMessage());
             System.debug('Error in sendWhatsAppMessageAsync: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
     }

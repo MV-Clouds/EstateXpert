@@ -8,7 +8,7 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class CheckListStatus extends LightningElement {
-    @track checklistItems = []; // Initialize as an empty array
+    @track checklistItems = [];
     @track originChecklistItems = [];
     @track showEditModal = false;
     @track objectName;
@@ -33,12 +33,23 @@ export default class CheckListStatus extends LightningElement {
         return this.checklistItems && this.checklistItems.length > 0;
     }
 
-    /**
-    * Method Name: totalCount
-    * @description: Used to get total count.
-    * Date: 09/07/2024
-    * Created By: Karan Singh
-    */
+    /** Split items into pending / completed for the two columns */
+    get pendingItems() {
+        return this.checklistItems.filter(item => !item.completed);
+    }
+
+    get completedItems() {
+        return this.checklistItems.filter(item => item.completed);
+    }
+
+    get hasPendingItems() {
+        return this.pendingItems.length > 0;
+    }
+
+    get hasCompletedItems() {
+        return this.completedItems.length > 0;
+    }
+
     get totalCount() {
         return this.checklistItems.length;
     }
@@ -53,15 +64,8 @@ export default class CheckListStatus extends LightningElement {
         return this.checklistItems.filter(item => item.completed).length;
     }
 
-    /**
-    * Method Name: progressStyle
-    * @description: Used to get progress style.
-    * Date: 09/07/2024
-    * Created By: Karan Singh
-    */
-    get progressStyle() {
-        const percentage = (this.completedCount / this.totalCount) * 100;
-        return `width: ${percentage}%;`;
+    get pendingCount() {
+        return this.checklistItems.filter(item => !item.completed).length;
     }
 
     get buttonLabel() {
@@ -80,7 +84,7 @@ export default class CheckListStatus extends LightningElement {
         try {
             loadStyle(this, MulishFontCss);
             this.screenWidth = window?.globalThis?.innerWidth;
-            window?.globalThis?.addEventListener("resize", this.handleResize);
+            window?.globalThis?.addEventListener('resize', this.handleResize);
             this.checklistValues();
         } catch (error) {
             errorDebugger('CheckListStatus', 'connectedCallback', error, 'warn', 'Error while loading css and fetching data');
@@ -134,35 +138,12 @@ export default class CheckListStatus extends LightningElement {
                 }
                 return item;
             });
-            if (fieldName == null || fieldName == '' || fieldName == undefined) {
+            if (fieldName == null || fieldName === '' || fieldName === undefined) {
                 this.createOrUpdateChecklistItem(itemId, checkboxValue);
             }
             this.updateChecklistItems();
         } catch (error) {
             errorDebugger('CheckListStatus', 'handleCheckboxChange', error, 'warn', 'Error while handling checkbox change');
-        }
-    }
-
-    /**
-    * Method Name: handleDropdownClick
-    * @description: Used to handle dropdown click.
-    * Created Date: 09/07/2024
-    * Last Updated: 23/12/2024
-    * Created By: Karan Singh
-    * Last Updated By: Karan Singh
-    */
-    handleDropdownClick(event) {
-        try {
-            const itemId = event.target.dataset.id;
-            this.checklistItems = this.checklistItems.map(item => {
-                if (item.id === itemId) {
-                    item.showDropdown = !item.showDropdown;
-                }
-                return item;
-            });
-            this.updateChecklistItems();
-        } catch (error) {
-            errorDebugger('CheckListStatus', 'handleDropdownClick', error, 'warn', 'Error while handling dropdown click');
         }
     }
 
@@ -182,18 +163,15 @@ export default class CheckListStatus extends LightningElement {
                 item.statusText = item.completed ? 'Completed' : 'Pending';
                 item.dropdownIcon = item.showDropdown ? '▲' : '▼';
                 item.displayValueToShow = item.displayValue || item.value;
-                
-                // Determine if "to" should be displayed
+
                 const operator = item.operator ? item.operator.trim() : '';
                 const operatorLower = operator.toLowerCase();
-                
                 if (operatorLower.endsWith('to')) {
                     item.isToRequired = false;
                 } else {
                     const needTo = ['equals', 'not equals'];
                     item.isToRequired = needTo.includes(operatorLower);
                 }
-                
                 return item;
             });
             this.isSpinner = false;
@@ -249,7 +227,7 @@ export default class CheckListStatus extends LightningElement {
         try {
             createCheckListItem({ recordId: this.recordId, checklistId: itemId, completed: checkboxValue })
                 .then(result => {
-                    if (result == 'success') {
+                    if (result === 'success') {
                         this.toast('Success', 'Checklist Item Updated successfully', 'success');
                     } else {
                         this.toast('Error', result, 'error');
@@ -276,9 +254,7 @@ export default class CheckListStatus extends LightningElement {
             this.showEditModal = event.details;
             this.addMainDiv();
             const inputElement = this.template.querySelector('.search_Input');
-            if (inputElement) {
-                inputElement.value = '';
-            }
+            if (inputElement) inputElement.value = '';
             this.checklistItems = [];
             this.checklistValues();
         } catch (error) {
@@ -300,11 +276,7 @@ export default class CheckListStatus extends LightningElement {
     toast(title, message, variant) {
         try {
             if (!import.meta.env.SSR) {
-                const toastEvent = new ShowToastEvent({
-                    title,
-                    message,
-                    variant
-                })
+                const toastEvent = new ShowToastEvent({ title, message, variant });
                 this.dispatchEvent(toastEvent);
             }
         } catch (error) {
@@ -323,9 +295,7 @@ export default class CheckListStatus extends LightningElement {
     refreshTable() {
         try {
             const inputElement = this.template.querySelector('.search_Input');
-            if (inputElement) {
-                inputElement.value = '';
-            }
+            if (inputElement) inputElement.value = '';
             this.checklistItems = [];
             this.checklistValues();
         } catch (error) {
@@ -344,8 +314,10 @@ export default class CheckListStatus extends LightningElement {
     hideMainDiv() {
         try {
             if (this.screenWidth <= 1050 && this.isDataAvailable) {
-                this.template.querySelector('.data_container').classList.add("removeMain");
-                this.template.querySelector('.container').classList.add("adddiv");
+                const dataContainer = this.template.querySelector('.columns-container');
+                const container = this.template.querySelector('.container');
+                if (dataContainer) dataContainer.classList.add('removeMain');
+                if (container) container.classList.add('adddiv');
             }
         } catch (error) {
             errorDebugger('CheckListStatus', 'hideMainDiv', error, 'warn', 'Error while hiding main div');
@@ -363,8 +335,10 @@ export default class CheckListStatus extends LightningElement {
     addMainDiv() {
         try {
             if (this.screenWidth <= 1050 && this.isDataAvailable) {
-                this.template.querySelector('.data_container').classList.remove("removeMain");
-                this.template.querySelector('.container').classList.remove("adddiv");
+                const dataContainer = this.template.querySelector('.columns-container');
+                const container = this.template.querySelector('.container');
+                if (dataContainer) dataContainer.classList.remove('removeMain');
+                if (container) container.classList.remove('adddiv');
             }
         } catch (error) {
             errorDebugger('CheckListStatus', 'addMainDiv', error, 'warn', 'Error while adding main div');

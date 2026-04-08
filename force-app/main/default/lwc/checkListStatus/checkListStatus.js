@@ -7,6 +7,9 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
+
 export default class CheckListStatus extends LightningElement {
     @track checklistItems = [];
     @track originChecklistItems = [];
@@ -105,6 +108,8 @@ export default class CheckListStatus extends LightningElement {
             getCheckList({ objectName: this.objectName, recordId: this.recordId })
                 .then(result => {
                     this.checklistItems = JSON.parse(JSON.stringify(result?.checklistData));
+                    console.log('CheckListStatus checklistData:', JSON.stringify(this.checklistItems));
+
                     this.originChecklistItems = JSON.parse(JSON.stringify(result?.checklistData));
                     this.checklistEditable = result.isEditable;
                     this.updateChecklistItems();
@@ -172,7 +177,26 @@ export default class CheckListStatus extends LightningElement {
                     const needTo = ['equals', 'not equals'];
                     item.isToRequired = needTo.includes(operatorLower);
                 }
-                return item;
+
+                let value = item.displayValueToShow;
+
+                if (value === null || value === undefined || value === '') {
+                    value = '-';
+                } else if (item.fieldType === 'CURRENCY') {
+                    const num = Number(value);
+                    value = !isNaN(num)
+                        ? new Intl.NumberFormat(USER_LOCALE, {
+                            style: 'currency',
+                            currency: USER_CURRENCY,
+                            minimumFractionDigits: 0
+                        }).format(num)
+                        : '-';
+                }
+
+                return {
+                    ...item,
+                    displayValueToShow: value
+                };
             });
             this.isSpinner = false;
         } catch (error) {

@@ -1,0 +1,103 @@
+<template>
+    <div class="merge-field-selector">
+        <!-- Field Picker Button -->
+        <button 
+            class="field-picker-button" 
+            onclick={toggleDropdown}
+            disabled={disabled}
+            title={buttonTitle}
+        >
+            <span class="field-picker-text">{displayText}</span>
+            <lightning-icon 
+                icon-name="utility:chevrondown" 
+                size="x-small" 
+                class="chevron-icon">
+            </lightning-icon>
+        </button>
+
+        <!-- Dropdown Panel -->
+        <template if:true={isDropdownOpen}>
+            <div class="field-dropdown-panel" onclick={handlePanelClick}>
+                
+                <!-- Breadcrumb Navigation (Existing Component) -->
+
+                <div class="breadcrumb-container">
+                    <c-wb-breadcrumb-navigation
+                        breadcrumbs={breadcrumbs}
+                        show-breadcrumbs={showBreadcrumbs}
+                        onbreadcrumbclick={handleBreadcrumbClick}>
+                    </c-wb-breadcrumb-navigation>
+                </div>
+                <!-- Search Input -->
+                <div class="field-search-container" onclick={handleSearchClick}>
+                    <lightning-input 
+                        type="search"
+                        placeholder="Search fields..."
+                        variant="label-hidden"
+                        value={searchTerm}
+                        onchange={handleSearchChange}
+                        onfocus={handleSearchFocus}
+                        class="search-input">
+                    </lightning-input>
+                </div>
+
+                <!-- Loading Spinner -->
+                <template if:true={isLoading}>
+                    <div class="field-dropdown-spinner">
+                        <lightning-spinner 
+                            alternative-text="Loading fields..." 
+                            size="small">
+                        </lightning-spinner>
+                    </div>
+                </template>
+
+                <!-- Field List -->
+                <template if:false={isLoading}>
+                    <div class="field-list-container">
+                        <template if:true={hasFilteredFields}>
+                            <template for:each={filteredFields} for:item="field">
+                                <div 
+                                    key={field.value}
+                                    class={field.cssClass}
+                                    data-value={field.value}
+                                    data-label={field.label}
+                                    data-apiname={field.apiName}
+                                    data-relationship={field.isRelationship}
+                                    data-canexpand={field.canExpand}
+                                    onclick={handleFieldClick}
+                                >
+                                    <lightning-icon 
+                                        icon-name={field.iconName}
+                                        size="x-small"
+                                        class="field-item-icon">
+                                    </lightning-icon>
+                                    <span class="field-item-label">{field.label}</span>
+                                    
+                                    <template if:true={field.showChevron}>
+                                        <lightning-icon 
+                                            icon-name="utility:chevronright"
+                                            size="x-small"
+                                            class="chevron-icon">
+                                        </lightning-icon>
+                                    </template>
+                                </div>
+                            </template>
+                        </template>
+
+                        <!-- No Results -->
+                        <template if:false={hasFilteredFields}>
+                            <div class="no-fields-found">
+                                <lightning-icon 
+                                    icon-name="utility:search"
+                                    size="small"
+                                    class="no-fields-icon">
+                                </lightning-icon>
+                                <p>No fields found</p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

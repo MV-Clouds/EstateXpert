@@ -1,12 +1,26 @@
+/**
+ * Component Name: WbPreviewTemplatePage
+ * @description: Used LWC components to preview the created template in meta.
+ * Date: 27/11/2024
+ * Created By: Kajal Tiwari
+ */
+ /***********************************************************************
+MODIFICATION LOG*
+ * Last Update Date : 30/04/2025
+ * Updated By : Divij Modi
+ * Change Description :Code Rework
+ ********************************************************************** */
+
 import { LightningElement,track,api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import sendPreviewTemplate from '@salesforce/apex/WBTemplateController.sendPreviewTemplate';  
 import getDynamicObjectData from '@salesforce/apex/WBTemplateController.getDynamicObjectData';
 import getTemplateDataWithReplacement from '@salesforce/apex/WBTemplateController.getTemplateDataWithReplacement';
 import CountryJson from '@salesforce/resourceUrl/CountryJson';
 import NoPreviewAvailable from '@salesforce/resourceUrl/NoPreviewAvailable';
+import createChat from '@salesforce/apex/ChatWindowController.createChat';
+import sendWhatsappMessage from '@salesforce/apex/ChatWindowController.sendWhatsappMessage';
+
 export default class WbPreviewTemplatePage extends LightningElement {
-    @track ispreviewTemplate = false;
     @track filepreview;
     @track originalHeader;
     @track originalBody;
@@ -16,23 +30,26 @@ export default class WbPreviewTemplatePage extends LightningElement {
     @track tempFooter;
     @track headerParams;
     @track bodyParams;
-    @track buttonList = [];
+    @track buttonList=[];
     @track formatedTempBody;
-    @track phoneNumber = '';
+    @track phoneNumber='';
+    @track objectNamesList = []; 
+    @track fieldNames = [];
     @track isImgSelected = false;
     @track isVidSelected = false;
     @track isDocSelected = false;
     @track IsHeaderText = true;
     @track options = [];
+    @track contactDetails=[];
     @track inputValues = {};
-    @track groupedVariables = [];
-    @track hasVarFields = true;
+    @track groupedVariables=[];
+    @track hasMergeFields=true;
     @track selectedCountryType = '+971';  
-    @track countryType = [];
+    @track countryType=[];
     @track filteredTableData = []; 
     @track variableMapping = { header: {}, body: {} };
-    @track isFieldDisabled = false;
-    @track isSendDisabled = false;
+    @track isFieldDisabled=false;
+    @track isSendDisabled=false;
     @track sendButtonClass;
     @track bodyParaCode = '';
     @track NoPreviewAvailableImg = NoPreviewAvailable;
@@ -40,7 +57,17 @@ export default class WbPreviewTemplatePage extends LightningElement {
     @track bodyPramsCustomList = [];
     @track isSecurityRecommedation = false;
     @track isCodeExpiration = false;
+    @track showLicenseError = false;
     @track isLoading = false;
+    @track objectName = '';
+
+    get hasButtons() {
+        return Array.isArray(this.buttonList) && this.buttonList.length > 0;
+    }
+
+    get chatBubbleClass() {
+        return `slds-box slds-theme_default templatepreviewchildWP chatWP-bubble ${this.hasButtons ? 'with-buttons' : 'no-buttons'}`;
+    }
 
     @api
     get templateid() {
@@ -58,130 +85,9 @@ export default class WbPreviewTemplatePage extends LightningElement {
         try {
             this.fetchCountries();
             this.fetchReplaceVariableTemplate(this.templateid,null);
-            this.ispreviewTemplate = true;
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
         }
-    }
-
-    formatText(inputText) {
-        try {
-            const patterns = [
-                { regex: /\n/g, replacement: '<br/>' },
-                { regex: /\*(.*?)\*/g, replacement: '<b>$1</b>' },
-                { regex: /_(.*?)_/g, replacement: '<i>$1</i>' },
-                { regex: /~(.*?)~/g, replacement: '<s>$1</s>' },
-                { regex: /```(.*?)```/g, replacement: '<code>$1</code>' }
-            ];
-    
-            // Loop through all patterns, apply them to the input text one after the other
-            let formattedText = inputText;
-            patterns.forEach(({ regex, replacement }) => {
-                formattedText = formattedText.replace(regex, replacement);
-            });
-    
-            return formattedText;
-        } catch (error) {
-            console.error('Something went wrong in formatting text.', error);
-        }
-    }
-
-    getIconName(btntype) {
-        switch (btntype) {
-            case 'QUICK_REPLY':
-                return 'utility:reply';
-            case 'PHONE_NUMBER':
-                return 'utility:call';
-            case 'URL':
-                return 'utility:new_window';
-            case 'COPY_CODE':
-            case 'OTP':
-            case 'COUPON_CODE':
-                return 'utility:copy';
-            case 'FLOW':
-                return 'utility:file';
-            case 'CATALOG' :
-                return 'utility:product_item'
-            case 'MPM' :
-                return 'utility:product_item'
-            default:
-                return 'utility:question'; 
-        }
-    }
-
-    handleCountryChange(event){
-        this.selectedCountryType = event.target.value;
-    }
-
-    fetchCountries() {
-        try{
-            fetch(CountryJson)
-            .then((response) => response.json())
-            .then((data) => {
-                this.countryType = data
-                    .filter(country => country.callingCode != null && country.name != null)
-                    .map(country => {
-                        return {
-                            label: `${country.name} (${country.callingCode})`,
-                            value: country.callingCode
-                        };
-                    });
-            })
-            .catch((e) => console.error('Error fetching country data:', e));
-        }catch(e){
-            console.error('Something wrong while fetching country data:', e);
-        }
-    }
-    
-    updateTemplates() {
-        try {
-            let updatedBody = this.originalBody;
-            let updatedHeader = this.originalHeader;
-            
-            this.groupedVariables.forEach(group => {
-                group.mappings.forEach(mapping => {
-                    const variableToken = mapping.variable;
-                
-                    if (group.type === 'Header' && this.variableMapping.header[variableToken]) {  
-                        updatedHeader = updatedHeader.replace(variableToken, this.variableMapping.header[variableToken]);    
-                    }
-
-                    if (group.type === 'Body' && this.variableMapping.body[variableToken]) {
-                        while (updatedBody.includes(variableToken)) {
-                            updatedBody = updatedBody.replace(variableToken, this.variableMapping.body[variableToken]);
-                        }
-                    }
-                
-                });
-            });
-        
-            this.formatedTempBody = this.formatText(updatedBody);
-            this.tempHeader = updatedHeader;
-        } catch (error) {
-            console.error('Something went wrong while updating the template.',error);   
-        }
-    }
-    
-    handleInputChange(event) {
-        try {
-            const {name, value } = event.target; 
-            const groupType = event.target.dataset.group; 
-            if(groupType == 'Header'){
-                this.headerPramsCustomList.push(value)
-            } else if(groupType == 'Body'){
-                this.bodyPramsCustomList.push(value);
-            }
-            this.variableMapping[groupType.toLowerCase()][name] = value;
-            const group = this.groupedVariables.find(group => group.type === groupType);
-            const mapping = group.mappings.find(mapping => mapping.variable === name);
-
-            if (mapping) {
-                mapping.value = value;            
-            }
-            this.updateTemplates();  
-        } catch (error) {
-            console.error('Something wrong as input change.',error);
-        }        
     }
 
     fetchTemplateData() {
@@ -190,6 +96,8 @@ export default class WbPreviewTemplatePage extends LightningElement {
 
             getDynamicObjectData({ templateId: this.templateid })
                 .then((result) => {
+                    console.log('result ::', result);
+                    
                     if (!result) return;
 
                     const template = result.template;
@@ -200,6 +108,10 @@ export default class WbPreviewTemplatePage extends LightningElement {
                     this.originalBody = template.MVEX__WBTemplate_Body__c;
                     this.tempBody = this.originalBody;
                     this.tempFooter = template.MVEX__WBFooter_Body__c;
+
+                    this.isSecurityRecommedation = miscData.isSecurityRecommedation;
+                    this.isCodeExpiration = miscData.isCodeExpiration;
+                    this.expireTime = miscData.expireTime;
 
                     const headerType = template.MVEX__Header_Type__c;
 
@@ -216,6 +128,7 @@ export default class WbPreviewTemplatePage extends LightningElement {
                     }
 
                     this.formattedtempHeader = this.originalHeader;
+
                     this.isSendDisabled = template.MVEX__Status__c !== 'Active-Quality Pending';
                     this.sendButtonClass = this.isSendDisabled ? 'send-btn send-btn-active' : 'send-btn';
 
@@ -242,18 +155,21 @@ export default class WbPreviewTemplatePage extends LightningElement {
 
                         return acc;
                     }, []);
+
                     this.groupedVariables = grouped;
 
-                    if (this.groupedVariables.length === 0) {
-                        this.hasVarFields = false;
+                    if (this.groupedVariables?.length === 0) {
+                        this.hasMergeFields = false;
                     }
+
+                    this.objectName = result?.objectNamesList?.[0] || 'Contact';
+                    this.fieldNames = result?.fieldNames;
+
+                    this.options = [{ label: this.objectName, value: this.objectName, isSelected: true }];
 
                     // Format template body
                     this.formatedTempBody = this.formatText(this.tempBody);
 
-                    this.isSecurityRecommedation = miscData.isSecurityRecommedation;
-                    this.isCodeExpiration = miscData.isCodeExpiration;
-                    this.expireTime = miscData.expireTime;
                     if (template.MVEX__Template_Category__c === 'Authentication') {
                         this.formatedTempBody = '{{code}} ' + this.formatedTempBody;
                         if (this.isSecurityRecommedation) {
@@ -261,6 +177,8 @@ export default class WbPreviewTemplatePage extends LightningElement {
                         }
                         if (this.isCodeExpiration) {
                             this.tempFooter = 'This code expires in ' + this.expireTime + ' seconds.';
+                        } else{
+                            this.tempFooter = '';
                         }
                     }
 
@@ -276,14 +194,54 @@ export default class WbPreviewTemplatePage extends LightningElement {
         }
     }
 
-    handlePhoneChange(event){
-        this.phoneNumber = event.target.value;
+    getIconName(btntype) {
+        switch (btntype) {
+            case 'QUICK_REPLY':
+                return 'utility:reply';
+            case 'PHONE_NUMBER':
+                return 'utility:call';
+            case 'URL':
+                return 'utility:new_window';
+            case 'COPY_CODE':
+            case 'OTP':
+            case 'COUPON_CODE':
+                return 'utility:copy';
+            case 'FLOW':
+                return 'utility:file';
+            case 'CATALOG' :
+                return 'utility:product_item'
+            case 'MPM' :
+                return 'utility:product_item'
+            default:
+                return 'utility:question'; 
+        }
+    }
+
+    fetchCountries() {
+        try{
+            fetch(CountryJson)
+            .then((response) => response.json())
+            .then((data) => {
+                this.countryType = data
+                    .filter(country => country.callingCode != null && country.name != null)
+                    .map(country => {
+                        return {
+                            label: `${country.name} (${country.callingCode})`,
+                            value: country.callingCode
+                        };
+                    });
+            })
+            .catch((e) => console.error('Error fetching country data:', e));
+        }catch(e){
+            console.error('Something wrong while fetching country data:', e);
+        }
     }
 
     fetchReplaceVariableTemplate(templateid,contactid){
         try {
             getTemplateDataWithReplacement({templateId: templateid, contactId:contactid})
                 .then((templateData) => {
+                    console.log('templateData :: ', templateData);
                     if (templateData) {
                         this.template = templateData.template;
                         if(templateData.headerParams) this.headerParams = templateData.headerParams;
@@ -301,12 +259,96 @@ export default class WbPreviewTemplatePage extends LightningElement {
         }
     }
 
+    formatText(inputText) {
+        console.log('inputText :: ', inputText);
+        
+        try {
+            const patterns = [
+                { regex: /\n/g, replacement: '<br/>' },
+                { regex: /\*(.*?)\*/g, replacement: '<b>$1</b>' },
+                { regex: /_(.*?)_/g, replacement: '<i>$1</i>' },
+                { regex: /~(.*?)~/g, replacement: '<s>$1</s>' },
+                { regex: /```(.*?)```/g, replacement: '<code>$1</code>' }
+            ];
+    
+            // Loop through all patterns, apply them to the input text one after the other
+            let formattedText = inputText;
+            patterns.forEach(({ regex, replacement }) => {
+                formattedText = formattedText.replace(regex, replacement);
+            });
+    
+            return formattedText;
+        } catch (error) {
+            console.error('Something went wrong in formatting text.', error);
+        }
+    }
+
+    handleCountryChange(event){
+        this.selectedCountryType = event.target.value;
+    }
+
+    handleInputChange(event) {
+        try {
+            const {name, value } = event.target; 
+            const groupType = event.target.dataset.group; 
+            if(groupType == 'Header'){
+                this.headerPramsCustomList.push(value)
+            }
+            else if(groupType == 'Body'){
+                this.bodyPramsCustomList.push(value);
+
+            }
+            this.variableMapping[groupType.toLowerCase()][name] = value;
+            const group = this.groupedVariables.find(group => group.type === groupType);
+            const mapping = group.mappings.find(mapping => mapping.variable === name);
+
+            if (mapping) {
+                mapping.value = value;            
+            }
+            this.updateTemplates();  
+        } catch (error) {
+            console.error('Something wrong as input change.',error);
+        }        
+    }
+    
+    updateTemplates() {
+        try {
+            let updatedBody = this.originalBody;
+            let updatedHeader = this.originalHeader;
+            
+            this.groupedVariables.forEach(group => {
+                group.mappings.forEach(mapping => {
+                    const variableToken = mapping.variable;
+                
+                    if (group.type === 'Header' && this.variableMapping.header[variableToken]) {  
+                        updatedHeader = updatedHeader.replace(variableToken, this.variableMapping.header[variableToken]);    
+                    }
+
+                    if (group.type === 'Body' && this.variableMapping.body[variableToken]) {
+                        while (updatedBody.includes(variableToken)) {
+                            updatedBody = updatedBody.replace(variableToken, this.variableMapping.body[variableToken]);
+                        }
+                    }
+                
+                });
+            });
+        
+            this.formatedTempBody = this.formatText(updatedBody);
+            this.tempHeader = updatedHeader;
+            
+        } catch (error) {
+            console.error('Something went wrong while updating the template.',error);   
+        }
+    }
+
+    handlePhoneChange(event){
+        this.phoneNumber=event.target.value;
+    }
+
     sendTemplatePreview() {
         this.isLoading = true; 
     
-        try {
-            let totalMappingsLength = 0;
-            
+        try {let totalMappingsLength = 0;
             if (this.groupedVariables && Array.isArray(this.groupedVariables)) {
                 totalMappingsLength = this.groupedVariables.reduce((total, group) => {
                     if (Array.isArray(group.mappings)) {
@@ -316,21 +358,25 @@ export default class WbPreviewTemplatePage extends LightningElement {
                 }, 0);
             }
             
-            if(totalMappingsLength != (this.headerPramsCustomList.length + this.bodyPramsCustomList.length)){
+            if(totalMappingsLength != (this.headerPramsCustomList.length+this.bodyPramsCustomList.length)){
                 this.showToast('Warning', 'Please fill all input fields', 'warning');
                 this.isLoading = false;
                 return;
             }
 
-            let phonenum = (this.selectedCountryType && this.phoneNumber) ? `${this.selectedCountryType}${this.phoneNumber}` : null;
-            
+            let phonenum = this.selectedContactId 
+                ? this.contactDetails.Phone 
+                : (this.selectedCountryType && this.phoneNumber) 
+                    ? `${this.selectedCountryType}${this.phoneNumber}`
+                    : null;
+
             if (!phonenum || isNaN(Number(phonenum))) {
                 this.showToast('Warning', 'Invalid country code or phone number', 'warning');
                 this.isLoading = false;
                 return;
             }
             
-            const buttonValue = this.template.MVEX__WBButton_Body__c != undefined ? JSON.parse(this.template.MVEX__WBButton_Body__c) : '';
+            const buttonValue = this.template.MVEX__WBButton_Body__c != undefined?JSON.parse(this.template.MVEX__WBButton_Body__c) : '';
             
             const templatePayload = this.createJSONBody(phonenum, "template", {
                 templateName: this.template.MVEX__Template_Name__c,
@@ -343,22 +389,38 @@ export default class WbPreviewTemplatePage extends LightningElement {
                 buttonType: this.template.MVEX__Button_Type__c || '',
                 buttonValue : buttonValue
             });
-
-            sendPreviewTemplate({ jsonData: templatePayload })
-                .then((result) => {
-                    if (result) {
-                        this.showToast('Error', result, 'error');
-                    } else {
-                        this.showToast('Success', 'Template sent successfully', 'success');
-                        this.closePreview(); 
+        
+            createChat({chatData: {message: '', templateId: this.templateid, messageType: 'template', recordId: '', replyToChatId: null, phoneNumber: phonenum}})
+                .then(chat => {
+                    if(chat){
+                        
+                        sendWhatsappMessage({jsonData: templatePayload, chatId: chat.Id, isReaction: false, reaction: null})
+                            .then(result => {
+                                if(result.hasOwnProperty('error')){
+                                    this.showToast('Error', result.error || 'Failed to send template', 'error');
+                                }
+                                this.showToast('Success', 'Template sent successfully', 'success');
+                                setTimeout(()=>{
+                                    this.closePreview(); 
+                                },900)
+                            })
+                            .catch((e) => {
+                                this.isLoading = false; 
+                                this.showToast('Error', e.body?.message || 'Failed to send template', 'error');
+                            })
+                    }else{
+                        this.isLoading = false; 
+                        this.showToast('Error', e.body?.message || 'Failed to send template', 'error');
                     }
                 })
-                .catch((error) => {
-                    this.showToast('Error', error.body?.message || 'Failed to send template', 'error');
+                .catch((e) => {
+                    this.isLoading = false; 
+                    this.showToast('Error', e.body?.message || 'Failed to send template', 'error');
                 })
                 .finally(() => {
                     this.isLoading = false; 
                 });
+    
         } catch (e) {
             console.error('Error in function sendTemplatePreview:', e.message+' --- '+e);
             this.isLoading = false; 
@@ -411,8 +473,7 @@ export default class WbPreviewTemplatePage extends LightningElement {
                         }
                     ]
                 });
-            }
-            else if (data.headerType === 'Document' && data.headerImageURL) {
+            } else if (data.headerType === 'Document' && data.headerImageURL) {
                 components.push({
                     type: "header",
                     parameters: [
@@ -424,8 +485,7 @@ export default class WbPreviewTemplatePage extends LightningElement {
                         }
                     ]
                 });
-            }
-            else if (data.headerType === 'Video' && data.headerImageURL) {
+            } else if (data.headerType === 'Video' && data.headerImageURL) {
                 components.push({
                     type: "header",
                     parameters: [
@@ -463,81 +523,80 @@ export default class WbPreviewTemplatePage extends LightningElement {
             }
     
             // Button Handling
+            
             if (data.buttonValue && data.buttonValue.length > 0) {
-                let buttons = data.buttonValue
-                    .map((button, index) => {
-                        
-                        switch (button.type.toUpperCase()) {
-                            case "PHONE_NUMBER":
-                                components.push( {
+                let buttons = data.buttonValue.map((button, index) => {
+                    switch (button.type.toUpperCase()) {
+                        case "PHONE_NUMBER":
+                            components.push( {
+                                type: "button",
+                                sub_type: "voice_call",
+                                index: index,
+                                parameters: [
+                                    {
+                                        type: "text",
+                                        text: button.phone_number
+                                    }
+                                ]
+                            });
+                            break;
+                        case "URL":
+                            break;
+                        case "QUICK_REPLY":
+                            break;
+                        case "FLOW":
+                            components.push( {
                                     type: "button",
-                                    sub_type: "voice_call",
+                                    sub_type: "flow",
                                     index: index,
                                     parameters: [
                                         {
-                                            type: "text",
-                                            text: button.phone_number
+                                            "type": "payload",
+                                            "payload": "PAYLOAD"
+                                        }
+                                    ]   
+                                });
+                            break;
+                        case 'copy_code' :
+                        case "COPY_CODE":
+                        case "COUPON_CODE":
+                            components.push( {
+                                type: "button",
+                                sub_type: "copy_code",
+                                index: index,
+                                parameters: [
+                                    {
+                                        type :'coupon_code',
+                                        coupon_code : button.example
+                                    }
+                                ]
+                            }); 
+                            break;
+                        case "OTP":
+                            if (button.otp_type && button.otp_type.toUpperCase() === "COPY_CODE") {
+                                components.push( {
+                                    type: "button",
+                                    sub_type: "url",
+                                    index: index,
+                                    parameters: [
+                                        {
+                                            type : 'text',
+                                            text : randomCodeStr
                                         }
                                     ]
                                 });
-                                break;
-                            case "URL":
-                                break;
-                            case "QUICK_REPLY":
-                                break;
-                            case "FLOW":
-                                components.push( {
-                                        type: "button",
-                                        sub_type: "flow",
-                                        index: index,
-                                        parameters: [
-                                            {
-                                                "type": "payload",
-                                                "payload": "PAYLOAD"
-                                            }
-                                        ]   
-                                    });
-                                break;
-                            case 'copy_code' :
-                            case "COPY_CODE":
-                            case "COUPON_CODE":
-                                components.push( {
-                                    type: "button",
-                                    sub_type: "copy_code",
-                                    index: index,
-                                    parameters: [
-                                        {
-                                            type :'coupon_code',
-                                            coupon_code : button.example
-                                        }
-                                    ]
-                                }); 
-                                break;
-                            case "OTP":
-                                if (button.otp_type && button.otp_type.toUpperCase() === "COPY_CODE") {
-                                    components.push( {
-                                        type: "button",
-                                        sub_type: "url",
-                                        index: index,
-                                        parameters: [
-                                            {
-                                                type : 'text',
-                                                text : randomCodeStr
-                                            }
-                                        ]
-                                    });
-                                } else {
-                                    console.warn(`OTP button at index ${index} missing otp_code parameter.`);
-                                    return null;
-                                }
-                                break;
-                            default:
-                                console.warn(`Unknown button type: ${button.type}`);
+                            } else {
+                                console.warn(`OTP button at index ${index} missing otp_code parameter.`);
                                 return null;
-                        }
-                    })
-                    .filter((button) => button !== null);
-                }
+                            }
+                            break;
+                        default:
+                            console.warn(`Unknown button type: ${button.type}`);
+                            return null;
+                    }
+                })
+                .filter((button) => button !== null);
+            }
             
             // Add components if available
             if (components.length > 0) {
@@ -560,6 +619,9 @@ export default class WbPreviewTemplatePage extends LightningElement {
         this.tempBody='';
         this.tempFooter='';
         this.buttonList=[];
+        this.objectNamesList=[];
+        this.fieldNames=[];
+        this.contactDetails=[];
         this.formatedTempBody='';
     }
 

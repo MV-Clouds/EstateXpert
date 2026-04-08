@@ -9,13 +9,9 @@
 <template>
     <section class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
-            <header class="slds-modal__header">
+            <header class="slds-modal__header custom-header">
                 <h2 class="slds-text-heading_medium">Select an existing flow</h2>
-                <lightning-button-icon icon-name="utility:close" alternative-text="Close"
-                    class="slds-modal__close" onclick={handleClose}>
-                </lightning-button-icon>
             </header>
-
 
             <div class="slds-modal__content slds-p-around_medium slds-grid slds-gutters">
                 <template if:false={flowDataAvailable}>
@@ -25,29 +21,27 @@
                 
                 <!-- Left Section: Flow Selection -->
                 <div class="slds-col slds-size_1-of-3">
-                    <lightning-input type="search" label="Search" class="slds-m-bottom_medium search-box"
-                        onchange={handleSearch}>
-                    </lightning-input>
+                    <lightning-input type="search" label="Search" class="slds-m-bottom_medium search-box" placeholder="Search by name..." onchange={handleSearch}></lightning-input>
 
-                    <div class="slds-scrollable slds-box slds-p-around_small flow-list"
-                        style="max-height: 350px; overflow-y: auto;">
+                    <div class="flow-list-container">
                         <template if:true={filteredFlows}>
                             <template for:each={filteredFlows} for:item="flow">
-                                <div key={flow.id} class="slds-m-vertical_x-small slds-radio flow-item">
-                                    <input type="radio" id={flow.id} name="flows" value={flow.id}
-                                        checked={flow.isSelected} onchange={handleFlowChange} />
-                                    <label for={flow.id} class="slds-radio__label">
-                                        <span class="slds-radio_faux"></span>
-                                        <span class="slds-form-element__label flow-name">{flow.name}</span>
-                                        <div class="slds-text-color_weak slds-text-body_small flow-date">
-                                            Published • {flow.date}
+                                <div key={flow.id} class="flow-item">
+                                    <input type="radio" id={flow.id} name="flows" value={flow.id} checked={flow.isSelected} onchange={handleFlowChange} class="flow-radio" />
+                                    <label for={flow.id} class="flow-label">
+                                        <span class="flow-radio-circle"></span>
+                                        <div class="flow-info">
+                                            <span class="flow-name">{flow.name}</span>
+                                            <div class="flow-date">Published • {flow.date}</div>
                                         </div>
                                     </label>
                                 </div>
                             </template>
                         </template>
                         <template if:false={filteredFlows}>
-                            <p class="slds-text-color_weak slds-text-body_small">No flows found.</p>
+                            <div class="flow-empty-message">
+                                <p>No flows found.</p>
+                            </div>
                         </template>
                     </div>
                 </div>
@@ -58,8 +52,8 @@
                             <iframe src={iframeSrc} class="iframe-preview"></iframe>
                         </template>
                         <template if:false={iframeSrc}>
-                            <div class="iframe-preview slds-context-bar__icon-action slds-text-align--center slds-text-heading_large">
-                                Please select the flow to view preview.
+                            <div class="slds-context-bar__icon-action slds-text-align--center slds-text-heading--medium" style="height: 900px;">
+                                Please select the flow
                             </div>
                         </template>
                     </div>
@@ -67,9 +61,9 @@
             </template>
             </div>
 
-            <footer class="slds-modal__footer" style="display: flex; justify-content: flex-end;">
-                <lightning-button label="Cancel" onclick={handleClose} class="slds-m-right_small"></lightning-button>
-                <lightning-button variant="brand" label="Submit" onclick={handleSubmit} disabled={isSubmitDisabled}></lightning-button>
+            <footer class="slds-modal__footer custom-footer">
+                <button class="flow-btn flow-btn-cancel" onclick={handleClose}>Cancel</button>
+                <button class="flow-btn flow-btn-submit" onclick={handleSubmit} disabled={isSubmitDisabled}>Submit</button>
             </footer>
         </div>
     </section>

@@ -4,12 +4,10 @@
  * Date: 30/04/2025
  * Created By: Rachit Shah
  */
-
 import { LightningElement,track,api } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
-
 
 export default class WbTemplateCategory extends NavigationMixin(LightningElement) {
     @api selectedTab = 'section1';    
@@ -36,13 +34,13 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
                     description: 'Send promotions or announcements to increase awareness and engagement.',
                     checked: true
                 },
-                // {
-                //     className: 'radio2',
-                //     label: 'Flows',
-                //     value: 'Flow',
-                //     description: 'Send a form to capture customer interests, appointment requests or run surveys.',
-                //     checked: false
-                // }
+                {
+                    className: 'radio2',
+                    label: 'Flows',
+                    value: 'Flow',
+                    description: 'Send a form to capture customer interests, appointment requests or run surveys.',
+                    checked: false
+                }
             ]
         },
         section2: {
@@ -61,13 +59,13 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
                 //     description: 'Send messages to tell customers about the progress of their orders.',
                 //     checked: false
                 // },
-                // {
-                //     className: 'radio3',
-                //     label: 'Flows',
-                //     value: 'flowutility',
-                //     description: 'Send a form to collect feedback, send reminders or manage orders.',
-                //     checked: false
-                // }
+                {
+                    className: 'radio3',
+                    label: 'Flows',
+                    value: 'flowutility',
+                    description: 'Send a form to collect feedback, send reminders or manage orders.',
+                    checked: false
+                }
             ]
         },
         section3: {
@@ -129,13 +127,12 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
         "authenticationPasscodeSelected": {
             "hey": "<b>123456</b> is your verification code. For your security, do not share this code.",
             "time": "11:59",
-            "buttons": [],
+            "buttons": [{ "icon": "/resource/MVEX__copy", "label": "Copy code" }],
             "goodFor": "One-time password, account recovery code, account verification, integrity challenges",
             "customizable": "Code delivery method"
         }
     }
 
-    
     get activeSection() {
         return this.sections[this.selectedTab];
     }
@@ -286,5 +283,4 @@ export default class WbTemplateCategory extends NavigationMixin(LightningElement
             }
         });
     }
-    
 }

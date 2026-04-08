@@ -2,30 +2,16 @@ import { LightningElement, api, track } from 'lwc';
 import getTemplatePreviewData from '@salesforce/apex/ChatWindowController.getTemplatePreviewData';
 import NoPreviewAvailable from '@salesforce/resourceUrl/NoPreviewAvailable';
 
-/**
- * TemplatePreview
- *
- * Renders a read-only WhatsApp template bubble.
- *
- * Mode A – standalone (chat history):
- *   Supply `templateId` + `chatId`. The component fetches its own data.
- *
- * Mode B – embedded inside templateSend:
- *   Supply `previewData` (pre-fetched by the parent). No Apex call is made.
- */
-export default class TemplatePreview extends LightningElement {
+export default class TemplateMessagePreview extends LightningElement {
 
     // ─── @api (public) ────────────────────────────────────────────────────────
-
     /** Mode A: chat-history record ID */
     @api templateId;
+    
     /** Mode A: chat record ID */
     @api chatId;
 
-    /**
-     * Mode B: pre-fetched data from the parent.
-     * Shape: { template, templateMergeDetails, headerParams, bodyParams }
-     */
+    /** Mode B: pre-fetched data from the parent. */
     @api
     get previewData() {
         return this.inflightPreviewData;
@@ -38,39 +24,48 @@ export default class TemplatePreview extends LightningElement {
     }
 
     // ─── Private fields ───────────────────────────────────────────────────────
-
     inflightPreviewData;
     NoPreviewAvailableImg = NoPreviewAvailable;
 
     // ─── @track (reactive) ────────────────────────────────────────────────────
-
     @track templateData;
     @track templateMergeDetails;
+    
     @track headerBody;
     @track templateBody;
     @track footerBody;
-    @track isTextHeader;
-    @track isImageHeader;
-    @track isVideoHeader;
-    @track isDocHeader;
+    
+    @track isTextHeader = false;
+    @track isImageHeader = false;
+    @track isVideoHeader = false;
+    @track isDocHeader = false;
+    
     @track headerParams;
     @track bodyParams;
     @track buttonList = [];
+    
     @track isInteractiveTemplate = false;
     @track isInteractiveLocationRequest = false;
     @track isInteractiveList = false;
     @track isInteractiveButton = false;
+    
     @track interactiveActionLabel = '';
     @track interactiveSections = [];
     @track interactiveButtons = [];
+    
     @track isSecurityRecommedation = false;
     @track isCodeExpiration = false;
     @track expireTime;
+    
     @track isTemplateDeleted = false;
     @track isUpdateBody = false;
     @track showSpinner = false;
 
-    // ─── Getters ──────────────────────────────────────────────────────────────
+    // ─── Getters for HTML ──────────────────────────────────────────────────────
+    
+    get isStandard() {
+        return !this.isInteractiveTemplate;
+    }
 
     get hasStandardButtons() {
         return this.buttonList?.length > 0;
@@ -80,15 +75,15 @@ export default class TemplatePreview extends LightningElement {
         return this.interactiveButtons?.length > 0;
     }
 
-    get hasInteractiveSections() {
-        return this.interactiveSections?.length > 0;
+    get isAuthentication() {
+        return this.templateData?.MVEX__Template_Category__c === 'Authentication';
     }
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     connectedCallback() {
         try {
-            if (!this.inflightPreviewData) {
+            if (!this.inflightPreviewData && (this.templateId || this.chatId)) {
                 this.fetchInitialData();
             }
         } catch (e) {
@@ -98,9 +93,9 @@ export default class TemplatePreview extends LightningElement {
 
     renderedCallback() {
         try {
-            const bodyText = this.template.querySelector('.body-text');
-            if (bodyText && this.isUpdateBody) {
-                bodyText.innerHTML = this.applyMarkdownFormatting(this.templateBody);
+            const bodyTextContainer = this.template.querySelector('.tmp-rich-body');
+            if (bodyTextContainer && this.isUpdateBody) {
+                bodyTextContainer.innerHTML = this.applyMarkdownFormatting(this.templateBody);
                 this.isUpdateBody = false;
             }
         } catch (e) {
@@ -339,6 +334,8 @@ export default class TemplatePreview extends LightningElement {
         }
     }
 
+    // ─── Handlers ─────────────────────────────────────────────────────────────
+
     // ─── Utilities ────────────────────────────────────────────────────────────
 
     safeJsonParse(data) {
@@ -363,7 +360,8 @@ export default class TemplatePreview extends LightningElement {
             .replaceAll(/\*(.+?)\*/g,     '<b>$1</b>')
             .replaceAll(/\_(.+?)\_/g,     '<i>$1</i>')
             .replaceAll(/\~(.+?)\~/g,     '<s>$1</s>')
-            .replaceAll(/\```(.+?)\```/g, '<code>$1</code>');
+            .replaceAll(/\```(.+?)\```/g, '<code>$1</code>')
+            .replaceAll(/\n/g, '<br/>'); // replace standard newlines with HTML line breaks for innerHTML
     }
 
     getIconName(btntype) {

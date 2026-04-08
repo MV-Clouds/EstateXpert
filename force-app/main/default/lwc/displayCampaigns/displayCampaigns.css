@@ -780,5 +780,5 @@ span {
 }
 
 .table-content .slds-table td{
-    max-width: none !important;
+    max-width: 5rem;
 }

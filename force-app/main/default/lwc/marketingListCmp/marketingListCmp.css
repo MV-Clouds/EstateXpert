@@ -378,10 +378,9 @@ span {
     align-items: center;
 }
 
-.table-content .colume2 {
-    width: 9rem;
+.table-content .slds-table_resizable-cols thead th{
+     width:12rem
 }
-
 .noresult {
     flex: 1;
     min-height: 0;

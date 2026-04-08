@@ -107,6 +107,14 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
 
     /**
+    * Method Name : showPagination
+    * @description : show the pagination only if totalpages are greater than 1.
+    */
+    get showPagination() {
+        return this.totalPages > 1;
+    }
+
+    /**
     * Method Name : showEllipsis
     * @description : show the elipsis when the total pages is gretaer then the visible pages.
     * * Date: 20/08/2024
@@ -1028,6 +1036,78 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         this.isContactSelected = this.selectedContactList.length <= 0;
     }
 
+    @track selectedContactSortField = 'Name';
+    @track selectedContactSortOrder = 'asc';
+
+    /**
+    * Method Name : sortSelectedContact
+    * @description : this methods apply the sorting on the selected contacts fields
+    */
+    sortSelectedContact(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.selectedContactSortField === fieldName) {
+                this.selectedContactSortOrder = this.selectedContactSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.selectedContactSortField = fieldName;
+                this.selectedContactSortOrder = 'asc';
+            }
+            this.sortSelectedContactsData();
+            this.updateSelectedSortIcons();
+        } catch (error) {
+            console.log('Error sortSelectedContact->' + error);
+        }
+    }
+
+    sortSelectedContactsData() {
+        try {
+            this.filteredSelectedContacts = [...this.filteredSelectedContacts].sort((a, b) => {
+                let aValue = a[this.selectedContactSortField] || '';
+                let bValue = b[this.selectedContactSortField] || '';
+
+                if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+                if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+                let compare = 0;
+                if (aValue > bValue) compare = 1;
+                else if (aValue < bValue) compare = -1;
+
+                return this.selectedContactSortOrder === 'asc' ? compare : -compare;
+            });
+        } catch (error) {
+            console.log('Error sortSelectedContactsData->' + error);
+        }
+    }
+
+    updateSelectedSortIcons() {
+        try {
+            // Remove icon rotation
+            const allIcons = this.template.querySelectorAll('.popup-table .slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.popup-table .sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('.popup-table [data-id="' + this.selectedContactSortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.selectedContactSortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
+            }
+        } catch (error) {
+            console.log('Error in updateSelectedSortIcons --> ' + error);
+        }
+    }
+
     /**
     * Method Name : sortClick
     * @description : this methods apply the sorting on the all fields
@@ -1135,19 +1215,19 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     updateSortIcons() {
         try {
             // Remove icon rotation
-            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            const allIcons = this.template.querySelectorAll('#table-content .slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
             // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            const allHeaders = this.template.querySelectorAll('#table-content .sorting_header');
             allHeaders.forEach(header => {
                 header.classList.remove('active-sort');
             });
 
             // Set active header
-            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            const currentHeader = this.template.querySelector('#table-content [data-id="' + this.sortField + '"]');
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
 

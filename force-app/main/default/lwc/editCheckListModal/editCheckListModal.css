@@ -297,3 +297,7 @@
     width: 40px;
     min-width: 40px;
 }
+
+.action{
+    width: 5rem;
+}

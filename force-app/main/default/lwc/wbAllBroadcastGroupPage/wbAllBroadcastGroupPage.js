@@ -49,6 +49,10 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
         return Math.ceil(this.totalItems / this.pageSize);
     }
     
+    get showPagination() {
+        return this.totalPages > 1;
+    }
+    
     get pageNumbers() {
         try {
             const totalPages = this.totalPages;

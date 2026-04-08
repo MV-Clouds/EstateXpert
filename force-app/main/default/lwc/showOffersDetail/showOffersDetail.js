@@ -4,6 +4,8 @@ import { refreshApex } from '@salesforce/apex';
 import getOfferTimeline from '@salesforce/apex/ShowOffersDetailController.getOfferTimeline';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
 
 export default class ShowOffersDetail extends NavigationMixin(LightningElement) {
     @api recordId; // The current offer record ID
@@ -103,9 +105,9 @@ export default class ShowOffersDetail extends NavigationMixin(LightningElement) 
 
     formatCurrency(amount) {
         if (amount == null) return '';
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat(USER_LOCALE, {
             style: 'currency',
-            currency: 'USD',
+            currency: USER_CURRENCY,
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(amount);

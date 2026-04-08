@@ -403,17 +403,12 @@
                                                 <template if:false={field.isNameField}>
                                                     <template if:false={field.isReference}>
                                                         <template if:true={field.isCurrency}>
-                                                            {inquiry.CurrencyIsoCode} {field.value}
+                                                            {field.value}
                                                         </template>
                                                         <template if:false={field.isCurrency}>
                                                             {field.value}
                                                         </template>
                                                     </template>
-                                                </template>
-                                            </template>
-                                            <template if:false={field.hasValue}>
-                                                <template if:true={field.isCurrency}>
-                                                    TBD
                                                 </template>
                                             </template>
                                         </td>

@@ -115,6 +115,7 @@ public with sharing class CheckListItemController {
     public class ChecklistWrapper {
         @AuraEnabled public String id;
         @AuraEnabled public String name;
+        @AuraEnabled public String type;
         @AuraEnabled public String fieldName;
         @AuraEnabled public String description;
         @AuraEnabled public String fieldLabel;
@@ -176,6 +177,7 @@ public with sharing class CheckListItemController {
                 wrapper.objectName = item.Object_Name__c;
                 wrapper.operator = item.Operator__c;
                 wrapper.value = item.Value__c;
+                 wrapper.type = item.Data_Type__c;
                 wrapper.completed = false;
                 wrapper.showDropdown = false;
                 wrapper.isDescription = item.Description__c != null && item.Description__c != '' ? true : false;

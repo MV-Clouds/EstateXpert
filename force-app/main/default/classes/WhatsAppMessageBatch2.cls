@@ -16,6 +16,8 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
     global List<Chat__c> chatsToUpdate = new List<Chat__c>();
     global static List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
     global String phoneField;
+    global MVEX__WhatsappTemplate__c template;
+    global List<MVEX__Template_Variable__c> templateVariables;
 
     // Constructor to pass Chat__c list and template data
     global WhatsAppMessageBatch2(String tempId, List<Chat__c> chats, String brId, String objName, String phoneFieldName) {
@@ -24,6 +26,29 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
         this.broadcastId = brId;
         this.objectApiName = objName;
         this.phoneField = phoneFieldName;
+
+        // Fetch template details
+        List<MVEX__WhatsappTemplate__c> templates = [
+            SELECT Id, MVEX__Template_Name__c, MVEX__Template_Id__c, MVEX__Language__c, 
+                   MVEX__Template_Type__c, MVEX__Template_Category__c, MVEX__Template_SubCatagory__c,
+                   MVEX__WBTemplate_Body__c, MVEX__WBHeader_Body__c, MVEX__WBFooter_Body__c, 
+                   MVEX__Header_Type__c, MVEX__Button_Type__c, MVEX__Button_Label__c, 
+                   MVEX__WBButton_Body__c, MVEX__File_Name__c, MVEX__WBImage_Header_Handle__c, 
+                   MVEX__Status__c
+            FROM MVEX__WhatsappTemplate__c
+            WHERE Id = :tempId
+            LIMIT 1
+        ];
+        
+        this.template = !templates.isEmpty() ? templates[0] : null;
+        
+        // Fetch template variables
+        this.templateVariables = [
+            SELECT Id, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Type__c, MVEX__Alternate_Text__c
+            FROM MVEX__Template_Variable__c
+            WHERE MVEX__WhatsappTemplate__c = :tempId
+            ORDER BY CreatedDate ASC
+        ];
     }
 
     /*
@@ -59,14 +84,27 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
                 chat = chatList[0];
             }
             String phone = chat.Phone__c;
+            String requestBody;
             
             String query = 'SELECT Id, ' + this.phoneField + ' FROM ' + this.objectApiName + ' WHERE ' + this.phoneField + ' =: phone ORDER BY CreatedDate DESC LIMIT 1';
 
             List<sObject> records = Database.query(String.escapeSingleQuotes(query));
             if(records.size() > 0){
-                Map<String, object> tempData = getTemplateData(this.templateId, records[0].Id, this.objectApiName);
-                String jsonData = generatePayloadFromTemplateData(tempData, chat.Phone__c);
-                List<Chat__c> cht = sendWhatsAppMessage(chat.Id, jsonData);
+                Map<String, String> fieldValues = fetchFieldValuesForRecord(
+                    this.templateVariables, records[0].Id, this.phoneField
+                );
+                
+                String phoneNumber = fieldValues.get(this.phoneField);
+                
+                if (String.isBlank(phoneNumber)) {
+                    System.debug('Phone number not found for record: ' + records[0].Id);
+                    return;
+                }
+                
+                requestBody = buildWhatsAppRequestBody(
+                    this.template, this.templateVariables, fieldValues, phoneNumber
+                );
+                List<Chat__c> cht = sendWhatsAppMessage(chat.Id, requestBody);
                 if(cht.size() > 0){
                     this.chatsToUpdate.add(cht[0]);
                 }
@@ -102,154 +140,222 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
 
     /*
     *********************************************************
-    @description     : This method is used to get the template data for the given templateId and recordId.
-    @param           : templateId - Id of the template
-    @param           : recordId - Id of the record
-    @param           : objectApiName - API name of the object
-    @return          : Map<String, object> - template data
+    @description     : Fetches field values for a single record based on template variables
+    @param           : templateVariables - List of template variables
+    @param           : recordId - The record ID to fetch values for
+    @param           : phoneField - The phone field API name
+    @return          : Map<String, String> of field names to values
     ********************************************************
     */
-   @AuraEnabled
-    global static Map<String, object> getTemplateData(String templateId, String recordId, String objectApiName){
+    public static Map<String, String> fetchFieldValuesForRecord(List<MVEX__Template_Variable__c> templateVariables, Id recordId, String phoneField) {
+        Map<String, String> fieldValues = new Map<String, String>();
+
         try {
-            Map<String, Object> templateData = new Map<String, Object>();
-            List<WhatsappTemplate__c> templates = new List<WhatsappTemplate__c>();
-
-            // Fetch templates with matching child variables
-            Set<Id> matchingTemplateIds = new Set<Id>();
-            for (Template_Variable__c tv : [SELECT WhatsappTemplate__c FROM Template_Variable__c WHERE Object_Name__c = :objectApiName WITH USER_MODE]) {
-                matchingTemplateIds.add(tv.WhatsappTemplate__c);
+            if (recordId == null) {
+                return fieldValues;
             }
-
-            // Fetch template details
-            if (!matchingTemplateIds.isEmpty()) {
-                templates.addAll([
-                    SELECT Id, Template_Name__c, WBButton_Body__c, Button_Label__c, Button_Type__c, WBFooter_Body__c, WBHeader_Body__c, Header_Type__c, Language__c, WBTemplate_Body__c, Template_Category__c, Template_SubCatagory__c, Template_Type__c, Template_Variable__c,
-                        (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WB_Template_Variables__r) FROM WhatsappTemplate__c WHERE Id = :templateId AND Id IN :matchingTemplateIds WITH USER_MODE
-                ]);
+            
+            String objectName = templateVariables.isEmpty() ? String.valueOf(recordId.getSObjectType()) : templateVariables[0].MVEX__Object_Name__c;
+            if (String.isBlank(objectName)) {
+                objectName = String.valueOf(recordId.getSObjectType());
             }
+            
+            // Build field list for SOQL
+            Set<String> fieldSet = new Set<String>();
+            fieldSet.add(phoneField); // Always include phone field
+            
+            for (MVEX__Template_Variable__c variable : templateVariables) {
+                if (String.isNotBlank(variable.MVEX__Field_Name__c)) {
+                    fieldSet.add(variable.MVEX__Field_Name__c);
+                }
+            }
+            
+            if (fieldSet.isEmpty()) {
+                return fieldValues;
+            }
+            
+            // Build and execute dynamic SOQL for single record
+            String query = 'SELECT Id, ' + String.join(new List<String>(fieldSet), ', ') + 
+                        ' FROM ' + objectName + 
+                        ' WHERE Id = :recordId LIMIT 1';
+            
+            List<SObject> records = Database.query(query);
+            
+            if (records.isEmpty()) {
+                return fieldValues;
+            }
+            
+            SObject record = records[0];
+            
+            // Extract phone field value
+            Object phoneValue = getFieldValue(record, phoneField);
+            fieldValues.put(phoneField, phoneValue != null ? String.valueOf(phoneValue) : '');
+            
+            // Extract template variable field values
+            for (MVEX__Template_Variable__c variable : templateVariables) {
+                String fieldName = variable.MVEX__Field_Name__c;
+                if (String.isNotBlank(fieldName)) {
+                    Object fieldValue = getFieldValue(record, fieldName);
+                    String value = formatFieldValue(fieldValue);
+                    
+                    // Use alternate text if field value is null or empty
+                    if (String.isBlank(value) && String.isNotBlank(variable.MVEX__Alternate_Text__c)) {
+                        value = variable.MVEX__Alternate_Text__c;
+                    }
+                    
+                    fieldValues.put(variable.MVEX__Field_Name__c, value);
+                }
+            }
+            
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WhatsAppMessageBatch', 'fetchFieldValuesForRecord', e.getMessage());   
+        }
+        
+        return fieldValues;
+    }
+    
+    /*
+    *********************************************************
+    @description     : Formats field value with proper date/datetime formatting
+    @param           : fieldValue - The field value to format
+    @return          : String formatted value
+    ********************************************************
+    */
+    public static String formatFieldValue(Object fieldValue) {
+        if (fieldValue == null) {
+            return '';
+        }
+        
+        try {
+            // Check if it's a Date
+            if (fieldValue instanceof Date) {
+                Date dateValue = (Date) fieldValue;
+                return dateValue.format();
+            }
+            
+            // Check if it's a DateTime
+            if (fieldValue instanceof DateTime) {
+                DateTime dateTimeValue = (DateTime) fieldValue;
+                return dateTimeValue.format('dd MMM yyyy') + ' at ' + dateTimeValue.format('hh:mm a');
+            }
+            
+            // For all other types, convert to string
+            return String.valueOf(fieldValue);
+            
+        } catch (Exception e) {
+            System.debug('Error formatting field value: ' + e.getMessage());
+            return String.valueOf(fieldValue);
+        }
+    }
+    
+     /*
+    *********************************************************
+    @description     : Utility method to get field value from SObject, including relationship fields
+    @param           : record - The SObject record
+    @param           : fieldPath - The field API name or relationship path
+    @return          : Object field value
+    ********************************************************
+    */
+    public static Object getFieldValue(SObject record, String fieldPath) {
 
-            // Fetch templates without child variables
-            List<WhatsappTemplate__c> templatesWithoutVariables = [
-                SELECT Id, Template_Name__c, WBButton_Body__c, Button_Label__c, Button_Type__c, WBFooter_Body__c, WBHeader_Body__c, Header_Type__c, Language__c, WBTemplate_Body__c, Template_Category__c, Template_SubCatagory__c, Template_Type__c, Template_Variable__c,
-                    (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WB_Template_Variables__r) FROM WhatsappTemplate__c WHERE Id = :templateId WITH USER_MODE
-            ];
-            templates.addAll(templatesWithoutVariables);
-
-            if(templates.size() > 0 && templates[0].Template_Variable__c > 0){
-                WhatsappTemplate__c template = templates[0];
-                Set<String> fieldSelectionCause = new Set<String>();
-                for (Template_Variable__c tv : template.WB_Template_Variables__r) {
-                    if (tv.Object_Name__c == objectApiName) {
-                        fieldSelectionCause.add(tv.Field_Name__c);
-                    } else {
-                        fieldSelectionCause.add(tv.Object_Name__c + '.' + tv.Field_Name__c);
+        try {
+            if (record == null || String.isBlank(fieldPath)) {
+                return null;
+            }
+            
+            if (fieldPath.contains('.')) {
+                // Handle relationship fields
+                List<String> fieldParts = fieldPath.split('\\.');
+                SObject currentRecord = record;
+                
+                for (Integer i = 0; i < fieldParts.size() - 1; i++) {
+                    currentRecord = currentRecord.getSObject(fieldParts[i]);
+                    if (currentRecord == null) {
+                        return null;
                     }
                 }
                 
-                if(fieldSelectionCause.size() < 1){
-                    templateData.put('template', templates[0]);
-                    return templateData;
-                }
-
-                String query = 'SELECT ' + String.join(fieldSelectionCause, ', ') + ' FROM ' + objectApiName + ' WHERE Id =:recordId';
-                List<sObject> records = Database.query(String.escapeSingleQuotes(query), AccessLevel.USER_MODE);
-                List<Object> headerVariables = new List<Object>();
-                List<Object> bodyVariables = new List<Object>();
-                if(records.size() > 0){
-                    sObject record = records[0];
-                    // Get the user's time zone
-                    String userTimeZone = UserInfo.getTimeZone().getID();
-                    for (Template_Variable__c tv: template.WB_Template_Variables__r) {
-                        Object valueToReplace = '';
-                        if (tv.Object_Name__c == objectApiName) {  
-                            valueToReplace = record.get(tv.Field_Name__c);  
-                        } else {  
-                            try {  
-                                SObject relatedRecord = record.getSObject(tv.Object_Name__c);  
-                                valueToReplace = (relatedRecord != null) ? relatedRecord.get(tv.Field_Name__c) : null;  
-                            } catch (Exception ex) {  
-                                valueToReplace = null;  
-                            }  
-                        }
-                        // Format Datetime fields in the user's time zone
-                        String formattedValue = '';
-                        if (valueToReplace instanceof Datetime) {
-                            Datetime dtValue = (Datetime)valueToReplace;
-                            formattedValue = dtValue.format('yyyy-MM-dd HH:mm', userTimeZone);
-                        } else {
-                            formattedValue = valueToReplace != null ? valueToReplace.toString() : (tv.Alternate_Text__c != null ? tv.Alternate_Text__c : ' ');
-                        }
-                        if (tv.Type__c == 'Header') {
-                            headerVariables.add(formattedValue);
-                            template.WBHeader_Body__c = template.WBHeader_Body__c.replace(tv.Name, formattedValue);
-                        } else if(tv.Type__c == 'Body'){
-                            bodyVariables.add(formattedValue);
-                            template.WBTemplate_Body__c = template.WBTemplate_Body__c.replace(tv.Name, formattedValue);
-                        }
-                    }
-                }
-                templateData.put('template', template);
-                templateData.put('headerParams', headerVariables);
-                templateData.put('bodyParams', bodyVariables);
-                return templateData;
-            } else if (templates.size() > 0 && templates[0].Template_Variable__c < 1){
-                templateData.put('template', templates[0]);
-                return templateData;
+                return currentRecord.get(fieldParts[fieldParts.size() - 1]);
             } else {
-                return null;
+                return record.get(fieldPath);
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'WhatsAppMessageBatch', 'getTemplateData', 'Error while fetching template data');
+            ErrorHandler.insertErrordata(e, 'WhatsAppMessageBatch', 'getFieldValue', e.getMessage());
             return null;
-        }
+        }  
     }
 
     /*
     *********************************************************
-    @description     : This method is used to generate the JSON payload for the WhatsApp message.
-    @param           : templateData - Map of template data
-    @param           : to - Phone number to send the message
-    @return          : String - JSON payload
+    @description     : Static method to build WhatsApp request body
+    @param           : template - The template record
+    @param           : templateVariables - List of template variables
+    @param           : fieldValues - Map of field names to values
+    @param           : phoneNumber - The recipient phone number
+    @return          : String JSON request body
     ********************************************************
     */
-    global static String generatePayloadFromTemplateData(Map<String, Object> templateData, String to) {
+    public static String buildWhatsAppRequestBody(MVEX__WhatsappTemplate__c template, List<MVEX__Template_Variable__c> templateVariables, Map<String, String> fieldValues, String phoneNumber) {
+
         try {
-            WhatsappTemplate__c template = (WhatsappTemplate__c)templateData.get('template'); // Cast to WhatsappTemplate__c
+            // Prepare template data structure
             Map<String, Object> data = new Map<String, Object>();
-
-            data.put('templateName', template.Template_Name__c);
-            data.put('languageCode', template.Language__c);
-            data.put('headerImageURL', template.WBHeader_Body__c);
-            data.put('headerType', template.Header_Type__c);
-            data.put('headerParameters', (List<Object>)templateData.get('headerParams'));
-            data.put('bodyParameters', (List<Object>)templateData.get('bodyParams'));
-            data.put('templateType', template.Template_Category__c);
-
-            if(template.WBButton_Body__c != null){
-                Object rawData = JSON.deserializeUntyped(template.WBButton_Body__c);
+            data.put('templateName', template.MVEX__Template_Name__c);
+            data.put('languageCode', template.MVEX__Language__c != null ? template.MVEX__Language__c : 'en_US');
+            data.put('headerImageURL', template.MVEX__WBHeader_Body__c);
+            data.put('headerType', template.MVEX__Header_Type__c);
+            data.put('templateType', template.MVEX__Template_Category__c);
+            
+            // Separate header and body parameters based on variable type
+            List<Object> headerParameters = new List<Object>();
+            List<Object> bodyParameters = new List<Object>();
+            
+            for (MVEX__Template_Variable__c variable : templateVariables) {
+                String fieldValue = fieldValues.get(variable.MVEX__Field_Name__c);
+                
+                // Use alternate text if field value is null or empty
+                if (String.isBlank(fieldValue) && String.isNotBlank(variable.MVEX__Alternate_Text__c)) {
+                    fieldValue = variable.MVEX__Alternate_Text__c;
+                }
+                
+                // Add to appropriate list based on type
+                if (variable.MVEX__Type__c != null && variable.MVEX__Type__c.equalsIgnoreCase('Header')) {
+                    headerParameters.add(String.isNotBlank(fieldValue) ? fieldValue : '');
+                } else {
+                    bodyParameters.add(String.isNotBlank(fieldValue) ? fieldValue : '');
+                }
+            }
+            
+            data.put('headerParameters', headerParameters);
+            data.put('bodyParameters', bodyParameters);
+            
+            // Handle button value if present
+            if (String.isNotBlank(template.MVEX__WBButton_Body__c)) {
+                Object rawData = JSON.deserializeUntyped(template.MVEX__WBButton_Body__c);
                 List<Object> dataList = (List<Object>) rawData;
-
-                // Convert each entry to a Map<String, Object>
+                
                 List<Map<String, Object>> finalList = new List<Map<String, Object>>();
                 for (Object item : dataList) {
                     finalList.add((Map<String, Object>) item);
                 }
-
+                
                 data.put('buttonValue', finalList);
             } else {
                 data.put('buttonValue', null);
             }
-            return createJSONBody(to, 'template', data);
+            
+            return createJSONBody(phoneNumber, 'template', data);
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'WhatsAppMessageBatch', 'generatePayloadFromTemplateData', 'Error while generating payload from template data');
+            ErrorHandler.insertErrordata(e, 'WhatsAppMessageBatch', 'buildWhatsAppRequestBody', e.getMessage());
             return null;
         }
+        
     }
+
 
     /*
     *********************************************************
-    @description     : This method is used to create the JSON body for the WhatsApp message.
+    @description     : Creates the complete JSON body for WhatsApp API request
     @param           : to - Phone number to send the message
     @param           : type - Type of the message
     @param           : data - Map of data to be included in the message
@@ -276,7 +382,7 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
                 List<Map<String, Object>> headerParams = new List<Map<String, Object>>();
                 
                 for (Object param : headerParameters) {
-                    headerParams.add(new Map<String, Object>{ 'type' => 'text', 'text' => (String)param });
+                    headerParams.add(new Map<String, Object>{ 'type' => 'text', 'text' => String.valueOf(param) });
                 }
                 
                 components.add(new Map<String, Object>{ 'type' => 'header', 'parameters' => headerParams });
@@ -289,7 +395,10 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
                 components.add(new Map<String, Object>{
                     'type' => 'header',
                     'parameters' => new List<Map<String, Object>>{
-                        new Map<String, Object>{ 'type' => headerType.toLowerCase(), headerType.toLowerCase() => new Map<String, Object>{ 'link' => headerImageURL } }
+                        new Map<String, Object>{
+                            'type' => headerType.toLowerCase(),
+                            headerType.toLowerCase() => new Map<String, Object>{ 'link' => headerImageURL }
+                        }
                     }
                 });
             }
@@ -307,7 +416,7 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
                 List<Map<String, Object>> bodyParams = new List<Map<String, Object>>();
                 
                 for (Object param : bodyParameters) {
-                    bodyParams.add(new Map<String, Object>{ 'type' => 'text', 'text' => (String)param });
+                    bodyParams.add(new Map<String, Object>{ 'type' => 'text', 'text' => String.valueOf(param) });
                 }
                 
                 components.add(new Map<String, Object>{ 'type' => 'body', 'parameters' => bodyParams });
@@ -325,49 +434,150 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
             if (buttonValue != null && !buttonValue.isEmpty()) {
                 Integer index = 0;
                 for (Map<String, Object> button : buttonValue) {
-                    String buttonType = ((String)button.get('type')).toUpperCase();
-                    switch on buttonType {
-                        when 'PHONE_NUMBER' {
-                            components.add(new Map<String, Object>{
-                                'type' => 'button',
-                                'sub_type' => 'voice_call',
-                                'index' => index,
-                                'parameters' => new List<Map<String, Object>>{
-                                    new Map<String, Object>{ 'type' => 'text', 'text' => (String)button.get('phone_number') }
-                                }
-                            });
-                        }
-                        when 'COPY_CODE', 'COUPON_CODE' {
-                            components.add(new Map<String, Object>{
-                                'type' => 'button',
-                                'sub_type' => 'copy_code',
-                                'index' => index,
-                                'parameters' => new List<Map<String, Object>>{
-                                    new Map<String, Object>{ 'type' => 'coupon_code', 'coupon_code' => (String)button.get('example') }
-                                }
-                            });
-                        }
-                        when 'OTP' {
+                    String buttonType = (String)button.get('type');
+                    
+                    if (buttonType == 'URL') {
+                        String url = (String)button.get('url');
+                        
+                        if (url != null && url.contains('{{1}}')) {
                             components.add(new Map<String, Object>{
                                 'type' => 'button',
                                 'sub_type' => 'url',
-                                'index' => index,
+                                'index' => String.valueOf(index),
                                 'parameters' => new List<Map<String, Object>>{
-                                    new Map<String, Object>{ 'type' => 'text', 'text' => randomCodeStr }
+                                    new Map<String, Object>{
+                                        'type' => 'text',
+                                        'text' => url.replace('{{1}}', '')
+                                    }
                                 }
                             });
                         }
-                        when 'FLOW' {
+                    } else if (buttonType == 'PHONE_NUMBER') {
+                        // No parameters needed for phone number buttons
+                        // They are static in the template
+                    } else if (buttonType == 'QUICK_REPLY') {
+                        // No parameters needed for quick reply buttons
+                        // They are static in the template
+                    } else if (buttonType == 'COPY_CODE') {
+                        String couponCode = (String)button.get('example');
+                        
+                        if (String.isNotBlank(couponCode)) {
+                            components.add(new Map<String, Object>{
+                                'type' => 'button',
+                                'sub_type' => 'copy_code',
+                                'index' => String.valueOf(index),
+                                'parameters' => new List<Map<String, Object>>{
+                                    new Map<String, Object>{
+                                        'type' => 'coupon_code',
+                                        'coupon_code' => couponCode
+                                    }
+                                }
+                            });
+                        }
+                    } else if (buttonType == 'CATALOG') {
+                        // Catalog button implementation
+                        String thumbnailProductId = (String)button.get('thumbnailProductId');
+                        
+                        if (String.isNotBlank(thumbnailProductId)) {
+                            components.add(new Map<String, Object>{
+                                'type' => 'button',
+                                'sub_type' => 'catalog',
+                                'index' => String.valueOf(index),
+                                'parameters' => new List<Map<String, Object>>{
+                                    new Map<String, Object>{
+                                        'type' => 'action',
+                                        'action' => new Map<String, Object>{
+                                            'thumbnail_product_retailer_id' => thumbnailProductId
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    } else if (buttonType == 'MPM') {
+                        // Multi-product message implementation
+                        List<Object> sections = (List<Object>)button.get('sections');
+                        
+                        if (sections != null && !sections.isEmpty()) {
+                            List<Map<String, Object>> sectionsList = new List<Map<String, Object>>();
+                            
+                            for (Object sectionObj : sections) {
+                                Map<String, Object> section = (Map<String, Object>)sectionObj;
+                                String title = (String)section.get('title');
+                                List<Object> productItems = (List<Object>)section.get('product_items');
+                                
+                                if (productItems != null && !productItems.isEmpty()) {
+                                    List<Map<String, Object>> productList = new List<Map<String, Object>>();
+                                    
+                                    for (Object productObj : productItems) {
+                                        Map<String, Object> product = (Map<String, Object>)productObj;
+                                        String productRetailerId = (String)product.get('product_retailer_id');
+                                        
+                                        if (String.isNotBlank(productRetailerId)) {
+                                            productList.add(new Map<String, Object>{
+                                                'product_retailer_id' => productRetailerId
+                                            });
+                                        }
+                                    }
+                                    
+                                    if (!productList.isEmpty()) {
+                                        sectionsList.add(new Map<String, Object>{
+                                            'title' => title,
+                                            'product_items' => productList
+                                        });
+                                    }
+                                }
+                            }
+                            
+                            if (!sectionsList.isEmpty()) {
+                                components.add(new Map<String, Object>{
+                                    'type' => 'button',
+                                    'sub_type' => 'mpm',
+                                    'index' => String.valueOf(index),
+                                    'parameters' => new List<Map<String, Object>>{
+                                        new Map<String, Object>{
+                                            'type' => 'action',
+                                            'action' => new Map<String, Object>{
+                                                'sections' => sectionsList
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    } else if (buttonType == 'FLOW') {
+                        // Flow button implementation
+                        String flowId = (String)button.get('flowId');
+                        String flowToken = (String)button.get('flowToken');
+                        Map<String, Object> flowActionPayload = (Map<String, Object>)button.get('flowActionPayload');
+                        
+                        if (String.isNotBlank(flowId)) {
+                            Map<String, Object> actionParams = new Map<String, Object>{
+                                'flow_message_version' => '3',
+                                'flow_id' => flowId
+                            };
+                            
+                            if (String.isNotBlank(flowToken)) {
+                                actionParams.put('flow_token', flowToken);
+                            }
+                            
+                            if (flowActionPayload != null && !flowActionPayload.isEmpty()) {
+                                actionParams.put('flow_action_payload', flowActionPayload);
+                            }
+                            
                             components.add(new Map<String, Object>{
                                 'type' => 'button',
                                 'sub_type' => 'flow',
-                                'index' => index,
+                                'index' => String.valueOf(index),
                                 'parameters' => new List<Map<String, Object>>{
-                                    new Map<String, Object>{ 'type' => 'payload', 'payload' => 'PAYLOAD' }
+                                    new Map<String, Object>{
+                                        'type' => 'action',
+                                        'action' => actionParams
+                                    }
                                 }
                             });
                         }
                     }
+                    
                     index++;
                 }
             }
@@ -380,7 +590,7 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
             payload.put('template', template);
             return JSON.serialize(payload);
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'WhatsAppMessageBatch', 'createJSONBody', 'Error while creating JSON body');
+            ErrorHandler.insertErrordata(e, 'WhatsAppMessageBatch', 'createJSONBody', e.getMessage());
             return null;
         }
     }
@@ -425,4 +635,9 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
             return null;
         }
     }
+
+    @AuraEnabled
+    global static Map<String, object> getTemplateData(String templateId, String recordId, String objectApiName){return null;}
+
+    global static String generatePayloadFromTemplateData(Map<String, Object> templateData, String to) {return null;}
 }

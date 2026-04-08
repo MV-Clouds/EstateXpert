@@ -22,6 +22,8 @@ import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappi
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -543,6 +545,20 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 // Convert value to string for display if it exists, else default to '-'
                 const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
                 let displayValue = hasRealValue ? String(value) : '-';
+
+                if (hasRealValue && col.type === 'currency') {
+                    const num = Number(value);
+
+                    if (!isNaN(num)) {
+                        displayValue = new Intl.NumberFormat(USER_LOCALE, {
+                            style: 'currency',
+                            currency: inquiry.CurrencyIsoCode || USER_CURRENCY,
+                            minimumFractionDigits: 0
+                        }).format(num);
+                    } else {
+                        displayValue = '-';
+                    }
+                }
 
                 if (hasRealValue && (col.fieldType || '').toUpperCase() === 'REFERENCE') {
                     const cachedName = this.refNameCache[value];

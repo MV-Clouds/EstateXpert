@@ -15,6 +15,8 @@ import { errorDebugger } from 'c/globalProperties';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -685,9 +687,24 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 }
 
                 // Apply formatting for date/datetime fields if format is provided
-                const hasRealValue = fieldValue !== '-';
+                const hasRealValue = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+
                 if (col.format && hasRealValue && (col.type === 'date' || col.type === 'datetime' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
                     fieldValue = this.applyFieldFormat(fieldValue, col.format);
+                }
+
+                if (col.type === 'currency') {
+                    const num = Number(fieldValue);
+
+                    if (hasRealValue && !isNaN(num)) {
+                        fieldValue = new Intl.NumberFormat(USER_LOCALE, {
+                            style: 'currency',
+                            currency: USER_CURRENCY || listing.CurrencyIsoCode,
+                            minimumFractionDigits: 0
+                        }).format(num);
+                    } else {
+                        fieldValue = '-';
+                    }
                 }
 
                 return {

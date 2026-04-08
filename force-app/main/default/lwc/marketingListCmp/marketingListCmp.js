@@ -17,6 +17,8 @@ import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController
 import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
 import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
 
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
@@ -487,6 +489,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
+                    fieldType: field.fieldType,
                     cardView: field.cardView,
                     format: field.format,
                     referenceObjectName: field.referenceObjectName,
@@ -565,60 +568,60 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     let isRedirectable = false;
                     let lookupId = null;
                     let objectApiName = null;
-                    let fieldValue;
+                    let rawValue;
 
                     if (field.fieldName.includes('.')) {
                         let fieldParts = field.fieldName.split('.');
                         let relatedObject = con[fieldParts[0]];
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
-                        
+                        rawValue = relatedObject ? relatedObject[fieldParts[1]] : null;
+
                         if (relatedObject && fieldParts[1] === 'Name') {
                             isRedirectable = true;
                             lookupId = relatedObject.Id;
                             objectApiName = field.referenceObjectName;
                         }
                     } else {
-                        fieldValue = con[field.fieldName] || '-';
+                        rawValue = con[field.fieldName];
                     }
 
-                    if (field.format && fieldValue) {
-                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
+                    let fieldValueraw;
+
+                    // Handle empty/null
+                    if (rawValue === null || rawValue === undefined || rawValue === '') {
+                        fieldValueraw = '-';
+                    } 
+
+                    // Currency Handling 
+                    else if (field.fieldType === 'CURRENCY') {
+                        fieldValueraw = new Intl.NumberFormat(USER_LOCALE, {
+                            style: 'currency',
+                            currency: con.CurrencyIsoCode || USER_CURRENCY,
+                            minimumFractionDigits: 0
+                        }).format(rawValue);
+                    } 
+
+                    // Date Formatting
+                    else if (field.format) {
+                        fieldValueraw = this.applyFieldFormat(rawValue, field.format);
+                    } 
+
+                    // Default
+                    else {
+                        fieldValueraw = rawValue;
                     }
 
                     return {
                         fieldName: field.fieldName,
-                        value: fieldValue,
+                        value: fieldValueraw,
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
                     };
                 });
 
-                let cardViewFields = this.fields
-                    .filter(field => field.cardView === 'true')
-                    .map(field => {
-                        let fieldValue;
-                        if (field.fieldName.includes('.')) {
-                            let fieldParts = field.fieldName.split('.');
-                            let relatedObject = con[fieldParts[0]];
-                            fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '';
-                        } else {
-                            fieldValue = con[field.fieldName] || '-';
-                        }
-
-                        if (field.format && fieldValue) {
-                            fieldValue = this.applyFieldFormat(fieldValue, field.format); // Apply the appropriate format
-                        }
-
-                        return {
-                            fieldName: field.fieldLabel,
-                            value: fieldValue
-                        };
-                    });
                 return {
                     ...con,
                     isChecked: con.isChecked,
-                    cardViewFields,
                     orderedFields
                 };
             });

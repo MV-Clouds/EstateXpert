@@ -15,6 +15,8 @@ import { errorDebugger } from 'c/globalProperties';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -87,7 +89,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track sortOrder = 'asc';
     hasUpdatedSortIcons = false;
 
-@track defaultColumns = [
+    @track defaultColumns = [
         { label: '', fieldName: 'media_url', type: 'image', sortable: false },
         { label: 'Name', fieldName: 'name', type: 'text' },
         { label: 'Listing Type', fieldName: 'mvex__listing_type__c', type: 'text' },
@@ -114,14 +116,14 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
      */
     get isApplyButtonDisabled() {
         // Check if the current condition type requires mappings
-        const requiresMappings = this.conditiontype === 'all' || 
-                                this.conditiontype === 'any' || 
-                                this.conditiontype === 'custom';
-        
+        const requiresMappings = this.conditiontype === 'all' ||
+            this.conditiontype === 'any' ||
+            this.conditiontype === 'custom';
+
         // If it requires mappings, check if mappings exist
         if (requiresMappings) {
             return !this.mappings || this.mappings.length === 0;
-        }        
+        }
         return false;
     }
 
@@ -654,7 +656,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     // Check for redirection (if specifically targeting a record name)
                     if (parts[parts.length - 1] === 'name') {
                         let foundId = null;
-                        
+
                         // First, try to get ID from standard lookup field on the main record (e.g. mvex__property__c)
                         const lookupField = parts[0].replace(/__r$/i, '__c').toLowerCase();
                         if (listing[lookupField] && typeof listing[lookupField] === 'string') {
@@ -685,9 +687,24 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 }
 
                 // Apply formatting for date/datetime fields if format is provided
-                const hasRealValue = fieldValue !== '-';
+                const hasRealValue = fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+
                 if (col.format && hasRealValue && (col.type === 'date' || col.type === 'datetime' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
                     fieldValue = this.applyFieldFormat(fieldValue, col.format);
+                }
+
+                if (col.type === 'currency') {
+                    const num = Number(fieldValue);
+
+                    if (hasRealValue && !isNaN(num)) {
+                        fieldValue = new Intl.NumberFormat(USER_LOCALE, {
+                            style: 'currency',
+                            currency: USER_CURRENCY || listing.CurrencyIsoCode,
+                            minimumFractionDigits: 0
+                        }).format(num);
+                    } else {
+                        fieldValue = '-';
+                    }
                 }
 
                 return {
@@ -717,13 +734,13 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 ...col,
                 sortable: col.sortable !== false
             };
-            
+
             if (!column.sortable) {
                 column.className = 'slds-is-resizable slds-cell_action-mode header-cell slds-truncate image-column';
             } else {
                 column.className = 'slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header colume2';
             }
-            
+
             return column;
         });
     }
@@ -750,14 +767,18 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 let inquiry = {};
 
                 if (this.objectName === 'MVEX__Inquiry__c') {
-                    this.totalListing = this.convertKeysToLowercase(data.listings);
+                    this.totalListing = this.convertKeysToLowercase(data.listings || []);
                     this.modalFilteredListingData = [...this.totalListing];
                     inquiry = data.inquiries && data.inquiries.length > 0 ? data.inquiries[0] : {};
                     this.inquiryRecord = inquiry;
                     this.propertyMediaUrls = result.medias || {};
+                } else if (this.objectName === 'MVEX__Listing__c') {
+                    this.totalListing = this.convertKeysToLowercase(data.listings || []);
+                    this.modalFilteredListingData = [...this.totalListing];
+                    this.propertyMediaUrls = result.medias || {};
                 }
 
-                this.totalListing.forEach(row => {
+                (this.totalListing || []).forEach(row => {
                     const prop_id = row.mvex__property__c;
                     row.media_url = this.propertyMediaUrls[prop_id];
                 });
@@ -1253,7 +1274,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         try {
             const recordId = event.currentTarget.dataset.id;
             const objectApiName = event.currentTarget.dataset.object; // Optional dynamic object name
-            
+
             const navConfig = {
                 type: 'standard__recordPage',
                 attributes: {
@@ -1261,7 +1282,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     actionName: 'view'
                 }
             };
-            
+
             if (objectApiName) {
                 navConfig.attributes.objectApiName = objectApiName;
             }
@@ -1569,34 +1590,118 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     });
             }
             else if (this.conditiontype === 'none') {
-                // No filter - show all listings
-                this.pagedFilteredListingData = [...this.totalListing];
-                this.modalFilteredListingData = [...this.pagedFilteredListingData];
-                this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
-                this.totalRecords = this.pagedFilteredListingData.length;
-                this.currentPage = 1;
-                this.updateMapMarkers();
-                this.hideModalBox(false);
-                this.isLoading = false;
-                this.searchTerm = '';
+                // No filter — fetch ALL listings fresh from the org.
+                // Using cached totalListing is wrong because it may only contain
+                // related/linked listings from a previous filter pass.
+                this.isLoading = true;
+
+                getRecords({ recId: this.recordId, objectName: this.objectName, filterType: 'default' })
+                    .then(result => {
+                        const data = result;
+                        let inquiry = {};
+
+                        if (this.objectName === 'MVEX__Inquiry__c') {
+                            this.totalListing = this.convertKeysToLowercase(data.listings || []);
+                            inquiry = data.inquiries && data.inquiries.length > 0 ? data.inquiries[0] : {};
+                            this.inquiryRecord = inquiry;
+                            this.propertyMediaUrls = result.medias || {};
+                        } else if (this.objectName === 'MVEX__Listing__c') {
+                            this.totalListing = this.convertKeysToLowercase(data.listings || []);
+                            this.propertyMediaUrls = result.medias || {};
+                        }
+
+                        // Attach media URLs
+                        (this.totalListing || []).forEach(row => {
+                            const prop_id = row.mvex__property__c;
+                            row.media_url = (this.propertyMediaUrls || {})[prop_id];
+                        });
+
+                        // Convert inquiry to lowercase keys
+                        const convertoLowerCase = (obj) => {
+                            return Object.keys(obj).reduce((acc, key) => {
+                                acc[key.toLowerCase()] = obj[key];
+                                return acc;
+                            }, {});
+                        };
+                        this.inquiryRecord = convertoLowerCase(inquiry);
+
+                        // Show all listings with no filtering applied
+                        this.pagedFilteredListingData = [...this.totalListing];
+                        this.modalFilteredListingData = [...this.pagedFilteredListingData];
+                        this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+                        this.totalRecords = this.pagedFilteredListingData.length;
+                        this.currentPage = 1;
+                        this.updateMapMarkers();
+                        this.hideModalBox(false);
+                        this.isLoading = false;
+                        this.searchTerm = '';
+                    })
+                    .catch(error => {
+                        errorDebugger('DisplayListing', 'applyModalFilters-none', error, 'warn', 'Error fetching all listings for No Filter');
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error loading all listings: ' + (error.body?.message || 'Unknown error'), 'error');
+                    });
             }
             else {
-                // For other filter types (all, any, custom), use the existing applyFiltersData logic
-                if (this.mappings.length === 0) {
-                    this.pagedFilteredListingData = [...this.totalListing];
-                    this.modalFilteredListingData = [...this.pagedFilteredListingData];
-                    this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
-                    this.totalRecords = this.pagedFilteredListingData.length;
-                    this.currentPage = 1;
-                    this.logicalExpression = '';
-                    this.hideModalBox(false);
-                    this.isLoading = false;
-                    this.updateMapMarkers();
-                    this.searchTerm = '';
-                    return;
-                }
+                // For filter types all/any/custom: first fetch ALL org listings fresh,
+                // then apply the filter conditions against the full dataset.
+                // Without this, totalListing contains only the listings from the previous
+                // filter (e.g. 'related'), so custom filters would only evaluate a subset.
+                this.isLoading = true;
 
-                this.applyFiltersData(this.inquiryRecord);
+                getRecords({ recId: this.recordId, objectName: this.objectName, filterType: 'default' })
+                    .then(result => {
+                        const data = result;
+                        let inquiry = {};
+
+                        if (this.objectName === 'MVEX__Inquiry__c') {
+                            this.totalListing = this.convertKeysToLowercase(data.listings || []);
+                            inquiry = data.inquiries && data.inquiries.length > 0 ? data.inquiries[0] : {};
+                            this.inquiryRecord = inquiry;
+                            this.propertyMediaUrls = result.medias || {};
+                        } else if (this.objectName === 'MVEX__Listing__c') {
+                            this.totalListing = this.convertKeysToLowercase(data.listings || []);
+                            this.propertyMediaUrls = result.medias || {};
+                        }
+
+                        // Attach media URLs
+                        (this.totalListing || []).forEach(row => {
+                            const prop_id = row.mvex__property__c;
+                            row.media_url = (this.propertyMediaUrls || {})[prop_id];
+                        });
+
+                        // Convert inquiry to lowercase keys
+                        const convertoLowerCase = (obj) => {
+                            return Object.keys(obj).reduce((acc, key) => {
+                                acc[key.toLowerCase()] = obj[key];
+                                return acc;
+                            }, {});
+                        };
+                        this.inquiryRecord = convertoLowerCase(inquiry);
+
+                        // If no mappings defined, show all listings unfiltered
+                        if (!this.mappings || this.mappings.length === 0) {
+                            this.pagedFilteredListingData = [...this.totalListing];
+                            this.modalFilteredListingData = [...this.pagedFilteredListingData];
+                            this.isPropertyAvailable = this.pagedFilteredListingData.length > 0;
+                            this.totalRecords = this.pagedFilteredListingData.length;
+                            this.currentPage = 1;
+                            this.logicalExpression = '';
+                            this.hideModalBox(false);
+                            this.isLoading = false;
+                            this.updateMapMarkers();
+                            this.searchTerm = '';
+                            return;
+                        }
+
+                        // Now apply the all/any/custom filter conditions against the full dataset
+                        this.applyFiltersData(this.inquiryRecord);
+                    })
+                    .catch(error => {
+                        errorDebugger('DisplayListing', 'applyModalFilters-custom', error, 'warn', 'Error fetching all listings for custom filter');
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error loading listings: ' + (error.body?.message || 'Unknown error'), 'error');
+                    });
             }
 
         } catch (error) {
@@ -1854,7 +1959,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             // String comparison (case insensitive)
             aValue = String(aValue).toLowerCase();
             bValue = String(bValue).toLowerCase();
-            return this.sortOrder === 'asc' 
+            return this.sortOrder === 'asc'
                 ? aValue.localeCompare(bValue)
                 : bValue.localeCompare(aValue);
         });
@@ -1865,7 +1970,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
      * Method Name : updateSortIcons
      * @description : Update visual sort indicators on headers
      */
-     updateSortIcons() {
+    updateSortIcons() {
         try {
             // Get all header cells with sorting capability
             const headers = this.template.querySelectorAll('[data-id]');

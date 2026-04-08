@@ -17,6 +17,8 @@ import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController
 import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
 import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
 
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
@@ -104,6 +106,14 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    /**
+    * Method Name : showPagination
+    * @description : show the pagination only if totalpages are greater than 1.
+    */
+    get showPagination() {
+        return this.totalPages > 1;
     }
 
     /**
@@ -479,6 +489,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
+                    fieldType: field.fieldType,
                     cardView: field.cardView,
                     format: field.format,
                     referenceObjectName: field.referenceObjectName,
@@ -557,60 +568,60 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     let isRedirectable = false;
                     let lookupId = null;
                     let objectApiName = null;
-                    let fieldValue;
+                    let rawValue;
 
                     if (field.fieldName.includes('.')) {
                         let fieldParts = field.fieldName.split('.');
                         let relatedObject = con[fieldParts[0]];
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
-                        
+                        rawValue = relatedObject ? relatedObject[fieldParts[1]] : null;
+
                         if (relatedObject && fieldParts[1] === 'Name') {
                             isRedirectable = true;
                             lookupId = relatedObject.Id;
                             objectApiName = field.referenceObjectName;
                         }
                     } else {
-                        fieldValue = con[field.fieldName] || '-';
+                        rawValue = con[field.fieldName];
                     }
 
-                    if (field.format && fieldValue) {
-                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
+                    let fieldValueraw;
+
+                    // Handle empty/null
+                    if (rawValue === null || rawValue === undefined || rawValue === '') {
+                        fieldValueraw = '-';
+                    } 
+
+                    // Currency Handling 
+                    else if (field.fieldType === 'CURRENCY') {
+                        fieldValueraw = new Intl.NumberFormat(USER_LOCALE, {
+                            style: 'currency',
+                            currency: con.CurrencyIsoCode || USER_CURRENCY,
+                            minimumFractionDigits: 0
+                        }).format(rawValue);
+                    } 
+
+                    // Date Formatting
+                    else if (field.format) {
+                        fieldValueraw = this.applyFieldFormat(rawValue, field.format);
+                    } 
+
+                    // Default
+                    else {
+                        fieldValueraw = rawValue;
                     }
 
                     return {
                         fieldName: field.fieldName,
-                        value: fieldValue,
+                        value: fieldValueraw,
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
                     };
                 });
 
-                let cardViewFields = this.fields
-                    .filter(field => field.cardView === 'true')
-                    .map(field => {
-                        let fieldValue;
-                        if (field.fieldName.includes('.')) {
-                            let fieldParts = field.fieldName.split('.');
-                            let relatedObject = con[fieldParts[0]];
-                            fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '';
-                        } else {
-                            fieldValue = con[field.fieldName] || '-';
-                        }
-
-                        if (field.format && fieldValue) {
-                            fieldValue = this.applyFieldFormat(fieldValue, field.format); // Apply the appropriate format
-                        }
-
-                        return {
-                            fieldName: field.fieldLabel,
-                            value: fieldValue
-                        };
-                    });
                 return {
                     ...con,
                     isChecked: con.isChecked,
-                    cardViewFields,
                     orderedFields
                 };
             });
@@ -1028,6 +1039,78 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         this.isContactSelected = this.selectedContactList.length <= 0;
     }
 
+    @track selectedContactSortField = 'Name';
+    @track selectedContactSortOrder = 'asc';
+
+    /**
+    * Method Name : sortSelectedContact
+    * @description : this methods apply the sorting on the selected contacts fields
+    */
+    sortSelectedContact(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.selectedContactSortField === fieldName) {
+                this.selectedContactSortOrder = this.selectedContactSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.selectedContactSortField = fieldName;
+                this.selectedContactSortOrder = 'asc';
+            }
+            this.sortSelectedContactsData();
+            this.updateSelectedSortIcons();
+        } catch (error) {
+            console.log('Error sortSelectedContact->' + error);
+        }
+    }
+
+    sortSelectedContactsData() {
+        try {
+            this.filteredSelectedContacts = [...this.filteredSelectedContacts].sort((a, b) => {
+                let aValue = a[this.selectedContactSortField] || '';
+                let bValue = b[this.selectedContactSortField] || '';
+
+                if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+                if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+                let compare = 0;
+                if (aValue > bValue) compare = 1;
+                else if (aValue < bValue) compare = -1;
+
+                return this.selectedContactSortOrder === 'asc' ? compare : -compare;
+            });
+        } catch (error) {
+            console.log('Error sortSelectedContactsData->' + error);
+        }
+    }
+
+    updateSelectedSortIcons() {
+        try {
+            // Remove icon rotation
+            const allIcons = this.template.querySelectorAll('.popup-table .slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            // Remove active class from all headers
+            const allHeaders = this.template.querySelectorAll('.popup-table .sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            // Set active header
+            const currentHeader = this.template.querySelector('.popup-table [data-id="' + this.selectedContactSortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.selectedContactSortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
+            }
+        } catch (error) {
+            console.log('Error in updateSelectedSortIcons --> ' + error);
+        }
+    }
+
     /**
     * Method Name : sortClick
     * @description : this methods apply the sorting on the all fields
@@ -1135,19 +1218,19 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     updateSortIcons() {
         try {
             // Remove icon rotation
-            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            const allIcons = this.template.querySelectorAll('#table-content .slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
             // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            const allHeaders = this.template.querySelectorAll('#table-content .sorting_header');
             allHeaders.forEach(header => {
                 header.classList.remove('active-sort');
             });
 
             // Set active header
-            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            const currentHeader = this.template.querySelector('#table-content [data-id="' + this.sortField + '"]');
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
 

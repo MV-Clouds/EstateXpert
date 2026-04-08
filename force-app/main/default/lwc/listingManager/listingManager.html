@@ -187,9 +187,10 @@
                                     </div>
                                 </template>
 
-                                <div class="paginationDiv">
-                                    <div class="btnCover">
-                                        <div class="pagination-container">
+                                <template if:true={showPagination}>
+                                    <div class="paginationDiv">
+                                        <div class="btnCover">
+                                            <div class="pagination-container">
                                             <button class="pagination-btn-css" disabled={isFirstPage}
                                                 onclick={handlePrevious}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
@@ -224,6 +225,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                </template>
                             </template>
 
                             <template if:true={showMap}>

@@ -1,0 +1,123 @@
+<template>
+    <lightning-spinner alternative-text="Loading" size="small" if:true={showSpinner}></lightning-spinner>
+
+    <div class="tmp-preview-main">
+        <template lwc:if={isTemplateDeleted}>
+            <div class="tmp-deleted-template-div">
+                This Template does not exist anymore!
+            </div>
+        </template>
+
+        <template lwc:else>
+            <!-- ══════════════════════════════════
+                 WHATSAPP BACKGROUND WRAPPER
+                 ══════════════════════════════════ -->
+            <div class="tmp-preview-bg">
+
+                <!-- VIEW: WHATSAPP CHAT BUBBLE -->
+                <div class="tmp-whatsapp-message">
+
+                    <div class="tmp-chat-bubble">
+
+                        <!-- Header Section -->
+                        <template if:true={headerBody}>
+                            <div class="tmp-header-div">
+                                <template if:true={isTextHeader}>
+                                    <div class="tmp-text-heading">
+                                        <b>{headerBody}</b>
+                                    </div>
+                                </template>
+
+                                <template if:true={isImageHeader}>
+                                    <div class="tmp-header-image-div">
+                                        <img class="tmp-header-media" src={headerBody} alt="header-image" />
+                                    </div>
+                                </template>
+
+                                <template if:true={isVideoHeader}>
+                                    <div class="tmp-header-image-div">
+                                        <video class="tmp-header-media" src={headerBody} controls playsinline></video>
+                                    </div>
+                                </template>
+
+                                <template if:true={isDocHeader}>
+                                    <div class="tmp-header-image-div">
+                                        <div class="tmp-media-doc">
+                                            <img src={NoPreviewAvailableImg} alt="doc-placeholder"
+                                                class="tmp-header-media tmp-placeholder" />
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Body Section -->
+                        <div class="tmp-body-div">
+                            <template if:true={templateBody}>
+                                <!-- Use span to allow HTML insertion from renderedCallback -->
+                                <span class="tmp-rich-body">{templateBody}</span>
+                            </template>
+                        </div>
+
+                        <!-- Footer Section -->
+                        <div class="tmp-footer-div">
+                            <p class="tmp-footer-text" if:true={footerBody}>{footerBody}</p>
+
+                            <!-- Timestamp -->
+                            <div class="tmp-text-time">
+                                <p class="tmp-time-text">11:59</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Button Area (Outside Bubble for CTA & Reply Buttons) -->
+                    <div class="tmp-btn-area">
+                        <!-- Standard Buttons -->
+                        <template if:true={hasStandardButtons}>
+                            <template for:each={buttonList} for:item="button">
+                                <div key={button.id} class="tmp-button-label-preview">
+                                    <lightning-icon icon-name={button.iconName} size="x-small"
+                                        class="tmp-button-icon"></lightning-icon>
+                                    <p>{button.btntext}</p>
+                                </div>
+                            </template>
+                        </template>
+
+                        <!-- Interactive Actions -->
+                        <template if:true={isInteractiveTemplate}>
+
+                            <template if:true={isInteractiveLocationRequest}>
+                                <div class="tmp-button-label-preview">
+                                    <lightning-icon icon-name="utility:checkin" size="x-small"
+                                        class="tmp-button-icon"></lightning-icon>
+                                    <p>{interactiveActionLabel}</p>
+                                </div>
+                            </template>
+
+                            <template if:true={isInteractiveButton}>
+                                <template if:true={hasInteractiveButtons}>
+                                    <template for:each={interactiveButtons} for:item="button">
+                                        <div key={button.id} class="tmp-button-label-preview">
+                                            <lightning-icon icon-name={button.iconName} size="x-small"
+                                                class="tmp-button-icon"></lightning-icon>
+                                            <p>{button.btntext}</p>
+                                        </div>
+                                    </template>
+                                </template>
+                            </template>
+
+                            <template if:true={isInteractiveList}>
+                                <div class="tmp-button-label-preview" if:true={interactiveActionLabel}>
+                                    <lightning-icon icon-name="utility:list" size="x-small"
+                                        class="tmp-button-icon"></lightning-icon>
+                                    <p>{interactiveActionLabel}</p>
+                                </div>
+                            </template>
+
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

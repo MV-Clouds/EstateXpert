@@ -6,6 +6,8 @@ import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMeta
 import { NavigationMixin } from 'lightning/navigation';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
+import USER_CURRENCY from '@salesforce/i18n/currency';
+import USER_LOCALE from '@salesforce/i18n/locale';
 
 export default class ListingManager extends NavigationMixin(LightningElement){
     @api objectName = 'MVEX__Listing__c';
@@ -57,6 +59,14 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     */
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    /**
+    * Method Name : showPagination
+    * @description : show the pagination only if totalpages are greater than 1.
+    */
+    get showPagination() {
+        return this.totalPages > 1;
     }
 
     /**
@@ -391,7 +401,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
-                    cardView: field.cardView,
+                    fieldType: field.fieldType,
                     format : field.format,
                     referenceObjectName: field.referenceObjectName,
                     relationshipName: field.relationshipName
@@ -446,40 +456,36 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                         fieldValue = listing[field.fieldName] || '-';
                     }
 
-                    if (field.format && fieldValue) {
-                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
+                    // if (field.format && fieldValue) {
+                    //     fieldValue = this.applyFieldFormat(fieldValue, field.format);
+                    // }
+                    let rawValue = listing[field.fieldName];
+                    let fieldValueraw = rawValue;
+
+                    // Handle empty/null/undefined
+                    if (rawValue === null || rawValue === undefined || rawValue === '') {
+                        fieldValueraw = '-';
+                    } 
+                    else if (field.fieldType === 'CURRENCY') {
+                        fieldValueraw = new Intl.NumberFormat(USER_LOCALE, {
+                            style: 'currency',
+                            currency: USER_CURRENCY,
+                            minimumFractionDigits: 0
+                        }).format(rawValue);
+                    } 
+                    else if (field.format) {
+                        fieldValueraw = this.applyFieldFormat(rawValue, field.format);
                     }
 
                     return {
                         fieldName: field.fieldName,
-                        value: fieldValue,
+                        value: fieldValueraw,
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
                     };
                 });
 
-            let cardViewFields = this.fields
-                .filter(field => field.cardView === 'true')
-                .map(field => {
-                    let fieldValue;
-                    if (field.fieldName.includes('.')) {
-                        let fieldParts = field.fieldName.split('.');
-                        let relatedObject = listing[fieldParts[0]];
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
-                    } else {
-                        fieldValue = listing[field.fieldName] || '-';
-                    }
-
-                    if (field.format && fieldValue) {
-                        fieldValue = this.applyFieldFormat(fieldValue, field.format);
-                    }
-
-                    return {
-                        fieldName: field.fieldName,
-                        value: fieldValue
-                    };
-                });
                 return {
                     Id: listing.Id,
                     Name: listing.Name,
@@ -490,7 +496,6 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     Street__c:listing.MVEX__Street__c,
                     isChecked: listing.isChecked,
                     Address__c:listing.MVEX__Address__c,
-                    cardViewFields,
                     orderedFields,
                     isActive: listing.isActive,
                 };

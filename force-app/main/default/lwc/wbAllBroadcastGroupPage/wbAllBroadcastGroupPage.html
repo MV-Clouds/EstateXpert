@@ -144,7 +144,7 @@
                                         </td>
                                         <td data-label="Actions">
                                             <div class="action-btn">
-                                                <button class="action-div" data-id={row.Id}
+                                                <button class="edit-icon-css" data-id={row.Id}
                                                     data-communication-type={row.MVEX__Communication_Type__c}
                                                     onclick={handleEditGroup}>
                                                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
@@ -155,7 +155,7 @@
                                                             stroke-linejoin="round" />
                                                     </svg>
                                                 </button>
-                                                <button class="delete-div" data-id={row.Id} onclick={handleDeleteGroup}>
+                                                <button class="delete-icon-css" data-id={row.Id} onclick={handleDeleteGroup}>
                                                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
@@ -188,7 +188,8 @@
                 </template>
 
                 <template if:true={paginatedData.length}>
-                    <div class="paginationDiv">
+                    <template if:true={showPagination}>
+                        <div class="paginationDiv">
                         <div class="btnCover">
                             <div class="pagination-container">
                                 <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
@@ -223,6 +224,7 @@
                             </div>
                         </div>
                     </div>
+                    </template>
                 </template>
             </div>
 

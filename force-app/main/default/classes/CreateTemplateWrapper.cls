@@ -13,8 +13,8 @@
  * Change Description : Store actual variable {{1}} in the name field of template variable.
  ***********************************************************************/
 
- public with sharing class CreateTemplateWrapper {
-
+public without sharing class CreateTemplateWrapper {
+    
     /*
     *********************************************************
     @description     : Handle response and store all in the template and template variable record.
@@ -22,15 +22,20 @@
     @return          : templateId of created template records.
     ********************************************************
     */
-
     public static Id handleSuccessResponse(String metaTempId, String metaTemplateStatus, Map<String, Object> payload, TemplateWrapper templateWrapper) {
+
+        System.debug('Handling success response for template creation');
+        System.debug('Meta Template ID: ' + metaTempId);
+        System.debug('Meta Template Status: ' + metaTemplateStatus);
+        System.debug('Payload: ' + payload);
+        System.debug('Template Wrapper: ' + templateWrapper);
+
         Map<String, Object> response = new Map<String, Object>();
         Id templateId = null;
         try {
             // Deserialize the payload
             Map<String, Object> payloadMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(payload));
-            
-            // List<Map<String, String>> buttonDetails;
+            System.debug('Payload Map: ' + payloadMap);
             String buttonDetails;
             String templatename = (String) payloadMap.get('name');
             WhatsappTemplate__c whatsAppTemplate;
@@ -48,7 +53,6 @@
                 }
             }
 
-
             if (whatsAppTemplateList.isEmpty()) {
                 whatsAppTemplate = new WhatsappTemplate__c();
             } else {
@@ -58,7 +62,7 @@
                 }
             }
             
-            // Populate WhatsappTemplate__c fields dynamically
+            // Populate Template__c fields dynamically
             String status = metaTemplateStatus;
             whatsAppTemplate.Template_Id__c = metaTempId != null ? metaTempId : whatsAppTemplate.Template_Id__c;
             whatsAppTemplate.Status__c = (status == null || status == '') ? 'In-Review' : (status == 'PENDING') ? 'In-Review' : 
@@ -73,8 +77,26 @@
             // Initialize variables for components
             List<Template_Variable__c> variableRecords = new List<Template_Variable__c>();
             List<Object> components = (List<Object>) payloadMap.get('components');
-            List<String> headAlternateTexts = templateWrapper.headAlternateTexts; 
-            List<String> varAlternateTexts = templateWrapper.varAlternateTexts;   
+            System.debug('Components: ' + components);
+            List<VariableWrapper> headerVariables = templateWrapper.header_variables != null ? templateWrapper.header_variables : new List<VariableWrapper>(); 
+            List<VariableWrapper> bodyVariables = templateWrapper.variables != null ? templateWrapper.variables : new List<VariableWrapper>();   
+
+            System.debug('===== VARIABLE DEBUG START =====');
+            System.debug('Header Variables Count: ' + (headerVariables != null ? headerVariables.size() : 0));
+            System.debug('Body Variables Count: ' + (bodyVariables != null ? bodyVariables.size() : 0));
+            if (headerVariables != null && !headerVariables.isEmpty()) {
+                for (Integer i = 0; i < headerVariables.size(); i++) {
+                    VariableWrapper hv = headerVariables[i];
+                    System.debug('Header Var ' + i + ': objectName=' + hv.objectName + ', fieldName=' + hv.fieldName + ', alternateText=' + hv.alternateText);
+                }
+            }
+            if (bodyVariables != null && !bodyVariables.isEmpty()) {
+                for (Integer i = 0; i < bodyVariables.size(); i++) {
+                    VariableWrapper bv = bodyVariables[i];
+                    System.debug('Body Var ' + i + ': objectName=' + bv.objectName + ', fieldName=' + bv.fieldName + ', alternateText=' + bv.alternateText);
+                }
+            }
+            System.debug('===== VARIABLE DEBUG END =====');
 
             Integer headerIndex = 0;
             Integer variableIndex = 0; 
@@ -85,16 +107,16 @@
                 if (!(comp instanceof Map<String, Object>)) {
                     continue;
                 }
+
                 Map<String, Object> component = (Map<String, Object>) comp;
+                System.debug('Component: ' + component);
                 String type = (String) component.get('type');
                 Map<String, Object> example = (Map<String, Object>) component.get('example');
-
-            
+                System.debug('Example: ' + example);
 
                 if(whatsAppTemplate.Template_Category__c == 'Authentication'){
                     component.put('text',templateWrapper.templateBody);
                 }
-
     
                 // HEADER Component
                 if (type == 'HEADER') {
@@ -108,90 +130,78 @@
                         
                     }
                     if (example != null && example.containsKey('header_text') && example.get('header_text') instanceof List<Object>) {
-                        List<Object> headerExampleObj = (List<Object>) example.get('header_text');
                         Pattern pattern = Pattern.compile('\\{\\{(\\d+)\\}\\}');
                         Matcher matcher = pattern.matcher((String) component.get('text'));
 
-                        if (!headerExampleObj.isEmpty()) {
-                            while (matcher.find()) {
-                                String placeholder = matcher.group();  
-                                headerMergeText = (String) headerExampleObj[0];
-                                headerMergeText = headerMergeText.replace('{{', '').replace('}}', '');
-                                List<String> parts = headerMergeText.split('\\.');
-                                if (parts.size() == 2) {
-                                    List<Template_Variable__c> existingHeaderVar = [
-                                        SELECT Id, Name
-                                        FROM Template_Variable__c
-                                        WHERE WhatsappTemplate__c = :whatsAppTemplate.Id
-                                        AND Type__c = 'Header'
-                                        WITH USER_MODE
-                                    ];
-                
-                                    if (!existingHeaderVar.isEmpty()) {
-                                        delete as user existingHeaderVar;
-                                    }
+                        List<Template_Variable__c> existingHeaderVar = [ SELECT Id, Name FROM Template_Variable__c WHERE WhatsappTemplate__c = :whatsAppTemplate.Id AND Type__c = 'Header'];
+                        if (!existingHeaderVar.isEmpty()) {
+                            delete existingHeaderVar;
+                        }
 
-                                    if (headerIndex < headAlternateTexts.size()) {
-                                        Template_Variable__c headerVariable = new Template_Variable__c(
-                                            Name = placeholder,
-                                            Object_Name__c = parts[0],
-                                            Field_Name__c = parts[1],
-                                            Type__c = 'Header',
-                                            Alternate_Text__c = headAlternateTexts[headerIndex]
-                                        );
-                                        variableRecords.add(headerVariable);
-                                        headerIndex++;
-                                    }                           
-                                   
-                                    headerIndex++;
-                                }
+                        while (matcher.find() && headerIndex < headerVariables.size()) {
+                            String placeholder = matcher.group();
+                            VariableWrapper varData = headerVariables[headerIndex];
+                            
+                            System.debug('Processing Header Variable: placeholder=' + placeholder + ', objectName=' + varData.objectName + ', fieldName=' + varData.fieldName);
+                            
+                            if (varData.objectName != null && varData.fieldName != null) {
+                                Template_Variable__c headerVariable = new Template_Variable__c(
+                                    Name = placeholder,
+                                    Object_Name__c = varData.objectName,
+                                    Field_Name__c = varData.fieldName,
+                                    Type__c = 'Header',
+                                    Alternate_Text__c = varData.alternateText
+                                );
+                                variableRecords.add(headerVariable);
+                                System.debug('Added Header Variable to list: ' + headerVariable);
+                            } else {
+                                System.debug('SKIPPED Header Variable - objectName or fieldName is null');
                             }
+                            headerIndex++;
                         }
                     }
                 }
                 // BODY Component
                 else if (type == 'BODY') {
                     Map<String, Object> result = handleBodyComponent(whatsAppTemplate.Template_Category__c, component, example);
+
+                    System.debug('Body Component Result: ' + result);
                     
                     if(((String) result.get('bodyText')) != null){
                         whatsAppTemplate.WBTemplate_Body__c = String.isNotBlank((String) result.get('bodyText')) ? (String) result.get('bodyText') : '';
 
                         if(whatsAppTemplate.Template_Category__c != 'Authentication'){
-                            List<Map<String, String>> parsedFields = (List<Map<String, String>>) result.get('parsedFields');
-                            String bodyMergeText = (String) result.get('bodyMergeText');
-        
                             Pattern pattern = Pattern.compile('\\{\\{(\\d+)\\}\\}');
                             Matcher matcher = pattern.matcher((String) result.get('bodyText'));
                             Set<String> processedBodyPlaceholders = new Set<String>();
         
-                            List<Template_Variable__c> existingBodyVars = [
-                                SELECT Id, Name
-                                FROM Template_Variable__c
-                                WHERE WhatsappTemplate__c = :whatsAppTemplate.Id
-                                AND Type__c = 'Body'
-                                WITH USER_MODE
-                            ];
+                            List<Template_Variable__c> existingBodyVars = [ SELECT Id, Name FROM Template_Variable__c WHERE WhatsappTemplate__c = :whatsAppTemplate.Id AND Type__c = 'Body'];
         
                             if (!existingBodyVars.isEmpty()) {
-                                delete as user existingBodyVars;
+                                delete existingBodyVars;
                             }
         
                             while (matcher.find()) {
                                 String placeholder = matcher.group();
         
-                                if (!processedBodyPlaceholders.contains(placeholder)) {
+                                if (!processedBodyPlaceholders.contains(placeholder) && variableIndex < bodyVariables.size()) {
                                     processedBodyPlaceholders.add(placeholder);
+                                    VariableWrapper varData = bodyVariables[variableIndex];
                             
-                                    if ((variableIndex < varAlternateTexts.size())) {
-                                        Template_Variable__c bodyVariable ;
-                                        bodyVariable = new Template_Variable__c(
+                                    System.debug('Processing Body Variable: placeholder=' + placeholder + ', objectName=' + varData.objectName + ', fieldName=' + varData.fieldName);
+                            
+                                    if (varData.objectName != null && varData.fieldName != null) {
+                                        Template_Variable__c bodyVariable = new Template_Variable__c(
                                             Name = placeholder,
-                                            Object_Name__c = parsedFields[variableIndex].get('objectName'),
-                                            Field_Name__c = parsedFields[variableIndex].get('fieldName'), 
+                                            Object_Name__c = varData.objectName,
+                                            Field_Name__c = varData.fieldName, 
                                             Type__c = 'Body',
-                                            Alternate_Text__c = varAlternateTexts[variableIndex]
+                                            Alternate_Text__c = varData.alternateText
                                         );
                                         variableRecords.add(bodyVariable);
+                                        System.debug('Added Body Variable to list: ' + bodyVariable);
+                                    } else {
+                                        System.debug('SKIPPED Body Variable - objectName or fieldName is null');
                                     }
                                     variableIndex++; 
                                 }
@@ -200,7 +210,7 @@
                     }
                 }
                 // FOOTER Component
-                else if (type == 'FOOTER') {
+                else if (type == 'FOOTER' && whatsAppTemplate.Template_Category__c != 'Authentication') {
                     whatsAppTemplate.WBFooter_Body__c = (String) component.get('text');
                 }
                 // BUTTONS Component
@@ -220,25 +230,34 @@
                     }
                     buttonDetails = handleButtonComponent(component);
                     whatsAppTemplate.WBButton_Body__c = buttonDetails;
-                    
                 }
             }
     
-            upsert as user whatsAppTemplate;
+            upsert whatsAppTemplate;
             templateId = whatsAppTemplate.Id;
+
+            System.debug('===== BEFORE VARIABLE UPSERT =====');
+            System.debug('Template ID: ' + templateId);
+            System.debug('Variable Records Count: ' + variableRecords.size());
+            for (Template_Variable__c var : variableRecords) {
+                System.debug('Variable to upsert: Name=' + var.Name + ', Object=' + var.Object_Name__c + ', Field=' + var.Field_Name__c);
+            }
+            System.debug('===== END VARIABLE UPSERT DEBUG =====');
 
             for (Template_Variable__c variable : variableRecords) {
                 variable.WhatsappTemplate__c = whatsAppTemplate.Id;
             }
 
             if (!variableRecords.isEmpty()) {
-                upsert as user variableRecords;
+                upsert variableRecords;
+                System.debug('Successfully upserted ' + variableRecords.size() + ' variable records');
+            } else {
+                System.debug('WARNING: No variable records to upsert');
             }
 
             // Success response
             response.put('success', true);
             response.put('templateId', templateId);
-    
         } catch (Exception e) {
             // Error response handling
             response.put('success', false);
@@ -248,68 +267,31 @@
         return templateId; 
     }
     
-     /*
+    /*
     *********************************************************
-    @description     : Handle body to get the alternate text.
+    @description     : Handle body component to extract body text.
     @param           : category,component,example - {String,Map<String, Object>,Map<String, Object>} 
-    @return          : result - contain the body text, parsefields use to create Template_Variable record.
+    @return          : result - contains the body text.
     ********************************************************
     */
     private static Map<String, Object> handleBodyComponent(String category, Map<String, Object> component, Map<String, Object> example) {
         Map<String, Object> result = new Map<String, Object>(); 
         try {
+            System.debug('Handling body component for category: ' + category);
+            System.debug('Component: ' + component);
             String bodyText = (String) component.get('text');
-            String bodyMergeText = '';  
-            List<Map<String, String>> parsedFields = new List<Map<String, String>>(); 
-    
-            if (example != null && example.containsKey('body_text')) {
-                Object bodyTextObj = example.get('body_text');
-    
-                if (bodyTextObj instanceof List<Object>) {
-                    List<Object> outerList = (List<Object>) bodyTextObj;
-    
-                    if (!outerList.isEmpty() && outerList[0] instanceof List<Object>) {
-                        List<Object> innerList = (List<Object>) outerList[0];
-                        List<String> stringList = new List<String>();
-    
-                        for (Object obj : innerList) {
-                            if (obj instanceof String) {
-                                String fieldRef = (String) obj;
-                                stringList.add(fieldRef);
-    
-                                if (fieldRef.contains('.')) {
-                                    fieldRef = fieldRef.replace('{{', '').replace('}}', '');
-                                    List<String> parts = fieldRef.split('\\.');
-                                    Map<String, String> fieldMap = new Map<String, String>();
-                                    fieldMap.put('objectName',parts[0]);
-                                    fieldMap.put('fieldName', parts[1]); 
-                                    parsedFields.add(fieldMap);
-                                }
-                            }
-                        }
-    
-                        if (!stringList.isEmpty()) {
-                            bodyMergeText = String.join(stringList, ',');
-                        }
-                    }
-                }
-            }
     
             result.put('bodyText', bodyText);
-            result.put('bodyMergeText', bodyMergeText);
-            result.put('parsedFields', parsedFields); 
-    
+            System.debug('Body Text: ' + bodyText);
+            System.debug('Finished handling body component');
         } catch (Exception e) {
-             ErrorHandler.insertErrordata(e, 'CreateTemplateWrapper', 'handleBodyComponent', 'Error while handling body component.');
+            // ErrorHandler.insertErrordata(e, 'CreateTemplateWrapper', 'handleBodyComponent', 'Error while handling body component.');
             result.put('bodyText', '');  
-            result.put('bodyMergeText', '');
-            result.put('parsedFields', new List<Map<String, String>>()); 
         }
-    
         return result; 
     }
 
-      /*
+    /*
     *********************************************************
     @description     : Handle buttons for different type of buttons.
     @param           : component - {Map<String, Object> 
@@ -323,23 +305,13 @@
     
             if (buttons != null) {
                 buttonList = (String) JSON.serialize(buttons);
-                
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'CreateTemplateWrapper', 'handleButtonComponent', e.getMessage());
+            // ErrorHandler.insertErrordata(e, 'CreateTemplateWrapper', 'handleButtonComponent', 'Error while handling button component.');
         }
         return buttonList; 
     }
     
-      /*
-    *********************************************************
-    @description     : Used to format text
-    @param           : bodyText - text that need to format.
-    @return          : bodyText (String) - formatted bodytext.
-    ********************************************************
-    */
-    
-
     public class TemplateWrapper {      
         @AuraEnabled public String templateName;
         @AuraEnabled public String templateCategory;
@@ -349,28 +321,26 @@
         @AuraEnabled public String tempLanguage;
         @AuraEnabled public String tempHeaderText;
         @AuraEnabled public List<String> tempHeaderExample;
-        @AuraEnabled public List<String> headAlternateTexts;
-        @AuraEnabled public List<String> varAlternateTexts;
         @AuraEnabled public String templateBody;
         @AuraEnabled public List<String> templateBodyText;
         @AuraEnabled public String tempFooterText;
         @AuraEnabled public String typeOfButton;
-        @AuraEnabled public String url;
-        @AuraEnabled public String tempImgUrl;
-        @AuraEnabled public String tempImgName;
-        @AuraEnabled public String tempImgId;
-        @AuraEnabled public Integer expireTime;
-        
-        @AuraEnabled public Boolean autofillCheck;  
+        @AuraEnabled public String tempImgUrl;  // Required for media headers
+        @AuraEnabled public String tempImgName; // Required for media headers
+        @AuraEnabled public String tempImgId;   // Required for media headers
         @AuraEnabled public List<String> packagename;  
         @AuraEnabled public List<String> signaturename;  
-        @AuraEnabled public String marketingOptText;  
+        @AuraEnabled public String marketingOptText;  // Required for button opt-out identification
         @AuraEnabled public String templateMiscellaneousData;
-        
-        @AuraEnabled public String selectedFlow;
-        @AuraEnabled public Boolean isSecurityRecommedation;
-        @AuraEnabled public Boolean isCodeExpiration;
-        
+        @AuraEnabled public List<VariableWrapper> variables;
+        @AuraEnabled public List<VariableWrapper> header_variables;
     }
-
+    
+    public class VariableWrapper {
+        @AuraEnabled public String placeholder;
+        @AuraEnabled public String alternateText;
+        @AuraEnabled public String objectName;
+        @AuraEnabled public String fieldName;
+        @AuraEnabled public String variableType;
+    }
 }

@@ -1,8 +1,8 @@
 /*
  * Component Name: WbBreadcrumbNavigation
  * @description: Reusable breadcrumb navigation component for hierarchical navigation
- * Date: 06/02/2026
- * Created By: Rachit Shah
+ * Date: 04/04/2026
+ * Created By: Harsh Gandhi
  */
 import { LightningElement, api } from 'lwc';
 

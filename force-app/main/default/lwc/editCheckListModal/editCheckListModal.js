@@ -99,7 +99,7 @@ export default class EditCheckListModal extends LightningElement {
                     this.checklistRecords = JSON.parse(JSON.stringify(result.checklist));
                     this.listOfFields = result.fields;
     
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
+                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL','CURRENCY'];
                     const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                     const referenceFieldTypes = ['REFERENCE'];
     
@@ -369,7 +369,7 @@ export default class EditCheckListModal extends LightningElement {
             if (selectedField) {
                 const fieldType = selectedField.type;
 
-                const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
+                const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL','CURRENCY'];
                 const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                 const referenceFieldTypes = ['REFERENCE'];
         
@@ -425,13 +425,21 @@ export default class EditCheckListModal extends LightningElement {
                 this.checklistItems[index].isPrimary = true;
                 this.checklistItems[index].isPicklist = false;
                 this.checklistItems[index].isReference = false;
-                this.checklistItems[index].MVEX__Data_Type__c = 'NUMBER';
+                // this.checklistItems[index].MVEX__Data_Type__c = 'NUMBER';
+               const selectedField = this.listOfFields.find(field => field.value === fieldApiName);
+                console.log('selectedField for Operator Change: ', selectedField);
+                console.log('selectedField type for Operator Change: ', selectedField ? selectedField.type : 'N/A');
+                
+                
+                if (selectedField) {
+                    this.checklistItems[index].MVEX__Data_Type__c = selectedField.type;
+                }
             } else {
                 const selectedField = this.listOfFields.find(field => field.value === fieldApiName);
                 if (selectedField) {
                     const fieldType = selectedField.type;
 
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL'];
+                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL','CURRENCY'];
                     const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                     const referenceFieldTypes = ['REFERENCE'];
             

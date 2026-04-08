@@ -71,7 +71,6 @@ public with sharing class PropertySearchController {
                                                             WHERE MVEX__Feature_Name__c = 'Suggested_Listing_Fields' WITH USER_MODE LIMIT 1];
             
             Set<String> extraListingFields = new Set<String>();
-            Set<String> extraInquiryFields = new Set<String>();
             
             if (!configs.isEmpty() && String.isNotBlank(configs[0].MVEX__Fields_Data__c)) {
                 List<Object> fieldsData = (List<Object>)JSON.deserializeUntyped(configs[0].MVEX__Fields_Data__c);
@@ -80,7 +79,6 @@ public with sharing class PropertySearchController {
                     String fieldName = (String)field.get('fieldApiname');
                     if (String.isNotBlank(fieldName)) {
                         extraListingFields.add(fieldName.toLowerCase());
-                        extraInquiryFields.add(fieldName.toLowerCase());
                     }
                 }
             }
@@ -89,18 +87,14 @@ public with sharing class PropertySearchController {
             String inquiryFieldsStr = getAllFields('MVEX__Inquiry__c');
             
             Set<String> listingFieldsSet = new Set<String>(listingFieldsStr.toLowerCase().split(','));
-            Set<String> inquiryFieldsSet = new Set<String>(inquiryFieldsStr.toLowerCase().split(','));
 
+            // Only add extra configured fields to the Listing query.
+            // These fields come from 'Suggested_Listing_Fields' and belong to MVEX__Listing__c only.
+            // Adding them to inquiryFieldsStr would cause a QueryException on MVEX__Inquiry__c.
             for (String f : extraListingFields) {
                 if (!listingFieldsSet.contains(f)) {
                     listingFieldsStr += ',' + f;
                     listingFieldsSet.add(f);
-                }
-            }
-            for (String f : extraInquiryFields) {
-                if (!inquiryFieldsSet.contains(f)) {
-                    inquiryFieldsStr += ',' + f;
-                    inquiryFieldsSet.add(f);
                 }
             }
 
@@ -185,9 +179,11 @@ public with sharing class PropertySearchController {
 
                 if (objectName == 'MVEX__Listing__c') {
 
+                    // Fetch ALL listings (no WHERE clause) so that the 'No Filter' option
+                    // shows every listing in the org, not just the current one.
                     listings = Database.query(
                         'SELECT ' + listingFieldsStr +
-                        ', (SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c WHERE Id = :recId',
+                        ', (SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquirys__r)' + ' FROM MVEX__Listing__c',
                         AccessLevel.USER_MODE);
 
                     inquiries = Database.query(

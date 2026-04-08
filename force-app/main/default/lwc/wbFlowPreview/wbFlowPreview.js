@@ -1,5 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
 export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     @api flowname;
@@ -140,6 +142,13 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * @description : Lifecycle hook to add event listeners for window resize.
     */
     connectedCallback() {
+        loadStyle(this, MulishFontCss)
+            .then(() => {
+                console.log('External Css Loaded');
+            })
+            .catch(error => {
+                console.log('Error occuring during loading external css', error);
+            });
         window.addEventListener('resize', this.adjustContentHeight.bind(this)); 
         this.selectedtheme = this.theme;
     }

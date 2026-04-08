@@ -1,0 +1,32 @@
+/*
+ * Breadcrumb Navigation Styles
+ */
+
+.breadcrumb-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.breadcrumb-link {
+    color: #0176D3;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.breadcrumb-current {
+    color: #3e3e3c;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 0.2rem 0.4rem;
+}
+
+.breadcrumb-separator {
+    margin: 0 0.2rem;
+    color: #706e6b;
+}

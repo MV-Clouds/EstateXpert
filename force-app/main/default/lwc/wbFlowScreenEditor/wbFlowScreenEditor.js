@@ -1,4 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getFlowElementTypes from '@salesforce/apex/WhatsAppFlowControllerV2.getFlowElementTypes';
 
 export default class WbFlowScreenEditor extends LightningElement {
@@ -77,6 +79,13 @@ export default class WbFlowScreenEditor extends LightningElement {
     }
 
     connectedCallback() {
+        loadStyle(this, MulishFontCss)
+            .then(() => {
+                console.log('External Css Loaded');
+            })
+            .catch(error => {
+                console.log('Error occuring during loading external css', error);
+            });
         this.fetchFlowElementTypes();
         this.boundDocumentClickHandler = this.handleDocumentClick.bind(this);
         document.addEventListener('click', this.boundDocumentClickHandler);

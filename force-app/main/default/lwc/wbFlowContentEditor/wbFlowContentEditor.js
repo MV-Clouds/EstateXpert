@@ -1,5 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getS3ConfigSettings from '@salesforce/apex/AWSFilesController.getS3ConfigSettings';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 
@@ -236,6 +238,13 @@ export default class WbFlowContentEditor extends LightningElement {
      * @description : Component initialization
      */
     connectedCallback() {
+        loadStyle(this, MulishFontCss)
+            .then(() => {
+                console.log('External Css Loaded');
+            })
+            .catch(error => {
+                console.log('Error occuring during loading external css', error);
+            });
         this.getS3ConfigData();
     }
 

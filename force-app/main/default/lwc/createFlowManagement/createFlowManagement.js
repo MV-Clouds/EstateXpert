@@ -1,4 +1,6 @@
 import { LightningElement, track, api } from 'lwc';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getAllJSONData from '@salesforce/apex/WhatsAppFlowControllerV2.getAllJSONData';
 import saveWhatsAppFlow from '@salesforce/apex/WhatsAppFlowControllerV2.saveWhatsAppFlow';
 import publishWhatsAppFlow from '@salesforce/apex/WhatsAppFlowControllerV2.publishWhatsAppFlow';
@@ -85,7 +87,13 @@ export default class WbCreateFlowManagement extends LightningElement {
      * @description : Initializes component and loads all JSON data.
      */
     connectedCallback(){
-        
+        loadStyle(this, MulishFontCss)
+            .then(() => {
+                console.log('External Css Loaded');
+            })
+            .catch(error => {
+                console.log('Error occuring during loading external css', error);
+            });
         // Load existing flow data if in edit mode
         
         if (this.isEditMode && this.selectedFlowId) {

@@ -1,6 +1,6 @@
 :host {
-    --fsn-primary: #3AB0CD;
-    --fsn-primary-hover: rgb(47 151 176);
+    --fsn-primary: #0176D3;
+    --fsn-primary-hover: #0157a0;
     --fsn-primary-light: rgba(58, 176, 205, 0.1);
     --fsn-text-dark: #333;
     --fsn-text-white: #ffffff;
@@ -19,6 +19,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    --webkit-scrollbar-width: 6px;
+    scrollbar-color: var(--color-primary) var(--color-scrollbar);
 }
 
 .screens-header {

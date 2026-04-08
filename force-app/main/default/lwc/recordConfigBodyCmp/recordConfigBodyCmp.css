@@ -122,38 +122,9 @@
 }
 
 .tableContainer {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
     border-radius: 8px;
-    position: relative;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    background: white;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-}
-
-/* Table Overrides */
-.tableContainer .slds-table th {
-    background: #0176D3;
-    color: white;
-    font-size: 14px;
-    height: 45px;
-    padding: 0;
-}
-
-.tableContainer tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.tableContainer tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-}
-
-.tableContainer th {
-    position: sticky;
-    top: 0;
-    z-index: 97;
+    height: 388px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;;
 }
 
 /* Drag Styling */

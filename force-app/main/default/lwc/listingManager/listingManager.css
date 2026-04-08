@@ -378,62 +378,8 @@
     width: 100%;
 }
 
-/* ===== TABLE ===== */
-.table-content {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #0170d27d transparent;
-    /* height: 90%;
-    border-radius: 10px; */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
-    /* margin: 10px; */
-}
-
-.table-content .header-checkbox-div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.table-content .list-view-checkbox {
-    align-items: center;
-    display: flex;
-    justify-content: center;
-}
-
-.table-content .slds-table_resizable-cols thead th,
-.slds-table--resizable-cols thead th {
-    padding: 0;
-    background: #0376D3;
-    color: white;
-    font-size: 14px;
-    height: 45px;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-
-.table-content .colume2 {
-    width: 9rem;
-}
-
 .table-content .offer-col {
     width: 5rem;
-}
-
-.table-content tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
-
-.slds-table:not(.slds-no-row-hover) tbody tr:hover>td {
-    background-color: #ebf3f6 !important;
-}
-
-.slds-table:not(.slds-no-row-hover) tbody tr:hover>th {
-    background-color: #ebf3f6 !important;
-    transition: 0.2s;
 }
 
 /* ===== NO RESULT ===== */

@@ -378,10 +378,6 @@ span {
     align-items: center;
 }
 
-.table-content .colume2 {
-    width: 9rem;
-}
-
 .noresult {
     flex: 1;
     min-height: 0;

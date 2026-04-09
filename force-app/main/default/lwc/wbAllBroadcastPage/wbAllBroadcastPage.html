@@ -426,13 +426,14 @@
                                                         class="contact-search">
                                                     </lightning-input>
 
-                                                    <div class="main_content_cls">
+                                                    <div class="main_content_cls contact-table">
                                                         <div class="table-content">
                                                             <table class="slds-table">
                                                                 <thead>
                                                                     <tr class="table_tr_cls">
                                                                         <th data-id="Name" aria-sort="none"
                                                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            onclick={sortPopupClick}
                                                                             scope="col">
                                                                             <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
                                                                                 role="button" tabindex="0">
@@ -448,6 +449,7 @@
                                                                         </th>
                                                                         <th data-id="Phone" aria-sort="none"
                                                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            onclick={sortPopupClick}
                                                                             scope="col">
                                                                             <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
                                                                                 role="button" tabindex="0">
@@ -461,8 +463,9 @@
                                                                                 </span>
                                                                             </div>
                                                                         </th>
-                                                                        <th data-id="Group" aria-sort="none"
+                                                                        <th data-id="GroupName" aria-sort="none"
                                                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            onclick={sortPopupClick}
                                                                             scope="col">
                                                                             <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
                                                                                 role="button" tabindex="0">

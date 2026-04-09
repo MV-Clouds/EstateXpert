@@ -245,6 +245,8 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
             }
     
             this.filteredRecords = filtered;
+            // Reset to first page whenever filters change so pagination recalculates correctly
+            this.currentPage = 1;
             this.sortData();
             this.isLoading = false;
             this.updateShownData();

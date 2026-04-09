@@ -140,7 +140,7 @@
                                             <td data-label="Actions">
                                                 <div class="action-btn">
                                                     <template if:false={record.isDeprecated}>
-                                                        <button class="action-div" data-id={record.Id}
+                                                        <button class="preview-icon-css" data-id={record.Id}
                                                             onclick={previewTemplate}>
                                                             <svg width="15" height="15" fill="#000000"
                                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
@@ -155,7 +155,7 @@
                                                         </button>
                                                     </template>
                                                     <template if:true={record.isEditable}>
-                                                        <button class="action-div" data-id={record.Id} data-name={record.MVEX__Flow_Name__c}
+                                                        <button class="edit-icon-css" data-id={record.Id} data-name={record.MVEX__Flow_Name__c}
                                                             data-status={record.MVEX__Status__c} onclick={editFlow}>
                                                             <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
@@ -167,7 +167,7 @@
                                                         </button>
                                                     </template>
                                                     <template if:true={record.isPublished}>
-                                                        <button class="delete-div" data-id={record.Id}
+                                                        <button class="delete-icon-css" data-id={record.Id}
                                                             data-status={record.MVEX__Status__c} onclick={deprecateFlow}>
                                                             <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
@@ -179,7 +179,7 @@
                                                         </button>
                                                     </template>
                                                     <template if:true={record.isDraft}>
-                                                        <button class="delete-div" data-id={record.Id}
+                                                        <button class="delete-icon-css" data-id={record.Id}
                                                             data-status={record.MVEX__Status__c} onclick={deleteFlow}>
                                                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
@@ -257,7 +257,7 @@
                                     <c-wb-flow-preview jsonstringdata={selectedFlowJson} flowname={selectedFlowName} selectedtheme="light"></c-wb-flow-preview>
                                 </div>
                                 <div class="footer">
-                                    <button class="cancel_btn_css" onclick={closePopup}>
+                                    <button class="white-btn-css" onclick={closePopup}>
                                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -267,7 +267,7 @@
                                         Close
                                     </button>
                                     <template if:true={isFlowDraft}>
-                                        <button class="publish-btn" onclick={publishFlow}>Publish Flow</button>
+                                        <button class="blue-btn-css" onclick={publishFlow}>Publish Flow</button>
                                     </template>
                                 </div>
                             </div>

@@ -72,7 +72,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     }
 
     get showPagination(){
-        return this.paginatedData.length > 0 && this.totalPages > 1;
+        return this.totalPages > 1;
     }
     
     get pageNumbers() {

@@ -110,18 +110,6 @@
     border-radius: 14px;
 }
 
-.broadcast-name {
-    min-width: 5rem;
-}
-
-.status_cls {
-    min-width: 7rem;
-}
-
-.progress_cls {
-    min-width: 8rem;
-}
-
 .clickable_css {
     color: #0176D3;
     cursor: pointer;

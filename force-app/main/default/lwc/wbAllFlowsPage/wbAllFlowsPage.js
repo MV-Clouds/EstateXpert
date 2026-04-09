@@ -182,6 +182,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                             isDraft: record.MVEX__Status__c === 'Draft',
                             isPublished: record.MVEX__Status__c === 'Published',
                             isDeprecated: record.MVEX__Status__c === 'Deprecated',
+                            statusClass: this.getStatusClass(record.MVEX__Status__c),
                             LastModifiedDate: this.formatDate(record.LastModifiedDate)
                         };
                     });
@@ -193,6 +194,21 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                 })
         } catch (error) {
             console.error('Error in fetchWhatsAppFlows : ' , error);
+        }
+    }
+
+    /**
+    * Method Name: getStatusClass
+    * @description: Returns a CSS class name for the given status value — same pattern as displayCampaigns.
+    * Date: 08/04/2026
+    * Created By: Vyom Soni
+    */
+    getStatusClass(status) {
+        switch (status) {
+            case 'Draft':       return 'status-draft-class';
+            case 'Published':   return 'status-published-class';
+            case 'Deprecated':  return 'status-deprecated-class';
+            default:            return 'status-default-class';
         }
     }
 

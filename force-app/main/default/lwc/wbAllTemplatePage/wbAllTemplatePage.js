@@ -189,6 +189,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                             isButtonDisabled,
                             cssClass: isButtonDisabled ? 'action edit disabled' : 'action edit',
                             editRestrictionMessage: editRestriction.message,
+                            statusClass: this.getStatusClass(record.MVEX__Status__c),
                         };
                     });
                     this.filteredRecords = [...this.allRecords];
@@ -332,6 +333,22 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         }
         
         return result;
+    }
+
+    /**
+    * Method Name: getStatusClass
+    * @description: Returns a CSS class name for the given template status — same pattern as displayCampaigns.
+    * Date: 08/04/2026
+    * Created By: Vyom Soni
+    */
+    getStatusClass(status) {
+        switch (status) {
+            case 'Active-Quality Pending':        return 'status-approved-class';
+            case 'In-Review':       return 'status-inreview-class';
+            case 'Rejected':        return 'status-rejected-class';
+            case 'Disabled':        return 'status-disabled-class';
+            default:                return 'status-approved-class';
+        }
     }
 
     filterRecords() {

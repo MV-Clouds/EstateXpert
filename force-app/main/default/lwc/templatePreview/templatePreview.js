@@ -72,6 +72,17 @@ export default class TemplatePreview extends LightningElement {
 
     // ─── Getters ──────────────────────────────────────────────────────────────
 
+    @api
+    refreshComponent(templateId) {
+        try {
+            this.templateId = templateId;
+            this.inflightPreviewData = null; // reset Mode B
+            this.fetchInitialData(); // call Apex again
+        } catch (e) {
+            console.error('Error in refreshComponent:::', e);
+        }
+    }
+
     get hasStandardButtons() {
         return this.buttonList?.length > 0;
     }

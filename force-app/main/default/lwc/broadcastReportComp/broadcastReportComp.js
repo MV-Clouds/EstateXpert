@@ -20,12 +20,22 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
     @track expandedRows = {};
     @track groupMembersData = {};
 
+    // Sorting
+    @track sortField = 'Name';
+    @track sortOrder = 'asc';
+
     connectedCallback() {
         loadStyle(this, MulishFontCss);
         console.log('broadcastReportComp recordId', this.recordId);
         console.log('broadcastReportComp record', this.record);
         this.loadBroadcastGroups();
         this.loadBroadcastGroupsWithBroadcastId();
+    }
+
+    renderedCallback() {
+        if (this.paginatedData && this.paginatedData.length > 0) {
+            this.updateSortIcons();
+        }
     }
 
     get showNoRecordsMessage() {
@@ -44,18 +54,18 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
         return this.record?.MVEX__Recipient_Count__c || '0';
     }
 
-    get templateName(){
+    get templateName() {
         return this.record?.MVEX__Template_Name__c || '-';
-    }    
+    }
 
     get totalItems() {
         return this.filteredData.length;
     }
-    
+
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
     }
-    
+
     get pageNumbers() {
         try {
             const totalPages = this.totalPages;
@@ -110,11 +120,11 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
             return null;
         }
     }
-    
+
     get isFirstPage() {
         return this.currentPage === 1;
     }
-    
+
     get isLastPage() {
         return this.currentPage === Math.ceil(this.totalItems / this.pageSize);
     }
@@ -122,17 +132,17 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
     loadBroadcastGroups() {
         this.isLoading = true;
         console.log('broadcastReportComp recordId 2', this.recordId);
-        
-        getBroadcastGroupsWithStats({broadcastId: this.recordId})
+
+        getBroadcastGroupsWithStats({ broadcastId: this.recordId })
             .then(result => {
                 this.data = result.map((group, index) => ({
                     ...group,
                     index: index + 1
                 }));
                 console.log('result', result);
-                
+
                 this.filteredData = [...this.data];
-                
+
                 // Load all group members data upfront
                 this.loadAllGroupMembers();
             })
@@ -140,14 +150,14 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
                 this.showToast('Error', 'Failed to load broadcast groups', 'error');
                 this.isLoading = false;
             });
-    }   
+    }
 
-     loadBroadcastGroupsWithBroadcastId() {
-        getBroadcastRecord({broadcastId: this.recordId})
+    loadBroadcastGroupsWithBroadcastId() {
+        getBroadcastRecord({ broadcastId: this.recordId })
             .then(result => {
-                console.log('result--> ',result);
+                console.log('result--> ', result);
                 this.record = result;
-                console.log('this.data in report--> ',this.record);               
+                console.log('this.data in report--> ', this.record);
 
             })
             .catch(() => {
@@ -175,38 +185,38 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
     }
 
     handlePrevious() {
-        try{
+        try {
             if (this.currentPage > 1) {
                 this.currentPage--;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             this.showToast('Error', 'Error navigating to previous page', 'error');
         }
     }
-    
+
     handleNext() {
-        try{
+        try {
             if (this.currentPage < this.totalPages) {
                 this.currentPage++;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             this.showToast('Error', 'Error navigating pages', 'error');
         }
     }
 
     handlePageChange(event) {
-        try{
+        try {
             const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
             if (selectedPage !== this.currentPage) {
                 this.currentPage = selectedPage;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             this.showToast('Error', 'Error navigating pages', 'error');
         }
-    } 
+    }
 
     handleBack() {
         this[NavigationMixin.Navigate]({
@@ -222,18 +232,18 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
         getAllBroadcastMembers({ broadcastId: this.recordId })
             .then(result => {
                 console.log('getAllBroadcastMembers result:', result);
-                
+
                 // Result is a Map<String, List<BroadcastMemberWrapper>>
                 // Process the map to format member data
                 const membersData = {};
-                
+
                 // Check if result is valid
                 if (result) {
                     for (const groupId in result) {
                         if (result.hasOwnProperty(groupId)) {
                             const membersList = result[groupId];
                             console.log(`Processing group ${groupId} with ${membersList.length} members`);
-                            
+
                             const members = membersList.map((item, index) => ({
                                 id: item.record.Id,
                                 name: item.record.Name || 'Not Specified',
@@ -244,15 +254,15 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
                                 repliedClass: item.hasReplied ? 'replied-yes' : 'replied-no',
                                 index: index + 1
                             }));
-                            
+
                             membersData[groupId] = members;
                         }
                     }
                 }
-                
+
                 this.groupMembersData = membersData;
                 console.log('Updated groupMembersData:', this.groupMembersData);
-                
+
                 // Update display to include the loaded member data
                 this.updateShownData();
             })
@@ -265,14 +275,14 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
             });
     }
 
-    handleNameClick(event){
+    handleNameClick(event) {
         // Use currentTarget to get the element with data attributes, not the clicked child element
-        const groupId = event.currentTarget.dataset.recordId;  
-        
+        const groupId = event.currentTarget.dataset.recordId;
+
         console.log('Clicked groupId:', groupId);
         console.log('Current expandedRows:', this.expandedRows);
         console.log('Available members for this group:', this.groupMembersData[groupId]);
-        
+
         // Just toggle accordion state - data is already loaded
         if (this.expandedRows[groupId]) {
             // Collapse
@@ -292,7 +302,99 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
             'Failed': 'Failed'
         };
         return statusMap[status] || '';
-    } 
+    }
+
+    /**
+    * Method Name : sortClick
+    * @description : Applies sorting on the clicked column header — same pattern as wbAllTemplatePage.
+    * Created Date: 09/04/2026
+    * Created By: Vyom Soni
+    */
+    sortClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+            this.sortData();
+            this.updateSortIcons();
+        } catch (error) {
+            console.log('Error in sortClick --> ' + error);
+        }
+    }
+
+    /**
+    * Method Name : sortData
+    * @description : Sorts filteredData by the current sortField/sortOrder and refreshes pagination.
+    * Created Date: 09/04/2026
+    * Created By: Vyom Soni
+    */
+    sortData() {
+        try {
+            this.filteredData = [...this.filteredData].sort((a, b) => {
+                let aValue = a[this.sortField];
+                let bValue = b[this.sortField];
+
+                if (aValue === undefined || aValue === null) aValue = '';
+                if (bValue === undefined || bValue === null) bValue = '';
+
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                let compare = 0;
+                if (aValue > bValue) compare = 1;
+                else if (aValue < bValue) compare = -1;
+
+                return this.sortOrder === 'asc' ? compare : -compare;
+            });
+
+            // Re-index and refresh pagination
+            this.filteredData = this.filteredData.map((item, index) => ({
+                ...item,
+                index: index + 1
+            }));
+            this.currentPage = 1;
+            this.updateShownData();
+        } catch (error) {
+            console.log('Error in sortData --> ', error.stack);
+        }
+    }
+
+    /**
+    * Method Name : updateSortIcons
+    * @description : Updates sort arrow icons on active column header — same pattern as wbAllTemplatePage.
+    * Created Date: 09/04/2026
+    * Created By: Vyom Soni
+    */
+    updateSortIcons() {
+        try {
+            const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
+            if (currentHeader) {
+                currentHeader.classList.add('active-sort');
+                const icon = currentHeader.querySelector('svg');
+                if (icon) {
+                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                }
+            }
+        } catch (error) {
+            console.log('Error in updateSortIcons --> ' + error);
+        }
+    }
 
     showToast(title, message, variant) {
         const event = new ShowToastEvent({

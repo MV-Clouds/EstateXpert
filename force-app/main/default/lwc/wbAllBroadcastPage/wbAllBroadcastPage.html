@@ -3,13 +3,22 @@
         <template if:true={hasBusinessAccountConfigured}>
             <template if:true={isTemplateVisible}>
                 <div class="wrapper">
-                    <!-- <h1 class="slds-text-align_center heading">Recent Broadcasts</h1> -->
                     <div class="main_header_cls">
                         <div class="sub_main_header_css">
                             <div slot="title" class="header_block_css">
                                 Recent Broadcasts
                             </div>
                             <div class="header">
+                                <div class="search-input header-search-bar-css">
+                                    <lightning-input type="search" onchange={handleSearch} placeholder="Search by Name..."
+                                        class="input-broadcast" variant="label-hidden"></lightning-input>
+                                </div>
+                                <div class="icon-button-container">
+                                    <div class="refresh-icon-container" onclick={handleRefresh}>
+                                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                            size="x-small"></lightning-icon>
+                                    </div>
+                                </div>
                                 <button class="blue-btn-css" onclick={newBroadcast}>
                                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
@@ -22,27 +31,14 @@
                     </div>
 
                     <div class="main_content_cls">
-                        <div class="slds-m-around_medium navbar">
-                            <div class="search-input">
-                                <lightning-input type="search" onchange={handleSearch} placeholder="Search by Name..."
-                                    class="input-broadcast" variant="label-hidden"></lightning-input>
-                            </div>
-                            <div class="icon-button-container">
-                                <div class="refresh-icon-container" onclick={handleRefresh}>
-                                    <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
-                                        size="x-small"></lightning-icon>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Custom Table -->
                         <template if:true={paginatedData.length}>
                             <div class="table-content">
                                 <table class="slds-table">
                                     <thead>
                                         <tr class="table_tr_cls">
-                                            <th scope="col" class="sno">
-                                                <div>No.</div>
+                                            <th scope="col" >
+                                                <div class="sno">No.</div>
                                             </th>
                                             <th data-id="Name" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
@@ -196,7 +192,7 @@
                                                 <td data-label="S.No.">
                                                     <div>{row.index}</div>
                                                 </td>
-                                                <td data-label="Name" class="truncate_css">
+                                                <td data-label="Name" class="slds-truncate">
                                                     <div><a href="javascript:void(0);" class="clickable_css"
                                                             data-record-id={row.Id}
                                                             onclick={handleNameClick}>{row.Name}</a></div>
@@ -248,37 +244,41 @@
                             </div>
                         </template>
 
-                        <template if:true={paginatedData.length}>
-                            <div class="pagination-container">
-                                <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                        fill="#fff">
-                                        <path
-                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                    </svg>
-                                    Previous
-                                </button>
-
-                                <template for:each={pageNumbers} for:item="page">
-                                    <template if:false={page.isEllipsis}>
-                                        <button key={page.number} data-id={page.number} class={page.className}
-                                            onclick={handlePageChange}>
-                                            {page.number}
+                        <template if:true={showPagination}>
+                            <div class="paginationDiv">
+                                <div class="btnCover">
+                                    <div class="pagination-container">
+                                        <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                                fill="#fff">
+                                                <path
+                                                    d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                            </svg>
+                                            Previous
                                         </button>
-                                    </template>
-                                    <template if:true={page.isEllipsis}>
-                                        <span key={page.number} class="pagination-ellipsis">...</span>
-                                    </template>
-                                </template>
 
-                                <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                                    Next
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                        fill="#fff">
-                                        <path
-                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                    </svg>
-                                </button>
+                                        <template for:each={pageNumbers} for:item="page">
+                                            <template if:false={page.isEllipsis}>
+                                                <button key={page.number} data-id={page.number} class={page.className}
+                                                    onclick={handlePageChange}>
+                                                    {page.number}
+                                                </button>
+                                            </template>
+                                            <template if:true={page.isEllipsis}>
+                                                <span key={page.number} class="pagination-ellipsis">...</span>
+                                            </template>
+                                        </template>
+
+                                        <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                            Next
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                                fill="#fff">
+                                                <path
+                                                    d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -426,14 +426,59 @@
                                                         class="contact-search">
                                                     </lightning-input>
 
-                                                    <div class="selected-contacts-section">
-                                                        <div class="contacts-table-wrapper">
-                                                            <table class="contacts-table">
+                                                    <div class="main_content_cls contact-table">
+                                                        <div class="table-content">
+                                                            <table class="slds-table">
                                                                 <thead>
-                                                                    <tr>
-                                                                        <th>Name</th>
-                                                                        <th>Phone</th>
-                                                                        <th>Group</th>
+                                                                    <tr class="table_tr_cls">
+                                                                        <th data-id="Name" aria-sort="none"
+                                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            onclick={sortPopupClick}
+                                                                            scope="col">
+                                                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
+                                                                                role="button" tabindex="0">
+                                                                                <span class="slds-truncate" title="Name">Name</span>
+                                                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                                    <svg data-index="Name" class="listing-manager-icon"
+                                                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path
+                                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                                    </svg>
+                                                                                </span>
+                                                                            </div>
+                                                                        </th>
+                                                                        <th data-id="Phone" aria-sort="none"
+                                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            onclick={sortPopupClick}
+                                                                            scope="col">
+                                                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
+                                                                                role="button" tabindex="0">
+                                                                                <span class="slds-truncate" title="Phone">Phone</span>
+                                                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                                    <svg data-index="Phone" class="listing-manager-icon"
+                                                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path
+                                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                                    </svg>
+                                                                                </span>
+                                                                            </div>
+                                                                        </th>
+                                                                        <th data-id="GroupName" aria-sort="none"
+                                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            onclick={sortPopupClick}
+                                                                            scope="col">
+                                                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
+                                                                                role="button" tabindex="0">
+                                                                                <span class="slds-truncate" title="Group">Group</span>
+                                                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                                    <svg data-index="Group" class="listing-manager-icon"
+                                                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path
+                                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                                    </svg>
+                                                                                </span>
+                                                                            </div>
+                                                                        </th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -441,9 +486,9 @@
                                                                         <template for:each={filteredGroupMembers}
                                                                             for:item="member" for:index="index">
                                                                             <tr key={member.Id}>
-                                                                                <td>{member.Name}</td>
-                                                                                <td>{member.Phone}</td>
-                                                                                <td>{member.GroupName}</td>
+                                                                                <td class="slds-truncate truncate_css">{member.Name}</td>
+                                                                                <td class="slds-truncate truncate_css">{member.Phone}</td>
+                                                                                <td class="slds-truncate truncate_css">{member.GroupName}</td>
                                                                             </tr>
                                                                         </template>
                                                                     </template>

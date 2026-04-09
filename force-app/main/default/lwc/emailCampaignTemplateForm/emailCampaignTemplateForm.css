@@ -344,154 +344,10 @@
     align-items: inherit;
 }
 
-.table-container {
-    border-radius: 8px;
-    margin: 16px 0px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-}
-
-.table-container::-webkit-scrollbar {
-    height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #0176D3;
-    border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-    background: #015a9e;
-}
-
-.table-container th {
-    padding: 1rem;
-    background: #0176D3;
-    color: white !important;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-
-.table-container .slds-table {
-    border: none;
-    background: white;
-    min-width: 1200px;
-}
-
-.table-container .slds-table thead tr:first-child th:first-child {
-    border-top-left-radius: 8px;
-}
-
-.table-container .slds-table thead tr:first-child th:last-child {
-    border-top-right-radius: 8px;
-}
-
-.table-container .slds-table tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 8px;
-}
-
-.table-container .slds-table tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 8px;
-}
-
-.table-container .slds-table tr:nth-child(even) {
-    background-color: aliceblue;
-}
-
-.table-container .slds-table td {
-    border: none;
-    padding: 0.7rem;
-}
-
-.table-container .slds-table tbody tr:hover td {
-    background-color: #ebf3f6 !important;
-    border: none;
-}
-
 .slds-cell-fixed {
     background: #0176D3 !important;
     color: white !important;
     border-bottom: 2px solid #005fb2;
-}
-
-.action-btn {
-    display: flex;
-    justify-content: start;
-    gap: 5%;
-}
-
-.delete-div,
-.action-div,
-.preview-div {
-    padding: 6px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.delete-div:hover {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #ef4444;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-}
-
-.delete-div:hover svg {
-    fill: #dc2626;
-}
-
-.delete-div:hover svg path {
-    fill: #dc2626;
-    stroke: #dc2626;
-}
-
-.action-div:hover {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    border-color: #0176D3;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
-}
-
-.action-div:hover svg {
-    fill: #0176d3;
-}
-
-.action-div:hover svg path {
-    fill: #0176d3;
-    stroke: #0176d3;
-}
-
-.preview-div:hover {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    border-color: #0176D3;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
-}
-
-.preview-div:hover svg {
-    fill: #0176d3;
-}
-
-.preview-div:hover svg path {
-    fill: #0176d3;
-}
-
-.action-div:disabled,
-.delete-div:disabled,
-.preview-div:disabled {
-    opacity: 0.5;
-    pointer-events: none;
-    cursor: not-allowed;
 }
 
 .input-field fieldset .slds-form-element__legend {
@@ -882,4 +738,10 @@
     font-size: 0.875rem;
     color: var(--primary-color, #0176D3);
     font-weight: 500;
+}
+
+.table-content {
+    max-height: 300px;
+    border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }

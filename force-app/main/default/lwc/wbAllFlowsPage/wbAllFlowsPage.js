@@ -29,7 +29,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     @track cloneFlowName = '';
     @track selectedFlowId = '';
     @track currentPage = 1;
-    @track pageSize = 15;
+    @track pageSize = 20;
     @track visiblePages = 5;
     @track paginatedData = [];
 
@@ -52,6 +52,10 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    get showPagination(){
+        return this.totalPages > 1;
     }
     
     get pageNumbers() {

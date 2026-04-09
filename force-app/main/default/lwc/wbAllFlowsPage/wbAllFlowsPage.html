@@ -22,6 +22,16 @@
                             </div>
                         </div>
                         <div class="header">
+                            <div class="search-input header-search-bar-css">
+                                <lightning-input type="search" onchange={handleSearchInputChange}
+                                    placeholder="Search Name..." class="input-campaign"
+                                    variant="label-hidden"></lightning-input>
+                            </div>
+                            <div class="status-select header-combobox">
+                                <lightning-combobox name="status" value={statusValues} options={statusOptions}
+                                    onchange={handleStatusChange} class="select-campaign" variant="label-hidden">
+                                </lightning-combobox>
+                            </div>
                             <button class="blue-btn-css" onclick={showCreateFlow}>
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -35,19 +45,6 @@
     
     
                 <div class="main_content_cls">
-                    <div class="slds-m-around_medium navbar">
-                        <div class="search-input">
-                            <lightning-input type="search" onchange={handleSearchInputChange}
-                                placeholder="Search Name..." class="input-campaign"
-                                variant="label-hidden"></lightning-input>
-                        </div>
-                        <div class="status-select">
-                            <lightning-combobox name="status" value={statusValues} options={statusOptions}
-                                onchange={handleStatusChange} class="select-campaign" variant="label-hidden">
-                            </lightning-combobox>
-                        </div>
-                    </div>
-    
                     <template if:true={paginatedData.length}>
                         <div class="table-content">
                             <table class="slds-table">
@@ -213,7 +210,7 @@
                             </div>
                         </div>
                     </template>
-                    <template if:true={paginatedData.length}>
+                    <template if:true={showPagination}>
                         <div class="paginationDiv">
                             <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"

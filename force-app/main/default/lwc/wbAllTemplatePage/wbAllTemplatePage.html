@@ -159,10 +159,10 @@
                                             <div>{record.LanguageLabel}</div>
                                         </td>
                                         <td data-label="Status" class="truncate_css">
-                                            <div class={record.MVEX__Status__c}>{record.MVEX__Status__c}</div>
+                                            <div class={record.statusClass}>{record.MVEX__Status__c}</div>
                                         </td>
                                         <td data-label="Last Modified Date" class="truncate_css">
-                                            <div class={record.LastModifiedDate}>{record.LastModifiedDate}</div>
+                                            <div>{record.LastModifiedDate}</div>
                                         </td>
                                         <td data-label="Actions">
                                             <div class="action-btn">

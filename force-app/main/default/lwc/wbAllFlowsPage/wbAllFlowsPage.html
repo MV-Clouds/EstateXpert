@@ -22,7 +22,7 @@
                             </div>
                         </div>
                         <div class="header">
-                            <button class="btn" onclick={showCreateFlow}>
+                            <button class="blue-btn-css" onclick={showCreateFlow}>
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
@@ -135,7 +135,7 @@
                                                 <div>{record.MVEX__Flow_Id__c}</div>
                                             </td>
                                             <td data-label="Status" class="truncate_css">
-                                                <div class={record.MVEX__Status__c}>{record.MVEX__Status__c}</div>
+                                                <div class={record.statusClass}>{record.MVEX__Status__c}</div>
                                             </td>
                                             <td data-label="Last Updated">
                                                 <div>{record.LastModifiedDate}</div>
@@ -214,7 +214,7 @@
                         </div>
                     </template>
                     <template if:true={paginatedData.length}>
-                        <div class="pagination-container">
+                        <div class="paginationDiv">
                             <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
                                     fill="#fff">

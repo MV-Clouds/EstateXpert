@@ -24,22 +24,16 @@
                         </div>
                     </div>
                     <div class="header">
+                        <div class="slds-col header-search-bar-css">
+                            <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" type="search" placeholder="Search Name" onchange={handleChange}></lightning-input>
+                        </div>
                         <button class="blue-btn-css" onclick={showCreateTemplate}>
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
                             </svg>
                             Create Template
                         </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="main_content_cls">
-                <div class="filterdiv">
-                    <div class="slds-col">
-                        <lightning-input variant="label-hidden" class="filter search-div" name="searchInput" type="search" placeholder="Search Name" onchange={handleChange}></lightning-input>
-                    </div>
-                    <div class="filter-icon-container" onclick={toggleFilterVisibility}>
+                         <div class="filter-icon-container" onclick={toggleFilterVisibility}>
                         <template if:false={showFilters}>
                             <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Show filters">
                                 <path d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z" fill="currentColor" />
@@ -78,8 +72,11 @@
                             </select>
                         </div>
                     </div>
+                    </div>
                 </div>
+            </div>
 
+            <div class="main_content_cls">
                 <template if:true={filteredRecords.length}>
                     <div class="table-content">
                         <table class="slds-table">
@@ -144,7 +141,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template for:each={filteredRecords} for:item="record" for:index="index">
+                                <template for:each={visibleRecords} for:item="record" for:index="index">
                                     <tr key={record.id}>
                                         <td data-label="S.No.">
                                             <div>{record.serialNumber}</div>
@@ -158,7 +155,7 @@
                                         <td data-label="Language" class="truncate_css">
                                             <div>{record.LanguageLabel}</div>
                                         </td>
-                                        <td data-label="Status" class="truncate_css">
+                                        <td data-label="Status" class="truncate_css status-col">
                                             <div class={record.statusClass}>{record.MVEX__Status__c}</div>
                                         </td>
                                         <td data-label="Last Modified Date" class="truncate_css">
@@ -166,18 +163,18 @@
                                         </td>
                                         <td data-label="Actions">
                                             <div class="action-btn">
-                                                <button class="action-div" data-id={record.id} onclick={previewTemplate}>
+                                                <button class="preview-icon-css" data-id={record.id} onclick={previewTemplate}>
                                                     <svg width="15" height="15" fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" enable-background="new 0 0 52 52" xml:space="preserve">
                                                         <path d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z"></path>
                                                         <path d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z"></path>
                                                     </svg>
                                                 </button>
-                                                <button class="action-div" data-id={record.id} onclick={editTemplate} disabled={record.isButtonDisabled} title={record.editRestrictionMessage}>
+                                                <button class="edit-icon-css" data-id={record.id} onclick={editTemplate} disabled={record.isButtonDisabled} title={record.editRestrictionMessage}>
                                                     <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
                                                     </svg>
                                                 </button>
-                                                <button class="delete-div" data-id={record.id} onclick={deleteTemplate}>
+                                                <button class="delete-icon-css" data-id={record.id} onclick={deleteTemplate}>
                                                     <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
                                                     </svg>
@@ -189,6 +186,38 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination -->
+                    <template if:true={showPagination}>
+                        <div class="paginationDiv">
+                            <div class="btnCover">
+                                <div class="pagination-container">
+                                    <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                            <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z"/>
+                                        </svg>
+                                        Previous
+                                    </button>
+                                    <template for:each={pageNumbers} for:item="page">
+                                        <template if:false={page.isEllipsis}>
+                                            <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
+                                                {page.number}
+                                            </button>
+                                        </template>
+                                        <template if:true={page.isEllipsis}>
+                                            <span key={page.number} class="pagination-ellipsis">...</span>
+                                        </template>
+                                    </template>
+                                    <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                        Next
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                            <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                 </template>
                 <template if:false={filteredRecords.length}>
                     <div class="no-records-message">

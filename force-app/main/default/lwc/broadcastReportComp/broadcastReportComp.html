@@ -35,23 +35,65 @@
                                 <th scope="col" class="sno">
                                     <div>No.</div>
                                 </th>
-                                <th scope="col" class="groupname">
-                                    <div>Group Name</div>
+                                <th data-id="Name" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action-mode sorting_header groupname" scope="col">
+                                    <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Group Name">Group Name</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="member-count">
-                                    <div>Member Count</div>
+                                <th data-id="MVEX__Count_of_Members__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header member-count" scope="col">
+                                    <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Member Count">Member Count</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="sent">
-                                    <div>Sent</div>
+                                <th data-id="MVEX__Total_Sent__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header sent" scope="col">
+                                    <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Sent">Sent</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="delivered">
-                                    <div>Delivered</div>
+                                <th data-id="MVEX__Total_Delivered__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header delivered" scope="col">
+                                    <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Delivered">Delivered</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="read">
-                                    <div>Read</div>
+                                <th data-id="MVEX__Total_Read__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header read" scope="col">
+                                    <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Read">Read</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="failed">
-                                    <div>Failed</div>
+                                <th data-id="MVEX__Total_Failed__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header failed" scope="col">
+                                    <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                        <span class="slds-truncate" title="Failed">Failed</span>
+                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </th>
                             </tr>
                         </thead>
@@ -101,28 +143,30 @@
                                     <tr key={row.accordionKey} class="accordion-row">
                                         <td colspan="8">
                                             <div class="accordion-content">
-                                                <table class="nested-table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="nested-sno">No.</th>
-                                                            <th class="nested-member">Group Member</th>
-                                                            <th class="nested-phone">Phone</th>
-                                                            <th class="nested-status">Message Status</th>
-                                                            <th class="nested-replied">Replied</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <template for:each={row.members} for:item="member">
-                                                            <tr key={member.id}>
-                                                                <td>{member.index}</td>
-                                                                <td>{member.name}</td>
-                                                                <td>{member.phone}</td>
-                                                                <td><p class={member.status}>{member.status}</p></td>
-                                                                <td><p class={member.repliedClass}>{member.repliedText}</p></td>
+                                                <div class="table-content">
+                                                    <table class="slds-table">
+                                                        <thead>
+                                                            <tr class="table_tr_cls">
+                                                                <th scope="col" class="nested-sno">No.</th>
+                                                                <th scope="col" class="nested-member">Group Member</th>
+                                                                <th scope="col" class="nested-phone">Phone</th>
+                                                                <th scope="col" class="nested-status">Message Status</th>
+                                                                <th scope="col" class="nested-replied">Replied</th>
                                                             </tr>
-                                                        </template>
-                                                    </tbody>
-                                                </table>
+                                                        </thead>
+                                                        <tbody>
+                                                            <template for:each={row.members} for:item="member">
+                                                                <tr key={member.id}>
+                                                                    <td class="truncate_css">{member.index}</td>
+                                                                    <td class="truncate_css">{member.name}</td>
+                                                                    <td class="truncate_css">{member.phone}</td>
+                                                                    <td class="truncate_css"><p class={member.status}>{member.status}</p></td>
+                                                                    <td class="truncate_css"><p class={member.repliedClass}>{member.repliedText}</p></td>
+                                                                </tr>
+                                                            </template>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>

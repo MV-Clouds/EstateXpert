@@ -46,6 +46,9 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track selectedRecordId = '';
     @track sortField = '';
     @track sortOrder = 'asc';
+    popupSortField = 'Name';
+    popupSortOrder = 'asc';
+
     @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
 
@@ -68,6 +71,10 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         return Math.ceil(this.totalItems / this.pageSize);
     }
 
+    get showPagination(){
+        return this.paginatedData.length > 0 && this.totalPages > 0;
+    }
+    
     get pageNumbers() {
         try {
             const totalPages = this.totalPages;
@@ -822,6 +829,80 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
         }
     }
 
+    sortPopupClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (!fieldName) return;
+            if (this.popupSortField === fieldName) {
+                this.popupSortOrder = this.popupSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.popupSortField = fieldName;
+                this.popupSortOrder = 'asc';
+            }
+            this.sortPopupData();
+            this.updatePopupSortIcons();
+        } catch (error) {
+            this.showToast('Error', 'Error in popup sorting: ' + error.message, 'error');
+        }
+    }
+
+    sortPopupData() {
+        try {
+            if (!this.filteredGroupMembers || this.filteredGroupMembers.length === 0) {
+                return;
+            }
+            this.filteredGroupMembers.sort((a, b) => {
+                let aValue = a[this.popupSortField];
+                let bValue = b[this.popupSortField];
+                if (aValue === undefined || aValue === null) aValue = '';
+                if (bValue === undefined || bValue === null) bValue = '';
+                if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+                if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+                if (!isNaN(aValue) && !isNaN(bValue)) {
+                    aValue = Number(aValue);
+                    bValue = Number(bValue);
+                }
+                let compare = 0;
+                if (aValue > bValue) compare = 1;
+                else if (aValue < bValue) compare = -1;
+                return this.popupSortOrder === 'asc' ? compare : -compare;
+            });
+        } catch (error) {
+            this.showToast('Error', 'Error in sortPopupData: ' + error.message, 'error');
+        }
+    }
+
+    updatePopupSortIcons() {
+        try {
+            // Force update after small delay to ensure DOM rendered
+            setTimeout(() => {
+                // Scope to popup table only
+                const popupHeaders = this.template.querySelectorAll('.contact-table .sorting_header');
+                popupHeaders.forEach(header => {
+                    header.classList.remove('active-sort');
+                });
+                const activeHeader = this.template.querySelector(`.contact-table .sorting_header[data-id="${this.popupSortField}"]`);
+                if (activeHeader) {
+                    activeHeader.classList.add('active-sort');
+                    const icon = activeHeader.querySelector('.listing-manager-icon');
+                    if (icon) {
+                        icon.classList.remove('rotate-asc', 'rotate-desc');
+                        if (this.popupSortOrder === 'asc') {
+                            icon.classList.add('rotate-asc');
+                        } else {
+                            icon.classList.add('rotate-desc');
+                        }
+                        icon.style.opacity = '1';
+                        icon.style.visibility = 'visible';
+                        icon.style.display = 'block';
+                    }
+                }
+            }, 100);
+        } catch (error) {
+            errorDebugger('displayInquiry', 'updatePopupSortIcons', error, 'warn', 'Error updating popup sort icons');
+        }
+    }
+
     // Natural sort function for alphanumeric strings
     naturalSort(a, b) {
         const aValue = a.toString().toLowerCase();
@@ -914,7 +995,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
 
-                const icon = currentHeader.querySelector('svg');
+                let icon = currentHeader.querySelector('svg.listing-manager-icon') || currentHeader.querySelector('svg');
                 if (icon) {
                     icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
                 }

@@ -192,7 +192,7 @@
                                                 <td data-label="S.No.">
                                                     <div>{row.index}</div>
                                                 </td>
-                                                <td data-label="Name" class="truncate_css">
+                                                <td data-label="Name" class="slds-truncate">
                                                     <div><a href="javascript:void(0);" class="clickable_css"
                                                             data-record-id={row.Id}
                                                             onclick={handleNameClick}>{row.Name}</a></div>
@@ -426,14 +426,56 @@
                                                         class="contact-search">
                                                     </lightning-input>
 
-                                                    <div class="selected-contacts-section">
-                                                        <div class="contacts-table-wrapper">
-                                                            <table class="contacts-table">
+                                                    <div class="main_content_cls">
+                                                        <div class="table-content">
+                                                            <table class="slds-table">
                                                                 <thead>
-                                                                    <tr>
-                                                                        <th>Name</th>
-                                                                        <th>Phone</th>
-                                                                        <th>Group</th>
+                                                                    <tr class="table_tr_cls">
+                                                                        <th data-id="Name" aria-sort="none"
+                                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            scope="col">
+                                                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
+                                                                                role="button" tabindex="0">
+                                                                                <span class="slds-truncate" title="Name">Name</span>
+                                                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                                    <svg data-index="Name" class="listing-manager-icon"
+                                                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path
+                                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                                    </svg>
+                                                                                </span>
+                                                                            </div>
+                                                                        </th>
+                                                                        <th data-id="Phone" aria-sort="none"
+                                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            scope="col">
+                                                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
+                                                                                role="button" tabindex="0">
+                                                                                <span class="slds-truncate" title="Phone">Phone</span>
+                                                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                                    <svg data-index="Phone" class="listing-manager-icon"
+                                                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path
+                                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                                    </svg>
+                                                                                </span>
+                                                                            </div>
+                                                                        </th>
+                                                                        <th data-id="Group" aria-sort="none"
+                                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                                            scope="col">
+                                                                            <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate broadcast-name"
+                                                                                role="button" tabindex="0">
+                                                                                <span class="slds-truncate" title="Group">Group</span>
+                                                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                                    <svg data-index="Group" class="listing-manager-icon"
+                                                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path
+                                                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                                    </svg>
+                                                                                </span>
+                                                                            </div>
+                                                                        </th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -441,9 +483,9 @@
                                                                         <template for:each={filteredGroupMembers}
                                                                             for:item="member" for:index="index">
                                                                             <tr key={member.Id}>
-                                                                                <td>{member.Name}</td>
-                                                                                <td>{member.Phone}</td>
-                                                                                <td>{member.GroupName}</td>
+                                                                                <td class="slds-truncate truncate_css">{member.Name}</td>
+                                                                                <td class="slds-truncate truncate_css">{member.Phone}</td>
+                                                                                <td class="slds-truncate truncate_css">{member.GroupName}</td>
                                                                             </tr>
                                                                         </template>
                                                                     </template>

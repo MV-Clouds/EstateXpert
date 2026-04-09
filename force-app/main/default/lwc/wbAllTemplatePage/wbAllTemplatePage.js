@@ -46,8 +46,95 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     showFilters = false;
     channelName = '/event/MVEX__Template_Update__e';
 
+    // Pagination properties
+    @track pageSize = 20;
+    @track currentPage = 1;
+    @track visiblePages = 5;
+
     get actionButtonClass(){
         return 'custom-button cus-btns' ;
+    }
+
+    get totalItems() {
+        return this.filteredRecords.length;
+    }
+
+    get totalPages() {
+        return Math.ceil(this.totalItems / this.pageSize) || 0;
+    }
+
+    get showPagination() {
+        return this.totalPages > 1;
+    }
+
+    get isFirstPage() {
+        return this.currentPage === 1;
+    }
+
+    get isLastPage() {
+        return this.currentPage === this.totalPages;
+    }
+
+    get pageNumbers() {
+        try {
+            const totalPages = this.totalPages;
+            const currentPage = this.currentPage;
+            const visiblePages = this.visiblePages;
+            let pages = [];
+
+            if (totalPages <= visiblePages) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push({ number: i, isEllipsis: false, className: `pagination-button ${i === currentPage ? 'active' : ''}` });
+                }
+            } else {
+                pages.push({ number: 1, isEllipsis: false, className: `pagination-button ${currentPage === 1 ? 'active' : ''}` });
+                if (currentPage > 3) {
+                    pages.push({ isEllipsis: true });
+                }
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(currentPage + 1, totalPages - 1);
+                for (let i = start; i <= end; i++) {
+                    pages.push({ number: i, isEllipsis: false, className: `pagination-button ${i === currentPage ? 'active' : ''}` });
+                }
+                if (currentPage < totalPages - 2) {
+                    pages.push({ isEllipsis: true });
+                }
+                pages.push({ number: totalPages, isEllipsis: false, className: `pagination-button ${currentPage === totalPages ? 'active' : ''}` });
+            }
+            return pages;
+        } catch (error) {
+            return [];
+        }
+    }
+
+    // Update visibleRecords when filtering/sorting changes
+    updateShownData() {
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+        this.filteredRecords = this.filteredRecords.slice(0); // ensure reactive
+        this.visibleRecords = this.filteredRecords.slice(startIndex, endIndex);
+    }
+
+    handlePrevious() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.updateShownData();
+        }
+    }
+
+    handleNext() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.updateShownData();
+        }
+    }
+
+    handlePageChange(event) {
+        const selectedPage = parseInt(event.currentTarget.dataset.id, 10);
+        if (selectedPage && selectedPage !== this.currentPage) {
+            this.currentPage = selectedPage;
+            this.updateShownData();
+        }
     }
 
     get timePeriodOptions() {
@@ -195,6 +282,9 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                     this.filteredRecords = [...this.allRecords];
                     this.sortData();
                     this.filterRecords();
+                    // Ensure pagination starts from first page and shown data is updated
+                    this.currentPage = 1;
+                    this.updateShownData();
                     this.isLoading=false;
                 } else if (error) {
                     console.error('Error fetching WhatsApp templates: ', error);
@@ -381,6 +471,8 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     
             this.filteredRecords = filtered;
             this.sortData();
+            this.currentPage = 1;
+            this.updateShownData();
 
         } catch (error) {
             this.showToastError('An error occurred while filtering the records.');
@@ -497,6 +589,9 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                             serialNumber: index + 1
                         }));   
                         this.filteredRecords = [...this.allRecords];                    
+                        // Refresh pagination after delete
+                        this.currentPage = 1;
+                        this.updateShownData();
                         this.isLoading=false;
                     }else{
                         this.showToastError('Error in deleting template');
@@ -575,6 +670,9 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                 ...record,
                 serialNumber: index + 1
             }));
+            // Refresh visibleRecords after sorting
+            this.currentPage = 1;
+            this.updateShownData();
         } catch (error) {
             console.log('Error in sortData --> ', error.stack);
         }

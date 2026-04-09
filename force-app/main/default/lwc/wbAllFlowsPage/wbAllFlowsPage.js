@@ -3,7 +3,7 @@ import getWhatsAppFlows from '@salesforce/apex/WhatsAppFlowController.getWhatsAp
 import publishWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.publishWhatsAppFlow';
 import deleteWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.deleteWhatsAppFlow';
 import deprecateWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.deprecateWhatsAppFlow';
-import getPreviewURLofWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.getPreviewURLofWhatsAppFlow';
+import getFlowByIdWithScreens from '@salesforce/apex/WhatsAppFlowControllerV2.getFlowByIdWithScreens';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo, getPicklistValues } from "lightning/uiObjectInfoApi";
 import FLOW_OBJECT from "@salesforce/schema/Flow__c";
@@ -22,7 +22,11 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     @track flowPreviewURL = '';
     @track showPopup = false;
     @track isFlowDraft = false;
+    @track isFlowVisible = true;
+    @track iscreateflowvisible = false;
     @track isEditMode = false;
+    @track isCloneFlow = false;
+    @track cloneFlowName = '';
     @track selectedFlowId = '';
     @track currentPage = 1;
     @track pageSize = 15;
@@ -32,6 +36,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     @track isNameClicked = false;
     @track selectedFlowName = '';
     @track selectedFlowStatus = '';
+    @track selectedFlowJson = '';
 
     // Sorting variables
     @track sortField = 'MVEX__Flow_Name__c';
@@ -137,6 +142,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
             .catch(error => {
                 console.log('Error occuring during loading external css', error);
             });
+            this.isFlowVisible = true;
             this.fetchWhatsAppFlows();
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
@@ -176,6 +182,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                             isDraft: record.MVEX__Status__c === 'Draft',
                             isPublished: record.MVEX__Status__c === 'Published',
                             isDeprecated: record.MVEX__Status__c === 'Deprecated',
+                            statusClass: this.getStatusClass(record.MVEX__Status__c),
                             LastModifiedDate: this.formatDate(record.LastModifiedDate)
                         };
                     });
@@ -190,22 +197,25 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         }
     }
 
+    /**
+    * Method Name: getStatusClass
+    * @description: Returns a CSS class name for the given status value — same pattern as displayCampaigns.
+    * Date: 08/04/2026
+    * Created By: Antigravity
+    */
+    getStatusClass(status) {
+        switch (status) {
+            case 'Draft':       return 'status-draft-class';
+            case 'Published':   return 'status-published-class';
+            case 'Deprecated':  return 'status-deprecated-class';
+            default:            return 'status-default-class';
+        }
+    }
+
     showCreateFlow(){
         this.isEditMode = false;
-        let cmpDef = {
-            componentDef: "MVEX:createFlowManagement",
-            attributes: {
-                isEditMode: this.isEditMode,
-            }
-        };
-
-        let encodedDef = btoa(JSON.stringify(cmpDef));
-            this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url:  "/one/one.app#" + encodedDef                                                         
-            }
-        });
+        this.isFlowVisible = false;
+        this.iscreateflowvisible = true;
     }
 
     handleStatusChange(event) {
@@ -408,22 +418,10 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
 
     editFlow(event){
         this.selectedFlowId = event.currentTarget.dataset.id;
+        this.cloneFlowName = event.currentTarget.dataset.name;
         this.isEditMode = true;
-        let cmpDef = {
-            componentDef: "MVEX:createFlowManagement",
-            attributes: {
-                isEditMode: this.isEditMode,
-                selectedFlowId: this.selectedFlowId
-            }
-        };
-
-        let encodedDef = btoa(JSON.stringify(cmpDef));
-            this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url:  "/one/one.app#" + encodedDef                                                         
-            }
-        });
+        this.isFlowVisible = false;
+        this.iscreateflowvisible = true;
     }
     
     deleteFlow(event){
@@ -438,30 +436,30 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         this.showMessagePopup('Warning','Deprecate WhatsApp Flow','Are you sure you want to deprecate this whatsapp flow? This action cannot be undone.');
     }
 
-    previewTemplate(event){
+    async previewTemplate(event){
         try {
-            let flowId = event.currentTarget.dataset.id;
+            let recordId = event.currentTarget.dataset.id;
             this.showPopup = true;
 
-            let matchingRecord = this.filteredRecords.find(record => record.MVEX__Flow_Id__c === flowId);
-            if (matchingRecord && matchingRecord.MVEX__Status__c === 'Draft') {
-                this.isFlowDraft = true;
+            let matchingRecord = this.filteredRecords.find(record => record.Id === recordId);
+            if (matchingRecord) {
+                this.isFlowDraft = matchingRecord.MVEX__Status__c === 'Draft';
+                this.selectedFlowId = recordId;
+                this.selectedFlowName = matchingRecord.MVEX__Flow_Name__c || '';
+                
+                // Fetch full flow data with screens
+                const resultString = await getFlowByIdWithScreens({ flowId: recordId });
+                const result = JSON.parse(resultString);
+                
+                if (result && result.success) {
+                    const flowData = result.data;
+                    this.selectedFlowJson = flowData.MVEX__Flow_JSON__c || '{}';
+                    this.showPopup = true;
+                } else {
+                    console.error('Failed to load flow data:', result.message);
+                    this.showMessageToast('Error', result.message || 'Failed to load flow data', 'error');
+                }
             }
-
-            this.selectedFlowId = flowId;
-            getPreviewURLofWhatsAppFlow({ flowId : flowId })
-                .then((data) => {
-                    if(data !== 'failed'){
-                        this.flowPreviewURL = data;
-                    } else {
-                        this.showToast('Error', 'Failed to get flow preview', 'error');
-                        console.error('Error in getting Flow Preview URL:', error);
-                    }
-                })
-                .catch(error => {
-                    this.showToast('Error', 'Failed to get flow preview', 'error');
-                    console.error('Error in getting Flow Preview URL:', error);
-                });
         } catch (error) {
             this.showToast('Error', 'Failed to get flow preview', 'error');
             console.error('Error in getting Flow Preview URL:', error);
@@ -472,26 +470,34 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         this.showPopup = false;
         this.flowPreviewURL = '';
         this.selectedFlowId = '';
+        this.selectedFlowName = '';
+        this.selectedFlowJson = '';
     }
 
     publishFlow(){
         try {
             this.isLoading = true;
-            publishWhatsAppFlow({flowId : this.selectedFlowId})
-                .then((result) => {
-                    if(!result.startsWith('Failed')){
-                        this.closePopup();
-                        this.fetchWhatsAppFlows();
-                        this.showToast('Success', 'Flow Published Successfully', 'success');
-                    } else {
+            let matchingRecord = this.filteredRecords.find(record => record.Id === this.selectedFlowId);
+            if (matchingRecord) {
+                publishWhatsAppFlow({flowId : matchingRecord.MVEX__Flow_Id__c})
+                    .then((result) => {
+                        if(!result.startsWith('Failed')){
+                            this.closePopup();
+                            this.fetchWhatsAppFlows();
+                            this.showToast('Success', 'Flow Published Successfully', 'success');
+                        } else {
+                            this.showToast('Error', 'Failed to publish flow', 'error');
+                            console.error('Error in publishing WhatsApp Flow:', error);
+                        }
+                    })
+                    .catch((error) => {
                         this.showToast('Error', 'Failed to publish flow', 'error');
-                        console.error('Error in publishing WhatsApp Flow:', error);
-                    }
-                })
-                .catch((error) => {
-                    this.showToast('Error', 'Failed to publish flow', 'error');
-                    console.error('Failed to publish flow : ' , error);
-                })
+                        console.error('Failed to publish flow : ' , error);
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
+            }
         } catch (error) {
             this.showToast('Error', 'Failed to publish flow', 'error');
             console.error('Error in publishFlow : ' , error);
@@ -527,34 +533,40 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         if(event.detail === true){
             if (this.selectedFlowStatus === 'Draft') {
                 this.isLoading = true;
-                deleteWhatsAppFlow({flowId : this.selectedFlowId})
-                    .then((result) => {
-                        if(!result.startsWith('Failed')){
-                            this.showToast('Success', 'Flow deleted successfully', 'success');
-                            this.fetchWhatsAppFlows();
-                        } else {
+                let matchingRecord = this.filteredRecords.find(record => record.Id === this.selectedFlowId);
+                if (matchingRecord) {
+                    deleteWhatsAppFlow({flowId : matchingRecord.MVEX__Flow_Id__c})
+                        .then((result) => {
+                            if(!result.startsWith('Failed')){
+                                this.showToast('Success', 'Flow deleted successfully', 'success');
+                                this.fetchWhatsAppFlows();
+                            } else {
+                                this.showToast('Error', 'Failed to delete flow', 'error');
+                            }
+                        })
+                        .catch((error) => {
                             this.showToast('Error', 'Failed to delete flow', 'error');
-                        }
-                    })
-                    .catch((error) => {
-                        this.showToast('Error', 'Failed to delete flow', 'error');
-                        console.error('Failed to delete flow : ' , error);
-                    })
+                            console.error('Failed to delete flow : ' , error);
+                        })
+                }
             } else if (this.selectedFlowStatus === 'Published') {
                 this.isLoading = true;
-                deprecateWhatsAppFlow({flowId : this.selectedFlowId})
-                    .then((result) => {
-                        if(!result.startsWith('Failed')){
-                            this.showToast('Success', 'Flow deprecated successfully', 'success');
-                            this.fetchWhatsAppFlows();
-                        } else {
+                let matchingRecord = this.filteredRecords.find(record => record.Id === this.selectedFlowId);
+                if (matchingRecord) {
+                    deprecateWhatsAppFlow({flowId : matchingRecord.MVEX__Flow_Id__c})
+                        .then((result) => {
+                            if(!result.startsWith('Failed')){
+                                this.showToast('Success', 'Flow deprecated successfully', 'success');
+                                this.fetchWhatsAppFlows();
+                            } else {
+                                this.showToast('Error', 'Failed to deprecate flow', 'error');
+                            }
+                        })
+                        .catch((error) => {
                             this.showToast('Error', 'Failed to deprecate flow', 'error');
-                        }
-                    })
-                    .catch((error) => {
-                        this.showToast('Error', 'Failed to deprecate flow', 'error');
-                        console.error('Failed to deprecate flow : ' , error);
-                    })
+                            console.error('Failed to deprecate flow : ' , error);
+                        })
+                }
             } else {
                 this.showToast('Error', 'Only flows in Draft or Published status can be deleted.', 'error');
                 this.selectedFlowStatus = '';
@@ -564,5 +576,16 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
             this.selectedFlowStatus = '';
             this.selectedFlowId = '';
         }
+    }
+
+    handleBack(){
+        this.iscreateflowvisible = false;
+        this.isNameClicked = false;
+        this.isFlowVisible = true;
+        this.isEditMode = false;
+        this.isCloneFlow = false;
+        this.selectedFlowId = '';
+        this.cloneFlowName = '';
+        this.fetchWhatsAppFlows();
     }
 }

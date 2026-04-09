@@ -2,9 +2,8 @@ import { LightningElement, track, api } from 'lwc';
 import getWhatsAppFlowById from '@salesforce/apex/WhatsAppFlowController.getWhatsAppFlowById';
 import getFlowSubmissionByFlowId from '@salesforce/apex/WhatsAppFlowController.getFlowSubmissionByFlowId';
 import getFlowSubmissionById from '@salesforce/apex/WhatsAppFlowController.getFlowSubmissionById';
-import { NavigationMixin } from 'lightning/navigation';
 
-export default class WbFlowsReport extends NavigationMixin(LightningElement) {
+export default class WbFlowsReport extends LightningElement {
     @api selectedFlowId;
     @api selectedFlowName;
 
@@ -26,17 +25,17 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
     @track pageGrpSize = 15;
     @track visibleGrpPages = 5;
     @track breadcrumbs = [{ label: 'Flows' }];
+    @track searchTerm = '';
+    @track allData = [];
+    @track allSubmissionDetails = [];
+    @track showBreadcrumbs = true;
 
     connectedCallback() {
         this.fetchFlowDetailsById();
-        // console.log('flowReport = ', this.flowReport);
-        // console.log('Selected Flow ID:', this.selectedFlowId);
-        // console.log('Selected Flow Name:', this.selectedFlowName);
         this.breadcrumbs = [
-            { label: 'All flows' },
-            { label: this.selectedFlowName }
+            { label: 'All flows', path: 'all-flows' },
+            { label: this.selectedFlowName, path: 'flow-report' }
         ];
-        this.updateBreadcrumbs();
         this.updateShownData();
     }
 
@@ -46,6 +45,26 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
 
     get isAnyReportActive() {
         return this.isFlowSubmissionDetails || this.flowReport;
+    }  
+
+    get formattedBreadcrumbs() {
+        return this.breadcrumbs.map((crumb, index, arr) => {
+            const isLast = index === arr.length - 1;
+            return {
+                id: `breadcrumb-${index}`,
+                label: crumb.label,
+                isClickable: !isLast,
+                isLast: isLast,
+                path: crumb.path || `level-${index}`
+            };
+        });
+    }
+
+    get searchPlaceholder() {
+        if (this.isFlowSubmissionDetails) {
+            return 'Search by Flow Field...';
+        }
+        return 'Search record by Name or Phone...';
     }  
 
     get name() {
@@ -220,9 +239,11 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
 
     fetchFlowDetailsById() {
         this.isLoading = true;
-        // console.log('Fetching flow details for ID:', this.selectedFlowId);
+        console.log('Fetching flow details for ID:', this.selectedFlowId);
         getWhatsAppFlowById({ flowId: this.selectedFlowId })
             .then(result => {
+                console.log('result ==> ', result);
+                
                 if (result && result.length > 0) {
                     this.flowDetails = result[0];
                     this.recordId = this.flowDetails.Id;
@@ -238,31 +259,31 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
     }
 
     fetchFlowReportById(){
-        // console.log('Fetching flow report for ID:', this.recordId);
         this.isLoading = true;
         getFlowSubmissionByFlowId({ flowId: this.recordId })
             .then(result => {
-                this.data = result.map((item, index) => ({
+                this.allData = result.map((item, index) => ({
                     ...item,
                     CreatedDate: this.formatDate(item.CreatedDate),
                     index: index + 1,
                 }));
-                this.filteredData = [...this.data];
-                this.updateShownData();
+                this.data = [...this.allData];
+                this.applySearch();
             })
             .catch((error) => {
                 console.error('Error fetching flow report:', error);
+            })
+            .finally(() => {
+                this.isLoading = false;
             });
     }
 
     fetchSubmissionDetailsById() {
-        console.log('Fetching submission details for ID:', this.selectedSubmissionId);
+        // console.log('Fetching submission details for ID:', this.selectedSubmissionId);
         this.isLoading = true;
 
         getFlowSubmissionById({ submissionId: this.selectedSubmissionId })
             .then(result => {
-                console.log('result:', JSON.stringify(result), 'type:', typeof result, 'length:', result.length, 'typeof length:');
-                
                 if (result && result.length > 0) {
                     const transformed = [];
                     let rowIndex = 1; // Counter for the overall row index
@@ -295,13 +316,14 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
                     });
 
                     this.flowSubmissionDetails = transformed;
-                    console.log('Transformed Submission Details:', JSON.stringify(this.flowSubmissionDetails));
+                    this.allSubmissionDetails = [...transformed];
+                    // console.log('Transformed Submission Details:', JSON.stringify(this.flowSubmissionDetails));
                 }
 
                 this.isFlowSubmissionDetails = true;
                 this.flowReport = false;
-                this.filteredDetails = [...this.flowSubmissionDetails];
-                this.updateGroupData();
+                this.searchTerm = '';
+                this.applySearch();
             })
             .catch((e) => {
                 console.error('Error fetching submission details:', e);
@@ -378,8 +400,10 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
     
             const submitterName = event.currentTarget.textContent;
             if (!this.breadcrumbs.find(b => b.label === submitterName)) {
-                this.breadcrumbs = [...this.breadcrumbs, { label: submitterName }];
-                this.updateBreadcrumbs();
+                this.breadcrumbs = [...this.breadcrumbs, { 
+                    label: submitterName, 
+                    path: 'submission-details' 
+                }];
             }
             this.fetchSubmissionDetailsById();
         } catch (error) {
@@ -387,16 +411,88 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
         }
     }
 
-    updateBreadcrumbs() {
-        this.breadcrumbs = this.breadcrumbs.map((b, i, arr) => {
-            return {
-                ...b,
-                className:
-                    i === arr.length - 1
-                        ? 'breadcrumb-link current-crumb'
-                        : 'breadcrumb-link'
-            };
-        });
+    handleBreadcrumbClick(event) {
+        try {
+            const path = event.detail.path;
+            
+            // Find the index of the clicked breadcrumb by path
+            const index = this.breadcrumbs.findIndex(b => b.path === path);
+            if (index === -1) return;
+    
+            // Trim breadcrumbs to clicked item
+            this.breadcrumbs = this.breadcrumbs.slice(0, index + 1);
+    
+            // Handle view toggling based on breadcrumb length
+            if (this.breadcrumbs.length === 1) {
+                // Only "All flows" breadcrumb
+                this.flowReport = false;
+                this.isFlowSubmissionDetails = false;
+                this.record = null;
+                this.paginatedData = [];
+            } else if (this.breadcrumbs.length === 2) {
+                // "All flows > Flow_Name"
+                this.isFlowSubmissionDetails = false;
+                this.flowReport = true;
+                this.flowSubmissionDetails = null;
+                this.paginatedDetails = [];
+                this.searchTerm = '';
+                this.applySearch();
+            } else if (this.breadcrumbs.length === 3) {
+                // "All flows > Flow_Name > Submitter"
+                this.isFlowSubmissionDetails = true;
+                this.flowReport = false;
+                this.fetchSubmissionDetailsById();
+            }
+        } catch (error) {
+            console.error('Error in handleBreadcrumbClick:', error);
+        }
+    }
+
+    handleSearch(event) {
+        try {
+            this.searchTerm = event.target.value;
+            if (this.flowReport) {
+                this.currentPage = 1;
+            } else if (this.isFlowSubmissionDetails) {
+                this.currentGrpPage = 1;
+            }
+            this.applySearch();
+        } catch (error) {
+            console.error('Error in handleSearch:', error);
+        }
+    }
+
+    applySearch() {
+        try {
+            if (this.flowReport) {
+                // Search in flow submissions by name or phone
+                if (!this.searchTerm || this.searchTerm.trim() === '') {
+                    this.filteredData = [...this.allData];
+                } else {
+                    const searchTermLower = this.searchTerm.toLowerCase();
+                    this.filteredData = this.allData.filter(item => {
+                        const name = (item.MVEX__Submitter_Name__c || '').toLowerCase();
+                        const phone = (item.MVEX__Submitter_Phone__c || '').toLowerCase();
+                        return name.includes(searchTermLower) || phone.includes(searchTermLower);
+                    });
+                }
+                this.updateShownData();
+            } else if (this.isFlowSubmissionDetails) {
+                // Search in submission details by flow field
+                if (!this.searchTerm || this.searchTerm.trim() === '') {
+                    this.filteredDetails = [...this.allSubmissionDetails];
+                } else {
+                    const searchTermLower = this.searchTerm.toLowerCase();
+                    this.filteredDetails = this.allSubmissionDetails.filter(item => {
+                        const flowField = (item.flowField || '').toLowerCase();
+                        return flowField.includes(searchTermLower);
+                    });
+                }
+                this.updateGroupData();
+            }
+        } catch (error) {
+            console.error('Error in applySearch:', error);
+        }
     }
 
     updateGroupData() {
@@ -433,7 +529,7 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
 
     handleGrpPageChange(event) {
         try{
-            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10); 
             if (selectedPage !== this.currentGrpPage) {
                 this.currentGrpPage = selectedPage;
                 this.updateGroupData();
@@ -452,39 +548,5 @@ export default class WbFlowsReport extends NavigationMixin(LightningElement) {
                 year: 'numeric'
             });
         }
-    }
-
-    backToAllFlowPage(){
-        if(!this.isFlowSubmissionDetails){
-            let componentDef = {
-                componentDef: "MVEX:wbAllFlowsPage",
-            };
-            
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
-            });
-        }else{
-            this.isFlowSubmissionDetails = false;
-            this.flowReport = true;
-        }
-        // let cmpDef = {
-        //             componentDef: "c:wbAllFlowsPage",
-        //             attributes: {
-        //                 isEditMode: this.isEditMode,
-        //                 selectedFlowId: this.selectedFlowId
-        //             }
-        //         };
-        
-        //         let encodedDef = btoa(JSON.stringify(cmpDef));
-        //             this[NavigationMixin.Navigate]({
-        //             type: "standard__webPage",
-        //             attributes: {
-        //                 url:  "/one/one.app#" + encodedDef                                                         
-        //             }
-        //         });
     }
 }

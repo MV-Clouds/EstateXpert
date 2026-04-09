@@ -1,0 +1,152 @@
+<template>
+    <div class="screen-editor-container">
+        <!-- HEADER -->
+        <div class="screens-header">
+            <h3 class="header-title">Screens</h3>
+
+            <button class="add-screen-icon-btn" onclick={handleAddScreen} title={addScreenButtonTitle} disabled={isMaxScreensReached}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round">
+                    <path d="M10 4v12M4 10h12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- SCREEN LIST -->
+        <div class="screens-list" data-is-dragging={isDragging}>
+
+            <!-- If screens exist -->
+            <template if:true={processedScreens}>
+                <template for:each={processedScreens} for:item="screen">
+                    <!-- Only render parent screens (not read more children) at top level -->
+                    <template if:true={screen.isParent}>
+                        <!-- WRAPPER DIV - Contains parent and read more screens -->
+                        <div key={screen.id} class={screen.wrapperCssClass}
+                            data-screen-id={screen.id}
+                            draggable={screen.isDraggable}
+                            ondragstart={handleDragStart} 
+                            ondragover={handleDragOver}
+                            ondrop={handleDrop}
+                            ondragend={handleDragEnd}
+                            ondragenter={handleDragEnter}
+                            ondragleave={handleDragLeave}>
+                            
+                            <!-- PARENT SCREEN -->
+                            <div onclick={handleScreenSelect}
+                                data-screen-id={screen.id}
+                                class={screen.cssClass}>
+                                <!-- Drag icon - Only show for draggable screens -->
+                                <template if:true={screen.isDraggable}>
+                                <svg class="drag-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <circle cx="3" cy="3" r="1.2"></circle>
+                                    <circle cx="8" cy="3" r="1.2"></circle>
+                                    <circle cx="13" cy="3" r="1.2"></circle>
+                                    <circle cx="3" cy="8" r="1.2"></circle>
+                                    <circle cx="8" cy="8" r="1.2"></circle>
+                                    <circle cx="13" cy="8" r="1.2"></circle>
+                                    <circle cx="3" cy="13" r="1.2"></circle>
+                                    <circle cx="8" cy="13" r="1.2"></circle>
+                                    <circle cx="13" cy="13" r="1.2"></circle>
+                                </svg>
+                                </template>
+
+                                <!-- Screen Icon + Title/Edit -->
+                                <div class="screen-info">
+
+                                    <svg class="screen-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M2 2h5v5H2V2zm0 7h5v5H2V9zm7-7h5v5H9V2zm0 7h5v5H9V9z" fill-rule="evenodd" />
+                                    </svg>
+
+                                    <!-- EDIT MODE -->
+                                    <template if:true={screen.isEditing}>
+                                        <input type="text" class="screen-title-input" value={screen.title}
+                                            data-screen-id={screen.id} placeholder="Enter screen name"
+                                            onkeydown={handleKeyDown} />
+                                    </template>
+
+                                    <!-- VIEW MODE -->
+                                    <template if:false={screen.isEditing}>
+                                        <div class="screen-title">
+                                            {screen.title}
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- CONFIRM BUTTON (only in editing) -->
+                                <template if:true={screen.isEditing}>
+                                    <button class="confirm-btn" data-screen-id={screen.id} onmousedown={handleConfirmScreen}
+                                        title="Confirm screen" aria-label="Confirm">
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 8l3.5 3.5L13 5" />
+                                        </svg>
+                                    </button>
+                                </template>
+
+                                <template if:false={screen.isEditing}>
+                                    <template if:true={screen.showDeleteButton}>
+                                        <button class="delete-btn" data-screen-id={screen.id} onclick={handleDeleteScreen}
+                                            title="Delete screen" aria-label="Delete">
+                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                                                <path d="M13.3 2.1l-1.4-1.4L7 5.6 2.1.7.7 2.1 5.6 7 
+                                                         .7 11.9l1.4 1.4L7 8.4l4.9 4.9 
+                                                         1.4-1.4L8.4 7l4.9-4.9z" />
+                                            </svg>
+                                        </button>
+                                    </template>
+                                </template>
+
+                            </div>
+
+                            <!-- READ MORE SCREENS - Sibling to parent, inside wrapper -->
+                            <template if:true={screen.readMoreScreens}>
+                                <template for:each={screen.readMoreScreens} for:item="readMoreScreen">
+                                    <div key={readMoreScreen.id} onclick={handleScreenSelect}
+                                        data-screen-id={readMoreScreen.id}
+                                        class={readMoreScreen.cssClass}>
+                                        
+                                        <!-- Screen Icon + Title/Edit -->
+                                        <div class="screen-info">
+
+                                            <svg class="screen-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M2 2h5v5H2V2zm0 7h5v5H2V9zm7-7h5v5H9V2zm0 7h5v5H9V9z" fill-rule="evenodd" />
+                                            </svg>
+
+                                            <!-- VIEW MODE ONLY for read more screens -->
+                                            <div class="screen-title">
+                                                {readMoreScreen.title}
+                                            </div>
+                                        </div>
+
+                                        <!-- Delete button for read more screens -->
+                                        <template if:true={readMoreScreen.showDeleteButton}>
+                                            <button class="delete-btn" data-screen-id={readMoreScreen.id} onclick={handleDeleteScreen}
+                                                title="Delete screen" aria-label="Delete">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                                                    <path d="M13.3 2.1l-1.4-1.4L7 5.6 2.1.7.7 2.1 5.6 7 
+                                                             .7 11.9l1.4 1.4L7 8.4l4.9 4.9 
+                                                             1.4-1.4L8.4 7l4.9-4.9z" />
+                                                </svg>
+                                            </button>
+                                        </template>
+
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </template>
+                </template>
+            </template>
+
+            <!-- EMPTY STATE -->
+            <template if:false={processedScreens.length}>
+                <div class="empty-state">
+                    <svg class="empty-icon" width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+                        <path d="M8 8h14v14H8V8zm0 18h14v14H8V26zm18-18h14v14H26V8zm0 18h14v14H26V26z" opacity="0.3" />
+                    </svg>
+                    <p>No screens available</p>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

@@ -490,6 +490,10 @@
     padding-left: 10px;
 }
 
-.table-content .column2{
-    width: 9rem;
+.table-content .slds-table_resizable-cols thead th{
+    width:12rem;
+}
+
+.table-content .slds-table td{
+    max-width: 16rem;
 }

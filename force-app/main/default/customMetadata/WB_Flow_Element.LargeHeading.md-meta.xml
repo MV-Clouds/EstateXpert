@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Large Heading</label>
+    <protected>false</protected>
+    <values>
+        <field>Element_Icon__c</field>
+        <value xsi:type="xsd:string">utility:display_rich_text</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Options__c</field>
+        <value xsi:type="xsd:string">{
+&quot;jsonType&quot;: &quot;TextHeading&quot;,
+&quot;category&quot;: &quot;Text&quot;,
+&quot;defaults&quot;: {
+&quot;text&quot;: &quot;Enter heading text&quot;
+},
+&quot;uiFields&quot;: {
+&quot;showTypeSwitch&quot;: true,
+&quot;allowedTypeSwitches&quot;: [&quot;LargeHeading&quot;, &quot;SmallHeading&quot;, &quot;Body&quot;, &quot;Caption&quot;],
+&quot;showLabel&quot;: false,
+&quot;showText&quot;: true,
+&quot;showRequired&quot;: false,
+&quot;showHelperText&quot;: false,
+&quot;showInputType&quot;: false,
+&quot;showOptions&quot;: false,
+&quot;showImageProps&quot;: false
+},
+&quot;constraints&quot;: {
+&quot;textMaxLength&quot;: 80
+}
+}</value>
+    </values>
+    <values>
+        <field>Type_Icon__c</field>
+        <value xsi:type="xsd:string">utility:text</value>
+    </values>
+    <values>
+        <field>Type__c</field>
+        <value xsi:type="xsd:string">Text</value>
+    </values>
+</CustomMetadata>

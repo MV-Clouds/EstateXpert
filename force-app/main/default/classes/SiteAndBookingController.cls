@@ -1,5 +1,22 @@
 public with sharing class SiteAndBookingController {
-    public static List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
+    public static List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values();
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helper: get the Record Type Id for "Showing" on Event
+    // ─────────────────────────────────────────────────────────────────────────
+    private static Id showingRecordTypeId {
+        get {
+            if (showingRecordTypeId == null) {
+                Map<String, Schema.RecordTypeInfo> rtMap =
+                    Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName();
+                if (rtMap.containsKey('Showing')) {
+                    showingRecordTypeId = rtMap.get('Showing').getRecordTypeId();
+                }
+            }
+            return showingRecordTypeId;
+        }
+        private set;
+    }
 
     @AuraEnabled
     public static Map<String, Object> getPropertyData(String listingId) {
@@ -22,26 +39,43 @@ public with sharing class SiteAndBookingController {
             if (!listing.isEmpty()) {
                 propertyFiles = [SELECT Id, Name, BaseUrl__c FROM Property_File__c WHERE Property__c = :listing[0].Property__c WITH USER_MODE];
             }
-            
-            // Fetch related Contacts with Showing details
-            List<Contact> contacts = [SELECT Id, Name, Email, Phone,
-                                    (SELECT Id, Status__c, Scheduled_Date__c, Reschedule_Date__c, Communication_Method__c FROM Showings__r WHERE Listing__c = :escapedListingId ORDER BY CreatedDate DESC LIMIT 1)
-                                    FROM Contact WHERE Id IN :contactIds WITH USER_MODE];
-            
+
+            // Fetch contacts
+            List<Contact> contacts = [SELECT Id, Name, Email, Phone FROM Contact WHERE Id IN :contactIds WITH USER_MODE];
+
+            // Fetch the most recent Showing Event per Buyer
+            Map<Id, Event> contactToEvent = new Map<Id, Event>();
+            if (!contactIds.isEmpty()) {
+                List<Event> showingEvents = [
+                    SELECT Id, Buyer__c, Status__c, Scheduled_Date__c, Reschedule_Date__c, Communication_Method__c
+                    FROM Event
+                    WHERE Buyer__c IN :contactIds
+                      AND Listing__c = :escapedListingId
+                      AND RecordTypeId = :showingRecordTypeId
+                    ORDER BY CreatedDate DESC
+                ];
+                for (Event ev : showingEvents) {
+                    // Keep only the most recent event per buyer
+                    if (!contactToEvent.containsKey(ev.Buyer__c)) {
+                        contactToEvent.put(ev.Buyer__c, ev);
+                    }
+                }
+            }
+
             // Map contacts with showing details
             List<Map<String, Object>> formattedContacts = new List<Map<String, Object>>();
             for (Contact c : contacts) {
                 Map<String, Object> contactMap = new Map<String, Object>();
+                Event ev = contactToEvent.get(c.Id);
                 contactMap.put('Id', c.Id);
                 contactMap.put('Name', c.Name);
                 contactMap.put('Email', c.Email);
                 contactMap.put('MobilePhone', c.Phone);
-                contactMap.put('ShowingId', c.Showings__r.isEmpty() ? '' : c.Showings__r[0].Id);
-                contactMap.put('ShowingStatus', c.Showings__r.isEmpty() ? 'Not Scheduled' : c.Showings__r[0].Status__c);
-                contactMap.put('ScheduleDate', c.Showings__r.isEmpty() ? '' : String.valueOf(c.Showings__r[0].Scheduled_Date__c));
-                contactMap.put('RescheduleDate', c.Showings__r.isEmpty() ? '' : String.valueOf(c.Showings__r[0].Reschedule_Date__c));
-                contactMap.put('CommunicationMethod', c.Showings__r.isEmpty() ? '' : c.Showings__r[0].Communication_Method__c);
-                
+                contactMap.put('ShowingId', ev == null ? '' : ev.Id);
+                contactMap.put('ShowingStatus', ev == null ? 'Not Scheduled' : ev.Status__c);
+                contactMap.put('ScheduleDate', ev == null ? '' : String.valueOf(ev.Scheduled_Date__c));
+                contactMap.put('RescheduleDate', ev == null ? '' : String.valueOf(ev.Reschedule_Date__c));
+                contactMap.put('CommunicationMethod', ev == null ? '' : ev.Communication_Method__c);
                 formattedContacts.add(contactMap);
             }
             
@@ -56,8 +90,18 @@ public with sharing class SiteAndBookingController {
         }
     }
 
+    private static Integer parseDuration(String durationValue) {
+        if (durationValue == '15 Minutes') return 15;
+        if (durationValue == '30 Minutes') return 30;
+        if (durationValue == '45 Minutes') return 45;
+        if (durationValue == '1 Hour') return 60;
+        if (durationValue == '1.5 Hours') return 90;
+        if (durationValue == '2 Hours') return 120;
+        return 60;
+    }
+
     @AuraEnabled
-    public static void sendEmailsAndCreateShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String communicationMethod, Boolean isReschedule) {
+    public static void sendEmailsAndCreateShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String durationValue, String communicationMethod, Boolean isReschedule) {
         try {
             // Determine the appropriate email template based on whether it's a schedule or reschedule
             String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
@@ -65,23 +109,22 @@ public with sharing class SiteAndBookingController {
 
             System.debug('scheduleDateTime: ' + scheduleDateTime);
             // Create or update showings
-            Map<String, Object> showingResult = createShowings(contactIds, listingId, scheduleDateTime, communicationMethod);
+            Map<String, Object> showingResult = createShowings(contactIds, listingId, scheduleDateTime, durationValue, communicationMethod);
             List<Id> showingIds = (List<Id>)showingResult.get('showingIds');
 
             // Fetch inserted/updated showings with contact email
-            List<Showing__c> insertedShowings = [SELECT Id, Buyer__c, Buyer__r.Email FROM Showing__c WHERE Id IN :showingIds WITH USER_MODE];
-
+            List<Event> insertedShowings = [SELECT Id, Buyer__c, Buyer__r.Email FROM Event WHERE Id IN :showingIds];
 
             // Prepare emails
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
-            for (Showing__c show : insertedShowings) {
+            for (Event show : insertedShowings) {
                 if (show.Buyer__r.Email != null) {
                     Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                     mail.setToAddresses(new List<String>{show.Buyer__r.Email});
                     mail.setTemplateId(template.Id);
                     mail.setTargetObjectId(show.Buyer__c); // Contact ID for recipient
-                    mail.setWhatId(show.Id); // Showing ID for merge fields
-                    mail.setSaveAsActivity(true);
+                    mail.setWhatId(show.Id); // Event ID for merge fields
+                    mail.setSaveAsActivity(false);
                     emails.add(mail);
                 }
             }
@@ -94,58 +137,82 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled
-    public static Map<String, Object> createShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String communicationMethod) {
+    public static Map<String, Object> createShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String durationValue, String communicationMethod) {
         Map<String, Object> result = new Map<String, Object>();
         List<Id> showingIds = new List<Id>();
-        Map<Id, Showing__c> contactToShowing = new Map<Id, Showing__c>();
+        Map<Id, Event> contactToShowing = new Map<Id, Event>();
         try {
-            // Fetch existing showings for these contacts and listing
-            Map<Id, Showing__c> existingShowingsMap = new Map<Id, Showing__c>();
-            List<Showing__c> existingShowings = [SELECT Id, Buyer__c, Listing__c, Status__c, Scheduled_Date__c FROM Showing__c WHERE Buyer__c IN :contactIds AND Listing__c = :listingId WITH USER_MODE];
-            for (Showing__c s : existingShowings) {
+            // Fetch existing showing Events for these contacts and listing
+            Map<Id, Event> existingShowingsMap = new Map<Id, Event>();
+            List<Event> existingShowings = [
+                SELECT Id, Buyer__c, Listing__c, Status__c, MVEX__Scheduled_Date__c, MVEX__Showing_Duration__c
+                FROM Event
+                WHERE Buyer__c IN :contactIds
+                  AND Listing__c = :listingId
+                  AND RecordTypeId = :showingRecordTypeId
+            ];
+            for (Event s : existingShowings) {
                 existingShowingsMap.put(s.Buyer__c, s);
             }
 
-            List<Showing__c> showingsToInsert = new List<Showing__c>();
-            List<Showing__c> showingsToUpdate = new List<Showing__c>();
+            List<Event> showingsToInsert = new List<Event>();
+            List<Event> showingsToUpdate = new List<Event>();
 
             for (Id contactId : contactIds) {
                 if (existingShowingsMap.containsKey(contactId)) {
                     // Update existing showing
-                    Showing__c existing = existingShowingsMap.get(contactId);
+                    Event existing = existingShowingsMap.get(contactId);
                     existing.Status__c = scheduleDateTime != null ? 'Waiting For Confirmation' : 'Scheduled';
-                    existing.Scheduled_Date__c = scheduleDateTime;
+                    if (scheduleDateTime != null) {
+                        Integer durationMins = parseDuration(durationValue);
+                        existing.MVEX__Scheduled_Date__c = scheduleDateTime;
+                        existing.MVEX__Showing_Duration__c = durationMins;
+                        existing.StartDateTime = scheduleDateTime;
+                        existing.EndDateTime = scheduleDateTime.addMinutes(durationMins);
+                    }
                     existing.Communication_Method__c = communicationMethod;
                     showingsToUpdate.add(existing);
                     showingIds.add(existing.Id);
                     contactToShowing.put(contactId, existing);
                 } else {
-                    // Create new showing
-                    Showing__c newShowing = new Showing__c(
+                    // Create new showing Event
+                    Event newShowing = new Event(
+                        RecordTypeId = showingRecordTypeId,
                         Buyer__c = contactId,
                         Listing__c = listingId,
                         Status__c = scheduleDateTime != null ? 'Waiting For Confirmation' : 'Scheduled',
-                        Scheduled_Date__c = scheduleDateTime,
-                        Communication_Method__c = communicationMethod
+                        Communication_Method__c = communicationMethod,
+                        Subject = 'Showing'
                     );
+                    if (scheduleDateTime != null) {
+                        Integer durationMins = parseDuration(durationValue);
+                        newShowing.MVEX__Scheduled_Date__c = scheduleDateTime;
+                        newShowing.MVEX__Showing_Duration__c = durationMins;
+                        newShowing.StartDateTime = scheduleDateTime;
+                        newShowing.EndDateTime = scheduleDateTime.addMinutes(durationMins);
+                    } else {
+                        newShowing.StartDateTime = System.now();
+                        newShowing.MVEX__Showing_Duration__c = 60;
+                        newShowing.EndDateTime = System.now().addMinutes(60);
+                    }
                     showingsToInsert.add(newShowing);
                 }
             }
 
             if (!showingsToInsert.isEmpty()) {
-                insert as user showingsToInsert;
-                for (Showing__c s : showingsToInsert) {
+                insert showingsToInsert;
+                for (Event s : showingsToInsert) {
                     showingIds.add(s.Id);
                     contactToShowing.put(s.Buyer__c, s);
                 }
             }
             if (!showingsToUpdate.isEmpty()) {
-                update as user showingsToUpdate;
+                update showingsToUpdate;
             }
 
             result.put('showingIds', showingIds);
-            // Convert contactToShowing to Map<String, Showing__c> for serialization
-            Map<String, Showing__c> contactToShowingStringKey = new Map<String, Showing__c>();
+            // Convert contactToShowing to Map<String, Event> for serialization
+            Map<String, Event> contactToShowingStringKey = new Map<String, Event>();
             for (Id contactId : contactToShowing.keySet()) {
                 contactToShowingStringKey.put((String)contactId, contactToShowing.get(contactId));
             }
@@ -159,18 +226,22 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled
-    public static Boolean updateShowing(Datetime rescheduleDateTime, String showingId, String communicationMethod) {
+    public static Boolean updateShowing(Datetime rescheduleDateTime, String durationValue, String showingId, String communicationMethod) {
         try {
             if (String.isBlank(showingId) || rescheduleDateTime == null) {
                 return false;
             }
-            Showing__c showing = new Showing__c(
+            Integer durationMins = parseDuration(durationValue);
+            Event showing = new Event(
                 Id = showingId,
-                Reschedule_Date__c = rescheduleDateTime,
+                MVEX__Reschedule_Date__c = rescheduleDateTime,
                 Status__c = 'Rescheduled',
-                Communication_Method__c = communicationMethod
+                Communication_Method__c = communicationMethod,
+                MVEX__Showing_Duration__c = durationMins,
+                StartDateTime = rescheduleDateTime,
+                EndDateTime = rescheduleDateTime.addMinutes(durationMins)
             );
-            update as user showing;
+            update showing;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'updateShowing', e.getMessage());
@@ -184,11 +255,11 @@ public with sharing class SiteAndBookingController {
             if (String.isBlank(showingId)) {
                 return false;
             }
-            Showing__c showing = new Showing__c(
+            Event showing = new Event(
                 Id = showingId,
                 Status__c = 'Completed'
             );
-            update as user showing;
+            update showing;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'markShowingAsCompleted', e.getMessage());
@@ -235,10 +306,12 @@ public with sharing class SiteAndBookingController {
                 // Update the chat record
                 chat.WhatsAppMessageId__c = whatsAppMessageID;
                 chat.Message_Status__c = 'Sent';
-                Showing__c showingToUpdate = new Showing__c(Id = showingId);
-                showingToUpdate.Chat__c = chat.Id;
-                showingToUpdate.Status__c = status == 'Wait' ? 'Waiting For Confirmation' : status;
-                update as user showingToUpdate;
+                if (String.isNotBlank(showingId)) {
+                    Event showingToUpdate = new Event(Id = showingId);
+                    showingToUpdate.Chat__c = chat.Id;
+                    showingToUpdate.Status__c = status == 'Wait' ? 'Waiting For Confirmation' : status;
+                    update showingToUpdate;
+                }
             } else {
                 chat.Message_Status__c = 'Failed';
                 ErrorHandler.insertErrordata(null, 'SiteAndBookingController', 'sendWhatsappMessage', response.getStatusCode() + response.getBody());
@@ -260,17 +333,17 @@ public with sharing class SiteAndBookingController {
     public static List<Map<String, Object>> getShowingsFromToday() {
         try {
             Datetime todayStart = Datetime.newInstance(Date.today(), Time.newInstance(0, 0, 0, 0));
-            
-            List<Showing__c> showings = [
+
+            List<Event> showings = [
                 SELECT Id, Status__c, Scheduled_Date__c, Reschedule_Date__c, Buyer__r.Name, Listing__r.Name
-                FROM Showing__c
-                WHERE (Scheduled_Date__c >= :todayStart OR Reschedule_Date__c >= :todayStart) AND
-                Status__c IN ('Waiting For Confirmation', 'Scheduled', 'Rescheduled')
-                WITH USER_MODE
+                FROM Event
+                WHERE (Scheduled_Date__c >= :todayStart OR Reschedule_Date__c >= :todayStart)
+                  AND Status__c IN ('Waiting For Confirmation', 'Scheduled', 'Rescheduled')
+                  AND RecordTypeId = :showingRecordTypeId
             ];
-            
+
             List<Map<String, Object>> formattedShowings = new List<Map<String, Object>>();
-            for (Showing__c showing : showings) {
+            for (Event showing : showings) {
                 Map<String, Object> showingMap = new Map<String, Object>();
                 showingMap.put('Id', showing.Id);
                 showingMap.put('MVEX__Status__c', showing.Status__c);
@@ -289,11 +362,11 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId,  String dateStr, 
-    String timeStr ) {
+    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, String dateStr,
+    String timeStr) {
         try {
             Savepoint sp = Database.setSavepoint();
-            Showing__c showing;
+            Event showing;
 
              // ---------------------------------------------------------
             // 1. Create DateTime from date and time strings
@@ -305,7 +378,7 @@ public with sharing class SiteAndBookingController {
                     List<String> dateParts = dateStr.split('-');
                     Date selectedDate = Date.newInstance(
                         Integer.valueOf(dateParts[0]),  // year
-                        Integer.valueOf(dateParts[1]),  // month  
+                        Integer.valueOf(dateParts[1]),  // month
                         Integer.valueOf(dateParts[2])   // day
                     );
                     
@@ -322,10 +395,10 @@ public with sharing class SiteAndBookingController {
             // ---------------------------------------------------------
             // 2. Check if showing exists; if not, create a temporary one
             // ---------------------------------------------------------
-            List<Showing__c> existingShowings = [
+            List<Event> existingShowings = [
                 SELECT Id, Buyer__c, Buyer__r.Email, Listing__c
-                FROM Showing__c 
-                WHERE Id = :showingId WITH USER_MODE
+                FROM Event
+                WHERE Id = :showingId
                 LIMIT 1
             ];
 
@@ -339,12 +412,16 @@ public with sharing class SiteAndBookingController {
                 
             } else if (contactId != null && listingId != null) {
                 // Create a temporary showing for preview purposes
-                showing = new Showing__c();
+                showing = new Event();
+                showing.RecordTypeId = showingRecordTypeId;
                 showing.Listing__c = listingId;
                 showing.Buyer__c = contactId;
                 showing.Status__c = 'Waiting For Confirmation';
-                showing.Scheduled_Date__c = scheduledDateTime; 
-                
+                showing.Scheduled_Date__c = scheduledDateTime;
+                showing.Subject = 'Showing';
+                showing.StartDateTime = scheduledDateTime;
+                showing.MVEX__Showing_Duration__c = 60;
+
                 // Insert temporarily for preview
                 insert showing;
             }
@@ -354,21 +431,21 @@ public with sharing class SiteAndBookingController {
             // ---------------------------------------------------------
             showing = [
                 SELECT Id, Buyer__c, Buyer__r.Email, Listing__c, Listing__r.Name
-                FROM Showing__c 
-                WHERE Id = :showing.Id WITH USER_MODE
+                FROM Event
+                WHERE Id = :showing.Id
                 LIMIT 1
             ];
 
             // ---------------------------------------------------------
             // 4. Pick the correct EmailTemplate
             // ---------------------------------------------------------
-            String templateName = isReschedule 
-                ? 'RescheduleConfirmationEmail' 
+            String templateName = isReschedule
+                ? 'RescheduleConfirmationEmail'
                 : 'Showing_Confirmation';
 
             EmailTemplate et = [
-                SELECT Id 
-                FROM EmailTemplate 
+                SELECT Id
+                FROM EmailTemplate
                 WHERE DeveloperName = :templateName WITH USER_MODE
                 LIMIT 1
             ];
@@ -413,11 +490,11 @@ public with sharing class SiteAndBookingController {
             if (String.isBlank(showingId) || String.isBlank(status)) {
                 return false;
             }
-            Showing__c showing = new Showing__c(
+            Event showing = new Event(
                 Id = showingId,
                 Status__c = status
             );
-            update as user showing;
+            update showing;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'updateShowingStatus', e.getMessage());

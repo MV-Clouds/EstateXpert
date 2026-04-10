@@ -494,11 +494,16 @@ private class WhatsAppWebhookTest {
         );
         insert contextChat;
         
-        // Create Showing__c record
-        Showing__c showing = new Showing__c(
+        // Create Event record
+        Id showingRecordTypeId = Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName().get('Showing').getRecordTypeId();
+        Event showing = new Event(
+            RecordTypeId = showingRecordTypeId,
             Chat__c = contextChat.Id,
             Status__c = 'Waiting For Confirmation',
-            Scheduled_Date__c = System.now().addDays(1)
+            MVEX__Scheduled_Date__c = System.now().addDays(1),
+            Subject = 'Showing',
+            MVEX__Showing_Duration__c = 60,
+            StartDateTime = System.now().addDays(1)
         );
         insert showing;
 
@@ -515,7 +520,7 @@ private class WhatsAppWebhookTest {
         Test.stopTest();
         
         // Verify showing status updated
-        Showing__c updatedShowing = [SELECT Status__c FROM Showing__c WHERE Id = :showing.Id];
+        Event updatedShowing = [SELECT Status__c FROM Event WHERE Id = :showing.Id];
         System.assertEquals('Scheduled', updatedShowing.Status__c);
     }
 
@@ -530,11 +535,16 @@ private class WhatsAppWebhookTest {
         );
         insert contextChat;
         
-        // Create Showing__c record
-        Showing__c showing = new Showing__c(
+        // Create Event record
+        Id showingRecordTypeId = Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName().get('Showing').getRecordTypeId();
+        Event showing = new Event(
+            RecordTypeId = showingRecordTypeId,
             Chat__c = contextChat.Id,
             Status__c = 'Waiting For Confirmation',
-            Scheduled_Date__c = System.now().addDays(1)
+            MVEX__Scheduled_Date__c = System.now().addDays(1),
+            Subject = 'Showing',
+            MVEX__Showing_Duration__c = 60,
+            StartDateTime = System.now().addDays(1)
         );
         insert showing;
 
@@ -551,7 +561,7 @@ private class WhatsAppWebhookTest {
         Test.stopTest();
         
         // Verify showing status updated
-        Showing__c updatedShowing = [SELECT Status__c FROM Showing__c WHERE Id = :showing.Id];
+        Event updatedShowing = [SELECT Status__c FROM Event WHERE Id = :showing.Id];
         System.assertEquals('Cancelled', updatedShowing.Status__c);
     }
 
@@ -580,11 +590,16 @@ private class WhatsAppWebhookTest {
         );
         insert contextChat;
         
-        // Create Showing__c record
-        Showing__c showing = new Showing__c(
+        // Create Event record
+        Id showingRecordTypeId = Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName().get('Showing').getRecordTypeId();
+        Event showing = new Event(
+            RecordTypeId = showingRecordTypeId,
             Chat__c = contextChat.Id,
             Status__c = 'Scheduled',
-            Scheduled_Date__c = System.now().addDays(1)
+            MVEX__Scheduled_Date__c = System.now().addDays(1),
+            Subject = 'Showing',
+            MVEX__Showing_Duration__c = 60,
+            StartDateTime = System.now().addDays(1)
         );
         insert showing;
 
@@ -600,9 +615,9 @@ private class WhatsAppWebhookTest {
         Test.stopTest();
         
         // Verify showing status updated to Rescheduled
-        Showing__c updatedShowing = [SELECT Status__c, Reschedule_Date__c FROM Showing__c WHERE Id = :showing.Id];
+        Event updatedShowing = [SELECT Status__c, MVEX__Reschedule_Date__c FROM Event WHERE Id = :showing.Id];
         System.assertEquals('Rescheduled', updatedShowing.Status__c);
-        System.assertNotEquals(null, updatedShowing.Reschedule_Date__c);
+        System.assertNotEquals(null, updatedShowing.MVEX__Reschedule_Date__c);
     }
 
     @isTest
@@ -749,7 +764,7 @@ private class WhatsAppWebhookTest {
         WhatsAppWebhook.processWhatsAppPayload(interactivePayload);
         Test.stopTest();
         
-        // Should create chat without crashing when no Showing__c exists
+        // Should create chat without crashing when no Event exists
         List<Chat__c> chats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = 'wamid.no_showing789'];
         System.assertEquals(1, chats.size());
     }

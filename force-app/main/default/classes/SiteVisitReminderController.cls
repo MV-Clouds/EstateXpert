@@ -8,8 +8,8 @@ public with sharing class SiteVisitReminderController {
 
     private static void sendShowingReminder(String showingId) {
         try {
-            Showing__c showing = [SELECT Id, Buyer__c, Buyer__r.Phone, Listing__c, Scheduled_Date__c, Status__c 
-                                FROM Showing__c WHERE Id = :showingId WITH USER_MODE];
+            Event showing = [SELECT Id, Buyer__c, Buyer__r.Phone, Listing__c, Scheduled_Date__c, Status__c 
+                                FROM Event WHERE Id = :showingId LIMIT 1];
             if (showing.Buyer__r.Phone == null || showing.Status__c != 'Scheduled') {
                 return;
             }
@@ -23,7 +23,7 @@ public with sharing class SiteVisitReminderController {
             }
             String templateId = temp.Id;
 
-            Map<String, Object> templateDataMap = ChatWindowController.getTemplateData(templateId, showingId, 'Showing__c');
+            Map<String, Object> templateDataMap = ChatWindowController.getTemplateData(templateId, showingId, 'Event');
             if (templateDataMap == null) {
                 return;
             }
@@ -50,7 +50,7 @@ public with sharing class SiteVisitReminderController {
                 Message_Type__c = 'Template',
                 WhatsappTemplate__c = templateId
             );
-            insert as user chat;
+            insert chat;
 
             String buttonValueStr = template.WBButton_Body__c != null ? template.WBButton_Body__c : '[]';
             List<Object> buttonValue = (List<Object>)JSON.deserializeUntyped(buttonValueStr);
@@ -73,7 +73,7 @@ public with sharing class SiteVisitReminderController {
             // Call future method to handle the callout
             sendWhatsAppMessageFuture(jsonData, chat.Id, showingId);
 
-            update as user showing;
+            update showing;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'SiteAndBookingController', 'sendShowingReminder', e.getMessage());
         }

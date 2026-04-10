@@ -229,10 +229,14 @@
 }
 
 .custom-accordion__body.expanded {
-    max-height: 520px;
+    min-height: 350px;
     opacity: 1;
     transform: translateY(0);
     padding: 1rem;
+    overflow: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
 }
 
 .custom-accordion__body.collapsed {
@@ -300,13 +304,13 @@
     transition: 0.3s;
 }
 
-.custom-checkbox input[type="checkbox"]:checked + .checkmark {
+.custom-checkbox input[type="checkbox"]:checked+.checkmark {
     background-color: #0376D3;
     border-color: white;
     transition: 0.3s;
 }
 
-.custom-checkbox-body input[type="checkbox"]:checked + .checkmark {
+.custom-checkbox-body input[type="checkbox"]:checked+.checkmark {
     border-color: #0376D3;
     transition: 0.3s;
 }
@@ -324,7 +328,7 @@
     transform: translate(-42%, -61%) rotate(45deg);
 }
 
-.custom-checkbox input[type="checkbox"]:checked + .checkmark::before {
+.custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
     display: block;
 }
 
@@ -347,9 +351,10 @@
     justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    background: #FFFFFF;
-    border-top: 1px solid #E5E7EB;
+    background: #f9fafb;
+    /* border-top: 1px solid #E5E7EB; */
     flex-shrink: 0;
+    padding-bottom: 0rem;
 }
 
 .popdiv_cls {
@@ -493,24 +498,17 @@
 }
 
 .main_content_cls {
-    height:90%;
+    height: 90%;
+    margin-bottom: 5rem;
 }
 
 .popup-table-content {
     margin: 0;
-    height: auto;
-    max-height: 45vh;
 }
 
 .display_cls,
 .index-display {
     text-align: center;
-}
-
-.action-btn {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
 }
 
 .delete-div {
@@ -543,7 +541,7 @@
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
-.delete-div:disabled{
+.delete-div:disabled {
     background-color: #f3f4f6;
     color: #9ca3af;
     border-color: #e5e7eb;
@@ -553,11 +551,11 @@
     transform: none;
 }
 
-.delete-div:disabled:hover svg{
+.delete-div:disabled:hover svg {
     fill: currentColor;
 }
 
-.delete-div:disabled:hover svg path{
+.delete-div:disabled:hover svg path {
     stroke: currentColor;
 }
 
@@ -612,29 +610,29 @@
     padding: 1rem 1.25rem;
 }
 
-.custom-field{
+.custom-field {
     width: 30rem;
 }
 
 /* Fix combobox dropdown alignment to left */
 .combobox_cls {
-  text-align: left !important;
+    text-align: left !important;
 }
 
 .combobox_cls lightning-combobox,
 .combobox_cls .slds-combobox {
-  text-align: left !important;
+    text-align: left !important;
 }
 
 .combobox_cls lightning-combobox .slds-combobox__input,
 .combobox_cls .slds-input {
-  text-align: left !important;
+    text-align: left !important;
 }
 
 lightning-combobox .slds-dropdown,
 .slds-dropdown {
-  text-align: left !important;
-  left: 0 !important;
-  right: auto !important;
-  margin-left: 0 !important;
+    text-align: left !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-left: 0 !important;
 }

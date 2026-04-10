@@ -87,6 +87,21 @@
                                                     </span>
                                                 </div>
                                             </th>
+                                            <th data-id="MVEX__Schedule_DateTime__c" onclick={sortClick} aria-sort="none"
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header created-date"
+                                                scope="col">
+                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Broadcast Time">Broadcast Time</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="MVEX__Schedule_DateTime__c" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
                                             <th data-id="MVEX__Total_Sent__c" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header total-sent"
                                                 scope="col">
@@ -152,23 +167,6 @@
                                                     </span>
                                                 </div>
                                             </th>
-                                            <th data-id="progressPercentage" onclick={sortClick} aria-sort="none"
-                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header progress"
-                                                scope="col">
-                                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate"
-                                                    role="button" tabindex="0">
-                                                    <span class="slds-truncate progress_cls"
-                                                        title="Progress">Progress</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="progressPercentage"
-                                                            class="listing-manager-icon" viewBox="0 0 384 512"
-                                                            xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
-                                                </div>
-                                            </th>
                                             <th data-id="CreatedDate" onclick={sortClick} aria-sort="none"
                                                 class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header created-date"
                                                 scope="col">
@@ -201,7 +199,16 @@
                                                     <div>{row.MVEX__Recipient_Count__c}</div>
                                                 </td>
                                                 <td data-label="Status">
-                                                    <div class={row.statusClass}>{row.MVEX__Status__c}</div>
+                                                    <div class={row.statusClass}>{row.MVEX__Status__c}
+                                                        <template lwc:if={row.isPending}>
+                                                            <button class="reschedule-btn" onclick={handleReschedulePopup} data-record-id={row.Id} aria-label="Reschedule broadcast">
+                                                                <lightning-icon icon-name="utility:event" size="xx-small" class="reschedule-icon"></lightning-icon>
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Broadcast Time">
+                                                    <div>{row.scheduledDateTime}</div>
                                                 </td>
                                                 <td data-label="Total Sent">
                                                     <div>{row.MVEX__Total_Sent__c}</div>
@@ -214,17 +221,6 @@
                                                 </td>
                                                 <td data-label="Total Failed">
                                                     <div>{row.MVEX__Total_Failed__c}</div>
-                                                </td>
-                                                <td data-label="Progress" class="progress-container">
-                                                    <div class="modern-progress-wrapper">
-                                                        <div class="modern-progress-bar">
-                                                            <div class="modern-progress-fill"
-                                                                data-progress={row.progressPercentage}
-                                                                style={row.progressWidth}></div>
-                                                            <span
-                                                                class="modern-progress-text">{row.progressPercentage}%</span>
-                                                        </div>
-                                                    </div>
                                                 </td>
                                                 <td data-label="Created Date">
                                                     <div>{row.CreatedDateformatted}</div>
@@ -610,7 +606,7 @@
                                                     <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
                                                         fill="currentColor" />
                                                 </svg>
-                                                Confirm &amp; Send
+                                                Confirm &amp; Schedule
                                             </button>
                                         </div>
                                     </div>
@@ -645,7 +641,6 @@
                                     <div class="slds-modal__content schedule-modal-content" id="modal-content-id-3">
                                         <p>Are you sure you want to send this template to the selected contacts?</p>
 
-
                                         <div class="schedule-modal-footer slds-text-align--center">
                                             <button class="white-btn-css" onclick={handlePreviousLastPage}>
                                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
@@ -670,6 +665,43 @@
                                 </div>
                             </section>
                         </template>
+                    </template>
+
+                    <template if:true={showReschedulePopup}>
+                        <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop"></div>
+
+                        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="confirm-modal-heading" class="slds-modal slds-fade-in-open confirm-modal" aria-describedby="modal-content-id-3">
+                            <div class="slds-modal__container schedule-modal-container">
+                                <div class="slds-modal__header blue-header">
+                                    <h2 class="slds-modal__title" id="confirm-modal-heading2">Reschedule Broadcast</h2>
+                                </div>
+
+                                <div class="slds-modal__content schedule-modal-content" id="modal-content-id-23">
+                                    <lightning-input type="datetime-local" name="dateTime" value={selectedDateTime} onchange={handleInputChange} class="slds-align_absolute-center"></lightning-input>
+
+                                    <div class="schedule-modal-footer slds-text-align--center">
+                                        <button class="white-btn-css" onclick={handleCloseReschedulePopup}>
+                                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                            </svg>
+                                            Cancel
+                                        </button>
+                                        <button class="blue-btn-css" onclick={handleReschedule} data-action="Delete Broadcast">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                                            </svg>
+                                            Delete Broadcast
+                                        </button>
+                                        <button class="blue-btn-css" onclick={handleReschedule} data-action="Reschedule">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                                            </svg>
+                                            Reschedule
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </template>
                 </div>
             </template>

@@ -162,7 +162,7 @@ public with sharing class BroadcastMessageController {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
         try {
             List<Broadcast__c> broadcasts = [
-                SELECT Id, Name,Status__c, CreatedDate, Recipient_Count__c,
+                SELECT Id, Name,Status__c, CreatedDate, Recipient_Count__c, MVEX__Schedule_DateTime__c,
                     Total_Sent__c, Total_Delivered__c, Total_Read__c,MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
                 FROM Broadcast__c 
                 ORDER BY CreatedDate DESC
@@ -235,7 +235,8 @@ public with sharing class BroadcastMessageController {
                     'MVEX__Total_Failed__c' => failed,
                     'MVEX__Total_Read__c' => read,
                     'MVEX__Total_Replies__c' => replied,
-                    'MVEX__Template_Name__c' => b.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
+                    'MVEX__Template_Name__c' => b.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c,
+                    'MVEX__Schedule_DateTime__c' => b.MVEX__Schedule_DateTime__c
                 });
             }
         } catch (Exception e) {
@@ -250,7 +251,7 @@ public with sharing class BroadcastMessageController {
         try {
             // Query single broadcast
             Broadcast__c broadcast = [
-                SELECT Id, Name, Status__c, CreatedDate, Recipient_Count__c,
+                SELECT Id, Name, Status__c, CreatedDate, Recipient_Count__c, Schedule_DateTime__c,
                     Total_Sent__c, Total_Delivered__c, Total_Read__c,
                     MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
                 FROM Broadcast__c 
@@ -323,7 +324,7 @@ public with sharing class BroadcastMessageController {
             result.put('MVEX__Total_Read__c', read);
             result.put('MVEX__Total_Replies__c', replied);
             result.put('MVEX__Template_Name__c', broadcast.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c);
-
+            result.put('MVEX__Schedule_DateTime__c', broadcast.MVEX__Schedule_DateTime__c);
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastRecsWithReplies', e.getMessage());
         }
@@ -504,6 +505,7 @@ public with sharing class BroadcastMessageController {
             Broadcast__c broadcast = new Broadcast__c();
             broadcast.WhatsappTemplate__c = templateId;
             broadcast.Status__c = 'Pending';
+            broadcast.Schedule_DateTime__c = DateTime.now();
             broadcast.Broadcast_Group_IDs__c = String.join(groupIds, ','); // Save all group IDs as a comma-separated string
 
             String objectApiName = '';
@@ -572,7 +574,7 @@ public with sharing class BroadcastMessageController {
                 br.Schedule_DateTime__c = userDateTime;
                 Database.SaveResult updateResult = Database.update(br, false, AccessLevel.USER_MODE);
 
-                String jobName = 'BroadcastSchedule_' + System.currentTimeMillis();
+                String jobName = 'BroadcastSchedule_' + broadcast.Id;
                 System.schedule(jobName, cronExpression, batchSchedular);
             }
             // return 'Success';
@@ -586,6 +588,96 @@ public with sharing class BroadcastMessageController {
     public static String getCronExpression(DateTime dt) {
         String cronExpression = '0 ' + dt.minute() + ' ' + dt.hour() + ' ' + dt.day() + ' ' + dt.month() + ' ' + '?' + ' ' + dt.year();
         return cronExpression;
+    }
+
+    @AuraEnabled
+    public static List<String> rescheduleBroadcast(String broadcastId, String action, String newScheduleTime) {
+        try {
+            String jobName = 'BroadcastSchedule_' + broadcastId;
+            // Query for the scheduled job using the current user's session ID
+            List<CronTrigger> jobs = [SELECT Id, CronExpression, NextFireTime FROM CronTrigger WHERE State = 'WAITING' AND CronJobDetail.Name=:jobName WITH USER_MODE LIMIT 1];
+
+            if (jobs.isEmpty()) {
+                return new List<String>{'Error', 'No scheduled job found for this broadcast.'};
+            }
+
+            System.debug('Aborted scheduled job for broadcast: ' + broadcastId);
+
+            List<Chat__c> chatRecs = [SELECT Id, Phone__c FROM Chat__c WHERE WB_Broadcast__c = :broadcastId WITH USER_MODE];
+            List<Broadcast__c> broadcastRecs = new List<Broadcast__c>();
+            broadcastRecs =  [SELECT Id, Name, WhatsappTemplate__c, WhatsappTemplate__r.Template_Name__c, Broadcast_Group_IDs__c, Status__c, MVEX__Schedule_DateTime__c FROM Broadcast__c WHERE Id = :broadcastId WITH USER_MODE ORDER BY LastModifiedDate DESC];
+
+            if (action == 'Reschedule') {
+                // Validate the new schedule time
+                if (String.isBlank(newScheduleTime)) {
+                    System.debug('New schedule time is required for rescheduling.');
+                    return new List<String>{'Error', 'Something went wrong while rescheduling the broadcast. Please try again.'};
+                }
+
+                String templateId = broadcastRecs[0].WhatsappTemplate__c;
+                String objectApiName = '';
+                String phoneField = '';
+                List<String> groupIds = new List<String>();
+                if (broadcastRecs[0].Broadcast_Group_IDs__c != null) {
+                    groupIds = broadcastRecs[0].Broadcast_Group_IDs__c.split(',');
+                    List<Broadcast_Group__c> brGroupRecs = [SELECT Id, Name, Object_Name__c, Phone_Field__c FROM Broadcast_Group__c WHERE Id IN :groupIds];
+                    if (brGroupRecs.size() > 0) {
+                        objectApiName = brGroupRecs[0].Object_Name__c;
+                        phoneField = brGroupRecs[0].Phone_Field__c;
+                    }
+                    System.debug('brGroupRecs: ' + brGroupRecs);
+                }
+
+                newScheduleTime = newScheduleTime.replace('T', ' ').replace('Z', '');
+
+                DateTime utcDateTime = DateTime.valueOf(newScheduleTime);
+
+                // Convert UTC to user's timezone
+                TimeZone userTimeZone = UserInfo.getTimeZone();
+                DateTime userDateTime = utcDateTime.addSeconds(userTimeZone.getOffset(utcDateTime) / 1000);
+
+                // Validate that the scheduled time is in the future
+                if (userDateTime < DateTime.now()) {
+                    System.debug('Scheduled time must be in the future.');
+                    return new List<String>{'Error', 'Scheduled time must be in the future.'};
+                }
+                
+                System.abortJob(jobs[0].Id); // Abort the job if found
+
+                System.debug('userDateTime: ' + userDateTime);
+
+                String formattedTime = userDateTime.format('hh:mm a');
+
+                String cronExpression = getCronExpression(userDateTime);
+
+                WhatsAppMessageBatchSchedulable2 batchSchedular = new WhatsAppMessageBatchSchedulable2(templateId, chatRecs, broadcastId, objectApiName, phoneField);
+
+                System.debug('batchSchedular: ' + batchSchedular);
+
+                Broadcast__c br = new Broadcast__c(Id = broadcastId);
+                br.Schedule_DateTime__c = userDateTime;
+                Database.SaveResult updateResult = Database.update(br, false, AccessLevel.USER_MODE);
+
+                System.debug('updateResult: ' + updateResult);
+
+                System.schedule(jobName, cronExpression, batchSchedular);
+
+                return new List<String>{'Success', 'Broadcast rescheduled successfully.'};
+            } else if (action == 'Delete Broadcast') {
+                
+                System.abortJob(jobs[0].Id); // Abort the job if found
+                // Delete the Broadcast record and related Chat records
+                delete chatRecs;
+                delete broadcastRecs;
+
+                return new List<String>{'Success', 'Broadcast deleted successfully.'};
+            } else {
+                return new List<String>{'Error', 'Invalid action specified. Please use "Reschedule" or "Delete Broadcast".'};
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'rescheduleBroadcast', e.getMessage());
+            return new List<String>{'Error', 'Something went wrong while rescheduling the broadcast. Please try again.'};
+        }
     }
 
     @AuraEnabled

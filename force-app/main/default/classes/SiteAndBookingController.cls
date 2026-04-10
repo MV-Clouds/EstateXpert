@@ -433,18 +433,15 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled
-    public static Boolean updateShowingStatus(String showingId, String status, String chatId) {
+    public static Boolean updateShowingStatus(String showingId, String status) {
         try {
             if (String.isBlank(showingId) || String.isBlank(status)) {
                 return false;
             }
             Event showing = new Event(
                 Id = showingId,
-                Status__c = status == 'Wait' ? 'Waiting For Confirmation' : status
+                Status__c = status
             );
-            if (String.isNotBlank(chatId)) {
-                showing.Chat__c = chatId;
-            }
             update showing;
             return true;
         } catch (Exception e) {

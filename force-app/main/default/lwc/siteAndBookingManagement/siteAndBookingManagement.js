@@ -6,7 +6,7 @@ import emptyState from '@salesforce/resourceUrl/emptyState';
 import getPropertyData from '@salesforce/apex/SiteAndBookingController.getPropertyData';
 import sendEmailsAndCreateShowings from '@salesforce/apex/SiteAndBookingController.sendEmailsAndCreateShowings';
 import createShowings from '@salesforce/apex/SiteAndBookingController.createShowings';
-import sendWhatsAppMessageBatch from '@salesforce/apex/WhatsAppMessageBatch2.sendWhatsAppMessage';
+import sendWhatsappMessage from '@salesforce/apex/SiteAndBookingController.sendWhatsappMessage';
 import getShowingsFromToday from '@salesforce/apex/SiteAndBookingController.getShowingsFromToday';
 import markShowingAsCompleted from '@salesforce/apex/SiteAndBookingController.markShowingAsCompleted';
 import updateShowingStatus from '@salesforce/apex/SiteAndBookingController.updateShowingStatus';
@@ -1003,24 +1003,15 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                         buttonType: this.templateData?.MVEX__Button_Type__c || '',
                         buttonValue: buttonValue
                     });
-                    sendWhatsAppMessageBatch({
+                    sendWhatsappMessage({
+                        jsonData: templatePayload,
                         chatId: chat.Id,
-                        jsonBody: templatePayload
+                        showingId: this.currentShowingId,
+                        status: status
                     })
                     .then(result => {
                         this.dispatchEvent(new CustomEvent('message', { detail: result }));
-                        if (status && this.currentShowingId) {
-                            updateShowingStatus({ showingId: this.currentShowingId, status: status, chatId: chat.Id })
-                                .then(() => {
-                                    this.handleApexSuccess('WhatsApp message sent and showing status updated.');
-                                })
-                                .catch(error => {
-                                    console.error('Error updating showing status:', error);
-                                    this.handleApexSuccess('WhatsApp message sent successfully (Status update failed).');
-                                });
-                        } else {
-                            this.handleApexSuccess('WhatsApp message sent successfully.');
-                        }
+                        this.handleApexSuccess('WhatsApp message sent successfully.');
                     })
                     .catch(error => this.handleApexError(error, 'Error sending WhatsApp message.'));
                 } else {

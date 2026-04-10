@@ -200,16 +200,9 @@ public with sharing class SiteVisitReminderController {
     @future(callout=true)
     public static void sendWhatsAppMessageFuture(String jsonData, String chatId, String showingId) {
         try {
-            WhatsAppMessageBatch2.sendWhatsAppMessage(chatId, jsonData);
-            if (String.isNotBlank(showingId)) {
-                Event showing = new Event(Id = showingId, Status__c = 'Scheduled');
-                if (String.isNotBlank(chatId)) {
-                    showing.Chat__c = chatId;
-                }
-                update showing;
-            }
+            SiteAndBookingController.sendWhatsappMessage(jsonData, chatId, showingId, 'Scheduled');
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'SiteVisitReminderController', 'sendWhatsAppMessageFuture', e.getMessage());
+            ErrorHandler.insertErrorData(e, 'SiteAndBookingController', 'sendWhatsAppMessageFuture', e.getMessage());
         }
     }
 }

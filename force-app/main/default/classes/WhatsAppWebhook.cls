@@ -477,9 +477,9 @@ global without sharing class WhatsAppWebhook{
                                         System.debug('Label-Value Mapped JSON: ' + labelToValueJson);
 
                                         createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
-                                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(responseJson);
-                                        String rescheduleDateStr = (String)responseMap.get('screen_0_SECTION_EKOGRID_0');
-                                        String rescheduleTimeStr = (String)responseMap.get('screen_0_SECTION_EKGGHPW_1');
+                                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(labelToValueJson);
+                                        String rescheduleDateStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Date');
+                                        String rescheduleTimeStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Time');
                                         List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
                                         System.debug('contextChats :'+contextChats);
                                         if (!contextChats.isEmpty()) {

@@ -47,7 +47,7 @@ public with sharing class SiteAndBookingController {
             Map<Id, Event> contactToEvent = new Map<Id, Event>();
             if (!contactIds.isEmpty()) {
                 List<Event> showingEvents = [
-                    SELECT Id, Buyer__c, Status__c, Scheduled_Date__c, Reschedule_Date__c, Communication_Method__c
+                    SELECT Id, Buyer__c, Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c, Communication_Method__c
                     FROM Event
                     WHERE Buyer__c IN :contactIds
                       AND Listing__c = :escapedListingId
@@ -73,8 +73,8 @@ public with sharing class SiteAndBookingController {
                 contactMap.put('MobilePhone', c.Phone);
                 contactMap.put('ShowingId', ev == null ? '' : ev.Id);
                 contactMap.put('ShowingStatus', ev == null ? 'Not Scheduled' : ev.Status__c);
-                contactMap.put('ScheduleDate', ev == null ? '' : String.valueOf(ev.Scheduled_Date__c));
-                contactMap.put('RescheduleDate', ev == null ? '' : String.valueOf(ev.Reschedule_Date__c));
+                contactMap.put('ScheduleDate', ev == null ? '' : String.valueOf(ev.MVEX__Scheduled_Date__c));
+                contactMap.put('RescheduleDate', ev == null ? '' : String.valueOf(ev.MVEX__Reschedule_Date__c));
                 contactMap.put('CommunicationMethod', ev == null ? '' : ev.Communication_Method__c);
                 formattedContacts.add(contactMap);
             }
@@ -335,9 +335,9 @@ public with sharing class SiteAndBookingController {
             Datetime todayStart = Datetime.newInstance(Date.today(), Time.newInstance(0, 0, 0, 0));
 
             List<Event> showings = [
-                SELECT Id, Status__c, Scheduled_Date__c, Reschedule_Date__c, Buyer__r.Name, Listing__r.Name
+                SELECT Id, Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c, Buyer__r.Name, Listing__r.Name
                 FROM Event
-                WHERE (Scheduled_Date__c >= :todayStart OR Reschedule_Date__c >= :todayStart)
+                WHERE (MVEX__Scheduled_Date__c >= :todayStart OR MVEX__Reschedule_Date__c >= :todayStart)
                   AND Status__c IN ('Waiting For Confirmation', 'Scheduled', 'Rescheduled')
                   AND RecordTypeId = :showingRecordTypeId
             ];
@@ -347,8 +347,8 @@ public with sharing class SiteAndBookingController {
                 Map<String, Object> showingMap = new Map<String, Object>();
                 showingMap.put('Id', showing.Id);
                 showingMap.put('MVEX__Status__c', showing.Status__c);
-                showingMap.put('MVEX__Scheduled_Date__c', showing.Scheduled_Date__c);
-                showingMap.put('MVEX__Reschedule_Date__c', showing.Reschedule_Date__c);
+                showingMap.put('MVEX__Scheduled_Date__c', showing.MVEX__Scheduled_Date__c);
+                showingMap.put('MVEX__Reschedule_Date__c', showing.MVEX__Reschedule_Date__c);
                 showingMap.put('ContactName', showing.Buyer__r.Name);
                 showingMap.put('ListingName', showing.Listing__r.Name);
                 formattedShowings.add(showingMap);
@@ -362,117 +362,65 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, String dateStr,
-    String timeStr) {
+    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, String dateStr, String timeStr) {
         try {
             Savepoint sp = Database.setSavepoint();
             Event showing;
 
-             // ---------------------------------------------------------
             // 1. Create DateTime from date and time strings
-            // ---------------------------------------------------------
-            DateTime scheduledDateTime = System.now(); // Default to now
-            
-            if (dateStr != null && timeStr != null) {
-                    // Parse the date string
-                    List<String> dateParts = dateStr.split('-');
-                    Date selectedDate = Date.newInstance(
-                        Integer.valueOf(dateParts[0]),  // year
-                        Integer.valueOf(dateParts[1]),  // month
-                        Integer.valueOf(dateParts[2])   // day
-                    );
-                    
-                    // Parse the time string
-                    List<String> timeParts = timeStr.split(':');
-                    Integer hour = Integer.valueOf(timeParts[0]);  // 15
-                    Integer minute = Integer.valueOf(timeParts[1]); // 57
-                    
+            DateTime scheduledDateTime = System.now(); 
+            if (String.isNotBlank(dateStr) && String.isNotBlank(timeStr)) {
+                try {
                     String gmtDateTimeStr = dateStr + ' ' + timeStr + ':00';
                     scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
-                
+                } catch (Exception e) {
+                    System.debug('Error parsing date/time: ' + e.getMessage());
+                }
             }
 
-            // ---------------------------------------------------------
             // 2. Check if showing exists; if not, create a temporary one
-            // ---------------------------------------------------------
-            List<Event> existingShowings = [
-                SELECT Id, Buyer__c, Buyer__r.Email, Listing__c
-                FROM Event
-                WHERE Id = :showingId
-                LIMIT 1
-            ];
-
-            if (!existingShowings.isEmpty()) {
-                showing = existingShowings[0];
-
-                if (isReschedule && scheduledDateTime != null) {
-                    showing.Reschedule_Date__c = scheduledDateTime;
-                    update showing;
+            if (String.isNotBlank(showingId)) {
+                List<Event> existingShowings = [SELECT Id, Buyer__c, Buyer__r.Email, Listing__c FROM Event WHERE Id = :showingId LIMIT 1];
+                if (!existingShowings.isEmpty()) {
+                    showing = existingShowings[0];
+                    if (isReschedule && scheduledDateTime != null) {
+                        showing.MVEX__Reschedule_Date__c = scheduledDateTime;
+                        update showing;
+                    }
                 }
-                
             } else if (contactId != null && listingId != null) {
-                // Create a temporary showing for preview purposes
-                showing = new Event();
-                showing.RecordTypeId = showingRecordTypeId;
-                showing.Listing__c = listingId;
-                showing.Buyer__c = contactId;
-                showing.Status__c = 'Waiting For Confirmation';
-                showing.Scheduled_Date__c = scheduledDateTime;
-                showing.Subject = 'Showing';
-                showing.StartDateTime = scheduledDateTime;
-                showing.MVEX__Showing_Duration__c = 60;
-
-                // Insert temporarily for preview
+                showing = new Event(
+                    RecordTypeId = showingRecordTypeId,
+                    Listing__c = listingId,
+                    Buyer__c = contactId,
+                    Status__c = 'Waiting For Confirmation',
+                    MVEX__Scheduled_Date__c = scheduledDateTime,
+                    Subject = 'Showing Preview',
+                    StartDateTime = scheduledDateTime,
+                    MVEX__Showing_Duration__c = 60,
+                    EndDateTime = scheduledDateTime.addMinutes(60)
+                );
                 insert showing;
             }
 
-            // ---------------------------------------------------------
+            if (showing == null || showing.Id == null) {
+                return null;
+            }
+
             // 3. Refresh to get related data
-            // ---------------------------------------------------------
-            showing = [
-                SELECT Id, Buyer__c, Buyer__r.Email, Listing__c, Listing__r.Name
-                FROM Event
-                WHERE Id = :showing.Id
-                LIMIT 1
-            ];
+            showing = [SELECT Id, Buyer__c, Buyer__r.Email, Listing__c FROM Event WHERE Id = :showing.Id LIMIT 1];
 
-            // ---------------------------------------------------------
             // 4. Pick the correct EmailTemplate
-            // ---------------------------------------------------------
-            String templateName = isReschedule
-                ? 'RescheduleConfirmationEmail'
-                : 'Showing_Confirmation';
+            String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
+            EmailTemplate et = [SELECT Id FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
 
-            EmailTemplate et = [
-                SELECT Id
-                FROM EmailTemplate
-                WHERE DeveloperName = :templateName WITH USER_MODE
-                LIMIT 1
-            ];
+            // 5. Build email for preview using renderStoredEmailTemplate
+            Messaging.SingleEmailMessage mail = Messaging.renderStoredEmailTemplate(et.Id, showing.Buyer__c, showing.Id);
 
-            // ---------------------------------------------------------
-            // 5. Build email for preview
-            // ---------------------------------------------------------
-            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-            mail.setTemplateId(et.Id);
-            mail.setTargetObjectId(showing.Buyer__c);
-            mail.setWhatId(showing.Id);
-            mail.setToAddresses(new List<String>{ showing.Buyer__r.Email });
-            mail.setSaveAsActivity(false);
-
-            // ---------------------------------------------------------
-            // 6. Send (will be rolled back) → gets merged body
-            // ---------------------------------------------------------
-            Messaging.sendEmail(new Messaging.SingleEmailMessage[]{ mail });
-
-            // ---------------------------------------------------------
-            // 7. Rollback all changes (temporary showing + email activity)
-            // ---------------------------------------------------------
+            // 6. Rollback temporary insertion
             Database.rollback(sp);
 
-            // ---------------------------------------------------------
-            // 8. Return merged subject + HTML
-            // ---------------------------------------------------------
+            // 7. Return merged subject + HTML
             return new Map<String,String>{
                 'subject'  => mail.getSubject(),
                 'htmlBody' => mail.getHtmlBody()

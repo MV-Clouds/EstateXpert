@@ -603,6 +603,7 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
     @return          : List<Chat__c> - List of chat records
     ********************************************************
     */
+    @AuraEnabled(cacheable=false)
     global static List<Chat__c> sendWhatsAppMessage(String chatId, String jsonBody) {
         try {
             List<Chat__c> chat = [SELECT Id, Phone__c, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id = :chatId WITH USER_MODE LIMIT 1];

@@ -478,12 +478,13 @@ global without sharing class WhatsAppWebhook{
 
                                         createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
                                         Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(responseJson);
-                                        String rescheduleDateStr = (String)responseMap.get('screen_0_reschedule_date_0');
-                                        String rescheduleTimeStr = (String)responseMap.get('screen_0_reschedule_time_1');
+                                        String rescheduleDateStr = (String)responseMap.get('screen_0_SECTION_EKOGRID_0');
+                                        String rescheduleTimeStr = (String)responseMap.get('screen_0_SECTION_EKGGHPW_1');
                                         List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
                                         System.debug('contextChats :'+contextChats);
                                         if (!contextChats.isEmpty()) {
                                             List<Event> showings = [SELECT Id, Status__c, MVEX__Scheduled_Date__c, MVEX__Showing_Duration__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
+                                            System.debug('contextChats :'+contextChats);
                                             System.debug('showings :'+showings);
                                             if (!showings.isEmpty() && rescheduleDateStr != null && rescheduleTimeStr != null) {
                                                 Event showing = showings[0];
@@ -507,6 +508,7 @@ global without sharing class WhatsAppWebhook{
                                                     Integer offsetMinutes1 = Math.mod(offsetMillis1 / (1000 * 60), 60);
                                                     Datetime gmtDateTime = istDateTime.addHours(-offsetHours1).addMinutes(-offsetMinutes1);
                                                     showing.MVEX__Reschedule_Date__c = gmtDateTime;
+                                                    System.debug('GMT DateTime for showing: ' + gmtDateTime);
                                                     showing.StartDateTime = gmtDateTime;
                                                     Integer duration = (Integer)showing.MVEX__Showing_Duration__c != null ? (Integer)showing.MVEX__Showing_Duration__c : 60;
                                                     showing.EndDateTime = gmtDateTime.addMinutes(duration);

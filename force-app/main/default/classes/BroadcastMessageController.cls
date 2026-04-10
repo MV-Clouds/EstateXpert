@@ -201,18 +201,6 @@ public with sharing class BroadcastMessageController {
                 }
             }
 
-            // Replies
-            Map<String, Integer> phoneReplies = new Map<String, Integer>();
-            for (AggregateResult ar : [
-                SELECT Phone__c, COUNT(Id) cnt
-                FROM Chat__c 
-                WHERE Phone__c IN :allPhones
-                AND Type_of_Message__c = 'Inbound Messages'
-                GROUP BY Phone__c
-            ]) {
-                phoneReplies.put((String)ar.get('MVEX__Phone__c'), (Integer)ar.get('cnt'));
-            }
-
             for (Broadcast__c b : broadcasts) {
                 Integer sent = 0, delivered = 0, read = 0, replied = 0, failed = 0;
                 for (String phone : broadcastToPhones.get(b.Id)) {
@@ -221,7 +209,6 @@ public with sharing class BroadcastMessageController {
                     else if (st == 'Delivered') delivered++;
                     else if (st == 'Seen') read++;
                     else if (st == 'failed') failed++;
-                    if (phoneReplies.containsKey(phone)) replied += phoneReplies.get(phone);
                 }
 
                 result.add(new Map<String, Object>{
@@ -234,7 +221,6 @@ public with sharing class BroadcastMessageController {
                     'MVEX__Total_Delivered__c' => delivered + read,
                     'MVEX__Total_Failed__c' => failed,
                     'MVEX__Total_Read__c' => read,
-                    'MVEX__Total_Replies__c' => replied,
                     'MVEX__Template_Name__c' => b.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c,
                     'MVEX__Schedule_DateTime__c' => b.MVEX__Schedule_DateTime__c
                 });
@@ -289,29 +275,13 @@ public with sharing class BroadcastMessageController {
                 }
             }
 
-            // Replies
-            Map<String, Integer> phoneReplies = new Map<String, Integer>();
-            for (AggregateResult ar : [
-                SELECT Phone__c, COUNT(Id) cnt
-                FROM Chat__c 
-                WHERE Phone__c IN :allPhones
-                AND Type_of_Message__c = 'Inbound Messages'
-                GROUP BY Phone__c
-            ]) {
-                phoneReplies.put((String)ar.get('Phone__c'), (Integer)ar.get('cnt'));
-            }
-
-            Integer sent = 0, delivered = 0, read = 0, replied = 0, failed = 0;
+            Integer sent = 0, delivered = 0, read = 0, failed = 0;
             for (String phone : broadcastPhones) {
                 String st = phoneStatus.get(phone);
                 if (st == 'Sent') sent++;
                 else if (st == 'Delivered') delivered++;
                 else if (st == 'Seen') read++;
                 else if (st == 'failed') failed++;
-                
-                if (phoneReplies.containsKey(phone)) {
-                    replied += phoneReplies.get(phone);
-                }
             }
 
             result.put('Id', broadcast.Id);
@@ -322,7 +292,6 @@ public with sharing class BroadcastMessageController {
             result.put('MVEX__Total_Delivered__c', delivered + read);
             result.put('MVEX__Total_Failed__c', failed);
             result.put('MVEX__Total_Read__c', read);
-            result.put('MVEX__Total_Replies__c', replied);
             result.put('MVEX__Template_Name__c', broadcast.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c);
             result.put('MVEX__Schedule_DateTime__c', broadcast.MVEX__Schedule_DateTime__c);
         } catch (Exception e) {
@@ -772,14 +741,14 @@ public with sharing class BroadcastMessageController {
             // Count replies
             Map<String, Integer> phoneToReplies = new Map<String, Integer>();
             for (AggregateResult ar : [
-                SELECT Phone__c, COUNT(Id) cnt
+                SELECT Phone__c phone, COUNT(Id) cnt
                 FROM Chat__c 
                 WHERE Phone__c IN :allPhones
                 AND Type_of_Message__c = 'Inbound Messages'
                 AND CreatedDate >= :broadcast.CreatedDate
                 GROUP BY Phone__c
             ]) {
-                phoneToReplies.put((String)ar.get('MVEX__Phone__c'), (Integer)ar.get('cnt'));
+                phoneToReplies.put((String) ar.get('phone'), (Integer) ar.get('cnt'));
             }
 
             // Build result

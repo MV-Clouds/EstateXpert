@@ -422,6 +422,10 @@
     border-radius: 4px;
 }
 
+.table-content .slds-table_resizable-cols thead th{
+    width: 11rem;
+}
+
 c-template-preview {
     max-height: none !important;
     --max-height-of-the-preview-div: none !important;

@@ -1098,7 +1098,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             type: 'standard__recordPage',
             attributes: {
                 recordId: showingId,
-                objectApiName: 'MVEX__Showing__c',
+                objectApiName: 'Event',
                 actionName: 'view'
             }
         }).then(url => {

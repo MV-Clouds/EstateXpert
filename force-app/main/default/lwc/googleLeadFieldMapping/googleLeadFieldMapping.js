@@ -28,6 +28,7 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
     @track newGoogleFieldValue = '';
     @track isScroll = false;
     @track isManageFieldsAccordionOpen = false;
+    @track backupGoogleFieldOptions = [];
 
     get integrationLabel() {
         return this.integrationType === 'Meta' ? 'Meta Ads' : 'Google Ads';
@@ -67,7 +68,7 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
             const result = await getGoogleAdsFieldsJson({ integrationType: this.integrationType });
             if (result) {
                 console.log('result', result);
-                
+
                 let fields = JSON.parse(result);
                 console.log(`Fetched ${this.integrationLabel} fields:`, JSON.stringify(fields));
                 fields = fields.map(field => ({
@@ -126,12 +127,12 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
     getMetadataFunction() {
         try {
             console.log('getMetadataFunction called');
-            
+
             getMetadata({ integrationType: this.integrationType })
                 .then(result => {
                     console.log('Metadata result:', JSON.stringify(result));
                     if (result) {
-                        
+
                         this.parseAndSetMappings(result);
                     }
                     this.isLoading = false;
@@ -189,7 +190,7 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
         this.newGoogleFieldValue = event.detail.value;
     }
 
-    async addGoogleField() {
+    addGoogleField() {
         try {
             const trimmedLabel = this.newGoogleFieldLabel.trim();
             const trimmedValue = this.newGoogleFieldValue.trim();
@@ -202,18 +203,6 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
                 this.showToast('Error', 'Field API name cannot be empty or contain only whitespace', 'error');
                 return;
             }
-
-            // const labelRegex = /^[a-zA-Z0-9\s\-_,.()]+$/;
-            // if (!labelRegex.test(trimmedLabel)) {
-            //     this.showToast('Error', 'Field label can only contain letters, numbers, spaces, hyphens, commas, periods, or parentheses', 'error');
-            //     return;
-            // }
-
-            // const apiNameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/;
-            // if (!apiNameRegex.test(trimmedValue)) {
-            //     this.showToast('Error', 'Field API name must start with a letter and contain only letters, numbers, and underscores', 'error');
-            //     return;
-            // }
 
             if (trimmedLabel.length > 100) {
                 this.showToast('Error', 'Field label cannot exceed 100 characters', 'error');
@@ -239,48 +228,36 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
                 return;
             }
 
-            const newField = { 
-                label: trimmedLabel, 
-                value: trimmedValue, 
+            const newField = {
+                label: trimmedLabel,
+                value: trimmedValue,
                 isCustom: true,
                 disable: false
             };
-            const updatedFields = [...this.googleFieldOptions, newField];
-            console.log(`Saving new ${this.integrationLabel} field:`, JSON.stringify(updatedFields));
-            await saveGoogleAdsFieldsJson({ fieldsJson: JSON.stringify(updatedFields), integrationType: this.integrationType });
-            this.showToast('Success', `${this.integrationLabel} field added successfully`, 'success');
+            this.googleFieldOptions = [...this.googleFieldOptions, newField].sort((a, b) => a.label.localeCompare(b.label));
             this.newGoogleFieldLabel = '';
             this.newGoogleFieldValue = '';
-            await this.pollForFieldUpdate([...this.googleFieldOptions, newField], 'add');
+            this.isManageFieldsAccordionOpen = true;
+            this.showToast('Success', 'Field added locally. Click Save to apply changes.', 'success');
         } catch (error) {
             console.error(`Error adding ${this.integrationLabel} field:`, error);
             errorDebugger('GoogleLeadFieldMapping', 'addGoogleField', error, 'warn', `Error in addGoogleField for ${this.integrationType}`);
-            this.showToast('Error', `Failed to add ${this.integrationLabel} field`, 'error');
         }
     }
 
-    async deleteGoogleField(event) {
+    deleteGoogleField(event) {
         try {
             const fieldValue = event.currentTarget.dataset.value;
             const field = this.googleFieldOptions.find(f => f.value === fieldValue);
-            console.log(`Attempting to delete ${this.integrationLabel} field:`, fieldValue, field);
             if (!field.isCustom) {
                 this.showToast('Error', `Cannot delete predefined ${this.integrationLabel} field`, 'error');
                 return;
             }
-            const updatedFields = this.googleFieldOptions.filter(f => f.value !== fieldValue);
-            console.log(`Saving updated ${this.integrationLabel} fields after delete:`, JSON.stringify(updatedFields));
-            await saveGoogleAdsFieldsJson({ fieldsJson: JSON.stringify(updatedFields), integrationType: this.integrationType });
-            this.showToast('Success', `${this.integrationLabel} field deleted successfully`, 'success');
-            await this.pollForFieldUpdate(updatedFields, 'delete');
-            this.dropDownPairs = this.dropDownPairs.filter(pair => pair.metaField !== fieldValue);
-            this.filterAndUpdateGoogleFieldOptions();
-            this.filterAndUpdateSalesforceOptions();
-            this.validatePairs();
+            this.googleFieldOptions = this.googleFieldOptions.filter(f => f.value !== fieldValue);
+            this.showToast('Success', 'Field removed locally. Click Save to apply changes.', 'success');
         } catch (error) {
             console.error(`Error deleting ${this.integrationLabel} field:`, error);
             errorDebugger('GoogleLeadFieldMapping', 'deleteGoogleField', error, 'warn', `Error in deleteGoogleField for ${this.integrationType}`);
-            this.showToast('Error', `Failed to delete ${this.integrationLabel} field`, 'error');
         }
     }
 
@@ -323,8 +300,54 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
     }
 
     openManageFieldsModal() {
+        this.backupGoogleFieldOptions = JSON.parse(JSON.stringify(this.googleFieldOptions));
         this.showManageFieldsModal = true;
         this.isManageFieldsAccordionOpen = false;
+    }
+
+    handleCancelManageFields() {
+        this.googleFieldOptions = JSON.parse(JSON.stringify(this.backupGoogleFieldOptions));
+        this.mainGoogleFieldOptions = [...this.googleFieldOptions];
+        this.filterAndUpdateGoogleFieldOptions();
+        this.closeManageFieldsModal();
+    }
+
+    async handleSaveBulkFields() {
+        try {
+            this.isLoading = true;
+            const updatedFields = this.googleFieldOptions.map(field => ({
+                label: field.label,
+                value: field.value,
+                isCustom: field.isCustom
+            }));
+
+            await saveGoogleAdsFieldsJson({
+                fieldsJson: JSON.stringify(updatedFields),
+                integrationType: this.integrationType
+            });
+
+            this.showToast('Success', `${this.integrationLabel} fields update initiated successfully`, 'success');
+            this.mainGoogleFieldOptions = [...this.googleFieldOptions];
+
+            // Cleanup missing mappings if fields were deleted
+            const currentFieldValues = this.googleFieldOptions.map(f => f.value);
+            this.dropDownPairs = this.dropDownPairs.filter(pair =>
+                !pair.metaField || currentFieldValues.includes(pair.metaField)
+            );
+
+            this.filterAndUpdateGoogleFieldOptions();
+            this.filterAndUpdateSalesforceOptions();
+            this.validatePairs();
+            this.closeManageFieldsModal();
+
+            // Start polling in background to ensure sync
+            this.pollForFieldUpdate(this.googleFieldOptions, 'bulk-update');
+        } catch (error) {
+            console.error(`Error saving ${this.integrationLabel} fields:`, error);
+            this.showToast('Error', `Failed to save ${this.integrationLabel} fields`, 'error');
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     closeManageFieldsModal() {
@@ -367,14 +390,14 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
             const selectedGoogleFields = this.dropDownPairs.map(pair => pair.metaField);
             this.dropDownPairs = this.dropDownPairs.map(pair => ({
                 ...pair,
-                googleFieldOptions: this.mainGoogleFieldOptions.filter(option => 
+                googleFieldOptions: this.mainGoogleFieldOptions.filter(option =>
                     !selectedGoogleFields.includes(option.value) || option.value === pair.metaField
                 )
             }));
             this.googleFieldOptions = [...this.updateGoogleFields];
             this.updateGoogleFields = [];
-            console.log('this.googleFieldOptions'+JSON.stringify(this.googleFieldOptions));
-            
+            console.log('this.googleFieldOptions' + JSON.stringify(this.googleFieldOptions));
+
         } catch (error) {
             console.log('Error in filterAndUpdateGoogleFieldOptions:', error.stack);
             errorDebugger('GoogleLeadFieldMapping', 'filterAndUpdateGoogleFieldOptions', error, 'warn', 'Error in filterAndUpdateGoogleFieldOptions');
@@ -387,17 +410,17 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
             const selectedSalesforceValues = this.dropDownPairs.map(pair => pair.salesforceField);
             this.dropDownPairs = this.dropDownPairs.map(pair => ({
                 ...pair,
-                salesforceOptions: this.mainSalesforceOptions.filter(option => 
+                salesforceOptions: this.mainSalesforceOptions.filter(option =>
                     !selectedSalesforceValues.includes(option.value) || option.value === pair.salesforceField
                 )
             }));
             this.salesforceOptions = [...this.updateSalesforce];
             this.updateSalesforce = [];
-            console.log('this.salesforceOptions'+JSON.stringify(this.salesforceOptions));
-            
+            console.log('this.salesforceOptions' + JSON.stringify(this.salesforceOptions));
+
         } catch (error) {
             console.log('Error in filterAndUpdateSalesforceOptions:', error.stack);
-            
+
             errorDebugger('GoogleLeadFieldMapping', 'filterAndUpdateSalesforceOptions', error, 'warn', 'Error in filterAndUpdateSalesforceOptions');
         }
     }
@@ -419,8 +442,8 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
                 salesforceOptions: [...this.salesforceOptions]
             };
             this.dropDownPairs = [...this.dropDownPairs, newPair];
-            console.log('this.dropdownpai'+JSON.stringify(this.dropDownPairs));
-            
+            console.log('this.dropdownpai' + JSON.stringify(this.dropDownPairs));
+
             this.savebutton = true;
             this.isScroll = true;
         } catch (error) {
@@ -483,11 +506,11 @@ export default class GoogleLeadFieldMapping extends NavigationMixin(LightningEle
             }
 
             const selectedSalesforceFields = this.dropDownPairs.map(pair => pair.salesforceField);
-            const duplicateSalesforceIndex = selectedSalesforceFields.findIndex((field, index) => 
+            const duplicateSalesforceIndex = selectedSalesforceFields.findIndex((field, index) =>
                 selectedSalesforceFields.indexOf(field) !== index
             );
             const selectedGoogleFields = this.dropDownPairs.map(pair => pair.metaField);
-            const duplicateGoogleIndex = selectedGoogleFields.findIndex((field, index) => 
+            const duplicateGoogleIndex = selectedGoogleFields.findIndex((field, index) =>
                 selectedGoogleFields.indexOf(field) !== index
             );
 

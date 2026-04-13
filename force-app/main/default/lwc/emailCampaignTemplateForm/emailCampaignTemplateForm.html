@@ -19,7 +19,8 @@
                 </div>
                 <div class="header">
                     <button class="revert_btn_css" onclick={handleRevert} disabled={isButtonsDisabled}>
-                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#000000">
+                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"
+                            fill="#000000">
                             <path
                                 d="m 5 2 c -0.265625 0 -0.519531 0.105469 -0.707031 0.292969 l -4 4 c -0.3906252 0.390625 -0.3906252 1.023437 0 1.414062 l 4 4 c 0.390625 0.390625 1.023437 0.390625 1.414062 0 s 0.390625 -1.023437 0 -1.414062 l -2.292969 -2.292969 h 8.585938 c 1.117188 0 2 0.882812 2 2 s -0.882812 2 -2 2 c -0.550781 0 -1 0.449219 -1 1 s 0.449219 1 1 1 c 2.199219 0 4 -1.800781 4 -4 s -1.800781 -4 -4 -4 h -8.585938 l 2.292969 -2.292969 c 0.390625 -0.390625 0.390625 -1.023437 0 -1.414062 c -0.1875 -0.1875 -0.441406 -0.292969 -0.707031 -0.292969 z m 0 0"
                                 fill="#0176d3"></path>
@@ -28,9 +29,13 @@
                     </button>
                     <button class="save_btn_css" onclick={handleSave} disabled={isButtonsDisabled}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path
+                                d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
+                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         Save
                     </button>
@@ -228,31 +233,36 @@
                                 <template if:true={isSpecificDateOption}>
                                     <div class="header-date-selector">
                                         <span class="header_label_css">Select Start Date :</span>
-                                        <lightning-input class="input-date" label="Select a date" placeholder="Choose a date"
-                                            type="date" min={today} value={specificDate} onchange={handleSpecificDateChange}
-                                            variant="label-hidden" required></lightning-input>
+                                        <lightning-input class="input-date" label="Select a date"
+                                            placeholder="Choose a date" type="date" min={today} value={specificDate}
+                                            onchange={handleSpecificDateChange} variant="label-hidden"
+                                            required></lightning-input>
                                     </div>
                                 </template>
-        
+
                                 <template if:true={isContactDateFieldOption}>
                                     <div class="header-date-selector">
                                         <span class="header_label_css">Select Start Date :</span>
                                         <lightning-combobox disabled={isContactDateFieldOptionDisabled}
                                             label="Select a date field" value={selectedContactDateField}
                                             placeholder="Select a date field" options={filteredContactDateFields}
-                                            onchange={handleDateFieldSelect} variant="label-hidden" required></lightning-combobox>
+                                            onchange={handleDateFieldSelect} variant="label-hidden"
+                                            required></lightning-combobox>
                                     </div>
                                 </template>
 
-                                <button class="add-email-icon-btn" onclick={handleAddNewEmail} title="Add New Email">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <button class="add-email-icon-btn" onclick={handleAddNewEmail} title="Add New Email"
+                                    disabled={isAddDisabled}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </button>
                             </div>
                         </div>
                         <div class="table-content">
-                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <table class="slds-table slds-table_cell-buffer">
                                 <thead>
                                     <tr class="slds-line-height_reset">
                                         <th scope="col">
@@ -260,12 +270,12 @@
                                                     title="required">*</abbr>Email Name</div>
                                         </th>
                                         <th scope="col">
-                                            <div class="slds-truncate" title="Related Object"><abbr class="slds-required"
-                                                title="required">*</abbr>Related Object</div>
+                                            <div class="slds-truncate" title="Related Object"><abbr
+                                                    class="slds-required" title="required">*</abbr>Related Object</div>
                                         </th>
                                         <th scope="col">
-                                            <div class="slds-truncate" title="Related Listing"><abbr class="slds-required"
-                                                title="required">*</abbr>Related Listing</div>
+                                            <div class="slds-truncate" title="Related Listing"><abbr
+                                                    class="slds-required" title="required">*</abbr>Related Listing</div>
                                         </th>
                                         <th scope="col">
                                             <div class="slds-truncate" title="Email Template"><abbr
@@ -305,8 +315,9 @@
                                             <td data-label="Related Object">
                                                 <div>
                                                     <lightning-combobox name="objectApiName" value={email.objectApiName}
-                                                        options={objectOptions} data-id={email.id} onchange={handleRowObjectChange}
-                                                        variant="label-hidden" disabled={email.disabled}>
+                                                        options={objectOptions} data-id={email.id}
+                                                        onchange={handleRowObjectChange} variant="label-hidden"
+                                                        disabled={email.disabled} dropdown-alignment="auto">
                                                     </lightning-combobox>
                                                 </div>
                                             </td>
@@ -314,8 +325,8 @@
                                                 <div>
                                                     <template if:true={email.isListingObject}>
                                                         <lightning-record-picker name="relatedListing"
-                                                            disabled={email.disabled}
-                                                            placeholder="Search Listing..." onchange={handleListingSelect}
+                                                            disabled={email.disabled} placeholder="Search Listing..."
+                                                            onchange={handleListingSelect}
                                                             value={email.selectedListingId} variant="label-hidden"
                                                             label="Related Listing" data-id={email.id} required
                                                             object-api-name="MVEX__Listing__c">
@@ -331,13 +342,14 @@
                                                     <lightning-combobox name="emailName" value={email.template}
                                                         options={email.templateOptions} data-id={email.id}
                                                         onchange={handleTemplateChange} placeholder="Select Template"
-                                                        variant="label-hidden" required
-                                                        disabled={email.disabled}></lightning-combobox>
+                                                        variant="label-hidden" required disabled={email.disabled}
+                                                        dropdown-alignment="auto"></lightning-combobox>
                                                 </div>
                                             </td>
                                             <td data-label="Subject">
                                                 <div class="subject-field-container">
-                                                    <span class="subject-text-cls" title={email.subject}>{email.subject}</span>
+                                                    <span class="subject-text-cls"
+                                                        title={email.subject}>{email.subject}</span>
                                                 </div>
                                             </td>
                                             <td data-label="Days after start date">

@@ -436,9 +436,9 @@ global without sharing class WhatsAppWebhook{
                         if (contextId != null && contextId != '') {
                             List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
                             if (!contextChats.isEmpty()) {
-                                List<Showing__c> showings = [SELECT Id, Status__c, Scheduled_Date__c FROM Showing__c WHERE Chat__c = :contextChats[0].Id LIMIT 1];
+                                List<Event> showings = [SELECT Id, Status__c, Scheduled_Date__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
                                 if (!showings.isEmpty()) {
-                                    Showing__c showing = showings[0];
+                                    Event showing = showings[0];
                                     if (payload == 'Confirm Visit') {
                                         showing.Status__c = 'Scheduled';
                                     } else if (payload == 'Cancel') {
@@ -477,16 +477,17 @@ global without sharing class WhatsAppWebhook{
                                         System.debug('Label-Value Mapped JSON: ' + labelToValueJson);
 
                                         createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
-                                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(responseJson);
-                                        String rescheduleDateStr = (String)responseMap.get('screen_0_reschedule_date_0');
-                                        String rescheduleTimeStr = (String)responseMap.get('screen_0_reschedule_time_1');
+                                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(labelToValueJson);
+                                        String rescheduleDateStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Date');
+                                        String rescheduleTimeStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Time');
                                         List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
                                         System.debug('contextChats :'+contextChats);
                                         if (!contextChats.isEmpty()) {
-                                            List<Showing__c> showings = [SELECT Id, Status__c, Scheduled_Date__c FROM Showing__c WHERE Chat__c = :contextChats[0].Id LIMIT 1];
+                                            List<Event> showings = [SELECT Id, Status__c, MVEX__Scheduled_Date__c, MVEX__Showing_Duration__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
+                                            System.debug('contextChats :'+contextChats);
                                             System.debug('showings :'+showings);
                                             if (!showings.isEmpty() && rescheduleDateStr != null && rescheduleTimeStr != null) {
-                                                Showing__c showing = showings[0];
+                                                Event showing = showings[0];
                                                 showing.Status__c = 'Rescheduled';
                                                 List<String> dateParts = rescheduleDateStr.split('-');
                                                 List<String> timeParts = rescheduleTimeStr.split(':');
@@ -506,7 +507,11 @@ global without sharing class WhatsAppWebhook{
                                                     Integer offsetHours1 = offsetMillis1 / (1000 * 60 * 60);
                                                     Integer offsetMinutes1 = Math.mod(offsetMillis1 / (1000 * 60), 60);
                                                     Datetime gmtDateTime = istDateTime.addHours(-offsetHours1).addMinutes(-offsetMinutes1);
-                                                    showing.Reschedule_Date__c = gmtDateTime;
+                                                    showing.MVEX__Reschedule_Date__c = gmtDateTime;
+                                                    System.debug('GMT DateTime for showing: ' + gmtDateTime);
+                                                    showing.StartDateTime = gmtDateTime;
+                                                    Integer duration = (Integer)showing.MVEX__Showing_Duration__c != null ? (Integer)showing.MVEX__Showing_Duration__c : 60;
+                                                    showing.EndDateTime = gmtDateTime.addMinutes(duration);
                                                 }
                                                 System.debug('showing :'+showing);
                                                 update showing;
@@ -1281,8 +1286,8 @@ global without sharing class WhatsAppWebhook{
 
             insert chat;
 
-            // Link the Chat__c record to the Showing__c record
-            // Showing__c showing = new Showing__c(Id = showingId, Chat__c = chat.Id);
+            // Link the Chat__c record to the Event record
+            // Event showing = new Event(Id = showingId, Chat__c = chat.Id);
             // update showing;
 
             // Publish platform event for the new chat

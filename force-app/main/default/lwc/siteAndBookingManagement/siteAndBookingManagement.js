@@ -50,6 +50,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track selectedDate = '';
     @track selectedTime = '';
     @track selectedDateTime = '';
+    @track selectedDuration = '1 Hour';
     @track selectedCommunicationMethod = 'Email';
     @track selectedTemplate = '';
     @track hasBusinessAccountConfigured = false;
@@ -58,7 +59,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     @track templateOptions = [];
     @track templateMap = new Map();
-    @track selectedObject = 'MVEX__Showing__c';
+    @track selectedObject = 'Event';
 
     // Preview State
     @track previewEmailHtml = '';
@@ -84,6 +85,17 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track bodyParams = [];
 
     // --- GETTERS ---
+
+    get durationOptions() {
+        return [
+            { label: '15 Minutes', value: '15 Minutes' },
+            { label: '30 Minutes', value: '30 Minutes' },
+            { label: '45 Minutes', value: '45 Minutes' },
+            { label: '1 Hour', value: '1 Hour' },
+            { label: '1.5 Hours', value: '1.5 Hours' },
+            { label: '2 Hours', value: '2 Hours' }
+        ];
+    }
 
     get communicationMethodOptions() {
         const options = [];
@@ -619,6 +631,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         this.loadEmailPreview();
     }
 
+    handleDurationChange(event) {
+        this.selectedDuration = event.detail.value;
+    }
+
     handleCommunicationMethodChange(event) {
         this.selectedCommunicationMethod = event.target.value;
         this.selectedTemplate = '';
@@ -711,27 +727,27 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     executeSchedule() {
         console.log('selected date time: ', this.selectedDateTime);
         if (this.isWhatsAppSelected) {
-            createShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, communicationMethod: this.selectedCommunicationMethod })
+            createShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, communicationMethod: this.selectedCommunicationMethod })
                 .then((result) => {
                     this.currentShowingId = result?.showingIds[0];
                     this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Waiting For Confirmation'));
                 })
                 .catch(error => this.handleApexError(error, 'Error creating showing.'));
         } else {
-            sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, communicationMethod: this.selectedCommunicationMethod, isReschedule: false })
+            sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, communicationMethod: this.selectedCommunicationMethod, isReschedule: false })
                 .then(() => this.handleApexSuccess('Email sent and showing scheduled successfully.'))
                 .catch(error => this.handleApexError(error, 'Error sending email and creating showing.'));
         }
     }
 
     executeReschedule() {
-        updateShowing({ rescheduleDateTime: this.selectedDateTime, showingId: this.currentShowingId, communicationMethod: this.selectedCommunicationMethod })
+        updateShowing({ rescheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, showingId: this.currentShowingId, communicationMethod: this.selectedCommunicationMethod })
             .then(result => {
                 if (result) {
                     if (this.isWhatsAppSelected) {
                         this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Rescheduled'));
                     } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime,isReschedule: true })
+                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, isReschedule: true })
                             .then(() => this.handleApexSuccess('Email sent and showing rescheduled successfully.'))
                             .catch(error => this.handleApexError(error, 'Error sending reschedule email.'));
                     }

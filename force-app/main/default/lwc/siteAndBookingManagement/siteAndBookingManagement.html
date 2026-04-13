@@ -228,6 +228,10 @@
                                     onchange={handleTimeChange} class="slds-m-bottom_medium" required
                                     message-when-value-missing="Time is required">
                                 </lightning-input>
+
+                                <lightning-combobox name="duration" label="Showing Duration" value={selectedDuration}
+                                    options={durationOptions} onchange={handleDurationChange} required class="slds-m-bottom_medium">
+                                </lightning-combobox>
                             </template>
 
                             <template if:true={showCommunicationInputs}>

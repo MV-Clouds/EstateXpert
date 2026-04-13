@@ -28,11 +28,16 @@ public class SiteVisitReminderControllerTest {
         );
         insert temp;
 
-        // Showing Record
-        Showing__c showing = new Showing__c(
+        // Showing Record as Event
+        Id showingRecordTypeId = Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName().get('Showing').getRecordTypeId();
+        Event showing = new Event(
+            RecordTypeId = showingRecordTypeId,
             Buyer__c = con.Id,
-            Scheduled_Date__c = System.now().addDays(1),
-            Status__c = 'Scheduled'
+            MVEX__Scheduled_Date__c = System.now().addDays(1),
+            Status__c = 'Scheduled',
+            Subject = 'Showing',
+            MVEX__Showing_Duration__c = 60,
+            StartDateTime = System.now().addDays(1)
         );
         insert showing;
     }
@@ -43,7 +48,7 @@ public class SiteVisitReminderControllerTest {
         // Mock callout
         //Test.setMock(HttpCalloutMock.class, new WhatsAppCalloutMock());
 
-        Showing__c sh = [SELECT Id FROM Showing__c LIMIT 1];
+        Event sh = [SELECT Id FROM Event LIMIT 1];
 
         Test.startTest();
             SiteVisitReminderController.sendShowingReminders(
@@ -66,10 +71,15 @@ public class SiteVisitReminderControllerTest {
         Contact c = new Contact(LastName='No Phone');
         insert c;
 
-        Showing__c sh = new Showing__c(
+        Id showingRecordTypeId = Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName().get('Showing').getRecordTypeId();
+        Event sh = new Event(
+            RecordTypeId = showingRecordTypeId,
             Buyer__c = c.Id,
             Status__c = 'Scheduled',
-            Scheduled_Date__c = System.now()
+            Scheduled_Date__c = System.now(),
+            Subject = 'Showing',
+            MVEX__Showing_Duration__c = 60,
+            StartDateTime = System.now()
         );
         insert sh;
 
@@ -89,10 +99,15 @@ public class SiteVisitReminderControllerTest {
         Contact c = new Contact(LastName='Buyer', Phone='911111111111');
         insert c;
 
-        Showing__c sh = new Showing__c(
+        Id showingRecordTypeId = Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName().get('Showing').getRecordTypeId();
+        Event sh = new Event(
+            RecordTypeId = showingRecordTypeId,
             Buyer__c = c.Id,
             Status__c = 'Completed',
-            Scheduled_Date__c = System.now()
+            Scheduled_Date__c = System.now(),
+            Subject = 'Showing',
+            MVEX__Showing_Duration__c = 60,
+            StartDateTime = System.now()
         );
         insert sh;
 

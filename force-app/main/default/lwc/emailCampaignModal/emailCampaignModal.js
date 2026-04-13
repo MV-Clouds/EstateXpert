@@ -19,7 +19,7 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
     @api formData = {
         campaignName: '',
         messagingService: '',
-        selectedObject : 'Contact' 
+        selectedObject: 'Contact'
     };
 
     @track messageOptions;
@@ -28,12 +28,12 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
     @track selectedTemplateIdValue = ''
     @track formDataValue = {};
 
-    get objectOptions (){
+    get objectOptions() {
         return [
             { label: 'Contact', value: 'Contact' }
         ];
     }
-    
+
 
     get isSaveDisabled() {
         return !this.isFormValid();
@@ -114,7 +114,7 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
         this.resetFormData();
         if (typeof window !== 'undefined') {
             const closeEvent = new CustomEvent('close');
-            this.dispatchEvent(closeEvent);   
+            this.dispatchEvent(closeEvent);
         }
     }
 
@@ -128,7 +128,7 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
         this.formDataValue = {
             campaignName: '',
             messagingService: '',
-            selectedObject : 'Contact'
+            selectedObject: 'Contact'
         };
         this.selectedTemplateIdValue = '';
     }
@@ -197,14 +197,14 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
                         selectedTemplateId: this.selectedTemplateIdValue,
                         selectedContacts: this.selectedContacts
                     };
-    
+
                     var cmpDef = {
                         componentDef: 'MVEX:emailCampaignTemplateForm',
                         attributes: {
                             c__navigationState: navigationState,
                         }
                     };
-    
+
                     let encodedDef = btoa(JSON.stringify(cmpDef));
                     console.log('encodedDef : ', encodedDef);
                     this[NavigationMixin.Navigate]({
@@ -214,7 +214,7 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
                         },
                         apiName: 'Email_Campaign_Template_Form'
                     });
-    
+
                     this.handleCloseModal();
                 })
                 .catch(error => {
@@ -237,7 +237,7 @@ export default class EmailCampaignModal extends NavigationMixin(LightningElement
         if (
             this.formDataValue.campaignName &&
             this.formDataValue.campaignName.trim() !== '' &&
-            this.formDataValue.messagingService 
+            this.formDataValue.messagingService
         ) {
             return true;
         }

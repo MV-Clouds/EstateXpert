@@ -77,6 +77,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
 
     // Button state management
     @track isButtonsDisabled = true;
+    @track isAddDisabled = false;
 
     // Original state tracking for revert functionality
     @track originalSelectedPrimaryRecipients = [];
@@ -1233,6 +1234,11 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Created By: Rachit Shah
     */
     handleAddNewEmail() {
+        if (this.emails.length >= 10) {
+            this.showToast('Info', 'Maximum limit of 10 drip emails reached.', 'info');
+            this.isAddDisabled = true;
+            return;
+        }
         const newId = this.emails.length + 1;
 
         const newEmail = { 
@@ -1268,9 +1274,12 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             this.deletedEmailList.push(emailId);
             this.emails = this.emails.filter(email => email.id != emailId);
             this.emailsWithTemplate = this.emailsWithTemplate.filter(email => email.id != emailId);
+            if (this.emails.length < 10) {
+                this.isAddDisabled = false;
+            }
             this.checkForChanges();
         } catch (error) {
-            console.log('error => ' , error);
+            console.log('error => ', error);
         }
 
     }

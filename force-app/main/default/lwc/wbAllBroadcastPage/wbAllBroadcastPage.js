@@ -3,6 +3,7 @@ import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getB
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
 import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
+import rescheduleBroadcast from '@salesforce/apex/BroadcastMessageController.rescheduleBroadcast';
 import { subscribe, unsubscribe } from 'lightning/empApi';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
@@ -34,6 +35,9 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track popUpLastPage = false;
     @track popUpConfirmPage = false;
     @track popupHeader = 'Choose Broadcast Groups';
+    @track showReschedulePopup = false;
+    @track rescheduleRecordId = '';
+    @track selectedDateTime = '';
 
     // Group members (contacts) list properties
     @track groupMembers = [];
@@ -251,12 +255,10 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             value: template.Id
         }));
         this.selectedTemplate = this.templateOptions[0].value;
-
     }
 
     subscribeToPlatformEvent() {
         subscribe(this.channelName, -1, (message) => {
-
             if (message.data.payload.MVEX__IsChanged__c === true) {
                 this.loadBroadcastGroups();
             }
@@ -386,7 +388,9 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
             this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((item, index) => ({
                 ...item,
-                index: startIndex + index + 1 // Recalculate index for current page
+                index: startIndex + index + 1, // Recalculate index for current page
+                scheduledDateTime: item.MVEX__Schedule_DateTime__c ? new Date(item.MVEX__Schedule_DateTime__c).toLocaleString() : '—',
+                isPending: item.MVEX__Status__c === 'Pending'
             }));
         } catch (error) {
             this.showToast('Error', 'Error updating shown data', 'error');
@@ -697,6 +701,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
             .then(result => {
                 if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
+                    this.loadBroadcastGroups();
                     this.handleCloseOnPopup();
                 } else {
                     this.showToast('Error', `Broadcast sent failed - ${result}`, 'error');
@@ -746,6 +751,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 if (result) {
                     this.showToast('Success', 'Broadcast sent successfully', 'success');
                     this.handleCloseOnPopup();
+                    this.loadBroadcastGroups();
                     this.navigateToBroadcastComponent(result);
                 } else {
                     this.showToast('Error', `Broadcast sent failed - ${result}`, 'error');
@@ -760,10 +766,12 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     }
 
     navigateToBroadcastComponent(broadcastId) {
+        const selectedBroadcast = this.data.find(item => item.Id === this.broadcastId);
         let componentDef = {
             componentDef: "MVEX:broadcastReportComp",
             attributes: {
-                recordId: broadcastId
+                recordId: broadcastId,
+                record: selectedBroadcast
             }
         };
 
@@ -775,6 +783,57 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
                 url: '/one/one.app#' + encodedComponentDef
             }
         });
+    }
+
+    handleReschedulePopup(event) {
+        this.showReschedulePopup = true;
+        this.rescheduleRecordId = event.currentTarget.dataset.recordId;
+
+        try {
+            const selectedBroadcast = this.data.find(item => item.Id === this.rescheduleRecordId);
+            this.selectedDateTime = selectedBroadcast?.MVEX__Schedule_DateTime__c
+                ? new Date(selectedBroadcast.MVEX__Schedule_DateTime__c).toISOString()
+                : '';
+        } catch (error) {
+            console.error('Failed to load broadcast details', error);
+        }
+    }
+
+    async handleReschedule(event) {
+        if (!this.selectedDateTime) {
+            this.showToast('Error!', 'Please select date and time', 'error');
+            return;
+        }
+        
+        if (new Date(this.selectedDateTime) < new Date()) {
+            this.showToast('Error!', 'Selected date and time cannot be in the past', 'error');
+            return;
+        }
+
+        this.isLoading = true;
+        const action = event.target.dataset.action;
+
+        try {
+            const result = await rescheduleBroadcast({
+                broadcastId: this.rescheduleRecordId,
+                action: action,
+                newScheduleTime: this.selectedDateTime
+            });
+
+            this.showToast(result[0], result[1], result[0]);
+            this.loadBroadcastGroups();
+        } catch (error) {
+            console.error('Failed to reschedule broadcast', error);
+        } finally {
+            this.handleCloseReschedulePopup();
+            this.isLoading = false;
+        }
+    }
+
+    handleCloseReschedulePopup() {
+        this.showReschedulePopup = false;
+        this.rescheduleRecordId = '';
+        this.selectedDateTime = '';
     }
 
     handleNameClick(event) {

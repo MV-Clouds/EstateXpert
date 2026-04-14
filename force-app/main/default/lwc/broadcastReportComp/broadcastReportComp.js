@@ -10,7 +10,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class BroadcastReportComp extends NavigationMixin(LightningElement) {
     @api recordId;
     // @api record;
-    @track record;
+    @api record;
     @track paginatedData = [];
     @track filteredData = [];
     @track currentPage = 1;

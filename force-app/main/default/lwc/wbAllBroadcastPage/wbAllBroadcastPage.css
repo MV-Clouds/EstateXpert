@@ -1147,3 +1147,27 @@
 .schedule-modal-container {
     --lwc-fontWeightBold: 500;
 }
+
+.reschedule-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.reschedule-btn:focus {
+    outline: 2px solid #0176D3;
+    outline-offset: 2px;
+}
+
+.reschedule-icon {
+    --slds-c-icon-color-foreground-default: #0176D3;
+    margin-left: 3px;
+    cursor: pointer;
+}
+
+.reschedule-btn:hover .reschedule-icon {
+    --slds-c-icon-color-foreground-default: #0176D3;
+}

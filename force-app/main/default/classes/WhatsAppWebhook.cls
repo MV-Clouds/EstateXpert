@@ -479,9 +479,13 @@ global without sharing class WhatsAppWebhook{
             List<Event> showings = [SELECT Id, Status__c, Scheduled_Date__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
             if (!showings.isEmpty()) {
                 Event showing = showings[0];
-                if (payload == 'Confirm Visit') {
+                Site_Visit_Settings__c settings = Site_Visit_Settings__c.getInstance();
+                String confirmVisitLabel = (settings != null && String.isNotBlank(settings.Confirm_Visit_Label__c)) ? settings.Confirm_Visit_Label__c : 'Confirm Visit';
+                String cancelLabel = (settings != null && String.isNotBlank(settings.Cancel_Label__c)) ? settings.Cancel_Label__c : 'Cancel';
+                
+                if (payload == confirmVisitLabel) {
                     showing.Status__c = 'Scheduled';
-                } else if (payload == 'Cancel') {
+                } else if (payload == cancelLabel) {
                     showing.Status__c = 'Cancelled';
                 }
                 update showing;
@@ -514,8 +518,12 @@ global without sharing class WhatsAppWebhook{
                         createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
                         Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(labelToValueJson);
                         System.debug('responseMap: ' + responseMap);
-                        String rescheduleDateStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Date');
-                        String rescheduleTimeStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Time');
+                        Site_Visit_Settings__c settings = Site_Visit_Settings__c.getInstance();
+                        String rescheduleDateLabel = (settings != null && String.isNotBlank(settings.Reschedule_Date_Label__c)) ? settings.Reschedule_Date_Label__c : 'Reschedule Date & Time - Reschedule Date';
+                        String rescheduleTimeLabel = (settings != null && String.isNotBlank(settings.Reschedule_Time_Label__c)) ? settings.Reschedule_Time_Label__c : 'Reschedule Date & Time - Reschedule Time';
+                        
+                        String rescheduleDateStr = (String)responseMap.get(rescheduleDateLabel);
+                        String rescheduleTimeStr = (String)responseMap.get(rescheduleTimeLabel);
                         System.debug('rescheduleDateStr ->'+rescheduleDateStr );
                         System.debug('rescheduleTimeStr ->'+rescheduleTimeStr );
 

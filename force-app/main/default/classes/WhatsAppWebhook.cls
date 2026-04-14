@@ -460,10 +460,10 @@ global without sharing class WhatsAppWebhook{
                         String interactiveType = (String)interactive.get('type');
                         if (interactiveType == 'nfm_reply') {
                             Map<String, Object> nfmReply = (Map<String, Object>)interactive.get('nfm_reply');
-                            System.debug('nfmReply : ' + nfmReply);
+                            System.debug('nfmReply : ' + JSON.serialize(nfmReply));
                             if (nfmReply != null) { 
                                 String responseJson = (String)nfmReply.get('response_json');
-                                System.debug('responseJson: ' + responseJson);
+                                System.debug('responseJson: ' + JSON.serialize(responseJson));
                                 if (responseJson != null && contextId != null) {
                                     whatsappChat.Flow_Response_JSON__c = responseJson;
 
@@ -477,9 +477,13 @@ global without sharing class WhatsAppWebhook{
                                         System.debug('Label-Value Mapped JSON: ' + labelToValueJson);
 
                                         createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
-                                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(responseJson);
-                                        String rescheduleDateStr = (String)responseMap.get('screen_0_SECTION_EKOGRID_0');
-                                        String rescheduleTimeStr = (String)responseMap.get('screen_0_SECTION_EKGGHPW_1');
+                                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(labelToValueJson);
+                                        System.debug('responseMap: ' + responseMap);
+                                        String rescheduleDateStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Date');
+                                        String rescheduleTimeStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Time');
+                                        System.debug('rescheduleDateStr ->'+rescheduleDateStr );
+                                        System.debug('rescheduleTimeStr ->'+rescheduleTimeStr );
+
                                         List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
                                         System.debug('contextChats :'+contextChats);
                                         if (!contextChats.isEmpty()) {
@@ -490,17 +494,39 @@ global without sharing class WhatsAppWebhook{
                                                 Event showing = showings[0];
                                                 showing.Status__c = 'Rescheduled';
                                                 List<String> dateParts = rescheduleDateStr.split('-');
-                                                List<String> timeParts = rescheduleTimeStr.split(':');
-                                                if (dateParts.size() == 3 && timeParts.size() == 2) {
+                                                String cleanTimeStr = rescheduleTimeStr;
+                                                String amPm = '';
+                                                if (cleanTimeStr.endsWithIgnoreCase('PM')) {
+                                                    amPm = 'PM';
+                                                    cleanTimeStr = cleanTimeStr.substring(0, cleanTimeStr.length() - 2).trim();
+                                                } else if (cleanTimeStr.endsWithIgnoreCase('AM')) {
+                                                    amPm = 'AM';
+                                                    cleanTimeStr = cleanTimeStr.substring(0, cleanTimeStr.length() - 2).trim();
+                                                }
+                                                List<String> timeParts = cleanTimeStr.split(':');
+                                                System.debug('dateparts->'+dateparts + ';' + dateParts.size());
+                                                System.debug('timeParts->'+timeParts + ';' + timeParts.size());
+                                                if (dateParts.size() == 3 && timeParts.size() >= 2) {
+                                                    Integer parsedHour = Integer.valueOf(timeParts[0]);
+                                                    Integer parsedMinute = Integer.valueOf(timeParts[1]);
+                                                    
+                                                    if (amPm == 'PM' && parsedHour < 12) {
+                                                        parsedHour += 12;
+                                                    } else if (amPm == 'AM' && parsedHour == 12) {
+                                                        parsedHour = 0;
+                                                    }
+                                                    
                                                     // Parse date and time as local time in user's time zone
                                                     Datetime istDateTime = Datetime.newInstance(
                                                         Integer.valueOf(dateParts[0]),
                                                         Integer.valueOf(dateParts[1]),
                                                         Integer.valueOf(dateParts[2]),
-                                                        Integer.valueOf(timeParts[0]),
-                                                        Integer.valueOf(timeParts[1]),
+                                                        parsedHour,
+                                                        parsedMinute,
                                                         0
                                                     );
+
+                                                    System.debug('istDateTime->' + istDateTime);
                                                     // Convert to GMT for storage
                                                     Timezone userTz1 = Timezone.getTimeZone('Asia/Kolkata');
                                                     Integer offsetMillis1 = userTz1.getOffset(istDateTime);

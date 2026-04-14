@@ -1,7 +1,8 @@
 import { LightningElement, track, api } from 'lwc';
 import getWhatsAppFlowById from '@salesforce/apex/WhatsAppFlowController.getWhatsAppFlowById';
 import getFlowSubmissionByFlowId from '@salesforce/apex/WhatsAppFlowController.getFlowSubmissionByFlowId';
-import getFlowSubmissionById from '@salesforce/apex/WhatsAppFlowController.getFlowSubmissionById';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
 export default class WbFlowsReport extends LightningElement {
     @api selectedFlowId;
@@ -9,94 +10,44 @@ export default class WbFlowsReport extends LightningElement {
 
     @track recordId;
     @track flowDetails;
-    @track flowSubmissionDetails;
     @track record;
     @track paginatedData = [];
     @track filteredData = [];
-    @track filteredDetails = [];
     @track currentPage = 1;
     @track pageSize = 15;
     @track visiblePages = 5;
-    @track flowReport=true;
-    @track isFlowSubmissionDetails=false;
+    @track flowReport = true;
     @track isLoading = false;
-    @track paginatedDetails = [];
-    @track currentGrpPage = 1;
-    @track pageGrpSize = 15;
-    @track visibleGrpPages = 5;
-    @track breadcrumbs = [{ label: 'Flows' }];
     @track searchTerm = '';
     @track allData = [];
-    @track allSubmissionDetails = [];
-    @track showBreadcrumbs = true;
+    @track expandedRows = {};
+
+    // Sorting properties for Flow Report
+    @track sortField = 'CreatedDate';
+    @track sortOrder = 'desc';
 
     connectedCallback() {
+        loadStyle(this, MulishFontCss);
         this.fetchFlowDetailsById();
-        this.breadcrumbs = [
-            { label: 'All flows', path: 'all-flows' },
-            { label: this.selectedFlowName, path: 'flow-report' }
-        ];
-        this.updateShownData();
     }
 
     get showNoRecordsMessage() {
         return this.filteredData.length === 0;
     }
 
-    get isAnyReportActive() {
-        return this.isFlowSubmissionDetails || this.flowReport;
-    }  
-
-    get formattedBreadcrumbs() {
-        return this.breadcrumbs.map((crumb, index, arr) => {
-            const isLast = index === arr.length - 1;
-            return {
-                id: `breadcrumb-${index}`,
-                label: crumb.label,
-                isClickable: !isLast,
-                isLast: isLast,
-                path: crumb.path || `level-${index}`
-            };
-        });
-    }
-
     get searchPlaceholder() {
-        if (this.isFlowSubmissionDetails) {
-            return 'Search by Flow Field...';
-        }
         return 'Search record by Name or Phone...';
-    }  
-
-    get name() {
-        return this.record?.Name || '—';
     }
 
-    get status() {
-        return this.record?.MVEX__Status__c || '—';
-    }
-
-    get recipientCount() {
-        return this.record?.MVEX__Recipient_Count__c || '0';
-    }
-
-    get groupName() {
-        const group = this.data?.find(item => item.Id === this.selectedSubmissionId);
-        return group?.Name || '—';
-    }
-    
-    get memberCount() {
-        const group = this.data?.find(item => item.Id === this.selectedSubmissionId);
-        return group?.MVEX__Count_of_Members__c?.toString() || '0';
-    }    
-
+    // --- Flow Report Pagination ---
     get totalItems() {
         return this.filteredData.length;
     }
-    
+
     get totalPages() {
-        return Math.ceil(this.totalItems / this.pageSize);
+        return Math.ceil(this.totalItems / this.pageSize) || 1;
     }
-    
+
     get pageNumbers() {
         try {
             const totalPages = this.totalPages;
@@ -151,99 +102,19 @@ export default class WbFlowsReport extends LightningElement {
             return null;
         }
     }
-    
+
     get isFirstPage() {
         return this.currentPage === 1;
     }
-    
+
     get isLastPage() {
-        return this.currentPage === Math.ceil(this.totalItems / this.pageSize);
-    }
-
-    // ------ Group Member --- 
-
-    get showNoGroupMember() {
-        return this.filteredDetails.length === 0;
-    }
-
-    get totalGrpItems() {
-        return this.filteredDetails.length;
-    }
-    
-    get totalGrpPages() {
-        return Math.ceil(this.totalGrpItems / this.pageGrpSize);
-    }
-    
-    get pageGrpNumbers() {
-        try {
-            const totalPages = this.totalGrpPages;
-            const currentPage = this.currentGrpPage;
-            const visiblePages = this.visibleGrpPages;
-
-            let pages = [];
-
-            if (totalPages <= visiblePages) {
-                for (let i = 1; i <= totalPages; i++) {
-                    pages.push({
-                        number: i,
-                        isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
-                    });
-                }
-            } else {
-                pages.push({
-                    number: 1,
-                    isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
-                });
-
-                if (currentPage > 3) {
-                    pages.push({ isEllipsis: true });
-                }
-
-                let start = Math.max(2, currentPage - 1);
-                let end = Math.min(currentPage + 1, totalPages - 1);
-
-                for (let i = start; i <= end; i++) {
-                    pages.push({
-                        number: i,
-                        isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
-                    });
-                }
-
-                if (currentPage < totalPages - 2) {
-                    pages.push({ isEllipsis: true });
-                }
-
-                pages.push({
-                    number: totalPages,
-                    isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
-                });
-            }
-            return pages;
-        } catch (error) {
-            console.error('Error in pageGrpNumber :: ',error);
-            return null;
-        }
-    }
-    
-    get isFirstGrpPage() {
-        return this.currentGrpPage === 1;
-    }
-    
-    get isLastGrpPage() {
-        return this.currentGrpPage === Math.ceil(this.totalGrpItems / this.pageGrpSize);
+        return this.currentPage === this.totalPages || this.totalPages === 0;
     }
 
     fetchFlowDetailsById() {
         this.isLoading = true;
-        console.log('Fetching flow details for ID:', this.selectedFlowId);
         getWhatsAppFlowById({ flowId: this.selectedFlowId })
             .then(result => {
-                console.log('result ==> ', result);
-                
                 if (result && result.length > 0) {
                     this.flowDetails = result[0];
                     this.recordId = this.flowDetails.Id;
@@ -252,81 +123,56 @@ export default class WbFlowsReport extends LightningElement {
             })
             .catch((error) => {
                 console.error('Error fetching flow details:', error);
-            })
-            .finally(() => {
                 this.isLoading = false;
             });
     }
 
-    fetchFlowReportById(){
+    fetchFlowReportById() {
         this.isLoading = true;
         getFlowSubmissionByFlowId({ flowId: this.recordId })
             .then(result => {
-                this.allData = result.map((item, index) => ({
-                    ...item,
-                    CreatedDate: this.formatDate(item.CreatedDate),
-                    index: index + 1,
-                }));
-                this.data = [...this.allData];
-                this.applySearch();
-            })
-            .catch((error) => {
-                console.error('Error fetching flow report:', error);
-            })
-            .finally(() => {
-                this.isLoading = false;
-            });
-    }
+                this.allData = result.map((item, index) => {
+                    let parsedDetails = [];
+                    let rowDetailIndex = 1;
 
-    fetchSubmissionDetailsById() {
-        // console.log('Fetching submission details for ID:', this.selectedSubmissionId);
-        this.isLoading = true;
-
-        getFlowSubmissionById({ submissionId: this.selectedSubmissionId })
-            .then(result => {
-                if (result && result.length > 0) {
-                    const transformed = [];
-                    let rowIndex = 1; // Counter for the overall row index
-
-                    result.forEach((item) => {
-                        try {
+                    try {
+                        if (item.MVEX__Flow_Response_Mapping__c) {
                             const parsedJson = JSON.parse(item.MVEX__Flow_Response_Mapping__c);
                             for (const key in parsedJson) {
                                 const value = parsedJson[key];
-
                                 const parts = key.split(' - ');
                                 const flowScreen = parts[0]?.trim() || '';
                                 let flowField = parts[1]?.trim() || '';
                                 flowField = flowField.replace(/[:\-]\s*$/, '');
-
-                                transformed.push({
+                                
+                                parsedDetails.push({
+                                    id: `${item.Id}-${rowDetailIndex}`,
                                     flowScreen,
                                     flowField,
                                     userInput: Array.isArray(value) ? value.join(', ') : value,
-                                    CreatedDate: item.CreatedDate,
-                                    MVEX__Submitter_Name__c: item.MVEX__Submitter_Name__c,
-                                    MVEX__Submitter_Phone__c: item.MVEX__Submitter_Phone__c,
-                                    Id: item.Id,
-                                    index: rowIndex++
+                                    index: rowDetailIndex++
                                 });
                             }
-                        } catch (parseError) {
-                            console.error('Error parsing Flow_Response_Mapping__c JSON:', parseError);
                         }
-                    });
+                    } catch (parseError) {
+                        console.error('Error parsing Flow_Response_Mapping__c JSON:', parseError);
+                    }
 
-                    this.flowSubmissionDetails = transformed;
-                    this.allSubmissionDetails = [...transformed];
-                    // console.log('Transformed Submission Details:', JSON.stringify(this.flowSubmissionDetails));
-                }
-
-                this.isFlowSubmissionDetails = true;
-                this.flowReport = false;
-                this.searchTerm = '';
-                this.applySearch();
+                    return {
+                        ...item,
+                        details: parsedDetails,
+                        CreatedDate: this.formatDate(item.CreatedDate),
+                        index: index + 1,
+                        isExpanded: this.expandedRows[item.Id] || false,
+                        accordionKey: `${item.Id}-accordion`
+                    };
+                });
+                
+                this.data = [...this.allData];
+                this.applySearch(); // applySearch will also sort and then update data
             })
-            .catch((e) => {
-                console.error('Error fetching submission details:', e);
+            .catch((error) => {
+                console.error('Error fetching flow report:', error);
             })
             .finally(() => {
                 this.isLoading = false;
@@ -337,125 +183,84 @@ export default class WbFlowsReport extends LightningElement {
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.paginatedData = this.filteredData.slice(startIndex, endIndex);
+            let rowIdx = 1;
+            
+            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((item, index) => ({
+                ...item,
+                isExpanded: this.expandedRows[item.Id] || false,
+                rowClass: index % 2 === 0 ? 'parent-row even-row' : 'parent-row odd-row',
+                index: startIndex + rowIdx++
+            }));
+            
+            // Use setTimeout to ensure DOM is updated before updating sort icons
+            setTimeout(() => {
+                this.updateSortIcons();
+            }, 0);
         } catch (error) {
             console.error('Error updating shown data:', error);
         }
     }
 
     handlePrevious() {
-        try{
+        try {
             if (this.currentPage > 1) {
                 this.currentPage--;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             console.error('Error navigating to previous page:', error);
         }
     }
-    
+
     handleNext() {
-        try{
+        try {
             if (this.currentPage < this.totalPages) {
                 this.currentPage++;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             console.error('Error navigating pages:', error);
         }
     }
 
     handlePageChange(event) {
-        try{
+        try {
             const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
             if (selectedPage !== this.currentPage) {
                 this.currentPage = selectedPage;
                 this.updateShownData();
             }
-        }catch(error){
+        } catch (error) {
             console.error('Error navigating pages:', error);
         }
-    } 
+    }
 
     handleBack() {
-        if (this.isFlowSubmissionDetails) {
-            // If on isFlowSubmissionDetails, go back to flowReport
-            this.isFlowSubmissionDetails = false;
-            this.flowReport = true;
-            this.flowSubmissionDetails = null; 
-            this.paginatedDetails = []; 
-        } else if (this.flowReport) {
-            // If on flowReport, go back to main page
+        if (this.flowReport) {
             this.flowReport = false;
-            this.record = null; 
-            this.paginatedData = []; 
+            this.record = null;
+            this.paginatedData = [];
         }
     }
 
-    handleNameClick(event){
+    handleNameClick(event) {
         try {
-            this.isFlowSubmissionDetails=true;
-            this.flowReport=false;
-            this.selectedSubmissionId = event.target.dataset.recordId;
-    
-            const submitterName = event.currentTarget.textContent;
-            if (!this.breadcrumbs.find(b => b.label === submitterName)) {
-                this.breadcrumbs = [...this.breadcrumbs, { 
-                    label: submitterName, 
-                    path: 'submission-details' 
-                }];
+            const recordId = event.currentTarget.dataset.recordId;
+            if (this.expandedRows[recordId]) {
+                this.expandedRows = { ...this.expandedRows, [recordId]: false };
+            } else {
+                this.expandedRows = { ...this.expandedRows, [recordId]: true };
             }
-            this.fetchSubmissionDetailsById();
+            this.updateShownData();
         } catch (error) {
             console.error('Error in handleNameClick:', error);
-        }
-    }
-
-    handleBreadcrumbClick(event) {
-        try {
-            const path = event.detail.path;
-            
-            // Find the index of the clicked breadcrumb by path
-            const index = this.breadcrumbs.findIndex(b => b.path === path);
-            if (index === -1) return;
-    
-            // Trim breadcrumbs to clicked item
-            this.breadcrumbs = this.breadcrumbs.slice(0, index + 1);
-    
-            // Handle view toggling based on breadcrumb length
-            if (this.breadcrumbs.length === 1) {
-                // Only "All flows" breadcrumb
-                this.flowReport = false;
-                this.isFlowSubmissionDetails = false;
-                this.record = null;
-                this.paginatedData = [];
-            } else if (this.breadcrumbs.length === 2) {
-                // "All flows > Flow_Name"
-                this.isFlowSubmissionDetails = false;
-                this.flowReport = true;
-                this.flowSubmissionDetails = null;
-                this.paginatedDetails = [];
-                this.searchTerm = '';
-                this.applySearch();
-            } else if (this.breadcrumbs.length === 3) {
-                // "All flows > Flow_Name > Submitter"
-                this.isFlowSubmissionDetails = true;
-                this.flowReport = false;
-                this.fetchSubmissionDetailsById();
-            }
-        } catch (error) {
-            console.error('Error in handleBreadcrumbClick:', error);
         }
     }
 
     handleSearch(event) {
         try {
             this.searchTerm = event.target.value;
-            if (this.flowReport) {
-                this.currentPage = 1;
-            } else if (this.isFlowSubmissionDetails) {
-                this.currentGrpPage = 1;
-            }
+            this.currentPage = 1;
             this.applySearch();
         } catch (error) {
             console.error('Error in handleSearch:', error);
@@ -464,89 +269,109 @@ export default class WbFlowsReport extends LightningElement {
 
     applySearch() {
         try {
-            if (this.flowReport) {
-                // Search in flow submissions by name or phone
-                if (!this.searchTerm || this.searchTerm.trim() === '') {
-                    this.filteredData = [...this.allData];
-                } else {
-                    const searchTermLower = this.searchTerm.toLowerCase();
-                    this.filteredData = this.allData.filter(item => {
-                        const name = (item.MVEX__Submitter_Name__c || '').toLowerCase();
-                        const phone = (item.MVEX__Submitter_Phone__c || '').toLowerCase();
-                        return name.includes(searchTermLower) || phone.includes(searchTermLower);
-                    });
-                }
-                this.updateShownData();
-            } else if (this.isFlowSubmissionDetails) {
-                // Search in submission details by flow field
-                if (!this.searchTerm || this.searchTerm.trim() === '') {
-                    this.filteredDetails = [...this.allSubmissionDetails];
-                } else {
-                    const searchTermLower = this.searchTerm.toLowerCase();
-                    this.filteredDetails = this.allSubmissionDetails.filter(item => {
-                        const flowField = (item.flowField || '').toLowerCase();
-                        return flowField.includes(searchTermLower);
-                    });
-                }
-                this.updateGroupData();
+            if (!this.searchTerm || this.searchTerm.trim() === '') {
+                this.filteredData = [...this.allData];
+            } else {
+                const searchTermLower = this.searchTerm.toLowerCase();
+                this.filteredData = this.allData.filter(item => {
+                    const name = (item.MVEX__Submitter_Name__c || '').toLowerCase();
+                    const phone = (item.MVEX__Submitter_Phone__c || '').toLowerCase();
+                    return name.includes(searchTermLower) || phone.includes(searchTermLower);
+                });
             }
+            this.sortData(); // Apply sort after search
         } catch (error) {
             console.error('Error in applySearch:', error);
         }
     }
 
-    updateGroupData() {
-        try {
-            const startIndex = (this.currentGrpPage - 1) * this.pageGrpSize;
-            const endIndex = Math.min(startIndex + this.pageGrpSize, this.totalGrpItems);
-            this.paginatedDetails = this.filteredDetails.slice(startIndex, endIndex);
-        } catch (error) {
-            console.error('Error updating shown data:', error);
-        }
-    }
-
-    handleGrpPrevious() {
-        try{
-            if (this.currentGrpPage > 1) {
-                this.currentGrpPage--;
-                this.updateGroupData();
-            }
-        }catch(error){
-            console.error('Error in handleGrpPrevious:', error);
-        }
-    }
-    
-    handleGrpNext() {
-        try{
-            if (this.currentGrpPage < this.totalGrpPages) {
-                this.currentGrpPage++;
-                this.updateGroupData();
-            }
-        }catch(error){
-            console.error('Error in handleGrpNext:', error);
-        }
-    }
-
-    handleGrpPageChange(event) {
-        try{
-            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10); 
-            if (selectedPage !== this.currentGrpPage) {
-                this.currentGrpPage = selectedPage;
-                this.updateGroupData();
-            }
-        }catch(error){
-            console.error('Error in handleGrpPageChange:', error);
-        }
-    }
-
     formatDate(dateString) {
-        if(dateString){
+        if (dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-GB', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric'
             });
+        }
+    }
+
+    /**
+     * Sorting Logic for Flow Report
+     */
+    sortClick(event) {
+        try {
+            const fieldName = event.currentTarget.dataset.id;
+            if (this.sortField === fieldName) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = fieldName;
+                this.sortOrder = 'asc';
+            }
+            this.sortData();
+        } catch (error) {
+            console.error('Error in sortClick --> ', error);
+        }
+    }
+
+    sortData() {
+        try {
+            this.filteredData = [...this.filteredData].sort((a, b) => {
+                let aValue = a[this.sortField];
+                let bValue = b[this.sortField];
+
+                if (aValue === undefined || aValue === null) aValue = '';
+                if (bValue === undefined || bValue === null) bValue = '';
+
+                if (this.sortField === 'CreatedDate') {
+                    // CreatedDate comes formatted from formatDate, but it's simpler to sort using raw date object if we parse.
+                    // Or we can rely on standard JS sorting since formatting preserves parts, but MM/DD/YYYY might fail.
+                    // Thus, original string sorting or parsing is required.
+                }
+
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                let compare = 0;
+                if (aValue > bValue) compare = 1;
+                else if (aValue < bValue) compare = -1;
+
+                return this.sortOrder === 'asc' ? compare : -compare;
+            });
+
+            this.currentPage = 1;
+            this.updateShownData();
+        } catch (error) {
+            console.error('Error in sortData --> ', error);
+        }
+    }
+
+    updateSortIcons() {
+        try {
+            const allIcons = this.template.querySelectorAll('.table-content .slds-icon-utility-arrowdown svg');
+            allIcons.forEach(icon => {
+                icon.classList.remove('rotate-asc', 'rotate-desc');
+            });
+
+            const allHeaders = this.template.querySelectorAll('.table-content .sorting_header');
+            allHeaders.forEach(header => {
+                header.classList.remove('active-sort');
+            });
+
+            if (this.sortField) {
+                const currentHeader = this.template.querySelector(`.table-content [data-id="${this.sortField}"]`);
+                if (currentHeader) {
+                    currentHeader.classList.add('active-sort');
+                    const icon = currentHeader.querySelector('svg');
+                    if (icon) {
+                        icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error in updateSortIcons --> ', error);
         }
     }
 }

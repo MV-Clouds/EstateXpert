@@ -435,20 +435,7 @@ global without sharing class WhatsAppWebhook{
                         whatsappChat.Message_Type__c = 'text';
                         if (contextId != null && contextId != '') {
                             List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
-                            if (!contextChats.isEmpty()) {
-                                List<Event> showings = [SELECT Id, Status__c, Scheduled_Date__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
-                                if (!showings.isEmpty()) {
-                                    Event showing = showings[0];
-                                    if (payload == 'Confirm Visit') {
-                                        showing.Status__c = 'Scheduled';
-                                    } else if (payload == 'Cancel') {
-                                        showing.Status__c = 'Cancelled';
-                                    }
-                                    update showing;
-                                    // Call sendWhatsAppResponse for Scheduled or Cancelled status
-                                    sendWhatsAppResponse(showing.Id, showing.Status__c, senderPhone, contextId);
-                                }
-                            }
+                            handleButtonReplyShowing(contextChats, payload, senderPhone, contextId);
                         }
                     }
                 }
@@ -457,102 +444,7 @@ global without sharing class WhatsAppWebhook{
                     Map<String, Object> interactive = (Map<String, Object>)message.get('interactive');
                     System.debug('interactive: ' + interactive);
                     if (interactive != null) { 
-                        String interactiveType = (String)interactive.get('type');
-                        if (interactiveType == 'nfm_reply') {
-                            Map<String, Object> nfmReply = (Map<String, Object>)interactive.get('nfm_reply');
-                            System.debug('nfmReply : ' + JSON.serialize(nfmReply));
-                            if (nfmReply != null) { 
-                                String responseJson = (String)nfmReply.get('response_json');
-                                System.debug('responseJson: ' + JSON.serialize(responseJson));
-                                if (responseJson != null && contextId != null) {
-                                    whatsappChat.Flow_Response_JSON__c = responseJson;
-
-                                    Map<String, Object> flowData = getFlowJsonFromContextId(contextId);
-                                    if (flowData != null) {
-                                        String flowJson = (String) flowData.get('flowJson');
-                                        Id flowRecordId = (Id) flowData.get('flowId');
-
-                                        System.debug('Flow JSON associated with this response: ' + flowJson);
-                                        String labelToValueJson = mapResponseToLabels(flowJson, responseJson);
-                                        System.debug('Label-Value Mapped JSON: ' + labelToValueJson);
-
-                                        createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
-                                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(labelToValueJson);
-                                        System.debug('responseMap: ' + responseMap);
-                                        String rescheduleDateStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Date');
-                                        String rescheduleTimeStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Time');
-                                        System.debug('rescheduleDateStr ->'+rescheduleDateStr );
-                                        System.debug('rescheduleTimeStr ->'+rescheduleTimeStr );
-
-                                        List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
-                                        System.debug('contextChats :'+contextChats);
-                                        if (!contextChats.isEmpty()) {
-                                            List<Event> showings = [SELECT Id, Status__c, MVEX__Scheduled_Date__c, MVEX__Showing_Duration__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
-                                            System.debug('contextChats :'+contextChats);
-                                            System.debug('showings :'+showings);
-                                            if (!showings.isEmpty() && rescheduleDateStr != null && rescheduleTimeStr != null) {
-                                                Event showing = showings[0];
-                                                showing.Status__c = 'Rescheduled';
-                                                List<String> dateParts = rescheduleDateStr.split('-');
-                                                String cleanTimeStr = rescheduleTimeStr;
-                                                String amPm = '';
-                                                if (cleanTimeStr.endsWithIgnoreCase('PM')) {
-                                                    amPm = 'PM';
-                                                    cleanTimeStr = cleanTimeStr.substring(0, cleanTimeStr.length() - 2).trim();
-                                                } else if (cleanTimeStr.endsWithIgnoreCase('AM')) {
-                                                    amPm = 'AM';
-                                                    cleanTimeStr = cleanTimeStr.substring(0, cleanTimeStr.length() - 2).trim();
-                                                }
-                                                List<String> timeParts = cleanTimeStr.split(':');
-                                                System.debug('dateparts->'+dateparts + ';' + dateParts.size());
-                                                System.debug('timeParts->'+timeParts + ';' + timeParts.size());
-                                                if (dateParts.size() == 3 && timeParts.size() >= 2) {
-                                                    Integer parsedHour = Integer.valueOf(timeParts[0]);
-                                                    Integer parsedMinute = Integer.valueOf(timeParts[1]);
-                                                    
-                                                    if (amPm == 'PM' && parsedHour < 12) {
-                                                        parsedHour += 12;
-                                                    } else if (amPm == 'AM' && parsedHour == 12) {
-                                                        parsedHour = 0;
-                                                    }
-                                                    
-                                                    // Parse date and time as local time in user's time zone
-                                                    Datetime istDateTime = Datetime.newInstance(
-                                                        Integer.valueOf(dateParts[0]),
-                                                        Integer.valueOf(dateParts[1]),
-                                                        Integer.valueOf(dateParts[2]),
-                                                        parsedHour,
-                                                        parsedMinute,
-                                                        0
-                                                    );
-
-                                                    System.debug('istDateTime->' + istDateTime);
-                                                    // Convert to GMT for storage
-                                                    Timezone userTz1 = Timezone.getTimeZone('Asia/Kolkata');
-                                                    Integer offsetMillis1 = userTz1.getOffset(istDateTime);
-                                                    Integer offsetHours1 = offsetMillis1 / (1000 * 60 * 60);
-                                                    Integer offsetMinutes1 = Math.mod(offsetMillis1 / (1000 * 60), 60);
-                                                    Datetime gmtDateTime = istDateTime.addHours(-offsetHours1).addMinutes(-offsetMinutes1);
-                                                    showing.MVEX__Reschedule_Date__c = gmtDateTime;
-                                                    System.debug('GMT DateTime for showing: ' + gmtDateTime);
-                                                    showing.StartDateTime = gmtDateTime;
-                                                    Integer duration = (Integer)showing.MVEX__Showing_Duration__c != null ? (Integer)showing.MVEX__Showing_Duration__c : 60;
-                                                    showing.EndDateTime = gmtDateTime.addMinutes(duration);
-                                                }
-                                                System.debug('showing :'+showing);
-                                                update showing;
-                                                // Call sendWhatsAppResponse for Rescheduled status
-                                                sendWhatsAppResponse(showing.Id, showing.Status__c, senderPhone, contextId);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            whatsappChat.Message_Type__c = 'interactive';
-                            if (contextId != null && contextId != '') {
-                                whatsappChat.WhatsAppContextMessageID__c = contextId;
-                            }
-                        }
+                        processInteractiveShowing(interactive, contextId, senderPhone, whatsappChat);
                     }
                 }
             }
@@ -579,6 +471,122 @@ global without sharing class WhatsAppWebhook{
         } catch (Exception e){
             ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'processSingleMessage', e.getMessage());
             System.debug('Error in processSingleMessage: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
+        }
+    }
+
+    public static void handleButtonReplyShowing(List<Chat__c> contextChats, String payload, String senderPhone, String contextId) {
+        if (!contextChats.isEmpty()) {
+            List<Event> showings = [SELECT Id, Status__c, Scheduled_Date__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
+            if (!showings.isEmpty()) {
+                Event showing = showings[0];
+                if (payload == 'Confirm Visit') {
+                    showing.Status__c = 'Scheduled';
+                } else if (payload == 'Cancel') {
+                    showing.Status__c = 'Cancelled';
+                }
+                update showing;
+                // Call sendWhatsAppResponse for Scheduled or Cancelled status
+                sendWhatsAppResponse(showing.Id, showing.Status__c, senderPhone, contextId);
+            }
+        }
+    }
+
+    public static void processInteractiveShowing(Map<String, Object> interactive, String contextId, String senderPhone, Chat__c whatsappChat) {
+        String interactiveType = (String)interactive.get('type');
+        if (interactiveType == 'nfm_reply') {
+            Map<String, Object> nfmReply = (Map<String, Object>)interactive.get('nfm_reply');
+            System.debug('nfmReply : ' + JSON.serialize(nfmReply));
+            if (nfmReply != null) { 
+                String responseJson = (String)nfmReply.get('response_json');
+                System.debug('responseJson: ' + JSON.serialize(responseJson));
+                if (responseJson != null && contextId != null) {
+                    whatsappChat.Flow_Response_JSON__c = responseJson;
+
+                    Map<String, Object> flowData = getFlowJsonFromContextId(contextId);
+                    if (flowData != null) {
+                        String flowJson = (String) flowData.get('flowJson');
+                        Id flowRecordId = (Id) flowData.get('flowId');
+
+                        System.debug('Flow JSON associated with this response: ' + flowJson);
+                        String labelToValueJson = mapResponseToLabels(flowJson, responseJson);
+                        System.debug('Label-Value Mapped JSON: ' + labelToValueJson);
+
+                        createFlowSubmissionRecord(senderPhone, flowRecordId, labelToValueJson);
+                        Map<String, Object> responseMap = (Map<String, Object>)JSON.deserializeUntyped(labelToValueJson);
+                        System.debug('responseMap: ' + responseMap);
+                        String rescheduleDateStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Date');
+                        String rescheduleTimeStr = (String)responseMap.get('Reschedule Date & Time - Reschedule Time');
+                        System.debug('rescheduleDateStr ->'+rescheduleDateStr );
+                        System.debug('rescheduleTimeStr ->'+rescheduleTimeStr );
+
+                        List<Chat__c> contextChats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = :contextId LIMIT 1];
+                        System.debug('contextChats :'+contextChats);
+                        if (!contextChats.isEmpty()) {
+                            List<Event> showings = [SELECT Id, Status__c, MVEX__Scheduled_Date__c, MVEX__Showing_Duration__c FROM Event WHERE Chat__c = :contextChats[0].Id LIMIT 1];
+                            System.debug('contextChats :'+contextChats);
+                            System.debug('showings :'+showings);
+                            if (!showings.isEmpty() && rescheduleDateStr != null && rescheduleTimeStr != null) {
+                                Event showing = showings[0];
+                                showing.Status__c = 'Rescheduled';
+                                List<String> dateParts = rescheduleDateStr.split('-');
+                                String cleanTimeStr = rescheduleTimeStr;
+                                String amPm = '';
+                                if (cleanTimeStr.endsWithIgnoreCase('PM')) {
+                                    amPm = 'PM';
+                                    cleanTimeStr = cleanTimeStr.substring(0, cleanTimeStr.length() - 2).trim();
+                                } else if (cleanTimeStr.endsWithIgnoreCase('AM')) {
+                                    amPm = 'AM';
+                                    cleanTimeStr = cleanTimeStr.substring(0, cleanTimeStr.length() - 2).trim();
+                                }
+                                List<String> timeParts = cleanTimeStr.split(':');
+                                System.debug('dateparts->'+dateparts + ';' + dateParts.size());
+                                System.debug('timeParts->'+timeParts + ';' + timeParts.size());
+                                if (dateParts.size() == 3 && timeParts.size() >= 2) {
+                                    Integer parsedHour = Integer.valueOf(timeParts[0]);
+                                    Integer parsedMinute = Integer.valueOf(timeParts[1]);
+                                    
+                                    if (amPm == 'PM' && parsedHour < 12) {
+                                        parsedHour += 12;
+                                    } else if (amPm == 'AM' && parsedHour == 12) {
+                                        parsedHour = 0;
+                                    }
+                                    
+                                    // Parse date and time as local time in user's time zone
+                                    Datetime istDateTime = Datetime.newInstance(
+                                        Integer.valueOf(dateParts[0]),
+                                        Integer.valueOf(dateParts[1]),
+                                        Integer.valueOf(dateParts[2]),
+                                        parsedHour,
+                                        parsedMinute,
+                                        0
+                                    );
+
+                                    System.debug('istDateTime->' + istDateTime);
+                                    // Convert to GMT for storage
+                                    Timezone userTz1 = Timezone.getTimeZone('Asia/Kolkata');
+                                    Integer offsetMillis1 = userTz1.getOffset(istDateTime);
+                                    Integer offsetHours1 = offsetMillis1 / (1000 * 60 * 60);
+                                    Integer offsetMinutes1 = Math.mod(offsetMillis1 / (1000 * 60), 60);
+                                    Datetime gmtDateTime = istDateTime.addHours(-offsetHours1).addMinutes(-offsetMinutes1);
+                                    showing.MVEX__Reschedule_Date__c = gmtDateTime;
+                                    System.debug('GMT DateTime for showing: ' + gmtDateTime);
+                                    showing.StartDateTime = gmtDateTime;
+                                    Integer duration = (Integer)showing.MVEX__Showing_Duration__c != null ? (Integer)showing.MVEX__Showing_Duration__c : 60;
+                                    showing.EndDateTime = gmtDateTime.addMinutes(duration);
+                                }
+                                System.debug('showing :'+showing);
+                                update showing;
+                                // Call sendWhatsAppResponse for Rescheduled status
+                                sendWhatsAppResponse(showing.Id, showing.Status__c, senderPhone, contextId);
+                            }
+                        }
+                    }
+                }
+            }
+            whatsappChat.Message_Type__c = 'interactive';
+            if (contextId != null && contextId != '') {
+                whatsappChat.WhatsAppContextMessageID__c = contextId;
+            }
         }
     }
 

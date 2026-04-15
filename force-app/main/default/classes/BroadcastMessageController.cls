@@ -733,7 +733,7 @@ public with sharing class BroadcastMessageController {
             Map<String, String> phoneToStatus = new Map<String, String>();
             for (Chat__c msg : outboundMessages) {
                 String status = msg.Message_Status__c;
-                if (status == 'Seen' || status == 'Delivered' || status == 'Sent') {
+                if (status == 'Seen' || status == 'Delivered' || status == 'Sent' || status == 'Failed') {
                     phoneToStatus.put(msg.Phone__c, status);
                 }
             }

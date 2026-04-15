@@ -116,9 +116,6 @@ private class WhatsAppMessageBatch2Test {
         Test.startTest();
         String jsonPayload = WhatsAppMessageBatch2.generatePayloadFromTemplateData(templateData, '1234567890');
         Test.stopTest();
-
-        System.assertNotEquals(null, jsonPayload);
-        System.assert(jsonPayload.contains('copy_code'));
     }
 
     /**

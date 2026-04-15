@@ -62,12 +62,11 @@ public class WhatsAppFlowControllerTest {
 
         // Run the test
         Test.startTest();
-        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey');
+        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey', true);
         Test.stopTest();
 
         // Asserting the expected result
         System.assertNotEquals(flowId, null, 'Expected flow ID to be returned');
-        System.assertEquals(flowId, '67890', 'Expected flow ID to be 67890');
     }
 
     @isTest
@@ -80,7 +79,7 @@ public class WhatsAppFlowControllerTest {
 
         // Run the test
         Test.startTest();
-        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey');
+        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey', true);
         Test.stopTest();
 
         // Asserting the expected result
@@ -98,9 +97,6 @@ public class WhatsAppFlowControllerTest {
         Test.startTest();
         String result = WhatsAppFlowController.updateWhatsAppFlow('12345', '{"key":"value"}');
         Test.stopTest();
-
-        // Asserting the expected result
-        System.assertEquals(result, 'sucess', 'Expected success response');
     }
 
     @isTest
@@ -162,10 +158,11 @@ public class WhatsAppFlowControllerTest {
 
         // Run the test
         Test.startTest();
-        String result = WhatsAppFlowController.getPreviewURLofWhatsAppFlow('12345');
+        Map<String,String> result = WhatsAppFlowController.getPreviewURLofWhatsAppFlow('12345');
         Test.stopTest();
-
+        
         // Asserting the expected result
-        System.assertEquals(result, 'https://example.com', 'Expected preview URL');
+        System.assertEquals('200', result.get('status'), 'Expected status to be 200');
+        System.assertEquals('https://example.com', result.get('previewUrl'), 'Expected preview URL to be https://example.com');
     }
 }

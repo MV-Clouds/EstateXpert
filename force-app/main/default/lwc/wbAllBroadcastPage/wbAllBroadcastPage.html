@@ -3,32 +3,34 @@
         <template if:true={hasBusinessAccountConfigured}>
             <template if:true={isTemplateVisible}>
                 <div class="wrapper">
-                    <div class="main_header_cls">
-                        <div class="sub_main_header_css">
-                            <div slot="title" class="header_block_css">
-                                Recent Broadcasts
-                            </div>
-                            <div class="header">
-                                <div class="search-input header-search-bar-css">
-                                    <lightning-input type="search" onchange={handleSearch} placeholder="Search by Name..."
-                                        class="input-broadcast" variant="label-hidden"></lightning-input>
+                    <template if:false={isMobileOrTablet}>
+                        <div class="main_header_cls">
+                            <div class="sub_main_header_css">
+                                <div slot="title" class="header_block_css">
+                                    Recent Broadcasts
                                 </div>
-                                <div class="icon-button-container">
-                                    <div class="refresh-icon-container" onclick={handleRefresh}>
-                                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
-                                            size="x-small"></lightning-icon>
+                                <div class="header">
+                                    <div class="search-input header-search-bar-css">
+                                        <lightning-input type="search" onchange={handleSearch} placeholder="Search by Name..."
+                                            class="input-broadcast" variant="label-hidden"></lightning-input>
                                     </div>
+                                    <div class="icon-button-container">
+                                        <div class="refresh-icon-container" onclick={handleRefresh}>
+                                            <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                                size="x-small"></lightning-icon>
+                                        </div>
+                                    </div>
+                                    <button class="blue-btn-css" onclick={newBroadcast}>
+                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                                        </svg>
+                                        New Broadcast
+                                    </button>
                                 </div>
-                                <button class="blue-btn-css" onclick={newBroadcast}>
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-                                    </svg>
-                                    New Broadcast
-                                </button>
                             </div>
                         </div>
-                    </div>
+                    </template>
 
                     <div class="main_content_cls">
                         <!-- Custom Table -->
@@ -201,9 +203,11 @@
                                                 <td data-label="Status">
                                                     <div class={row.statusClass}>{row.MVEX__Status__c}
                                                         <template lwc:if={row.isPending}>
-                                                            <button class="reschedule-btn" onclick={handleReschedulePopup} data-record-id={row.Id} aria-label="Reschedule broadcast">
-                                                                <lightning-icon icon-name="utility:event" size="xx-small" class="reschedule-icon"></lightning-icon>
-                                                            </button>
+                                                            <template if:false={isMobileOrTablet}>
+                                                                <button class="reschedule-btn" onclick={handleReschedulePopup} data-record-id={row.Id} aria-label="Reschedule broadcast">
+                                                                    <lightning-icon icon-name="utility:event" size="xx-small" class="reschedule-icon"></lightning-icon>
+                                                                </button>
+                                                            </template>
                                                         </template>
                                                     </div>
                                                 </td>

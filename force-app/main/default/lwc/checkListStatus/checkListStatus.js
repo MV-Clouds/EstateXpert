@@ -9,6 +9,7 @@ import { errorDebugger } from 'c/globalProperties';
 
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class CheckListStatus extends LightningElement {
     @track checklistItems = [];
@@ -19,6 +20,10 @@ export default class CheckListStatus extends LightningElement {
     @track isSpinner = true;
     @track screenWidth = 0;
     @track checklistEditable = false;
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
 
     @wire(CurrentPageReference)
     setCurrentPageReference(pageRef) {

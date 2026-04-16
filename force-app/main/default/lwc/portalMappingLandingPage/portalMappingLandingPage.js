@@ -6,6 +6,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import portalmappingcss from '@salesforce/resourceUrl/portalmappingcss';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class PortalMappingLandingPage extends NavigationMixin(LightningElement) {
@@ -67,6 +68,10 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
     */
     get isButtonsDisabled() {
         return !this.isDataChanged;
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     /**

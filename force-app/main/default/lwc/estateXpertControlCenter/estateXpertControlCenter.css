@@ -440,23 +440,9 @@
     .features-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
-    .main-content {
-        padding: 1.25rem;
-    }
 }
 
-@media (max-width: 768px) {
-    .control-center-layout {
-        flex-direction: column;
-    }
-    
-    .sidebar-info {
-        width: 100%;
-        height: auto;
-        box-shadow: 0 4px 12px rgba(1, 118, 211, 0.1);
-    }
-    
+@media (max-width: 768px) {        
     .sidebar-header {
         padding: 1.25rem 1.5rem;
     }
@@ -489,10 +475,6 @@
     
     .features-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .main-content {
-        padding: 1rem;
     }
 }
 
@@ -562,10 +544,6 @@
     
     .description-text {
         font-size: 0.75rem;
-    }
-    
-    .main-content {
-        padding: 0.875rem;
     }
     
     .section-group {

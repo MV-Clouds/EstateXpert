@@ -18,88 +18,110 @@
                     </div>
                 </div>
                 <div class="header">
-                    <div class="search-input header-search-bar-css">
-                        <lightning-input type="search" onchange={handleSearch} placeholder="Search Template..."
-                            class="input-campaign" variant="label-hidden"></lightning-input>
-                    </div>
-                    <button class="blue-btn-css" onclick={handleAdd}>
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-                        </svg>
-                        Add New
-                    </button>
-                    <div class="filter-icon-container" onclick={toggleMoreFilters}>
-                        <template if:false={showMoreFilters}>
-                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Show filters">
-                                <path d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z" fill="currentColor"/>
-                            </svg>
-                        </template>
-                        <template if:true={showMoreFilters}>
-                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hide filters">
-                                <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
-                            </svg>
-                        </template>
-                    </div>
-                    <div if:true={showMoreFilters} class="filter-backdrop" onclick={toggleMoreFilters}></div>
-                <div if:true={showMoreFilters} class="filter-dropdown-box">
-                    <div class="filter-container" onclick={handleFilterContainerClick}>
-                        <div class="filter-row">
-                            <div class="filter-item">
-                                <label for="objectFilter" class="filter-label">Filter By Object</label>
-                                <lightning-combobox name="objectFilter" value={selectedObject} options={objectOptions}
-                                    onchange={handleObjectFilterChange} placeholder="Select Objects to Filter..." variant="label-hidden"></lightning-combobox>
-                            </div>
-                            <div class="filter-item">
-                                <label for="templateTypeFilter" class="filter-label">Template Type</label>
-                                <lightning-combobox name="templateTypeFilter" value={selectedTemplateType} options={templateTypeOptions}
-                                    onchange={handleTemplateTypeFilterChange} variant="label-hidden"></lightning-combobox>
-                            </div>
+                    <template if:false={isMobileOrTablet}>
+                        <div class="search-input header-search-bar-css">
+                            <lightning-input type="search" onchange={handleSearch} placeholder="Search Template..."
+                                class="input-campaign" variant="label-hidden"></lightning-input>
                         </div>
-                        <div class="filter-row">
-                            <div class="filter-item">
-                                <label for="templateStatusFilter" class="filter-label">Template Status</label>
-                                <lightning-combobox name="templateStatusFilter" value={selectedTemplateStatus} options={templateStatusOptions}
-                                    onchange={handleTemplateStatusFilterChange} variant="label-hidden"></lightning-combobox>
-                            </div>
+                        <button class="blue-btn-css" onclick={handleAdd}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                            </svg>
+                            Add New
+                        </button>
+                        <div class="filter-icon-container" onclick={toggleMoreFilters}>
+                            <template if:false={showMoreFilters}>
+                                <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Show filters">
+                                    <path
+                                        d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z"
+                                        fill="currentColor" />
+                                </svg>
+                            </template>
+                            <template if:true={showMoreFilters}>
+                                <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hide filters">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
+                                </svg>
+                            </template>
                         </div>
-                        <div class="filter-row">
-                            <div class="date-filter">
-                                <div class="filter-item">
-                                    <label for="dateFieldFilter" class="filter-label">Date Field</label>
-                                    <lightning-combobox name="dateFieldFilter" value={dateField} options={dateFieldOptions}
-                                        onchange={handleDateFieldChange} placeholder="Select Date Field..." variant="label-hidden"></lightning-combobox>
-                                </div>
-                                <div class="filter-item">
-                                    <label class="filter-label">Date Range</label>
-                                    <div class="date-inputs">
-                                        <lightning-input type="date" name="dateFrom" value={dateFrom} onchange={handleDateFromChange} variant="label-hidden"></lightning-input>
-                                        <lightning-input type="date" name="dateTo" value={dateTo} onchange={handleDateToChange} variant="label-hidden"></lightning-input>
+                        <div if:true={showMoreFilters} class="filter-backdrop" onclick={toggleMoreFilters}></div>
+                        <div if:true={showMoreFilters} class="filter-dropdown-box">
+                            <div class="filter-container" onclick={handleFilterContainerClick}>
+                                <div class="filter-row">
+                                    <div class="filter-item">
+                                        <label for="objectFilter" class="filter-label">Filter By Object</label>
+                                        <lightning-combobox name="objectFilter" value={selectedObject}
+                                            options={objectOptions} onchange={handleObjectFilterChange}
+                                            placeholder="Select Objects to Filter..."
+                                            variant="label-hidden"></lightning-combobox>
+                                    </div>
+                                    <div class="filter-item">
+                                        <label for="templateTypeFilter" class="filter-label">Template Type</label>
+                                        <lightning-combobox name="templateTypeFilter" value={selectedTemplateType}
+                                            options={templateTypeOptions} onchange={handleTemplateTypeFilterChange}
+                                            variant="label-hidden"></lightning-combobox>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="filter-item quick-date-options">
-                                <button class="quick-date-btn" onclick={setThisWeek}>This Week</button>
-                                <button class="quick-date-btn" onclick={setLastWeek}>Last Week</button>
-                                <button class="quick-date-btn" onclick={setThisMonth}>This Month</button>
-                                <button class="quick-date-btn" onclick={setLastMonth}>Last Month</button>
+                                <div class="filter-row">
+                                    <div class="filter-item">
+                                        <label for="templateStatusFilter" class="filter-label">Template Status</label>
+                                        <lightning-combobox name="templateStatusFilter" value={selectedTemplateStatus}
+                                            options={templateStatusOptions} onchange={handleTemplateStatusFilterChange}
+                                            variant="label-hidden"></lightning-combobox>
+                                    </div>
+                                </div>
+                                <div class="filter-row">
+                                    <div class="date-filter">
+                                        <div class="filter-item">
+                                            <label for="dateFieldFilter" class="filter-label">Date Field</label>
+                                            <lightning-combobox name="dateFieldFilter" value={dateField}
+                                                options={dateFieldOptions} onchange={handleDateFieldChange}
+                                                placeholder="Select Date Field..."
+                                                variant="label-hidden"></lightning-combobox>
+                                        </div>
+                                        <div class="filter-item">
+                                            <label class="filter-label">Date Range</label>
+                                            <div class="date-inputs">
+                                                <lightning-input type="date" name="dateFrom" value={dateFrom}
+                                                    onchange={handleDateFromChange}
+                                                    variant="label-hidden"></lightning-input>
+                                                <lightning-input type="date" name="dateTo" value={dateTo}
+                                                    onchange={handleDateToChange} variant="label-hidden"></lightning-input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="filter-item quick-date-options">
+                                        <button class="quick-date-btn" onclick={setThisWeek}>This Week</button>
+                                        <button class="quick-date-btn" onclick={setLastWeek}>Last Week</button>
+                                        <button class="quick-date-btn" onclick={setThisMonth}>This Month</button>
+                                        <button class="quick-date-btn" onclick={setLastMonth}>Last Month</button>
+                                    </div>
+                                </div>
+                                <div class="filter-actions">
+                                    <button class="white-btn-css" onclick={clearFilters}>
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        Clear
+                                    </button>
+                                    <button class="blue-btn-css" onclick={applyFilters}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        Apply
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="filter-actions">
-                            <button class="white-btn-css" onclick={clearFilters}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
-                                </svg>
-                                Clear
-                            </button>
-                            <button class="blue-btn-css" onclick={applyFilters}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
-                                </svg>
-                                Apply
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -112,11 +134,11 @@
                             <tr class="table_tr_cls">
                                 <template for:each={tableColumns} for:item="column" for:index="colIndex">
                                     <template if:true={column.isSortable}>
-                                        <th key={column.key} data-id={column.key} onclick={sortClick}
-                                            aria-sort="none"
+                                        <th key={column.key} data-id={column.key} onclick={sortClick} aria-sort="none"
                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header column2"
                                             scope="col">
-                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                role="button" tabindex="0">
                                                 <span class="slds-truncate" title={column.label}>{column.label}</span>
                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                     <svg data-index={column.key} class="listing-manager-icon"
@@ -185,7 +207,8 @@
                                                             <div class="content">
                                                                 <label class="switch">
                                                                     <input type="checkbox" checked={template.isActive}
-                                                                        onchange={handleStatusChange} data-id={template.Id} />
+                                                                        onchange={handleStatusChange}
+                                                                        data-id={template.Id} />
                                                                     <small></small>
                                                                 </label>
                                                             </div>
@@ -198,39 +221,44 @@
                                         <template if:true={column.isAction}>
                                             <td key={column.key} data-label={column.dataLabel}>
                                                 <div class="action-btn">
-                                                    <button class="preview-icon-css" onclick={handlePreview} data-id={template.Id}
-                                                        data-objectapi={template.MVEX__Object_API_Name__c}
-                                                        data-status={template.isActive}
-                                                        data-type={template.MVEX__Template_pattern__c}>
-                                                        <svg width="15" height="15" fill="#000000"
-                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                                                            enable-background="new 0 0 52 52" xml:space="preserve">
-                                                            <path
-                                                                d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
-                                                            </path>
-                                                            <path
-                                                                d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
-                                                            </path>
-                                                        </svg>
-                                                    </button>
-                                                    <button class="edit-icon-css" onclick={handleEdit} data-id={template.Id}
-                                                        data-objectapi={template.MVEX__Object_API_Name__c}
-                                                        data-type={template.MVEX__Template_pattern__c}>
-                                                        <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                                stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                                stroke-linejoin="round" />
-                                                        </svg>
-                                                    </button>
-                                                    <button class="delete-icon-css" onclick={handleDelete} data-id={template.Id}>
+                                                    <template if:false={isMobileOrTablet}>
+                                                        <button class="preview-icon-css" onclick={handlePreview}
+                                                            data-id={template.Id}
+                                                            data-objectapi={template.MVEX__Object_API_Name__c}
+                                                            data-status={template.isActive}
+                                                            data-type={template.MVEX__Template_pattern__c}>
+                                                            <svg width="15" height="15" fill="#000000"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                                                                enable-background="new 0 0 52 52" xml:space="preserve">
+                                                                <path
+                                                                    d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
+                                                                </path>
+                                                                <path
+                                                                    d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
+                                                                </path>
+                                                            </svg>
+                                                        </button>
+                                                        <button class="edit-icon-css" onclick={handleEdit}
+                                                            data-id={template.Id}
+                                                            data-objectapi={template.MVEX__Object_API_Name__c}
+                                                            data-type={template.MVEX__Template_pattern__c}>
+                                                            <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                                    stroke="#212529" stroke-width="1.25"
+                                                                    stroke-linecap="round" stroke-linejoin="round" />
+                                                            </svg>
+                                                        </button>
+                                                    </template>
+                                                    <button class="delete-icon-css" onclick={handleDelete}
+                                                        data-id={template.Id}>
                                                         <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                             xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                                stroke-linejoin="round" />
+                                                                stroke="#212529" stroke-width="1.25"
+                                                                stroke-linecap="round" stroke-linejoin="round" />
                                                         </svg>
                                                     </button>
                                                 </div>

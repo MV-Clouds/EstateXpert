@@ -4,7 +4,7 @@
   </template>
   <div class="maindiv">
     <div class="stylebtn">
-      <button class="blue-btn-css" onclick={saveChanges} disabled={disableEnableBtn}>
+      <button class="blue-btn-css" onclick={saveChanges} disabled={disableEnableBtn} aria-label="Save Changes">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
@@ -12,29 +12,29 @@
           <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        Save Changes
+        <template if:false={isMobileOrTablet}>Save Changes</template>
       </button>
-      <button class="white-btn-css" onclick={cancelChanges} disabled={disableEnableBtn}>
+      <button class="white-btn-css" onclick={cancelChanges} disabled={disableEnableBtn} aria-label="Cancel">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
             fill="#0176D3" />
         </svg>
-        Cancel
+        <template if:false={isMobileOrTablet}>Cancel</template>
       </button>
-      <button class="blue-btn-css" onclick={modalPopup}>
+      <button class="blue-btn-css" onclick={modalPopup} aria-label="Add New Files">
         <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
         </svg>
-        Add New Files
+        <template if:false={isMobileOrTablet}>Add New Files</template>
       </button>
-      <button class="white-btn-css" onclick={toDeleteAllMedia} disabled={isAllDelete}>
+      <button class="white-btn-css" onclick={toDeleteAllMedia} disabled={isAllDelete} aria-label="Delete All">
         <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
             stroke="#0176D3" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        Delete All
+        <template if:false={isMobileOrTablet}>Delete All</template>
       </button>
     </div>
 
@@ -55,9 +55,9 @@
             <div class="tab active-tab-content" data-id="tab1">
               <div class="sort-container">
                 <div class="sorting_btn">
-                  <button class="sort_btn_blue" onclick={getExpose}>
+                  <button class="sort_btn_white" onclick={getExpose}>
                     <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
+                      <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="#0176D3" />
                     </svg>
                     Add All
                   </button>
@@ -100,9 +100,9 @@
             <div class="tab" data-id="tab2">
               <div class="sort-container">
                 <div class="sorting_btn">
-                  <button class="sort_btn_blue" onclick={getWebsite}>
+                  <button class="sort_btn_white" onclick={getWebsite}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white" />
+                      <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="#0176D3" />
                     </svg>
                     Add All
                   </button>
@@ -145,9 +145,9 @@
             <div class="tab" data-id="tab3">
               <div class="sort-container">
                 <div class="sorting_btn">
-                  <button class="sort_btn_blue" onclick={getPortal}>
+                  <button class="sort_btn_white" onclick={getPortal}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white" />
+                      <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="#0176D3" />
                     </svg>
                     Add All
                   </button>

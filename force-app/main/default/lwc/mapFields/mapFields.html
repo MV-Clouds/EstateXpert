@@ -21,7 +21,7 @@
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
                             </svg>
-                            Add
+                            <template if:false={isMobileOrTablet}>Add</template>
                         </button>
                         <button disabled={savebutton} onclick={handleAddPairClick} class="blue-btn-css">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -29,7 +29,7 @@
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
                                     fill="currentColor" />
                             </svg>
-                            Save Mapping
+                            <template if:false={isMobileOrTablet}>Save Mapping</template>
                         </button>
                         <button disabled={isRevertDisabled} onclick={revertChanges} class="blue-btn-css">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -38,7 +38,7 @@
                                     d="M12 5V1L7 6L12 11V7C15.31 7 18 9.69 18 13C18 16.31 15.31 19 12 19C8.69 19 6 16.31 6 13H4C4 17.42 7.58 21 12 21C16.42 21 20 17.42 20 13C20 8.58 16.42 5 12 5Z"
                                     fill="currentColor" />
                             </svg>
-                            Revert Changes
+                            <template if:false={isMobileOrTablet}>Revert Changes</template>
                         </button>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                         fill="currentColor" />
                                 </svg>
-                                Cancel
+                                <template if:false={isMobileOrTablet}>Cancel</template>
                             </button>
                             <button class="blue-btn-css" onclick={handleConfirmAddPair}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -156,7 +156,7 @@
                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
                                         fill="currentColor" />
                                 </svg>
-                                Save
+                                <template if:false={isMobileOrTablet}>Save</template>
                             </button>
                         </div>
                     </div>

@@ -6,25 +6,25 @@
         <div class="main_header_cls">
             <div class="navbar">
                 <div class="save-btn">
-                    <button onclick={addNewPair} class="blue-btn-css">
+                    <button onclick={addNewPair} class="blue-btn-css" aria-label="Add">
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
                         </svg>
-                        Add
+                        <template if:false={isMobileOrTablet}>Add</template>
                     </button>
-                    <button onclick={openManageFieldsModal} class="blue-btn-css">
+                    <button onclick={openManageFieldsModal} class="blue-btn-css" aria-label="Manage Fields">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4 7H20M4 12H20M4 17H14" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        Manage {integrationLabel} Fields
+                        <template if:false={isMobileOrTablet}>Manage {integrationLabel} Fields</template>
                     </button>
-                    <button disabled={savebutton} onclick={handleAddPairClick} class="blue-btn-css">
+                    <button disabled={savebutton} onclick={handleAddPairClick} class="blue-btn-css" aria-label="Save Mapping">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
                         </svg>
-                        Save Mapping
+                        <template if:false={isMobileOrTablet}>Save Mapping</template>
                     </button>
                 </div>
             </div>

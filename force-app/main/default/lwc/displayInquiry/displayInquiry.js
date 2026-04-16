@@ -24,6 +24,7 @@ import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMeta
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -123,7 +124,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         { label: 'Price', fieldName: 'mvex__price_min__c', type: 'currency' }
     ];
 
-    conditionOptions = [
+    allConditionOptions = [
         { label: 'All Condition Are Met', value: 'all' },
         { label: 'Any Condition Is Met', value: 'any' },
         { label: 'Custom Logic Is Met', value: 'custom' },
@@ -131,6 +132,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         { label: 'Linked Inquiries', value: 'linked' },
         { label: 'No Filter', value: 'none' },
     ];
+
+    get conditionOptions() {
+        if (this.isMobileOrTablet) {
+            return this.allConditionOptions.filter(option =>
+                option.value === 'related' || option.value === 'linked' || option.value === 'none'
+            );
+        }
+        return this.allConditionOptions;
+    }
 
     @track broadcastContactList = [];
     @track popUpFirstPage = true;
@@ -160,6 +170,10 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track modalFilteredInquiryData = [];
     @track sendMailInquiryDataList = [];
     filterModalSnapshot = null;
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
 
     /**
  * Method Name : isApplyButtonDisabled
@@ -262,7 +276,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Date: 10/03/2026
     */
     get showAddConditionIcon() {
-        return this.conditiontype && this.conditiontype !== 'related' && this.conditiontype !== 'none';
+        return this.conditiontype && this.conditiontype !== 'related' && this.conditiontype !== 'none' && this.conditiontype !== 'linked';
     }
 
     /**
@@ -1608,6 +1622,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By: Rachit Shah
     */
     showModalBox() {
+        if (this.isMobileOrTablet && !['related', 'linked', 'none'].includes(this.conditiontype)) {
+            this.conditiontype = 'related';
+            this.selectedConditionType = this.conditionOptions.find(option => option.value === 'related')?.label || 'Related List';
+        }
+
         this.filterModalSnapshot = {
             conditiontype: this.conditiontype,
             selectedConditionType: this.selectedConditionType,

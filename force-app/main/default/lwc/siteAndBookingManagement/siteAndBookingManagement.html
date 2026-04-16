@@ -13,26 +13,28 @@
         <div class="contacts-header">
             <h2>Related Inquiries</h2>
             <div class="header-actions">
-                <button class="blue-btn-css" onclick={handleRefreshData} title="Refresh Data">
+                <button class="blue-btn-css" onclick={handleRefreshData} title="Refresh Data" aria-label="Refresh Data">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M21.5 2V8.5M21.5 8.5H15M21.5 8.5L18 5C16.6 3.5 14.8 2.5 12.6 2.1C8.9 1.5 5.4 3.1 3.5 6.1M2.5 22V15.5M2.5 15.5H9M2.5 15.5L6 19C7.4 20.5 9.2 21.5 11.4 21.9C15.1 22.5 18.6 20.9 20.5 17.9"
                             stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    Refresh
+                    <template if:false={isMobileOrTablet}>Refresh</template>
                 </button>
-                <button class="blue-btn-css" onclick={openScheduleModal} title="View Full Schedule">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
-                            stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path
-                            d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329"
-                            stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    View Schedule
-                </button>
+                <template if:false={isMobileOrTablet}>
+                    <button class="blue-btn-css" onclick={openScheduleModal} title="View Full Schedule">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+                                stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path
+                                d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329"
+                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        View Schedule
+                    </button>
+                </template>
             </div>
         </div>
         <template if:true={isContactDataAvailable}>
@@ -119,18 +121,20 @@
                                 </td>
                                 <td data-label="Actions">
                                     <div class="action-btn">
-                                        <button class="edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
-                                            title="Send Email/WhatsApp">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
-                                                    stroke="#212529" stroke-width="1.5" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                                <path d="M8 10L12 12L16 10" stroke="#212529" stroke-width="1.5"
-                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                            </svg>
-                                        </button>
+                                        <template if:false={isMobileOrTablet}>
+                                            <button class="edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
+                                                title="Send Email/WhatsApp">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
+                                                        stroke="#212529" stroke-width="1.5" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M8 10L12 12L16 10" stroke="#212529" stroke-width="1.5"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                        </template>
                                         <button class="preview-icon-css" onclick={openShowingInNewTab}
                                             data-showing-id={contact.ShowingId} disabled={contact.isShowingDisabled}
                                             title="View Showing Record">

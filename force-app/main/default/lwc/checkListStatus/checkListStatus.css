@@ -296,14 +296,10 @@
     .columns-container {
         grid-template-columns: 1fr;
     }
-    .header {
-        flex-wrap: wrap;
-    }
     .search-input {
         width: 100%;
     }
     .buttons {
-        width: 100%;
         justify-content: flex-end;
     }
     .card-top-row {
@@ -312,5 +308,8 @@
     }
     .card-badges {
         align-self: flex-start;
+    }
+    .header {
+        gap: 10px;
     }
 }

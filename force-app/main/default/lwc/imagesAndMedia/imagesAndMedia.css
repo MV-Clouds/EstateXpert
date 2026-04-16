@@ -516,12 +516,6 @@
     border: 1px solid #d0d4d8;
 }
 
-.sort_btn_white svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-}
-
 .sort_btn_white svg path {
     transition: all 0.2s ease;
 }

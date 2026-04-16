@@ -12,6 +12,7 @@ import getBroadcastRecsWithReplies from '@salesforce/apex/BroadcastMessageContro
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import getBroadcastMembersByGroupId from '@salesforce/apex/BroadcastMessageController.getBroadcastMembersByGroupId';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class WbAllBroadcastPage extends NavigationMixin(LightningElement) {
     @track data = [];
@@ -58,6 +59,10 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     subscription = {};
     channelName = '/event/MVEX__BroadcastUpdateEvent__e';
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
 
     get showNoRecordsMessage() {
         return this.filteredData.length === 0;

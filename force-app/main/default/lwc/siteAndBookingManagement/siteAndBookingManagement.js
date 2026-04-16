@@ -18,6 +18,7 @@ import getTemplateData from '@salesforce/apex/ChatWindowController.getTemplateDa
 import createChat from '@salesforce/apex/ChatWindowController.createChat';
 import previewEmailTemplate from '@salesforce/apex/SiteAndBookingController.previewEmailTemplate';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 // Define paths
 const JQUERY_PATH = `${EvoCalendarZip}/evo-jquery.js`;
@@ -83,6 +84,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track buttonList = [];
     @track headerParams = [];
     @track bodyParams = [];
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
 
     // --- GETTERS ---
 

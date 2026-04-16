@@ -568,25 +568,55 @@
         align-items: stretch;
     }
 
-    .rule-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .rule-actions {
-        margin-left: 0;
-    }
-
-    .rule-user {
-        min-width: 100%;
-    }
-
     .content_body {
         padding: 1rem;
     }
 
     .footerbtns {
         flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 1024px) {
+    .rule-item {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 #f8fafc;
+    }
+
+    .rule-item::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+    }
+
+    .rule-item::-webkit-scrollbar-track {
+        background: #f8fafc;
+        border-radius: 999px;
+    }
+
+    .rule-item::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .rule-item::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .rule-header {
+        flex-wrap: nowrap;
+        align-items: center;
+        min-width: max-content;
+    }
+
+    .rule-user {
+        min-width: 240px;
+    }
+
+    .rule-actions {
+        margin-left: 0;
     }
 }
 
@@ -610,7 +640,7 @@
     overflow: auto;
 }
 
-.slds-table .index-display {
+.popup-table-content .slds-table .index-display {
     text-align: center;
 }
 
@@ -627,19 +657,10 @@
 }
 
 /* Ensure inputs inside table fill cell */
-.slds-table td .combobox_cls lightning-combobox,
-.slds-table td .combobox_cls lightning-input,
-.slds-table td .combobox_cls lightning-record-picker {
+.popup-table-content .slds-table td .combobox_cls lightning-combobox,
+.popup-table-content .slds-table td .combobox_cls lightning-input,
+.popup-table-content .slds-table td .combobox_cls lightning-record-picker {
     width: 100%;
-}
-
-/* Responsive adjustments */
-@media (max-width: 480px) {
-    .slds-table thead { display: none; }
-    .slds-table, .slds-table tbody, .slds-table tr, .slds-table td { display: block; width: 100%; }
-    .slds-table tr { margin-bottom: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem; background: #fff; }
-    .slds-table td { padding: 0.25rem 0; display: flex; justify-content: space-between; align-items: center; }
-    .slds-table td[data-label]::before { content: attr(data-label)": "; font-weight: 600; margin-right: 0.5rem; color: #374151; }
 }
 
 /* Fix combobox dropdown alignment to left */
@@ -663,4 +684,8 @@ lightning-combobox .slds-dropdown,
   left: 0 !important;
   right: auto !important;
   margin-left: 0 !important;
+}
+
+.value-width-css {
+    min-width: 8rem;
 }

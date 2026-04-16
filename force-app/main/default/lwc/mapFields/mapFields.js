@@ -6,6 +6,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import externalCss from '@salesforce/resourceUrl/templateCss';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 import { NavigationMixin } from 'lightning/navigation';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -72,6 +73,10 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     */
     get isRevertDisabled() {
         return !this.hasChanges;
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     /**

@@ -1,86 +1,179 @@
 <template>
-    <template if:true={isAnyReportActive}>
-        <div class="main">
-            <template if:true={isLoading}>
-                <div class="spinner-container">
-                    <c-spinner-component></c-spinner-component>
-                </div>
-            </template>
-    
-            <div class="content">
-                <div class="heading-div">
-                    <div class="breadcrumb-wrapper">
-                        <div>
-                            <h1 class="heading">Flow Report</h1>
-                            <c-wb-breadcrumb-navigation 
-                                breadcrumbs={formattedBreadcrumbs} 
-                                show-breadcrumbs={showBreadcrumbs}
-                                onbreadcrumbclick={handleBreadcrumbClick}>
-                            </c-wb-breadcrumb-navigation>
+    <template if:true={flowReport}>
+        <template if:true={isLoading}>
+            <c-spinner-component></c-spinner-component>
+        </template>
+        <div class="wrapper">
+            <div class="main_header_cls">
+                <div class="sub_main_header_css">
+                    <div class="header_block_css">
+                        <div class="svg_back_icon" onclick={handleBack}>
+                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                    fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div class="broadcast-title">
+                            {selectedFlowName}
                         </div>
                     </div>
-                    <div class="search-container">
-                        <div class="search-icon">
-                            <lightning-icon icon-name="utility:search" size="x-small"></lightning-icon>
+                    <div class="header-right-info">
+                        <div class="search-container">
+                            <!-- <div class="search-icon">
+                                <lightning-icon icon-name="utility:search" size="x-small"></lightning-icon>
+                            </div>
+                            <input 
+                                type="search" 
+                                class="slds-input" 
+                                name="searchInput" 
+                                placeholder={searchPlaceholder}
+                                value={searchTerm}
+                                oninput={handleSearch}
+                                aria-label="Search flows" /> -->
+                            <lightning-input type="search" class="slds-input" placeholder={searchPlaceholder}
+                                value={searchTerm} onchange={handleSearch} variant="label-hidden"></lightning-input>
                         </div>
-                        <input 
-                            type="search" 
-                            class="slds-input" 
-                            name="searchInput" 
-                            placeholder={searchPlaceholder}
-                            value={searchTerm}
-                            oninput={handleSearch}
-                            aria-label="Search flows" />
                     </div>
                 </div>
-            <template if:true={flowReport}>
-                <div class="container">
-                    <!-- Custom Table -->
-                    <template if:true={paginatedData.length}>
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th class="sr-no">No.</th>
-                                        <th>Submitter Name</th>
-                                        <th>Submitter Phone</th>
-                                        <th>Submission Date</th>
+            </div>
+
+            <div class="main_content_cls">
+                <!-- Flow Report Table -->
+                <template if:true={paginatedData.length}>
+                    <div class="table-content">
+                        <table class="slds-table">
+                            <thead>
+                                <tr class="table_tr_cls">
+                                    <th scope="col" class="expand-col">
+                                        <div></div>
+                                    </th>
+                                    <th scope="col" class="sno">
+                                        <div>No.</div>
+                                    </th>
+                                    <th data-id="MVEX__Submitter_Name__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action-mode sorting_header name" scope="col">
+                                        <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Submitter Name">Submitter Name</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th data-id="MVEX__Submitter_Phone__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header phone" scope="col">
+                                        <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Submitter Phone">Submitter Phone</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th data-id="CreatedDate" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header date" scope="col">
+                                        <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <span class="slds-truncate" title="Submission Date">Submission Date</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={paginatedData} for:item="row" for:index="index">
+                                    <!-- Parent Row -->
+                                    <tr key={row.Id} class={row.rowClass}>
+                                        <td data-label="" class="expand-cell">
+                                            <div class="action-icon-container" data-record-id={row.Id} onclick={handleNameClick}>
+                                                <svg class="action-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <template if:true={row.isExpanded}>
+                                                        <path d="M7 10l5 5 5-5z" fill="currentColor"/>
+                                                    </template>
+                                                    <template if:false={row.isExpanded}>
+                                                        <path d="M10 17l5-5-5-5z" fill="currentColor"/>
+                                                    </template>
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <td data-label="S.No.">
+                                            <div>{row.index}</div>
+                                        </td>
+                                        <td data-label="Submitter Name" class="truncate_css">
+                                            <div data-name={row.MVEX__Submitter_Name__c}>{row.MVEX__Submitter_Name__c}</div>
+                                        </td>
+                                        <td data-label="Submitter Phone">
+                                            <div>{row.MVEX__Submitter_Phone__c}</div>
+                                        </td>
+                                        <td data-label="Submission Date">
+                                            <div>{row.CreatedDate}</div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={paginatedData} for:item="row">
-                                        <tr key={row.Id} class="slds-table_bordered">
-                                            <td class="sr-no">{row.index}</td>
-                                            <td>
-                                                <a href="javascript:void(0);" class="clickable-name" data-record-id={row.Id} onclick={handleNameClick}>{row.MVEX__Submitter_Name__c}</a>
+                                    
+                                    <!-- Accordion Content Row -->
+                                    <template if:true={row.isExpanded}>
+                                        <tr key={row.accordionKey} class="accordion-row">
+                                            <td colspan="5">
+                                                <div class="accordion-content">
+                                                    <div class="table-content">
+                                                        <table class="slds-table">
+                                                            <thead>
+                                                                <tr class="table_tr_cls">
+                                                                    <th scope="col" class="nested-sno">No.</th>
+                                                                    <th scope="col" class="nested-member">Flow Field</th>
+                                                                    <th scope="col" class="nested-member">User Response</th>
+                                                                    <th scope="col" class="nested-member">Flow Screen</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <template if:true={row.details.length}>
+                                                                    <template for:each={row.details} for:item="detail">
+                                                                        <tr key={detail.id}>
+                                                                            <td class="truncate_css">{detail.index}</td>
+                                                                            <td class="truncate_css">{detail.flowField}</td>
+                                                                            <td class="truncate_css">{detail.userInput}</td>
+                                                                            <td class="truncate_css">{detail.flowScreen}</td>
+                                                                        </tr>
+                                                                    </template>
+                                                                </template>
+                                                                <template if:false={row.details.length}>
+                                                                    <tr>
+                                                                        <td colspan="4" style="text-align: center; padding: 15px;">No details available for this submission.</td>
+                                                                    </tr>
+                                                                </template>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td>{row.MVEX__Submitter_Phone__c}</td>
-                                            <td>{row.CreatedDate}</td>
                                         </tr>
                                     </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </template>
-        
-                    <!-- No Records Message -->
-                    <template if:true={showNoRecordsMessage}>
-                        <div class="no-records-message">
-                            <div class="empty-state">
-                                <div class="empty-state__content">
-                                    <div class="empty-state__icon">
-                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                    </div>
-                                    <div class="empty-state__message">No data available to show.</div>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <!-- No Records Message -->
+                <template if:true={showNoRecordsMessage}>
+                    <div class="no-records-message">
+                        <div class="empty-state">
+                            <div class="empty-state__content">
+                                <div class="empty-state__icon">
+                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
                                 </div>
+                                <div class="empty-state__message">No Data Available to Show.</div>
                             </div>
                         </div>
-                    </template>
-                </div>
-        
+                    </div>
+                </template>
+
                 <template if:true={paginatedData.length}>
                     <div class="pagination-container">
-                        <button class="pagination-button" disabled={isFirstPage} onclick={handlePrevious}>
+                        <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
                             <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
                                 <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
                             </svg>
@@ -99,97 +192,19 @@
                             </template>
                         </template>
         
-                        <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
+                        <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
                             Next
                             <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
                                 <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                             </svg>
                         </button>
                     </div>
-                </template>            
-            </template>
-            
-            <template if:true={isFlowSubmissionDetails}>
-                <div class="container">
-                    <!-- Custom Table -->
-                    <template if:true={paginatedDetails.length}>
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th class="sr-no">No.</th>
-                                        <th class="left-align">Flow Field</th>
-                                        <th class="left-align">User Response</th>
-                                        <th class="left-align">Flow Screen</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={paginatedDetails} for:item="row">
-                                        <tr key={row.Id} class="slds-table_bordered">
-                                            <td class="sr-no">{row.index}</td>
-                                            <td class="left-align">{row.flowField}</td>
-                                            <td class="left-align">{row.userInput}</td>
-                                            <td class="left-align">{row.flowScreen}</td>
-                                            <!-- <td class="tableData" data-label="Status">
-                                                <div class="slds-truncate status"><p class={row.status}>{row.status}</p></div>
-                                            </td> -->
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </template> 
-        
-                    <!-- No Records Message -->
-                    <template if:true={showNoGroupMember}>
-                        <div class="no-records-message">
-                            <div class="empty-state">
-                                <div class="empty-state__content">
-                                    <div class="empty-state__icon">
-                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                    </div>
-                                    <div class="empty-state__message">No data available to show.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-        
-                <template if:true={paginatedDetails.length}>
-                    <div class="pagination-container">
-                        <button class="pagination-button" disabled={isFirstGrpPage} onclick={handleGrpPrevious}>
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                            </svg>
-                            Previous
-                        </button>
-        
-                        <template for:each={pageGrpNumbers} for:item="page">
-                            <template if:false={page.isEllipsis}>
-                                <button key={page.number} data-id={page.number} class={page.className}
-                                    onclick={handleGrpPageChange}>
-                                    {page.number}
-                                </button>
-                            </template>
-                            <template if:true={page.isEllipsis}>
-                                <span key={page.number} class="pagination-ellipsis">...</span>
-                            </template>
-                        </template>
-        
-                        <button class="pagination-button" disabled={isLastGrpPage} onclick={handleGrpNext}>
-                            Next
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                            </svg>
-                        </button>
-                    </div>
-                </template>  
-            </template>
+                </template>
             </div>
         </div>
     </template>
    
-    <template if:false={isAnyReportActive}>
+    <template if:false={flowReport}>
         <c-wb-all-flows-page></c-wb-all-flows-page>
     </template>
 </template>

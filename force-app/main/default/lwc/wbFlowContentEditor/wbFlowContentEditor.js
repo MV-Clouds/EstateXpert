@@ -91,9 +91,11 @@ export default class WbFlowContentEditor extends LightningElement {
             
             // Calculate max options validation for dropdown/selection elements
             const optionsCount = section.options?.length || 0;
-            const isMaxOptionsReached = optionsCount >= 10;
-            const addOptionButtonTitle = isMaxOptionsReached 
-                ? 'You can add a maximum of 10 options.' 
+            const config = this.getMetadataConfig(section.itemName);
+            const maxOptions = config?.constraints?.maxOptions || 10;
+            const isMaxOptionsReached = optionsCount >= maxOptions;
+            const addOptionButtonTitle = isMaxOptionsReached
+                ? `You can add a maximum of ${maxOptions} options.`
                 : 'Add option';
             
             // Check if this section has an image operation in progress
@@ -1160,8 +1162,11 @@ export default class WbFlowContentEditor extends LightningElement {
 
         this.contentSections = this.contentSections.map(section => {
             if (section.id === sectionId && section.options) {
-                // Limit to maximum 10 options
-                if (section.options.length >= 10) {
+                const config = this.getMetadataConfig(section.itemName);
+                const maxOptions = config?.constraints?.maxOptions || 10;
+
+                // Limit to maximum options defined in metadata
+                if (section.options.length >= maxOptions) {
                     return section;
                 }
                 const newOptionId = this.generateSanitizedId(`OPT_${section.options.length + 1}_${section.id}_${Date.now()}`);

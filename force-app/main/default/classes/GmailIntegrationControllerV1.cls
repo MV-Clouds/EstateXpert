@@ -4,7 +4,9 @@ public with sharing class GmailIntegrationControllerV1 {
         public Boolean isFailed { get; set; }
         public String errorMessage { get; set; }
         public static String gmailEndpoint = System.label.Google_Endpoint;
-        public static String gmailSendingEndpoint = System.label.Gmail_Sending_Endpoint;
+    public static String gmailSendingEndpoint = System.label.Gmail_Sending_Endpoint;
+    @TestVisible public static List<MVEX__recordManagerConfig__mdt> mockMetadata = null;
+
         
         public GmailIntegrationControllerV1() {
             isFailed = false;
@@ -24,7 +26,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 String clientSecret = '';
                 String redirectUrl = '';
                 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig'  LIMIT 1];
+                List<MVEX__recordManagerConfig__mdt> mdtList = mockMetadata != null ? mockMetadata : [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig'  LIMIT 1];
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
                     if(parts.size() >= 3) {
@@ -115,7 +117,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 String clientId = '';
                 String clientSecret = '';
                 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig' LIMIT 1];
+                List<MVEX__recordManagerConfig__mdt> mdtList = mockMetadata != null ? mockMetadata : [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig' LIMIT 1];
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
                     if(parts.size() >= 2) {

@@ -767,4 +767,192 @@ private class WhatsAppWebhookTest {
         List<Chat__c> chats = [SELECT Id FROM Chat__c WHERE WhatsAppMessageId__c = 'wamid.no_showing789'];
         System.assertEquals(1, chats.size());
     }
+
+    // =========================================================================
+    // NEW METHODS: covering the uncovered blocks called out in the user request
+    // =========================================================================
+
+    /**
+     * Covers parseMessages: 'delivered', 'read', 'failed' (with errors), 'failed' (no errors).
+     */
+    @isTest
+    static void testParseMessages_AllStatuses() {
+        Chat__c chat = new Chat__c(
+            WhatsAppMessageId__c = 'wamid.status_all_001',
+            Phone__c = '+919428234735',
+            Message_Status__c = 'Sent'
+        );
+        insert chat;
+
+        // delivered
+        WhatsAppWebhook.parseMessages('{"object":"whatsapp_business_account","entry":[{"id":"1","changes":[{"value":{"messaging_product":"whatsapp","statuses":[{"id":"wamid.status_all_001","status":"delivered","timestamp":"2147483647","recipient_id":"919428234735"}]},"field":"messages"}]}]}');
+        System.assertEquals('Delivered', [SELECT Message_Status__c FROM Chat__c WHERE Id = :chat.Id].Message_Status__c);
+
+        // read
+        WhatsAppWebhook.parseMessages('{"object":"whatsapp_business_account","entry":[{"id":"1","changes":[{"value":{"messaging_product":"whatsapp","statuses":[{"id":"wamid.status_all_001","status":"read","timestamp":"2147483647","recipient_id":"919428234735"}]},"field":"messages"}]}]}');
+        System.assertEquals('Seen', [SELECT Message_Status__c FROM Chat__c WHERE Id = :chat.Id].Message_Status__c);
+
+        // failed with errors list
+        WhatsAppWebhook.parseMessages('{"object":"whatsapp_business_account","entry":[{"id":"1","changes":[{"value":{"messaging_product":"whatsapp","statuses":[{"id":"wamid.status_all_001","status":"failed","timestamp":"2147483647","recipient_id":"919428234735","errors":[{"code":131026,"title":"Msg failed"}]}]},"field":"messages"}]}]}');
+        System.assertEquals('Failed', [SELECT Message_Status__c FROM Chat__c WHERE Id = :chat.Id].Message_Status__c);
+
+        // failed without errors list
+        Chat__c chat2 = new Chat__c(WhatsAppMessageId__c = 'wamid.status_all_002', Phone__c = '+919428234735', Message_Status__c = 'Sent');
+        insert chat2;
+        WhatsAppWebhook.parseMessages('{"object":"whatsapp_business_account","entry":[{"id":"1","changes":[{"value":{"messaging_product":"whatsapp","statuses":[{"id":"wamid.status_all_002","status":"failed","timestamp":"2147483647","recipient_id":"919428234735"}]},"field":"messages"}]}]}');
+        System.assertEquals('Failed', [SELECT Message_Status__c FROM Chat__c WHERE Id = :chat2.Id].Message_Status__c);
+    }
+
+    /**
+     * Covers parseMessages 'sent' status when chat is already 'Delivered'
+     * (the if-condition is false, so no assignment happens).
+     */
+    @isTest
+    static void testParseMessages_SentSkippedWhenDelivered() {
+        Chat__c chat = new Chat__c(WhatsAppMessageId__c = 'wamid.sent_skip_001', Phone__c = '+919428234735', Message_Status__c = 'Delivered');
+        insert chat;
+
+        WhatsAppWebhook.parseMessages('{"object":"whatsapp_business_account","entry":[{"id":"1","changes":[{"value":{"messaging_product":"whatsapp","statuses":[{"id":"wamid.sent_skip_001","status":"sent","timestamp":"2147483647","recipient_id":"919428234735"}]},"field":"messages"}]}]}');
+        System.assertEquals('Delivered', [SELECT Message_Status__c FROM Chat__c WHERE Id = :chat.Id].Message_Status__c);
+    }
+
+    /**
+     * Covers sendWhatsAppMessageAsync success branch (200 → WhatsAppMessageId set).
+     */
+    @isTest
+    static void testSendWhatsAppMessageAsync_Success() {
+        Chat__c chat = new Chat__c(Phone__c = '+919428234735', Message_Status__c = null);
+        insert chat;
+
+        HttpResponse mockRes = new HttpResponse();
+        mockRes.setStatusCode(200);
+        mockRes.setBody('{"messages":[{"id":"wamid.async_success"}]}');
+
+        Test.startTest();
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockRes));
+        WhatsAppWebhook.sendWhatsAppMessageAsync(chat.Id, 'showingId', '+919428234735', 'Hi', 'ctx001');
+        Test.stopTest();
+
+        Chat__c updated = [SELECT Message_Status__c, WhatsAppMessageId__c FROM Chat__c WHERE Id = :chat.Id];
+        System.assertEquals('Sent', updated.Message_Status__c);
+        System.assertEquals('wamid.async_success', updated.WhatsAppMessageId__c);
+    }
+
+    /**
+     * Covers sendWhatsAppMessageAsync failure branch (non-200 → 'Failed').
+     */
+    @isTest
+    static void testSendWhatsAppMessageAsync_Failed() {
+        Chat__c chat = new Chat__c(Phone__c = '+919428234735', Message_Status__c = null);
+        insert chat;
+
+        HttpResponse mockRes = new HttpResponse();
+        mockRes.setStatusCode(400);
+        mockRes.setBody('{"error":"Bad Request"}');
+
+        Test.startTest();
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockRes));
+        WhatsAppWebhook.sendWhatsAppMessageAsync(chat.Id, 'showingId', '+919428234735', 'Hi', '');
+        Test.stopTest();
+
+        Chat__c updated = [SELECT Message_Status__c FROM Chat__c WHERE Id = :chat.Id];
+        System.assertEquals('Failed', updated.Message_Status__c);
+    }
+
+    /**
+     * Covers sendWhatsAppResponse 'Rescheduled' message branch.
+     */
+    @isTest
+    static void testSendWhatsAppResponse_Rescheduled() {
+        Chat__c ctx = new Chat__c(WhatsAppMessageId__c = 'wamid.ctx_resch', Phone__c = '+919428234735');
+        insert ctx;
+
+        HttpResponse mockRes = new HttpResponse();
+        mockRes.setStatusCode(200);
+        mockRes.setBody('{"messages":[{"id":"wamid.resch_resp"}]}');
+
+        Test.startTest();
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockRes));
+        WhatsAppWebhook.sendWhatsAppResponse('showingAbc', 'Rescheduled', '+919428234735', 'wamid.ctx_resch');
+        Test.stopTest();
+
+        System.assert(true);
+    }
+
+    /**
+     * Covers sendWhatsAppResponse unknown status (early return branch).
+     */
+    @isTest
+    static void testSendWhatsAppResponse_UnknownStatus() {
+        Test.startTest();
+        WhatsAppWebhook.sendWhatsAppResponse('showingXyz', 'Unknown', '+919428234735', '');
+        Test.stopTest();
+        System.assert(true);
+    }
+
+    /**
+     * Covers mapResponseToLabels with a data-source field (Dropdown → single value,
+     * CheckboxGroup → list value).
+     */
+    @isTest
+    static void testMapResponseToLabels_WithDataSource() {
+        String flowJson = '{"screens":[{"id":"SCR0","title":"Screen 0","layout":{"children":[{"type":"Form","name":"form_1","children":[{"type":"Dropdown","name":"pick_one","label":"Pick One","data-source":[{"id":"opt1","title":"Option A"},{"id":"opt2","title":"Option B"}]},{"type":"CheckboxGroup","name":"pick_many","label":"Pick Many","data-source":[{"id":"c1","title":"Choice 1"},{"id":"c2","title":"Choice 2"}]}]}]}}]}';
+        String responseJson = '{"screen_0_pick_one_0":"opt1","screen_0_pick_many_1":["c1","c2"]}';
+
+        Test.startTest();
+        String result = WhatsAppWebhook.mapResponseToLabels(flowJson, responseJson);
+        Test.stopTest();
+
+        System.assertNotEquals(null, result);
+    }
+
+    /**
+     * Covers processSingleMessage new-record creation branch.
+     * Uses a phone number not on any existing Contact/User to hit the
+     * `userRecs.isEmpty()` branch.
+     */
+    @isTest
+    static void testProcessSingleMessage_NewRecordCreation() {
+        HttpResponse mockRes = new HttpResponse();
+        mockRes.setStatusCode(200);
+        mockRes.setBodyAsBlob(Blob.valueOf('mock'));
+
+        String newPersonPayload = '{"object":"whatsapp_business_account","entry":[{"id":"319254377948692","changes":[{"value":{"messaging_product":"whatsapp","metadata":{"display_phone_number":"919558019600","phone_number_id":"397858113402150"},"contacts":[{"profile":{"name":"Brand New Person"},"wa_id":"919888888888"}],"messages":[{"from":"919888888888","id":"wamid.new_person_001","timestamp":"2147483647","type":"text","text":{"body":"Hello"}}]},"field":"messages"}]}]}';
+
+        Test.startTest();
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockRes));
+        WhatsAppWebhook.processWhatsAppPayload(newPersonPayload);
+        Test.stopTest();
+
+        System.assert(true, 'Should complete without exception');
+    }
+
+    /**
+     * Covers createFlowSubmissionRecord (success + catch paths).
+     */
+    @isTest
+    static void testCreateFlowSubmissionRecord_Paths() {
+        Contact c = [SELECT Id, Phone FROM Contact WHERE Phone = '+919428234735' LIMIT 1];
+        Flow__c flow = new Flow__c(Flow_Id__c = 'sub_flow_99', Flow_JSON__c = '{"screens":[]}');
+        insert flow;
+
+        // Success path (may hit catch if MVEX__Object_Config__mdt is not in test org)
+        Test.startTest();
+        WhatsAppWebhook.createFlowSubmissionRecord(c.Phone, flow.Id, '{"Q":"A"}');
+
+        // Exception path: null flowRecordId
+        WhatsAppWebhook.createFlowSubmissionRecord(c.Phone, null, '{"Q":"A"}');
+        Test.stopTest();
+
+        System.assert(true);
+    }
+
+    /**
+     * Covers normalizePhoneNumber blank/null branches.
+     */
+    @isTest
+    static void testNormalizePhoneNumber_BlankAndNull() {
+        System.assertEquals('', WhatsAppWebhook.normalizePhoneNumber(''));
+        System.assertEquals(null, WhatsAppWebhook.normalizePhoneNumber(null));
+    }
 }

@@ -100,6 +100,18 @@ public class WhatsAppFlowControllerTest {
     }
 
     @isTest
+    public static void testUpdateWhatsAppFlowWithScreens() {
+        HttpResponse mockResponse = createMockResponse('200', '{}');
+        MockHttpResponseGenerator mock = new MockHttpResponseGenerator(mockResponse);
+        Test.setMock(HttpCalloutMock.class, mock);
+
+        Test.startTest();
+        String validJson = '{"screens":[{"id":"screen1"}]}';
+        String result = WhatsAppFlowController.updateWhatsAppFlow('12345', validJson);
+        Test.stopTest();
+    }
+
+    @isTest
     public static void testPublishWhatsAppFlow() {
         // Create mock response for the HTTP request inside the controller
         String mockResponseBody = '{"success":true}';
@@ -164,5 +176,22 @@ public class WhatsAppFlowControllerTest {
         // Asserting the expected result
         System.assertEquals('200', result.get('status'), 'Expected status to be 200');
         System.assertEquals('https://example.com', result.get('previewUrl'), 'Expected preview URL to be https://example.com');
+    }
+
+    @isTest
+    public static void testGetWhatsAppFlowById() {
+        Flow__c testFlow = [SELECT Id, Flow_Id__c FROM Flow__c LIMIT 1];
+        testFlow.Flow_JSON__c = '{"screens": []}';
+        update testFlow;
+        
+        Flow_Screen__c fsc = new Flow_Screen__c();
+        fsc.Flow__c = testFlow.Id;
+        fsc.Screen_Id__c = 'screen1';
+        fsc.Screen_Flow_Json__c = '{"id":"screen1"}';
+        fsc.Screen_Sequence_No__c = 1;
+        insert fsc;
+        
+        List<Flow__c> result = WhatsAppFlowController.getWhatsAppFlowById(testFlow.Flow_Id__c);
+        System.assertNotEquals(0, result.size());
     }
 }

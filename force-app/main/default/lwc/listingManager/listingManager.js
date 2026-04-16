@@ -1,4 +1,4 @@
-import { LightningElement,track,api} from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import designcss from '@salesforce/resourceUrl/listingManagerCss';
 import getListingData from '@salesforce/apex/ListingManagerController.getListingData';
@@ -9,23 +9,23 @@ import { errorDebugger } from 'c/globalProperties';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
 
-export default class ListingManager extends NavigationMixin(LightningElement){
+export default class ListingManager extends NavigationMixin(LightningElement) {
     @api objectName = 'MVEX__Listing__c';
     @api recordId;
     @api fieldSet = 'ListingManagerFieldSet';
-    @track spinnerShow=true;
+    @track spinnerShow = true;
     @track showList = true;
     @track showMap = false;
     @track listingData = [];
     @track unchangedListingData = [];
     @track fields = [];
-    @track processedListingData = [];    
-    @track unchangedProcessListings = [];    
+    @track processedListingData = [];
+    @track unchangedProcessListings = [];
     @track shownProcessedListingData = [];
     @track propertyMediaUrls = [];
     @track sortField = 'Name';
     @track sortOrder = 'asc';
-    @track totalSelected=0;
+    @track totalSelected = 0;
     @track selectedProperties;
     @track selectedListingData;
     @track isPrevDisabled = true;
@@ -126,13 +126,13 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     get pageNumbers() {
-        try{
+        try {
             const totalPages = this.totalPages;
             const currentPage = this.currentPage;
             const visiblePages = this.visiblePages;
-        
+
             let pages = [];
-        
+
             if (totalPages <= visiblePages) {
                 for (let i = 1; i <= totalPages; i++) {
                     pages.push({
@@ -147,14 +147,14 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     isEllipsis: false,
                     className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
-        
+
                 if (currentPage > 3) {
                     pages.push({ isEllipsis: true });
                 }
-        
+
                 let start = Math.max(2, currentPage - 1);
                 let end = Math.min(currentPage + 1, totalPages - 1);
-        
+
                 for (let i = start; i <= end; i++) {
                     pages.push({
                         number: i,
@@ -173,9 +173,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
-        
+
             return pages;
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'pageNumbers', error, 'warn', 'Error in pageNumbers');
             return null;
         }
@@ -187,7 +187,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * * Date: 20/08/2024
     * Created By:Vyom Soni
     */
-    get mobileView(){
+    get mobileView() {
         return window?.globalThis?.innerWidth <= 900 ? true : false;
     }
 
@@ -218,15 +218,15 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     get sortDescription() {
-        try{
-            if(this.sortField !== ''){
+        try {
+            if (this.sortField !== '') {
                 const orderDisplayName = this.sortOrder === 'asc' ? 'Ascending' : 'Descending';
-                
+
                 let field = null;
-                if(this.sortField != 'Name'){
+                if (this.sortField != 'Name') {
                     field = this.fields.find(item => item.fieldName === this.sortField);
-                }else{
-                    field = {fieldName:'Name',fieldLabel:'Listing Name'};
+                } else {
+                    field = { fieldName: 'Name', fieldLabel: 'Listing Name' };
                 }
                 if (!field) {
                     return '';
@@ -234,10 +234,10 @@ export default class ListingManager extends NavigationMixin(LightningElement){
 
                 const fieldDisplayName = field.fieldLabel;
                 return `Sorted by : ${fieldDisplayName} (${orderDisplayName})`;
-            }else{
+            } else {
                 return '';
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'sortDescription', error, 'warn', 'Error in sortDescription');
             return null;
         }
@@ -251,7 +251,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Date: 16/07/2024
     * Created By:Vyom Soni
     */
-    get totalListings(){
+    get totalListings() {
         return this.processedListingData.length;
     }
 
@@ -261,8 +261,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Date: 16/07/2024
     * Created By:Vyom Soni
     */
-    get isSelected(){
-        return this.totalSelected>0;
+    get isSelected() {
+        return this.totalSelected > 0;
     }
 
     /**
@@ -271,18 +271,18 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Date: 16/07/2024
     * Created By:Vyom Soni
     */
-    get items(){
+    get items() {
         return this.totalSelected > 1 ? 'Items' : 'Item';
     }
-    
+
     /**
     * Method Name : lisitngItems
     * @description : set 'Items' when the filtered items is more then the 1.
     * Date: 16/07/2024
     * Created By:Vyom Soni
     */
-    get lisitngItems(){
-        return this.processedListingData.length>1 ? 'Items' :'Item';
+    get lisitngItems() {
+        return this.processedListingData.length > 1 ? 'Items' : 'Item';
     }
 
     /**
@@ -291,8 +291,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    connectedCallback(){
-        try{
+    connectedCallback() {
+        try {
             loadStyle(this, MulishFontCss);
             this.updateScreenWidth();
             if (!import.meta.env.SSR) {
@@ -301,7 +301,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             loadStyle(this, designcss);
             this.getAccessible();
 
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
         }
     }
@@ -312,8 +312,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * * Date: 26/02/2026
     * Created By:Vyom Soni
     */
-    renderedCallback(){
-        try{
+    renderedCallback() {
+        try {
             if (this.listingData && this.listingData.length > 0) {
                 this.updateSortIcons();
             }
@@ -322,44 +322,44 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 const toggleBtn = this.template.querySelector('.filter-toggle-btn');
                 const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
                 const div1 = this.template.querySelector('.innerDiv1');
-                
+
                 if (toggleBtn && filterDiv && div1) {
                     // Filter should be hidden by default
                     filterDiv.classList.add('removeInnerDiv1');
                     div1.classList.add('removeInnerDiv1');
-                    
+
                     if (this.screenWidth >= 900) {
                         div1.style.width = '0';
                         div1.style.opacity = '0';
                     }
-                    
+
                     // Mark as initialized
                     this.hasInitializedFilter = true;
                 }
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'renderedCallback', error, 'warn', 'Error in renderedCallback');
         }
     }
 
     getAccessible() {
         getMetadataRecords()
-        .then(data => {
-            const listingManagerFeature = data.find(
-                item => item.DeveloperName === 'Listing_Manager'
-            );
-            this.isAccessible = listingManagerFeature ? Boolean(listingManagerFeature.MVEX__isAvailable__c) : false;
-            if (this.isAccessible) {
-                this.getListingDataMethod();
-            } else {
+            .then(data => {
+                const listingManagerFeature = data.find(
+                    item => item.DeveloperName === 'Listing_Manager'
+                );
+                this.isAccessible = listingManagerFeature ? Boolean(listingManagerFeature.MVEX__isAvailable__c) : false;
+                if (this.isAccessible) {
+                    this.getListingDataMethod();
+                } else {
+                    this.spinnerShow = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching accessible fields', error);
+                this.isAccessible = false;
                 this.spinnerShow = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching accessible fields', error);
-            this.isAccessible = false;
-            this.spinnerShow = false;
-        });
+            });
     }
 
     /**
@@ -380,7 +380,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    updateScreenWidth =()=> {
+    updateScreenWidth = () => {
         this.screenWidth = window.innerWidth;
     }
 
@@ -390,24 +390,24 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    getListingDataMethod(){
+    getListingDataMethod() {
         this.spinnerShow = true;
         getListingData()
             .then(result => {
                 this.listingData = result.listings;
-                this.propertyMediaUrls = result.medias;this.listingData = result.listings;
+                this.propertyMediaUrls = result.medias; this.listingData = result.listings;
                 this.propertyMediaUrls = result.medias;
                 this.pageSize = result.pageSize;
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
                     fieldType: field.fieldType,
-                    format : field.format,
+                    format: field.format,
                     referenceObjectName: field.referenceObjectName,
                     relationshipName: field.relationshipName
                 }));
-        
-                this.listingData.forEach((listing)=>{
+
+                this.listingData.forEach((listing) => {
                     const prop_id = listing.MVEX__Property__c;
                     listing.media_url = this.propertyMediaUrls[prop_id] ? this.propertyMediaUrls[prop_id] : '/resource/MVEX__blankImage';
                     listing.isChecked = false;
@@ -415,7 +415,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 })
 
                 console.log('Listing Data:', this.listingData);
-                
+
                 this.unchangedListingData = this.listingData;
                 this.processListings();
             })
@@ -434,47 +434,49 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     processListings() {
-        try{
+        try {
             this.processedListingData = this.listingData.map(listing => {
                 let orderedFields = this.fields.map(field => {
                     let isRedirectable = false;
                     let lookupId = null;
                     let objectApiName = null;
-                    let fieldValue;
+                    let rawValue;
 
+                    // For relationship fields (e.g. "Property__r.Name"), traverse the
+                    // related object so we get the parent name, not an ID or '-'.
+                    // Mirrors the same pattern used in marketingListCmp.processContacts.
                     if (field.fieldName.includes('.')) {
                         let fieldParts = field.fieldName.split('.');
                         let relatedObject = listing[fieldParts[0]];
-                        fieldValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
-                        
+                        rawValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
+
                         if (relatedObject && fieldParts[1] === 'Name') {
                             isRedirectable = true;
                             lookupId = relatedObject.Id;
                             objectApiName = field.referenceObjectName;
                         }
                     } else {
-                        fieldValue = listing[field.fieldName] || '-';
+                        rawValue = listing[field.fieldName];
                     }
 
-                    // if (field.format && fieldValue) {
-                    //     fieldValue = this.applyFieldFormat(fieldValue, field.format);
-                    // }
-                    let rawValue = listing[field.fieldName];
-                    let fieldValueraw = rawValue;
+                    let fieldValueraw;
 
                     // Handle empty/null/undefined
                     if (rawValue === null || rawValue === undefined || rawValue === '') {
                         fieldValueraw = '-';
-                    } 
+                    }
                     else if (field.fieldType === 'CURRENCY') {
                         fieldValueraw = new Intl.NumberFormat(USER_LOCALE, {
                             style: 'currency',
                             currency: USER_CURRENCY,
                             minimumFractionDigits: 0
                         }).format(rawValue);
-                    } 
+                    }
                     else if (field.format) {
                         fieldValueraw = this.applyFieldFormat(rawValue, field.format);
+                    }
+                    else {
+                        fieldValueraw = rawValue;
                     }
 
                     return {
@@ -490,12 +492,12 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     Id: listing.Id,
                     Name: listing.Name,
                     media_url: listing.media_url,
-                    Listing_Price__c:listing.MVEX__Listing_Price__c,
-                    Bathrooms__c:listing.MVEX__Bathrooms__c,
-                    City__c:listing.MVEX__City__c,
-                    Street__c:listing.MVEX__Street__c,
+                    Listing_Price__c: listing.MVEX__Listing_Price__c,
+                    Bathrooms__c: listing.MVEX__Bathrooms__c,
+                    City__c: listing.MVEX__City__c,
+                    Street__c: listing.MVEX__Street__c,
                     isChecked: listing.isChecked,
-                    Address__c:listing.MVEX__Address__c,
+                    Address__c: listing.MVEX__Address__c,
                     orderedFields,
                     isActive: listing.isActive,
                 };
@@ -562,8 +564,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Date: 14/06/2024
     * Created By:Vyom Soni
     */
-    handleFilteredListings(event){
-        try{
+    handleFilteredListings(event) {
+        try {
             this.sortField = 'Name';
             this.sortOrder = 'asc';
 
@@ -586,7 +588,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'handleFilteredListings', error, 'warn', 'Error in handleFilteredListings');
         }
     }
@@ -597,9 +599,9 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Date: 14/06/2024
     * Created By:Vyom Soni
     */
-    handleReset(event){
-        try{
-            if(event.detail.filterlistings == true){
+    handleReset(event) {
+        try {
+            if (event.detail.filterlistings == true) {
                 this.sortField = 'Name';
                 this.sortOrder = 'asc';
                 this.sortField = 'Name';
@@ -616,7 +618,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 this.updateShownData();
                 this.updateSelectedProperties();
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'handleReset', error, 'warn', 'Error in handleReset');
         }
     }
@@ -627,11 +629,11 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Date: 14/10/2024
     * Created By:Vyom Soni
     */
-    handleAddModalChange(event){
+    handleAddModalChange(event) {
         this.fieldsModal = event.detail;
     }
 
-    get listingSpinnerLoading(){
+    get listingSpinnerLoading() {
         return !this.spinnerShow && this.listingLoading;
     }
     /**
@@ -639,7 +641,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * @description : handle the loading event from the filter cmp
     * Date: 19/02/2026
     */
-    handleLoading(event){
+    handleLoading(event) {
         this.listingLoading = event.detail;
     }
 
@@ -649,14 +651,14 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     *  Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    handleMenuTabClick(evt){
-        try{
+    handleMenuTabClick(evt) {
+        try {
             let target = evt.currentTarget.dataset.tabId;
             this.showList = false;
             this.showMap = false;
-            if(target == "1"){
+            if (target == "1") {
                 this.showList = true;
-            } else if(target == "2"){
+            } else if (target == "2") {
                 this.showMap = true;
             }
             this.template.querySelectorAll(".tab-div").forEach(tabEl => {
@@ -672,7 +674,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             if (selectedPath) {
                 selectedPath.style.fill = '#fff';
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'handleMenuTabClick', error, 'warn', 'Error in handleMenuTabClick');
         }
     }
@@ -683,8 +685,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    redirectToRecord(event){
-        try{
+    redirectToRecord(event) {
+        try {
             const recordId = event.target.dataset.id;
             const objectApiName = event.target.dataset.object || 'MVEX__Listing__c';
             this[NavigationMixin.Navigate]({
@@ -695,7 +697,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     actionName: 'view'
                 }
             })
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'redirectToRecord', error, 'warn', 'Error in redirectToRecord');
         }
     }
@@ -707,11 +709,11 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     updateShownData() {
-        try{
+        try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
             this.shownProcessedListingData = this.processedListingData.slice(startIndex, endIndex);
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'updateShownData', error, 'warn', 'Error in updateShownData');
         }
     }
@@ -723,7 +725,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     handlePrevious() {
-       if (this.currentPage > 1) {
+        if (this.currentPage > 1) {
             this.currentPage--;
             this.updateShownData();
             this.scrollToTop();
@@ -745,7 +747,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             this.sortData();
         }
     }
- 
+
     /**
     * Method Name : handlePageChange
     * @description : handle the direct click on page number.
@@ -768,33 +770,33 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * date: 3/06/2024
     * Created By:Vyom Soni
     */
-    checkBoxValueChange(event){
-        try{
+    checkBoxValueChange(event) {
+        try {
             const checkboxId = Number(event.target.dataset.id);
             this.shownProcessedListingData[checkboxId].isChecked = event.target.checked;
-            this.processedListingData.forEach(item1=>{
-                this.shownProcessedListingData.forEach(item2=>{
-                    if(item1.Id == item2.Id){
+            this.processedListingData.forEach(item1 => {
+                this.shownProcessedListingData.forEach(item2 => {
+                    if (item1.Id == item2.Id) {
                         item1.isChecked = item2.isChecked;
                     }
                 })
-               })
-            this.unchangedProcessListings.forEach(item1=>{
-                this.shownProcessedListingData.forEach(item2=>{
-                    if(item1.Id == item2.Id){
+            })
+            this.unchangedProcessListings.forEach(item1 => {
+                this.shownProcessedListingData.forEach(item2 => {
+                    if (item1.Id == item2.Id) {
                         item1.isChecked = item2.isChecked;
                     }
                 })
-               })
-            this.listingData.forEach(item1=>{
-                this.shownProcessedListingData.forEach(item2=>{
-                    if(item1.Id == item2.Id){
+            })
+            this.listingData.forEach(item1 => {
+                this.shownProcessedListingData.forEach(item2 => {
+                    if (item1.Id == item2.Id) {
                         item1.isChecked = item2.isChecked;
                     }
                 })
-               })
-               this.updateSelectedProperties();
-        }catch (error){
+            })
+            this.updateSelectedProperties();
+        } catch (error) {
             errorDebugger('ListingManager', 'checkBoxValueChange', error, 'warn', 'Error in checkBoxValueChange');
         }
     }
@@ -805,8 +807,8 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * date: 3/06/2024
     * Created By:Vyom Soni
     */
-    selectAllCheckbox(event){
-        try{
+    selectAllCheckbox(event) {
+        try {
             const isChecked = event.target.checked;
             this.sortField = '';
             this.sortOrder = 'asc';
@@ -821,14 +823,14 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             this.unchangedProcessListings = this.unchangedProcessListings.map(item => {
                 return { ...item, isChecked: isChecked };
             });
-            
+
             this.updateShownData();
             this.updateSelectedProperties();
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'selectAllCheckbox', error, 'warn', 'Error in selectAllCheckbox');
         }
     }
-    
+
     /**
     * Method Name : goTONewListing
     * @description : Redirect the new listing page
@@ -859,10 +861,10 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     updateSelectedProperties() {
-        try{
+        try {
             this.selectedProperties = this.processedListingData.filter(listing => listing.isChecked);
             this.totalSelected = this.selectedProperties.length;
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'updateSelectedProperties', error, 'warn', 'Error in updateSelectedProperties');
         }
     }
@@ -874,7 +876,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     sortClick(event) {
-        try{
+        try {
             const fieldName = event.currentTarget.dataset.id;
             if (this.sortField === fieldName) {
                 this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
@@ -885,7 +887,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             this.sortData();
             this.updateShownData();
             this.updateSortIcons();
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'sortClick', error, 'warn', 'Error in sortClick');
         }
     }
@@ -927,10 +929,10 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     sortData() {
-        try{
+        try {
             this.processedListingData = [...this.processedListingData].sort((a, b) => {
                 let aValue, bValue;
-    
+
                 if (this.sortField === 'Name') {
                     aValue = a.Name;
                     bValue = b.Name;
@@ -938,22 +940,22 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                     aValue = a.orderedFields.find(field => field.fieldName === this.sortField).value;
                     bValue = b.orderedFields.find(field => field.fieldName === this.sortField).value;
                 }
-    
+
                 if (typeof aValue === 'string' && typeof bValue === 'string') {
                     aValue = aValue.toLowerCase();
                     bValue = bValue.toLowerCase();
                 }
-    
+
                 let compare = 0;
                 if (aValue > bValue) {
                     compare = 1;
                 } else if (aValue < bValue) {
                     compare = -1;
                 }
-    
+
                 return this.sortOrder === 'asc' ? compare : -compare;
             });
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'sortData', error, 'warn', 'Error in sortData');
             return null;
         }
@@ -966,12 +968,12 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     scrollToTop() {
-        try{
+        try {
             const tableDiv = this.template.querySelector('.table-content');
             if (tableDiv) {
                 tableDiv.scrollTop = 0;
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'scrollToTop', error, 'warn', 'Error in scrollToTop');
         }
     }
@@ -983,23 +985,23 @@ export default class ListingManager extends NavigationMixin(LightningElement){
     * Created By:Vyom Soni
     */
     wrapFilter() {
-        try{
+        try {
             const toggleBtn = this.template.querySelector('.filter-toggle-btn');
             const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
             const div1 = this.template.querySelector('.innerDiv1');
             const div2 = this.template.querySelector('.innerDiv2');
-            
+
             if (this.wrapOn) {
                 // Currently hidden, show filter
                 toggleBtn.classList.add('active'); // Blue when filter showing
                 filterDiv.classList.remove('removeInnerDiv1');
                 div1.classList.remove('removeInnerDiv1');
-    
-                if(this.screenWidth >= 900){
+
+                if (this.screenWidth >= 900) {
                     div1.style.width = '22%';
                     div1.style.opacity = '1';
                     div2.style.width = '78%';
-                }else{
+                } else {
                     div1.style.height = 'fit-content';
                     div1.style.width = '100%';
                     div1.style.opacity = '1';
@@ -1010,12 +1012,12 @@ export default class ListingManager extends NavigationMixin(LightningElement){
             } else {
                 // Currently showing, hide filter
                 toggleBtn.classList.remove('active'); // White when filter hidden
-                
-                if(this.screenWidth >= 900){
+
+                if (this.screenWidth >= 900) {
                     div1.style.width = '0';
                     div1.style.opacity = '0';
                     div2.style.width = '100%';
-                    
+
                     // Hide filter content and remove margin after animation starts
                     setTimeout(() => {
                         if (this.wrapOn) {
@@ -1023,7 +1025,7 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                             div1.classList.add('removeInnerDiv1');
                         }
                     }, 150);
-                }else{
+                } else {
                     filterDiv.classList.add('removeInnerDiv1');
                     div1.style.height = '0';
                     div1.style.opacity = '0';
@@ -1033,12 +1035,12 @@ export default class ListingManager extends NavigationMixin(LightningElement){
                 }
                 this.wrapOn = true;
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('ListingManager', 'wrapFilter', error, 'warn', 'Error in wrapFilter');
         }
     }
 
-    openConfigureSettings(){
+    openConfigureSettings() {
         this.isConfigOpen = true;
     }
 

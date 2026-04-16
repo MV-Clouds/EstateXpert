@@ -248,7 +248,7 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
                                 id: item.record.Id,
                                 name: item.record.Name || 'Not Specified',
                                 phone: item.record.Phone || item.record.MobilePhone || '',
-                                status: item.status || '',
+                                status: item.status || 'Not Sent',
                                 hasReplied: item.hasReplied || false,
                                 repliedText: item.hasReplied ? 'Yes' : 'No',
                                 repliedClass: item.hasReplied ? 'replied-yes' : 'replied-no',
@@ -299,7 +299,8 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
             'Sent': 'Sent',
             'Delivered': 'Delivered',
             'Seen': 'Seen',
-            'Failed': 'Failed'
+            'Failed': 'Failed',
+            'Not Sent': 'Not-Sent'
         };
         return statusMap[status] || '';
     }

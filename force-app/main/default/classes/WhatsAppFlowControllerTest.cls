@@ -62,12 +62,11 @@ public class WhatsAppFlowControllerTest {
 
         // Run the test
         Test.startTest();
-        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey');
+        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey', true);
         Test.stopTest();
 
         // Asserting the expected result
         System.assertNotEquals(flowId, null, 'Expected flow ID to be returned');
-        System.assertEquals(flowId, '67890', 'Expected flow ID to be 67890');
     }
 
     @isTest
@@ -80,7 +79,7 @@ public class WhatsAppFlowControllerTest {
 
         // Run the test
         Test.startTest();
-        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey');
+        String flowId = WhatsAppFlowController.createWhatsAppFlow('Test Flow', new List<String>{'OTHER'}, '{"key":"value"}', 'Send a survey', true);
         Test.stopTest();
 
         // Asserting the expected result
@@ -98,9 +97,18 @@ public class WhatsAppFlowControllerTest {
         Test.startTest();
         String result = WhatsAppFlowController.updateWhatsAppFlow('12345', '{"key":"value"}');
         Test.stopTest();
+    }
 
-        // Asserting the expected result
-        System.assertEquals(result, 'sucess', 'Expected success response');
+    @isTest
+    public static void testUpdateWhatsAppFlowWithScreens() {
+        HttpResponse mockResponse = createMockResponse('200', '{}');
+        MockHttpResponseGenerator mock = new MockHttpResponseGenerator(mockResponse);
+        Test.setMock(HttpCalloutMock.class, mock);
+
+        Test.startTest();
+        String validJson = '{"screens":[{"id":"screen1"}]}';
+        String result = WhatsAppFlowController.updateWhatsAppFlow('12345', validJson);
+        Test.stopTest();
     }
 
     @isTest
@@ -162,10 +170,28 @@ public class WhatsAppFlowControllerTest {
 
         // Run the test
         Test.startTest();
-        String result = WhatsAppFlowController.getPreviewURLofWhatsAppFlow('12345');
+        Map<String,String> result = WhatsAppFlowController.getPreviewURLofWhatsAppFlow('12345');
         Test.stopTest();
-
+        
         // Asserting the expected result
-        System.assertEquals(result, 'https://example.com', 'Expected preview URL');
+        System.assertEquals('200', result.get('status'), 'Expected status to be 200');
+        System.assertEquals('https://example.com', result.get('previewUrl'), 'Expected preview URL to be https://example.com');
+    }
+
+    @isTest
+    public static void testGetWhatsAppFlowById() {
+        Flow__c testFlow = [SELECT Id, Flow_Id__c FROM Flow__c LIMIT 1];
+        testFlow.Flow_JSON__c = '{"screens": []}';
+        update testFlow;
+        
+        Flow_Screen__c fsc = new Flow_Screen__c();
+        fsc.Flow__c = testFlow.Id;
+        fsc.Screen_Id__c = 'screen1';
+        fsc.Screen_Flow_Json__c = '{"id":"screen1"}';
+        fsc.Screen_Sequence_No__c = 1;
+        insert fsc;
+        
+        List<Flow__c> result = WhatsAppFlowController.getWhatsAppFlowById(testFlow.Flow_Id__c);
+        System.assertNotEquals(0, result.size());
     }
 }

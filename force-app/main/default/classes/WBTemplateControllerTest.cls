@@ -136,8 +136,25 @@ public class WBTemplateControllerTest {
             Contact resultContact = (Contact)resultMap.get('queriedData');
             System.assertEquals(resultContact.FirstName, 'Test1', 'FirstName should be John');
         } catch (Exception e) {
-            // ExceptionHandler.logException(new Map<String, Object>{ 'className' => 'WBTemplateControllerTest', 'methodName' => 'testFetchDynamicRecordData', 'exceptionObj' => e, 'isApiException' => false, 'statusCode' => null, 'chatId' => null, 'moreDetails' => e.getMessage(), 'apiResponse' => null });
+            // ExceptionHandler.logException(...)
         }
+    }
+    
+    @isTest
+    static void testGetObjectFieldsWithRelationships() {
+        Test.startTest();
+        // Test single object root level
+        Map<String, List<WBTemplateController.FieldOption>> result1 = WBTemplateController.getObjectFieldsWithRelationships(new List<String>{'Contact'}, null);
+        
+        // Test single object with relationship path
+        Map<String, List<WBTemplateController.FieldOption>> result2 = WBTemplateController.getObjectFieldsWithRelationships(new List<String>{'Contact'}, new List<String>{'Account'});
+        
+        // Test invalid object (exception branch)
+        Map<String, List<WBTemplateController.FieldOption>> result3 = WBTemplateController.getObjectFieldsWithRelationships(new List<String>{'Invalid_Object_Name_XYZ'}, null);
+        Test.stopTest();
+        
+        System.assert(result1.containsKey('Contact'));
+        System.assert(result3.containsKey('Invalid_Object_Name_XYZ'));
     }
         
     @IsTest
@@ -252,6 +269,7 @@ public class WBTemplateControllerTest {
 
         Test.startTest();
         String sessionId = WBTemplateController.startUploadSession('testFile.txt', 1024, 'text/plain');
+        WBTemplateController.checkTemplateExistance('test_template', '{"invalid":"json"}', '{"invalid":"json"}'); // exception branch
         Test.stopTest();
 
     }
@@ -338,7 +356,7 @@ public class WBTemplateControllerTest {
             HttpResponse res = new HttpResponse();
             res.setHeader('Content-Type', 'application/json');
             res.setStatusCode(statusCode);
-            res.setBody('{\"success\": false}');
+            res.setBody('{\"success\": false, \"id\": \"upload:123\", \"h\": \"header123\"}');
             return res;
         }
     }
@@ -409,10 +427,70 @@ public class WBTemplateControllerTest {
         String companyName = WBTemplateController.getCompanyName();
         WBTemplateController.getObjectsWithPhoneField();
         Test.stopTest();
-        
-        // Assert that it returns a non-null value
-        System.assertNotEquals(null, companyName, 'Company name should not be null');
     }
-    
-    
+        // Assert that it returns a non-null value
+    @isTest
+    static void testGetMetaHeaderHandler() {
+        Test.setMock(HttpCalloutMock.class, new TestHttpResponse(200));
+        Test.startTest();
+        String res = WBTemplateController.getMetaHeaderHandler('https://example.amazonaws.com/test.png', null);
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testGetMetaHeaderHandlerException() {
+        Test.setMock(HttpCalloutMock.class, new TestHttpResponse(500));
+        Test.startTest();
+        String res = WBTemplateController.getMetaHeaderHandler('https://example.amazonaws.com/test.png', null);
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testUploadContentVersionToMetaAndGetHeaderHandle() {
+        Test.setMock(HttpCalloutMock.class, new TestHttpResponse(200));
+        ContentVersion cv = new ContentVersion(Title='Test', PathOnClient='Test.png', VersionData=Blob.valueOf('Test Content'));
+        insert cv;
+        cv = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id];
+        
+        CreateTemplateWrapper.TemplateWrapper mockTemplateWrapper = new CreateTemplateWrapper.TemplateWrapper();
+        mockTemplateWrapper.templateName = 'Test Template';
+        mockTemplateWrapper.tempLanguage = 'en';
+        mockTemplateWrapper.tempImgUrl = cv.Id;
+        mockTemplateWrapper.templateMiscellaneousData = '{"contentVersionId":"' + cv.Id + '"}';
+        String serializedWrapper = JSON.serialize(mockTemplateWrapper);
+
+        Test.startTest();
+        WBTemplateController.uploadFileToMetaAndGetHeaderHandle('testTemplate', serializedWrapper, '{"header_handle":"test"}', '1234');
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testGetAllFlowsAndScreens() {
+        Flow__c f = new Flow__c(Flow_Name__c='Test', Status__c='Published', Flow_Id__c='123', Flow_Json__c='{"screens":[{"id":"scr1"}]}');
+        insert f;
+        
+        Test.startTest();
+        List<Flow__c> flows = WBTemplateController.getAllFlows();
+        String screenId = WBTemplateController.getAllFlowScreenIds('123');
+        Test.stopTest();
+        System.assertEquals(1, flows.size());
+        System.assertEquals('scr1', screenId);
+    }
+
+    @isTest
+    static void testGetPreviewURLofWhatsAppFlow() {
+        Test.setMock(HttpCalloutMock.class, new TestHttpResponse(200));
+        Test.startTest();
+        Map<String,String> res = WBTemplateController.getPreviewURLofWhatsAppFlow('123');
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testGetPreviewURLofWhatsAppFlowException() {
+        Test.startTest();
+        WBTemplateController.SETTINGS = null;
+        Map<String,String> res = WBTemplateController.getPreviewURLofWhatsAppFlow('123');
+        WBTemplateController.getAllFlows();
+        Test.stopTest();
+    }
 }

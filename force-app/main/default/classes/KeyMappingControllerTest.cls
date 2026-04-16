@@ -88,6 +88,13 @@ private class KeyMappingControllerTest {
         Account acc = createAccountRecord();
         createContentVersion(acc.Id);
         returnValue = KeyMappingController.getAllContentVersionImgs('Google Doc Template');
+        Template__c testTemplateForSig = createTemplateRecord();
+        KeyMappingController.getSignatureInfo(testTemplateForSig.Id);
+        KeyMappingController.getSignatureInfo(null);
+        KeyMappingController.updateSignatureInfo(testTemplateForSig.Id, 100);
+        KeyMappingController.updateSignatureInfo('invalid_id', 100); // For catch block
+        KeyMappingController.getMerginTemplateKeys('Account', testTemplateForSig.Id);
+        KeyMappingController.getMerginTemplateKeys(null, null); // For catch block
         Test.stopTest();
 
         System.assertEquals(true, returnValue.isSuccess, 'success');

@@ -298,4 +298,59 @@ private class TemplateBuilderControllerTest {
         System.assertNotEquals(null, result, 'The result should not be null.');
         System.assertEquals('Test Listing', result.listingName, 'The listing name should match the test listing.');
     }
+
+    @isTest
+    static void testSearchContactsWithEmail() {
+        Contact c1 = new Contact(FirstName='TestEmail', LastName='User1', Email='test1@example.com');
+        Contact c2 = new Contact(FirstName='TestEmail', LastName='User2');
+        insert new List<Contact>{c1, c2};
+
+        Test.startTest();
+        List<Contact> results = TemplateBuilderController.searchContactsWithEmail('TestEmail');
+        
+        try {
+            TemplateBuilderController.searchContactsWithEmail(null);
+        } catch (Exception e) {}
+        
+        Test.stopTest();
+
+        System.assert(results.size() > 0, 'Should find contacts');
+    }
+
+    @isTest
+    static void testSendEmailWithPDF() {
+        Contact c = new Contact(FirstName='EM', LastName='User', Email='em_user@example.com');
+        insert c;
+
+        Test.startTest();
+        // Positive case
+        TemplateBuilderController.sendEmailWithPDF(
+            new List<Id>{c.Id}, 
+            new List<String>{'manual@example.com', 'invalid-email', null}, 
+            'Subject', 'Body', 'tempId', 'recId', 'file.pdf', 'YmFzZTY0'
+        );
+        
+        // Exception cases
+        try {
+            TemplateBuilderController.sendEmailWithPDF(null, null, 'Subject', 'Body', 'tempId', 'recId', 'file.pdf', 'YmFzZTY0');
+        } catch (Exception e){}
+        
+        try {
+            TemplateBuilderController.sendEmailWithPDF(new List<Id>{c.Id}, null, null, 'Body', 'tempId', 'recId', 'file.pdf', 'YmFzZTY0');
+        } catch (Exception e){}
+        
+        try {
+            TemplateBuilderController.sendEmailWithPDF(new List<Id>{c.Id}, null, 'Subject', null, 'tempId', 'recId', 'file.pdf', 'YmFzZTY0');
+        } catch (Exception e){}
+        
+        try {
+            TemplateBuilderController.sendEmailWithPDF(new List<Id>{c.Id}, null, 'Subject', 'Body', 'tempId', 'recId', 'file.pdf', null);
+        } catch (Exception e){}
+        
+        try {
+            TemplateBuilderController.sendEmailWithPDF(new List<Id>{c.Id}, null, 'Subject', 'Body', 'tempId', 'recId', 'file.pdf', 'INVALID_BASE64_!!!');
+        } catch (Exception e){}
+
+        Test.stopTest();
+    }
 }

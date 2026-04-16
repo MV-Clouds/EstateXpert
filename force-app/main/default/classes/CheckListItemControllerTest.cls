@@ -254,4 +254,92 @@ public class CheckListItemControllerTest {
         System.assertEquals('success', result, 'Result should be success');
 
     }
+
+    @isTest
+    static void testSetCompletedBasedOnFieldCoverage() {
+        CheckListItemController.ChecklistWrapper wrapper = new CheckListItemController.ChecklistWrapper();
+        Account acc = new Account(Name = 'Test Acc', NumberOfEmployees = 100);
+        // We use Account for simplicity to get mapped fields
+        Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Account.fields.getMap();
+
+        Checklist__c item1 = new Checklist__c(Field_Name__c = 'NumberOfEmployees', Value__c = '50', Operator__c = 'Greater Than', Data_Type__c = 'NUMBER');
+        CheckListItemController.setCompletedBasedOnField(wrapper, item1, acc, fieldMap);
+        System.assertEquals(true, wrapper.completed);
+
+        item1.Operator__c = 'Greater Than Equal To';
+        CheckListItemController.setCompletedBasedOnField(wrapper, item1, acc, fieldMap);
+        System.assertEquals(true, wrapper.completed);
+
+        item1.Operator__c = 'Less Than';
+        CheckListItemController.setCompletedBasedOnField(wrapper, item1, acc, fieldMap);
+        System.assertEquals(false, wrapper.completed);
+
+        item1.Operator__c = 'Less Than Equal To';
+        CheckListItemController.setCompletedBasedOnField(wrapper, item1, acc, fieldMap);
+        System.assertEquals(false, wrapper.completed);
+
+        item1.Operator__c = 'InvalidOp';
+        CheckListItemController.setCompletedBasedOnField(wrapper, item1, acc, fieldMap);
+        System.assertEquals(false, wrapper.completed);
+
+        // check when fieldValue is null
+        Account accNull = new Account(Name = 'Test Acc');
+        Checklist__c itemNull = new Checklist__c(Field_Name__c = 'NumberOfEmployees', Value__c = '50', Operator__c = 'InvalidOp', Data_Type__c = 'NUMBER');
+        CheckListItemController.setCompletedBasedOnField(wrapper, itemNull, accNull, fieldMap);
+        
+        CheckListItemController.setCompletedBasedOnField(wrapper, null, null, null); // Exception branch
+    }
+
+    @isTest
+    static void testChangeDateFormat() {
+        Checklist__c item = new Checklist__c(Value__c = String.valueOf(Date.today()), Operator__c = 'Equals');
+        Boolean res = CheckListItemController.changeDateFormat(item, Date.today());
+        System.assertEquals(true, res);
+
+        item.Operator__c = 'Not Equals to';
+        Boolean res2 = CheckListItemController.changeDateFormat(item, Date.today().addDays(1));
+        System.assertEquals(true, res2);
+
+        Boolean res3 = CheckListItemController.changeDateFormat(item, 'Not a date');
+        
+        // Exception branch:
+        Checklist__c itemExc = new Checklist__c(Value__c = 'Invalid Date String');
+        CheckListItemController.changeDateFormat(itemExc, Date.today());
+    }
+
+    @isTest
+    static void testChangeDateTimeFormat() {
+        Checklist__c item = new Checklist__c(Value__c = '2023-10-10T10:10:10Z', Operator__c = 'Equals');
+        Datetime dt = Datetime.newInstanceGmt(2023, 10, 10, 10, 10, 10);
+        Boolean res = CheckListItemController.changeDateTimeFormat(item, dt);
+        System.assertEquals(true, res);
+        
+        item.Operator__c = 'Not Equals to';
+        Boolean res2 = CheckListItemController.changeDateTimeFormat(item, dt.addDays(1));
+        System.assertEquals(true, res2);
+
+        Boolean res3 = CheckListItemController.changeDateTimeFormat(item, 'Not a datetime');
+        
+        // Exception branch:
+        Checklist__c itemExc = new Checklist__c(Value__c = 'Invalid Date String');
+        CheckListItemController.changeDateTimeFormat(itemExc, dt);
+    }
+
+    @isTest
+    static void testExceptions() {
+        Test.startTest();
+        // getCheckList exception
+        CheckListItemController.getCheckList('Account', 'invalid_id_format');
+        CheckListItemController.getCheckList('Invalid__c', 'invalid_id_format');
+        
+        // getObjectFields exception
+        CheckListItemController.getObjectFields('Invalid__c');
+        
+        // createCheckListItem exception
+        CheckListItemController.createCheckListItem(null, null, null);
+        
+        // manageChecklistRecords exception
+        CheckListItemController.manageChecklistRecords(null, null, null);
+        Test.stopTest();
+    }
 }

@@ -360,6 +360,20 @@
     margin: auto;
 }
 
+.Not-Sent{
+    background-color: #f5c9c9;
+    color: #e43333;
+    width: fit-content;
+    border-radius: 7px;
+    padding: 5px 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    margin: auto;
+}
+
 .replied-yes {
     background-color: #d3fab7;
     color: #008000;

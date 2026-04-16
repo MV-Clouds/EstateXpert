@@ -77,6 +77,14 @@ public class ListingTriggerHandlerTest {
             Address__c = '456 Off St'
         ));
 
+        // Create with existing property
+        Property__c existingProp = [SELECT Id FROM Property__c LIMIT 1];
+        newListings.add(new Listing__c(
+            Name = 'Sync Off Existing Prop',
+            Property__c = existingProp.Id,
+            Address__c = '123 Salesforce Lane'
+        ));
+
         Test.startTest();
         insert newListings;
         Test.stopTest();
@@ -142,6 +150,8 @@ public class ListingTriggerHandlerTest {
         );
         handler.handleListingAfterInsert();
         handler.handleListingAfterUpdate();
+        handler.afterInsertEvent();
+        handler.afterUpdateEvent();
         Test.stopTest();
         
         // If it reaches here without failing the test, the catch block worked.

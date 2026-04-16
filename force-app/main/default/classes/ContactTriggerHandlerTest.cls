@@ -173,4 +173,26 @@ public class ContactTriggerHandlerTest {
         System.assert(true, 'Catches were executed successfully');
     }
 
+    @isTest
+    static void testExceptionsDeep() {
+        // Deep coverage for exceptions
+        ContactTriggerHandler.Condition c1 = new ContactTriggerHandler.Condition();
+        c1.Lead_Field = 'InvalidField__c';
+        c1.Condition = 'equals';
+        
+        // Logical expression edge cases
+        Lead_Assignment_Setting__c r1 = new Lead_Assignment_Setting__c(Name=UserInfo.getUserId(), Conditions__c='[{"Order":1}]', Logic_Type__c='Custom', Logical_Expression__c='(1) OR 2');
+        insert r1;
+
+        Contact con = new Contact(FirstName = 'Test',LastName = 'Test');
+        insert con;
+        ContactTriggerHandler.handleLeadAssignment(new List<Contact>{con}, null);
+        
+        MVEX__Lead_Notification__c socialConfig = [SELECT Id, MVEX__Email_Addresses__c FROM MVEX__Lead_Notification__c LIMIT 1];
+        socialConfig.MVEX__Email_Addresses__c = null;
+        update socialConfig;
+
+        Contact conSocial = new Contact(FirstName = 'Social', LastName = 'Buyer', LeadSource = 'Facebook', MVEX__Contact_Type__c = 'Buyer');
+        ContactTriggerHandler.notifyOwner(new List<Contact>{conSocial}, null);
+    }
 }

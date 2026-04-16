@@ -1285,3 +1285,10 @@ span {
     position: sticky;
     bottom: 0;
 }
+
+.table-content .slds-table td{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 12rem;
+}

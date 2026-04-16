@@ -168,48 +168,34 @@ public with sharing class BroadcastMessageController {
                 ORDER BY CreatedDate DESC
             ];
 
-            Set<String> allPhones = new Set<String>();
-            Map<Id, List<String>> broadcastToPhones = new Map<Id, List<String>>();
-
-            // Collect phones
+            Map<Id, Map<String, Integer>> broadcastStats = new Map<Id, Map<String, Integer>>();
             for (Broadcast__c b : broadcasts) {
-                List<Chat__c> chats = [
-                    SELECT Phone__c FROM Chat__c 
-                    WHERE WB_Broadcast__c = :b.Id 
-                    AND Type_of_Message__c = 'Outbound Messages'
-                    LIMIT 50000
-                ];
-                List<String> phones = new List<String>();
-                for (Chat__c c : chats) {
-                    phones.add(c.Phone__c);
-                    allPhones.add(c.Phone__c);
-                }
-                broadcastToPhones.put(b.Id, phones);
+                broadcastStats.put(b.Id, new Map<String, Integer>{
+                    'Sent' => 0, 'Delivered' => 0, 'Seen' => 0, 'Failed' => 0
+                });
             }
 
-            // Latest status per phone
-            Map<String, String> phoneStatus = new Map<String, String>();
-            for (Chat__c c : [
-                SELECT Phone__c, Message_Status__c 
-                FROM Chat__c 
-                WHERE Phone__c IN :allPhones 
-                AND Type_of_Message__c = 'Outbound Messages'
-                ORDER BY LastModifiedDate DESC
+            for (AggregateResult ar : [
+                SELECT WB_Broadcast__c broadcastId, Message_Status__c status, COUNT(Id) cnt
+                FROM Chat__c
+                WHERE WB_Broadcast__c IN :broadcasts AND Type_of_Message__c IN ('Outbound Messages', 'OutBound Messages')
+                GROUP BY WB_Broadcast__c, Message_Status__c
             ]) {
-                if (!phoneStatus.containsKey(c.Phone__c)) {
-                    phoneStatus.put(c.Phone__c, c.Message_Status__c);
-                }
+                Id bId = (Id) ar.get('broadcastId');
+                String status = (String) ar.get('status');
+                Integer cnt = (Integer) ar.get('cnt');
+                
+                if (status == 'Sent') broadcastStats.get(bId).put('Sent', broadcastStats.get(bId).get('Sent') + cnt);
+                else if (status == 'Delivered') broadcastStats.get(bId).put('Delivered', broadcastStats.get(bId).get('Delivered') + cnt);
+                else if (status == 'Seen') broadcastStats.get(bId).put('Seen', broadcastStats.get(bId).get('Seen') + cnt);
+                else if (status == 'Failed' || status == 'failed') broadcastStats.get(bId).put('Failed', broadcastStats.get(bId).get('Failed') + cnt);
             }
 
             for (Broadcast__c b : broadcasts) {
-                Integer sent = 0, delivered = 0, read = 0, replied = 0, failed = 0;
-                for (String phone : broadcastToPhones.get(b.Id)) {
-                    String st = phoneStatus.get(phone);
-                    if (st == 'Sent') sent++;
-                    else if (st == 'Delivered') delivered++;
-                    else if (st == 'Seen') read++;
-                    else if (st == 'failed') failed++;
-                }
+                Integer sent = broadcastStats.get(b.Id).get('Sent');
+                Integer delivered = broadcastStats.get(b.Id).get('Delivered');
+                Integer read = broadcastStats.get(b.Id).get('Seen');
+                Integer failed = broadcastStats.get(b.Id).get('Failed');
 
                 result.add(new Map<String, Object>{
                     'Id' => b.Id,
@@ -245,43 +231,21 @@ public with sharing class BroadcastMessageController {
                 LIMIT 1
             ];
 
-            Set<String> allPhones = new Set<String>();
-            List<String> broadcastPhones = new List<String>();
-
-            // Collect phones for this broadcast
-            List<Chat__c> chats = [
-                SELECT Phone__c FROM Chat__c 
-                WHERE WB_Broadcast__c = :broadcast.Id 
-                AND Type_of_Message__c = 'Outbound Messages'
-                LIMIT 50000
-            ];
-            
-            for (Chat__c c : chats) {
-                broadcastPhones.add(c.Phone__c);
-                allPhones.add(c.Phone__c);
-            }
-
-            // Latest status per phone
-            Map<String, String> phoneStatus = new Map<String, String>();
-            for (Chat__c c : [
-                SELECT Phone__c, Message_Status__c 
-                FROM Chat__c 
-                WHERE Phone__c IN :allPhones 
-                AND Type_of_Message__c = 'Outbound Messages'
-                ORDER BY LastModifiedDate DESC
-            ]) {
-                if (!phoneStatus.containsKey(c.Phone__c)) {
-                    phoneStatus.put(c.Phone__c, c.Message_Status__c);
-                }
-            }
-
             Integer sent = 0, delivered = 0, read = 0, failed = 0;
-            for (String phone : broadcastPhones) {
-                String st = phoneStatus.get(phone);
-                if (st == 'Sent') sent++;
-                else if (st == 'Delivered') delivered++;
-                else if (st == 'Seen') read++;
-                else if (st == 'failed') failed++;
+
+            for (AggregateResult ar : [
+                SELECT Message_Status__c status, COUNT(Id) cnt
+                FROM Chat__c
+                WHERE WB_Broadcast__c = :broadcastId AND Type_of_Message__c IN ('Outbound Messages', 'OutBound Messages')
+                GROUP BY Message_Status__c
+            ]) {
+                String status = (String) ar.get('status');
+                Integer cnt = (Integer) ar.get('cnt');
+                
+                if (status == 'Sent') sent += cnt;
+                else if (status == 'Delivered') delivered += cnt;
+                else if (status == 'Seen') read += cnt;
+                else if (status == 'Failed' || status == 'failed') failed += cnt;
             }
 
             result.put('Id', broadcast.Id);
@@ -295,7 +259,7 @@ public with sharing class BroadcastMessageController {
             result.put('MVEX__Template_Name__c', broadcast.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c);
             result.put('MVEX__Schedule_DateTime__c', broadcast.MVEX__Schedule_DateTime__c);
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastRecsWithReplies', e.getMessage());
+            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastRecord', e.getMessage());
         }
         return result;
     }

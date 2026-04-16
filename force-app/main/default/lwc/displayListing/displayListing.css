@@ -948,3 +948,7 @@ button:disabled {
 .image-column .slds-icon_container {
     display: none !important;
 }
+
+.table-content .slds-table td {
+    max-width: 12rem;
+}

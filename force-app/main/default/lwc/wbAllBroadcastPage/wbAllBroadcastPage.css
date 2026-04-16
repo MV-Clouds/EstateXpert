@@ -1171,3 +1171,7 @@
 .reschedule-btn:hover .reschedule-icon {
     --slds-c-icon-color-foreground-default: #0176D3;
 }
+
+.table-content .slds-table td {
+    max-width: 10rem;
+}

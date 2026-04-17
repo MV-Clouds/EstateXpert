@@ -15,7 +15,7 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     @track filteredData = [];
     @track paginatedData = [];
     @track currentPage = 1;
-    @track pageSize = 12;
+    @track pageSize = 20;
     @track visiblePages = 5;
     @track isLoading = true;
     @track showCommunicationPopup = false;

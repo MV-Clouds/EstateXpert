@@ -26,14 +26,14 @@
     flex-direction: column;
     height: 100%;
     position: relative;
-    gap: 1rem;
+    gap: 10px;
 }
 
 .portal-syndication h2 {
     font-size: 18px;
     font-weight: 500;
     color: #1a1a1a;
-    padding: 1rem;
+    padding: 10px;
     margin: 0;
     background: white;
     border-radius: 8px;

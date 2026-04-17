@@ -26,7 +26,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track selectedTemplate = null;
     @track selectedDateTime;
     @track currentPage = 1;
-    @track pageSize = 15;
+    @track pageSize = 20;
     @track visiblePages = 5;
     @track isLoading = true;
     @track showPopup = false;

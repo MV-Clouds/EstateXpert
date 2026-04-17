@@ -1,9 +1,8 @@
 import { LightningElement } from 'lwc';
-// import getGeminiResponse from '@salesforce/apex/GeminiChatService.getGeminiResponse';
-// import getListingFields from '@salesforce/apex/GeminiChatService.getListingFields';
 import sendFeedbackEmail from '@salesforce/apex/GeminiChatService.sendFeedbackEmail';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import SUPPORT_EMAILS from '@salesforce/label/c.supportEmail';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
 export default class ChatBot extends LightningElement {
     userInput = '';
@@ -15,6 +14,10 @@ export default class ChatBot extends LightningElement {
     formSubject = '';
     formDescription = '';
     uploadedImages = [];
+
+    connectedCallback() {
+        loadStyle(this, MulishFontCss);
+    }
 
     handleFormInputChange(event) {
         const field = event.target.dataset.field;

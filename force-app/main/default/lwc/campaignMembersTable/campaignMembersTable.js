@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 import getCampaignMemberEmails from '@salesforce/apex/EmailCampaignController.getCampaignMemberEmails';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
@@ -29,6 +30,14 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         { label: 'Success', value: 'Success' },
         { label: 'Failed', value: 'Failed' }
     ];
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
+
+    get headerTitle() {
+        return this.isMobileOrTablet ? 'Members' : 'Campaign Members and Email Status';
+    }
 
     get totalItems() {
         return this.filteredMembers.length;

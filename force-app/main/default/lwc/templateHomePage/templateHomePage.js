@@ -23,7 +23,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     @track isLoading = false;
     @track isPreviewModal = false;
     @track visiblePages = 5;
-    @track pageSize = 20;
+    @track pageSize = PAGE_SIZE;
     @track pageNumber = 1;
     @track templateType = '';
     @track selectedTempStatus = '';
@@ -872,7 +872,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                         this.templates.forEach((tmpl, index) => { tmpl.rowIndex = index + 1; });
                         this.filteredTemplates = [...this.templates];
                         this.applyFilters();
-                        const startIndex = (this.currentPage - 1) * PAGE_SIZE;
+                        const startIndex = (this.currentPage - 1) * this.pageSize;
                         if (startIndex >= this.filteredTemplates.length && this.currentPage > 1) {
                             this.currentPage--;
                         }

@@ -324,3 +324,12 @@
 .accordion-row:hover {
     background-color: #f8f9fa !important;
 }
+
+@media only screen and (max-width: 900px) {
+    .wrapper {
+        height: 100%;
+        width: 100%;
+        margin-top: unset;
+        margin-left: unset;
+    }
+}

@@ -665,3 +665,7 @@
         height: 64px;
     }
 }
+
+.max-width-css {
+    width: 15rem;
+}

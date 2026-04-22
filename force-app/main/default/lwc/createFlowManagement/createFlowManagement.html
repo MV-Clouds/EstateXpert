@@ -48,8 +48,8 @@
                 <div class="flow-container container-padding">
                     <div class="form-container margin-top-medium">
                         <div class="form-field">
-                            <label class="form-label" for="flowName">Enter Flow Name</label>
-                            <input type="text" id="flowName" class="form-input" value={flowName} maxlength="150" placeholder="WBC Flow 1" oninput={handleInputChange} onblur={handleInputBlur}/>
+                            <label class="form-label" for="flowName">Enter Flow Name <span class="required-marker">*</span></label>
+                            <input type="text" id="flowName" data-id="flow-name-input" class="form-input" value={flowName} maxlength="150" placeholder="WBC Flow 1" oninput={handleInputChange} onblur={handleInputBlur} required/>
                             <p class="char-count tempname-count">{flowName.length}/{maxFlowNameLength}</p>
                         </div>
                         <template if:true={headerNameLengthError}>
@@ -57,7 +57,7 @@
                         </template>
 
                         
-                        <label class="form-label" for="flowName">Categories</label>
+                        <label class="form-label" for="flowName">Categories <span class="required-marker">*</span></label>
                         <div class="combobox-wrapper">
                             <lightning-combobox
                                 data-id="category-combobox"
@@ -66,7 +66,8 @@
                                 variant="label-hidden"
                                 value={selectedCategory}
                                 options={typeOptions}
-                                onchange={handleCategories}>
+                                onchange={handleCategories}
+                                required>
                             </lightning-combobox>
                         </div>
 

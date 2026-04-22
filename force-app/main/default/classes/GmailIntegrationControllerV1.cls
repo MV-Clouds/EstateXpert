@@ -128,7 +128,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 }
 
                 if(String.isBlank(clientId) || String.isBlank(clientSecret)) {
-                    ErrorHandler.insertErrordata(null, 'GmailIntegrationControllerV1', 'requestNewAccessToken', 'Gmail Client ID or Secret missing in Metadata and error at line no 129.');
+                    ErrorHandler.insertErrordata(null, 'GmailIntegrationControllerV1', 'requestNewAccessToken', 'Gmail Client ID or Secret missing in Metadata and error at line no 131.');
                     return;
                 }
 
@@ -151,7 +151,7 @@ public with sharing class GmailIntegrationControllerV1 {
                     Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(tokenRes.getBody());
                     accessToken = (String) jsonResponse.get('access_token');
                 } else {
-                    ErrorHandler.insertErrordata(null, 'GmailIntegrationControllerV1', 'sendEmail', 'Failed to get new access token: ' + tokenRes.getBody());
+                    ErrorHandler.insertErrordata(null, 'GmailIntegrationControllerV1', 'sendEmail', 'Failed to get new access token and error at line 154: ' + tokenRes.getBody());
                     return;
                 }
         

@@ -91,7 +91,7 @@ public with sharing class WBTemplateController {
             Integer statusCode = response.getStatusCode();
             if(statusCode != 200){
                 errorMessage='Failed to send Template';
-                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'sendPreviewTemplate', 'API Exception while sending a message');
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'sendPreviewTemplate', 'API Exception while sending a message and error at line 94');
             }
 
         } catch (Exception e) {
@@ -926,11 +926,11 @@ public with sharing class WBTemplateController {
                     shouldDeleteFromSF = true;
                     returnMessage = 'Template deleted successfully';
                 } else {
-                    ErrorHandler.insertErrordata(null, 'WBTemplateController', 'deleteTemplete', res.getBody());
+                    ErrorHandler.insertErrordata(null, 'WBTemplateController', 'deleteTemplete', res.getBody() + ' and error at line 929');
                     returnMessage = 'Template deletion failed in Meta';
                 }
             }else {
-                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'deleteTemplete', res.getBody());
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'deleteTemplete', res.getBody() + ' and error at line 933');
                 returnMessage = 'Template deletion failed with status: ' + statusCode;
             }
 
@@ -1026,10 +1026,10 @@ public with sharing class WBTemplateController {
                 //     ];
 
                 // }
-                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'editWhatsappTemplate', 'HTTP callout failed with status: ' + res.getStatusCode() + ' and body: ' + res.getBody());
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'editWhatsappTemplate', 'HTTP callout failed with status: ' + res.getStatusCode() + ' and body: ' + res.getBody() + ' and error at line 1029');
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(null, 'WBTemplateController', 'editWhatsappTemplate', 'HTTP callout failed with status: ' + res.getStatusCode() + ' and body: ' + res.getBody());
+            ErrorHandler.insertErrordata(null, 'WBTemplateController', 'editWhatsappTemplate', 'HTTP callout failed with status: ' + res.getStatusCode() + ' and body: ' + res.getBody() + ' and error at line 1032');
             // response.put('status', 'error');
             // response.put('message', e.getMessage());
             if (e instanceof CalloutException && e.getMessage().containsIgnoreCase('Read timed out')) {
@@ -1091,7 +1091,7 @@ public with sharing class WBTemplateController {
 
                 HttpResponse s3Res = http.send(s3Req);
                 if (s3Res.getStatusCode() != 200){
-                    ErrorHandler.insertErrordata(null, 'WBTemplateController', 'uploadFileToMetaAndGetHeaderHandle', 'HTTP callout failed with status: ' + s3Res.getStatusCode());
+                    ErrorHandler.insertErrordata(null, 'WBTemplateController', 'uploadFileToMetaAndGetHeaderHandle', 'HTTP callout failed with status: ' + s3Res.getStatusCode() + ' and error at line 1094');
 
                     System.debug('❌ Failed to fetch file from S3. Status: ' + s3Res.getStatusCode());
                     return '';
@@ -1170,7 +1170,7 @@ public with sharing class WBTemplateController {
 
                 HttpResponse s3Res = http.send(s3Req);
                 if (s3Res.getStatusCode() != 200){
-                    ErrorHandler.insertErrordata(null, 'WBTemplateController', 'uploadFileToMetaAndGetHeaderHandle', 'HTTP callout failed with status: ' + s3Res.getStatusCode() + ' and body: ' + s3Res.getBody());
+                    ErrorHandler.insertErrordata(null, 'WBTemplateController', 'uploadFileToMetaAndGetHeaderHandle', 'HTTP callout failed with status: ' + s3Res.getStatusCode() + ' and body: ' + s3Res.getBody() + ' and error at line 1173');
 
                     System.debug('❌ Failed to fetch file from S3. Status: ' + s3Res.getStatusCode());
                     return;

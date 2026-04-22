@@ -1035,7 +1035,7 @@ global without sharing class WhatsAppWebhook{
                         // Download the media content
                         return downloadMediaContent(downloadUrl, accessToken);
                     } else{
-                        ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'handleMediaAttachment', 'Failed to retrieve media metadata. Status: ' + res.getStatus() + ', Response: ' + res.getBody());
+                        ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'handleMediaAttachment', 'Failed to retrieve media metadata. Status: ' + res.getStatus() + ', Response: ' + res.getBody() + 'and error at line 1038');
                         System.debug('Failed to retrieve media metadata. Status: ' + res.getStatus() + ', Response: ' + res.getBody());
                         return null;
                     }
@@ -1045,7 +1045,7 @@ global without sharing class WhatsAppWebhook{
                     return null;
                 }
             } else{
-                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'handleMediaAttachment', 'Failed to fetch access token or endpoint.');
+                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'handleMediaAttachment', 'Failed to fetch access token or endpoint and error at line 1048.');
                 System.debug('Failed fetched access token and endpoint from custom labels');
                 return null;
             }
@@ -1071,7 +1071,7 @@ global without sharing class WhatsAppWebhook{
                 // Return the binary data
                 return res.getBodyAsBlob();
             } else{
-                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'downloadMediaContent', res.getBody());
+                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'downloadMediaContent', res.getBody() + ' and error at line 1074');
                 System.debug('Failed to download media. Status: ' + res.getStatus() + ', Response: ' + res.getBody());
                 return null;
             }
@@ -1189,10 +1189,10 @@ global without sharing class WhatsAppWebhook{
                                             List<Object> errors = (List<Object>) statusMap.get('errors');
                                             if (errors != null && !errors.isEmpty()) {
                                                 Map<String, Object> errorDetails = (Map<String, Object>) errors[0];
-                                                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'parseMessages', 'Message failed to send. Error details: ' + JSON.serialize(errorDetails));
+                                                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'parseMessages', 'Message failed to send. Error details: ' + JSON.serialize(errorDetails) + ' and error at line 1192');
                                             } else {
                                                 // Fallback if 'errors' object is missing
-                                                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'parseMessages', 'Message failed to send. Error details: ' + JSON.serialize(statusMap));
+                                                ErrorHandler.insertErrordata(null, 'WhatsAppWebhook', 'parseMessages', 'Message failed to send. Error details: ' + JSON.serialize(statusMap) + ' and error at line 1195');
                                             }
                                         }
                                         update waChat;

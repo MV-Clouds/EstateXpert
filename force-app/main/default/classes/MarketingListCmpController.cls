@@ -211,7 +211,7 @@ public with sharing class MarketingListCmpController {
             
             // Validate total recipients for messaging service limits
             if (sendMethod == 'outlook' && allContactIds.size() > 20) {
-                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'sendEmail', 'Outlook has a limit of 20 recipients. Total recipients: ' + allContactIds.size() + ' and error at line 203.');
+                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'sendEmail', 'Outlook has a limit of 20 recipients. Total recipients: ' + allContactIds.size() + ' and error at line 214.');
                 return; // Outlook has a limit of 20 recipients per email
             }
             
@@ -341,7 +341,7 @@ public with sharing class MarketingListCmpController {
 
             // Check if any ListView was found
             if (listViews.isEmpty()) {
-                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'getListViewId', 'No ListView found for object: ' + objectName + ' and developer name: ' + developerName + ' at line 340.');
+                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'getListViewId', 'No ListView found for object: ' + objectName + ' and developer name: ' + developerName + ' at line 344.');
                 return 'Error: No ListView found for the specified object and developer name.';
             }
 
@@ -385,7 +385,7 @@ public with sharing class MarketingListCmpController {
 
             Database.SaveResult insertResult = Database.insert(broadcastGroup, false, AccessLevel.USER_MODE);
             if (!insertResult.isSuccess()) {
-                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'processBroadcastMessageWithObject', 'Failed to create broadcast group and error at line 384.');
+                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'processBroadcastMessageWithObject', 'Failed to create broadcast group and error at line 388.');
                 return 'Failed to create broadcast group.';
             }
     

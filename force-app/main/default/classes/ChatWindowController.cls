@@ -438,7 +438,7 @@ public with sharing class ChatWindowController {
                 if(!isReaction){
                     chat.Message_Status__c = 'Failed';
                 }
-                ErrorHandler.insertErrordata(null, 'ChatWindowController', 'sendWhatsappMessage', 'API Exception while sending a message');
+                ErrorHandler.insertErrordata(null, 'ChatWindowController', 'sendWhatsappMessage', 'API Exception while sending a message and error at line 441');
             }
 
             // Step 1: Deserialize full JSON

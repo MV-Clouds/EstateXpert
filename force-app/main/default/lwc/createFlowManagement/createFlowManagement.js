@@ -36,6 +36,14 @@ export default class WbCreateFlowManagement extends LightningElement {
     isParentFlow = false;
     initialJsonString = '';
 
+    get hasValidFlowName() {
+        return this.flowName.trim() !== '';
+    }
+
+    get hasValidCategories() {
+        return Array.isArray(this.selectedCategories) && this.selectedCategories.filter(category => category && category.trim() !== '').length > 0;
+    }
+
     get typeOptions() {
         return [
             { label: 'Sign up', value: 'SIGN_UP' },
@@ -261,6 +269,21 @@ export default class WbCreateFlowManagement extends LightningElement {
      * @description : Creates flow in Meta first, then shows the flow builder screen.
      */
     async handleCreate(){
+        this.flowName = this.flowName.trim();
+
+        if (!this.hasValidFlowName || !this.hasValidCategories) {
+            const missingFields = [];
+            if (!this.hasValidFlowName) {
+                missingFields.push('Flow Name');
+            }
+            if (!this.hasValidCategories) {
+                missingFields.push('Categories');
+            }
+            const verb = missingFields.length > 1 ? 'are' : 'is';
+            this.showToast('Error', `${missingFields.join(' and ')} ${verb} required.`, 'error');
+            return;
+        }
+
         // Process read more screens before creating (migration and cleanup)
         this.jsonString = this.processReadMoreScreens(this.jsonString);
         

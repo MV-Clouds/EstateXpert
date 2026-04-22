@@ -2264,7 +2264,7 @@ public with sharing class EmailCampaignController {
             
             Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
             if (!sObjectType.getDescribe().isAccessible()) {
-                ErrorHandler.insertErrordata(null, 'EmailCampaignController', 'getAllFieldNames', 'No access to object: ' + objectName + ' at line 2263.');
+                ErrorHandler.insertErrordata(null, 'EmailCampaignController', 'getAllFieldNames', 'No access to object: ' + objectName + ' at line 2267.');
                 return null;
             }
             

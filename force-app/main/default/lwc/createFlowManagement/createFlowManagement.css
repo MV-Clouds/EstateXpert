@@ -164,6 +164,10 @@
     margin-bottom: 8px;
 }
 
+.required-marker {
+    color: #b3042b;
+}
+
 /* Custom input override for slds-input */
 .form-input {
     padding: 4px 8px;
@@ -183,6 +187,12 @@
     font-size: 12px;
     color: var(--color-text-muted);
     text-align: right;
+    margin-top: 4px;
+}
+
+.field-error {
+    color: #b3042b;
+    font-size: 12px;
     margin-top: 4px;
 }
 

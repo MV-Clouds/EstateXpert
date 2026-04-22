@@ -314,7 +314,7 @@ public with sharing class SiteAndBookingController {
                 }
             } else {
                 chat.Message_Status__c = 'Failed';
-                ErrorHandler.insertErrordata(null, 'SiteAndBookingController', 'sendWhatsappMessage', response.getStatusCode() + response.getBody());
+                ErrorHandler.insertErrordata(null, 'SiteAndBookingController', 'sendWhatsappMessage', response.getStatusCode() + response.getBody() + ' and error at line 317');
             }
 
             resultMap.put('chat', chat);

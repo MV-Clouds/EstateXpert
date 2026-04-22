@@ -94,7 +94,7 @@ public with sharing class OutlookIntegrationController {
                 Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(tokenRes.getBody());
                 accessToken = (String) jsonResponse.get('access_token');
             } else {
-                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'sendEmail', 'Failed to refresh token: ' + tokenRes.getBody());
+                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'sendEmail', 'Failed to refresh token and error at line 97: ' + tokenRes.getBody());
                 return;
             }
 
@@ -191,7 +191,7 @@ public with sharing class OutlookIntegrationController {
                 if(IsCampaignData){
                     System.enqueueJob(new CampaignUpdateQueueable(remainingEmails, campaign, outlookMails.size(), 'Failed', res.getBody()));
                 }
-                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'sendEmail', 'Failed to send batch email: ' + res.getBody() + ' and error at line 199.');
+                ErrorHandler.insertErrorData(null, 'OutlookIntegrationController', 'sendEmail', 'Failed to send batch email: ' + res.getBody() + ' and error at line 194.');
             } else {
                 if(consolidatedContactEmailInfoMap.size() > 0){
                     CreateActivityRecordsFromMail.createCaseEmailMessage(consolidatedContactEmailInfoMap);

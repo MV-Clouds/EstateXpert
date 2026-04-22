@@ -427,7 +427,7 @@ public with sharing class IntegrationPopupController {
             
             // Check the response
             if (res.getStatusCode() != 200) {
-                ErrorHandler.insertErrordata(null, 'IntegrationPopupController', 'revokeGmailAccess', res.getBody());
+                ErrorHandler.insertErrordata(null, 'IntegrationPopupController', 'revokeGmailAccess', res.getBody() + 'and error at line 430');
             }
 
             status = deleteGmailConfig(recordId);

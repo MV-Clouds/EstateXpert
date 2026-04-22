@@ -31,7 +31,7 @@ public class PropertyFinderPublishQueueable implements Queueable, Database.Allow
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res3.getBody());
                 return (String) responseMap.get('accessToken');
             } else {
-                ErrorHandler.insertErrorData(null, 'PropertyFinderPublishQueueable', 'getAccesstoken', 'Failed to get access token: ' + res3.getBody() + ' and error at line 393');
+                ErrorHandler.insertErrorData(null, 'PropertyFinderPublishQueueable', 'getAccesstoken', 'Failed to get access token: ' + res3.getBody() + ' and error at line 34');
                 return 'Failed to get access token: ' + res3.getBody();
             }
         } catch (Exception e) {

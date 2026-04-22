@@ -6,14 +6,14 @@ global without sharing class GoogleLeadsWebhook {
             // Grab the body from the request
             String requestBody = RestContext.request.requestBody.toString();
             if (String.isBlank(requestBody)) {
-                ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'Empty request body received.');
+                ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'Empty request body received and error at line 9.');
                 return;
             }
 
             // Deserialize JSON into LeadData
             LeadData googleLead = (LeadData) JSON.deserialize(requestBody, LeadData.class);
             if (googleLead == null || googleLead.user_column_data == null) {
-                ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'Invalid or null JSON payload.');
+                ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'Invalid or null JSON payload and error at line 16.');
                 return;
             }
 
@@ -42,7 +42,7 @@ global without sharing class GoogleLeadsWebhook {
             // Validate Google key
             String returnedGoogleKey = googleLead.google_key;
             if (String.isBlank(savedGoogleKey) || savedGoogleKey != returnedGoogleKey) {
-                ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'The google secret was incorrect. Captured secret: ' + returnedGoogleKey);
+                ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'The google secret was incorrect. Captured secret and error at line 45: ' + returnedGoogleKey);
                 return;
             }
 
@@ -94,7 +94,7 @@ global without sharing class GoogleLeadsWebhook {
             insert newContact;
 
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'Error processing webhook: ' + e.getMessage() + '\nStack Trace: ' + e.getStackTraceString());
+            ErrorHandler.insertErrorData(null, 'GoogleLeadsWebhook', 'handleNotification', 'Error processing webhook and error at line 97: ' + e.getMessage() + '\nStack Trace: ' + e.getStackTraceString());
         }
     }
 

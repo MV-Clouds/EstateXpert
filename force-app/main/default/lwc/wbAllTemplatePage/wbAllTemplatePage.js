@@ -20,6 +20,7 @@ import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -152,6 +153,10 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
 
     get filterIconName() {
         return this.showFilters ? 'utility:close' : 'utility:filter';
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     connectedCallback(){

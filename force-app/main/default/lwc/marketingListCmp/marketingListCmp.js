@@ -19,6 +19,7 @@ import createChatRecods from '@salesforce/apex/BroadcastMessageController.create
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
@@ -53,7 +54,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track currentPage = 1;
     @track visiblePages = 5;
     @track fieldsModal = false;
-    @track mobileAddModal = false;
     isSortApplied = false;
 
     // rachit changes
@@ -242,6 +242,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     get mobileView() {
         return window?.globalThis?.innerWidth <= 900 ? true : false;
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
 
@@ -1013,19 +1017,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
 
     /**
-    * Method Name : handleClose
-    * @description : close Modal for new contact form
-    * Date: 18/07/2024
-    * Created By:Vyom Soni
-    */
-    handleClose() {
-        this.addModal = false;
-        if (this.mobileView == true) {
-            this.mobileAddModal = false;
-        }
-    }
-
-    /**
     * Method Name : updateSelectedProperties
     * @description : update the properties as selected
     * Date: 22/06/2024
@@ -1260,16 +1251,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         } catch (error) {
             console.log('Error scrollToTop->' + error);
         }
-    }
-
-    /**
-    * Method Name : cancelRecordForm
-    * @description : method to cancel the new contact modal
-    * Date: 29/07/2024
-    * Created By:Vyom Soni
-    */
-    cancelRecordForm() {
-        this.handleClose();
     }
 
     /**

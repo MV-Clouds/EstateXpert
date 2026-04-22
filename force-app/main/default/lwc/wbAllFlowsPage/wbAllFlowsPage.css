@@ -504,3 +504,12 @@
     font-weight: 500;
     letter-spacing: 0.3px;
 }
+
+@media only screen and (max-width: 900px) {
+    .main {
+        height: 100%;
+        width: 100%;
+        margin-top: unset;
+        margin-left: unset;
+    }
+}

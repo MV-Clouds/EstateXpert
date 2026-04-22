@@ -8,6 +8,7 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class ListingManager extends NavigationMixin(LightningElement) {
     @api objectName = 'MVEX__Listing__c';
@@ -189,6 +190,10 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     get mobileView() {
         return window?.globalThis?.innerWidth <= 900 ? true : false;
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     /**

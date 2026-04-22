@@ -13,6 +13,11 @@
     --error-border: #ef4444;
 }
 
+* {
+    font-family: 'Mulish';
+    user-select: none;
+}
+
 /* Chat Popup */
 .chat-container {
     width: 100%;

@@ -11,6 +11,7 @@ import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from "c/globalProperties";
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -65,6 +66,10 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     @track fileListToDelete = [];
     @track sortBy;
     @track sortDirection = 'asc';
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
 
     /**
     * Method Name: showMobileView

@@ -12,6 +12,7 @@ import getCampaigns from '@salesforce/apex/EmailCampaignController.getCampaigns'
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class DisplayCampaigns extends NavigationMixin(LightningElement) {
     @track campaigns = [];
@@ -104,6 +105,10 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
     */
     get filterIconName() {
         return this.isFilterModalOpen ? 'utility:close' : 'utility:filter';
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     /**

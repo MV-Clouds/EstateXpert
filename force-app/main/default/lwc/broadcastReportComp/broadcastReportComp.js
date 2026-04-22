@@ -6,6 +6,7 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class BroadcastReportComp extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -14,7 +15,7 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
     @track paginatedData = [];
     @track filteredData = [];
     @track currentPage = 1;
-    @track pageSize = 15;
+    @track pageSize = 20;
     @track visiblePages = 5;
     @track isLoading = false;
     @track expandedRows = {};
@@ -56,6 +57,10 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
 
     get templateName() {
         return this.record?.MVEX__Template_Name__c || '-';
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     get totalItems() {
@@ -127,6 +132,10 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
 
     get isLastPage() {
         return this.currentPage === Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    get showPagination(){
+        return this.totalPages > 1;
     }
 
     loadBroadcastGroups() {

@@ -8,13 +8,14 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningElement) {
     @track data = [];
     @track filteredData = [];
     @track paginatedData = [];
     @track currentPage = 1;
-    @track pageSize = 12;
+    @track pageSize = 20;
     @track visiblePages = 5;
     @track isLoading = true;
     @track showCommunicationPopup = false;
@@ -126,6 +127,10 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
 
     get isBothChecked() {
         return this.selectedCommunicationType === 'Both';
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
     
     async connectedCallback() {

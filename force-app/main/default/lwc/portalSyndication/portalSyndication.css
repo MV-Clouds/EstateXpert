@@ -26,14 +26,14 @@
     flex-direction: column;
     height: 100%;
     position: relative;
-    gap: 1rem;
+    gap: 10px;
 }
 
 .portal-syndication h2 {
     font-size: 18px;
     font-weight: 500;
     color: #1a1a1a;
-    padding: 1rem;
+    padding: 10px;
     margin: 0;
     background: white;
     border-radius: 8px;
@@ -184,4 +184,22 @@
     max-width: 200px;
     margin: auto;
     font-weight: 500;
+}
+
+.portal-syndication .table-content .slds-table td {
+    height: 2rem;
+}
+
+.portal-syndication .table-content .slds-table th {
+    height: 2.5rem;
+}
+
+.portal-syndication .blue-btn-css {
+    height: 34px;
+    min-height: 34px;
+}
+
+.portal-syndication .red-btn-css {
+    height: 34px;
+    min-height: 34px;
 }

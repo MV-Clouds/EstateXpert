@@ -184,6 +184,8 @@
     background: #ffffff;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    margin: 1rem;
+    margin-top: 0;
 }
 
 .custom-accordion__header {
@@ -351,10 +353,10 @@
     justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    background: #f9fafb;
-    /* border-top: 1px solid #E5E7EB; */
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
     flex-shrink: 0;
-    padding-bottom: 0rem;
+    box-shadow: 0 -1px 0 rgba(15, 23, 42, 0.03);
 }
 
 .popdiv_cls {
@@ -498,8 +500,7 @@
 }
 
 .main_content_cls {
-    height: 90%;
-    margin-bottom: 5rem;
+    height: 94%;
 }
 
 .popup-table-content {

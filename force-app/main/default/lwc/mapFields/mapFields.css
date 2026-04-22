@@ -450,7 +450,7 @@
     background-size: cover;
     background-position: unset;
     background-image: url('/resource/MVEX__newImageandMediaBg'); */
-    border-radius: 8px;
+    border-radius: unset;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -664,4 +664,8 @@
         width: 64px;
         height: 64px;
     }
+}
+
+.max-width-css {
+    width: 15rem;
 }

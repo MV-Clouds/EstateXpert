@@ -22,23 +22,25 @@
                             </div>
                         </div>
                         <div class="header">
-                            <div class="search-input header-search-bar-css">
-                                <lightning-input type="search" onchange={handleSearchInputChange}
-                                    placeholder="Search Name..." class="input-campaign"
-                                    variant="label-hidden"></lightning-input>
-                            </div>
-                            <div class="status-select header-combobox">
-                                <lightning-combobox name="status" value={statusValues} options={statusOptions}
-                                    onchange={handleStatusChange} class="select-campaign" variant="label-hidden">
-                                </lightning-combobox>
-                            </div>
-                            <button class="blue-btn-css" onclick={showCreateFlow}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
-                                </svg>
-                                Create Flow
-                            </button>
+                            <template if:false={isMobileOrTablet}>
+                                <div class="search-input header-search-bar-css">
+                                    <lightning-input type="search" onchange={handleSearchInputChange}
+                                        placeholder="Search Name..." class="input-campaign"
+                                        variant="label-hidden"></lightning-input>
+                                </div>
+                                <div class="status-select header-combobox">
+                                    <lightning-combobox name="status" value={statusValues} options={statusOptions}
+                                        onchange={handleStatusChange} class="select-campaign" variant="label-hidden">
+                                    </lightning-combobox>
+                                </div>
+                                <button class="blue-btn-css" onclick={showCreateFlow}>
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
+                                    </svg>
+                                    Create Flow
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -139,32 +141,34 @@
                                             </td>
                                             <td data-label="Actions">
                                                 <div class="action-btn">
-                                                    <template if:false={record.isDeprecated}>
-                                                        <button class="preview-icon-css" data-id={record.Id}
-                                                            onclick={previewTemplate}>
-                                                            <svg width="15" height="15" fill="#000000"
-                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                                                                enable-background="new 0 0 52 52" xml:space="preserve">
-                                                                <path
-                                                                    d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
-                                                                </path>
-                                                                <path
-                                                                    d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
-                                                                </path>
-                                                            </svg>
-                                                        </button>
-                                                    </template>
-                                                    <template if:true={record.isEditable}>
-                                                        <button class="edit-icon-css" data-id={record.Id} data-name={record.MVEX__Flow_Name__c}
-                                                            data-status={record.MVEX__Status__c} onclick={editFlow}>
-                                                            <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path
-                                                                    d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                                    stroke="#212529" stroke-width="1.25"
-                                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                            </svg>
-                                                        </button>
+                                                    <template if:false={isMobileOrTablet}>
+                                                        <template if:false={record.isDeprecated}>
+                                                            <button class="preview-icon-css" data-id={record.Id}
+                                                                onclick={previewTemplate}>
+                                                                <svg width="15" height="15" fill="#000000"
+                                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                                                                    enable-background="new 0 0 52 52" xml:space="preserve">
+                                                                    <path
+                                                                        d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
+                                                                    </path>
+                                                                    <path
+                                                                        d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
+                                                                    </path>
+                                                                </svg>
+                                                            </button>
+                                                        </template>
+                                                        <template if:true={record.isEditable}>
+                                                            <button class="edit-icon-css" data-id={record.Id} data-name={record.MVEX__Flow_Name__c}
+                                                                data-status={record.MVEX__Status__c} onclick={editFlow}>
+                                                                <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                                        stroke="#212529" stroke-width="1.25"
+                                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                                </svg>
+                                                            </button>
+                                                        </template>
                                                     </template>
                                                     <template if:true={record.isPublished}>
                                                         <button class="delete-icon-css" data-id={record.Id}

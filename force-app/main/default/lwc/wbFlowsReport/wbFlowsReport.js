@@ -3,6 +3,7 @@ import getWhatsAppFlowById from '@salesforce/apex/WhatsAppFlowController.getWhat
 import getFlowSubmissionByFlowId from '@salesforce/apex/WhatsAppFlowController.getFlowSubmissionByFlowId';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class WbFlowsReport extends LightningElement {
     @api selectedFlowId;
@@ -37,6 +38,10 @@ export default class WbFlowsReport extends LightningElement {
 
     get searchPlaceholder() {
         return 'Search record by Name or Phone...';
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     // --- Flow Report Pagination ---
@@ -109,6 +114,10 @@ export default class WbFlowsReport extends LightningElement {
 
     get isLastPage() {
         return this.currentPage === this.totalPages || this.totalPages === 0;
+    }
+
+    get showPagination() {
+        return this.totalPages > 1;
     }
 
     fetchFlowDetailsById() {

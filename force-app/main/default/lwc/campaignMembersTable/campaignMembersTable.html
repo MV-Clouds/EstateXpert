@@ -11,83 +11,85 @@
                         </svg>
                     </div>
                     <div class="portal_mapping">
-                        Campaign Members and Email Status
+                        {headerTitle}
                     </div>
                 </div>
             </div>
-             <div class="header">
-                <div class="search-input header-search-bar-css">
-                    <lightning-input type="search" value={searchInput} onchange={handleSearch}
-                        placeholder="Search Members" class="input-members" variant="label-hidden"></lightning-input>
-                </div>
-                <div class="icon-button-container">
-                    <div class="filter-icon-container" onclick={handleFilterClick}>
-                        <template if:false={isFilterModalOpen}>
-                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Show filters">
-                                <path
-                                    d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z"
-                                    fill="currentColor" />
-                            </svg>
-                        </template>
-                        <template if:true={isFilterModalOpen}>
-                            <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hide filters">
-                                <path
-                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                    fill="currentColor" />
-                            </svg>
-                        </template>
+            <template if:false={isMobileOrTablet}>
+                <div class="header">
+                    <div class="search-input header-search-bar-css">
+                        <lightning-input type="search" value={searchInput} onchange={handleSearch}
+                            placeholder="Search Members" class="input-members" variant="label-hidden"></lightning-input>
                     </div>
-                    <div class="refresh-icon-container" onclick={refreshTable}>
-                        <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
-                            size="x-small"></lightning-icon>
-                    </div>
-                </div>
-                <div if:true={isFilterModalOpen} class="filter-backdrop" onclick={closeFilterModal}></div>
-                <div if:true={isFilterModalOpen} class="filter-dropdown-box">
-                    <div class="filter-container" onclick={handleFilterContainerClick}>
-                        <div class="filter-row">
-                            <div class="filter-item">
-                                <label class="filter-label">Status</label>
-                                <lightning-combobox placeholder="Select a status" options={statusOptions}
-                                    onchange={handleFilterChange} data-id="statusFilter" value={statusFilter}
-                                    variant="label-hidden"></lightning-combobox>
-                            </div>
-                        </div>
-                        <div class="filter-row">
-                            <div class="filter-item">
-                                <label class="filter-label">Send Time Start</label>
-                                <lightning-input type="date" onchange={handleFilterChange} value={sendTimeStart}
-                                    data-id="sendTimeStart" variant="label-hidden"></lightning-input>
-                            </div>
-                            <div class="filter-item">
-                                <label class="filter-label">Send Time End</label>
-                                <lightning-input type="date" onchange={handleFilterChange} value={sendTimeEnd}
-                                    data-id="sendTimeEnd" variant="label-hidden"></lightning-input>
-                            </div>
-                        </div>
-                        <div class="filter-actions">
-                            <button class="white-btn-css" onclick={clearFilterModal}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M12.25 1.75L1.75 12.25M1.75 1.75L12.25 12.25" stroke="currentColor"
-                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <div class="icon-button-container">
+                        <div class="filter-icon-container" onclick={handleFilterClick}>
+                            <template if:false={isFilterModalOpen}>
+                                <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Show filters">
+                                    <path
+                                        d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z"
+                                        fill="currentColor" />
                                 </svg>
-                                Clear
-                            </button>
-                            <button class="blue-btn-css" onclick={applyFilter}>
-                                <svg width="18" height="18" viewBox="0 0 14 14" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M2.33331 7.58333L5.24998 10.5L11.6666 4.08333" stroke="currentColor"
-                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </template>
+                            <template if:true={isFilterModalOpen}>
+                                <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hide filters">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
                                 </svg>
-                                Apply
-                            </button>
+                            </template>
+                        </div>
+                        <div class="refresh-icon-container" onclick={refreshTable}>
+                            <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                size="x-small"></lightning-icon>
+                        </div>
+                    </div>
+                    <div if:true={isFilterModalOpen} class="filter-backdrop" onclick={closeFilterModal}></div>
+                    <div if:true={isFilterModalOpen} class="filter-dropdown-box">
+                        <div class="filter-container" onclick={handleFilterContainerClick}>
+                            <div class="filter-row">
+                                <div class="filter-item">
+                                    <label class="filter-label">Status</label>
+                                    <lightning-combobox placeholder="Select a status" options={statusOptions}
+                                        onchange={handleFilterChange} data-id="statusFilter" value={statusFilter}
+                                        variant="label-hidden"></lightning-combobox>
+                                </div>
+                            </div>
+                            <div class="filter-row">
+                                <div class="filter-item">
+                                    <label class="filter-label">Send Time Start</label>
+                                    <lightning-input type="date" onchange={handleFilterChange} value={sendTimeStart}
+                                        data-id="sendTimeStart" variant="label-hidden"></lightning-input>
+                                </div>
+                                <div class="filter-item">
+                                    <label class="filter-label">Send Time End</label>
+                                    <lightning-input type="date" onchange={handleFilterChange} value={sendTimeEnd}
+                                        data-id="sendTimeEnd" variant="label-hidden"></lightning-input>
+                                </div>
+                            </div>
+                            <div class="filter-actions">
+                                <button class="white-btn-css" onclick={clearFilterModal}>
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M12.25 1.75L1.75 12.25M1.75 1.75L12.25 12.25" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    Clear
+                                </button>
+                                <button class="blue-btn-css" onclick={applyFilter}>
+                                    <svg width="18" height="18" viewBox="0 0 14 14" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M2.33331 7.58333L5.24998 10.5L11.6666 4.08333" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    Apply
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
 
         <div class="main_content_cls">
@@ -99,71 +101,76 @@
                                 <th scope="col" class="sno">
                                     <div>No.</div>
                                 </th>
-                                <th data-id="contactName" onclick={sortClick}
-                                    aria-sort="none"
+                                <th data-id="contactName" onclick={sortClick} aria-sort="none"
                                     class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header contact-name"
                                     scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                        tabindex="0">
                                         <span class="slds-truncate" title="Contact Name">Contact Name</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
                                             <svg data-index="contactName" class="listing-manager-icon"
                                                 viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="contactEmail" onclick={sortClick}
-                                    aria-sort="none"
+                                <th data-id="contactEmail" onclick={sortClick} aria-sort="none"
                                     class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header contact-email"
                                     scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                        tabindex="0">
                                         <span class="slds-truncate" title="Contact Email">Contact Email</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
                                             <svg data-index="contactEmail" class="listing-manager-icon"
                                                 viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="emailName" onclick={sortClick}
-                                    aria-sort="none"
+                                <th data-id="emailName" onclick={sortClick} aria-sort="none"
                                     class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header email-name"
                                     scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                        tabindex="0">
                                         <span class="slds-truncate" title="Email Name">Email Name</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
                                             <svg data-index="emailName" class="listing-manager-icon"
                                                 viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="sendTimeFormatted" onclick={sortClick}
-                                    aria-sort="none"
+                                <th data-id="sendTimeFormatted" onclick={sortClick} aria-sort="none"
                                     class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header send-time"
                                     scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                        tabindex="0">
                                         <span class="slds-truncate" title="Send Date">Send Date</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
                                             <svg data-index="sendTimeFormatted" class="listing-manager-icon"
                                                 viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="status" onclick={sortClick}
-                                    aria-sort="none"
+                                <th data-id="status" onclick={sortClick} aria-sort="none"
                                     class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header status"
                                     scope="col">
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                        tabindex="0">
                                         <span class="slds-truncate" title="Status">Status</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg data-index="status" class="listing-manager-icon"
-                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z"/>
+                                            <svg data-index="status" class="listing-manager-icon" viewBox="0 0 384 512"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>

@@ -11,6 +11,7 @@ import STATUS_FIELD from "@salesforce/schema/Flow__c.Status__c";
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { NavigationMixin } from 'lightning/navigation';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     @track allRecords = [];
@@ -119,6 +120,10 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     
     get isLastPage() {
         return this.currentPage === Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    get isMobileOrTablet() {
+        return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
     @wire(getObjectInfo, { objectApiName: FLOW_OBJECT })

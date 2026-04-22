@@ -246,6 +246,7 @@ input:focus {
     color: var(--color-accent);
     padding: var(--spacing-sm) var(--spacing-lg);
     background: var(--color-background);
+    border-radius: var(--radius-sm);
     gap: var(--spacing-sm);
     border-top: 2px solid #e2e5e5;
     flex-shrink: 0;

@@ -19,7 +19,7 @@
     align-items: center;
     background-color: white;
     border-radius: 8px;
-    padding: 1rem;
+    padding: 10px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-left: 4px solid #0176D3;
     margin-bottom: 1.25rem;
@@ -63,6 +63,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .column-header {
@@ -296,14 +297,10 @@
     .columns-container {
         grid-template-columns: 1fr;
     }
-    .header {
-        flex-wrap: wrap;
-    }
     .search-input {
         width: 100%;
     }
     .buttons {
-        width: 100%;
         justify-content: flex-end;
     }
     .card-top-row {
@@ -313,4 +310,12 @@
     .card-badges {
         align-self: flex-start;
     }
+    .header {
+        gap: 10px;
+    }
+}
+
+.buttons .blue-btn-css {
+    height: 34px;
+    min-height: 34px;
 }

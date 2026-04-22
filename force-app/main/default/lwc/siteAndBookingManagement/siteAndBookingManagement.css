@@ -29,7 +29,7 @@
     align-items: center;
     background-color: white;
     border-radius: 8px;
-    padding: 1rem;
+    padding: 10px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-left: 4px solid #0176D3;
 }
@@ -154,6 +154,7 @@
     flex-direction: column;
     gap: 2rem;
     font-size: 1.5rem;
+    text-align: center;
 }
 
 .no-data-img {
@@ -438,4 +439,9 @@ c-template-preview {
     .modal-preview-area {
         border-left: none !important;
     }
+}
+
+.header-actions .blue-btn-css {
+    height: 34px;
+    min-height: 34px;
 }

@@ -1209,19 +1209,19 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     updateSortIcons() {
         try {
             // Remove icon rotation
-            const allIcons = this.template.querySelectorAll('#table-content .slds-icon-utility-arrowdown svg');
+            const allIcons = this.template.querySelectorAll('.table-content .slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
                 icon.classList.remove('rotate-asc', 'rotate-desc');
             });
 
             // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('#table-content .sorting_header');
+            const allHeaders = this.template.querySelectorAll('.table-content .sorting_header');
             allHeaders.forEach(header => {
                 header.classList.remove('active-sort');
             });
 
             // Set active header
-            const currentHeader = this.template.querySelector('#table-content [data-id="' + this.sortField + '"]');
+            const currentHeader = this.template.querySelector('.table-content [data-id="' + this.sortField + '"]');
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
 

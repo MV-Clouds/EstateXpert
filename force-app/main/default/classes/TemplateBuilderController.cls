@@ -120,6 +120,7 @@ public with sharing class TemplateBuilderController {
         @AuraEnabled public String templateBody;
         @AuraEnabled public String mappingKeyVsMappingValues;
         @AuraEnabled public String salesforceImages;
+        @AuraEnabled public String listingMediaImages;
     }
 
     @AuraEnabled
@@ -148,6 +149,7 @@ public with sharing class TemplateBuilderController {
     
             tdw.mappingKeyVsMappingValues = JSON.serialize(mappingKeys.get('objectNGeneral'));
             tdw.salesforceImages = JSON.serialize(mappingKeys.get('salesforceImages'));
+            tdw.listingMediaImages = JSON.serialize(mappingKeys.get('listingMediaImages'));
             
             return tdw;
         } catch (Exception e) {

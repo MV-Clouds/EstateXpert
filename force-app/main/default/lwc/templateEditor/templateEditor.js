@@ -23,7 +23,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     @api templateId;                                // Template Id 
     @api objectName;                                // Source Object API name
     @api activeTabName;
-    @api templateType                           // To define active tab
+    @api templateType;                           // To define active tab
 
     @track defaultTab = 'contentTab';               // To open default on component load
     @track startchat = true;                        // To used in chatbot

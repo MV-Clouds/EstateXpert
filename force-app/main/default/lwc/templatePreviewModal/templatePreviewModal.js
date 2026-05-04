@@ -273,6 +273,7 @@ export default class TemplatePreviewModal extends LightningElement {
                     let bodyHtml = result.templateBody;
                     const mappingValueString = result.mappingKeyVsMappingValues ? JSON.parse(result.mappingKeyVsMappingValues) : {};
                     const salesforceImagesCV = result.salesforceImages ? JSON.parse(result.salesforceImages) : {};
+                    const listingMediaImages = result.listingMediaImages ? JSON.parse(result.listingMediaImages) : {};
 
                     for(let key in mappingValueString){
                         bodyHtml = bodyHtml.replaceAll(key, mappingValueString[key]);
@@ -281,6 +282,18 @@ export default class TemplatePreviewModal extends LightningElement {
 
                     for(let src in salesforceImagesCV){
                         bodyHtml = bodyHtml.replaceAll(src, salesforceImagesCV[src]);
+                    }
+
+                    // Replace listingMedia[n] image placeholders with actual property image URLs
+                    if(Object.keys(listingMediaImages).length > 0){
+                        const imgTagRegex = /<img[^>]*data-name="(listingMedia\[\d+\])"[^>]*>/g;
+                        bodyHtml = bodyHtml.replace(imgTagRegex, (fullMatch, mediaKey) => {
+                            const newSrc = listingMediaImages[mediaKey];
+                            if(newSrc){
+                                return fullMatch.replace(/src="[^"]*"/, `src="${newSrc}"`);
+                            }
+                            return fullMatch;
+                        });
                     }
 
                     this.templateBody = bodyHtml;

@@ -387,7 +387,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     setDataInMainEditor() {
         try {
             if (this.contentEditor && this.dataLoaded && !this.valueInserted) {
-                $(this.contentEditor).summernote('code', this.bodyData);
+                $(this.contentEditor).summernote('code', this.scopeTemplateStyles(this.bodyData));
                 this.setEditorPageSize();
                 this.valueInserted = true;
             }
@@ -398,13 +398,13 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
 
     setDataInHeader() {
         if (this.headerEditor && this.dataLoaded) {
-            $(this.headerEditor).summernote('code', this.headerData);
+            $(this.headerEditor).summernote('code', this.scopeTemplateStyles(this.headerData));
         }
     }
 
     setDataInFooter() {
         if (this.footerEditor && this.dataLoaded) {
-            $(this.footerEditor).summernote('code', this.footerData);
+            $(this.footerEditor).summernote('code', this.scopeTemplateStyles(this.footerData));
             this.setPageHeaderFooterMargin()
         }
     }
@@ -439,13 +439,13 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
 
             if (typeof window !== 'undefined') {   
                 headerEle = document.createElement('div');
-                headerEle.innerHTML = $(this.headerEditor).summernote('code');
+                headerEle.innerHTML = this.unscopeTemplateStyles($(this.headerEditor).summernote('code'));
                 
                 footerEle = document.createElement('div');
-                footerEle.innerHTML = $(this.footerEditor).summernote('code');
+                footerEle.innerHTML = this.unscopeTemplateStyles($(this.footerEditor).summernote('code'));
                 
                 bodyEle = document.createElement('div');
-                bodyEle.innerHTML = $(this.contentEditor).summernote('code');
+                bodyEle.innerHTML = this.unscopeTemplateStyles($(this.contentEditor).summernote('code'));
             }
 
             if (this.templateType === 'Marketing Template') {
@@ -1704,9 +1704,9 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
 
     captureCurrentTemplate() {
         return {
-            header: $(this.headerEditor).summernote('code') || '',
-            body:   $(this.contentEditor).summernote('code') || '',
-            footer: $(this.footerEditor).summernote('code') || ''
+            header: this.unscopeTemplateStyles($(this.headerEditor).summernote('code') || ''),
+            body:   this.unscopeTemplateStyles($(this.contentEditor).summernote('code') || ''),
+            footer: this.unscopeTemplateStyles($(this.footerEditor).summernote('code') || '')
         };
     }
 
@@ -1750,9 +1750,9 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     }
 
     restoreTemplate(state) {
-        $(this.headerEditor).summernote('code', state.header);
-        $(this.contentEditor).summernote('code', state.body);
-        $(this.footerEditor).summernote('code', state.footer);
+        $(this.headerEditor).summernote('code', this.scopeTemplateStyles(state.header));
+        $(this.contentEditor).summernote('code', this.scopeTemplateStyles(state.body));
+        $(this.footerEditor).summernote('code', this.scopeTemplateStyles(state.footer));
     }
 
     formatTime() {
@@ -1804,4 +1804,104 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
         this.restoreTemplate(entry.template);
         this.showToast('Restored', `Reverted to version from ${entry.timestamp}`, 'success');
     };
+
+    scopeCSS(css, scopeClass) {
+        let result = '';
+        let buffer = '';
+        let depth = 0;
+        let inKeyframes = false;
+        let inString = false;
+        let stringChar = '';
+
+        css = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+        for (let i = 0; i < css.length; i++) {
+            let char = css[i];
+            
+            if (inString) {
+                buffer += char;
+                if (char === stringChar && css[i-1] !== '\\') {
+                    inString = false;
+                }
+                continue;
+            }
+            
+            if (char === '"' || char === "'") {
+                inString = true;
+                stringChar = char;
+                buffer += char;
+                continue;
+            }
+
+            if (char === '{') {
+                let selector = buffer.trim();
+                
+                if (selector.startsWith('@keyframes') || selector.startsWith('@-webkit-keyframes')) {
+                    inKeyframes = true;
+                    result += buffer + '{';
+                } 
+                else if (selector.startsWith('@font-face') || selector.startsWith('@page')) {
+                    result += buffer + '{';
+                }
+                else if (selector.startsWith('@')) {
+                    result += buffer + '{';
+                }
+                else if (inKeyframes) {
+                    result += buffer + '{';
+                }
+                else {
+                    if (selector) {
+                        let scoped = selector.split(',').map(s => {
+                            s = s.trim();
+                            if (s === 'body' || s === 'html') return `.${scopeClass}`;
+                            if (s.startsWith(`.${scopeClass}`)) return s;
+                            return `.${scopeClass} ` + s;
+                        }).join(', ');
+                        
+                        let lastIdx = buffer.lastIndexOf(selector);
+                        if(lastIdx !== -1) {
+                            result += buffer.substring(0, lastIdx) + scoped + buffer.substring(lastIdx + selector.length) + '{';
+                        } else {
+                            result += buffer + '{';
+                        }
+                    } else {
+                        result += buffer + '{';
+                    }
+                }
+                
+                depth++;
+                buffer = '';
+            } else if (char === '}') {
+                depth--;
+                if (depth <= 0) {
+                    inKeyframes = false;
+                    depth = 0;
+                }
+                result += buffer + '}';
+                buffer = '';
+            } else {
+                buffer += char;
+            }
+        }
+        result += buffer;
+        return result;
+    }
+
+    scopeTemplateStyles(htmlContent) {
+        if (!htmlContent) return htmlContent;
+        const styleRegex = /<style([^>]*)>([\s\S]*?)<\/style>/gi;
+        return htmlContent.replace(styleRegex, (match, attrs, css) => {
+            return `<style${attrs}>\n${this.scopeCSS(css, 'note-editable')}\n</style>`;
+        });
+    }
+
+    unscopeTemplateStyles(htmlContent) {
+        if (!htmlContent) return htmlContent;
+        const styleRegex = /<style([^>]*)>([\s\S]*?)<\/style>/gi;
+        return htmlContent.replace(styleRegex, (match, attrs, css) => {
+            let unscopedCss = css.replace(/\.note-editable\s+/g, '');
+            unscopedCss = unscopedCss.replace(/\.note-editable(?=[\s{,])/g, 'body');
+            return `<style${attrs}>\n${unscopedCss}\n</style>`;
+        });
+    }
 }

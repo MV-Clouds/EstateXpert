@@ -33,7 +33,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     @track filteredData = [];
     @track paginatedData = [];
     @track currentPage = 1;
-    @track pageSize = 10;
+    @track pageSize = 20;
     @track visiblePages = 5;
     @track isLoading = false;
     @track configMap = {};
@@ -190,8 +190,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
     connectedCallback() {
         loadStyle(this, MulishFontCss);
         this.selectedObject = 'Contact';
-        this.loadConfigs();
-        this.loadListViews(); // Load Contact List views initially
+        this.loadConfigs(); // loadListViews is chained inside after sessionId is ready
     }
 
     renderedCallback() {
@@ -236,17 +235,22 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 if (!this._broadcastGroupId) {
                     this.broadcastHeading = 'New Group';
                     getSessionId()
-                        .then(res => { this.sessionId = res; })
-                        .catch(err => { this.showToast('Error', 'Error fetching session ID', 'error'); });
+                        .then(res => {
+                            this.sessionId = res;
+                            // Load list views now that sessionId is ready — auto-fetch will fire inside
+                            this.loadListViews();
+                        })
+                        .catch(err => {
+                            this.isLoading = false;
+                            this.showToast('Error', 'Error fetching session ID', 'error');
+                        });
                 } else {
                     this.fetchGroupDetails();
                 }
             })
             .catch(() => {
-                this.showToast('Error', 'Error loading configs', 'error');
-            })
-            .finally(() => {
                 this.isLoading = false;
+                this.showToast('Error', 'Error loading configs', 'error');
             });
     }
 
@@ -269,19 +273,21 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 getSessionId()
                     .then(res => {
                         this.sessionId = res;
+                        // Load list views to populate the dropdown; selectedListView is already
+                        // set from saved data so the auto-select guard won't override it.
+                        this.loadListViews();
                         if (this.selectedListView && this.sessionId) {
                             this.fetchAllListViewRecords(this.selectedListView, this.sessionId, this.maxLimit);
                         }
                     })
                     .catch(error => {
+                        this.isLoading = false;
                         this.showToast('Error', 'Error fetching session ID - ' + (error.body.message || error.message), 'error');
                     });
             })
             .catch(() => {
-                this.showToast('Error', 'Error fetching group details', 'error');
-            })
-            .finally(() => {
                 this.isLoading = false;
+                this.showToast('Error', 'Error fetching group details', 'error');
             });
     }
 
@@ -447,12 +453,21 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                     label: lv.Name,
                     value: lv.Id
                 }));
+
+                // Auto-select the first list view as default
+                if (this.listViewOptions.length > 0 && !this.selectedListView) {
+                    this.selectedListView = this.listViewOptions[0].value;
+                    if (this.sessionId && this.selectedListView) {
+                        this.fetchAllListViewRecords(this.selectedListView, this.sessionId, this.maxLimit);
+                        return; // fetchRecords.finally will turn off the spinner
+                    }
+                }
+                // No records to fetch — spinner ends here
+                this.isLoading = false;
             })
             .catch(() => {
-                this.showToast('Error', 'Error loading list views', 'error');
-            })
-            .finally(() => {
                 this.isLoading = false;
+                this.showToast('Error', 'Error loading list views', 'error');
             });
     }
 
@@ -548,8 +563,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 this.fetchRecords(soqlQueryUrl, sessionId, maxLimit);
             })
             .catch(err => {
-                this.showToast('Error', 'Error Fetching List View Describe', 'error');
                 this.isLoading = false;
+                this.showToast('Error', 'Error Fetching List View Describe', 'error');
             });
     }
 
@@ -619,6 +634,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 }
             })
             .catch(() => {
+                this.isLoading = false;
                 this.showToast('error', 'Error', 'Failed to retrieve records');
                 return false;
             })
@@ -769,6 +785,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 this.updateShownData();
             })
             .catch(error => {
+                this.isLoading = false;
                 this.showToast('Error', error.body?.message || 'Failed to save group', 'error');
             })
             .finally(() => {

@@ -481,3 +481,8 @@ progress::-moz-progress-bar {
 .fileuploader_container {
     width: 100%;
 }
+
+.upload-icon-svg {
+    display: flex;
+    justify-content: center;
+}

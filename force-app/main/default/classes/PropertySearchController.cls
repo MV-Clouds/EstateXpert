@@ -256,8 +256,13 @@ public with sharing class PropertySearchController {
         }
         
         try {
-            // Get field descriptions for Inquiry__c
-            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.MVEX__Inquiry__c.fields.getMap();
+            // Get field descriptions for Inquiry__c (handling namespace dynamically)
+            Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
+            Schema.SObjectType inquiryType = globalDescribe.get('MVEX__Inquiry__c');
+            if (inquiryType == null) {
+                inquiryType = globalDescribe.get('Inquiry__c');
+            }
+            Map<String, Schema.SObjectField> fieldMap = inquiryType != null ? inquiryType.getDescribe().fields.getMap() : new Map<String, Schema.SObjectField>();
             Map<String, Set<Id>> refIdsByField = new Map<String, Set<Id>>();
             
             // Collect all reference field IDs
@@ -331,6 +336,27 @@ public with sharing class PropertySearchController {
                     Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
                     if (fieldDescribe.isAccessible()) {
                         fieldNames.add(fieldName);
+                        
+                        // For lookup/reference fields, also include the parent Name via relationship
+                        // e.g. MVEX__Contact__c  ->  MVEX__Contact__r.Name
+                        // This allows the LWC to read the display name directly from nested object
+                        if (fieldDescribe.getType() == Schema.DisplayType.REFERENCE) {
+                            String relName = fieldDescribe.getRelationshipName();
+                            if (String.isNotBlank(relName)) {
+                                try {
+                                    // Verify the parent object has a Name field before adding
+                                    List<Schema.SObjectType> refs = fieldDescribe.getReferenceTo();
+                                    if (!refs.isEmpty()) {
+                                        Map<String, Schema.SObjectField> parentFields = refs[0].getDescribe().fields.getMap();
+                                        if (parentFields.containsKey('name') || parentFields.containsKey('Name')) {
+                                            fieldNames.add(relName + '.Name');
+                                        }
+                                    }
+                                } catch (Exception ex) {
+                                    // Skip if parent object doesn't support Name field
+                                }
+                            }
+                        }
                     }
                 }
                 

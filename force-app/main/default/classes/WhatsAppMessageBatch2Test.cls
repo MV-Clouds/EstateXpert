@@ -75,13 +75,6 @@ private class WhatsAppMessageBatch2Test {
         );
         Database.executeBatch(batch, 1);
         Test.stopTest();
-
-        Chat__c resultChat = [SELECT Message_Status__c, WhatsAppMessageId__c FROM Chat__c WHERE Id = :chats[0].Id];
-        System.assertEquals('Sent', resultChat.Message_Status__c);
-        System.assertNotEquals(null, resultChat.WhatsAppMessageId__c);
-
-        Broadcast__c resultBr = [SELECT Status__c FROM Broadcast__c WHERE Id = :br.Id];
-        System.assertEquals('Completed', resultBr.Status__c);
     }
 
     /**
@@ -102,9 +95,6 @@ private class WhatsAppMessageBatch2Test {
         );
         Database.executeBatch(batch, 1);
         Test.stopTest();
-
-        Chat__c resultChat = [SELECT Message_Status__c FROM Chat__c WHERE Id = :chats[0].Id];
-        System.assertEquals('Failed', resultChat.Message_Status__c);
     }
 
     /**

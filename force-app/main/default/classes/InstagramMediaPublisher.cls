@@ -44,36 +44,47 @@ public class InstagramMediaPublisher implements Schedulable {
                 String awsBucketName = awsData.S3_Bucket_Name__c;
 
                 String endpoint = 'https://' + awsBucketName + '.s3.amazonaws.com/';
-                String payload = '<Delete><Quiet>true</Quiet>';
 
-                for(String objectKey : awsObjectKeys) {
-                    if(!awsObjectKeysToPreserve.contains(objectKey)){
-                        payload += '<Object><Key>' + objectKey + '</Key></Object>';
+                List<String> keysToDelete = new List<String>();
+                System.debug('keysToDelete->'+keysToDelete);
+                if (awsObjectKeys != null) {
+                    for(String objectKey : awsObjectKeys) {
+                        if(awsObjectKeysToPreserve == null || !awsObjectKeysToPreserve.contains(objectKey)){
+                            keysToDelete.add(objectKey);
+                        }
                     }
                 }
-                payload += '</Delete>';
 
-                String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', Blob.valueOf(payload)));
-                Map<String, String> headers = InstagramPostController.generateAWSHeaders(payload, contentMD5, awsAccessKey, awsSecretKey, awsRegion, awsBucketName);
+                if (!keysToDelete.isEmpty()) {
+                    String payload = '<Delete><Quiet>true</Quiet>';
+                    for(String objectKey : keysToDelete) {
+                        payload += '<Object><Key>' + objectKey + '</Key></Object>';
+                    }
+                    payload += '</Delete>';
 
-                HttpRequest req = new HttpRequest();
-                req.setEndpoint(endpoint + '?delete');
-                req.setMethod('POST');
-                req.setHeader('Content-Type', 'application/xml');
-                req.setHeader('Content-MD5', contentMD5);
-                
-                for(String key : headers.keySet()){
-                    req.setHeader(key, headers.get(key));
-                }
-                
-                req.setBody(payload);
-                
-                Http http2 = new Http();
-                HttpResponse res = http2.send(req);
+                    String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', Blob.valueOf(payload)));
+                    Map<String, String> headers = InstagramPostController.generateAWSHeaders(payload, contentMD5, awsAccessKey, awsSecretKey, awsRegion, awsBucketName);
 
-                if(res.getStatusCode() != 200) {
-                    ErrorHandler.insertErrordata(null, 'InstagramMediaPublisher', 'publishMedia', 'Failed to delete AWS objects: ' + res.getBody() + ' and error at line no 75.');
-                    return;
+                    HttpRequest req = new HttpRequest();
+                    req.setTimeout(120000);
+                    req.setEndpoint(endpoint + '?delete');
+                    req.setMethod('POST');
+                    req.setHeader('Content-Type', 'application/xml');
+                    req.setHeader('Content-MD5', contentMD5);
+                    
+                    for(String key : headers.keySet()){
+                        req.setHeader(key, headers.get(key));
+                    }
+                    
+                    req.setBody(payload);
+                    
+                    Http http2 = new Http();
+                    HttpResponse res = http2.send(req);
+
+                    if(res.getStatusCode() != 200) {
+                        ErrorHandler.insertErrordata(null, 'InstagramMediaPublisher', 'publishMedia', 'Failed to delete AWS objects: ' + res.getBody() + ' and error at line no 75.');
+                        return;
+                    }
                 }
 
             }

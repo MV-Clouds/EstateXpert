@@ -412,14 +412,14 @@ export default class InstagramPostFromListing extends LightningElement {
         try {
             const duration = await this.getVideoDuration(file);
             const fileSizeInMB = file.size / (1024 * 1024);
-            
+
             let willBeCarousel;
             if (isCarousel !== null) {
                 willBeCarousel = isCarousel;
             } else {
                 willBeCarousel = this.selectedFileWithPreview.length > 0 || this.selectedFilesToUpload.length > 0;
             }
-            
+
             if (willBeCarousel) {
                 // Carousel rules: 60s max, 3s min, 25MB max
                 if (duration < 3) {
@@ -509,7 +509,7 @@ export default class InstagramPostFromListing extends LightningElement {
                     const fileType = file.type;
                     const fileSizeInKB = Math.floor(file.size / 1024);
                     const fileSizeInMB = file.size / (1024 * 1024);
-                    
+
                     // Check basic file size limits
                     const isAllowedSize = fileType === 'video/mp4'
                         ? fileSizeInKB <= 25000  // 25MB for videos
@@ -666,25 +666,15 @@ export default class InstagramPostFromListing extends LightningElement {
     }
 
     handleRemoveFile(event) {
-
-        console.log('fileURLs BEFORE ==> ', this.fileURLs.length);
-
         const fileNameToRemove = event.currentTarget.dataset.name;
-
-        const selectedFileURL = this.selectedFileWithPreview.find(file => file.name === fileNameToRemove);
-
-        if (selectedFileURL) {
-            this.fileURLs = this.fileURLs.filter(file => file !== selectedFileURL.preview);
-        }
 
         this.selectedFileWithPreview = this.selectedFileWithPreview.filter(file => file.name !== fileNameToRemove);
         this.selectedFilesToUpload = this.selectedFilesToUpload.filter(file => file.name !== fileNameToRemove);
-
-        console.log('fileURLs AFTER ==> ', this.fileURLs.length);
+        this.awsObjectKeysToPreserve = this.awsObjectKeysToPreserve.filter(key => key !== fileNameToRemove);
     }
 
     async handlePost() {
-        const totalFiles = this.fileURLs.length + this.selectedFilesToUpload.length;
+        const totalFiles = this.selectedFileWithPreview.length;
 
         if (totalFiles === 0) {
             this.showToast('Error', 'Please select a file to upload.', 'error');
@@ -696,9 +686,17 @@ export default class InstagramPostFromListing extends LightningElement {
             return;
         }
 
+        this.showSpinner = true;
+        this.isLoading = true;
+        if (this.selectedFilesToUpload.length === 0) {
+            this.progressText = 'Processing Post...';
+            this.progressStyle = 'width: 100%';
+        }
+
         const isSuccess = await this.uploadToAWS();
 
         if (isSuccess) {
+            this.fileURLs = this.selectedFileWithPreview.map(file => file.preview);
             postToInstagram({ mediaUrls: this.fileURLs, caption: this.caption, awsObjectKeys: this.awsObjectKeys, awsObjectKeysToPreserve: this.awsObjectKeysToPreserve })
                 .then(result => {
                     console.log('Post to Instagram result -> ', result);

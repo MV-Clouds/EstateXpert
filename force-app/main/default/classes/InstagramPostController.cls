@@ -25,6 +25,7 @@ public with sharing class InstagramPostController {
                 String mediaType = getMediaTypeFromUrl(mediaUrl);
 
                 HttpRequest req = new HttpRequest();
+                req.setTimeout(120000);
                 req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
                 req.setMethod('POST');
                 req.setHeader('Content-Type', 'application/json');
@@ -366,6 +367,7 @@ public with sharing class InstagramPostController {
                     String mediaType = getMediaTypeFromUrl(mediaUrl);
 
                     HttpRequest req = new HttpRequest();
+                    req.setTimeout(120000);
                     req.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
                     req.setMethod('POST');
                     req.setHeader('Content-Type', 'application/json');
@@ -429,10 +431,12 @@ public with sharing class InstagramPostController {
         try {
             
             String emailId = UserInfo.getUserEmail();
-            // String emailId = 'karan.s@mvclouds.com';
             String userName = UserInfo.getName();
+            String errorEmailId = System.Label.ErrorNotificationEmail;
     
-            EmailTemplate emailTemplate = [SELECT Id, HtmlValue, Subject FROM EmailTemplate WHERE DeveloperName = 'Instagram_Error_Template' WITH SECURITY_ENFORCED LIMIT 1];
+            List<EmailTemplate> emailTemplates = [SELECT Id, HtmlValue, Subject FROM EmailTemplate WHERE DeveloperName = 'Instagram_Error_Template' WITH SECURITY_ENFORCED LIMIT 1];
+            
+            EmailTemplate emailTemplate = emailTemplates[0];
         
             String emailBody = emailTemplate.HtmlValue;
             emailBody = emailBody.replace('{!errorDetails}', errorMessage);
@@ -446,7 +450,7 @@ public with sharing class InstagramPostController {
                 List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
     
                 GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
-                singleGmail.toAddresses = new List<String>{emailId};
+                singleGmail.toAddresses = new List<String>{emailId , errorEmailId};
                 singleGmail.subject = emailTemplate.Subject;
                 singleGmail.body = emailBody;
     
@@ -458,7 +462,7 @@ public with sharing class InstagramPostController {
             else if(emailId != null){
                     
                 Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-                mail.setToAddresses(new String[] { emailId });
+                mail.setToAddresses(new String[] { emailId, errorEmailId});
                 mail.setSubject(emailTemplate.Subject);
                 mail.setHtmlBody(emailBody);
         

@@ -60,8 +60,9 @@ export default class KeyMappingContainer extends LightningElement {
             showSearchbar: false,
             showRefresh: false,
         },
-        {   label: 'Signature',     name: 'signature',
-            helpText : 'Add Signature into Your file by Mapping Signature Key in The Template.', selected : false,
+        {
+            label: 'Signature', name: 'signature',
+            helpText: 'Add Signature into Your file by Mapping Signature Key in The Template.', selected: false,
         }
     ];
 
@@ -98,9 +99,9 @@ export default class KeyMappingContainer extends LightningElement {
     @track signatureSize;
     savedSignatureSize = this.signatureSize;
 
-    @track objectFieldKeys   = [];   // e.g. ["{{#Account__c.Name__c}}", …]
-    @track generalFieldKeys  = [];   // e.g. ["{{Doc.Company_Name}}", …]
-    @track signatureKey      = [];   // e.g. ["{{Sign.EXP *Signature Key*}}"]
+    @track objectFieldKeys = [];   // e.g. ["{{#Account__c.Name__c}}", …]
+    @track generalFieldKeys = [];   // e.g. ["{{Doc.Company_Name}}", …]
+    @track signatureKey = [];   // e.g. ["{{Sign.EXP *Signature Key*}}"]
 
     /**
      * boolean to set showFulbrightButtonFor based on template type.
@@ -228,14 +229,14 @@ export default class KeyMappingContainer extends LightningElement {
         }
         else if (this.clickedFieldType == 'CURRENCY' || this.clickedFieldType == 'NUMBER' || this.clickedFieldType == 'PERCENTAGE') {
             return `Format Options for ${this.clickedFieldType} field`;
-        } 
+        }
         return null;
     }
 
     /**
      * Getter to Enable/Disable signature update button
      */
-    get isSignatureSetBtn(){
+    get isSignatureSetBtn() {
         return this.savedSignatureSize === this.signatureSize;
     }
 
@@ -249,7 +250,7 @@ export default class KeyMappingContainer extends LightningElement {
     get hidePropertyImagesForOtherObjects() {
         console.log('objectName => ', this.objectName);
         return this.objectName == 'MVEX__Listing__c' || this.objectName == 'MVEX__Inquiry__c' ? false : true;
-        
+
     }
 
     connectedCallback() {
@@ -290,7 +291,7 @@ export default class KeyMappingContainer extends LightningElement {
             this.isInit = false;
         }
 
-        if(!this.customTimeout){
+        if (!this.customTimeout) {
             this.customTimeout = this.template.querySelector('c-custom-timeout');
         }
     }
@@ -453,16 +454,16 @@ export default class KeyMappingContainer extends LightningElement {
     /**
      * Method to fetch signature size stored in template record field.
      */
-    fetchSignatureInfo(){
+    fetchSignatureInfo() {
         try {
-            getSignatureInfo({templateId : this.templateId})
-            .then(result => {
-                this.isDataRefreshing = false;
-                this.signatureSize = Math.max(result, 1);               // To avoid value lesser than 1
-                this.savedSignatureSize = this.signatureSize;
-            })
+            getSignatureInfo({ templateId: this.templateId })
+                .then(result => {
+                    this.isDataRefreshing = false;
+                    this.signatureSize = Math.max(result, 1);               // To avoid value lesser than 1
+                    this.savedSignatureSize = this.signatureSize;
+                })
         } catch (error) {
-            errorDebugger('FieldMappingKeyV2', 'fetchSignatureInfo', error ,'warn');
+            errorDebugger('FieldMappingKeyV2', 'fetchSignatureInfo', error, 'warn');
         }
     }
 
@@ -550,7 +551,7 @@ export default class KeyMappingContainer extends LightningElement {
             }
             this.setMappingKeysForObjFields();
 
-            
+
         } catch (error) {
             errorDebugger('FieldMappingKey', 'handleRelatedObjSelect', error, 'warn');
         }
@@ -1009,26 +1010,26 @@ export default class KeyMappingContainer extends LightningElement {
     * Set Formatting key into mapping key for Number field.
     * @param {*} event 
     */
-    setNumberFormat(event){
+    setNumberFormat(event) {
         try {
             const action = event.currentTarget.dataset.action;
 
             // ... When Method called from format toggle btn ...
-            if(action == 'format'){
-                if(event.target.checked == true){
+            if (action == 'format') {
+                if (event.target.checked == true) {
                     this.numberFormat['F'] = 'yes';
                 }
-                else{
+                else {
                     delete this.numberFormat['F'];
                 }
             }
             // ... When Method called from Decimal Places Input  ...
-            else if(action == 'decimalPlaces'){
+            else if (action == 'decimalPlaces') {
                 // SET negative value to Zero...
-                if(event.target.value < 0){
+                if (event.target.value < 0) {
                     event.target.value = 0;
                 }
-                else if(event.target.value > 32){
+                else if (event.target.value > 32) {
                     event.target.value = 32;
                 }
 
@@ -1036,24 +1037,24 @@ export default class KeyMappingContainer extends LightningElement {
                 const roundMode = this.template.querySelector(`[data-action="roundMode"]`);
                 const roundModeText = this.template.querySelector('[data-text="roundMode"]');
 
-                if(event.target.value != '' && event.target.value != null){
+                if (event.target.value != '' && event.target.value != null) {
                     this.numberFormat['dP'] = event.target.value;
 
-                    if(roundMode){
+                    if (roundMode) {
                         roundMode.removeAttribute('disabled');
                         roundModeText.classList.remove('roundMode');
 
                         // add round Mode with decimal places if rM value is not available and value is not none...
-                        if(!Object.prototype.hasOwnProperty.call(this.numberFormat, 'rM') && roundMode.value != 'none'){
+                        if (!Object.prototype.hasOwnProperty.call(this.numberFormat, 'rM') && roundMode.value != 'none') {
                             this.numberFormat['rM'] = roundMode.value;
                         }
                     }
                 }
-                else{
+                else {
                     delete this.numberFormat['dP'];
                     delete this.numberFormat['rM'];        // remove round Mode if decimal places is null
 
-                    if(roundMode){
+                    if (roundMode) {
                         // if decimal places is not zero... then disable round mode selection as we don't need round node in this case...
                         roundMode.setAttribute('disabled', 'true');
                         roundModeText.classList.add('roundMode');
@@ -1062,34 +1063,34 @@ export default class KeyMappingContainer extends LightningElement {
             }
 
             // ... When Method called from Round Mode selection ...
-            else if(action == 'roundMode'){
-                if(event.target.value != 'none' && event.target.value != '' && event.target.value != null){
+            else if (action == 'roundMode') {
+                if (event.target.value != 'none' && event.target.value != '' && event.target.value != null) {
                     this.numberFormat['rM'] = event.target.value;
                 }
-                else{
+                else {
                     delete this.numberFormat['rM'];
                 }
             }
 
             // ... Update mapping Key ...
-            if(Object.keys(this.numberFormat).length){
+            if (Object.keys(this.numberFormat).length) {
                 const str1 = JSON.stringify(this.numberFormat).replaceAll('"', '');
                 const str2 = str1.replaceAll('{', '');
                 const str3 = str2.replaceAll('}', ',');
 
-                if(this.chosenFormat.key.includes('*')){
-                    this.chosenFormat.key = this.chosenFormat.key.replace(/(?<=\*)(.*?)(?=\*)/g,  `${str3}`);
+                if (this.chosenFormat.key.includes('*')) {
+                    this.chosenFormat.key = this.chosenFormat.key.replace(/(?<=\*)(.*?)(?=\*)/g, `${str3}`);
                 }
-                else{
+                else {
                     this.chosenFormat.key = this.chosenFormat.key.replace(this.chosenFormat.name, this.chosenFormat.name + ` *${str3}*`);
                 }
             }
-            else{
+            else {
                 this.chosenFormat.key = this.formatDefault.key;
             }
-            
+
         } catch (error) {
-            errorDebugger('FieldMappingKey', 'setNumberFormat', error ,'warn');            
+            errorDebugger('FieldMappingKey', 'setNumberFormat', error, 'warn');
         }
     }
 
@@ -1145,6 +1146,7 @@ export default class KeyMappingContainer extends LightningElement {
             let listingno = event.currentTarget.dataset.name;
 
             const ImgUrl = '/resource/MVEX__tempimage';
+            console.log('templateType->' + this.templateType);
 
             const textarea = document.createElement('textarea');
             textarea.value = ImgUrl;
@@ -1157,7 +1159,11 @@ export default class KeyMappingContainer extends LightningElement {
             img.setAttribute('src', ImgUrl);
             img.setAttribute('data-origin', 'pm');
             img.setAttribute('data-name', listingno);
-            img.setAttribute('crossorigin', '*');
+
+            if (this.templateType != 'Marketing Template') {
+                img.setAttribute('crossorigin', '*');
+            }
+
 
             document.body.appendChild(img);
 
@@ -1275,19 +1281,19 @@ export default class KeyMappingContainer extends LightningElement {
      * Set Signature size into variable
      * @param {*} event 
      */
-    setSignatureSize(event){
+    setSignatureSize(event) {
         this.signatureSize = event.target.value;
     }
 
     /**
      * Update Signature size in backed.
      */
-    updateSignatureSize(){
+    updateSignatureSize() {
         try {
             this.savedSignatureSize = this.signatureSize;
-            updateSignatureInfo({templateId : this.templateId, signatureSize : this.signatureSize});
+            updateSignatureInfo({ templateId: this.templateId, signatureSize: this.signatureSize });
         } catch (error) {
-            errorDebugger('FieldMappingKeyV2', 'updateSignatureSize', error ,'warn');            
+            errorDebugger('FieldMappingKeyV2', 'updateSignatureSize', error, 'warn');
         }
     }
 
@@ -1355,15 +1361,15 @@ export default class KeyMappingContainer extends LightningElement {
         }
     }
 
-    handleTimeout(event){
-		try {
-			if(event?.detail?.function){
-				event?.detail?.function();
-			}
-		} catch (error) {
-			errorDebugger('DocumentLoader', 'handleTimeout', error, 'warn')
-		}
-	}
+    handleTimeout(event) {
+        try {
+            if (event?.detail?.function) {
+                event?.detail?.function();
+            }
+        } catch (error) {
+            errorDebugger('DocumentLoader', 'handleTimeout', error, 'warn')
+        }
+    }
 
     _buildAllMappingKeys() {
         // ---- object fields -------------------------------------------------
@@ -1387,9 +1393,9 @@ export default class KeyMappingContainer extends LightningElement {
         this.dispatchEvent(
             new CustomEvent('mappingkeysready', {
                 detail: {
-                    objectFieldKeys:  this.objectFieldKeys,
+                    objectFieldKeys: this.objectFieldKeys,
                     generalFieldKeys: this.generalFieldKeys,
-                    signatureKey:     this.signatureKey
+                    signatureKey: this.signatureKey
                 },
                 bubbles: true,
                 composed: true

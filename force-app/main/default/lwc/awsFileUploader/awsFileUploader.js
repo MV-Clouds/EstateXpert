@@ -57,6 +57,17 @@ export default class AwsFileUploader extends LightningElement {
         return !this.isContentVersionDataIsAvailable;
     }
 
+    get isUploadDisabled() {
+        if (this.uploadStatus) {
+            return true;
+        }
+        if (this.isAWS) {
+            return this.selectedFilesToUpload.length === 0;
+        } else {
+            return !(this.imageTitleToUpload && this.imageUrlToUpload);
+        }
+    }
+
     /**
     * Method Name: connectedCallback
     * @description: Used to load css and fetch data.
@@ -548,36 +559,67 @@ export default class AwsFileUploader extends LightningElement {
             }
 
             if (this.propertyId != undefined) {
-                await this.uploadToAWS(this.selectedFilesToUpload);
-
-                let contents = [];
-                for (let file = 0; file < this.selectedFilesToUpload.length; file++) {
-                    contents.push({
-                        recordId: this.propertyId,
-                        externalUrl: this.selectedFilesToUpload[file].type != 'video/mp4' ? this.fileURL[file] : this.thumbnail,
-                        externalVideoUrl: this.fileURL[file],
-                        name: this.renameFileName(this.fileName[file]),
-                        size: this.fileSize[file],
-                        type: this.selectedFilesToUpload[file].type,
-                        isOnExpose: true,
-                        isOnPortalFeed: true,
-                        isOnWebsite: true
-                    });
+                // Step 1: Attempt the AWS S3 upload first.
+                let uploadSucceeded = false;
+                try {
+                    await this.uploadToAWS(this.selectedFilesToUpload);
+                    uploadSucceeded = true;
+                } catch (uploadError) {
+                    console.log('uploadError->' + uploadError);
+                    this.showSpinner = false;
+                    this.uploadStatus = false;
+                    // Detect CORS-related errors and surface a specific, actionable message.
+                    const isCorsError = this.isCorsError(uploadError);
+                    console.log('isCorsError->' + isCorsError);
+                    if (isCorsError) {
+                        this.showToast(
+                            'AWS CORS Configuration Required',
+                            'The image upload was rejected by AWS S3. Please configure the CORS policy on your S3 bucket to allow uploads from Salesforce.',
+                            'error'
+                        );
+                    } else {
+                        this.showToast('Error', 'AWS upload failed. No Salesforce record has been created. Please check your AWS configuration.', 'error');
+                    }
+                    errorDebugger('AwsFileUploader', 'handleclick:uploadToAWS', uploadError, 'warn', 'AWS S3 upload failed — Salesforce record creation skipped');
+                    return; // Abort: do NOT create the Salesforce record.
                 }
-                createmediaforlisting({ recordId: this.propertyId, mediaList: contents })
-                    .then(result => {
-                        this.showSpinner = false;
-                        if (result == 'success') {
-                            this.handleDialogueCloseAndRefresh();
-                        } else {
-                            this.showToast('Error', result, 'error');
-                        }
-                    }).catch(error => {
-                        this.showSpinner = false;
-                        this.uploadStatus = false;
-                        this.showToast('Error', error, 'error');
-                        errorDebugger('AwsFileUploader', 'handleclick:createmediaforlisting', error, 'warn', 'Error while uploading image');
-                    });
+
+                // Step 2: Only create the Salesforce record after a confirmed successful upload.
+                if (uploadSucceeded && this.fileURL.length === this.selectedFilesToUpload.length) {
+                    let contents = [];
+                    for (let file = 0; file < this.selectedFilesToUpload.length; file++) {
+                        contents.push({
+                            recordId: this.propertyId,
+                            externalUrl: this.selectedFilesToUpload[file].type != 'video/mp4' ? this.fileURL[file] : this.thumbnail,
+                            externalVideoUrl: this.fileURL[file],
+                            name: this.renameFileName(this.fileName[file]),
+                            size: this.fileSize[file],
+                            type: this.selectedFilesToUpload[file].type,
+                            isOnExpose: true,
+                            isOnPortalFeed: true,
+                            isOnWebsite: true
+                        });
+                    }
+                    createmediaforlisting({ recordId: this.propertyId, mediaList: contents })
+                        .then(result => {
+                            this.showSpinner = false;
+                            if (result == 'success') {
+                                this.handleDialogueCloseAndRefresh();
+                            } else {
+                                this.showToast('Error', result, 'error');
+                            }
+                        }).catch(error => {
+                            this.showSpinner = false;
+                            this.uploadStatus = false;
+                            this.showToast('Error', error, 'error');
+                            errorDebugger('AwsFileUploader', 'handleclick:createmediaforlisting', error, 'warn', 'Error while uploading image');
+                        });
+                } else {
+                    // Upload appeared to succeed but URLs are missing — treat as failure.
+                    this.showSpinner = false;
+                    this.uploadStatus = false;
+                    this.showToast('Error', 'The image upload was rejected by AWS S3. Please configure the CORS policy on your S3 bucket to allow uploads from Salesforce.', 'error');
+                }
             } else {
                 this.showSpinner = false;
                 this.uploadStatus = false;
@@ -588,6 +630,34 @@ export default class AwsFileUploader extends LightningElement {
             this.uploadStatus = false;
             this.showToast('Error', JSON.stringify(error.stack), 'error');
             errorDebugger('AwsFileUploader', 'handleclick', error, 'warn', 'Error while handling click');
+        }
+    }
+
+    /**
+    * Method Name: isCorsError
+    * @description: Detects whether an error is caused by a CORS policy rejection from AWS S3.
+    * CORS errors typically manifest as NetworkingError, XMLHttpRequest errors, or messages
+    * containing keywords like 'CORS', 'NetworkingError', 'Network Failure', or 'Failed to fetch'.
+    * @param {object} error - The error object thrown by the AWS SDK or fetch.
+    * Created Date: 11/05/2026
+    */
+    isCorsError(error) {
+        try {
+            if (!error) return false;
+            const msg = (error.message || error.toString() || '').toLowerCase();
+            const code = (error.code || '').toLowerCase();
+            return (
+                msg.includes('cors') ||
+                msg.includes('networkerror') ||
+                msg.includes('network failure') ||
+                msg.includes('failed to fetch') ||
+                msg.includes('xmlhttprequest') ||
+                msg.includes('cross-origin') ||
+                code.includes('networkingerror') ||
+                code === 'cors'
+            );
+        } catch (e) {
+            return false;
         }
     }
 
@@ -635,9 +705,11 @@ export default class AwsFileUploader extends LightningElement {
             });
 
         } catch (error) {
+            this.isFileUploading = false;
+            this.uploadProgress = 0;
             this.showSpinner = false;
             this.uploadStatus = false;
-            errorDebugger('AwsFileUploader', 'uploadToAWS', error, 'warn', 'Error while uploading to aws');
+            errorDebugger('AwsFileUploader', 'uploadToAWS', error, 'warn', 'Error while uploading to AWS');
         }
     }
 
@@ -893,7 +965,7 @@ export default class AwsFileUploader extends LightningElement {
                     message: message,
                     variant: variant,
                 });
-    
+
                 this.dispatchEvent(event);
             }
         } catch (error) {

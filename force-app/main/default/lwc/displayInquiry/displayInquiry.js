@@ -45,8 +45,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track listingRecord = {};
     @track conditiontype = 'related';
     @track checkAll = false;
-    @track sortField = 'Name';
-@track sortOrder = 'asc';
+    @track sortField = 'name';
+    @track sortOrder = 'asc';
     @track popupSortField = 'Name';
     @track popupSortOrder = 'asc';
     _renderedCallbackRunOnce = false;
@@ -549,52 +549,102 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             row.displayFields = cols.map(col => {
                 // Ensure fieldName is lowercase to match inquiry data keys
                 const key = (col.fieldName || '').toLowerCase();
-                let value = inquiry[key];
+                const isReference = (col.fieldType || '').toUpperCase() === 'REFERENCE';
 
-                // Handle special cases for field mapping
-                if (!value && key === 'name' && inquiry.name) {
-                    value = inquiry.name;
-                }
+                let value;
+                let displayValue = '-';
+                let lookupId = null;
 
-                // Convert value to string for display if it exists, else default to '-'
-                const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
-                let displayValue = hasRealValue ? String(value) : '-';
+                if (isReference) {
+                    // -- PRIMARY approach: traverse nested relationship object --
+                    // Build the relationship field name from the lookup field name:
+                    //   mvex__contact__c  -->  mvex__contact__r
+                    //   contact__c        -->  contact__r (fallback)
+                    const relationshipKey = col.relationshipName
+                        ? col.relationshipName.toLowerCase()
+                        : key.replace(/__c$/i, '__r');
 
-                if (hasRealValue && col.type === 'currency') {
-                    const num = Number(value);
+                    // Find the parent object case-insensitively (handles namespace drift)
+                    const parentObjKey = Object.keys(inquiry).find(
+                        k => k.toLowerCase() === relationshipKey
+                    );
+                    const parentObj = parentObjKey ? inquiry[parentObjKey] : null;
 
-                    if (!isNaN(num)) {
-                        displayValue = new Intl.NumberFormat(USER_LOCALE, {
-                            style: 'currency',
-                            currency: inquiry.CurrencyIsoCode || USER_CURRENCY,
-                            minimumFractionDigits: 0
-                        }).format(num);
+                    if (parentObj && typeof parentObj === 'object') {
+                        // Get 'Name' field case-insensitively from parent object
+                        const nameKey = Object.keys(parentObj).find(
+                            k => k.toLowerCase() === 'name'
+                        );
+                        const resolvedName = nameKey ? parentObj[nameKey] : null;
+                        if (resolvedName !== null && resolvedName !== undefined && String(resolvedName).trim() !== '') {
+                            displayValue = String(resolvedName);
+                        }
+                    }
+
+                    // If relationship traversal failed, fall back to refNameCache
+                    if (displayValue === '-') {
+                        // Get the raw ID from the lookup field (case-insensitive)
+                        const idFieldKey = Object.keys(inquiry).find(k => k.toLowerCase() === key);
+                        value = idFieldKey ? inquiry[idFieldKey] : undefined;
+                        if (value) {
+                            const cachedName = this.refNameCache[value];
+                            if (cachedName) {
+                                displayValue = cachedName;
+                            } else {
+                                // Last resort: show the raw ID value as-is (not '-')
+                                displayValue = String(value);
+                            }
+                        }
                     } else {
-                        displayValue = '-';
+                        // We got the name — also find the ID for the recordId link
+                        const idFieldKey = Object.keys(inquiry).find(k => k.toLowerCase() === key);
+                        value = idFieldKey ? inquiry[idFieldKey] : undefined;
                     }
-                }
 
-                if (hasRealValue && (col.fieldType || '').toUpperCase() === 'REFERENCE') {
-                    const cachedName = this.refNameCache[value];
-                    if (cachedName) {
-                        displayValue = cachedName;
+                    if (value) lookupId = value;
+
+                } else {
+                    // -- Non-reference fields --
+                    // Case-insensitive key lookup to handle namespace drift
+                    const foundKey = Object.keys(inquiry).find(k => k.toLowerCase() === key);
+                    value = foundKey ? inquiry[foundKey] : undefined;
+
+                    // Special case: name field
+                    if (value === undefined && key === 'name') {
+                        value = inquiry.name || inquiry.Name;
                     }
-                }
 
-                // Apply formatting for date/datetime fields if format is provided
-                if (col.format && hasRealValue && (col.type === 'date' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
-                    displayValue = this.applyFieldFormat(value, col.format);
+                    const hasRealValue = value !== null && value !== undefined && String(value).trim() !== '';
+                    displayValue = hasRealValue ? String(value) : '-';
+
+                    if (hasRealValue && col.type === 'currency') {
+                        const num = Number(value);
+                        if (!isNaN(num)) {
+                            displayValue = new Intl.NumberFormat(USER_LOCALE, {
+                                style: 'currency',
+                                currency: inquiry.CurrencyIsoCode || USER_CURRENCY,
+                                minimumFractionDigits: 0
+                            }).format(num);
+                        } else {
+                            displayValue = '-';
+                        }
+                    }
+
+                    // Apply formatting for date/datetime fields if format is provided
+                    if (col.format && hasRealValue && (col.type === 'date' || col.fieldType === 'DATE' || col.fieldType === 'DATETIME')) {
+                        displayValue = this.applyFieldFormat(value, col.format);
+                    }
                 }
 
                 return {
                     key,
                     value: displayValue,
-                    rawValue: value, // Keep original value for type checking
-                    hasValue: true, // Always true to display either the value or the hyphen
+                    rawValue: value,
+                    hasValue: true,
                     isNameField: key === 'name',
                     isCurrency: col.type === 'currency',
-                    isReference: hasRealValue && (col.fieldType || '').toUpperCase() === 'REFERENCE',
-                    recordId: (col.fieldType || '').toUpperCase() === 'REFERENCE' ? value : null
+                    isReference: isReference,
+                    recordId: isReference ? lookupId : null
                 };
             });
             return row;
@@ -2742,7 +2792,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
                                 type: this.getColumnType(field.fieldType),
                                 fieldType: field.fieldType,
-                                format: field.format
+                                format: field.format,
+                                referenceObjectName: field.referenceObjectName,
+                                relationshipName: field.relationshipName
                             }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                         console.log('this.inquiryColumns', JSON.stringify(this.inquiryColumns));

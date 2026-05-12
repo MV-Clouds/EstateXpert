@@ -30,7 +30,7 @@ export default class AwsFileUploader extends LightningElement {
     @track selectedUrlType = 'Image';
     @track currentDateTimeWithSeconds = '';
     @track logo;
-    @track thumbnail = videoThumbnail;
+    @track thumbnail = 'https://estatexpertlistingimages.s3.us-east-1.amazonaws.com/videothumbnail.jpeg';
     @track fileURL = [];
     @track isContentVersionDataIsAvailable = false;
     @track isAWS = true;
@@ -182,7 +182,7 @@ export default class AwsFileUploader extends LightningElement {
             const minutes = currentDateTime.getMinutes().toString().padStart(2, '0');
             const seconds = currentDateTime.getSeconds().toString().padStart(2, '0');
 
-            const formattedDateTime = `${day}_${month}_${year}_${hours}:${minutes}:${seconds}`;
+            const formattedDateTime = `${day}_${month}_${year}_${hours}_${minutes}_${seconds}`;
             this.currentDateTimeWithSeconds = formattedDateTime;
         } catch (error) {
             errorDebugger('AwsFileUploader', 'timeInString', error, 'warn', 'Error while getting current date and time');

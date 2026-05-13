@@ -7,7 +7,6 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import sendEmail from '@salesforce/apex/PropertySearchController.sendEmail';
-import summerNoteEditor from '@salesforce/resourceUrl/summerNoteEditor';
 import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuickTemplates';
 import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController.getMessagingServiceOptions';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
@@ -290,7 +289,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         return Math.ceil(this.totalItems / this.pageSize);
     }
 
-     get showPagination() {
+    get showPagination() {
         return this.pagedInquries.length > 0 && this.totalPages > 1;
     }
 
@@ -730,7 +729,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             errorDebugger('displayInquiry', 'populateRefNameCacheFromMappings', error, 'warn', 'Error populating reference name cache');
         }
     }
-  
+
     /**
     * Method Name : applyFieldFormat
     * @description : Method to apply formatting based on the format value from dateOptions and dateTimeOptions
@@ -1181,7 +1180,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return date.toISOString().split('T')[0]; // "2024-09-26"
             } else {
                 date.setSeconds(0, 0);
-                return date.getTime(); 
+                return date.getTime();
             }
         }
         return String(value);
@@ -1818,7 +1817,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             if (this.conditiontype === 'custom') {
                 const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
-               
+
                 // If expression is empty, block apply
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     if (inputElement) {
@@ -2449,17 +2448,17 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         Phone: record.Phone,
                         GroupName: record.InquiryName // For display in 3rd column
                     }));
-                this.filteredGroupMembers = [...this.broadcastContactList];
+                    this.filteredGroupMembers = [...this.broadcastContactList];
 
-                // Apply default popup sort (Name ASC) when popup opens
-                if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
-                    this.popupSortField = 'Name';
-                    this.popupSortOrder = 'asc';
-                    this.sortPopupData();
-                    this.updatePopupSortIcons();
-                }
+                    // Apply default popup sort (Name ASC) when popup opens
+                    if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
+                        this.popupSortField = 'Name';
+                        this.popupSortOrder = 'asc';
+                        this.sortPopupData();
+                        this.updatePopupSortIcons();
+                    }
 
-                this.showTemplate = true;
+                    this.showTemplate = true;
                     this.popUpFirstPage = false;
                     this.popUpSecondPage = true;
                     this.popUpConfirmPage = false;
@@ -2506,24 +2505,24 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 console.warn('Delete button with data-id not found');
                 return;
             }
-            
+
             const memberId = button.dataset.id;
-            
+
             // Validate memberId exists
             if (!memberId) {
                 console.warn('No memberId found in button data-id');
                 return;
             }
-            
+
             const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
-            
+
             if (!memberToRemove) {
                 console.warn('Member not found in broadcastContactList');
                 return;
             }
-            
+
             const inquiryId = memberToRemove.InquiryId;
-            
+
             // 1. Update Inquiry Selection state in main table
             this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
                 if (inquiry.id === inquiryId) {
@@ -2843,7 +2842,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                         console.log('this.inquiryColumns', JSON.stringify(this.inquiryColumns));
-                        
+
                     } catch (e) {
                         this.inquiryColumns = this.defaultColumns;
                     }

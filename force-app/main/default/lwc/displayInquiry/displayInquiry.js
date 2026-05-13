@@ -170,9 +170,21 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track modalFilteredInquiryData = [];
     @track sendMailInquiryDataList = [];
     filterModalSnapshot = null;
+    @track screenWidth = 0;
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
+
+    @track showMoreActions = false;
+
+    toggleMoreActions(event) {
+        event.stopPropagation();
+        this.showMoreActions = !this.showMoreActions;
+    }
+
+    updateScreenWidth = () => {
+        this.screenWidth = window.innerWidth;
     }
 
     /**
@@ -520,6 +532,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             this.loadAllTemplates();
             this.fetchFilterConfiguration();
+            
+            this.updateScreenWidth();
+            window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
             this.vfPageMessageHandler();
             this.checkHideFilterButton();
@@ -992,6 +1007,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         if (this.divElement && !this.divElement.contains(event.target)) {
             this.hideModalBox();
             this.closeAddConditionModal();
+        }
+        
+        const dropdownContainer = this.template.querySelector('.custom-dropdown-container');
+        if (dropdownContainer && !dropdownContainer.contains(event.target)) {
+            this.showMoreActions = false;
         }
     }
 
@@ -2303,6 +2323,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     disconnectedCallback() {
         try {
+            window?.globalThis?.removeEventListener('resize', this.updateScreenWidth);
             window?.globalThis?.removeEventListener('message', this.simpleTempFileGenResponse);
             window?.globalThis?.removeEventListener('click', this.handleClickOutside);
             const richTextElement = this.template.querySelector('.richText');

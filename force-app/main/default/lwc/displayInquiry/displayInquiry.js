@@ -1,5 +1,6 @@
 import { LightningElement, track, wire, api } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
+import { encodeDefaultFieldValues } from 'lightning/pageReferenceUtils';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import getContactsForInquiries from '@salesforce/apex/PropertySearchController.getContactsForInquiries';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -660,6 +661,50 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             errorDebugger('displayInquiry', 'getObjectApiName', error, 'warn', 'Error fetching object API name');
             return null;
         }
+    }
+
+    /**
+    * Method Name : goToNewInquiry
+    * @description : Redirect the new inquiry page
+    */
+    goToNewInquiry() {
+        try {
+            let stateParams = {
+                c__customParam: 'displayInquiry',
+                navigationLocation: 'RELATED_LIST',
+                backgroundContext: '/lightning/r/' + this.objectName + '/' + this.recordId + '/view'
+            };
+
+            if (this.objectName === 'MVEX__Listing__c' && this.recordId) {
+                stateParams.defaultFieldValues = encodeDefaultFieldValues({
+                    MVEX__Listing__c: this.recordId
+                });
+            }
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__objectPage',
+                attributes: {
+                    objectApiName: 'MVEX__Inquiry__c',
+                    actionName: 'new'
+                },
+                state: stateParams
+            });
+        } catch (error) {
+            errorDebugger('displayInquiry', 'goToNewInquiry', error, 'warn', 'Error in goToNewInquiry');
+        }
+    }
+
+    /**
+    * Method Name : handleRefresh
+    * @description : Refresh the component data
+    */
+    handleRefresh() {
+        this.isLoading = true;
+        this.checkAll = false;
+        this.sendMailInquiryDataList = [];
+        this.searchTerm = '';
+        this.fetchListings();
+        this.checkHideFilterButton();
     }
 
     /**

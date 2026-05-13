@@ -35,6 +35,21 @@ public with sharing class SiteAndBookingController {
                     contactIds.add(inquiry.Contact__c);
                 }
             }
+
+            // Fetch contacts from MVEX__Listing_Inquiry__c junction object
+            List<MVEX__Listing_Inquiry__c> junctionInquiries = [
+                SELECT MVEX__Contact__c, MVEX__Inquiry__r.Contact__c 
+                FROM MVEX__Listing_Inquiry__c 
+                WHERE MVEX__Listing__c = :escapedListingId 
+                WITH USER_MODE
+            ];
+            for (MVEX__Listing_Inquiry__c li : junctionInquiries) {
+                if (li.MVEX__Contact__c != null) {
+                    contactIds.add(li.MVEX__Contact__c);
+                } else if (li.MVEX__Inquiry__r != null && li.MVEX__Inquiry__r.Contact__c != null) {
+                    contactIds.add(li.MVEX__Inquiry__r.Contact__c);
+                }
+            }
     
             if (!listing.isEmpty()) {
                 propertyFiles = [SELECT Id, Name, BaseUrl__c FROM Property_File__c WHERE Property__c = :listing[0].Property__c WITH USER_MODE];

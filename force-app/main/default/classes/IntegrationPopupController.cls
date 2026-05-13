@@ -527,23 +527,6 @@ public with sharing class IntegrationPopupController {
         }
     }
 
-    /**
-    * Method Name : revokeWhatsappAccess
-    * @param recordId : String to stored the record id.
-    * @return String : Status of revoke access.
-    * @description : Method to revoke whatsapp access.
-    */
-    @AuraEnabled
-    public static string revokeWhatsappAccess(String recordId){
-        try {
-            delete as user new WhatsAppConfig__c(Id = recordId);
-            return 'success';
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeWhatsappAccess', 'Error while revoking whatsapp access.');
-            return e.getMessage();
-        }
-    }
-
     @AuraEnabled
     public static string revokeInstagramAccess(String recordId){
         try {

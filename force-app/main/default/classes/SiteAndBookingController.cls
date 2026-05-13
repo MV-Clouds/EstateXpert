@@ -1,5 +1,5 @@
 public with sharing class SiteAndBookingController {
-    public static List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values();
+    public static MVEX__WhatsAppConfig__c wbConfig = MVEX__WhatsAppConfig__c.getOrgDefaults();
 
     // ─────────────────────────────────────────────────────────────────────────
     // Helper: get the Record Type Id for "Showing" on Event
@@ -275,16 +275,16 @@ public with sharing class SiteAndBookingController {
             HttpRequest httpReq = new HttpRequest();
             resultMap.put('errorMessage', null);
 
-            if (wbConfig == null || wbConfig.isEmpty()) {
+            if (wbConfig == null) {
                 chat.Message_Status__c = 'Failed';
                 update as user chat;
-                resultMap.put('errorMessage', 'METADATA_ERROR');
+                resultMap.put('errorMessage', 'CUSTOM_SETTING_ERROR');
                 resultMap.put('chat', chat);
                 return resultMap;
             }
 
-            String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + wbConfig.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
             httpReq.setEndpoint(endpoint);
             httpReq.setMethod('POST');
             httpReq.setHeader('Content-Type', 'application/json');

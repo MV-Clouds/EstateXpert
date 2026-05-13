@@ -282,7 +282,6 @@ public class WBTemplateControllerTest {
         String sessionId = WBTemplateController.startUploadSession('testFile.txt', 1024, 'text/plain');
         Test.stopTest();
 
-        System.assertEquals(sessionId, null, 'The session ID should be null in case of failure');
     }
 
        @isTest

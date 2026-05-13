@@ -1,6 +1,6 @@
 public with sharing class WhatsAppFlowControllerV2 {
 
-    public static List<MVEX__WBConnect_Configuration__mdt> wbConfig = [SELECT Id, MVEX__API_Endpoint__c, MVEX__API_Version__c, MVEX__Access_Token__c, MVEX__Business_Account_Id__c FROM MVEX__WBConnect_Configuration__mdt LIMIT 1];
+    public static MVEX__WhatsAppConfig__c wbConfig = MVEX__WhatsAppConfig__c.getOrgDefaults();
 
 
     @AuraEnabled
@@ -90,7 +90,7 @@ public with sharing class WhatsAppFlowControllerV2 {
         
         try {
             // Validate WB Config
-            if (wbConfig == null || wbConfig.isEmpty()) {
+            if (wbConfig == null) {
                 response.put('success', false);
                 response.put('message', 'WhatsApp Business configuration not found');
                 return JSON.serialize(response);
@@ -326,8 +326,8 @@ public with sharing class WhatsAppFlowControllerV2 {
      */
     private static MetaFlowResult createFlowInMeta(String flowName, List<String> categories, String flowJson) {
         try {
-            String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = 'https://graph.facebook.com/v21.0/' + wbConfig[0].Business_Account_Id__c + '/flows';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = 'https://graph.facebook.com/v21.0/' + wbConfig.MVEX__Whatsapp_Business_Account_Id__c + '/flows';
             
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
@@ -410,7 +410,7 @@ public with sharing class WhatsAppFlowControllerV2 {
             String bodyString = filePart + namePart + assetTypePart + footer;
             Blob bodyBlob = Blob.valueOf(bodyString);
             
-            String accessToken = wbConfig[0].Access_Token__c;
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
             String endpoint = 'https://graph.facebook.com/v21.0/' + metaFlowId + '/assets';
             
             HttpRequest request = new HttpRequest();
@@ -596,14 +596,14 @@ public with sharing class WhatsAppFlowControllerV2 {
         
         try {
             // Validate WB Config
-            if (wbConfig == null || wbConfig.isEmpty()) {
+            if (wbConfig == null) {
                 response.put('success', false);
                 response.put('message', 'WhatsApp Business configuration not found');
                 return JSON.serialize(response);
             }
 
             // Publish flow in Meta
-            String accessToken = wbConfig[0].Access_Token__c;
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
             String endpoint = 'https://graph.facebook.com/v21.0/' + metaFlowId + '/publish';
             
             HttpRequest request = new HttpRequest();
@@ -663,8 +663,8 @@ public with sharing class WhatsAppFlowControllerV2 {
 
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        String accessToken = wbConfig[0].Access_Token__c;
-        String endpoint = 'https://graph.facebook.com/v21.0/' + wbConfig[0].Business_Account_Id__c + '/flows';
+        String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+        String endpoint = 'https://graph.facebook.com/v21.0/' + wbConfig.MVEX__Whatsapp_Business_Account_Id__c + '/flows';
 
         request.setEndpoint(endpoint);
         request.setMethod('POST');

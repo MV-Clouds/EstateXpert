@@ -15,6 +15,7 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
     global String objectApiName;
     global List<Chat__c> chatsToUpdate = new List<Chat__c>();
     global static List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
+    global static MVEX__WhatsAppConfig__c wbConfig2 = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
     global String phoneField;
     global MVEX__WhatsappTemplate__c template;
     global List<MVEX__Template_Variable__c> templateVariables;
@@ -608,8 +609,8 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
             List<Chat__c> chat = [SELECT Id, Phone__c, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id = :chatId WITH USER_MODE LIMIT 1];
     
             HttpRequest httpReq = new HttpRequest();
-            String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].API_Endpoint__c + '/' + wbConfig[0].API_Version__c + '/' + wbConfig[0].Phone_Number_Id__c + '/messages';
+            String accessToken = (wbConfig2.MVEX__Access_Token_1__c != null ? wbConfig2.MVEX__Access_Token_1__c : '') + (wbConfig2.MVEX__Access_Token_2__c != null ? wbConfig2.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig2.MVEX__whatsapp_endpoint__c + '/' + wbConfig2.MVEX__APIVersion__c + '/' + wbConfig2.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
             httpReq.setEndpoint(endpoint);
             httpReq.setMethod('POST');
             httpReq.setHeader('Content-Type', 'application/json');

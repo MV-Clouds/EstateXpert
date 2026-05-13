@@ -851,13 +851,15 @@
                             } 
                             // if user reports an error during the Embedded Signup flow
                             else if (data.event === 'ERROR') {
+                                console.error('Embedded Signup Error:', data);
                                 const {error_message} = data.data;
                                 document.getElementById("error-message").textContent = "There was some error logging you in.";
                             }
                         }
                         // document.getElementById("session-info-response").textContent = JSON.stringify(data, null, 2);
-                    } catch {
-                        if(event.data.includes('error=')){
+                    } catch(err) {
+                        console.error('Error parsing message event:', err, event.data);
+                        if(typeof event.data === 'string' && event.data.includes('error=')){
                             document.getElementById("error-message").textContent = "Could not log you in, try again...";
                         } 
                     }
@@ -878,6 +880,7 @@
                             } 
                         }, true );
                     }else{
+                        console.error('Facebook Login failed or was cancelled.', response);
                         document.getElementById("error-message").textContent = 'Could not authorize, try again...';
                     }
                 }
@@ -889,6 +892,7 @@
                         .then(response => response.json())
                         .then(result => {
                             if(result.error){
+                                console.error('Validation API returned an error:', result.error);
                                 hideSpinner();
                                 document.getElementById("error-message").textContent = "The Application Id is incorrect! Please Validate it.";
                             } else {
@@ -911,6 +915,7 @@
                                                 window.location.reload();
                                             }, 5000);
                                         } else {
+                                            console.error('Remoting Action Failed:', event.message, event);
                                             hideSpinner();
                                             document.getElementById("error-message").textContent = "There was some error, please try again...";
                                         }
@@ -922,6 +927,7 @@
                             }
                         })
                         .catch(error => {
+                            console.error('Network or fetch error during validation:', error);
                             hideSpinner();
                             document.getElementById("error-message").textContent = "Could not validate Application Id! Please try again.";
                         });

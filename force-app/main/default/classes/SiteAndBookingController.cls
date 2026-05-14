@@ -36,18 +36,16 @@ public with sharing class SiteAndBookingController {
                 }
             }
 
-            // Fetch contacts from MVEX__Listing_Inquiry__c junction object
+            // Also retrieve Inquiries connected via the Listing Inquiry junction object
             List<MVEX__Listing_Inquiry__c> junctionInquiries = [
-                SELECT MVEX__Contact__c, MVEX__Inquiry__r.Contact__c 
+                SELECT MVEX__Inquiry__r.Contact__c 
                 FROM MVEX__Listing_Inquiry__c 
                 WHERE MVEX__Listing__c = :escapedListingId 
                 WITH USER_MODE
             ];
-            for (MVEX__Listing_Inquiry__c li : junctionInquiries) {
-                if (li.MVEX__Contact__c != null) {
-                    contactIds.add(li.MVEX__Contact__c);
-                } else if (li.MVEX__Inquiry__r != null && li.MVEX__Inquiry__r.Contact__c != null) {
-                    contactIds.add(li.MVEX__Inquiry__r.Contact__c);
+            for (MVEX__Listing_Inquiry__c junction : junctionInquiries) {
+                if (junction.MVEX__Inquiry__r != null && junction.MVEX__Inquiry__r.Contact__c != null) {
+                    contactIds.add(junction.MVEX__Inquiry__r.Contact__c);
                 }
             }
     

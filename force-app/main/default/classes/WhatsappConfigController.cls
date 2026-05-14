@@ -12,31 +12,27 @@ public without sharing class WhatsappConfigController {
     public static String lastModifiedDate {get; set;}
 
     public WhatsappConfigController() {
-        List<WBConnect_Configuration__mdt> metaList = [
-            SELECT MasterLabel, MVEX__Application_Id__c, Business_Account_Id__c, MVEX__Phone_Number_Id__c, 
-            MVEX__Access_Token__c, SystemModstamp, MVEX__APIVersion__c, MVEX__APIEndpoint__c
-            FROM WBConnect_Configuration__mdt WITH USER_MODE
-        ];
+        MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults();
+        List<String> EndpointVersion = System.Label.Whatsapp_Endpoint.split(';');
+        
+        apiVersion = EndpointVersion.size() > 1 ? EndpointVersion[1] : 'v24.0';
+        apiEndpoint = EndpointVersion.size() > 0 ? EndpointVersion[0] : 'https://graph.facebook.com';
 
-        if (metaList.size() > 0) {
-            appId = metaList[0].MVEX__Application_Id__c;
-            businessAccountId = metaList[0].Business_Account_Id__c;
-            phoneNumberId = metaList[0].MVEX__Phone_Number_Id__c;
-            accessToken = metaList[0].MVEX__Access_Token__c;
-            apiVersion = metaList[0].MVEX__APIVersion__c;
-            apiEndpoint = metaList[0].MVEX__APIEndpoint__c;
-            lastModifiedDate = metaList[0].SystemModstamp != null ? metaList[0].SystemModstamp.format('MM/dd/yyyy, hh:mm:ss a') : '';
+        if (config != null && config.Id != null) {
+            appId = config.MVEX__Whatsapp_App_Id__c;
+            businessAccountId = config.MVEX__Whatsapp_Business_Account_Id__c;
+            phoneNumberId = config.MVEX__Whatsapp_Phone_Number_Id__c;
+            accessToken = (config.MVEX__Access_Token_1__c != null ? config.MVEX__Access_Token_1__c : '') + (config.MVEX__Access_Token_2__c != null ? config.MVEX__Access_Token_2__c : '');
+            lastModifiedDate = config.LastModifiedDate != null ? config.LastModifiedDate.format('MM/dd/yyyy, hh:mm:ss a') : '';
         } else {
             appId = '';
             businessAccountId = '';
             phoneNumberId = '';
             accessToken = '';
-            apiVersion = '';
-            apiEndpoint = '';
             lastModifiedDate = '';
         }
 
-        List<EmbeddedSignUpConfig__c> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM EmbeddedSignUpConfig__c WITH USER_MODE];
+        List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt order by SystemModstamp desc];
         if (embeddedConfig.size() > 0) {
             clientId = embeddedConfig[0].Client_Id__c;
             clientSecret = embeddedConfig[0].Client_Secret__c;
@@ -61,7 +57,7 @@ public without sharing class WhatsappConfigController {
     @RemoteAction
     public static String saveFBLoginDetails(String sAccessToken, String phoneId, String wabaId, String appId) {
         try {
-            List<EmbeddedSignUpConfig__c> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM EmbeddedSignUpConfig__c WITH USER_MODE];
+            List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt order by SystemModstamp desc];
             if (embeddedConfig.size() < 1) {
                 return 'Failure';
             }
@@ -91,44 +87,23 @@ public without sharing class WhatsappConfigController {
 
     public static Boolean saveMetaData(String accessToken, String phoneId, String wabaId, String appId) {
         try {
-            Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
-            mdata.fullName = 'MVEX__WBConnect_Configuration__mdt.MVEX__WBConnect_Configuration'; 
-            mdata.label = 'WBConnect_Configuration';
-
-            Metadata.CustomMetadataValue instance1 = new Metadata.CustomMetadataValue();
-            instance1.field = 'MVEX__Business_Account_Id__c';
-            instance1.value = wabaId;
-            mdata.values.add(instance1);
-
-            Metadata.CustomMetadataValue instance2 = new Metadata.CustomMetadataValue();
-            instance2.field = 'MVEX__Phone_Number_Id__c';
-            instance2.value = phoneId;
-            mdata.values.add(instance2);
-
-            Metadata.CustomMetadataValue instance3 = new Metadata.CustomMetadataValue();
-            instance3.field = 'MVEX__Access_Token__c';
-            instance3.value = accessToken;
-            mdata.values.add(instance3);
-
-            Metadata.CustomMetadataValue instance4 = new Metadata.CustomMetadataValue();
-            instance4.field = 'MVEX__Application_Id__c';
-            instance4.value = appId;
-            mdata.values.add(instance4);
-
-            Metadata.CustomMetadataValue instance5 = new Metadata.CustomMetadataValue();
-            instance5.field = 'MVEX__APIEndpoint__c';
-            instance5.value = 'https://graph.facebook.com';
-            mdata.values.add(instance5);
-
-            Metadata.CustomMetadataValue instance6 = new Metadata.CustomMetadataValue();
-            instance6.field = 'MVEX__APIVersion__c';
-            instance6.value = 'v24.0';
-            mdata.values.add(instance6);
-
-            Metadata.DeployContainer container = new Metadata.DeployContainer();
-            container.addMetadata(mdata);
+            MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults();
             
-            Id jobId = Metadata.Operations.enqueueDeployment(container, null);
+            if (accessToken != null && accessToken.length() > 255) {
+                config.MVEX__Access_Token_1__c = accessToken.substring(0, 255);
+                config.MVEX__Access_Token_2__c = accessToken.substring(255);
+            } else {
+                config.MVEX__Access_Token_1__c = accessToken;
+                config.MVEX__Access_Token_2__c = '';
+            }
+            
+            config.MVEX__Whatsapp_Business_Account_Id__c = wabaId;
+            config.MVEX__Whatsapp_Phone_Number_Id__c = phoneId;
+            config.MVEX__Whatsapp_App_Id__c = appId;
+            config.MVEX__whatsapp_endpoint__c = 'https://graph.facebook.com';
+            config.MVEX__APIVersion__c = 'v24.0';
+            
+            upsert config;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'WhatsappConfigController', 'saveMetaData', e.getMessage());

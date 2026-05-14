@@ -1,12 +1,12 @@
 import { LightningElement, track, wire, api } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
+import { encodeDefaultFieldValues } from 'lightning/pageReferenceUtils';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import getContactsForInquiries from '@salesforce/apex/PropertySearchController.getContactsForInquiries';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import sendEmail from '@salesforce/apex/PropertySearchController.sendEmail';
-import summerNoteEditor from '@salesforce/resourceUrl/summerNoteEditor';
 import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuickTemplates';
 import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController.getMessagingServiceOptions';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
@@ -170,9 +170,21 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track modalFilteredInquiryData = [];
     @track sendMailInquiryDataList = [];
     filterModalSnapshot = null;
+    @track screenWidth = 0;
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
+    }
+
+    @track showMoreActions = false;
+
+    toggleMoreActions(event) {
+        event.stopPropagation();
+        this.showMoreActions = !this.showMoreActions;
+    }
+
+    updateScreenWidth = () => {
+        this.screenWidth = window.innerWidth;
     }
 
     /**
@@ -289,7 +301,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         return Math.ceil(this.totalItems / this.pageSize);
     }
 
-     get showPagination() {
+    get showPagination() {
         return this.pagedInquries.length > 0 && this.totalPages > 1;
     }
 
@@ -520,6 +532,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             this.loadAllTemplates();
             this.fetchFilterConfiguration();
+            
+            this.updateScreenWidth();
+            window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
             this.vfPageMessageHandler();
             this.checkHideFilterButton();
@@ -663,6 +678,50 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name : goToNewInquiry
+    * @description : Redirect the new inquiry page
+    */
+    goToNewInquiry() {
+        try {
+            let stateParams = {
+                c__customParam: 'displayInquiry',
+                navigationLocation: 'RELATED_LIST',
+                backgroundContext: '/lightning/r/' + this.objectName + '/' + this.recordId + '/view'
+            };
+
+            if (this.objectName === 'MVEX__Listing__c' && this.recordId) {
+                stateParams.defaultFieldValues = encodeDefaultFieldValues({
+                    MVEX__Listing__c: this.recordId
+                });
+            }
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__objectPage',
+                attributes: {
+                    objectApiName: 'MVEX__Inquiry__c',
+                    actionName: 'new'
+                },
+                state: stateParams
+            });
+        } catch (error) {
+            errorDebugger('displayInquiry', 'goToNewInquiry', error, 'warn', 'Error in goToNewInquiry');
+        }
+    }
+
+    /**
+    * Method Name : handleRefresh
+    * @description : Refresh the component data
+    */
+    handleRefresh() {
+        this.isLoading = true;
+        this.checkAll = false;
+        this.sendMailInquiryDataList = [];
+        this.searchTerm = '';
+        this.fetchListings();
+        this.checkHideFilterButton();
+    }
+
+    /**
      * Method Name: populateRefNameCacheFromMappings
      * @description: Populate the unified refNameCache from referenceNameMappings returned by Apex
      */
@@ -685,7 +744,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             errorDebugger('displayInquiry', 'populateRefNameCacheFromMappings', error, 'warn', 'Error populating reference name cache');
         }
     }
-  
+
     /**
     * Method Name : applyFieldFormat
     * @description : Method to apply formatting based on the format value from dateOptions and dateTimeOptions
@@ -949,6 +1008,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.hideModalBox();
             this.closeAddConditionModal();
         }
+        
+        const dropdownContainer = this.template.querySelector('.custom-dropdown-container');
+        if (dropdownContainer && !dropdownContainer.contains(event.target)) {
+            this.showMoreActions = false;
+        }
     }
 
     /**
@@ -1136,7 +1200,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 return date.toISOString().split('T')[0]; // "2024-09-26"
             } else {
                 date.setSeconds(0, 0);
-                return date.getTime(); 
+                return date.getTime();
             }
         }
         return String(value);
@@ -1773,7 +1837,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             if (this.conditiontype === 'custom') {
                 const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
-               
+
                 // If expression is empty, block apply
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     if (inputElement) {
@@ -2259,6 +2323,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     disconnectedCallback() {
         try {
+            window?.globalThis?.removeEventListener('resize', this.updateScreenWidth);
             window?.globalThis?.removeEventListener('message', this.simpleTempFileGenResponse);
             window?.globalThis?.removeEventListener('click', this.handleClickOutside);
             const richTextElement = this.template.querySelector('.richText');
@@ -2404,17 +2469,17 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         Phone: record.Phone,
                         GroupName: record.InquiryName // For display in 3rd column
                     }));
-                this.filteredGroupMembers = [...this.broadcastContactList];
+                    this.filteredGroupMembers = [...this.broadcastContactList];
 
-                // Apply default popup sort (Name ASC) when popup opens
-                if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
-                    this.popupSortField = 'Name';
-                    this.popupSortOrder = 'asc';
-                    this.sortPopupData();
-                    this.updatePopupSortIcons();
-                }
+                    // Apply default popup sort (Name ASC) when popup opens
+                    if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
+                        this.popupSortField = 'Name';
+                        this.popupSortOrder = 'asc';
+                        this.sortPopupData();
+                        this.updatePopupSortIcons();
+                    }
 
-                this.showTemplate = true;
+                    this.showTemplate = true;
                     this.popUpFirstPage = false;
                     this.popUpSecondPage = true;
                     this.popUpConfirmPage = false;
@@ -2461,24 +2526,24 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 console.warn('Delete button with data-id not found');
                 return;
             }
-            
+
             const memberId = button.dataset.id;
-            
+
             // Validate memberId exists
             if (!memberId) {
                 console.warn('No memberId found in button data-id');
                 return;
             }
-            
+
             const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
-            
+
             if (!memberToRemove) {
                 console.warn('Member not found in broadcastContactList');
                 return;
             }
-            
+
             const inquiryId = memberToRemove.InquiryId;
-            
+
             // 1. Update Inquiry Selection state in main table
             this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
                 if (inquiry.id === inquiryId) {
@@ -2798,7 +2863,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                             }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                         console.log('this.inquiryColumns', JSON.stringify(this.inquiryColumns));
-                        
+
                     } catch (e) {
                         this.inquiryColumns = this.defaultColumns;
                     }

@@ -165,7 +165,6 @@ public class IntegrationPopupControllerTest {
         Test.startTest();
         String gmailStatus = IntegrationPopupController.revokeGmailAccess('test_refresh_token', gmailConfig.Id);
         String outlookStatus = IntegrationPopupController.revokeOutlookAccess('test_refresh_token', outlookConfig.Id);
-        String whatsappStatus = IntegrationPopupController.revokeWhatsappAccess(whatsappConfig.Id);
         String instaStatus = IntegrationPopupController.revokeInstagramAccess(instaConfig.Id);
         String googleStatus = IntegrationPopupController.revokeGoogleAccess(googleConfig.Id, 'Google');
         String metaStatus = IntegrationPopupController.revokeGoogleAccess(metaConfig.Id, 'Meta');
@@ -174,7 +173,6 @@ public class IntegrationPopupControllerTest {
         
         System.assertNotEquals(null, gmailStatus, 'Gmail status should not be null');
         System.assertNotEquals(null, outlookStatus, 'Outlook status should not be null');
-        System.assertEquals('success', whatsappStatus, 'WhatsApp should be revoked successfully');
         System.assertEquals('success', instaStatus, 'Instagram should be revoked successfully');
     }
 

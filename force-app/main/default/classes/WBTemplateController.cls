@@ -18,8 +18,8 @@
 public with sharing class WBTemplateController {
     
     // public static final MVEX__WBConnect_Configuration__mdt SETTINGS[0];
-    public static List<MVEX__WBConnect_Configuration__mdt> SETTINGS = MVEX__WBConnect_Configuration__mdt.getAll().values(); 
-    public static String accessToken = !SETTINGS.isEmpty() ? SETTINGS[0].MVEX__Access_Token__c : null;
+    public static MVEX__WhatsAppConfig__c SETTINGS = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
+    public static String accessToken = (SETTINGS != null && SETTINGS.MVEX__Access_Token_1__c != null ? SETTINGS.MVEX__Access_Token_1__c : '') + (SETTINGS != null && SETTINGS.MVEX__Access_Token_2__c != null ? SETTINGS.MVEX__Access_Token_2__c : '');
     public static String uploadEndpoint;
 
    // List of allowed fields for polymorphic relationships (like Owner which can be User or Queue)
@@ -74,13 +74,13 @@ public with sharing class WBTemplateController {
         String errorMessage=null;
         try {
             HttpRequest httpReq = new HttpRequest();
-            List<MVEX__WBConnect_Configuration__mdt> config = MVEX__WBConnect_Configuration__mdt.getAll().values(); 
-            if(config==null && config.isEmpty()){
-                errorMessage='Metadata records are missing.';
+            MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
+            if(config==null){
+                errorMessage='Custom Setting records are missing.';
                 return errorMessage;
             }
-            String accessToken = config[0].MVEX__Access_Token__c;
-            String endpoint = config[0].MVEX__APIEndpoint__c + '/' + config[0].MVEX__APIVersion__c + '/' + config[0].MVEX__Phone_Number_Id__c + '/messages';
+            String accessToken = (config.MVEX__Access_Token_1__c != null ? config.MVEX__Access_Token_1__c : '') + (config.MVEX__Access_Token_2__c != null ? config.MVEX__Access_Token_2__c : '');
+            String endpoint = config.MVEX__whatsapp_endpoint__c + '/' + config.MVEX__APIVersion__c + '/' + config.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
             httpReq.setEndpoint(endpoint);
             httpReq.setMethod('POST');
             httpReq.setHeader('Content-Type', 'application/json');
@@ -663,7 +663,7 @@ public with sharing class WBTemplateController {
         Map<String, Object> response = new Map<String, Object>();
 
         try {
-            if (String.isBlank(SETTINGS[0].MVEX__Business_Account_Id__c)) {
+            if (String.isBlank(SETTINGS.MVEX__Whatsapp_Business_Account_Id__c)) {
                 response.put('success', false);
                 response.put('errorMessage', 'Business Account ID is not configured in the system.');
                 return response;
@@ -674,7 +674,7 @@ public with sharing class WBTemplateController {
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             System.debug('payload :: '+payload);
 
-            String endpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/' + SETTINGS[0].MVEX__Business_Account_Id__c+'/message_templates';
+            String endpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/' + SETTINGS.MVEX__Whatsapp_Business_Account_Id__c+'/message_templates';
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
@@ -740,7 +740,7 @@ public with sharing class WBTemplateController {
     @AuraEnabled
     public static void checkTemplateExistance(String templateName, String serializedWrapper, String payloadWrapper) {
         try {
-            String endpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/' + SETTINGS[0].MVEX__Business_Account_Id__c + '/message_templates?name=' + EncodingUtil.urlEncode(templateName, 'UTF-8');
+            String endpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/' + SETTINGS.MVEX__Whatsapp_Business_Account_Id__c + '/message_templates?name=' + EncodingUtil.urlEncode(templateName, 'UTF-8');
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
@@ -799,14 +799,14 @@ public with sharing class WBTemplateController {
     @AuraEnabled
     public static String startUploadSession(String fileName, Integer fileLength, String fileType) {
         try {
-            if (String.isBlank(SETTINGS[0].MVEX__Application_Id__c)) {
+            if (String.isBlank(SETTINGS.MVEX__Whatsapp_App_Id__c)) {
                 return 'Application ID is not configured in the system.';
             }
             Map<String, Object> payload = new Map<String, Object>();
             payload.put('file_name', fileName);
             payload.put('file_length', fileLength);
             payload.put('file_type', fileType);
-            uploadEndpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/'+SETTINGS[0].MVEX__Application_Id__c+'/uploads';
+            uploadEndpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/'+SETTINGS.MVEX__Whatsapp_App_Id__c+'/uploads';
 
             HttpRequest req = new HttpRequest();
             Http http = new Http();
@@ -853,7 +853,7 @@ public with sharing class WBTemplateController {
             HttpRequest req = new HttpRequest();
             Http http = new Http();
 
-            String endpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/' + 'upload:' + fileWrapper.uploadSessionId;
+            String endpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/' + 'upload:' + fileWrapper.uploadSessionId;
             req.setEndpoint(endpoint);
             req.setMethod('POST');            
             req.setHeader('Authorization', 'OAuth ' + accessToken);
@@ -890,13 +890,13 @@ public with sharing class WBTemplateController {
     @AuraEnabled
     public static string deleteTemplete(String templateId){
         try {
-            if (String.isBlank(SETTINGS[0].MVEX__Business_Account_Id__c)) {
+            if (String.isBlank(SETTINGS.MVEX__Whatsapp_Business_Account_Id__c)) {
                 return 'Business Account ID is not configured in the system.';
             }
 
             WhatsappTemplate__c wbTempRec = [SELECT Id, Name,Template_Name__c FROM WhatsappTemplate__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
             
-            String endpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/' + SETTINGS[0].MVEX__Business_Account_Id__c+'/message_templates?name=' + wbTempRec.Template_Name__c;
+            String endpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/' + SETTINGS.MVEX__Whatsapp_Business_Account_Id__c+'/message_templates?name=' + wbTempRec.Template_Name__c;
 
             HttpRequest req = new HttpRequest();         
             req.setEndpoint(endpoint);
@@ -961,7 +961,7 @@ public with sharing class WBTemplateController {
         try {
             CreateTemplateWrapper.TemplateWrapper templateWrapper = (CreateTemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, CreateTemplateWrapper.TemplateWrapper.class);
 
-            String editEndpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/'+templateId;
+            String editEndpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/'+templateId;
 
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
             
@@ -1249,12 +1249,12 @@ public with sharing class WBTemplateController {
     public static Map<String,String> getPreviewURLofWhatsAppFlow(String flowId) {
         try {
 
-            if (SETTINGS==null || SETTINGS.isEmpty()) {
+            if (SETTINGS==null) {
                 return new Map<String,String>{'status' => 'failed', 'error' => 'failed'};
             }
 
-            String accessToken = SETTINGS[0].MVEX__Access_Token__c;
-            String endpoint = SETTINGS[0].MVEX__APIEndpoint__c + '/' + SETTINGS[0].MVEX__APIVersion__c + '/' + flowId + '?fields=preview.invalidate(false)';
+            String accessToken = (SETTINGS.MVEX__Access_Token_1__c != null ? SETTINGS.MVEX__Access_Token_1__c : '') + (SETTINGS.MVEX__Access_Token_2__c != null ? SETTINGS.MVEX__Access_Token_2__c : '');
+            String endpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/' + flowId + '?fields=preview.invalidate(false)';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('GET');

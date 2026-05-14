@@ -29,7 +29,7 @@ public with sharing class ChatWindowController {
     *********************************************************
     */
     /* ---------------- Start ---------------- */
-    public static List<MVEX__WBConnect_Configuration__mdt> wbConfig = MVEX__WBConnect_Configuration__mdt.getAll().values(); 
+    public static MVEX__WhatsAppConfig__c wbConfig = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
     public static List<MVEX__User_Theme_Preference__c> userPreferences = [SELECT MVEX__Theme__c FROM MVEX__User_Theme_Preference__c WHERE SetupOwnerId =: UserInfo.getUserId() WITH USER_MODE LIMIT 1];
     /* ----------------  End  ---------------- */
     
@@ -398,21 +398,21 @@ public with sharing class ChatWindowController {
             HttpRequest httpReq = new HttpRequest();
             resultMap.put('errorMessage', null);
             // List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
-            if(wbConfig==null || wbConfig.isEmpty()){
+            if(wbConfig==null){
                 if(!isReaction){
                     chat.Message_Status__c = 'Failed';
                 }else{
                     chat.Reaction__c = '<|USER|>' + reaction.substringAfter('<|USER|>');
                 }
                 update as user chat;
-                resultMap.put('errorMessage', 'METADATA_ERROR');
+                resultMap.put('errorMessage', 'CUSTOM_SETTING_ERROR');
                 resultMap.put('chat', chat);
                 return resultMap;
             }
 
             System.debug('jsonData: ' + jsonData);
-            String accessToken = wbConfig[0].MVEX__Access_Token__c;
-            String endpoint = wbConfig[0].MVEX__APIEndpoint__c + '/' + wbConfig[0].MVEX__APIVersion__c + '/' + wbConfig[0].MVEX__Phone_Number_Id__c + '/messages';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + wbConfig.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
             httpReq.setEndpoint(endpoint);
             httpReq.setMethod('POST');
             httpReq.setHeader('Content-Type', 'application/json');
@@ -631,8 +631,8 @@ public with sharing class ChatWindowController {
     @AuraEnabled
     public static Integer updateStatus(List<String> messageIds) {
         List<Chat__c> chats = [SELECT Id, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id IN :messageIds WITH USER_MODE];
-        String accessToken = wbConfig[0].MVEX__Access_Token__c;
-        String endpoint = wbConfig[0].MVEX__APIEndpoint__c + '/' + wbConfig[0].MVEX__APIVersion__c + '/' + wbConfig[0].MVEX__Phone_Number_Id__c + '/messages';
+        String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+        String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + wbConfig.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
         
         List<Map<String, Object>> errorLogs = new List<Map<String, Object>>();
         Integer successCount = 0;

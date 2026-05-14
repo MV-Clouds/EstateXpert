@@ -10,7 +10,7 @@
  */
 public with sharing class WhatsAppFlowController {
     
-    public static List<MVEX__WBConnect_Configuration__mdt> wbConfig = MVEX__WBConnect_Configuration__mdt.getAll().values();     
+    public static MVEX__WhatsAppConfig__c wbConfig = MVEX__WhatsAppConfig__c.getOrgDefaults();     
     /**
      ******************************************************************************
      * Method Name  : getWhatsAppFlows
@@ -152,11 +152,11 @@ public with sharing class WhatsAppFlowController {
     public static String createWhatsAppFlow(String flowName, List<String> categories, String flowJson, String templateType, Boolean createRecord) {
         try {
 
-            if (wbConfig==null || wbConfig.isEmpty()) {
+            if (wbConfig==null) {
                 return 'Failed to create flow: Cannot create the flow because the WhatsApp Business configuration is not found. You need to add a WhatsApp Business configuration before creating the flow.';
             }
-            String accessToken = wbConfig[0].MVEX__Access_Token__c;
-            String endpoint = wbConfig[0].MVEX__APIEndpoint__c + '/' + wbConfig[0].MVEX__APIVersion__c + '/' + wbConfig[0].MVEX__Business_Account_Id__c + '/flows';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + wbConfig.MVEX__Whatsapp_Business_Account_Id__c + '/flows';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -245,7 +245,7 @@ public with sharing class WhatsAppFlowController {
     public static String updateWhatsAppFlow(String flowId, String flowJson) {
         try {
             
-            if (wbConfig==null || wbConfig.isEmpty()) {
+            if (wbConfig==null) {
                 return 'failed';
             }
 
@@ -276,8 +276,8 @@ public with sharing class WhatsAppFlowController {
             // Convert the body to a Blob
             Blob bodyBlob = Blob.valueOf(bodyString);
           
-            String accessToken = wbConfig[0].MVEX__Access_Token__c;
-            String endpoint = wbConfig[0].MVEX__APIEndpoint__c + '/' + wbConfig[0].MVEX__APIVersion__c + '/' + flowId + '/assets';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + flowId + '/assets';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -353,11 +353,11 @@ public with sharing class WhatsAppFlowController {
     public static String publishWhatsAppFlow(String flowId) {
         try {
 
-            if (wbConfig==null || wbConfig.isEmpty()) {
+            if (wbConfig==null) {
                 return 'Failed to publish flow: Cannot publish the flow because the WhatsApp Business configuration is not found. You need to add a WhatsApp Business configuration before publishing the flow.';
             }
-            String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId + '/publish';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + flowId + '/publish';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -399,11 +399,11 @@ public with sharing class WhatsAppFlowController {
     public static String deleteWhatsAppFlow(String flowId) {
         try {
 
-            if (wbConfig==null || wbConfig.isEmpty()) {
+            if (wbConfig==null) {
                 return 'failed';
             }
-            String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId;
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + flowId;
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('DELETE');
@@ -438,11 +438,11 @@ public with sharing class WhatsAppFlowController {
     public static String deprecateWhatsAppFlow(String flowId) {
         try {
 
-            if (wbConfig==null || wbConfig.isEmpty()) {
+            if (wbConfig==null) {
                 return 'failed';
             }
-            String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId + '/deprecate';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + flowId + '/deprecate';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('POST');
@@ -477,11 +477,11 @@ public with sharing class WhatsAppFlowController {
     @AuraEnabled
     public static Map<String,String> getPreviewURLofWhatsAppFlow(String flowId) {
         try {
-            if (wbConfig==null || wbConfig.isEmpty()) {
+            if (wbConfig==null) {
                 return new Map<String,String>{'status' => 'failed', 'error' => 'failed'};
             }
-            String accessToken = wbConfig[0].Access_Token__c;
-            String endpoint = wbConfig[0].APIEndpoint__c + '/' + wbConfig[0].APIVersion__c + '/' + flowId + '?fields=preview.invalidate(false)';
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + flowId + '?fields=preview.invalidate(false)';
             HttpRequest request = new HttpRequest();
             request.setEndpoint(endpoint);
             request.setMethod('GET');

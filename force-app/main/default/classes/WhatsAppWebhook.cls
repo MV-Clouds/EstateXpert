@@ -1010,9 +1010,11 @@ global without sharing class WhatsAppWebhook{
     public static Blob handleMediaAttachment(String documentId){
         try{
             String accessToken = '';
-            List<MVEX__WBConnect_Configuration__mdt> config = MVEX__WBConnect_Configuration__mdt.getAll().values();
-            accessToken = config[0].MVEX__Access_Token__c;
-            String mediaUrl = config[0].MVEX__APIEndpoint__c + '/' + config[0].MVEX__APIVersion__c + '/' + documentId;
+            MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults();
+            if (config != null) {
+                accessToken = (config.MVEX__Access_Token_1__c != null ? config.MVEX__Access_Token_1__c : '') + (config.MVEX__Access_Token_2__c != null ? config.MVEX__Access_Token_2__c : '');
+            }
+            String mediaUrl = config != null ? config.MVEX__whatsapp_endpoint__c + '/' + config.MVEX__APIVersion__c + '/' + documentId : '';
             
             if (accessToken != ''){
                 HttpRequest req = new HttpRequest();
@@ -1365,16 +1367,16 @@ global without sharing class WhatsAppWebhook{
             String jsonData = JSON.serialize(payload);
 
             // Send WhatsApp message
-            List<WBConnect_Configuration__mdt> config = WBConnect_Configuration__mdt.getAll().values();
+            MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults();
             Chat__c chat = new Chat__c(Id = chatId);
-            if (config.isEmpty()) {
+            if (config == null) {
                 chat.Message_Status__c = 'Failed';
                 update chat;
                 return;
             }
 
-            String accessToken = config[0].Access_Token__c;
-            String endpoint = config[0].API_Endpoint__c + '/' + config[0].API_Version__c + '/' + config[0].Phone_Number_Id__c + '/messages';
+            String accessToken = (config.MVEX__Access_Token_1__c != null ? config.MVEX__Access_Token_1__c : '') + (config.MVEX__Access_Token_2__c != null ? config.MVEX__Access_Token_2__c : '');
+            String endpoint = config.MVEX__whatsapp_endpoint__c + '/' + config.MVEX__APIVersion__c + '/' + config.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
 
             HttpRequest httpReq = new HttpRequest();
             httpReq.setEndpoint(endpoint);

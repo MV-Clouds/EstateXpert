@@ -98,10 +98,9 @@ public with sharing class EmailCampaignController {
                 'createddate', 'lastmodifieddate', 'systemmodstamp', 'lastactivitydate', 'lastreferenceddate', 'lastvieweddate'
             };
             
-            for (String fieldName : contactFields.keySet()) {
-                String filedOrginalName = fieldName;
-                Schema.DescribeFieldResult fieldDescribe = contactFields.get(fieldName).getDescribe();
-                if (fieldDescribe.getType() == Schema.DisplayType.Date && !auditFieldsToExclude.contains(fieldName.toLowerCase())) {
+            for (Schema.SObjectField field : contactFields.values()) {
+                Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+                if (fieldDescribe.isAccessible() && fieldDescribe.getType() == Schema.DisplayType.Date && !auditFieldsToExclude.contains(fieldDescribe.getName().toLowerCase())) {
                     options.add(new Map<String, String>{
                         'label' => fieldDescribe.getLabel(),
                         'value' => fieldDescribe.getName()
@@ -2269,8 +2268,11 @@ public with sharing class EmailCampaignController {
             }
             
             Map<String, Schema.SObjectField> fields = sObjectType.getDescribe().fields.getMap();
-            for(String fieldName : fields.keySet()) {
-                fieldNames.add(fieldName);
+            for(Schema.SObjectField field : fields.values()) {
+                Schema.DescribeFieldResult dr = field.getDescribe();
+                if (dr.isAccessible()) {
+                    fieldNames.add(dr.getName());
+                }
             }
             fieldNames.sort();
             

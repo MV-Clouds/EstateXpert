@@ -53,7 +53,7 @@
                             <label><span class="red">*</span>Object Select</label>
                         </div>
                         <div class="input-container">
-                            <lightning-combobox placeholder="Please select the Object" name="objectSelect"
+                            <lightning-combobox placeholder={objectPlaceholder} name="objectSelect"
                                 variant="label-hidden" options={objectOptions} value={selectedObjectAPIName}
                                 onchange={handleInputChange} disabled={isPicklistDisabled}>
                             </lightning-combobox>

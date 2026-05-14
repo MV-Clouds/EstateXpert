@@ -17,8 +17,9 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
     @track selectedObjectLabel = '';
     @track currentRecordIdValue = '';
     @track templateTypeSelectValue = '';
-    @track isPicklistDisabled = false;
+    @track isPicklistDisabled = true;
     @track subjectValue = '';
+    @track objectPlaceholder = 'Please select Template Type first';
 
     /**
     * Method Name: get isMarketingTemplate()
@@ -204,19 +205,43 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
                     this.selectedObjectAPIName = '';
                     this.selectedObjectLabel = '';
                     this.isPicklistDisabled = false;
+                    this.objectPlaceholder = 'Please select the Object';
                     console.log('Object Options: ', this.objectOptions);
-                    
-                    this.objectOptions  = this.objectOptions.filter(option => 
-                        ['contact', 'MVEX__Listing__c'].some(type => 
+
+                    this.objectOptions = this.backupObjectOptions.filter(option =>
+                        ['contact', 'MVEX__Listing__c'].some(type =>
                             type.toLowerCase() === option.value.toLowerCase()
                         )
-                    )
+                    );
                 }
-                
+
+                else if(this.templateTypeSelectValue === 'PDF Template'){
+                    this.selectedObjectAPIName = '';
+                    this.selectedObjectLabel = '';
+                    this.isPicklistDisabled = false;
+                    this.objectPlaceholder = 'Please select the Object';
+
+                    const pdfAllowedObjects = [
+                        'contact',
+                        'MVEX__Listing__c',
+                        'MVEX__Closing__c',
+                        'MVEX__Inquiry__c',
+                        'MVEX__Listing_Inquiry__c',
+                        'MVEX__Offer__c',
+                        'MVEX__Payment_Schedule__c'
+                    ];
+                    this.objectOptions = this.backupObjectOptions.filter(option =>
+                        pdfAllowedObjects.some(type =>
+                            type.toLowerCase() === option.value.toLowerCase()
+                        )
+                    );
+                }
+
                 else{
                     this.selectedObjectAPIName = '';
                     this.selectedObjectLabel = '';
                     this.isPicklistDisabled = false;
+                    this.objectPlaceholder = 'Please select the Object';
                     this.objectOptions = [...this.backupObjectOptions];
                 }
             }

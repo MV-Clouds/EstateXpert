@@ -342,9 +342,14 @@ public with sharing class EmailCampaignController {
             
             List<Object> emails = (List<Object>) campaignEmailDataMap.get('emails');
             
+            // Check accessibility of selectedContactDateField
+            Map<String, SObjectField> contactFields = Contact.SObjectType.getDescribe().fields.getMap();
+            Boolean isDateFieldAccessible = String.isBlank(selectedContactDateField) || 
+                (contactFields.containsKey(selectedContactDateField) && contactFields.get(selectedContactDateField).getDescribe().isAccessible());
+
             // Query contacts to validate emails and date fields
             String queryForFailedEmails = 'SELECT Id, Email';
-            if (!String.isEmpty(selectedContactDateField)) {
+            if (!String.isEmpty(selectedContactDateField) && isDateFieldAccessible) {
                 queryForFailedEmails += ', ' + selectedContactDateField;
             }
             String objectName = 'Contact';
@@ -380,6 +385,11 @@ public with sharing class EmailCampaignController {
                 }
                 
                 if (!String.isEmpty(selectedContactDateField)) {
+                    if (!isDateFieldAccessible) {
+                        failedEmails += marketingEmailCount;
+                        conMap.put(conId, email);
+                        continue;
+                    }
                     Object fieldValObj = con.get(selectedContactDateField);
                     if (fieldValObj == null) {
                         failedEmails += marketingEmailCount;
@@ -713,9 +723,14 @@ public with sharing class EmailCampaignController {
                 specificDate = Date.valueOf((String) campaignEmailDataMap.get('specificDate'));
             }
             
+            // Check accessibility of selectedContactDateField
+            Map<String, SObjectField> contactFields = Contact.SObjectType.getDescribe().fields.getMap();
+            Boolean isDateFieldAccessible = String.isBlank(selectedContactDateField) || 
+                (contactFields.containsKey(selectedContactDateField) && contactFields.get(selectedContactDateField).getDescribe().isAccessible());
+
             // Query contacts to validate emails and date fields
             String queryForFailedEmails = 'SELECT Id, Email';
-            if (!String.isEmpty(selectedContactDateField)) {
+            if (!String.isEmpty(selectedContactDateField) && isDateFieldAccessible) {
                 queryForFailedEmails += ', ' + selectedContactDateField;
             }
             String objectName = 'Contact';
@@ -754,6 +769,11 @@ public with sharing class EmailCampaignController {
                 }
                             
                 if (!String.isEmpty(selectedContactDateField)) {
+                    if (!isDateFieldAccessible) {
+                        failedEmails += marketingEmailCount;
+                        conMap.put(conId, email);
+                        continue;
+                    }
                     Object fieldObj = con.get(selectedContactDateField);
                     if (fieldObj == null) {
                         failedEmails += marketingEmailCount;
@@ -1179,8 +1199,13 @@ public with sharing class EmailCampaignController {
 
             for (Email_Member__c em : emailMembers) {
                 totalEmails++;
-                if (em.Status__c == 'Pending' && em.Schedule_Date_and_Time__c != null && em.Schedule_Date_and_Time__c > System.now()) {
-                    remainingEmails++;
+                if (em.Status__c == 'Pending') {
+                    if (em.Schedule_Date_and_Time__c != null && em.Schedule_Date_and_Time__c > System.now()) {
+                        remainingEmails++;
+                    } else {
+                        // Pending but past time - considered failed
+                        failedEmails++;
+                    }
                 } else if (em.Status__c != null && em.Status__c.contains('Failed')) {
                     failedEmails++;
                 } else if (em.Status__c == 'Success') {
@@ -1193,8 +1218,8 @@ public with sharing class EmailCampaignController {
             campaign.Failed_Emails__c = failedEmails;
             campaign.Total_Sent_Mails__c = sentEmails;
             campaign.Status__c = totalEmails == 0 ? 'Pending' : 
-                                (remainingEmails == 0 && failedEmails == 0 && sentEmails > 0 ? 'Completed' : 
-                                (sentEmails > 0 ? 'In Progress' : 'Pending'));
+                                (remainingEmails == 0 ? 'Completed' : 
+                                (sentEmails > 0 || failedEmails > 0 ? 'In Progress' : 'Pending'));
 
 
             update as user campaign;

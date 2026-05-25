@@ -21,6 +21,71 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
     @track expandedRows = {};
     @track groupMembersData = {};
 
+    @track selectedStatusFilter = 'All';
+    @track selectedRepliedFilter = 'All';
+
+    get statusOptions() {
+        return [
+            { label: 'All Statuses', value: 'All' },
+            { label: 'Sent', value: 'Sent' },
+            { label: 'Delivered', value: 'Delivered' },
+            { label: 'Seen', value: 'Seen' },
+            { label: 'Failed', value: 'Failed' },
+            { label: 'Not Sent', value: 'Not Sent' }
+        ];
+    }
+
+    get repliedOptions() {
+        return [
+            { label: 'All', value: 'All' },
+            { label: 'Yes', value: 'Yes' },
+            { label: 'No', value: 'No' }
+        ];
+    }
+
+    handleStatusFilterChange(event) {
+        this.selectedStatusFilter = event.detail.value;
+        this.applyFilters();
+    }
+
+    handleRepliedFilterChange(event) {
+        this.selectedRepliedFilter = event.detail.value;
+        this.applyFilters();
+    }
+
+    applyFilters() {
+        if (!this.data) return;
+
+        const statusFilter = this.selectedStatusFilter;
+        const repliedFilter = this.selectedRepliedFilter;
+
+        if (statusFilter === 'All' && repliedFilter === 'All') {
+            this.filteredData = [...this.data];
+        } else {
+            this.filteredData = this.data.map(group => {
+                const allMembers = this.groupMembersData[group.Id] || [];
+                const filteredMembers = allMembers.filter(member => {
+                    const matchStatus = (statusFilter === 'All' || member.status === statusFilter);
+                    const matchReplied = (repliedFilter === 'All' || 
+                        (repliedFilter === 'Yes' && member.hasReplied) || 
+                        (repliedFilter === 'No' && !member.hasReplied));
+                    return matchStatus && matchReplied;
+                });
+
+                return {
+                    ...group,
+                    MVEX__Count_of_Members__c: filteredMembers.length,
+                    MVEX__Total_Sent__c: filteredMembers.filter(m => m.status === 'Sent').length,
+                    MVEX__Total_Delivered__c: filteredMembers.filter(m => m.status === 'Delivered').length,
+                    MVEX__Total_Read__c: filteredMembers.filter(m => m.status === 'Seen').length,
+                    MVEX__Total_Failed__c: filteredMembers.filter(m => m.status === 'Failed' || m.status === 'Not Sent').length,
+                };
+            });
+        }
+
+        this.sortData();
+    }
+
     // Sorting
     @track sortField = 'Name';
     @track sortOrder = 'asc';
@@ -181,13 +246,30 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
         try {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((group, index) => ({
-                ...group,
-                isExpanded: this.expandedRows[group.Id] || false,
-                members: this.groupMembersData[group.Id] || [],
-                accordionKey: `${group.Id}-accordion`,
-                rowClass: index % 2 === 0 ? 'parent-row even-row' : 'parent-row odd-row'
-            }));
+            this.paginatedData = this.filteredData.slice(startIndex, endIndex).map((group, index) => {
+                const allMembers = this.groupMembersData[group.Id] || [];
+                const filteredMembers = allMembers.filter(member => {
+                    const matchStatus = (this.selectedStatusFilter === 'All' || member.status === this.selectedStatusFilter);
+                    const matchReplied = (this.selectedRepliedFilter === 'All' || 
+                        (this.selectedRepliedFilter === 'Yes' && member.hasReplied) || 
+                        (this.selectedRepliedFilter === 'No' && !member.hasReplied));
+                    return matchStatus && matchReplied;
+                });
+
+                const reindexedMembers = filteredMembers.map((member, idx) => ({
+                    ...member,
+                    index: idx + 1
+                }));
+
+                return {
+                    ...group,
+                    isExpanded: this.expandedRows[group.Id] || false,
+                    members: reindexedMembers,
+                    hasNoMembersAtAll: allMembers.length === 0,
+                    accordionKey: `${group.Id}-accordion`,
+                    rowClass: index % 2 === 0 ? 'parent-row even-row' : 'parent-row odd-row'
+                };
+            });
         } catch (error) {
             this.showToast('Error', 'Error updating shown data', 'error');
         }
@@ -273,7 +355,7 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
                 console.log('Updated groupMembersData:', this.groupMembersData);
 
                 // Update display to include the loaded member data
-                this.updateShownData();
+                this.applyFilters();
             })
             .catch((error) => {
                 console.error('Error loading group members:', error);

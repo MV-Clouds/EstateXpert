@@ -15,15 +15,30 @@
                     </div>
                     <div class="broadcast-title">{name} ({recipientCount})</div>
                 </div>
-                <template if:false={isMobileOrTablet}>
-                    <div class="header-right-info">
+                <div class="header-right-info">
+                    <div class="filters-container">
+                        <div class="filter_item_css">
+                            <label class="filter_label_css">Message Status</label>
+                            <lightning-combobox name="statusFilter" value={selectedStatusFilter} variant="label-hidden"
+                                options={statusOptions} onchange={handleStatusFilterChange} class="filter-combobox">
+                            </lightning-combobox>
+                        </div>
+                        <div class="filter_item_css">
+                            <label class="filter_label_css">Replied Status</label>
+                            <lightning-combobox name="repliedFilter" value={selectedRepliedFilter}
+                                variant="label-hidden" options={repliedOptions} onchange={handleRepliedFilterChange}
+                                class="filter-combobox">
+                            </lightning-combobox>
+                        </div>
+                    </div>
+                    <template if:false={isMobileOrTablet}>
                         <span class="info-badge status-badge"><strong>Status:</strong> {status}</span>
                         <span class="info-badge template-badge"><strong>Template:</strong> {templateName}</span>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
         </div>
-        
+
         <div class="main_content_cls">
             <!-- Custom Table -->
             <template if:true={paginatedData.length}>
@@ -37,62 +52,81 @@
                                 <th scope="col" class="sno">
                                     <div>No.</div>
                                 </th>
-                                <th data-id="Name" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action-mode sorting_header groupname" scope="col">
+                                <th data-id="Name" onclick={sortClick} aria-sort="none"
+                                    class="slds-is-sortable slds-cell_action-mode sorting_header groupname" scope="col">
                                     <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                         <span class="slds-truncate" title="Group Name">Group Name</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="MVEX__Count_of_Members__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header member-count" scope="col">
+                                <th data-id="MVEX__Count_of_Members__c" onclick={sortClick} aria-sort="none"
+                                    class="slds-is-sortable slds-cell_action_mode sorting_header member-count"
+                                    scope="col">
                                     <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                         <span class="slds-truncate" title="Member Count">Member Count</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="MVEX__Total_Sent__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header sent" scope="col">
+                                <th data-id="MVEX__Total_Sent__c" onclick={sortClick} aria-sort="none"
+                                    class="slds-is-sortable slds-cell_action_mode sorting_header sent" scope="col">
                                     <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                         <span class="slds-truncate" title="Sent">Sent</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="MVEX__Total_Delivered__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header delivered" scope="col">
+                                <th data-id="MVEX__Total_Delivered__c" onclick={sortClick} aria-sort="none"
+                                    class="slds-is-sortable slds-cell_action_mode sorting_header delivered" scope="col">
                                     <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                         <span class="slds-truncate" title="Delivered">Delivered</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="MVEX__Total_Read__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header read" scope="col">
+                                <th data-id="MVEX__Total_Read__c" onclick={sortClick} aria-sort="none"
+                                    class="slds-is-sortable slds-cell_action_mode sorting_header read" scope="col">
                                     <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                         <span class="slds-truncate" title="Read">Read</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th data-id="MVEX__Total_Failed__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header failed" scope="col">
+                                <th data-id="MVEX__Total_Failed__c" onclick={sortClick} aria-sort="none"
+                                    class="slds-is-sortable slds-cell_action_mode sorting_header failed" scope="col">
                                     <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                         <span class="slds-truncate" title="Failed">Failed</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                            <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
@@ -104,18 +138,18 @@
                                 <!-- Parent Row -->
                                 <tr key={row.Id} class={row.rowClass}>
                                     <td data-label="" class="expand-cell">
-                                        <template if:true={row.MVEX__Count_of_Members__c}>
-                                            <div class="action-icon-container" data-record-id={row.Id} data-object-name={row.MVEX__Object_Name__c} onclick={handleNameClick}>
-                                                <svg class="action-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <template if:true={row.isExpanded}>
-                                                        <path d="M7 10l5 5 5-5z" fill="currentColor"/>
-                                                    </template>
-                                                    <template if:false={row.isExpanded}>
-                                                        <path d="M10 17l5-5-5-5z" fill="currentColor"/>
-                                                    </template>
-                                                </svg>
-                                            </div>
-                                        </template>
+                                        <div class="action-icon-container" data-record-id={row.Id}
+                                            data-object-name={row.MVEX__Object_Name__c} onclick={handleNameClick}>
+                                            <svg class="action-arrow" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <template if:true={row.isExpanded}>
+                                                    <path d="M7 10l5 5 5-5z" fill="currentColor" />
+                                                </template>
+                                                <template if:false={row.isExpanded}>
+                                                    <path d="M10 17l5-5-5-5z" fill="currentColor" />
+                                                </template>
+                                            </svg>
+                                        </div>
                                     </td>
                                     <td data-label="S.No.">
                                         <div>{row.index}</div>
@@ -139,36 +173,56 @@
                                         <div>{row.MVEX__Total_Failed__c}</div>
                                     </td>
                                 </tr>
-                                
+
                                 <!-- Accordion Content Row -->
                                 <template if:true={row.isExpanded}>
                                     <tr key={row.accordionKey} class="accordion-row">
                                         <td colspan="8">
                                             <div class="accordion-content">
-                                                <div class="table-content">
-                                                    <table class="slds-table">
-                                                        <thead>
-                                                            <tr class="table_tr_cls">
-                                                                <th scope="col" class="nested-sno">No.</th>
-                                                                <th scope="col" class="nested-member">Group Member</th>
-                                                                <th scope="col" class="nested-phone">Phone</th>
-                                                                <th scope="col" class="nested-status">Message Status</th>
-                                                                <th scope="col" class="nested-replied">Replied</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <template for:each={row.members} for:item="member">
-                                                                <tr key={member.id}>
-                                                                    <td class="truncate_css">{member.index}</td>
-                                                                    <td class="truncate_css">{member.name}</td>
-                                                                    <td class="truncate_css">{member.phone}</td>
-                                                                    <td class="truncate_css"><p class={member.status}>{member.status}</p></td>
-                                                                    <td class="truncate_css"><p class={member.repliedClass}>{member.repliedText}</p></td>
+                                                <template if:true={row.members.length}>
+                                                    <div class="table-content">
+                                                        <table class="slds-table">
+                                                            <thead>
+                                                                <tr class="table_tr_cls">
+                                                                    <th scope="col" class="nested-sno">No.</th>
+                                                                    <th scope="col" class="nested-member">Group Member</th>
+                                                                    <th scope="col" class="nested-phone">Phone</th>
+                                                                    <th scope="col" class="nested-status">Message Status
+                                                                    </th>
+                                                                    <th scope="col" class="nested-replied">Replied</th>
                                                                 </tr>
-                                                            </template>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                            </thead>
+                                                            <tbody>
+                                                                <template for:each={row.members} for:item="member">
+                                                                    <tr key={member.id}>
+                                                                        <td class="truncate_css">{member.index}</td>
+                                                                        <td class="truncate_css">{member.name}</td>
+                                                                        <td class="truncate_css">{member.phone}</td>
+                                                                        <td class="truncate_css">
+                                                                            <p class={member.status}>{member.status}</p>
+                                                                        </td>
+                                                                        <td class="truncate_css">
+                                                                            <p class={member.repliedClass}>
+                                                                                {member.repliedText}</p>
+                                                                        </td>
+                                                                    </tr>
+                                                                </template>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </template>
+                                                <template if:false={row.members.length}>
+                                                    <template if:true={row.hasNoMembersAtAll}>
+                                                        <div class="no-members-message">
+                                                            No group member
+                                                        </div>
+                                                    </template>
+                                                    <template if:false={row.hasNoMembersAtAll}>
+                                                        <div class="no-members-message">
+                                                            No group members match the current filters.
+                                                        </div>
+                                                    </template>
+                                                </template>
                                             </div>
                                         </td>
                                     </tr>
@@ -197,8 +251,10 @@
                 <template if:true={showPagination}>
                     <div class="paginationDiv">
                         <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                fill="#fff">
+                                <path
+                                    d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
                             </svg>
                             Previous
                         </button>
@@ -217,8 +273,10 @@
 
                         <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
                             Next
-                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                fill="#fff">
+                                <path
+                                    d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                             </svg>
                         </button>
                     </div>

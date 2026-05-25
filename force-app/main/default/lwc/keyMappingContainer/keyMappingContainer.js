@@ -27,6 +27,7 @@ export default class KeyMappingContainer extends LightningElement {
 
     @track field_Vs_KeyList = [];
     @track selectedObjectName;
+    @track recipientFieldMappingsWithObj = [];
 
     @track isMappingOpen = false;
     @track isMappingContainerExpanded;
@@ -35,11 +36,17 @@ export default class KeyMappingContainer extends LightningElement {
     @track propertyMediaCount = 1;
     @track allFieldLabels = [];
 
-    mappingTypeTabs = [
+    @track mappingTypeTabs = [
         {
             label: 'Object Fields', name: 'objectFields',
             helpText: 'Insert Base Object and Lookup (Related) Object\'s Fields in Template.',
             showCombobox: true, comboboxPlaceholder: 'Select Object...', showDescription: false,
+            showSearchbar: true, searchBarPlaceHolder: 'Search Fields...',
+        },
+        {
+            label: 'Recipient', name: 'recipientFields',
+            helpText: 'Insert Contact Fields as Recipient Mapping.',
+            showCombobox: false,
             showSearchbar: true, searchBarPlaceHolder: 'Search Fields...',
         },
         {
@@ -100,6 +107,7 @@ export default class KeyMappingContainer extends LightningElement {
     savedSignatureSize = this.signatureSize;
 
     @track objectFieldKeys = [];   // e.g. ["{{#Account__c.Name__c}}", …]
+    @track recipientFieldKeys = [];   // e.g. ["{{EXPRecipient.Name}}", …]
     @track generalFieldKeys = [];   // e.g. ["{{Doc.Company_Name}}", …]
     @track signatureKey = [];   // e.g. ["{{Sign.EXP *Signature Key*}}"]
 
@@ -120,7 +128,7 @@ export default class KeyMappingContainer extends LightningElement {
      */
     get mappingTypeTabArea() {
         return {
-            objectFields: this.activeMappingTabName == 'objectFields' ? true : false,
+            objectFields: this.activeMappingTabName == 'objectFields' || this.activeMappingTabName == 'recipientFields' ? true : false,
             generalFields: this.activeMappingTabName == 'generalFields' ? true : false,
             sfImages: this.activeMappingTabName == 'sfImages' ? true : false,
             signature: this.activeMappingTabName == 'signature' ? true : false,
@@ -248,21 +256,12 @@ export default class KeyMappingContainer extends LightningElement {
     }
 
     get hidePropertyImagesForOtherObjects() {
-        console.log('objectName => ', this.objectName);
-        return this.objectName == 'MVEX__Listing__c' || this.objectName == 'MVEX__Inquiry__c' ? false : true;
-
+        return this.objectName == 'MVEX__Listing__c' ? false : true;
     }
 
     connectedCallback() {
-        console.log('templatetype => ', this.templateType);
         try {
-            loadStyle(this, MulishFontCss)
-                .then(() => {
-                    console.log('External Css Loaded');
-                })
-                .catch(error => {
-                    console.log('Error occuring during loading external css', error);
-                });
+            loadStyle(this, MulishFontCss);
 
             if (this.templateId) {
                 this.fetchFieldMapping();
@@ -271,14 +270,19 @@ export default class KeyMappingContainer extends LightningElement {
                 this.fetchFormatMappingKeys();
                 this.fetchSignatureInfo();
             }
+
             window?.globalThis?.addEventListener('resize', this.resizeFunction);
 
             if (this.hidePropertyImagesForOtherObjects) {
                 const index = this.mappingTypeTabs.indexOf(this.mappingTypeTabs.find(ele => ele.name == 'pmImages'));
                 if (index !== -1) this.mappingTypeTabs.splice(index, 1);
             }
-            else {
-                this.fetchAllActiveTemps()
+
+            if (this.templateType === 'Marketing Template' && this.objectName === 'MVEX__Listing__c') {
+                this.fetchRecipientFieldMapping();
+            } else {
+                const index = this.mappingTypeTabs.indexOf(this.mappingTypeTabs.find(ele => ele.name == 'recipientFields'));
+                if (index !== -1) this.mappingTypeTabs.splice(index, 1);
             }
         } catch (error) {
             errorDebugger('FieldMappingKey', 'connectedCallback', error, 'warn');
@@ -311,7 +315,6 @@ export default class KeyMappingContainer extends LightningElement {
             getFieldMappingKeys({ sourceObjectAPI: this.objectName, getParentFields: true, templateId: this.templateId })
                 .then(result => {
                     this.isDataRefreshing = false;
-                    console.log('getFieldMappingKeys result  : ', result);
                     if (result.isSuccess) {
                         // Set... Base Object, Related Parent Object and It's Fields with mapping key
                         this.propertyMediaCount = result.listingMediaCount;
@@ -332,7 +335,6 @@ export default class KeyMappingContainer extends LightningElement {
                         this.fieldMappingsWithObj = result.fieldMappingsWithObj;
                         this.setMappingKeysForObjFields();
                         this.setMappingTab();
-                        this._buildAllMappingKeys();
                     }
                     else {
                         errorDebugger('FieldMappingKey', 'fetchFieldMapping', null, 'warn', `error in getFieldMappingKeys apex call : ${result.returnMessage}`);
@@ -347,6 +349,41 @@ export default class KeyMappingContainer extends LightningElement {
         } catch (error) {
             console.log('error in fetchFieldMapping : ', error);
             errorDebugger('FieldMappingKey', 'fetchFieldMapping', error, 'warn');
+        }
+    }
+
+    /**
+     * Fetches the field mapping data for the recipient (Contact).
+     */
+    fetchRecipientFieldMapping() {
+        try {
+            getFieldMappingKeys({ sourceObjectAPI: 'Contact', getParentFields: false, templateId: this.templateId })
+                .then(result => {
+                    console.log('Recipient Field Mapping Result => ', result);
+                    if (result.isSuccess) {
+                        result.fieldMappingsWithObj.forEach(obj => {
+                            obj.fieldMappings.forEach(field => {
+                                if (field.key && typeof field.key === 'string') {
+                                    field.key = field.key.replace('{{#', '{{EXPRecipient.');
+                                }
+                            });
+                        });
+
+                        this.recipientFieldMappingsWithObj = result.fieldMappingsWithObj;
+                        if (this.activeMappingTabName === 'recipientFields') {
+                            this.setMappingKeysForObjFields();
+                        }
+                    } else {
+                        errorDebugger('FieldMappingKey', 'fetchRecipientFieldMapping', null, 'warn', `error in getFieldMappingKeys apex call : ${result.returnMessage}`);
+                    }
+                })
+                .catch(error => {
+                    console.log('error in getFieldMappingKeys (Recipient) apex call : ', error);
+                    errorDebugger('FieldMappingKey', 'fetchRecipientFieldMapping', error, 'warn', `error in getFieldMappingKeys apex call `);
+                })
+        } catch (error) {
+            console.log('error in fetchRecipientFieldMapping : ', error);
+            errorDebugger('FieldMappingKey', 'fetchRecipientFieldMapping', error, 'warn');
         }
     }
 
@@ -366,7 +403,6 @@ export default class KeyMappingContainer extends LightningElement {
                         })
                         this.generalFieldTypes = JSON.parse(JSON.stringify(generalFieldTypes_temp));
                         this.setGeneralFieldsToDisplay();
-                        this._buildAllMappingKeys();
                     }
                     else {
                         errorDebugger('FieldMappingKey', 'fetchGeneralFields', null, 'warn', `error in fetchGeneralFields apex : ${result.returnMessage}`);
@@ -391,7 +427,6 @@ export default class KeyMappingContainer extends LightningElement {
             getAllContentVersionImgs({ templateType: this.templateType })
                 .then(result => {
                     this.isDataRefreshing = false;
-                    console.log('getAllContentVersionImgs result => ', result);
                     if (result.isSuccess == true) {
                         this.contentVersionImages = result.cdImages;
                         // this.cvIdVsImageSRC = result.cvIdVsImageSRC;
@@ -433,14 +468,12 @@ export default class KeyMappingContainer extends LightningElement {
             formattingFieldKeys()
                 .then(result => {
                     this.isDataRefreshing = false;
-                    console.log('formattingFieldKeys result => ', result);
                     if (result.isSuccess == true) {
                         if (result.fieldFormatting && result.fieldFormatting.length) {
                             this.dateFormatKeys = result.fieldFormatting.find(ele => ele.formatType == 'DATE').fieldMappings;
                             this.timeFormatKeys = result.fieldFormatting.find(ele => ele.formatType == 'TIME').fieldMappings;
                             this.signatureKey = result.signatureKey;
                         }
-                        this._buildAllMappingKeys();
                     }
                     else {
                         errorDebugger('FieldMappingKey', 'fetchFormatMappingKeys', null, 'warn', `Error in ${result.returnMessage}`);
@@ -479,7 +512,6 @@ export default class KeyMappingContainer extends LightningElement {
             if (event && event.currentTarget && this.activeMappingTabName !== event.currentTarget.dataset.name) {
                 this.template.querySelector('[data-combox="relatedObj"]')?.clearSearch();
                 this.activeMappingTabName = event.currentTarget.dataset.name;
-                console.log('this.activeMappingTabName => ', this.activeMappingTabName);
                 var tabSelection = this.template.querySelectorAll('.tabSelection');
                 if (tabSelection) {
                     tabSelection.forEach(ele => {
@@ -579,7 +611,7 @@ export default class KeyMappingContainer extends LightningElement {
     handleKeySearch(event) {
         try {
             this.searchFieldValue = event ? event.target.value : null;
-            if (this.activeMappingTabName == 'objectFields') {
+            if (this.activeMappingTabName == 'objectFields' || this.activeMappingTabName == 'recipientFields') {
                 this.setMappingKeysForObjFields();
             }
             else if (this.activeMappingTabName == 'generalFields') {
@@ -613,9 +645,13 @@ export default class KeyMappingContainer extends LightningElement {
      */
     setMappingKeysForObjFields() {
         try {
-            this.field_Vs_KeyList = this.selectedObjectName ?
-                this.fieldMappingsWithObj.find(ele => ele.name === this.selectedObjectName).fieldMappings :
-                this.fieldMappingsWithObj.find(ele => ele.name === this.objectName).fieldMappings;
+            if (this.activeMappingTabName === 'recipientFields') {
+                this.field_Vs_KeyList = this.recipientFieldMappingsWithObj.find(ele => ele.name === 'Contact').fieldMappings;
+            } else {
+                this.field_Vs_KeyList = this.selectedObjectName ?
+                    this.fieldMappingsWithObj.find(ele => ele.name === this.selectedObjectName).fieldMappings :
+                    this.fieldMappingsWithObj.find(ele => ele.name === this.objectName).fieldMappings;
+            }
 
             // If Search value is not null, filter Field_Vs_KeysList based on search value...
             if (this.searchFieldValue !== undefined && this.searchFieldValue !== null && this.searchFieldValue != '') {
@@ -1146,7 +1182,6 @@ export default class KeyMappingContainer extends LightningElement {
             let listingno = event.currentTarget.dataset.name;
 
             const ImgUrl = '/resource/MVEX__tempimage';
-            console.log('templateType->' + this.templateType);
 
             const textarea = document.createElement('textarea');
             textarea.value = ImgUrl;
@@ -1178,12 +1213,8 @@ export default class KeyMappingContainer extends LightningElement {
             document.body.removeChild(img);
 
             const displaycontainer = this.template.querySelector('.width_main_css');
-            console.log('displaycontainer', displaycontainer);
             if (displaycontainer) {
                 displaycontainer.classList.add('copied');
-                // setTimeout(() => {
-                //     displaycontainer.classList.remove('copied');
-                // }, 1001);
                 this.customTimeout?.setCustomTimeoutMethod(() => {
                     displaycontainer.classList.remove('copied');
                 }, 1001);
@@ -1231,9 +1262,6 @@ export default class KeyMappingContainer extends LightningElement {
             mappingImgContainer.forEach(ele => {
                 if (ele.dataset.imgid == imgID) {
                     ele.classList.add('copied');
-                    // setTimeout(() => {
-                    //     ele.classList.remove('copied');
-                    // }, 1001);
                     this.customTimeout?.setCustomTimeoutMethod(() => {
                         ele.classList.remove('copied');
                     }, 1001);
@@ -1370,37 +1398,4 @@ export default class KeyMappingContainer extends LightningElement {
             errorDebugger('DocumentLoader', 'handleTimeout', error, 'warn')
         }
     }
-
-    _buildAllMappingKeys() {
-        // ---- object fields -------------------------------------------------
-        this.objectFieldKeys = [];
-        this.fieldMappingsWithObj?.forEach(obj => {
-            obj.fieldMappings?.forEach(f => this.objectFieldKeys.push(f.key));
-        });
-
-        // ---- general fields ------------------------------------------------
-        this.generalFieldKeys = [];
-        this.generalFieldTypes?.forEach(type => {
-            type.fieldMappings?.forEach(f => this.generalFieldKeys.push(f.key));
-        });
-
-        // ---- signature -----------------------------------------------------
-        // The signature key is returned from the Apex call `formattingFieldKeys`
-        // (it is already stored in `this.signatureKey` – just wrap it)
-        this.signatureKey = this.signatureKey ? [this.signatureKey] : [];
-
-        // ---- fire the event for the parent --------------------------------
-        this.dispatchEvent(
-            new CustomEvent('mappingkeysready', {
-                detail: {
-                    objectFieldKeys: this.objectFieldKeys,
-                    generalFieldKeys: this.generalFieldKeys,
-                    signatureKey: this.signatureKey
-                },
-                bubbles: true,
-                composed: true
-            })
-        );
-    }
-
 }

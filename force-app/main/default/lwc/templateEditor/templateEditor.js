@@ -5,14 +5,11 @@ import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getS3ConfigSettings from "@salesforce/apex/ImageAndMediaController.getS3ConfigSettings";
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import summerNoteEditor from "@salesforce/resourceUrl/summerNoteEditor";
-import docGeniusLogoSvg from "@salesforce/resourceUrl/docGeniusLogo";
 import getTemplateData from '@salesforce/apex/TemplateBuilderController.getTemplateData';
 import saveTemplateApex from '@salesforce/apex/TemplateBuilderController.saveTemplateApex';
 import saveTempDataRecordsInBatch from '@salesforce/apex/TemplateBuilderController.saveTempDataRecordsInBatch';
 import { initializeSummerNote } from './editorConf.js';
 import { navigationComps, nameSpace, pageFormats, unitMultiplier, unitConverter, errorDebugger } from 'c/globalProperties';
-// import generateTemplate from '@salesforce/apex/GeminiTemplateGenerator.generateTemplate';
-// import editTemplateWithGemini from '@salesforce/apex/GeminiTemplateGenerator.editTemplateWithGemini';
 
 export default class TemplateEditor extends NavigationMixin(LightningElement) {
 
@@ -26,7 +23,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     @api templateType;                           // To define active tab
 
     @track defaultTab = 'contentTab';               // To open default on component load
-    @track startchat = true;                        // To used in chatbot
     @track isSpinner = false;                       // To show hide spinner
     @track isPreview = false;                       // To Show hide preview modal
     isInitialRender = true;                         // To check dom and editor rended or not
@@ -55,12 +51,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     editorDataChanges = false;                      // To identify any editor data change or not
 
     listingImageCount = 0;                          // To store count of inserted related list table
-
-    // @track aiPrompt = '';
-    // @track isGenerating = false;
-    @track objectFieldKeys   = [];
-    @track generalFieldKeys  = [];
-    @track signatureKey      = [];
 
     /**
      * variable to store page configuration to display on UI, used in HTML
@@ -118,38 +108,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     isPageSetup = false;                    // To defined page setup is open or not
     @track activePageConfigs = [];          // To set by default open page config accordions
 
-    @track isChatOpen = false;
-    @track aiPrompt = '';
-    @track isGenerating = false;
-
-    @track isEditMode = false;          // false → New, true → Edit
-    @track currentTemplateHtml = '';    // header+body+footer (plain HTML)
-    @track chatMessages = [];
-
-    // This returns: "ai-chat-container open" or "ai-chat-container"
-    get chatContainerClass() {
-        return 'ai-chat-container' + (this.isChatOpen ? ' open' : '');
-    }
-
-    // Send button disabled when empty or generating
-    get isSendButtonDisabled() {
-        return this.isGenerating || !this.aiPrompt || this.aiPrompt.trim() === '';
-    }
-
-    get placeholderText() {
-        return this.isEditMode
-            ? 'Tell me how to improve the current template...'
-            : 'Ask me to generate or improve your template...';
-    }
-
-    get isSendButtonDisabled() {
-        return this.isGenerating || !this.aiPrompt?.trim();
-    }
-
-    get setdocGeniusLogoSvg() {
-        return docGeniusLogoSvg;
-    }
-
     get showTempDetail() {
         return Object.keys(this.templateRecord).length ? true : false;
     }
@@ -181,12 +139,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
         return this.templateType == 'Marketing Template' ? true : false;
     }
 
-    get storageKey() {
-        return `docgenius_template_${this.templateId}_ai_history`;
-    }
-
-    get isNewMode() { return !this.isEditMode; }
-
     connectedCallback() {
         try {
             this.getS3ConfigDataAsync();
@@ -195,13 +147,8 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
             if (this.templateId) {
                 this.isSpinner = true;
                 this.getTemplateValues();
-            }
-            else {
+            } else {
                 this.noTemplateFound = true;
-            }
-            this.loadHistoryFromStorage();
-            if (typeof window !== 'undefined') {   
-                window?.addEventListener('resize', this.resizeFunction);
             }
 
         } catch (error) {
@@ -212,7 +159,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     renderedCallback() {
         try {
             if (this.isInitialRender) {
-                // this.isSpinner = true;
                 // ------------------------------------- Editor  -------------------------------------------
                 Promise.all([
                     loadScript(this, summerNoteEditor + '/jquery-3.7.1.min.js'),
@@ -248,7 +194,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
                     })
                 
                 this.setActiveTab();
-                this._renderChatMessages();
                 this.template.querySelector(`[data-name="custom_timeout"]`)?.addEventListener('animationend', this.customTimeoutMethod)
             }
 
@@ -266,7 +211,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
             getS3ConfigSettings()
                 .then(result => {
                     this.showSpinner = false;
-                    console.log('result--> ', result);
                     if (result.status) {
                         this.confData = result.awsConfigData;
                         this.initializeAwsSdk(this.confData);
@@ -278,14 +222,13 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
         } catch (error) {
             this.showSpinner = false;
             console.log('error in getS3ConfigDataAsync -> ', error.stack);
-            
         }
     }
 
     initialize_Content_Editor() {
         try {
             this.contentEditor = this.template.querySelector(`[data-name="templateContent"]`);
-            this.isLoadedSuccessfully = initializeSummerNote(this, docGeniusLogoSvg, 'templateContent');
+            this.isLoadedSuccessfully = initializeSummerNote(this, 'templateContent');
 
             if (this.isLoadedSuccessfully == true) {
                 this.resizeFunction();
@@ -304,7 +247,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     initialize_Header_Editor() {
         try {
             this.headerEditor = this.template.querySelector(`[data-name="headerEditor"]`);
-            let isLoadedSuccessfully = initializeSummerNote(this, docGeniusLogoSvg, 'headerEditor');
+            let isLoadedSuccessfully = initializeSummerNote(this, 'headerEditor');
 
             if (!isLoadedSuccessfully) {
                 this.showMessagePopup('Error', 'Error', 'There is Some issue to Load Editor Properly, Please reload current page or try after some time.')
@@ -317,7 +260,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     initialize_Footer_Editor() {
         try {
             this.footerEditor = this.template.querySelector(`[data-name="footerEditor"]`);
-            let isLoadedSuccessfully = initializeSummerNote(this, docGeniusLogoSvg, 'footerEditor');
+            let isLoadedSuccessfully = initializeSummerNote(this, 'footerEditor');
 
             if (!isLoadedSuccessfully) {
                 this.showMessagePopup('Error', 'Error', 'There is Some issue to Load Editor Properly, Please reload current page or try after some time.')
@@ -749,8 +692,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     vfPageLoaded() {
         try {
             this.isSpinner = false;
-            // const iframe = this.template.querySelector('iframe');
-            // const pdfViewer = iframe.querySelector('pdf-viewer');
         } catch (error) {
             errorDebugger('TemplateEditor', 'vfPageLoaded', error, 'warn');
         }
@@ -798,14 +739,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
                     ele.classList.remove('deactiveTabs');
                     this.setKeyMappingVisibility(JSON.parse(ele.dataset.keyMapping.toLowerCase()));
                     this.setToolbarAreaVisibility(JSON.parse(ele.dataset.toolbar.toLowerCase()));
-                }
-                else if (ele.dataset.section == 'aiGenerateTab') {
-                    // Explicitly hide key mapping and toolbar for AI Generate tab
-                    ele.classList.add('deactiveTabs');
-                    // this.setKeyMappingVisibility(false);
-                    // this.setToolbarAreaVisibility(false);
-                }
-                else {
+                } else {
                     ele.classList.add('deactiveTabs');
                 }
             });
@@ -1299,15 +1233,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     setActivePageConfigs(isOpen) {
         if (isOpen) {
             this.activePageConfigs = ['pageMarginConfig', 'pageSizeConfig', 'pageOrientationConfig'];
-            // if(this.currentTab == 'contentTab'){
-            //     this.activePageConfigs = ['pageMarginConfig', 'pageSizeConfig', 'pageOrientationConfig'];
-            // }
-            // else if(this.currentTab == 'headerTab'){
-            //     this.activePageConfigs = ['pageHeaderConfig'];
-            // }
-            // else if(this.currentTab == 'footerTab'){
-            //     this.activePageConfigs = ['pageFooterConfig'];
-            // }
         }
         else {
             this.activePageConfigs = [];
@@ -1334,6 +1259,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
         try {
             const innerHTML = this.headerData + this.bodyData + this.footerData;
             const objectFields = this.extractedKeys(innerHTML, /\{\{#([^{}]+)\}\}/g);
+            const recipientFields = this.extractedKeys(innerHTML, /\{\{EXPRecipient.([^{}]+)\}\}/g);
             const generalFields = this.extractedKeys(innerHTML, /\{\{Doc.([^{}]+)\}\}/g);
             const signatureKeys = this.extractedKeys(innerHTML, /\{\{Sign.([^{}]+)\}\}/g)
             const sfImages = this.extractSalesforceImages();
@@ -1342,6 +1268,7 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
 
             return {
                 'objectFields': objectFields,
+                'recipientFields': recipientFields,
                 'generalFields': generalFields,
                 'signatureKeys' : signatureKeys,
                 'salesforceImages': sfImages,
@@ -1489,321 +1416,6 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
             this.dispatchEvent(event);
         }
     }
-
-    handleAIPromptChange(event) {
-        this.aiPrompt = event.target.value;
-    }
-
-    // async generateWithGemini() {
-    //     if (!this.aiPrompt.trim()) {
-    //         this.showToast('Error', 'Please enter a prompt', 'error');
-    //         return;
-    //     }
-
-    //     this.isGenerating = true;
-    //     try {
-    //         const result = await generateTemplate({
-    //             prompt           : this.aiPrompt,
-    //             objectApiName    : this.objectName,
-    //             objectFieldKeys  : this.objectFieldKeys,
-    //             generalFieldKeys : this.generalFieldKeys,
-    //             signatureKey     : this.signatureKey,
-    //             isForEmail: this.isForEmail
-    //         });
-
-    //         // Insert into editors
-    //         if (result.header) {
-    //             $(this.headerEditor).summernote('code', result.header);
-    //         }
-    //         if (result.body) {
-    //             $(this.contentEditor).summernote('code', result.body);
-    //         }
-    //         if (result.footer) {
-    //             $(this.footerEditor).summernote('code', result.footer);
-    //         }
-
-    //         this.showToast('Success', 'AI template generated and inserted!', 'success');
-
-    //         // Switch to content tab to show result
-    //         this.currentTab = 'contentTab';
-    //         this.setActiveTab();
-
-    //     } catch (error) {
-    //         this.showToast('Error', error.body?.message || error.message, 'error');
-    //     } finally {
-    //         this.isGenerating = false;
-    //     }
-    // }
-
-    handleMappingKeysReady(event) {
-        const { objectFieldKeys, generalFieldKeys, signatureKey } = event.detail;
-        this.objectFieldKeys  = objectFieldKeys;
-        this.generalFieldKeys = generalFieldKeys;
-        this.signatureKey     = signatureKey;
-    }
-
-    // Toggle chat
-    toggleChat() {
-        this.isChatOpen = !this.isChatOpen;
-
-        if (this.isChatOpen) {
-            setTimeout(() => {
-                const messages = this.template.querySelector('.ai-chat-messages');
-                if (messages) {
-                    messages.scrollTop = messages.scrollHeight;
-                }
-                }, 150);
-        }
-    }
-
-    // Input handler
-    handleAIPromptChange(event) {
-        this.aiPrompt = event.target.value;
-        const textarea = event.target;
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-    // Enter = send
-    handleKeyDown(event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            // this.sendPrompt();
-        }
-    }
-
-    // Add message
-    addMessageToChat(sender, text) {
-        const container = this.template.querySelector('.ai-chat-messages');
-        if (!container) return;
-
-        const msg = document.createElement('div');
-        msg.className = `ai-message ai-${sender}`;
-        msg.innerHTML = `
-            <div class="ai-avatar">${sender === 'user' ? 'You' : 'AI'}</div>
-            <div class="ai-bubble">${this.escapeHtml(text)}</div>
-        `;
-        container.appendChild(msg);
-        container.scrollTop = container.scrollHeight;
-        }
-
-        escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML.replace(/\n/g, '<br>');
-    }
-
-    handleModeToggle(event) {
-        const btn = event.currentTarget;
-        const mode = btn.dataset.mode;               // "new" or "edit"
-        const isEdit = (mode === 'edit');
-
-        // 1. Update tracked flag
-        this.isEditMode = isEdit;
-
-        // 2. UI – toggle active class on both buttons
-        const toggle = this.template.querySelector('.ai-chat-mode-toggle');
-        toggle.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        // 3. Clear prompt when switching
-        this.aiPrompt = '';
-    }
-
-    // async sendPrompt() {
-    //     if (!this.aiPrompt?.trim()) return;
-
-    //     const userPrompt = this.aiPrompt.trim();
-    //     this.aiPrompt = '';
-
-    //     // 1. USER MESSAGE (now also a version)
-    //     this.addUserMessage(userPrompt);
-
-    //     // 2. Capture the *before* state (still useful for AI edit mode)
-    //     const beforeState = this.captureCurrentTemplate();
-
-    //     this.isGenerating = true;
-    //     try {
-    //         let result;
-    //         if (this.isEditMode) {
-    //             const fullHtml = `${beforeState.header}\n<!-- BODY -->\n${beforeState.body}\n<!-- FOOTER -->\n${beforeState.footer}`;
-    //             result = await editTemplateWithGemini({
-    //                 userPrompt,
-    //                 currentHtml: fullHtml,
-    //                 objectApiName: this.objectName,
-    //                 objectFieldKeys: this.objectFieldKeys,
-    //                 generalFieldKeys: this.generalFieldKeys,
-    //                 signatureKey: this.signatureKey,
-    //                 isForEmail: this.isForEmail
-    //             });
-    //         } else {
-    //             result = await generateTemplate({
-    //                 prompt: userPrompt,
-    //                 objectApiName: this.objectName,
-    //                 objectFieldKeys: this.objectFieldKeys,
-    //                 generalFieldKeys: this.generalFieldKeys,
-    //                 signatureKey: this.signatureKey,
-    //                 isForEmail: this.isForEmail
-    //             });
-    //         }
-
-    //         // ---- APPLY AI RESULT -------------------------------------------------
-    //         if (result.header !== undefined) $(this.headerEditor).summernote('code', result.header);
-    //         if (result.body   !== undefined) $(this.contentEditor).summernote('code', result.body);
-    //         if (result.footer !== undefined) $(this.footerEditor).summernote('code', result.footer);
-
-    //         // ---- CAPTURE AFTER ---------------------------------------------------
-    //         const afterState = this.captureCurrentTemplate();
-
-    //         // ---- AI VERSION (unchanged) -----------------------------------------
-    //         this.addAIVersion(userPrompt, afterState);
-
-    //         this.showToast('Success', this.isEditMode ? 'Template updated!' : 'Template generated!', 'success');
-    //     } catch (err) {
-    //         this.addUserMessage(`Error: ${err.body?.message || err.message}`);
-    //         this.showToast('Error', err.body?.message || err.message, 'error');
-    //     } finally {
-    //         this.isGenerating = false;
-    //         this.scrollToBottom();
-    //         this._renderChatMessages();
-    //     }
-    // }
-
-    
-
-    loadHistoryFromStorage() {
-        try {
-            const raw = localStorage.getItem(this.storageKey);
-            if (raw) {
-                const saved = JSON.parse(raw);
-                this.chatMessages = saved.messages || [];
-                // Restore last version if exists
-                const last = this.chatMessages[this.chatMessages.length - 1];
-                if (last && last.isHistory && last.template) {
-                    setTimeout(() => this.restoreTemplate(last.template), 500);
-                }
-
-                // FORCE RENDER AFTER LOAD
-                setTimeout(() => this._renderChatMessages(), 100);
-            }
-        } catch (e) {
-            console.warn('Failed to load AI history', e);
-        }
-    }
-
-    saveHistoryToStorage() {
-        try {
-            localStorage.setItem(this.storageKey, JSON.stringify({
-                messages: this.chatMessages
-            })).then(()=>this.loadHistoryFromStorage());
-            
-        } catch (e) {
-            console.warn('Failed to save AI history', e);
-        }
-    }
-
-    captureCurrentTemplate() {
-        return {
-            header: this.unscopeTemplateStyles($(this.headerEditor).summernote('code') || ''),
-            body:   this.unscopeTemplateStyles($(this.contentEditor).summernote('code') || ''),
-            footer: this.unscopeTemplateStyles($(this.footerEditor).summernote('code') || '')
-        };
-    }
-
-    addUserMessage(text) {
-        const version = this.captureCurrentTemplate();               // <-- NEW
-        const msg = {
-            id        : Date.now(),
-            text      : this.escapeHtml(text),
-            isUser    : true,
-            isHistory : true,                                 // <-- NEW: treat user prompt as a version
-            timestamp : this.formatTime(),
-            template  : version                               // <-- NEW
-        };
-        this.chatMessages = [...this.chatMessages, msg];
-        this.scrollToBottom();
-        this.saveHistoryToStorage();          // persists immediately
-        this._renderChatMessages();           // make the Restore button appear
-    }
-
-    addAIVersion(prompt, templateState) {
-        const msg = {
-            id: Date.now(),
-            text: `<strong>${this.escapeHtml(prompt)}</strong>`,
-            isHistory: true,
-            timestamp: this.formatTime(),
-            template: templateState
-        };
-        this.chatMessages = [...this.chatMessages, msg];
-        this.scrollToBottom();
-        this.saveHistoryToStorage();
-        this._renderChatMessages();
-    }
-
-    handleRestore(event) {
-        const id = event.target.closest('button').dataset.id;
-        const entry = this.chatMessages.find(m => m.id == id);
-        if (!entry || !entry.template) return;
-
-        this.restoreTemplate(entry.template);
-        this.showToast('Restored', `Reverted to version from ${entry.timestamp}`, 'success');
-    }
-
-    restoreTemplate(state) {
-        $(this.headerEditor).summernote('code', this.scopeTemplateStyles(state.header));
-        $(this.contentEditor).summernote('code', this.scopeTemplateStyles(state.body));
-        $(this.footerEditor).summernote('code', this.scopeTemplateStyles(state.footer));
-    }
-
-    formatTime() {
-        const d = new Date();
-        return d.toLocaleString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    }
-
-    scrollToBottom() {
-        this.template.querySelector('.ai-chat-messages')?.scrollTo(0, 999999);
-    }
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    _renderChatMessages() {
-        // Clear any pending render
-        if (this._renderTimeout) {
-            clearTimeout(this._renderTimeout);
-        }
-
-        this._renderTimeout = setTimeout(() => {
-            this.chatMessages.forEach(msg => {
-                const container = this.template.querySelector(`[data-msg-id="${msg.id}"]`);
-                if (!container || container.dataset.rendered) return;
-
-                container.innerHTML = msg.text;
-
-                if (msg.isHistory) {
-                    const btn = container.parentElement.querySelector('.ai-restore-btn');
-                    if (btn) {
-                        btn.removeEventListener('click', this._restoreHandler);
-                        btn.addEventListener('click', this._restoreHandler);
-                    }
-                }
-
-                container.dataset.rendered = 'true';
-            });
-        }, 50);
-    }
-
-    _restoreHandler = (event) => {
-        const id = event.currentTarget.dataset.id;
-        const entry = this.chatMessages.find(m => m.id == id);
-        if (!entry?.template) return;
-
-        this.restoreTemplate(entry.template);
-        this.showToast('Restored', `Reverted to version from ${entry.timestamp}`, 'success');
-    };
 
     scopeCSS(css, scopeClass) {
         let result = '';

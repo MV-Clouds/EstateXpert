@@ -142,7 +142,7 @@
             template-id={templateId} save-button-label="Save" preview-button-label="Save &#38; Preview"
             cancel-button-label="Close" template-type={templateType} onsave={saveTemplateData}
             onpreview={handleSaveNPreview} onclose={handleCloseEdit} onfullheight={toggleMappingContainerHeight}
-            ontogglemapping={showHideMappingContainer} onopengenchildtable={openGenChildTablePopup} onfieldlistready={handleFieldListReady} onmappingkeysready={handleMappingKeysReady}>
+            ontogglemapping={showHideMappingContainer} onopengenchildtable={openGenChildTablePopup} onfieldlistready={handleFieldListReady}>
           </c-key-mapping-container>
           <!-- === ==== ==== ## Basic Detail Edit Tab Section === ==== ==== -->
           <div class="basicDetailSetion tabArea deactiveTabs" data-section="basicTab" data-key-mapping="false"
@@ -368,118 +368,11 @@
               </div>
             </div>
           </div>
-          <!-- === AI Generate Tab === -->
-          <!-- <div class="tabArea deactiveTabs" data-section="aiGenerateTab" data-key-mapping="false" data-toolbar="false">
-            <div class="aiGenerateContainer">
-              <div class="aiPromptSection">
-
-                <textarea name="comment" class="aiPromptTextarea" placeholder="Write a modern, clean invoice template for Account and OpportunityLineItem with company logo placeholder..." onchange={handleAIPromptChange}></textarea>
-                <div class="aiActions">
-                  <lightning-button 
-                    label="Generate with Gemini" 
-                    class="aiGenerateBtn"
-                    variant="brand" 
-                    onclick={generateWithGemini}
-                    disabled={isGenerating}>
-                  </lightning-button>
-                  <lightning-spinner if:true={isGenerating} size="small"></lightning-spinner>
-                </div>
-              </div>
-            </div>
-          </div> -->
-       
         </div>
         <!-- === ==== ==== Main Editing Section - END - === ==== ==== -->
       </div>
     </div>
 
-    <!-- === AI CHAT PANEL === -->
-    <div class={chatContainerClass}>
-      <!-- Floating Toggle Button -->
-      <button class="ai-chat-toggle-btn" onclick={toggleChat} title="AI Template Assistant">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" >
-          <path d="M12 2L2 12H5V22H19V12H22L12 2Z"/>
-          <circle cx="12" cy="12" r="3" fill="white"/>
-        </svg>
-        <span class="ai-badge">AI</span>
-      </button>
-
-      <!-- Chat Panel -->
-    <div class="ai-chat-panel">
-       
-
-        <div class="ai-chat-header">
-            <div class="ai-header-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="24" height="24">
-                    <path d="M12 2L2 12H5V22H19V12H22L12 2Z"/>
-                    <circle cx="12" cy="12" r="3" fill="white"/>
-                </svg>
-                AI Template Assistant
-            </div>
-            <button class="ai-close-btn" onclick={toggleChat}>X</button>
-        </div>
-
-        <div class="ai-chat-mode-toggle">
-          <button class="mode-btn active" data-mode="new" onclick={handleModeToggle}>New Generate</button>
-          <button class="mode-btn" data-mode="edit" onclick={handleModeToggle}>Edit Existing</button>
-        </div>
-
-        <!-- CHAT MESSAGES -->
-        <div class="ai-chat-messages" onscroll={handleChatScroll}>
-          <template for:each={chatMessages} for:item="msg">
-            <div key={msg.id} class="ai-message" data-ai={msg.isUser} class:ai-user={msg.isUser} class:ai-history={msg.isHistory}>
-              <div class="ai-avatar">
-                <template lwc:if={msg.isUser}>
-                  <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </template>
-                <template lwc:else>
-                  <svg viewBox="0 0 24 24"><path d="M12 2L2 12H5V22H19V12H22L12 2Z"/><circle cx="12" cy="12" r="3" fill="white"/></svg>
-                </template>
-              </div>
-
-              <div class="ai-bubble">
-                <!-- HISTORY HEADER -->
-                <div if:true={msg.isHistory} class="ai-history-header">
-                  <span class="ai-history-time">{msg.timestamp}</span>
-                  <button class="ai-restore-btn" data-id={msg.id} title="Restore this version">
-                    <svg viewBox="0 0 24 24" width="14" height="14"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.26 19.71 10.06 21 12 21a9 9 0 0 0 0-18z"/></svg>
-                    Restore
-                  </button>
-                </div>
-
-                <!-- MESSAGE TEXT – manual DOM -->
-                <div lwc:dom="manual" data-msg-id={msg.id}></div>
-              </div>
-            </div>
-          </template>
-
-          <div if:false={chatMessages.length} class="ai-chat-empty">
-            Start by generating or editing your template.
-          </div>
-        </div>
-
-        <div class="ai-chat-input">
-            <textarea
-                placeholder={placeholderText}
-                rows="1"
-                value={aiPrompt}
-                oninput={handleAIPromptChange}
-                onkeydown={handleKeyDown}
-                disabled={isGenerating}>
-            </textarea>
-            <!-- <button onclick={sendPrompt} disabled={isSendButtonDisabled}>
-                <template lwc:if={isGenerating}>
-                    <lightning-spinner size="small" variant="brand"></lightning-spinner>
-                </template>
-                <template lwc:else>
-                    <svg viewBox="0 0 24 24" fill="white">
-                        <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z"/>
-                    </svg>
-                </template>
-            </button> -->
-        </div>
-    </div>
-    </div>
     <!-- === ==== ==== ### Page Configuration Popover === ==== ==== -->
     <div class="pageConfigPopover close" onclick={togglePageConfigPopover}>
       <div class="pageConfigPopover_sub" onclick={eventStopPropagation}>

@@ -540,11 +540,10 @@ function createPageSetupBtn(note, context) {
  * This is main method to initialize editor into DOM,
  * Use can use this method multiple time to initialize multiple editor,
  * @param {*} self 
- * @param {*} docGeniusLogoSvg 
  * @param {*} editorSelector 
  * @returns 
  */
-export function initializeSummerNote(self, docGeniusLogoSvg, editorSelector) {
+export function initializeSummerNote(self, editorSelector) {
   try {
     var note = {
       summerNote: null,
@@ -577,11 +576,6 @@ export function initializeSummerNote(self, docGeniusLogoSvg, editorSelector) {
       return createFontResizer(note, context);
     }
 
-    var createBuilderTitle = function () {
-      var titleImg = `<div class="docGeniusLogo"><p>Powered By</p><img src=${docGeniusLogoSvg}></img></div>`
-      return titleImg;
-    }
-
     var rowcolorbtn = function (context) {
       return createRowColorBtn(note, context)
     }
@@ -612,10 +606,8 @@ export function initializeSummerNote(self, docGeniusLogoSvg, editorSelector) {
       ['custom_paragraphFormatting', ['ul', 'ol', 'paragraph', 'height']],
       ['custom_style', ['style']],
       ['custom_insert', ['table', 'link', 'picture', 'hr']],
-      // ['custom_clearFormatting', ['truncate','clear']],
       ['custom_clearFormatting', ['clear']],
       ['custom_view', ['codeview', 'help']],
-      //['custom_title', ['titleBtn']],
     ]
 
     // remove page backer for header and footer editor.
@@ -668,8 +660,6 @@ export function initializeSummerNote(self, docGeniusLogoSvg, editorSelector) {
         setTableBorder: borderColorBtn,
         setTableCellColor: cellColorBtn,
         setCellVeticalAlign: cellVerticalAlignBtn,
-        titleBtn: createBuilderTitle,
-        // truncate : truncateBtn,
         pageSetup: pageSetupBtn,
       },
       tabsize: 2,

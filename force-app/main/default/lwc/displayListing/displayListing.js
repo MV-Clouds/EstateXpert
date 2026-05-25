@@ -515,10 +515,16 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
                         const fieldsData = JSON.parse(result.metadataRecords[0]);
-                        // Always include image column first and actions column last
+                        // Filter out any existing 'name' field from configured data to avoid duplication
+                        const filteredFieldsData = fieldsData.filter(field => {
+                            const fname = (field.fieldName || field.value || '').toLowerCase();
+                            return fname !== 'name';
+                        });
+                        // Always include image column first, Name column second, and actions column last
                         this.listingColumns = [
                             { label: '', fieldName: 'media_url', type: 'image', sortable: false },
-                            ...fieldsData.map(field => ({
+                            { label: 'Name', fieldName: 'name', type: 'text', sortable: true },
+                            ...filteredFieldsData.map(field => ({
                                 label: field.label || field.fieldLabel,
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
                                 type: this.getColumnType(field.fieldType),

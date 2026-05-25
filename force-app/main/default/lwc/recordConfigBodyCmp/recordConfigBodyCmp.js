@@ -113,9 +113,12 @@ export default class RecordConfigBodyCmp extends LightningElement {
                      this.isLoading = false;
                      return;
                 }
-                this.fieldOptions = result.fieldDetailsList;
                 this.fieldOptions = result.fieldDetailsList
-                    .filter(option => option.value !== 'OwnerId')
+                    .filter(option => {
+                        if (option.value === 'OwnerId') return false;
+                        if (this.featureName === 'Suggested_Listing_Fields' && option.value.toLowerCase() === 'name') return false;
+                        return true;
+                    })
                     .map(option => ({
                         ...option,
                         showRightRef: false
@@ -124,7 +127,10 @@ export default class RecordConfigBodyCmp extends LightningElement {
                 if (result.metadataRecords && result.metadataRecords.length > 0) {
                     // Check if JSON exists
                     if(result.metadataRecords[0]) {
-                        const fieldsData = JSON.parse(result.metadataRecords[0]);
+                        let fieldsData = JSON.parse(result.metadataRecords[0]);
+                        if (this.featureName === 'Suggested_Listing_Fields') {
+                            fieldsData = fieldsData.filter(item => (item.fieldName || item.value || '').toLowerCase() !== 'name');
+                        }
                         this.checklistItems = fieldsData.map((item, index) => ({
                             id: index + 1,
                             fieldName: item.fieldName,

@@ -459,7 +459,6 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             this.isLoading = true;
             getTemplates()
                 .then(data => {
-                    console.log('OUTPUT : ', data);
                     this.processTemplates(data);
                     this.isLoading = false;
                 })
@@ -531,7 +530,6 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             if (!dateStr) return '-';
             
             let formatdate = new Date(dateStr);
-            formatdate.setDate(formatdate.getDate());
 
             const day = formatdate.getDate();
             const month = formatdate.getMonth() + 1;
@@ -540,7 +538,16 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             const paddedDay = day < 10 ? `0${day}` : day;
             const paddedMonth = month < 10 ? `0${month}` : month;
 
-            return `${paddedDay}/${paddedMonth}/${year}`;
+            let hours = formatdate.getHours();
+            const minutes = formatdate.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+            const paddedHours = hours < 10 ? `0${hours}` : hours;
+
+            return `${paddedDay}/${paddedMonth}/${year} ${paddedHours}:${paddedMinutes} ${ampm}`;
         } catch (error) {
             console.log('Error in formatDate ==> ', error.stack);
             return '-';
@@ -780,14 +787,17 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                 if (aValue === undefined) aValue = '';
                 if (bValue === undefined) bValue = '';
 
-                if (typeof aValue === 'string' && typeof bValue === 'string') {
-                    aValue = aValue.toLowerCase();
-                    bValue = bValue.toLowerCase();
-                }
-
-                if (this.sortField === 'CreatedDate') {
-                    aValue = new Date(aValue);
-                    bValue = new Date(bValue);
+                if (this.sortField === 'CreatedDateformatted' || this.sortField === 'CreatedDate') {
+                    aValue = a.CreatedDate ? new Date(a.CreatedDate).getTime() : 0;
+                    bValue = b.CreatedDate ? new Date(b.CreatedDate).getTime() : 0;
+                } else if (this.sortField === 'LastModifiedDate' || this.sortField === 'LastModifiedDateformatted') {
+                    aValue = a.LastModifiedDate ? new Date(a.LastModifiedDate).getTime() : 0;
+                    bValue = b.LastModifiedDate ? new Date(b.LastModifiedDate).getTime() : 0;
+                } else {
+                    if (typeof aValue === 'string' && typeof bValue === 'string') {
+                        aValue = aValue.toLowerCase();
+                        bValue = bValue.toLowerCase();
+                    }
                 }
 
                 let compare = 0;
@@ -1021,11 +1031,18 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                     matches = false;
                 }
             }
-            if (this.dateFrom && this.dateTo) {
-                const templateDate = new Date(template[this.dateField]);
-                const fromDate = new Date(this.dateFrom);
-                const toDate = new Date(this.dateTo);
-                if (templateDate < fromDate || templateDate > toDate) {
+            if (this.dateFrom && this.dateTo && this.dateField) {
+                if (template[this.dateField]) {
+                    const templateDate = new Date(template[this.dateField]);
+                    const fromDate = new Date(this.dateFrom);
+                    fromDate.setHours(0, 0, 0, 0);
+                    const toDate = new Date(this.dateTo);
+                    toDate.setHours(23, 59, 59, 999);
+                    
+                    if (templateDate.getTime() < fromDate.getTime() || templateDate.getTime() > toDate.getTime()) {
+                        matches = false;
+                    }
+                } else {
                     matches = false;
                 }
             }

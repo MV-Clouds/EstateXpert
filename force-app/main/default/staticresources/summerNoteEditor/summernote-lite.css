@@ -1943,10 +1943,6 @@ a.note-dropdown-item:hover {
                 border-radius: 6px;
                 margin-bottom: 0.5rem;
                 transition: all linear 0.4s;
-                /* background-image: url('/resource/docGeniusLogoSvg');
-                background-position: center;
-                background-repeat: repeat-y;
-                background-size: cover; */
             }
             .headerEditor.note-editor.note-frame .note-editing-area .note-editable,
             .footerEditor.note-editor.note-frame .note-editing-area .note-editable{
@@ -2369,36 +2365,6 @@ a.note-dropdown-item:hover {
                 flex-grow: 1;
                 width: fit-content;
                 justify-content: flex-end !important;
-            }
-            .docGeniusLogo{
-                height: 100%;
-                /* padding-inline: 0.5rem; */
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                width: fit-content;
-                font-size: 18px;
-                text-align: center;
-                font-weight: 900;
-                color: #00adff;
-                font-family: 'Segoe UI', 'Segoe UI Web (West European)', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
-                letter-spacing: 1px;
-                line-height: 24px;
-                cursor: pointer;
-                transition: all linear 0.25s;
-                flex-direction: column;
-            }
-
-            .docGeniusLogo p {
-                font-size: 14px;
-                font-weight: 500;
-                line-height: 16.94px;
-                text-align: left;
-                color: black;
-            }
-
-            .docGeniusLogo img{
-                height: 2rem;
             }
 
             .note-custom_title::after{

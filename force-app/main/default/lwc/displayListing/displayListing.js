@@ -872,6 +872,93 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name: validateCustomLogic
+    * @description: validates custom logical expression
+    */
+    validateCustomLogic() {
+        if (this.conditiontype === 'custom') {
+            const inputElement = this.template.querySelector('lightning-input[data-id="condition-input"]');
+
+            if (!this.logicalExpression || this.logicalExpression.trim() === '') {
+                this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
+            }
+
+            if (this.logicalExpression.trim() === '') {
+                if (inputElement) {
+                    inputElement.setCustomValidity('Expression cannot be empty');
+                    inputElement.reportValidity();
+                }
+                return false;
+            }
+
+            const mappinglength = this.mappings.length;
+            const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
+
+            if (!regex.test(this.logicalExpression) && mappinglength > 1) {
+                if (inputElement) {
+                    inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
+                    inputElement.reportValidity();
+                }
+                return false;
+            }
+
+            const numbers = this.logicalExpression.match(/\d+/g);
+            if (numbers) {
+                const numberSet = new Set(numbers.map(Number));
+                const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
+
+                if (invalidIndex) {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
+                        inputElement.reportValidity();
+                    }
+                    return false;
+                }
+
+                if (numberSet.size !== mappinglength) {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Condition must include all indices.');
+                        inputElement.reportValidity();
+                    }
+                    return false;
+                }
+
+                let openParens = 0;
+                for (let char of this.logicalExpression) {
+                    if (char === '(') openParens++;
+                    if (char === ')') openParens--;
+                    if (openParens < 0) {
+                        if (inputElement) {
+                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                            inputElement.reportValidity();
+                        }
+                        return false;
+                    }
+                }
+                if (openParens !== 0) {
+                    if (inputElement) {
+                        inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
+                        inputElement.reportValidity();
+                    }
+                    return false;
+                }
+
+                if (inputElement) {
+                    inputElement.setCustomValidity('');
+                    inputElement.reportValidity();
+                }
+            } else {
+                if (inputElement) {
+                    inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
+                    inputElement.reportValidity();
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
     * Method Name: applyFiltersData
     * @description: this method is used to filter data initially when component is loaded
     * Date: 17/06/2024
@@ -906,33 +993,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             });
 
             if (this.conditiontype === 'custom') {
-                if (!this.logicalExpression || this.logicalExpression.trim() === '') {
-                    this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
-                }
-
-                const mappinglength = this.mappings.length;
-                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
-
-                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
-                }
-
-                if (!regex.test(this.logicalExpression) && mappinglength > 1 && !/^\d+$/.test(this.logicalExpression)) {
-                    this.showToast('Error', 'Invalid condition syntax in custom logic. Use numbers, AND, OR, spaces, and parentheses only.', 'error');
+                this.selectedConditionType = 'Custom Logic Is Met';
+                if (!this.validateCustomLogic()) {
+                    this.isLoading = false;
                     return;
-                }
-
-                const numbers = this.logicalExpression.match(/\d+/g);
-                if (numbers) {
-                    const numberSet = new Set(numbers.map(Number));
-                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
-                    if (invalidIndex) {
-                        this.showToast('Error', `Condition uses invalid index. Use indices from 1 to ${mappinglength}.`, 'error');
-                        return;
-                    }
-                    if (numberSet.size !== mappinglength) {
-                        this.showToast('Error', 'Condition must include all indices.', 'error');
-                        return;
-                    }
                 }
 
 
@@ -1494,6 +1558,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     .catch(error => {
                         errorDebugger('DisplayListing', 'saveConfiguration', error, 'warn', 'Error saving configuration');
                     });
+            }
+
+            if (this.conditiontype === 'custom') {
+                if (!this.validateCustomLogic()) {
+                    return;
+                }
             }
 
             // Handle different filter types

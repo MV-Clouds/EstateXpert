@@ -123,7 +123,11 @@
     padding: 8px !important;
 }
 
-.groupname .member-count, .sent, .delivered, .read, .failed {
+.groupname .member-count,
+.sent,
+.delivered,
+.read,
+.failed {
     width: 10%;
     text-align: center;
 }
@@ -152,11 +156,13 @@
     height: 18px;
     color: #585858;
     transition: color 0.2s ease;
-    pointer-events: none; /* Ensure clicks pass through to parent container */
+    pointer-events: none;
+    /* Ensure clicks pass through to parent container */
 }
 
 .action-arrow * {
-    pointer-events: none; /* Ensure clicks on SVG children pass through */
+    pointer-events: none;
+    /* Ensure clicks on SVG children pass through */
 }
 
 .action-icon-container:hover .action-arrow {
@@ -360,7 +366,7 @@
     margin: auto;
 }
 
-.Not-Sent{
+.Not-Sent {
     background-color: #f5c9c9;
     color: #e43333;
     width: fit-content;
@@ -402,15 +408,40 @@
     margin: auto;
 }
 
-.table-content .slds-table:not(.slds-no-row-hover) tbody tr:hover>th{
+.table-content .slds-table:not(.slds-no-row-hover) tbody tr:hover>th {
     background-color: #0476d3;
 }
 
-.accordion-content .table-content{
+.accordion-content .table-content {
     border-radius: 8px;
     max-height: 300px;
     overflow: auto;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.filters-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.filter_item_css {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.filter_label_css {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a4a4a;
+    font-family: 'Mulish';
+}
+
+.filter-combobox {
+    width: 150px;
 }
 
 @media only screen and (max-width: 900px) {
@@ -420,4 +451,41 @@
         margin-top: unset;
         margin-left: unset;
     }
+
+    .sub_main_header_css {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .header-right-info {
+        width: 100%;
+    }
+
+    .filters-container {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .filter_item_css {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .filter-combobox {
+        width: 60%;
+    }
+}
+
+.no-members-message {
+    padding: 1.25rem;
+    text-align: center;
+    color: #747474;
+    font-size: 14px;
+    background-color: #fcfcfc;
+    border: 1px dashed #d8d8d8;
+    border-radius: 8px;
+    margin: 4px 0;
 }

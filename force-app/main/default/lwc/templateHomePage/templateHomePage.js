@@ -1031,11 +1031,18 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                     matches = false;
                 }
             }
-            if (this.dateFrom && this.dateTo) {
-                const templateDate = new Date(template[this.dateField]);
-                const fromDate = new Date(this.dateFrom);
-                const toDate = new Date(this.dateTo);
-                if (templateDate < fromDate || templateDate > toDate) {
+            if (this.dateFrom && this.dateTo && this.dateField) {
+                if (template[this.dateField]) {
+                    const templateDate = new Date(template[this.dateField]);
+                    const fromDate = new Date(this.dateFrom);
+                    fromDate.setHours(0, 0, 0, 0);
+                    const toDate = new Date(this.dateTo);
+                    toDate.setHours(23, 59, 59, 999);
+                    
+                    if (templateDate.getTime() < fromDate.getTime() || templateDate.getTime() > toDate.getTime()) {
+                        matches = false;
+                    }
+                } else {
                     matches = false;
                 }
             }

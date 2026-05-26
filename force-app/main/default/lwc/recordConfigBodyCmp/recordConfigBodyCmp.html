@@ -11,7 +11,7 @@
             </div>
 
             <div class="slds-modal__header blue-header">
-                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Configure Settings
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Configure Data View
                 </h1>
             </div>
 
@@ -25,7 +25,7 @@
                     <div class="header_container_css">
                         <div class="header-action">
                             <div class="page-size-container">
-                                <label class="page-size-label">Page Size:</label>
+                                <label class="page-size-label">Records to Display per Page:</label>
                                 <input type="number" class="page-size-input" value={pageSize}
                                     onchange={handlePageSizeChange} min="1" max="200" />
                             </div>
@@ -46,21 +46,29 @@
                         <div class="tableContainer">
                             <template if:true={isDataAvailable}>
                                 <div class="table-content tableContainer">
-                                    <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols record-config-table">
+                                    <table aria-multiselectable="true"
+                                        class="slds-table slds-table_fixed-layout slds-table_resizable-cols record-config-table">
                                         <thead>
                                             <tr class="table_tr_cls slds-line-height_reset">
                                                 <th scope="col" style="width: 50px;"></th>
-                                                <th scope="col" class="sorting_header"><div class="slds-truncate" title="Field">Field</div></th>
-                                                <th scope="col" class="sorting_header"><div class="slds-truncate" title="Display Format">Display Format</div></th>
-                                                <th scope="col" class="sorting_header" style="width: 80px;"><div class="slds-truncate" title="Delete">Delete</div></th>
+                                                <th scope="col" class="sorting_header">
+                                                    <div class="slds-truncate" title="Field">Field</div>
+                                                </th>
+                                                <th scope="col" class="sorting_header">
+                                                    <div class="slds-truncate" title="Display Format">Display Format
+                                                    </div>
+                                                </th>
+                                                <th scope="col" class="sorting_header" style="width: 80px;">
+                                                    <div class="slds-truncate" title="Delete">Delete</div>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <template for:each={checklistItems} for:item="item" for:index="index">
-                                                <tr key={item.id} class="popup__data-row" draggable="true" data-index={index}
-                                                    ondragstart={handleDragStart} ondragover={handleDragOver}
-                                                    ondrop={handleDrop} ondragleave={handleDragLeave}
-                                                    ondragend={handleDragEnd}>
+                                                <tr key={item.id} class="popup__data-row" draggable="true"
+                                                    data-index={index} ondragstart={handleDragStart}
+                                                    ondragover={handleDragOver} ondrop={handleDrop}
+                                                    ondragleave={handleDragLeave} ondragend={handleDragEnd}>
 
                                                     <td>
                                                         <div class="drag-icon" title="Drag to reorder">
@@ -81,14 +89,16 @@
                                                             <div class="combobox-input" data-index={index}
                                                                 data-field="fieldName" data-id={index}
                                                                 onclick={handleFocus1}>
-                                                                <div class="input-show" title={item.label}>{item.label}</div>
+                                                                <div class="input-show" title={item.label}>{item.label}
+                                                                </div>
                                                                 <div class="add-btn-class" data-index={index}
                                                                     data-field="fieldName" data-id={index}
                                                                     onclick={handleFocus1}>
                                                                     <svg width="16" height="10" viewBox="0 0 16 10"
                                                                         fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M2 1.75L8 7.75L14 1.75" stroke="#131314"
-                                                                            stroke-width="2" stroke-linecap="square" />
+                                                                        <path d="M2 1.75L8 7.75L14 1.75"
+                                                                            stroke="#131314" stroke-width="2"
+                                                                            stroke-linecap="square" />
                                                                     </svg>
                                                                 </div>
 
@@ -106,7 +116,8 @@
                                                                             onmousedown={handlePreventDefault}>
                                                                             <template for:each={filteredFieldOptions}
                                                                                 for:item="option1">
-                                                                                <template if:false={option1.showRightIcon}>
+                                                                                <template
+                                                                                    if:false={option1.showRightIcon}>
                                                                                     <template
                                                                                         if:false={option1.showRightRef}>
                                                                                         <li key={option1.value}
@@ -116,9 +127,11 @@
                                                                                             data-id={option1.value}
                                                                                             onclick={selectOption1}
                                                                                             class="options-value">
-                                                                                            <span class="slds-media__body">
+                                                                                            <span
+                                                                                                class="slds-media__body">
                                                                                                 <span
-                                                                                                    class="_entity slds-truncate" title={option1.label}>{option1.label}</span>
+                                                                                                    class="_entity slds-truncate"
+                                                                                                    title={option1.label}>{option1.label}</span>
                                                                                             </span>
                                                                                         </li>
                                                                                     </template>
@@ -133,14 +146,16 @@
 
                                                     <td>
                                                         <div class="slds-truncate">
-                                                            <lightning-combobox options={item.picklist} variant="label-hidden"
-                                                                value={item.format} onchange={handleFormatChange}
-                                                                data-id={index} disabled={item.isDisable}></lightning-combobox>
+                                                            <lightning-combobox options={item.picklist}
+                                                                variant="label-hidden" value={item.format}
+                                                                onchange={handleFormatChange} data-id={index}
+                                                                disabled={item.isDisable}></lightning-combobox>
                                                         </div>
                                                     </td>
 
                                                     <td class="order_btn_grp">
-                                                        <div class="delete-icon-css" onclick={handleDelete} data-index={index}>
+                                                        <div class="delete-icon-css" onclick={handleDelete}
+                                                            data-index={index}>
                                                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
                                                                 <path

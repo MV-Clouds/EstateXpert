@@ -72,27 +72,27 @@ export default class RecordConfigBodyCmp extends LightningElement {
             .catch(error => {
                 console.log('Error loading external css', error);
             });
-        
-        if(this.selectedTabObject) {
+
+        if (this.selectedTabObject) {
             this.fetchMetadata();
         }
     }
 
-    renderedCallback(){
-        if(this.setScroll){
+    renderedCallback() {
+        if (this.setScroll) {
             const rows = this.template.querySelectorAll('.popup__data-row');
-            if(rows && rows.length > 0){
+            if (rows && rows.length > 0) {
                 rows[rows.length - 1].scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
             this.setScroll = false;
         } else if (this.isForFocus) {
             const inputElement = this.template.querySelector(`input[data-index="${this.setIndex}"]`);
-            if(inputElement) inputElement.focus();
+            if (inputElement) inputElement.focus();
             this.isForFocus = false;
         }
     }
 
-    handleDialogueClose(){
+    handleDialogueClose() {
         // Dispatch event to parent to close this component
         this.dispatchEvent(new CustomEvent('close'));
     }
@@ -100,7 +100,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
     handlePageSizeChange(event) {
         let value = parseInt(event.target.value, 10);
         if (isNaN(value) || value < 1) {
-            value = 30; // Default fallback
+            value = 20;
         }
         this.pageSize = value;
     }
@@ -109,11 +109,11 @@ export default class RecordConfigBodyCmp extends LightningElement {
 
     fetchMetadata() {
         this.isLoading = true;
-        getObjectFields({ objectApiName: this.selectedTabObject , featureName: this.featureName})
+        getObjectFields({ objectApiName: this.selectedTabObject, featureName: this.featureName })
             .then((result) => {
-                if(!result) {
-                     this.isLoading = false;
-                     return;
+                if (!result) {
+                    this.isLoading = false;
+                    return;
                 }
                 this.fieldOptions = result.fieldDetailsList
                     .filter(option => {
@@ -128,7 +128,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
 
                 if (result.metadataRecords && result.metadataRecords.length > 0) {
                     // Check if JSON exists
-                    if(result.metadataRecords[0]) {
+                    if (result.metadataRecords[0]) {
                         let fieldsData = JSON.parse(result.metadataRecords[0]);
                         if (this.featureName === 'Suggested_Listing_Fields') {
                             fieldsData = fieldsData.filter(item => (item.fieldName || item.value || '').toLowerCase() !== 'name');
@@ -145,7 +145,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
                                 item.fieldType === 'DATETIME' ? this.dateTimeOptions : null
                         }));
                     }
-                    if(result.metadataRecords[1]) {
+                    if (result.metadataRecords[1]) {
                         this.pageSize = parseInt(result.metadataRecords[1], 10);
                     } else {
                         this.pageSize = 30; // Default if not found
@@ -199,7 +199,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
         }
     }
 
-    handlePreventDefault(event){
+    handlePreventDefault(event) {
         event.preventDefault();
     }
 
@@ -244,7 +244,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
             }
 
             this.updateChecklistItem(index, finalValue, finalValue, label, type, selectedField?.referenceObjectName, selectedField?.relationshipName);
-            
+
             requestAnimationFrame(() => {
                 this.handleBlur(index);
             });
@@ -290,7 +290,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
     }
 
 
-    handleFormatChange(event){
+    handleFormatChange(event) {
         const value = event.detail.value;
         const index = event.currentTarget.dataset.id;
         this.checklistItems[index].format = value;
@@ -338,22 +338,22 @@ export default class RecordConfigBodyCmp extends LightningElement {
         event.preventDefault();
         const row = event.currentTarget;
         row.classList.add('drop-over');
-    
+
         const container = this.template.querySelector('.tableContainer');
         if (!container) return;
-    
+
         const bounding = container.getBoundingClientRect();
         const mouseY = event.clientY;
-        const scrollMargin = 70; 
+        const scrollMargin = 70;
         const scrollSpeed = 20;
         const maxScroll = container.scrollHeight - container.clientHeight;
         const currentScroll = container.scrollTop;
-    
+
         if (this.scrollInterval) {
             clearInterval(this.scrollInterval);
             this.scrollInterval = null;
         }
-    
+
         if (mouseY < bounding.top + scrollMargin && currentScroll > 0) {
             this.scrollInterval = setInterval(() => {
                 container.scrollTop = Math.max(0, container.scrollTop - scrollSpeed);
@@ -394,14 +394,22 @@ export default class RecordConfigBodyCmp extends LightningElement {
 
     saveChecklistRecords() {
         try {
-            // Validate
+            // Validate page size range
+            const MIN_PAGE_SIZE = 10;
+            const MAX_PAGE_SIZE = 50;
+            if (this.pageSize < MIN_PAGE_SIZE || this.pageSize > MAX_PAGE_SIZE) {
+                this.toast('Error', `Records per page must be between ${MIN_PAGE_SIZE} and ${MAX_PAGE_SIZE}.`, 'error');
+                return;
+            }
+
+            // Validate field selections
             for (let i = 0; i < this.checklistItems.length; i++) {
                 if (!this.checklistItems[i].fieldName) {
-                    this.toast('Error', `Please select field for row ${i+1}`, 'error');
+                    this.toast('Error', `Please select field for row ${i + 1}`, 'error');
                     return;
                 }
             }
-            
+
             // Duplicate Check
             const fieldNames = new Set();
             let errorFields = [];
@@ -412,7 +420,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
                     fieldNames.add(item.fieldName);
                 }
             });
-            
+
             if (errorFields.length > 0) {
                 this.toast('Error', `Duplicate field name found: ${errorFields.join(', ')}`, 'error');
                 return;
@@ -429,30 +437,30 @@ export default class RecordConfigBodyCmp extends LightningElement {
                 referenceObjectName: item.referenceObjectName,
                 relationshipName: item.relationshipName
             }));
-            
+
             const checklistData = JSON.stringify(itemsToSave);
-            
+
             this.isLoading = true;
 
             // Ensure pageSize is valid before saving
             const pageSizeToSave = this.pageSize || 30;
 
-            saveMetadata({ 
-                checklistData: checklistData, 
-                totalPages: pageSizeToSave, 
-                objectApiName: this.selectedTabObject, 
-                featureName: this.featureName 
+            saveMetadata({
+                checklistData: checklistData,
+                totalPages: pageSizeToSave,
+                objectApiName: this.selectedTabObject,
+                featureName: this.featureName
             })
-            .then(() => {
-                this.toast('Success', 'Configuration updated successfully', 'success');
-                this.isLoading = false;
-                this.handleDialogueClose(); // Close modal on success
-            })
-            .catch(error => {
-                this.isLoading = false;
-                console.error('Save error', error);
-                this.toast('Error', 'Error while updating settings', 'error');
-            });
+                .then(() => {
+                    this.toast('Success', 'Configuration updated successfully', 'success');
+                    this.isLoading = false;
+                    this.handleDialogueClose(); // Close modal on success
+                })
+                .catch(error => {
+                    this.isLoading = false;
+                    console.error('Save error', error);
+                    this.toast('Error', 'Error while updating settings', 'error');
+                });
 
         } catch (error) {
             this.isLoading = false;

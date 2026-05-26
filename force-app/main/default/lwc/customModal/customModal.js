@@ -20,6 +20,28 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
     @track isPicklistDisabled = true;
     @track subjectValue = '';
     @track objectPlaceholder = 'Please select Template Type first';
+    @track isSaving = false;
+
+    /**
+    * @description: Returns true while the form is incomplete or a save is already in flight.
+    *               Drives the disabled state of the Save button.
+    */
+    get isSaveDisabled() {
+        const baseFieldsFilled =
+            this.templateNameValue &&
+            this.templateTypeSelectValue &&
+            this.selectedObjectAPIName;
+        if (!baseFieldsFilled) return true;
+        // Subject is required only for Marketing Template
+        if (this.templateTypeSelectValue === 'Marketing Template' && !this.subjectValue) return true;
+        // Disable while the save callout is in-flight
+        return this.isSaving;
+    }
+
+    /** Returns the label for the Save button. */
+    get saveBtnLabel() {
+        return this.isSaving ? 'Saving...' : 'Save';
+    }
 
     /**
     * Method Name: get isMarketingTemplate()
@@ -38,15 +60,15 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
     * Created Date: 12/06/2024
     * Created By: Rachit Shah
     */
-    connectedCallback(){    
+    connectedCallback() {
         try {
             loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('External Css Loaded');
-            })
-            .catch(error => {
-                console.log('Error occuring during loading external css', error);
-            });
+                .then(() => {
+                    console.log('External Css Loaded');
+                })
+                .catch(error => {
+                    console.log('Error occuring during loading external css', error);
+                });
             this.fetchObjectNames();
         } catch (error) {
             console.log('Error in connectedCallback -> ' + error);
@@ -69,7 +91,7 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
                             label: data.objectData[key],
                             value: key
                         }))
-                        .sort((a, b) => a.label.localeCompare(b.label));
+                            .sort((a, b) => a.label.localeCompare(b.label));
                         this.templateTypeOptions = data.picklistValues.map(value => ({
                             label: value,
                             value: value
@@ -112,38 +134,36 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
     */
     handleSave() {
         try {
-            if (this.templateNameValue && this.selectedObjectAPIName && this.templateTypeSelectValue && this.selectedObjectAPIName) {
+            if (this.isSaveDisabled) return; // Guard: should not reach here, but be safe
 
-                if(this.templateTypeSelectValue === 'Marketing Template' && this.subjectValue == ''){
-                    this.showToast('Error', 'Please fill in all required fields', 'error');
-                    return;
-                }
+            const template = {
+                MVEX__Object_API_Name__c: this.selectedObjectAPIName,
+                MVEX__Object_Name__c: this.selectedObjectLabel,
+                MVEX__Template_Name__c: this.templateNameValue,
+                MVEX__Description__c: this.descriptionValue,
+                MVEX__Template_pattern__c: this.templateTypeSelectValue,
+                MVEX__Subject__c: this.subjectValue,
+                MVEX__Template_Status__c: true,
+            };
 
-                const template = {
-                    MVEX__Object_API_Name__c : this.selectedObjectAPIName,
-                    MVEX__Object_Name__c : this.selectedObjectLabel,
-                    MVEX__Template_Name__c : this.templateNameValue,
-                    MVEX__Description__c : this.descriptionValue,
-                    MVEX__Template_pattern__c : this.templateTypeSelectValue,
-                    MVEX__Subject__c	: this.subjectValue,
-                    MVEX__Template_Status__c	: true,
-                };
+            this.isSaving = true; // Disable button during callout
 
-                insertTemplate({ template : template})
+            insertTemplate({ template: template })
                 .then((res) => {
                     console.log('Template saved successfully:', res);
                     this.showToast('Success', 'Template saved successfully', 'success');
                     this.currentRecordIdValue = res;
+                    // isSaving stays true — we navigate away, no need to re-enable
                     this.navigationTotab();
                 })
                 .catch(error => {
                     console.error('Error saving template:', error);
+                    this.showToast('Error', 'An error occurred while saving. Please try again.', 'error');
+                    this.isSaving = false; // Re-enable button so user can retry
                 });
-            } else {
-                this.showToast('Error', 'Please fill in all required fields', 'error');
-            }
         } catch (error) {
             console.log('Error in handleSave -> ', error.stack);
+            this.isSaving = false; // Re-enable on unexpected JS error
         }
     }
 
@@ -153,7 +173,7 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
     * Created Date: 12/06/2024
     * Created By: Rachit Shah
     */
-    navigationTotab(){
+    navigationTotab() {
         try {
             let cmpDef = {
                 componentDef: "MVEX:templateEditor",
@@ -165,10 +185,10 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
             };
 
             let encodedDef = btoa(JSON.stringify(cmpDef));
-                this[NavigationMixin.Navigate]({
+            this[NavigationMixin.Navigate]({
                 type: "standard__webPage",
                 attributes: {
-                    url:  "/one/one.app#" + encodedDef                                                         
+                    url: "/one/one.app#" + encodedDef
                 }
             });
             this.closeModal();
@@ -198,10 +218,10 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
                 const selectedLabel = selectedOption ? selectedOption.label : '';
                 this.selectedObjectLabel = selectedLabel;
                 console.log('Selected Object:', selectedLabel, value);
-            }else if (field === 'templateType') {
+            } else if (field === 'templateType') {
                 this.templateTypeSelectValue = value;
-                
-                if(this.templateTypeSelectValue === 'Marketing Template'){
+
+                if (this.templateTypeSelectValue === 'Marketing Template') {
                     this.selectedObjectAPIName = '';
                     this.selectedObjectLabel = '';
                     this.isPicklistDisabled = false;
@@ -215,7 +235,7 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
                     );
                 }
 
-                else if(this.templateTypeSelectValue === 'PDF Template'){
+                else if (this.templateTypeSelectValue === 'PDF Template') {
                     this.selectedObjectAPIName = '';
                     this.selectedObjectLabel = '';
                     this.isPicklistDisabled = false;
@@ -237,7 +257,7 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
                     );
                 }
 
-                else{
+                else {
                     this.selectedObjectAPIName = '';
                     this.selectedObjectLabel = '';
                     this.isPicklistDisabled = false;

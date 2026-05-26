@@ -80,8 +80,10 @@ export default class RecordConfigBodyCmp extends LightningElement {
 
     renderedCallback(){
         if(this.setScroll){
-            const container = this.template.querySelector('.tableContainer');
-            if(container) container.scrollTop = container.scrollHeight;
+            const rows = this.template.querySelectorAll('.popup__data-row');
+            if(rows && rows.length > 0){
+                rows[rows.length - 1].scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
             this.setScroll = false;
         } else if (this.isForFocus) {
             const inputElement = this.template.querySelector(`input[data-index="${this.setIndex}"]`);

@@ -341,6 +341,68 @@ public without sharing class DataMappingControllerV2 {
     }
 
     /**
+     * @param extractedKeyMap, Map of keyType vs list of keys in object form,
+     * @description : Extract and collect recipient field keys (e.g. {{EXPRecipient.Name}})
+     *               from the 'recipientFields' array stored in the extracted key map.
+     *               These keys are used to replace contact-specific placeholders in email body
+     *               when sending listing-object marketing templates.
+     * @return Set<String> of raw mapping keys for recipient fields.
+     */
+    public static Set<String> collectRecipientFieldKeys(Map<String, Object> extractedKeyMap) {
+        Set<String> recipientKeys = new Set<String>();
+        try {
+            Object recipientFields = extractedKeyMap?.get('recipientFields') != null
+                ? extractedKeyMap.get('recipientFields')
+                : (Object) JSON.deserializeUntyped('[]');
+            String recipientFieldString = JSON.serialize(recipientFields);
+            List<Object> recipientFieldKeys = (List<Object>) JSON.deserializeUntyped(recipientFieldString);
+            for (Object key : recipientFieldKeys) {
+                recipientKeys.add((String) key);
+            }
+            return recipientKeys;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'DataMappingControllerV2', 'collectRecipientFieldKeys', e.getMessage());
+            return recipientKeys;
+        }
+    }
+
+    /**
+     * @param recipientKeys,    Set of raw keys like {{EXPRecipient.Name}}, {{EXPRecipient.Phone}}
+     * @param recipientContact, Contact record with all accessible fields already queried by the caller.
+     * @description : Build a map of recipient template key -> actual contact field value.
+     *               The key format is {{EXPRecipient.<ContactFieldAPI>}}.
+     *               Only applies to the To-recipient contact; CC/BCC are intentionally excluded.
+     * @return Map<String, String> of raw key -> replacement value (empty string when field is null).
+     */
+    public static Map<String, String> getRecipientFieldReplacements(Set<String> recipientKeys, Contact recipientContact) {
+        Map<String, String> replacements = new Map<String, String>();
+        try {
+            if (recipientContact == null || recipientKeys == null || recipientKeys.isEmpty()) {
+                return replacements;
+            }
+            final String PREFIX = 'EXPRecipient.';
+            for (String key : recipientKeys) {
+                // Expected format: {{EXPRecipient.<FieldAPI>}}
+                String keyContent = key.substringBetween('{{', '}}');
+                if (keyContent != null && keyContent.startsWith(PREFIX)) {
+                    String fieldAPI = keyContent.substringAfter(PREFIX).trim();
+                    Object fieldValue = null;
+                    try {
+                        fieldValue = recipientContact.get(fieldAPI);
+                    } catch (Exception ex) {
+                        // Field not accessible or invalid — leave value as empty string
+                    }
+                    replacements.put(key, fieldValue != null ? String.valueOf(fieldValue) : '');
+                }
+            }
+            return replacements;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'DataMappingControllerV2', 'getRecipientFieldReplacements', e.getMessage());
+            return replacements;
+        }
+    }
+
+    /**
      * @param extractedKeyMap,  Map of keyType vs list of keys in object form,
      * @description : Methods to collect all SRC with content version id
      * @return map of string(imageSrc) and String(imageId)

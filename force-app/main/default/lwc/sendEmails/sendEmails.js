@@ -18,7 +18,7 @@ export default class SendEmails extends LightningElement {
     @track isPreviewModal = false;
     @track templateStatus = false;
     @track previewObjectName = 'Contact';
-    
+
     @track messagingServiceOptions = [];
     @track selectedTemplate = '';
     @track selectedTemplateType = '';
@@ -54,7 +54,7 @@ export default class SendEmails extends LightningElement {
     @track selectedOptionLabel = '';
     @track currentStep = 1;
     @track totalSteps = 3;
-    
+
     // Single object to store all campaign details
     @track campaignDetails = {
         objectName: 'Contact',
@@ -65,7 +65,7 @@ export default class SendEmails extends LightningElement {
         selectedTemplate: '',
         isObjectDropDownDisabled: false
     };
-    
+
     // Drip Campaign Properties
     @track dripSequence = [];
     @track dripStartDate = null;
@@ -89,7 +89,7 @@ export default class SendEmails extends LightningElement {
             { label: 'Listing', value: 'MVEX__Listing__c' }
         ];
     }
-    
+
     steps = [
         { label: 'Select Type', value: 'step-1' },
         { label: 'Template Configuration', value: 'step-2' },
@@ -147,7 +147,7 @@ export default class SendEmails extends LightningElement {
         } else {
             listings = this.listingOptions.filter(listing => listing.type === this.activeTab);
         }
-        
+
         // Add computed classes to each listing (removed typeClass)
         return listings.map(listing => ({
             ...listing,
@@ -252,7 +252,7 @@ export default class SendEmails extends LightningElement {
         } else {
             relatedObj = this.campaignDetails.templateRelatedObject;
         }
-        
+
         return this.allCustomTemplates.filter(template =>
             template.objectName === relatedObj || template.objectName === 'Generic'
         );
@@ -301,9 +301,9 @@ export default class SendEmails extends LightningElement {
 
     // Show broadcast groups only when no individual contacts selected and object is selected
     get showBroadcastGroups() {
-        return this.campaignDetails.objectName && 
-               (this.selectedContacts.length === 0 || this.selectedContacts.length === null) &&
-               this.filteredBroadcastGroups.length > 0;
+        return this.campaignDetails.objectName &&
+            (this.selectedContacts.length === 0 || this.selectedContacts.length === null) &&
+            this.filteredBroadcastGroups.length > 0;
     }
 
     // Filter broadcast groups based on selected object
@@ -311,8 +311,8 @@ export default class SendEmails extends LightningElement {
         if (!this.campaignDetails.objectName || !this.broadcastGroupOptions) {
             return [];
         }
-        
-        return this.broadcastGroupOptions.filter(group => 
+
+        return this.broadcastGroupOptions.filter(group =>
             group.objectName === 'Contact'
         ).map(group => ({
             ...group,
@@ -328,7 +328,7 @@ export default class SendEmails extends LightningElement {
     // Estimate contacts from selected groups
     get estimatedContactsFromGroups() {
         if (!this.selectedBroadcastGroups.length) return 0;
-        
+
         return this.filteredBroadcastGroups
             .filter(group => group.selected)
             .reduce((total, group) => total + (group.contactCount || 0), 0);
@@ -345,7 +345,7 @@ export default class SendEmails extends LightningElement {
         }
         return 'drip-sequence-timing';
     }
-    
+
     // Compute CSS class for delay input
     get computeDelayInputClass() {
         const drip = this.selectedDrip;
@@ -354,7 +354,7 @@ export default class SendEmails extends LightningElement {
         }
         return 'custom-input delay-input';
     }
-    
+
     // Compute CSS class for time input
     get computeTimeInputClass() {
         const drip = this.selectedDrip;
@@ -376,27 +376,27 @@ export default class SendEmails extends LightningElement {
     get selectedTemplateDisalbed() {
         return !this.selectedTemplate;
     }
-    
+
     connectedCallback() {
         loadStyle(this, MulishFontCss);
         if (this.objectApiName) {
             this.campaignDetails.objectName = this.objectApiName;
             this.campaignDetails.isObjectDropDownDisabled = true;
         }
-    
+
         // Convert selectedContacts from objects to IDs if needed
         if (this.selectedContacts && this.selectedContacts.length > 0) {
             if (typeof this.selectedContacts[0] === 'object' && this.selectedContacts[0].Id) {
                 this.selectedContacts = this.selectedContacts.map(contact => contact.Id);
             }
         }
-        
+
         this.loadMessageOptions();
         this.loadTemplates();
         this.loadListings();
         this.loadAllContacts();
         this.loadBroadcastGroups();
-    
+
         this._documentClickHandler = this.handleDocumentClick.bind(this);
         document.addEventListener('click', this._documentClickHandler);
     }
@@ -423,31 +423,31 @@ export default class SendEmails extends LightningElement {
             });
     }
 
-    loadBroadcastGroups(){
+    loadBroadcastGroups() {
         getBroadcastGroups()
-        .then(data => {
-            if(data && data.length > 0){
-                this.broadcastGroupOptions = data.map(option => ({
-                    label: option.Name,
-                    value: option.Id,
-                    objectName: option.MVEX__Object_Name__c, // Assuming this field exists
-                    contactCount: option.MVEX__Count_of_Members__c || 0, // Assuming this field exists
-                    selected: false
-                }));
-            }
-        })
-        .catch(error => {
-            this.showToast('Error', 'Failed to fetch broadcast groups', 'error');
-            console.error('Error loading broadcast groups:', error);
-        });
+            .then(data => {
+                if (data && data.length > 0) {
+                    this.broadcastGroupOptions = data.map(option => ({
+                        label: option.Name,
+                        value: option.Id,
+                        objectName: option.MVEX__Object_Name__c, // Assuming this field exists
+                        contactCount: option.MVEX__Count_of_Members__c || 0, // Assuming this field exists
+                        selected: false
+                    }));
+                }
+            })
+            .catch(error => {
+                this.showToast('Error', 'Failed to fetch broadcast groups', 'error');
+                console.error('Error loading broadcast groups:', error);
+            });
     }
 
     loadTemplates() {
         getTemplatesByObject()
             .then(data => {
                 if (data) {
-                    console.log('data from backend ',data);
-                    
+                    console.log('data from backend ', data);
+
                     this.allEmailTemplates = data.emailTemplates ? data.emailTemplates.map(template => ({
                         label: template.label,
                         value: template.value,
@@ -466,7 +466,7 @@ export default class SendEmails extends LightningElement {
                     })) : [];
 
                     console.log('all custom template => ', JSON.stringify(this.allCustomTemplates));
-                    
+
                     this.filterTemplatesByObject();
                 }
             })
@@ -512,7 +512,7 @@ export default class SendEmails extends LightningElement {
                         email: contact.Email,
                         company: contact.MVEX__Company__c || ''
                     }));
-                    
+
                     // Create options for combobox with searchable format
                     this.allContactOptions = this.allContacts.map(contact => ({
                         label: `${contact.name} (${contact.email})`,
@@ -520,7 +520,7 @@ export default class SendEmails extends LightningElement {
                     }));
 
                     console.log('Data ==> ', this.allContacts);
-                    
+
                     // Update selected contacts details if any pre-selected
                     this.updateSelectedContactsDetails();
                 } else {
@@ -534,7 +534,7 @@ export default class SendEmails extends LightningElement {
                 console.error('Contact loading error:', error.stack);
             });
     }
-    
+
     // Update selected contacts details
     updateSelectedContactsDetails() {
 
@@ -545,12 +545,12 @@ export default class SendEmails extends LightningElement {
         if (this.selectedContacts && this.selectedContacts.length > 0 && typeof this.selectedContacts[0] === 'object') {
             this.selectedContacts = this.selectedContacts.map(contact => contact.Id || contact.id);
         }
-    
+
         this.selectedContactsDetails = this.selectedContacts.map(contactId => {
             const contact = this.allContacts.find(c => c.id === contactId);
-            return contact ? {...contact} : null;
+            return contact ? { ...contact } : null;
         }).filter(Boolean);
-            
+
         // Handle CC contacts similarly
         let ccContactIds = this.selectedCCContacts;
         if (ccContactIds && ccContactIds.length > 0 && typeof ccContactIds[0] === 'object') {
@@ -559,10 +559,10 @@ export default class SendEmails extends LightningElement {
         }
         this.selectedCCContactsDetails = this.selectedCCContacts.map(contactId => {
             const contact = this.allContacts.find(c => c.id === contactId);
-            return contact ? {...contact} : null;
+            return contact ? { ...contact } : null;
         }).filter(Boolean);
     }
-    
+
     // Handle primary contact selection from custom combobox
     handlePrimaryContactSelect(event) {
         const selectedContactIds = event.detail; // This will be an array from multiselect
@@ -576,7 +576,7 @@ export default class SendEmails extends LightningElement {
             this.updateSelectedContactsDetails();
         }
     }
-    
+
     // Handle CC contact selection from custom combobox
     handleCCContactSelect(event) {
         const selectedContactIds = event.detail; // This will be an array from multiselect
@@ -592,11 +592,11 @@ export default class SendEmails extends LightningElement {
     // Handle removing primary contact from pill
     handleRemovePrimaryContact(event) {
         const contactId = event.currentTarget.name;
-        
+
         // Remove from selectedContacts
         this.selectedContacts = this.selectedContacts.filter(id => id !== contactId);
         this.updateSelectedContactsDetails();
-        
+
         // Unselect from combobox
         const combobox = this.template.querySelector('c-custom-combobox[data-id="primary-combo"]');
         if (combobox) {
@@ -607,11 +607,11 @@ export default class SendEmails extends LightningElement {
     // Handle removing CC contact from pill
     handleRemoveCCContact(event) {
         const contactId = event.currentTarget.name;
-        
+
         // Remove from selectedCCContacts
         this.selectedCCContacts = this.selectedCCContacts.filter(id => id !== contactId);
         this.updateSelectedContactsDetails();
-        
+
         // Unselect from combobox
         const combobox = this.template.querySelector('c-custom-combobox[data-id="cc-combo"]');
         if (combobox) {
@@ -623,30 +623,30 @@ export default class SendEmails extends LightningElement {
     filterTemplatesByObject() {
         const objectName = this.campaignDetails.templateRelatedObject;
 
-        console.log('obj name => ',objectName);
-        
+        console.log('obj name => ', objectName);
+
         if (!objectName) {
             this.filteredEmailTemplates = [];
             this.filteredCustomTemplates = [];
             return;
         }
-        
+
         this.filteredEmailTemplates = [...this.allEmailTemplates];
-        
-        this.filteredCustomTemplates = this.allCustomTemplates.filter(template => 
+
+        this.filteredCustomTemplates = this.allCustomTemplates.filter(template =>
             template.objectName === objectName || template.objectName === 'Generic'
         );
 
-        console.log('all custom ',JSON.stringify(this.allCustomTemplates));
+        console.log('all custom ', JSON.stringify(this.allCustomTemplates));
         console.log('filter custom temp--> ', JSON.stringify(this.filteredCustomTemplates));
-        
+
     }
 
     // Handle campaign type selection (auto-advance)
     handleOptionSelect(event) {
         const selectedValue = event.currentTarget.dataset.value;
         this.selectedOption = selectedValue;
-        
+
         if (selectedValue === 'single') {
             this.selectedOptionLabel = 'Single Marketing Campaign';
             // Reset drip data for single campaigns
@@ -658,7 +658,7 @@ export default class SendEmails extends LightningElement {
             // Initialize with one drip when drip campaign is selected
             this.initializeDripSequence();
         }
-        
+
         // Go directly to step 2 (Template Configuration)
         this.currentStep = 2;
     }
@@ -667,13 +667,13 @@ export default class SendEmails extends LightningElement {
     getDefaultTimePlusOneHour() {
         const now = new Date();
         now.setHours(now.getHours() + 1);
-        return now.getHours().toString().padStart(2, '0') + ':' + 
-               now.getMinutes().toString().padStart(2, '0');
+        return now.getHours().toString().padStart(2, '0') + ':' +
+            now.getMinutes().toString().padStart(2, '0');
     }
 
     // Initialize drip sequence with first drip
     initializeDripSequence() {
-        const defaultTime = this.getDefaultTimePlusOneHour(); 
+        const defaultTime = this.getDefaultTimePlusOneHour();
         this.dripSequence = [{
             id: this.nextDripId++,
             name: 'Email 1',
@@ -692,10 +692,10 @@ export default class SendEmails extends LightningElement {
             templateLabel: 'No Template Selected',
             templateClass: 'drip-sequence-template no-template'
         }];
-        
+
         // Set the first drip as selected by default
         this.selectedDripId = this.dripSequence[0].id;
-        
+
         // Set default start date to today
         this.dripStartDate = new Date().toISOString().split('T')[0];
     }
@@ -705,8 +705,8 @@ export default class SendEmails extends LightningElement {
         const now = new Date();
         return {
             date: now.toISOString().split('T')[0],
-            time: now.getHours().toString().padStart(2, '0') + ':' + 
-                  now.getMinutes().toString().padStart(2, '0')
+            time: now.getHours().toString().padStart(2, '0') + ':' +
+                now.getMinutes().toString().padStart(2, '0')
         };
     }
 
@@ -716,15 +716,15 @@ export default class SendEmails extends LightningElement {
         const targetDate = new Date(startDate);
         targetDate.setDate(targetDate.getDate() + daysOffset);
         const targetDateString = targetDate.toISOString().split('T')[0];
-        
+
         // If target date is today, minimum time should be current time + 15 minutes
         if (targetDateString === currentDateTime.date) {
             const currentTime = new Date();
             currentTime.setMinutes(currentTime.getMinutes() + 15);
-            return currentTime.getHours().toString().padStart(2, '0') + ':' + 
-                   currentTime.getMinutes().toString().padStart(2, '0');
+            return currentTime.getHours().toString().padStart(2, '0') + ':' +
+                currentTime.getMinutes().toString().padStart(2, '0');
         }
-        
+
         // For future dates, any time is allowed
         return '00:00';
     }
@@ -735,22 +735,22 @@ export default class SendEmails extends LightningElement {
         const targetDate = new Date(startDate);
         targetDate.setDate(targetDate.getDate() + daysOffset);
         const targetDateString = targetDate.toISOString().split('T')[0];
-        
+
         // If target date is in the past, it's invalid
         if (targetDateString < currentDateTime.date) {
             return false;
         }
-        
+
         // If target date is today, check if time is at least 15 minutes in the future
         if (targetDateString === currentDateTime.date) {
             const currentMinutes = new Date().getHours() * 60 + new Date().getMinutes();
             const [hours, minutes] = timeToSend.split(':');
             const targetMinutes = parseInt(hours) * 60 + parseInt(minutes);
-            
+
             // Must be at least 15 minutes in the future
             return targetMinutes >= currentMinutes + 15;
         }
-        
+
         // Future dates are always valid
         return true;
     }
@@ -759,16 +759,16 @@ export default class SendEmails extends LightningElement {
     handleDripStartDateChange(event) {
         const selectedDate = event.target.value;
         const currentDate = this.getCurrentDateTime().date;
-        
+
         // Prevent selecting past dates
         if (selectedDate < currentDate) {
             this.showToast('Error', 'Cannot select a past date for campaign start.', 'error');
             event.target.value = this.dripStartDate; // Reset to previous value
             return;
         }
-        
+
         this.dripStartDate = selectedDate;
-        
+
         // Validate all existing drip times for the new start date
         let hasInvalidTimes = false;
         this.dripSequence = this.dripSequence.map(drip => {
@@ -781,7 +781,7 @@ export default class SendEmails extends LightningElement {
                 hasInvalidTime: !isValid
             };
         });
-        
+
         if (hasInvalidTimes) {
             this.showToast('Warning', 'Some email times are now in the past and need to be updated.', 'warning');
         }
@@ -800,7 +800,7 @@ export default class SendEmails extends LightningElement {
                 name: `Email ${this.dripSequence.length + 1}`,
                 template: '',
                 subject: '',
-                daysAfterStartDate: this.dripSequence.length > 0 ? 
+                daysAfterStartDate: this.dripSequence.length > 0 ?
                     Math.max(...this.dripSequence.map(d => parseInt(d.daysAfterStartDate) || 0)) + 1 : 1,
                 timeToSend: defaultTime,
                 formattedTime: this.formatTimeForDisplay(defaultTime),
@@ -814,18 +814,18 @@ export default class SendEmails extends LightningElement {
                 templateLabel: 'No Template Selected',
                 templateClass: 'drip-sequence-template no-template'
             };
-            
+
             // Update existing drips to unselect them and update classes
             this.dripSequence = this.dripSequence.map(drip => ({
                 ...drip,
                 selectedClass: '',
                 canDelete: this.dripSequence.length > 0 // Enable delete for all when we have more than 1
             }));
-            
+
             // Add new drip and select it
             newDrip.selectedClass = 'selected';
             this.dripSequence = [...this.dripSequence, newDrip];
-            
+
             // Select the newly added drip
             this.selectedDripId = newDrip.id;
         }
@@ -844,7 +844,7 @@ export default class SendEmails extends LightningElement {
                 displayIndex: index + 1,
                 canDelete: this.dripSequence.length > 1 // Update delete availability
             }));
-            
+
             // If deleted drip was selected, select the first available drip
             if (this.selectedDripId === dripId && this.dripSequence.length > 0) {
                 this.selectedDripId = this.dripSequence[0].id;
@@ -874,7 +874,7 @@ export default class SendEmails extends LightningElement {
     handleNameChange(event) {
         const dripId = parseInt(event.target.dataset.id);
         const emailName = event.target.value;
-        
+
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
                 return { ...drip, name: emailName };
@@ -887,7 +887,7 @@ export default class SendEmails extends LightningElement {
     handleDripRelatedObjectChange(event) {
         const dripId = parseInt(event.target.dataset.id);
         const newObject = event.detail.value;
-        
+
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
                 return {
@@ -910,7 +910,7 @@ export default class SendEmails extends LightningElement {
     get dripAvailableTemplates() {
         const drip = this.selectedDrip;
         if (!drip) return [];
-        
+
         let relatedObj = drip.relatedObject || 'Contact';
         return this.allCustomTemplates.filter(template =>
             template.objectName === relatedObj || template.objectName === 'Generic'
@@ -920,12 +920,13 @@ export default class SendEmails extends LightningElement {
     // Handle related object change in template selection step (kept for Single Campaign)
     handleRelatedObjectChange(event) {
         this.campaignDetails.templateRelatedObject = event.detail.value;
-        
+        this.campaignDetails.objectName = event.detail.value;
+
         // Reset selections on related object change
         this.selectedTemplate = '';
         this.selectedListing = null;
         this.selectedListingName = '';
-        
+
         if (this.isDripCampaign) {
             this.dripSequence = this.dripSequence.map(drip => ({
                 ...drip,
@@ -944,9 +945,9 @@ export default class SendEmails extends LightningElement {
     handleTemplateChange(event) {
         const dripId = parseInt(event.target.dataset.id);
         const selectedTemplateId = event.detail.value;
-        
+
         const selectedTemplate = this.availableTemplates.find(template => template.value === selectedTemplateId);
-        
+
         if (selectedTemplate) {
             this.dripSequence = this.dripSequence.map(drip => {
                 if (drip.id === dripId) {
@@ -969,18 +970,18 @@ export default class SendEmails extends LightningElement {
     handleDaysAfterStartDateChange(event) {
         const dripId = parseInt(event.target.dataset.id);
         const newDays = parseInt(event.target.value) || 0;
-        
+
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
                 // Validate the new date/time combination
                 const isValid = this.isDateTimeInFuture(this.dripStartDate, newDays, drip.timeToSend);
-                
+
                 if (!isValid && this.dripStartDate) {
                     this.showToast('Error', 'This date and time combination is in the past. Please select a future time.', 'error');
                 }
-                
-                return { 
-                    ...drip, 
+
+                return {
+                    ...drip,
                     daysAfterStartDate: newDays,
                     hasInvalidTime: !isValid
                 };
@@ -993,19 +994,19 @@ export default class SendEmails extends LightningElement {
     handleTimeToSendChange(event) {
         const dripId = parseInt(event.target.dataset.id);
         const newTime = event.target.value;
-        
+
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
                 // Validate the new date/time combination
                 const isValid = this.isDateTimeInFuture(this.dripStartDate, drip.daysAfterStartDate, newTime);
-                
+
                 if (!isValid && this.dripStartDate) {
                     const minTime = this.getMinimumTimeForDate(this.dripStartDate, drip.daysAfterStartDate);
                     this.showToast('Error', `Time must be at least ${this.formatTimeForDisplay(minTime)} for this date.`, 'error');
                 }
-                
-                return { 
-                    ...drip, 
+
+                return {
+                    ...drip,
                     timeToSend: newTime,
                     formattedTime: this.formatTimeForDisplay(newTime),
                     hasInvalidTime: !isValid
@@ -1056,14 +1057,14 @@ export default class SendEmails extends LightningElement {
         const listingId = event.currentTarget.dataset.value;
         const listingName = event.currentTarget.dataset.label;
         const dripId = this.selectedDripId;
-        
+
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
-                return { 
-                    ...drip, 
-                    selectedListingId: listingId, 
+                return {
+                    ...drip,
+                    selectedListingId: listingId,
                     selectedListingName: listingName,
-                    template: '', 
+                    template: '',
                     subject: '',
                     hasNoTemplate: true,
                     templateLabel: 'No Template Selected',
@@ -1081,11 +1082,11 @@ export default class SendEmails extends LightningElement {
         const dripId = this.selectedDripId;
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
-                return { 
-                    ...drip, 
-                    selectedListingId: null, 
+                return {
+                    ...drip,
+                    selectedListingId: null,
                     selectedListingName: '',
-                    template: '', 
+                    template: '',
                     subject: '',
                     hasNoTemplate: true,
                     templateLabel: 'No Template Selected',
@@ -1099,13 +1100,13 @@ export default class SendEmails extends LightningElement {
     handleDocumentClick(event) {
         const comboboxContainers = this.template.querySelectorAll('.custom-combobox-container');
         let clickedInside = false;
-        
+
         comboboxContainers.forEach(container => {
             if (container.contains(event.target)) {
                 clickedInside = true;
             }
         });
-        
+
         if (!clickedInside) {
             this.isListingDropdownOpen = false;
         }
@@ -1123,12 +1124,12 @@ export default class SendEmails extends LightningElement {
             if (!drip.name || !drip.template || !drip.timeToSend || drip.daysAfterStartDate == null || !drip.relatedObject) {
                 return false;
             }
-            
+
             // Mandatory listing for Listing-type drips
             if (drip.relatedObject === 'MVEX__Listing__c' && !drip.selectedListingId) {
                 return false;
             }
-            
+
             // Validate that date/time is in the future
             if (this.dripStartDate && !this.isDateTimeInFuture(this.dripStartDate, drip.daysAfterStartDate, drip.timeToSend)) {
                 return false;
@@ -1147,7 +1148,7 @@ export default class SendEmails extends LightningElement {
     handleCampaignFieldChange(event) {
         const fieldName = event.target.dataset.id;
         const value = event.detail.value || event.target.value;
-        
+
         this.campaignDetails = {
             ...this.campaignDetails,
             [fieldName]: value
@@ -1162,8 +1163,8 @@ export default class SendEmails extends LightningElement {
     // Generic button handler
     handleButtonClick(event) {
         const action = event.currentTarget.dataset.action;
-        
-        switch(action) {
+
+        switch (action) {
             case 'handleBack':
                 this.handleBack();
                 break;
@@ -1247,8 +1248,8 @@ export default class SendEmails extends LightningElement {
                 templateType: this.campaignDetails.templateType === 'Email Template' ? 'EmailTemplate' : 'EstateXpertTemplate',
                 subject: this.templatePreview.subject || 'Marketing Email',
                 daysAfterStartDate: 0, // Send immediately
-                timeToSend: currentDateTime.getHours().toString().padStart(2, '0') + ':' + 
-                           currentDateTime.getMinutes().toString().padStart(2, '0') + ':00',
+                timeToSend: currentDateTime.getHours().toString().padStart(2, '0') + ':' +
+                    currentDateTime.getMinutes().toString().padStart(2, '0') + ':00',
                 exactDate: currentDateTime.toISOString().split('T')[0], // Today's date
                 disabled: false,
                 selectedListingId: this.selectedListing || '',
@@ -1401,33 +1402,33 @@ export default class SendEmails extends LightningElement {
                     this.showToast('Error', 'Please select a start date for your drip campaign.', 'error');
                     return false;
                 }
-                
+
                 // Validate start date is not in the past
                 if (this.dripStartDate < this.getCurrentDateTime().date) {
                     this.showToast('Error', 'Campaign start date cannot be in the past.', 'error');
                     return false;
                 }
-                
+
                 if (this.dripSequence.length === 0) {
                     this.showToast('Error', 'Please add at least one drip email.', 'error');
                     return false;
                 }
-                
+
                 if (!this.validateDripSequence()) {
                     this.showToast('Error', 'Please fill in all required fields for each drip email and ensure all dates/times are in the future.', 'error');
                     return false;
                 }
-                
+
                 // Check for invalid times
-                const hasInvalidTimes = this.dripSequence.some(drip => 
+                const hasInvalidTimes = this.dripSequence.some(drip =>
                     !this.isDateTimeInFuture(this.dripStartDate, drip.daysAfterStartDate, drip.timeToSend)
                 );
-                
+
                 if (hasInvalidTimes) {
                     this.showToast('Error', 'Some emails are scheduled for past dates/times. Please update them to future dates/times.', 'error');
                     return false;
                 }
-                
+
                 // Validate duplicate date-time combinations
                 const uniqueDateTimeValues = new Set();
                 let hasDuplicateDateTime = false;
@@ -1490,19 +1491,19 @@ export default class SendEmails extends LightningElement {
         this.selectedListing = null;
         this.selectedListingName = '';
         this.activeTab = 'All';
-        
+
         // Reset contact selections
         this.selectedContacts = [];
         this.selectedCCContacts = [];
         this.selectedContactsDetails = [];
         this.selectedCCContactsDetails = [];
-        
+
         // Reset drip campaign data
         this.dripSequence = [];
         this.dripStartDate = null;
         this.nextDripId = 1;
         this.selectedDripId = null; // Reset selected drip
-        
+
         this.campaignDetails = {
             objectName: 'Contact',
             templateRelatedObject: 'Contact',
@@ -1512,9 +1513,9 @@ export default class SendEmails extends LightningElement {
             selectedTemplate: '',
             isObjectDropDownDisabled: !!this.objectApiName
         };
-        
+
         this.selectedBroadcastGroups = [];
-        
+
         this.dispatchEvent(new CustomEvent('close'));
         this.showModal = false;
     }
@@ -1529,7 +1530,7 @@ export default class SendEmails extends LightningElement {
         this.dispatchEvent(event);
     }
 
-    handleCloseModal(){
+    handleCloseModal() {
         this.isPreviewModal = false;
         this.selectedTemplateId = '';
     }
@@ -1574,13 +1575,13 @@ export default class SendEmails extends LightningElement {
     // Add this method to format time for display
     formatTimeForDisplay(time24) {
         if (!time24) return '';
-        
+
         const [hours, minutes] = time24.split(':');
         const hour = parseInt(hours);
         const minute = parseInt(minutes);
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-        
+
         return `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
     }
 

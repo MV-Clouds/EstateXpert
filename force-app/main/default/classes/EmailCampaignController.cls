@@ -1950,7 +1950,6 @@ public with sharing class EmailCampaignController {
 
                     String emailType = campaignRecord.Email_Type__c;
                     String relatedObject = campaignRecord.RelatedObject__c;
-                    processedBody = request.body;
      
                     String extractedKeyString = '';
                     List<Template__c> fieldData = new List<Template__c>();
@@ -1969,6 +1968,9 @@ public with sharing class EmailCampaignController {
                     Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);            
                     
                     for (String toAddress : request.toAddresses) {
+                        // Reset body per-recipient so substitutions from one recipient
+                        // don't carry over into the next recipient's email.
+                        processedBody = request.body;
                         SObject recipient = emailToRecipientMap.get(toAddress);
                         if (recipient == null) {
                             continue;
@@ -2022,6 +2024,28 @@ public with sharing class EmailCampaignController {
                             for (String src : salesforceImages.keySet()) {
                                 String escapedSrc = Pattern.quote(src);
                                 processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
+                            }
+
+                            // --- Recipient field replacement for Listing templates ---
+                            // Replace {{EXPRecipient.<FieldAPI>}} keys with values from the To-recipient
+                            // Contact's own fields. CC/BCC contacts are intentionally excluded here.
+                            String relObjName = request.RelatedObjectName;
+                            if (String.isNotBlank(relObjName) &&
+                                    (relObjName.equalsIgnoreCase('MVEX__Listing__c') || relObjName.equalsIgnoreCase('Listing__c'))) {
+                                Set<String> recipientFieldKeys = DataMappingControllerV2.collectRecipientFieldKeys(extractedKeyMap);
+                                if (!recipientFieldKeys.isEmpty()) {
+                                    Contact recipientContact = (Contact) emailToRecipientMap.get(toAddress);
+                                    if (recipientContact != null) {
+                                        Map<String, String> recipientReplacements =
+                                            DataMappingControllerV2.getRecipientFieldReplacements(recipientFieldKeys, recipientContact);
+                                        for (String rKey : recipientReplacements.keySet()) {
+                                            processedBody = processedBody.replaceAll(
+                                                Pattern.quote(rKey),
+                                                recipientReplacements.get(rKey) != null ? recipientReplacements.get(rKey) : ''
+                                            );
+                                        }
+                                    }
+                                }
                             }
                         }
 

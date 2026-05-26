@@ -24,7 +24,8 @@ public with sharing class EmailCampaignScheduler {
             Map<String, Marketing_Campaign__c> campaignMap = new Map<String, Marketing_Campaign__c>();
             if (!campaignIds.isEmpty()) {
                 List<Marketing_Campaign__c> campaigns = [
-                SELECT Id, Name, Remaining_Emails__c, Status__c, Total_Sent_Mails__c, Email_Type__c, Schedule_Type__c 
+                SELECT Id, Name, Remaining_Emails__c, Status__c, Total_Sent_Mails__c,
+                       Email_Type__c, Schedule_Type__c, RelatedObject__c
                 FROM Marketing_Campaign__c 
                 WHERE Id IN :campaignIds WITH USER_MODE
             ];
@@ -86,6 +87,42 @@ public with sharing class EmailCampaignScheduler {
                 }
             }
             
+            // Build a cache of templateId -> extractedKeyMap for recipient field replacement.
+            // This allows us to look up recipientFields keys per template without per-request SOQL.
+            Set<Id> allTemplateDataIds = new Set<Id>();
+            for (EmailRequest req : emailRequests) {
+                if (req.templateDataId != null) {
+                    allTemplateDataIds.add(req.templateDataId);
+                }
+            }
+            Map<Id, Map<String, Object>> templateIdToExtractedKeyMap = new Map<Id, Map<String, Object>>();
+            if (!allTemplateDataIds.isEmpty()) {
+                List<Template__c> templateDataRecords = [
+                    SELECT Id,
+                        (SELECT Template_Value_Simple__c FROM Template_Data__r
+                         WHERE Value_Type__c = 'Extracted Mapping Keys'
+                         ORDER BY Order_No_Simple__c ASC)
+                    FROM Template__c
+                    WHERE Id IN :allTemplateDataIds WITH USER_MODE
+                ];
+                for (Template__c temp : templateDataRecords) {
+                    String keyStr = '';
+                    for (Template_Data__c td : temp.Template_Data__r) {
+                        keyStr += td.Template_Value_Simple__c != null ? td.Template_Value_Simple__c : '';
+                    }
+                    if (String.isNotBlank(keyStr)) {
+                        try {
+                            templateIdToExtractedKeyMap.put(
+                                temp.Id,
+                                (Map<String, Object>) JSON.deserializeUntyped(keyStr)
+                            );
+                        } catch (Exception parseEx) {
+                            // Malformed JSON in key data — skip gracefully
+                        }
+                    }
+                }
+            }
+
             for (EmailRequest req : emailRequests) {
                 Marketing_Campaign__c campaignRecord = campaignMap.get(req.campaignId);
                 if (campaignRecord.Schedule_Type__c != 'Contact Field') {
@@ -111,6 +148,29 @@ public with sharing class EmailCampaignScheduler {
                     for (String src : salesforceImages.keySet()) {
                         String escapedSrc = Pattern.quote(src);
                         processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
+                    }
+
+                    // --- Recipient field replacement for Listing templates ---
+                    // Replace {{EXPRecipient.<FieldAPI>}} keys with values from the To-recipient
+                    // Contact's own fields. CC/BCC contacts are intentionally excluded here.
+                    Marketing_Campaign__c cmpRecord = campaignMap.get(req.campaignId);
+                    String relObjAPI = cmpRecord != null ? cmpRecord.RelatedObject__c : null;
+                    if (String.isNotBlank(relObjAPI) &&
+                            (relObjAPI.equalsIgnoreCase('MVEX__Listing__c') || relObjAPI.equalsIgnoreCase('Listing__c'))) {
+                        Map<String, Object> ekMap = templateIdToExtractedKeyMap.get(req.templateDataId);
+                        if (ekMap != null) {
+                            Set<String> recipientFieldKeys = DataMappingControllerV2.collectRecipientFieldKeys(ekMap);
+                            if (!recipientFieldKeys.isEmpty() && contact != null) {
+                                Map<String, String> recipientReplacements =
+                                    DataMappingControllerV2.getRecipientFieldReplacements(recipientFieldKeys, contact);
+                                for (String rKey : recipientReplacements.keySet()) {
+                                    processedBody = processedBody.replaceAll(
+                                        Pattern.quote(rKey),
+                                        recipientReplacements.get(rKey) != null ? recipientReplacements.get(rKey) : ''
+                                    );
+                                }
+                            }
+                        }
                     }
                 }
                 

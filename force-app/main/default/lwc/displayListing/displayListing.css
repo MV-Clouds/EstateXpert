@@ -69,10 +69,11 @@
     justify-content: space-around;
 }
 
-.main {
+.main-map {
     background-color: white;
     display: flex;
     width: 100%;
+    height: 26.8rem;
 }
 
 .item-1 p {

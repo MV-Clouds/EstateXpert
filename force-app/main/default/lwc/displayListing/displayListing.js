@@ -1254,17 +1254,21 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     updateMapMarkers() {
         const startIndex = (this.currentPage - 1) * this.pageSize;
         const currentPageData = this.pagedFilteredListingData.slice(startIndex, startIndex + this.pageSize);
+        console.log('current Page Data -> ', currentPageData);
+        console.log('this.pagedFilteredListingData -> ', this.pagedFilteredListingData);
+        
 
         this.mapMarkers = currentPageData.map(listing => ({
             id: listing.id,
             location: {
-                Street: listing.mvex__street__c,
-                City: listing.mvex__city__c,
-                State: listing.mvex__state__c,
-                Country: listing.mvex__country__c
+                Street: listing.mvex__listing_address__street__s,
+                City: listing.mvex__listing_address__city__s,
+                State: listing.mvex__listing_address__state__c,
+                PostalCode: listing.mvex__listing_address__postal_code__s,
+                Country: listing.mvex__listing_address__country__c
             },
-            title: listing.Name,
-            description: `City: ${listing.mvex__city__c}, Sq Ft: ${listing.mvex__sq_ft__c}`,
+            title: listing.name,
+            description: listing.mvex__listing_type__c == 'Sale' ? `City: ${listing.mvex__listing_address__city__s}, Price: ${listing.mvex__listing_price__c}` : `City: ${listing.mvex__listing_address__city__s}, Rent: ${listing.mvex__rental_price__c}`,
             icon: 'custom:custom26',
             media_url: listing.media_url
         }));

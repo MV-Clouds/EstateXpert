@@ -491,18 +491,31 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     // ── Search ─────────────────────────────────────────────────
     handleSearch(event) {
-        this.searchTerm = event.target.value.toLowerCase();
-        const term = this.searchTerm.trim();
+        const rawValue = (event.detail.value !== undefined ? event.detail.value : event.target.value) || '';
+        this.searchTerm = rawValue.toLowerCase().trim();
+
         let results = this.data.filter(item => {
-            const name = item.name?.toLowerCase() || '';
-            const phone = item.phone?.toLowerCase() || '';
-            const email = item.email?.toLowerCase() || '';
-            return !term || name.includes(term) || phone.includes(term) || email.includes(term);
+            if (!this.searchTerm) return true;
+
+            const name  = item.name?.toLowerCase()  || '';
+            const phone = item.phone?.toLowerCase()  || '';
+            const email = item.email?.toLowerCase()  || '';
+
+            if (this.communicationType === 'Email') {
+                // Search by Name or Email only
+                return name.includes(this.searchTerm) || email.includes(this.searchTerm);
+            } else if (this.communicationType === 'Phone' || this.communicationType === 'WhatsApp') {
+                // Search by Name or Phone only
+                return name.includes(this.searchTerm) || phone.includes(this.searchTerm);
+            } else if (this.communicationType === 'Both') {
+                // Search by Name, Phone, or Email
+                return name.includes(this.searchTerm) || phone.includes(this.searchTerm) || email.includes(this.searchTerm);
+            }
+            // Fallback: search by name only
+            return name.includes(this.searchTerm);
         });
 
-        // Do not alter sorting/order, keep the natural filter order
         this.filteredData = results;
-
         this.currentPage = 1;
         this.updateShownData();
     }

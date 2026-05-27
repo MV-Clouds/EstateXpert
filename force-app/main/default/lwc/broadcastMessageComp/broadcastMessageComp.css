@@ -431,7 +431,10 @@ span {
 
 .table-content .name,
 .table-content .phone,
-.table-content .email {
+.table-content .email,
+.table-content .contactType,
+.table-content .lastModifiedDate,
+.table-content .createdDate {
     width: 30%;
 }
 

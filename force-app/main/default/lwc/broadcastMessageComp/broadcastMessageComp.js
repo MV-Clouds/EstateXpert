@@ -65,6 +65,17 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         return this.data.filter(record => this.selectedRecords.has(record.Id));
     }
 
+    get searchPlaceholder() {
+        if (this.communicationType === 'Email') {
+            return 'Search by Name or Email...';
+        } else if (this.communicationType === 'Phone' || this.communicationType === 'WhatsApp') {
+            return 'Search by Name or Phone...';
+        } else if (this.communicationType === 'Both') {
+            return 'Search by Name, Phone or Email...';
+        }
+        return 'Search...';
+    }
+
     handleRemoveRecord(event) {
         const recordId = event.currentTarget.dataset.id || event.target.name;
         if (recordId) {
@@ -480,18 +491,31 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     // ── Search ─────────────────────────────────────────────────
     handleSearch(event) {
-        this.searchTerm = event.target.value.toLowerCase();
-        const term = this.searchTerm.trim();
+        const rawValue = (event.detail.value !== undefined ? event.detail.value : event.target.value) || '';
+        this.searchTerm = rawValue.toLowerCase().trim();
+
         let results = this.data.filter(item => {
-            const name = item.name?.toLowerCase() || '';
-            const phone = item.phone?.toLowerCase() || '';
-            const email = item.email?.toLowerCase() || '';
-            return !term || name.includes(term) || phone.includes(term) || email.includes(term);
+            if (!this.searchTerm) return true;
+
+            const name  = item.name?.toLowerCase()  || '';
+            const phone = item.phone?.toLowerCase()  || '';
+            const email = item.email?.toLowerCase()  || '';
+
+            if (this.communicationType === 'Email') {
+                // Search by Name or Email only
+                return name.includes(this.searchTerm) || email.includes(this.searchTerm);
+            } else if (this.communicationType === 'Phone' || this.communicationType === 'WhatsApp') {
+                // Search by Name or Phone only
+                return name.includes(this.searchTerm) || phone.includes(this.searchTerm);
+            } else if (this.communicationType === 'Both') {
+                // Search by Name, Phone, or Email
+                return name.includes(this.searchTerm) || phone.includes(this.searchTerm) || email.includes(this.searchTerm);
+            }
+            // Fallback: search by name only
+            return name.includes(this.searchTerm);
         });
 
-        // Do not alter sorting/order, keep the natural filter order
         this.filteredData = results;
-
         this.currentPage = 1;
         this.updateShownData();
     }
@@ -534,6 +558,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         if (response.status === 200) {
             const fields = this.configMap[this.selectedObject];
             let fieldsString = `Id, Name`;
+            // Always include the three extra display fields
+            fieldsString += `, MVEX__Contact_Type__c, CreatedDate, LastModifiedDate`;
             if (fields && fields.phoneField && fields.phoneField.trim() !== '') {
                 fieldsString += `, ${fields.phoneField}`;
             }
@@ -596,6 +622,9 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                             Id: record.Id,
                             name: record['Name'] ? record['Name'] : ' - ',
                             phone: (fields && fields.phoneField && record[fields.phoneField]) ? record[fields.phoneField] : ' - ',
+                            contactType: record['MVEX__Contact_Type__c'] ? record['MVEX__Contact_Type__c'] : ' - ',
+                            createdDate: record['CreatedDate'] ? this.formatDate(record['CreatedDate']) : ' - ',
+                            lastModifiedDate: record['LastModifiedDate'] ? this.formatDate(record['LastModifiedDate']) : ' - ',
                             isSelected: false
                         };
                         if (fields && (this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
@@ -702,8 +731,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     // ── Modal ──────────────────────────────────────────────────
     handleModalOpen() {
-        if (this.selectedRecords.size === 0) {
-            this.showToast('Error', 'Please select at least one record', 'error');
+        if (this.selectedRecords.size < 2) {
+            this.showToast('Error', 'Please select at least two records', 'error');
             return;
         }
 
@@ -743,8 +772,19 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     // ── Save ───────────────────────────────────────────────────
     handleSave() {
-        if (this.messageText.trim() === '' || this.broadcastGroupName.trim() === '') {
+        const name        = (this.broadcastGroupName || '').trim();
+        const description = (this.messageText       || '').trim();
+
+        if (!name || !description) {
             this.showToast('Error', 'Please fill in all required fields', 'error');
+            return;
+        }
+        if (name.length > 80) {
+            this.showToast('Error', 'Name must not exceed 80 characters', 'error');
+            return;
+        }
+        if (description.length > 255) {
+            this.showToast('Error', 'Description must not exceed 255 characters', 'error');
             return;
         }
 
@@ -813,6 +853,20 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             });
         } catch (error) {
             errorDebugger('broadcastMessageComp', 'navigateToAllGroup', error, 'warn', 'Error in navigateToAllGroup');
+        }
+    }
+
+    /** Formats an ISO date/datetime string to DD/MM/YYYY for display. */
+    formatDate(isoString) {
+        try {
+            const d = new Date(isoString);
+            if (isNaN(d.getTime())) return isoString;
+            const day   = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year  = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        } catch (e) {
+            return isoString;
         }
     }
 }

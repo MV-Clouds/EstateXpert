@@ -731,8 +731,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     // ── Modal ──────────────────────────────────────────────────
     handleModalOpen() {
-        if (this.selectedRecords.size === 0) {
-            this.showToast('Error', 'Please select at least one record', 'error');
+        if (this.selectedRecords.size < 2) {
+            this.showToast('Error', 'Please select at least two records', 'error');
             return;
         }
 

@@ -65,6 +65,17 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         return this.data.filter(record => this.selectedRecords.has(record.Id));
     }
 
+    get searchPlaceholder() {
+        if (this.communicationType === 'Email') {
+            return 'Search by Name or Email...';
+        } else if (this.communicationType === 'Phone' || this.communicationType === 'WhatsApp') {
+            return 'Search by Name or Phone...';
+        } else if (this.communicationType === 'Both') {
+            return 'Search by Name, Phone or Email...';
+        }
+        return 'Search...';
+    }
+
     handleRemoveRecord(event) {
         const recordId = event.currentTarget.dataset.id || event.target.name;
         if (recordId) {
@@ -534,6 +545,8 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         if (response.status === 200) {
             const fields = this.configMap[this.selectedObject];
             let fieldsString = `Id, Name`;
+            // Always include the three extra display fields
+            fieldsString += `, MVEX__Contact_Type__c, CreatedDate, LastModifiedDate`;
             if (fields && fields.phoneField && fields.phoneField.trim() !== '') {
                 fieldsString += `, ${fields.phoneField}`;
             }
@@ -596,6 +609,9 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                             Id: record.Id,
                             name: record['Name'] ? record['Name'] : ' - ',
                             phone: (fields && fields.phoneField && record[fields.phoneField]) ? record[fields.phoneField] : ' - ',
+                            contactType: record['MVEX__Contact_Type__c'] ? record['MVEX__Contact_Type__c'] : ' - ',
+                            createdDate: record['CreatedDate'] ? this.formatDate(record['CreatedDate']) : ' - ',
+                            lastModifiedDate: record['LastModifiedDate'] ? this.formatDate(record['LastModifiedDate']) : ' - ',
                             isSelected: false
                         };
                         if (fields && (this.communicationType === 'Email' || this.communicationType === 'Both') && fields.emailField) {
@@ -813,6 +829,20 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
             });
         } catch (error) {
             errorDebugger('broadcastMessageComp', 'navigateToAllGroup', error, 'warn', 'Error in navigateToAllGroup');
+        }
+    }
+
+    /** Formats an ISO date/datetime string to DD/MM/YYYY for display. */
+    formatDate(isoString) {
+        try {
+            const d = new Date(isoString);
+            if (isNaN(d.getTime())) return isoString;
+            const day   = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year  = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        } catch (e) {
+            return isoString;
         }
     }
 }

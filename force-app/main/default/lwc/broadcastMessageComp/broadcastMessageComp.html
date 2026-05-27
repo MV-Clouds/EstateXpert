@@ -22,8 +22,8 @@
                     <div class="filter-toolbar">
                         <div class="header-search-bar-css">
                             <lightning-input type="search" class='searchInput' label="Search Contact"
-                                variant='label-hidden' placeholder="Search by Name, Phone or Email..."
-                                onchange={handleSearch} disabled={isSearchDisabled}></lightning-input>
+                                variant='label-hidden' placeholder={searchPlaceholder} onchange={handleSearch}
+                                disabled={isSearchDisabled}></lightning-input>
                         </div>
                         <div class="header-combobox">
                             <lightning-combobox label="Select List View" class='listView' variant='label-hidden'
@@ -63,8 +63,7 @@
                         <!-- Custom Table -->
                         <template if:true={paginatedData.length}>
                             <div class="table-content">
-                                <table aria-multiselectable="true"
-                                    class="slds-table slds-table_fixed-layout slds-table_resizable-cols">
+                                <table aria-multiselectable="true" class="slds-table slds-table_resizable-cols">
                                     <thead>
                                         <tr class="table_tr_cls slds-line-height_reset">
                                             <th scope="col" class="checkbox sno">
@@ -110,7 +109,7 @@
                                             </template>
                                             <template if:true={showEmailColumn}>
                                                 <th aria-sort="none" data-id="email" onclick={sortClick}
-                                                    class="email slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                                    class="email slds-is-resizable slds-is-sortable slds-cell_action_mode sorting_header"
                                                     scope="col">
                                                     <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
                                                         role="button" tabindex="0">
@@ -126,6 +125,52 @@
                                                     </div>
                                                 </th>
                                             </template>
+                                            <th aria-sort="none" data-id="contactType" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action_mode sorting_header contactType"
+                                                scope="col">
+                                                <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Contact Type">Contact Type</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="contactType" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th aria-sort="none" data-id="createdDate" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action_mode sorting_header createdDate"
+                                                scope="col">
+                                                <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Created Date">Created Date</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="createdDate" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th aria-sort="none" data-id="lastModifiedDate" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action_mode sorting_header lastModifiedDate"
+                                                scope="col">
+                                                <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                    role="button" tabindex="0">
+                                                    <span class="slds-truncate" title="Last Modified Date">Last Modified
+                                                        Date</span>
+                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                        <svg data-index="lastModifiedDate" class="listing-manager-icon"
+                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -152,6 +197,15 @@
                                                         <div>{row.email}</div>
                                                     </td>
                                                 </template>
+                                                <td data-label="Contact Type">
+                                                    <div>{row.contactType}</div>
+                                                </td>
+                                                <td data-label="Created Date">
+                                                    <div>{row.createdDate}</div>
+                                                </td>
+                                                <td data-label="Last Modified Date">
+                                                    <div>{row.lastModifiedDate}</div>
+                                                </td>
                                             </tr>
                                         </template>
                                     </tbody>

@@ -772,8 +772,19 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
 
     // ── Save ───────────────────────────────────────────────────
     handleSave() {
-        if (this.messageText.trim() === '' || this.broadcastGroupName.trim() === '') {
+        const name        = (this.broadcastGroupName || '').trim();
+        const description = (this.messageText       || '').trim();
+
+        if (!name || !description) {
             this.showToast('Error', 'Please fill in all required fields', 'error');
+            return;
+        }
+        if (name.length > 80) {
+            this.showToast('Error', 'Name must not exceed 80 characters', 'error');
+            return;
+        }
+        if (description.length > 255) {
+            this.showToast('Error', 'Description must not exceed 255 characters', 'error');
             return;
         }
 

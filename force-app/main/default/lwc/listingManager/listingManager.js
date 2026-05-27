@@ -575,9 +575,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             this.sortField = 'Name';
             this.sortOrder = 'asc';
 
-            this.sortField = 'Name';
-            this.sortOrder = 'asc';
-
             const resetCheckedFlag = item => ({ ...item, isChecked: false });
             this.processedListingData = this.processedListingData.map(resetCheckedFlag);
             this.unchangedProcessListings = this.unchangedProcessListings.map(resetCheckedFlag);

@@ -758,6 +758,18 @@ export default class SendEmails extends LightningElement {
     // Handle drip start date change
     handleDripStartDateChange(event) {
         const selectedDate = event.target.value;
+
+        // If the user cleared the date field, just reset the start date silently
+        if (!selectedDate) {
+            this.dripStartDate = null;
+            // Clear any invalid-time flags since there's no date to validate against
+            this.dripSequence = this.dripSequence.map(drip => ({
+                ...drip,
+                hasInvalidTime: false
+            }));
+            return;
+        }
+
         const currentDate = this.getCurrentDateTime().date;
 
         // Prevent selecting past dates

@@ -38,6 +38,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         { label: 'Pending', value: 'Pending' },
         { label: 'In Progress', value: 'In Progress' },
         { label: 'Completed', value: 'Completed' },
+        { label: 'Failed', value: 'Failed' }
     ];
 
     // Sorting variables
@@ -558,11 +559,6 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
             const filterId = event.target.dataset.id;
             if (filterId === 'statusFilter') {
                 this.statusFilter = event.target.value;
-
-                if(!this.statusFilterList.includes(this.statusFilter) && this.statusFilter !== ''){
-                    this.statusFilterList.push(this.statusFilter);
-                }
-    
             } else if (filterId === 'createdDateStart') {
                 this.createdDateStart = event.target.value;
             } else if (filterId === 'createdDateEnd') {
@@ -623,7 +619,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
                 endDate.setHours(23, 59, 59, 999);
             }    
 
-            const isStatusMatch = this.statusFilterList.length === 0 || this.statusFilterList.includes(campaign.MVEX__Status__c);
+            const isStatusMatch = !this.statusFilter || campaign.MVEX__Status__c === this.statusFilter;
             const isDateMatch = (!startDate || createdDate >= startDate) && (!endDate || createdDate <= endDate);
     
             return isStatusMatch && isDateMatch;

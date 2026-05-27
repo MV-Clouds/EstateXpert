@@ -1260,8 +1260,12 @@ export default class SendEmails extends LightningElement {
                 templateType: this.campaignDetails.templateType === 'Email Template' ? 'EmailTemplate' : 'EstateXpertTemplate',
                 subject: this.templatePreview.subject || 'Marketing Email',
                 daysAfterStartDate: 0, // Send immediately
-                timeToSend: currentDateTime.getHours().toString().padStart(2, '0') + ':' +
-                    currentDateTime.getMinutes().toString().padStart(2, '0') + ':00',
+                timeToSend: this.convertLocalToUTCTime(
+                    currentDateTime.getHours().toString().padStart(2, '0') + ':' +
+                    currentDateTime.getMinutes().toString().padStart(2, '0') + ':00', 
+                    0, 
+                    currentDateTime.toISOString().split('T')[0]
+                ),
                 exactDate: currentDateTime.toISOString().split('T')[0], // Today's date
                 disabled: false,
                 selectedListingId: this.selectedListing || '',
@@ -1328,7 +1332,7 @@ export default class SendEmails extends LightningElement {
                 templateType: this.campaignDetails.templateType === 'Email Template' ? 'EmailTemplate' : 'EstateXpertTemplate',
                 subject: drip.subject,
                 daysAfterStartDate: drip.daysAfterStartDate,
-                timeToSend: drip.timeToSend + ':00', // Add seconds as EmailCampaignController expects
+                timeToSend: this.convertLocalToUTCTime(drip.timeToSend + ':00', drip.daysAfterStartDate, this.dripStartDate),
                 exactDate: this.dripStartDate,
                 disabled: false,
                 selectedListingId: drip.selectedListingId || this.selectedListing || '',
@@ -1390,6 +1394,31 @@ export default class SendEmails extends LightningElement {
     // Transform CC/BCC recipients like emailCampaignTemplateForm.js
     transformRecipients(recipients) {
         return recipients.map(recipient => `${recipient.id}:${recipient.email}`);
+    }
+
+    convertLocalToUTCTime(localTimeString, daysAfterStartDate = 0, baseDateString = null) {
+        if (!localTimeString) return '';
+        try {
+            let baseDateStr = baseDateString || new Date().toISOString().split('T')[0];
+            const dateObj = new Date(baseDateStr);
+            dateObj.setDate(dateObj.getDate() + (parseInt(daysAfterStartDate, 10) || 0));
+            
+            const timeStr = localTimeString.replace('Z', '');
+            const [hours, minutes, secondsAndMillis] = timeStr.split(':');
+            const seconds = secondsAndMillis ? secondsAndMillis.split('.')[0] : '00';
+            const millis = secondsAndMillis && secondsAndMillis.includes('.') ? secondsAndMillis.split('.')[1] : '000';
+            
+            dateObj.setHours(parseInt(hours, 10), parseInt(minutes, 10), parseInt(seconds, 10), parseInt(millis, 10));
+            
+            const utcHours = dateObj.getUTCHours().toString().padStart(2, '0');
+            const utcMinutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+            const utcSeconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+            const utcMillis = dateObj.getUTCMilliseconds().toString().padStart(3, '0');
+            return `${utcHours}:${utcMinutes}:${utcSeconds}.${utcMillis}`;
+        } catch(e) {
+            console.log('Error converting to UTC:', e);
+            return localTimeString;
+        }
     }
 
     // Reset finish button state

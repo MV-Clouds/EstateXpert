@@ -38,6 +38,7 @@ export default class DisplayCampaigns extends NavigationMixin(LightningElement) 
         { label: 'Pending', value: 'Pending' },
         { label: 'In Progress', value: 'In Progress' },
         { label: 'Completed', value: 'Completed' },
+        { label: 'Failed', value: 'Failed' }
     ];
 
     // Sorting variables

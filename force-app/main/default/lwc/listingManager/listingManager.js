@@ -487,6 +487,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     return {
                         fieldName: field.fieldName,
                         value: fieldValueraw,
+                        rawValue: (rawValue === null || rawValue === undefined || rawValue === '') ? null : rawValue,
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
@@ -935,6 +936,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     sortData() {
         try {
+            // Helper: returns true if a value represents an empty/null display value
+            const isEmpty = (v) => v === null || v === undefined || v === '' || v === '-';
+
             this.processedListingData = [...this.processedListingData].sort((a, b) => {
                 let aValue, bValue;
 
@@ -942,9 +946,30 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     aValue = a.Name;
                     bValue = b.Name;
                 } else {
-                    aValue = a.orderedFields.find(field => field.fieldName === this.sortField).value;
-                    bValue = b.orderedFields.find(field => field.fieldName === this.sortField).value;
+                    const aField = a.orderedFields.find(field => field.fieldName === this.sortField);
+                    const bField = b.orderedFields.find(field => field.fieldName === this.sortField);
+
+                    // For DATE / DATETIME fields use the raw Salesforce value so we
+                    // sort chronologically, not by the locale-formatted display string.
+                    const fieldMeta = this.fields.find(f => f.fieldName === this.sortField);
+                    const isDateField = fieldMeta &&
+                        (fieldMeta.fieldType === 'DATE' || fieldMeta.fieldType === 'DATETIME');
+
+                    if (isDateField) {
+                        aValue = aField.rawValue ? Date.parse(aField.rawValue) : null;
+                        bValue = bField.rawValue ? Date.parse(bField.rawValue) : null;
+                    } else {
+                        aValue = aField.value;
+                        bValue = bField.value;
+                    }
                 }
+
+                // Push null/empty to the very end on asc, very front on desc
+                const aEmpty = isEmpty(aValue);
+                const bEmpty = isEmpty(bValue);
+                if (aEmpty && bEmpty) return 0;
+                if (aEmpty) return this.sortOrder === 'asc' ? 1 : -1;
+                if (bEmpty) return this.sortOrder === 'asc' ? -1 : 1;
 
                 if (typeof aValue === 'string' && typeof bValue === 'string') {
                     aValue = aValue.toLowerCase();

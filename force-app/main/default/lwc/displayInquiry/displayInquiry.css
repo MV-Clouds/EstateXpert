@@ -144,7 +144,7 @@ button:disabled {
     border: 1px solid #0176D3;
 }
 
-.main_content_cls{
+.main_content_cls {
     height: 30rem;
 }
 
@@ -221,17 +221,18 @@ button:disabled {
     transition: all 0.2s ease;
 }
 
-.action-icon-div{
-display: flex;
+.action-icon-div {
+    display: flex;
     justify-content: center;
     align-items: center;
 }
+
 /* 
 .mapping-btn:hover {
     background-color: #005fb2;
 } */
 
-.mapping-btn:hover:not(:disabled)  {
+.mapping-btn:hover:not(:disabled) {
     background: #0156A3;
     box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
     transform: translateY(-1px);
@@ -491,14 +492,21 @@ span {
     color: white;
 }
 
-.add-condition-icon-btn:hover {
+.add-condition-icon-btn:hover:not(:disabled) {
     background: #0156A3;
     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.3);
     transform: translateY(-1px) scale(1.05);
 }
 
-.add-condition-icon-btn:active {
+.add-condition-icon-btn:active:not(:disabled) {
     transform: translateY(0) scale(0.98);
+}
+
+.add-condition-icon-btn:disabled {
+    background: #9CA3AF;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
 }
 
 
@@ -864,7 +872,7 @@ span {
         justify-content: space-between;
     }
 
-    .btn-container{
+    .btn-container {
         display: flex;
         gap: 1rem;
     }
@@ -874,7 +882,7 @@ span {
         display: flex;
     }
 
-    .filter-section{
+    .filter-section {
         width: 100%;
         display: flex;
         gap: 0.5rem;
@@ -925,12 +933,12 @@ span {
         box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    .btn-container{
+    .btn-container {
         display: flex;
         gap: 1rem;
     }
 
-    .filter-section{
+    .filter-section {
         width: 100%;
         display: flex;
         justify-content: space-between;
@@ -981,7 +989,7 @@ span {
 
 /* --- New Send Template Modal Styles (Matched with marketingListCmp) --- */
 .send-template-modal-container {
-   width: 70%;
+    width: 70%;
     min-width: 60rem;
     display: flex;
     flex-direction: column;
@@ -1091,7 +1099,7 @@ span {
     padding-top: 23px;
 }
 
-.contact-table{
+.contact-table {
     min-height: 300px;
     max-height: 300px;
 }
@@ -1150,7 +1158,8 @@ span {
 }
 
 .confirm-modal {
-    z-index: 9200; /* Higher than backdrop */
+    z-index: 9200;
+    /* Higher than backdrop */
 }
 
 .confirm-modal .slds-modal__container {
@@ -1207,14 +1216,14 @@ span {
     flex-shrink: 0;
 }
 
-.main-line { 
-    font-size: 14px; 
+.main-line {
+    font-size: 14px;
     font-weight: 500;
     color: #1F2937;
     margin: 0;
 }
 
-.next-line { 
+.next-line {
     font-size: 12px;
     color: #6B7280;
     margin: 0;
@@ -1272,7 +1281,7 @@ span {
     bottom: 0;
 }
 
-.table-content .slds-table td{
+.table-content .slds-table td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

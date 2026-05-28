@@ -5,7 +5,6 @@ import createmediaforlisting from "@salesforce/apex/ImageAndMediaController.crea
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import watermarkjs from "@salesforce/resourceUrl/watermarkjs";
 import buffer from 'c/buffer';
-import videoThumbnail from '@salesforce/resourceUrl/videothumbnail';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
@@ -283,14 +282,14 @@ export default class AwsFileUploader extends LightningElement {
     */
     uploadImage() {
         try {
-            const urlPattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                    '((([a-z0-9\\-]+\\.)+[a-z]{2,})|'+ // domain name
-                    'localhost|'+ // localhost
-                    '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|'+ // IP address
-                    '\\[?[a-f0-9]*:[a-f0-9:%.]+\\]?)'+ // IPv6
-                    '(\\:\\d+)?(\\/[-a-z0-9%_.~+]*)*'+ // port and path
-                    '(\\?[;&a-z0-9%_.~+=-]*)?'+ // query string
-                    '(\\#[-a-z0-9_]*)?$','i'); // fragment locator
+            const urlPattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+                '((([a-z0-9\\-]+\\.)+[a-z]{2,})|' + // domain name
+                'localhost|' + // localhost
+                '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' + // IP address
+                '\\[?[a-f0-9]*:[a-f0-9:%.]+\\]?)' + // IPv6
+                '(\\:\\d+)?(\\/[-a-z0-9%_.~+]*)*' + // port and path
+                '(\\?[;&a-z0-9%_.~+=-]*)?' + // query string
+                '(\\#[-a-z0-9_]*)?$', 'i'); // fragment locator
             if (this.imageTitleToUpload?.trim() && this.imageUrlToUpload) {
                 if (this.selectedUrlType === 'Image') {
                     if (!this.imageUrlToUpload.match(/\.(png|jpg|jpeg|gif|png|svg)(\?.*)?$/)) {
@@ -307,23 +306,23 @@ export default class AwsFileUploader extends LightningElement {
                             isOnWebsite: true
                         })
                         createmediaforlisting({ recordId: this.propertyId, mediaList: fileContent })
-                        .then(result => {
-                            if (result == 'success') {
-                                this.handleDialogueCloseAndRefresh();
-                                this.imageTitleToUpload = null;
-                                this.showToast('Success', 'Image uploaded successfully.', 'success');
-                            } else {
-                                this.showToast('Error', result, 'error');
-                                this.uploadStatus = false;
-                                this.showSpinner = false;
-                            }
+                            .then(result => {
+                                if (result == 'success') {
+                                    this.handleDialogueCloseAndRefresh();
+                                    this.imageTitleToUpload = null;
+                                    this.showToast('Success', 'Image uploaded successfully.', 'success');
+                                } else {
+                                    this.showToast('Error', result, 'error');
+                                    this.uploadStatus = false;
+                                    this.showSpinner = false;
+                                }
 
-                        }).catch(error => {
-                            this.showToast('Error', JSON.stringify(error.stack), 'error');
-                            this.showSpinner = false;
-                            this.uploadStatus = false;
-                            errorDebugger('AwsFileUploader', 'uploadImage:createmediaforlisting', error, 'warn', 'Error while uploading image');
-                        });
+                            }).catch(error => {
+                                this.showToast('Error', JSON.stringify(error.stack), 'error');
+                                this.showSpinner = false;
+                                this.uploadStatus = false;
+                                errorDebugger('AwsFileUploader', 'uploadImage:createmediaforlisting', error, 'warn', 'Error while uploading image');
+                            });
                     }
                 } else if (this.selectedUrlType === 'Video') {
                     if (urlPattern.test(this.imageUrlToUpload) && !this.imageUrlToUpload.match(/\.(png|jpg|jpeg|gif|png|svg)(\?.*)?$/)) {
@@ -418,7 +417,7 @@ export default class AwsFileUploader extends LightningElement {
             const fileName = event.currentTarget.dataset.name;
             // Get the index of the file to remove
             const index_of_fileName = this.fileName.indexOf(fileName);
-        
+
             if (index_of_fileName > -1) {
                 // Remove the file from the relevant arrays
                 this.imageToShowFiles.splice(index_of_fileName, 1);
@@ -426,10 +425,10 @@ export default class AwsFileUploader extends LightningElement {
                 this.selectedFilesToUpload.splice(index_of_fileName, 1);
                 this.fileSize.splice(index_of_fileName, 1);
             }
-        
+
             // Reset the file input
             this.template.querySelector('.slds-file-selector__input').value = null;
-        
+
             // If no files left, update the boolean flag
             if (this.imageToShowFiles.length === 0) {
                 this.isImageData = false;
@@ -438,7 +437,7 @@ export default class AwsFileUploader extends LightningElement {
             errorDebugger('AwsFileUploader', 'handleRemove', error, 'warn', 'Error while handling remove');
         }
     }
-    
+
 
     /**
     * Method Name: handleSelectedFiles
@@ -488,7 +487,7 @@ export default class AwsFileUploader extends LightningElement {
             this.template.querySelector('.slds-file-selector__input').value = null;
 
             this.isScrolling = true;
-            
+
         } catch (error) {
             errorDebugger('AwsFileUploader', 'handleSelectedFiles', error, 'warn', 'Error while handling selected files');
         }
@@ -507,24 +506,24 @@ export default class AwsFileUploader extends LightningElement {
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-    
+
                 video.src = URL.createObjectURL(file);
-                
+
                 video.addEventListener('loadeddata', () => {
                     video.currentTime = 1;
-                    
+
                     video.addEventListener('seeked', () => {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
-    
+
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
+
                         const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
-    
+
                         resolve(thumbnailDataUrl);
                     });
                 });
-    
+
                 video.onerror = () => {
                     reject('Error loading video file');
                 };

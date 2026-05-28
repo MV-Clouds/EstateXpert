@@ -517,36 +517,42 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
     }
 
     saveRule() {
-        const errors = [];
-
+        // Step 1: Assigned User check
         if (!this.currentRule.selectedUser) {
-            errors.push('Assigned User is required.');
+            this.showToast('Error', 'Please select an Assigned User before saving.', 'error');
+            return;
         }
 
-        this.currentRule.conditions.forEach((condition, index) => {
+        // Step 2: Condition rows — stop at the FIRST row with any missing field
+        for (let i = 0; i < this.currentRule.conditions.length; i++) {
+            const condition = this.currentRule.conditions[i];
+            const rowNum = i + 1;
+
             if (!condition.selectedField) {
-                errors.push(`Lead Field is required for Condition ${index + 1}.`);
+                this.showToast('Error', `Condition ${rowNum}: Please select a Contact Field.`, 'error');
+                return;
             }
             if (!condition.selectedCondition) {
-                errors.push(`Condition is required for Condition ${index + 1}.`);
+                this.showToast('Error', `Condition ${rowNum}: Please select an Operator.`, 'error');
+                return;
             }
             if (!condition.selectedValue) {
-                errors.push(`Value is required for Condition ${index + 1}.`);
+                this.showToast('Error', `Condition ${rowNum}: Please enter or select a Value.`, 'error');
+                return;
             }
-        });
+        }
 
+        // Step 3: Duplicate condition check
         const conditionKeys = this.currentRule.conditions.map(c => `${c.selectedField}-${c.selectedCondition}-${c.selectedValue}`);
         const uniqueKeys = new Set(conditionKeys);
         if (conditionKeys.length !== uniqueKeys.size) {
-            errors.push('Duplicate conditions found.');
+            this.showToast('Error', 'Duplicate conditions found. Each condition row must be unique.', 'error');
+            return;
         }
 
+        // Step 4: Custom logic validation
         if (this.currentRule.logicalExpression && this.logicError) {
-            errors.push(this.logicError);
-        }
-
-        if (errors.length > 0) {
-            this.showToast('Error', errors.join('\n'), 'error');
+            this.showToast('Error', `Custom Logic Error: ${this.logicError}`, 'error');
             return;
         }
 

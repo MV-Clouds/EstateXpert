@@ -155,6 +155,59 @@ public with sharing class LeadAssignmentController {
         }
     }
 
+    /**
+     * Bulk resolve record IDs to Names.
+     * @param recordIdToObjectMap  Map of recordId (String) → objectApiName (String)
+     * @return Map of recordId (String) → display name (String)
+     */
+    @AuraEnabled
+    public static Map<String, String> getRecordNames(Map<String, String> recordIdToObjectMap) {
+        Map<String, String> result = new Map<String, String>();
+        if (recordIdToObjectMap == null || recordIdToObjectMap.isEmpty()) {
+            return result;
+        }
+
+        // Group IDs by object so we can issue one query per object
+        Map<String, List<String>> objectToIds = new Map<String, List<String>>();
+        for (String recId : recordIdToObjectMap.keySet()) {
+            String objName = recordIdToObjectMap.get(recId);
+            if (String.isNotBlank(objName)) {
+                if (!objectToIds.containsKey(objName)) {
+                    objectToIds.put(objName, new List<String>());
+                }
+                objectToIds.get(objName).add(recId);
+            }
+        }
+
+        for (String objName : objectToIds.keySet()) {
+            try {
+                // Check if the object has a Name field
+                Map<String, Schema.SObjectField> fieldMap =
+                    Schema.getGlobalDescribe().get(objName)?.getDescribe().fields.getMap();
+                if (fieldMap == null || !fieldMap.containsKey('name')) {
+                    // No Name field – fall back to ID for all records of this object
+                    for (String recId : objectToIds.get(objName)) {
+                        result.put(recId, recId);
+                    }
+                    continue;
+                }
+
+                List<String> ids = objectToIds.get(objName);
+                String query = 'SELECT Id, Name FROM ' + objName + ' WHERE Id IN :ids WITH USER_MODE';
+                List<SObject> records = Database.query(query);
+                for (SObject rec : records) {
+                    result.put((String)rec.get('Id'), (String)rec.get('Name'));
+                }
+            } catch (Exception e) {
+                // If query fails, fall back to IDs
+                for (String recId : objectToIds.get(objName)) {
+                    result.put(recId, recId);
+                }
+            }
+        }
+        return result;
+    }
+
     public class LeadAssignmentInitData {
         @AuraEnabled public List<FieldWrapper> objectFields = new List<FieldWrapper>();
         @AuraEnabled public List<User> users = new List<User>();

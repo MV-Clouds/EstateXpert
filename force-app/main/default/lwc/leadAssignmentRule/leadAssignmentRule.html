@@ -110,7 +110,7 @@
                             <div class="form-group">
                                 <div class="condition-heading">
                                 <label class="slds-form-element__label">Conditions</label>
-                                <button class="blue-btn-css" onclick={addNewCondition}>
+                                <button class="blue-btn-css" onclick={addNewCondition} disabled={isConditionLimitReached}>
                                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
                                     </svg>
@@ -212,11 +212,13 @@
                                                             </td>
                                                             <td data-label="Actions">
                                                                 <div class="action-btn">
-                                                                    <button class="delete-icon-css" data-condition-index={conditionIndex} onclick={deleteCondition}>
-                                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-                                                                        </svg>
-                                                                    </button>
+                                                                    <template if:true={canDeleteCondition}>
+                                                                        <button class="delete-icon-css" data-condition-index={conditionIndex} onclick={deleteCondition}>
+                                                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                <path d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                            </svg>
+                                                                        </button>
+                                                                    </template>
                                                                 </div>
                                                             </td>
                                                         </tr>

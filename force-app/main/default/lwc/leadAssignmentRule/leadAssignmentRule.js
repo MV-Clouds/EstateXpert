@@ -50,6 +50,18 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         return this.isEditMode ? 'Edit Rule' : 'New Rule';
     }
 
+    get canAddCondition() {
+        return (this.currentRule?.conditions?.length || 0) < 10;
+    }
+
+    get canDeleteCondition() {
+        return (this.currentRule?.conditions?.length || 0) > 1;
+    }
+
+    get isConditionLimitReached() {
+        return (this.currentRule?.conditions?.length || 0) >= 10;
+    }
+
     connectedCallback() {
         this.isLoading = true;
         loadStyle(this, MulishFontCss);

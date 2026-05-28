@@ -455,7 +455,10 @@ export default class AwsFileUploader extends LightningElement {
 
     /**
     * Method Name: handleSelectedFiles
-    * @description: Used to handle selected files.
+    * @description: Used to handle selected files. Validates file types against the allowed
+    *   list (PNG, JPEG, HEIC, HEIF, MP4, QuickTime/MOV). In multi-file mode, invalid files
+    *   are skipped with an aggregated error toast. In single-file mode, an invalid file
+    *   blocks the upload entirely.
     * Created Date: 27/06/2024
     * Created By: Karan Singh
     */
@@ -463,12 +466,71 @@ export default class AwsFileUploader extends LightningElement {
         try {
             const files = event.target.files;
             if (files.length > 0) {
+
+                // Allowed MIME types (must match the accept attribute)
+                const ALLOWED_TYPES = new Set([
+                    'image/png',
+                    'image/jpeg',
+                    'image/jpg',
+                    'image/heic',
+                    'image/heif',
+                    'video/mp4',
+                    'video/quicktime'   // iPhone .mov files
+                ]);
+
+                // --- Pre-validation: check file types before processing ---
+                const invalidFiles = [];
+                const validFiles = [];
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    // Use MIME type; fall back to extension check for HEIC/HEIF which
+                    // some browsers report as '' or 'application/octet-stream'
+                    const mimeType = (file.type || '').toLowerCase();
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    const isValidMime = ALLOWED_TYPES.has(mimeType);
+                    const isValidExt = ['png', 'jpg', 'jpeg', 'heic', 'heif', 'mp4', 'mov'].includes(ext);
+
+                    if (isValidMime || isValidExt) {
+                        validFiles.push(file);
+                    } else {
+                        invalidFiles.push(file.name);
+                    }
+                }
+
+                // If selecting a single file and it is invalid — block entirely
+                if (files.length === 1 && invalidFiles.length === 1) {
+                    this.showToast(
+                        'Error',
+                        `"${invalidFiles[0]}" is not a supported file type. Please upload PNG, JPG, HEIC, HEIF, MP4, or MOV files only.`,
+                        'error'
+                    );
+                    this.template.querySelector('.slds-file-selector__input').value = null;
+                    return;
+                }
+
+                // If multiple files and some are invalid — show aggregated error and continue with valid ones
+                if (invalidFiles.length > 0) {
+                    this.showToast(
+                        'Error',
+                        `The following file(s) have unsupported types and were skipped: ${invalidFiles.join(', ')}. Only PNG, JPG, HEIC, HEIF, MP4, and MOV files are allowed.`,
+                        'error'
+                    );
+                }
+
+                // If no valid files remain after filtering, stop here
+                if (validFiles.length === 0) {
+                    this.template.querySelector('.slds-file-selector__input').value = null;
+                    return;
+                }
+
+                // --- Process valid files ---
                 this.isImageData = true;
                 this.largeImagefiles = [];
                 let totalSize = 0; // Initialize total size variable
 
-                for (let fileCount = 0; fileCount < files.length; fileCount++) {
-                    let file = files[fileCount];
+                for (let fileCount = 0; fileCount < validFiles.length; fileCount++) {
+                    let file = validFiles[fileCount];
                     const fileSizeInMB = Math.floor((file.size) / 1024); // Size in KB
 
                     // Check if the individual file size is within 10 MB
@@ -480,11 +542,15 @@ export default class AwsFileUploader extends LightningElement {
                             this.fileSize.push(fileSizeInMB);
                             totalSize += fileSizeInMB; // Update total size
 
+                            const mimeType = (file.type || '').toLowerCase();
+                            const ext = file.name.split('.').pop().toLowerCase();
+                            const isVideo = mimeType.startsWith('video/') || ext === 'mov' || ext === 'mp4';
+
                             const fileData = {
                                 name: file.name,
                                 size: file.size,
                                 formattedSize: this.getFormattedSize(file.size),
-                                preview: file.type != 'video/mp4' ? URL.createObjectURL(file) : await this.createThumbnail(file)
+                                preview: isVideo ? await this.createThumbnail(file) : URL.createObjectURL(file)
                             };
                             this.imageToShowFiles.push(fileData);
                         } else {

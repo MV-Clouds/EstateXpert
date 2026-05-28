@@ -180,7 +180,9 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
     }
 
     updateShownData() {
@@ -390,16 +392,10 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
                 if (aValue === undefined || aValue === null) aValue = '';
                 if (bValue === undefined || bValue === null) bValue = '';
 
-                // Date handling: sendTimeFormatted is a dd/MM/yyyy string; prefer raw date if available
+                // Date handling: sort by raw sendTime instead of parsed formatted string
                 if (this.sortField === 'sendTimeFormatted') {
-                    // Convert from dd/MM/yyyy -> Date for proper comparison
-                    const parseDMY = (val) => {
-                        if (!val || typeof val !== 'string') return new Date(0);
-                        const [d, m, y] = val.split('/');
-                        return new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
-                    };
-                    aValue = parseDMY(aValue);
-                    bValue = parseDMY(bValue);
+                    aValue = a.sendTime ? new Date(a.sendTime).getTime() : 0;
+                    bValue = b.sendTime ? new Date(b.sendTime).getTime() : 0;
                 }
 
                 if (typeof aValue === 'string' && typeof bValue === 'string') {

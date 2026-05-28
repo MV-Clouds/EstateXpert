@@ -530,7 +530,7 @@ public with sharing class EmailCampaignController {
                         DateTime now = DateTime.now();
                         emailCampaign.Send_Date_Time__c = now;
                     } else if (specificDate != null) {
-                        DateTime sendDateTime = DateTime.newInstance(specificDate.addDays(daysAfterStartDate), sendTime);
+                        DateTime sendDateTime = DateTime.newInstanceGmt(specificDate.addDays(daysAfterStartDate), sendTime);
                         emailCampaign.Send_Date_Time__c = sendDateTime;
                     }
                 }
@@ -599,7 +599,7 @@ public with sharing class EmailCampaignController {
                         scheduledDateTime = DateTime.now();
                     } else {
                         Date emailDate = scheduleBaseDate.addDays(Integer.valueOf(email.Days_After_Start_Date__c));
-                        scheduledDateTime = DateTime.newInstance(emailDate, email.TimeToSend__c);
+                        scheduledDateTime = DateTime.newInstanceGmt(emailDate, email.TimeToSend__c);
                     }
             
                     String memberKey = contactId + '-' + email.Id + '-' + String.valueOf(scheduledDateTime);
@@ -938,7 +938,7 @@ public with sharing class EmailCampaignController {
                         emailCampaign.TimeToSend__c = Time.newInstance(hours, minutes, seconds, 0);
                         if (specificDate != null) {
                             Date sendDate = specificDate.addDays(daysAfterStartDate);
-                            emailCampaign.Send_Date_Time__c = DateTime.newInstance(sendDate, emailCampaign.TimeToSend__c);
+                            emailCampaign.Send_Date_Time__c = DateTime.newInstanceGmt(sendDate, emailCampaign.TimeToSend__c);
                         }
                     }
                 }
@@ -1105,7 +1105,7 @@ public with sharing class EmailCampaignController {
                     }
 
                     Date sendDate = scheduleBaseDate.addDays(email.Days_After_Start_Date__c != null ? email.Days_After_Start_Date__c.intValue() : 0);
-                    DateTime scheduleDateTime = DateTime.newInstance(sendDate, email.TimeToSend__c);
+                    DateTime scheduleDateTime = DateTime.newInstanceGmt(sendDate, email.TimeToSend__c);
                     String compositeKey = email.Id + '-' + contactId;
                     Email_Member__c existingMember = existingEmailMemberMap.get(compositeKey);
                     if (scheduleDateTime <= System.now()) {

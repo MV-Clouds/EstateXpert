@@ -4,6 +4,7 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/leadassignmentcss';
 import getLeadAssignmentInitData from '@salesforce/apex/LeadAssignmentController.getLeadAssignmentInitData';
 import manageRule from '@salesforce/apex/LeadAssignmentController.manageRule';
+import getRecordNames from '@salesforce/apex/LeadAssignmentController.getRecordNames';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class LeadAssignmentRule extends NavigationMixin(LightningElement) {
@@ -208,11 +209,57 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         this.originalUserGroups = JSON.parse(JSON.stringify(this.userGroups));
         this.isLoading = false;
         this.userGroups = [...this.userGroups];
+
+        // Resolve any reference-field IDs to human-readable names
+        this.resolveReferenceNames();
     }
 
     getPicklistValues(fieldName) {
         const field = this.fieldOptions.find(f => f.value === fieldName);
         return Promise.resolve(field ? (field.isBoolean ? this.booleanOptions : field.picklistValues) : []);
+    }
+
+    /**
+     * Batch-resolve all reference-field record IDs in userGroups to their Name values.
+     * Fires one Apex call covering all objects/IDs, then patches displayCondition in-place.
+     */
+    resolveReferenceNames() {
+        // Build a flat map: recordId → objectApiName (only for reference conditions with a value)
+        const idToObject = {};
+        this.userGroups.forEach(group => {
+            group.conditions.forEach(condition => {
+                if (condition.isReference && condition.selectedValue && condition.referenceObject) {
+                    idToObject[condition.selectedValue] = condition.referenceObject;
+                }
+            });
+        });
+
+        if (Object.keys(idToObject).length === 0) return;
+
+        getRecordNames({ recordIdToObjectMap: idToObject })
+            .then(nameMap => {
+                // Patch each matching condition's displayCondition with the resolved name
+                this.userGroups = this.userGroups.map(group => ({
+                    ...group,
+                    conditions: group.conditions.map(condition => {
+                        if (condition.isReference && condition.selectedValue && nameMap[condition.selectedValue]) {
+                            const resolvedName = nameMap[condition.selectedValue];
+                            const conditionLabel = this.conditionOptions.find(c => c.value === condition.selectedCondition)?.label || condition.selectedCondition;
+                            const field = this.fieldOptions.find(f => f.value === condition.selectedField) || {};
+                            return {
+                                ...condition,
+                                referenceDisplayName: resolvedName,
+                                displayCondition: `${field.label || condition.selectedField} ${conditionLabel} ${resolvedName}`
+                            };
+                        }
+                        return condition;
+                    })
+                }));
+                this.userGroups = [...this.userGroups];
+            })
+            .catch(() => {
+                // Silently fall back — IDs will remain in displayCondition
+            });
     }
 
     filterConditionOptions(dataType) {
@@ -448,11 +495,35 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                 } else if (['DOUBLE', 'CURRENCY', 'INTEGER'].includes(field.dataType)) {
                     formattedValue = selectedValue || '';
                 } else if (field.isReference) {
+                    // For reference fields, resolve the name asynchronously
+                    // Temporarily show the ID; the resolved name will overwrite it
                     formattedValue = selectedValue || 'No Record Selected';
+                    if (selectedValue && condition.referenceObject) {
+                        const idToObject = { [selectedValue]: condition.referenceObject };
+                        getRecordNames({ recordIdToObjectMap: idToObject })
+                            .then(nameMap => {
+                                const resolvedName = nameMap[selectedValue] || selectedValue;
+                                this.currentRule.conditions = this.currentRule.conditions.map((c, ci) => {
+                                    if (ci === conditionIndex) {
+                                        const cLabel = this.conditionOptions.find(opt => opt.value === c.selectedCondition)?.label || c.selectedCondition;
+                                        const f = this.fieldOptions.find(opt => opt.value === c.selectedField) || {};
+                                        return {
+                                            ...c,
+                                            referenceDisplayName: resolvedName,
+                                            displayCondition: `${f.label || c.selectedField} ${cLabel} ${resolvedName}`
+                                        };
+                                    }
+                                    return c;
+                                });
+                                this.currentRule = { ...this.currentRule };
+                            })
+                            .catch(() => { /* silently keep ID */ });
+                    }
                 }
                 return {
                     ...condition,
                     selectedValue,
+                    referenceDisplayName: field.isReference ? (selectedValue || '') : (condition.referenceDisplayName || ''),
                     displayCondition: `${field.label || condition.selectedField} ${conditionLabel} ${formattedValue}`
                 };
             }

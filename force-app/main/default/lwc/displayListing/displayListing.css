@@ -685,14 +685,21 @@ button:disabled {
     color: white;
 }
 
-.add-condition-icon-btn:hover {
+.add-condition-icon-btn:hover:not(:disabled) {
     background: #0156A3;
     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.3);
     transform: translateY(-1px) scale(1.05);
 }
 
-.add-condition-icon-btn:active {
+.add-condition-icon-btn:active:not(:disabled) {
     transform: translateY(0) scale(0.98);
+}
+
+.add-condition-icon-btn:disabled {
+    background: #9CA3AF;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
 }
 
 .condition-type-wrapper {
@@ -797,14 +804,21 @@ button:disabled {
         color: white;
     }
 
-    .add-condition-icon-btn:hover {
+    .add-condition-icon-btn:hover:not(:disabled) {
         background: #0156A3;
         box-shadow: 0 4px 8px rgba(1, 118, 211, 0.3);
         transform: translateY(-1px) scale(1.05);
     }
 
-    .add-condition-icon-btn:active {
+    .add-condition-icon-btn:active:not(:disabled) {
         transform: translateY(0) scale(0.98);
+    }
+
+    .add-condition-icon-btn:disabled {
+        background: #9CA3AF;
+        cursor: not-allowed;
+        opacity: 0.6;
+        box-shadow: none;
     }
 
     .condition-type-wrapper {

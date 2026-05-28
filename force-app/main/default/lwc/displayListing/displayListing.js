@@ -202,6 +202,26 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name : isAddConditionDisabled
+    * @description : Disable the Add Condition button when the maximum of 10 conditions has been reached
+    * Date: 28/05/2026
+    */
+    get isAddConditionDisabled() {
+        return this.mappings && this.mappings.length >= 10;
+    }
+
+    /**
+    * Method Name : addConditionTitle
+    * @description : Dynamic tooltip for the Add Condition button
+    * Date: 28/05/2026
+    */
+    get addConditionTitle() {
+        return this.isAddConditionDisabled
+            ? 'Maximum of 10 filter conditions reached'
+            : 'Add Condition';
+    }
+
+    /**
     * Method Name : isListView
     * @description : set list view
     * * Date: 20/08/2024
@@ -1509,12 +1529,110 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name: handleLogicalExpressionChange
-    * @description: this method is used handle logical condition change
+    * @description: this method is used handle logical condition change with live validation.
+    *   Validates:
+    *   - Expression is not empty
+    *   - Only valid characters (digits, AND, OR, parentheses, spaces)
+    *   - Indices are within range (1 to N) where N is the number of conditions
+    *   - All condition indices are referenced at least once
+    *   - Parentheses are balanced
     * Date: 17/06/2024
     * Created By: Rachit Shah
     */
     handleLogicalExpressionChange(event) {
         this.logicalExpression = event.detail.value;
+        const inputElement = event.target;
+
+        const expr = this.logicalExpression ? this.logicalExpression.trim() : '';
+
+        // Clear validity if expression is empty (required check handled on Apply)
+        if (!expr) {
+            if (inputElement) {
+                inputElement.setCustomValidity('');
+                inputElement.reportValidity();
+            }
+            return;
+        }
+
+        const mappingLength = this.mappings.length;
+
+        // Rule 1: Only allow digits, AND, OR, spaces and parentheses
+        const allowedCharsRegex = /^[\d\s()ANDORandor]+$/;
+        if (!allowedCharsRegex.test(expr)) {
+            if (inputElement) {
+                inputElement.setCustomValidity('Invalid characters. Use only numbers, AND, OR, spaces, and parentheses.');
+                inputElement.reportValidity();
+            }
+            return;
+        }
+
+        // Rule 2: When more than 1 condition exists, must have AND/OR connecting terms
+        const andOrRegex = /\d+\s*(?:AND|OR)\s*\d+/i;
+        if (mappingLength > 1 && !andOrRegex.test(expr)) {
+            if (inputElement) {
+                inputElement.setCustomValidity('Invalid syntax. Use numbers connected by AND / OR (e.g. "1 AND 2 OR 3").');
+                inputElement.reportValidity();
+            }
+            return;
+        }
+
+        const numbers = expr.match(/\d+/g);
+        if (numbers) {
+            const numberSet = new Set(numbers.map(Number));
+
+            // Rule 3: No index should be out of range
+            const hasOutOfRange = Array.from(numberSet).some(num => num < 1 || num > mappingLength);
+            if (hasOutOfRange) {
+                if (inputElement) {
+                    inputElement.setCustomValidity(`Condition indices must be between 1 and ${mappingLength}.`);
+                    inputElement.reportValidity();
+                }
+                return;
+            }
+
+            // Rule 4: All condition indices must be referenced
+            if (numberSet.size !== mappingLength) {
+                if (inputElement) {
+                    inputElement.setCustomValidity(`All ${mappingLength} condition(s) must be included in the expression.`);
+                    inputElement.reportValidity();
+                }
+                return;
+            }
+        } else {
+            // No numbers found but expression is not empty
+            if (inputElement) {
+                inputElement.setCustomValidity('Expression must reference at least one condition number.');
+                inputElement.reportValidity();
+            }
+            return;
+        }
+
+        // Rule 5: Balanced parentheses
+        let openParens = 0;
+        for (let char of expr) {
+            if (char === '(') openParens++;
+            if (char === ')') openParens--;
+            if (openParens < 0) {
+                if (inputElement) {
+                    inputElement.setCustomValidity('Unbalanced parentheses: unexpected closing ")".');
+                    inputElement.reportValidity();
+                }
+                return;
+            }
+        }
+        if (openParens !== 0) {
+            if (inputElement) {
+                inputElement.setCustomValidity('Unbalanced parentheses: missing closing ")".');
+                inputElement.reportValidity();
+            }
+            return;
+        }
+
+        // All validations passed
+        if (inputElement) {
+            inputElement.setCustomValidity('');
+            inputElement.reportValidity();
+        }
     }
 
     /**
@@ -1928,9 +2046,11 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name : saveCondition
-    * @description : method to save condition
+    * @description : method to save condition with validations:
+    *   1. Maximum 10 conditions allowed
+    *   2. Duplicate conditions (same field + operator + value) are not permitted
     * Date: 29/07/2024
-    * Created By:Rachit Shah
+    * Created By: Rachit Shah
     */
     saveCondition() {
         const isFieldValid = this.listingFieldObject.MVEX__Field_Name__c;
@@ -1939,6 +2059,40 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         const isValueValid = this.selectedInquiryValue; // constant or inquiry field
 
         if (isFieldValid && isOperatorValid && isValueValid) {
+
+            // --- Validation 1: Maximum 10 conditions ---
+            const MAX_CONDITIONS = 10;
+            const isAddingNew = !this.selectedMappingId;
+            if (isAddingNew && this.mappings.length >= MAX_CONDITIONS) {
+                this.showToast('Error', `You cannot add more than ${MAX_CONDITIONS} filter conditions.`, 'error');
+                return;
+            }
+
+            // --- Validation 2: No duplicate conditions ---
+            // A duplicate is defined as the same field + operator + value combination
+            const currentField = this.listingFieldObject.MVEX__Field_Name__c;
+            const currentOp    = this.selectedConditionOperator;
+            const currentValue = this.selectedInquiryValue;
+            const currentType  = this.isConstant ? 'constant' : 'field';
+
+            const isDuplicate = this.mappings.some(mapping => {
+                // When editing, skip the mapping being edited
+                if (this.selectedMappingId && mapping.id === this.selectedMappingId) {
+                    return false;
+                }
+                return (
+                    mapping.field === currentField &&
+                    mapping.operator === currentOp &&
+                    mapping.valueField === currentValue &&
+                    mapping.type === currentType
+                );
+            });
+
+            if (isDuplicate) {
+                this.showToast('Error', 'A filter with the same field, operator, and value already exists. Please modify your condition.', 'error');
+                return;
+            }
+
             let label = this.getValueFromLabel(this.listingFieldObject.MVEX__Field_Name__c);
             let displayOperator = this.displayOperator(this.selectedConditionOperator);
 

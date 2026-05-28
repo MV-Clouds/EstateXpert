@@ -442,8 +442,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     listing.isActive = listing.MVEX__Status__c === 'Active' ? true : false;
                 })
 
-                console.log('Listing Data:', this.listingData);
-
                 this.unchangedListingData = this.listingData;
                 this.processListings();
             })

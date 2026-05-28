@@ -802,6 +802,28 @@ export default class ListingManagerFilterCmp extends LightningElement {
     }
 
     /**
+     * Method Name: handleNumberKeyDown
+     * @description: Allow only digit keys (0-9) and essential control keys in number inputs.
+     *               Everything else (letters, symbols, dash, etc.) is blocked.
+     */
+    handleNumberKeyDown(event) {
+        const allowedKeys = [
+            'Backspace', 'Delete', 'Tab',
+            'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+            'Home', 'End'
+        ];
+        // Allow Ctrl/Cmd + A/C/V/X (select-all, copy, paste, cut)
+        const isCtrlCmd = event.ctrlKey || event.metaKey;
+        if (isCtrlCmd) return;
+        // Allow control keys
+        if (allowedKeys.includes(event.key)) return;
+        // Allow digits 0–9
+        if (/^\d$/.test(event.key)) return;
+        // Block everything else
+        event.preventDefault();
+    }
+
+    /**
      * Method Name: handleMinValueChange
      * @description: Handle the min value change in the number Input field.
      * Date: 9/06/2024
@@ -809,42 +831,50 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMinValueChange(event) {
         try {
-            
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
-    
+
             if (isNaN(value)) {
                 value = null;
             }
-            
-    
-            // Clear any existing debounce timer
+
             if (this.debounceTimeout) {
                 clearTimeout(this.debounceTimeout);
             }
-    
-            // Set a new debounce timer
+
             this.debounceTimeout = setTimeout(() => {
                 this.filterFields[index].minValue = value;
-    
-                if (value < 0) {
-                this.filterFields[index].message =
-                    'Filters are not applied for negative values';
-                return; 
-            }
-            
-                if (
-                    this.filterFields[index].isMin === true ||
-                    value <= this.filterFields[index].maxValue ||
-                    value === 0
-                ) {
-                    this.applyFilters();
-                    this.filterFields[index].message = null;
+                const maxVal  = this.filterFields[index].maxValue;
+                const isRange = this.filterFields[index].isRange;
+
+                if (isRange) {
+                    // Range filter: both sides must be filled before we do anything
+                    if (value !== null && maxVal !== null) {
+                        if (value > maxVal) {
+                            this.filterFields[index].message = 'Min Value cannot be Greater than the Max Value';
+                        } else {
+                            this.filterFields[index].message = null;
+                            this.applyFilters();
+                        }
+                    } else if (value === null && maxVal === null) {
+                        // Both cleared — reset filter
+                        this.filterFields[index].message = null;
+                        this.applyFilters();
+                    } else {
+                        // Only one side filled — prompt user to fill both
+                        this.filterFields[index].message = 'Please enter both Min and Max values to apply this filter.';
+                    }
                 } else {
-                    this.filterFields[index].message =
-                        'Min Value cannot be Greater than the Max Value';
+                    // Single-side filter (≥ min only)
+                    if (value !== null) {
+                        this.filterFields[index].message = null;
+                        this.applyFilters();
+                    } else {
+                        this.filterFields[index].message = null;
+                        this.applyFilters();
+                    }
                 }
-            }, 300); // Adjust the debounce delay (in milliseconds) as needed
+            }, 300);
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'handleMinValueChange', error, 'warn', 'Error in handleMinValueChange');
         }
@@ -858,41 +888,45 @@ export default class ListingManagerFilterCmp extends LightningElement {
      */
     handleMaxValueChange(event) {
         try {
-            
             const index = event.currentTarget.dataset.index;
             let value = parseInt(event.target.value, 10);
-    
+
             if (isNaN(value)) {
                 value = null;
             }
-    
-            // Clear any existing debounce timer
+
             if (this.debounceTimeout) {
                 clearTimeout(this.debounceTimeout);
             }
-    
-            // Set a new debounce timer
+
             this.debounceTimeout = setTimeout(() => {
                 this.filterFields[index].maxValue = value;
-    
-                if (value < 0) {
-                this.filterFields[index].message =
-                    'Filters are not applied for negative values';
-                return; 
-            }
-            
-                if (
-                    this.filterFields[index].isMax === true ||
-                    value === 0 ||
-                    value >= this.filterFields[index].minValue
-                ) {
-                    this.applyFilters();
-                    this.filterFields[index].message = '';
+                const minVal  = this.filterFields[index].minValue;
+                const isRange = this.filterFields[index].isRange;
+
+                if (isRange) {
+                    // Range filter: both sides must be filled before we do anything
+                    if (value !== null && minVal !== null) {
+                        if (minVal > value) {
+                            this.filterFields[index].message = 'Min Value cannot be Greater than the Max Value';
+                        } else {
+                            this.filterFields[index].message = '';
+                            this.applyFilters();
+                        }
+                    } else if (value === null && minVal === null) {
+                        // Both cleared — reset filter
+                        this.filterFields[index].message = '';
+                        this.applyFilters();
+                    } else {
+                        // Only one side filled — prompt user to fill both
+                        this.filterFields[index].message = 'Please enter both Min and Max values to apply this filter.';
+                    }
                 } else {
-                    this.filterFields[index].message =
-                        'Min Value cannot be Greater than the Max Value';
+                    // Single-side filter (≤ max only)
+                    this.filterFields[index].message = '';
+                    this.applyFilters();
                 }
-            }, 300); // Adjust debounce delay as needed
+            }, 300);
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'handleMaxValueChange', error, 'warn', 'Error in handleMaxValueChange');
         }

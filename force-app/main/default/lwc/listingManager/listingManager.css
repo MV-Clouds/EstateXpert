@@ -788,3 +788,7 @@ span {
 .table-content .slds-table_resizable-cols thead th {
     width: 12rem;
 }
+
+.bold_css {
+    font-size: 14px !important;
+}

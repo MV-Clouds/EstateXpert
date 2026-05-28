@@ -668,22 +668,70 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Date: 24/06/2024
     * Created By: Rachit Shah
     */
-    parseTimeString(timeString) {
+    parseTimeString(timeString, dateString = null) {
         try {       
             if (!timeString) return '';
         
-            const [hours, minutes, secondsAndMillis] = timeString.split(':');
-            const [seconds, milliseconds] = secondsAndMillis.split('.');
-        
-            const formattedTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
-            const timeToSend = formattedTime.replace('Z', '');
-        
-            return timeToSend;
+            if (typeof timeString === 'number') {
+                const totalSeconds = Math.floor(timeString / 1000);
+                const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+                const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+                const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+                timeString = `${hours}:${minutes}:${seconds}.000Z`;
+            }
+
+            if (!timeString.endsWith('Z')) {
+                timeString = timeString + (timeString.includes('.') ? 'Z' : '.000Z');
+            }
+            
+            let baseDateStr = dateString || this.specificDate;
+            if (!baseDateStr) {
+                const now = new Date();
+                baseDateStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+            }
+
+            const date = new Date(`${baseDateStr}T${timeString}`);
+            
+            const localHours = date.getHours().toString().padStart(2, '0');
+            const localMinutes = date.getMinutes().toString().padStart(2, '0');
+            const localSeconds = date.getSeconds().toString().padStart(2, '0');
+            const localMilliseconds = date.getMilliseconds().toString().padStart(3, '0');
+            
+            return `${localHours}:${localMinutes}:${localSeconds}.${localMilliseconds}`;
         } catch (error) {
             console.log('Error parsing time string:', error);
         }
+        return '';
+    }
 
-        return ''
+    convertLocalToUTCTime(localTimeString, daysAfterStartDate = 0) {
+        if (!localTimeString) return '';
+        try {
+            let baseDateStr = this.specificDate;
+            if (!baseDateStr) {
+                const now = new Date();
+                baseDateStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+            }
+            
+            const dateObj = new Date(baseDateStr);
+            dateObj.setDate(dateObj.getDate() + (parseInt(daysAfterStartDate, 10) || 0));
+            
+            const timeStr = localTimeString.replace('Z', '');
+            const [hours, minutes, secondsAndMillis] = timeStr.split(':');
+            const seconds = secondsAndMillis ? secondsAndMillis.split('.')[0] : '00';
+            const millis = secondsAndMillis && secondsAndMillis.includes('.') ? secondsAndMillis.split('.')[1] : '000';
+            
+            dateObj.setHours(parseInt(hours, 10), parseInt(minutes, 10), parseInt(seconds, 10), parseInt(millis, 10));
+            
+            const utcHours = dateObj.getUTCHours().toString().padStart(2, '0');
+            const utcMinutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+            const utcSeconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
+            const utcMillis = dateObj.getUTCMilliseconds().toString().padStart(3, '0');
+            return `${utcHours}:${utcMinutes}:${utcSeconds}.${utcMillis}`;
+        } catch(e) {
+            console.log('Error converting to UTC:', e);
+            return localTimeString;
+        }
     }
     
     /*
@@ -1777,7 +1825,10 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
                 selectedPrimaryRecipients: this.transformRecipientsPrimary(this.selectedPrimaryRecipients),
                 selectedCCRecipients: this.transformRecipients(this.selectedCCRecipients),
                 selectedBCCRecipients: this.transformRecipients(this.selectedBCCRecipients),
-                emails: emailsWithTemplate,
+                emails: emailsWithTemplate.map(email => ({
+                    ...email,
+                    timeToSend: this.convertLocalToUTCTime(email.timeToSend, email.daysAfterStartDate)
+                })),
                 specificDate : this.specificDate,
                 selectedContactDateField : this.selectedContactDateField,
                 deletedEmailList : this.deletedEmailList,

@@ -152,7 +152,7 @@ public with sharing class ListingManagerFilterController {
         } catch (Exception e) {
             System.debug('Error in getFilteredListings: ' + e.getMessage() + ' at line ' + e.getLineNumber());
             ErrorHandler.insertErrorData(e, 'ListingManagerFilterController', 'getFilteredListings', e.getMessage());
-            return null;
+            return new List<Listing__c>();
         }
     }
 

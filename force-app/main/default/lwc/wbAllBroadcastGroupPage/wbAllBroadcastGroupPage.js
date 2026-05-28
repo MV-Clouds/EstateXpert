@@ -23,8 +23,8 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     @track selectedCommunicationTypeFilter = '';
     @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
-    @track sortField = 'Name';
-    @track sortOrder = 'asc';
+    @track sortField = 'CreatedDate';
+    @track sortOrder = 'desc';
 
     broadcastGroupId = null;
     searchTerm = '';
@@ -449,6 +449,12 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
                 if (this.sortField === 'MVEX__Count_of_Members__c') {
                     aValue = Number(aValue) || 0;
                     bValue = Number(bValue) || 0;
+                }
+
+                // For date fields, compare as timestamps
+                if (this.sortField === 'CreatedDate') {
+                    aValue = aValue ? Date.parse(aValue) : 0;
+                    bValue = bValue ? Date.parse(bValue) : 0;
                 }
 
                 let compare = 0;

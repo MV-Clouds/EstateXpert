@@ -1,9 +1,11 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track, api, wire } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import designcss from '@salesforce/resourceUrl/listingManagerCss';
 import getListingData from '@salesforce/apex/ListingManagerController.getListingData';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { NavigationMixin } from 'lightning/navigation';
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import LISTING_OBJECT from '@salesforce/schema/Listing__c';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 import USER_CURRENCY from '@salesforce/i18n/currency';
@@ -41,6 +43,27 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     @track listingLoading = false;
     isConfigOpen = false;
     hasInitializedFilter = false;
+
+    // ── Record-type picker ─────────────────────────────────────
+    @track showRecordTypePicker = false;
+    @track recordTypeOptions = [];
+    @track selectedRecordTypeId = null;
+
+    @wire(getObjectInfo, { objectApiName: LISTING_OBJECT })
+    wiredObjectInfo({ data, error }) {
+        if (data) {
+            const rtMap = data.recordTypeInfos;
+            const options = Object.values(rtMap)
+                .filter(rt => rt.available && !rt.master)
+                .map(rt => ({ label: rt.name, value: rt.recordTypeId, isDefault: false }));
+            // Pre-select the first option
+            if (options.length > 0) {
+                options[0].isDefault = true;
+                this.selectedRecordTypeId = options[0].value;
+            }
+            this.recordTypeOptions = options;
+        }
+    }
 
     /**
     * Method Name : totalItems
@@ -836,24 +859,59 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name : goTONewListing
-    * @description : Redirect the new listing page
+    * @description : Opens a record-type picker when the object has multiple record
+    *   types (mirroring Salesforce standard behaviour), then navigates to the new
+    *   listing form with the chosen recordTypeId.
     * date: 3/06/2024
     * Created By:Vyom Soni
     */
     goTONewListing() {
         try {
+            if (this.recordTypeOptions.length > 1) {
+                // Pre-select the first option
+                this.selectedRecordTypeId = this.recordTypeOptions[0].value;
+                this.showRecordTypePicker = true;
+            } else {
+                // Only one (or zero) record types — navigate directly
+                const rtId = this.recordTypeOptions.length === 1
+                    ? this.recordTypeOptions[0].value
+                    : null;
+                this._navigateNewListing(rtId);
+            }
+        } catch (error) {
+            errorDebugger('ListingManager', 'goTONewListing', error, 'warn', 'Error in goTONewListing');
+        }
+    }
+
+    handleRecordTypeSelect(event) {
+        this.selectedRecordTypeId = event.target.value;
+    }
+
+    handleRecordTypeContinue() {
+        this.showRecordTypePicker = false;
+        this._navigateNewListing(this.selectedRecordTypeId);
+    }
+
+    handleRecordTypePickerClose() {
+        this.showRecordTypePicker = false;
+    }
+
+    _navigateNewListing(recordTypeId) {
+        try {
+            const state = { c__customParam: 'ListingManager' };
+            if (recordTypeId) {
+                state.recordTypeId = recordTypeId;
+            }
             this[NavigationMixin.Navigate]({
                 type: 'standard__objectPage',
                 attributes: {
                     objectApiName: 'MVEX__Listing__c',
                     actionName: 'new'
                 },
-                state: {
-                    c__customParam: 'ListingManager'
-                }
+                state
             });
         } catch (error) {
-            errorDebugger('ListingManager', 'goTONewListing', error, 'warn', 'Error in goTONewListing');
+            errorDebugger('ListingManager', '_navigateNewListing', error, 'warn', 'Error in _navigateNewListing');
         }
     }
 

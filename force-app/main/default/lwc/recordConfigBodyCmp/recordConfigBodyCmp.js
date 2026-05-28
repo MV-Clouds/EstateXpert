@@ -1,7 +1,6 @@
 import { LightningElement, track, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
-import getListingFieldsParent from '@salesforce/apex/RecordManagersCmpController.getListingFieldsParent';
 import saveMetadata from '@salesforce/apex/RecordManagersCmpController.saveMappings';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
@@ -117,12 +116,18 @@ export default class RecordConfigBodyCmp extends LightningElement {
                 }
                 this.fieldOptions = result.fieldDetailsList
                     .filter(option => {
+                        if (!option.label || !option.value) return false;  // skip malformed entries
                         if (option.value === 'OwnerId') return false;
                         if (this.featureName === 'Suggested_Listing_Fields' && option.value.toLowerCase() === 'name') return false;
                         return true;
                     })
                     .map(option => ({
-                        ...option,
+                        label: option.label || '',
+                        value: option.value || '',
+                        fieldType: option.fieldType || '',
+                        referenceObjectName: option.referenceObjectName || '',
+                        relationshipName: option.relationshipName || '',
+                        picklistValues: option.picklistValues || [],
                         showRightRef: false
                     }));
 

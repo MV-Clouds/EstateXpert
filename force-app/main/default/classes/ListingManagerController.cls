@@ -31,47 +31,90 @@ public with sharing class ListingManagerController {
     public static WrapperClass getListingData(){
         try {
             String listingFields = 'Id,MVEX__City__c,MVEX__Status__c,MVEX__Bathrooms__c,MVEX__Listing__c.MVEX__Property__c,MVEX__Country__c,MVEX__State__c,MVEX__Street__c,Name,MVEX__Sq_Ft__c,MVEX__Listing_Address__CountryCode__s,MVEX__Listing_Address__StateCode__s,MVEX__Listing_Address__City__s,MVEX__Listing_Address__PostalCode__s,MVEX__Listing_Address__Street__s,MVEX__Property_Type__c, MVEX__Property_Category__c';
-            List<Map<String, String>> configuredFields = getConfiguredFields(); // Method to get selected fields from the config
+            List<Map<String, String>> configuredFields = getConfiguredFields();
 
             if (configuredFields == null) {
                 configuredFields = new List<Map<String, String>>();
             }
 
+            // Collect state/country address sub-fields so we can build code→label maps.
+            // Detection is by API name suffix — no special fieldType sentinel needed.
+            Set<String> stateCountryApiNames = new Set<String>();
+            // We also need the original-case API name for SObject.put() later.
+            Map<String, String> lowerToOriginalCase = new Map<String, String>();
+
             if (!configuredFields.isEmpty()) {
                 List<String> fieldNames = new List<String>();
-                
-                // Convert listingFields to a Set for easier comparison and remove extra spaces
+
                 Set<String> existingFields = new Set<String>();
                 for (String field : listingFields.split(',')) {
-                    existingFields.add(field.trim());
+                    existingFields.add(field.trim().toLowerCase());
                 }
 
-                // Add fields from configuredFields if they are not already in listingFields
                 for (Map<String, String> field : configuredFields) {
                     String fieldApiname = field.get('fieldApiname').trim();
-                    if (!existingFields.contains(fieldApiname)) {
+                    String lowerApi    = fieldApiname.toLowerCase();
+
+                    // Require __ before state/country so we only match address compound
+                    // sub-fields (e.g. MVEX__Listing_Address__StateCode__s) and not
+                    // plain custom fields that happen to end in State__c.
+                    if (lowerApi.endsWith('__statecode__s') || lowerApi.endsWith('__state__s')
+                        || lowerApi.endsWith('__countrycode__s') || lowerApi.endsWith('__country__s')) {
+                        stateCountryApiNames.add(lowerApi);
+                        lowerToOriginalCase.put(lowerApi, fieldApiname);
+                    }
+
+                    if (!existingFields.contains(lowerApi)) {
                         fieldNames.add(fieldApiname);
+                        existingFields.add(lowerApi);
                     }
                 }
-                
-                // If there are new fields to add, append them to listingFields
+
                 if (!fieldNames.isEmpty()) {
                     listingFields += ', ' + String.join(fieldNames, ', ');
                 }
             }
 
-            // Fetch pageSize from the custom metadata
-            Integer pageSize = getPageSizeFromConfig(); 
+            Integer pageSize = getPageSizeFromConfig();
 
             String query = 'SELECT ' + listingFields + ' FROM MVEX__Listing__c';
-            // Fetch the listings with related records
             List<MVEX__Listing__c> listing = Database.query(query, AccessLevel.USER_MODE);
+
+            // ── Build code→label maps for each detected state/country field ────────────
+            Map<String, Map<String, String>> codeToLabelByField = new Map<String, Map<String, String>>();
+            if (!stateCountryApiNames.isEmpty()) {
+                Schema.DescribeSObjectResult objDescribe = MVEX__Listing__c.sObjectType.getDescribe();
+                Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
+
+                for (String lowerApi : stateCountryApiNames) {
+                    if (fieldsMap.containsKey(lowerApi)) {
+                        Map<String, String> codeToLabel = new Map<String, String>();
+                        for (Schema.PicklistEntry pe : fieldsMap.get(lowerApi).getDescribe().getPicklistValues()) {
+                            codeToLabel.put(pe.getValue(), pe.getLabel());
+                        }
+                        codeToLabelByField.put(lowerApi, codeToLabel);
+                    }
+                }
+            }
+
             Set<Id> propertyIds = new Set<Id>();     
 
             for(MVEX__Listing__c listingrec :listing) {
                 Id propertyId = (Id)listingrec.get('MVEX__Property__c');
                 if (propertyId != null) {
                     propertyIds.add(propertyId);
+                }
+
+                // Resolve state/country code → display label in-place on each record.
+                for (String lowerApi : codeToLabelByField.keySet()) {
+                    Object codeVal = listingrec.get(lowerApi);
+                    if (codeVal != null) {
+                        String resolvedLabel = codeToLabelByField.get(lowerApi).get(String.valueOf(codeVal));
+                        if (resolvedLabel != null) {
+                            // Use the original-case API name — SObject.put() is case-sensitive
+                            listingrec.put(lowerToOriginalCase.get(lowerApi), resolvedLabel);
+                        }
+                    }
                 }
             }
 

@@ -45,13 +45,14 @@ public with sharing class RecordManagersCmpController {
             for (String fieldName : fieldsMap.keySet()) {
                 Schema.SObjectField field = fieldsMap.get(fieldName);
                 Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+                Schema.DisplayType fieldType = fieldDescribe.getType();
 
                 FieldDetails fieldDetails = new FieldDetails();
                 fieldDetails.label = fieldDescribe.getLabel();
                 fieldDetails.value = fieldDescribe.getName();
-                fieldDetails.fieldType = String.valueOf(fieldDescribe.getType());
+                fieldDetails.fieldType = String.valueOf(fieldType);
 
-                if (fieldDescribe.getType() == Schema.DisplayType.Reference) {
+                if (fieldType == Schema.DisplayType.Reference) {
                     List<Schema.SObjectType> referenceTo = fieldDescribe.getReferenceTo();
                     if (!referenceTo.isEmpty()) {
                         fieldDetails.referenceObjectName = referenceTo[0].getDescribe().getName();
@@ -61,7 +62,7 @@ public with sharing class RecordManagersCmpController {
                     fieldDetails.referenceObjectName = objectApiName;
                 }
 
-                if (fieldDescribe.getType() == Schema.DisplayType.Picklist) {
+                if (fieldType == Schema.DisplayType.Picklist) {
                     List<PicklistValue> picklistValues = new List<PicklistValue>();
                     for (Schema.PicklistEntry picklistEntry : fieldDescribe.getPicklistValues()) {
                         PicklistValue picklistValue = new PicklistValue();

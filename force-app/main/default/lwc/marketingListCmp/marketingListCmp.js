@@ -46,7 +46,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track isModalOpen = false;
     @track selectedContactList = [];
     @track isContactSelected = true;
-        isConfigOpen = false;
+    isConfigOpen = false;
 
     //new variables
     @track wrapOn = true; // Default to closed (hidden filter)
@@ -85,7 +85,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track isAccessible = false;
     @track hasBusinessAccountConfigured = false;
     selectedTemplate = '';
-    allSelectedContact =[];
+    allSelectedContact = [];
     @track listingLoading = false;
 
     /**
@@ -269,7 +269,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return this.shownProcessedContactData.length === 0;
     }
 
-    get listingSpinnerLoading(){
+    get listingSpinnerLoading() {
         return !this.spinnerShow && this.listingLoading;
     }
 
@@ -342,17 +342,17 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         this.screenWidth = window?.globalThis?.innerWidth;
         window?.globalThis?.addEventListener('resize', this.handleResize);
         loadStyle(this, designcss)
-        .then(() => {
-            console.log('Styles loaded successfully');
-        })
-        .catch(error => {
-            console.error('Error loading styles', error);
-        });
+            .then(() => {
+                console.log('Styles loaded successfully');
+            })
+            .catch(error => {
+                console.error('Error loading styles', error);
+            });
         this.checkBusinessAccountConfig();
         this.getAccessible();
     }
 
-    handleLoading(event){
+    handleLoading(event) {
         this.listingLoading = event.detail;
     }
 
@@ -374,28 +374,27 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     getAccessible() {
         getMetadataRecords()
-        .then(data => {
-            const marketingListFeature = data.find(
-                item => item.DeveloperName === 'Marketing_List'
-            );
-            this.isAccessible = marketingListFeature ? Boolean(marketingListFeature.MVEX__isAvailable__c) : false;
-            console.log('Marketing List Feature Accessibility:', this.isAccessible);
-            
-            if (this.isAccessible) {
-                this.getContactDataMethod();
-                this.loadQuickTemplates();
-                this.loadMessageOptions();
-                this.loadListViewId();
-                this.loadAllTemplates();
-            } else {
+            .then(data => {
+                const marketingListFeature = data.find(
+                    item => item.DeveloperName === 'Marketing_List'
+                );
+                this.isAccessible = marketingListFeature ? Boolean(marketingListFeature.MVEX__isAvailable__c) : false;
+
+                if (this.isAccessible) {
+                    this.getContactDataMethod();
+                    this.loadQuickTemplates();
+                    this.loadMessageOptions();
+                    this.loadListViewId();
+                    this.loadAllTemplates();
+                } else {
+                    this.spinnerShow = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching accessible fields', error);
+                this.isAccessible = false;
                 this.spinnerShow = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching accessible fields', error);
-            this.isAccessible = false;
-            this.spinnerShow = false;
-        });
+            });
     }
 
     /**
@@ -456,7 +455,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     loadMessageOptions() {
         getMessagingServiceOptions()
             .then(data => {
-                console.log(JSON.stringify(data));
                 this.messageOptions = data.map(option => {
                     return { label: option.label, value: option.value };
                 });
@@ -467,11 +465,11 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             })
     }
 
-    loadListViewId(){
+    loadListViewId() {
         getListViewId().then(data => {
             this.listViewId = data;
         }).catch(error => {
-            this.showToast('Error', 'Failed to load list view id: '+error.stack, 'error');
+            this.showToast('Error', 'Failed to load list view id: ' + error.stack, 'error');
         })
     }
 
@@ -486,9 +484,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         getContactData()
             .then(result => {
                 this.contactData = result.contacts;
-                console.log('Contact Data:', JSON.stringify(this.contactData, null, 2));
-                console.log('Total Contacts Fetched:', this.contactData.length);
-                
                 this.pageSize = result.pageSize;
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
@@ -593,7 +588,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     // Handle empty/null
                     if (rawValue === null || rawValue === undefined || rawValue === '') {
                         fieldValueraw = '-';
-                    } 
+                    }
 
                     // Currency Handling 
                     else if (field.fieldType === 'CURRENCY') {
@@ -602,12 +597,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                             currency: con.CurrencyIsoCode || USER_CURRENCY,
                             minimumFractionDigits: 0
                         }).format(rawValue);
-                    } 
+                    }
 
                     // Date Formatting
                     else if (field.format) {
                         fieldValueraw = this.applyFieldFormat(rawValue, field.format);
-                    } 
+                    }
 
                     // Default
                     else {
@@ -617,6 +612,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     return {
                         fieldName: field.fieldName,
                         value: fieldValueraw,
+                        rawValue: (rawValue === null || rawValue === undefined || rawValue === '') ? null : rawValue,
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
@@ -652,7 +648,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
 
         let date = new Date(fieldValue);
-        
+
         if (isNaN(date.getTime())) {
             return '-';
         }
@@ -871,7 +867,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     redirectToRecord(event) {
         try {
             const recordId = event.target.dataset.id;
-            const objectApiName = event.target.dataset.object ||'Contact';
+            const objectApiName = event.target.dataset.object || 'Contact';
             if (this.screenWidth > 900) {
                 this[NavigationMixin.GenerateUrl]({
                     type: 'standard__recordPage',
@@ -1024,8 +1020,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     updateSelectedProperties() {
         this.selectedContactList = this.processedContactData.filter(con => con.isChecked);
-        this.allSelectedContacts = [...this.selectedContactList]; 
-    this.filteredSelectedContacts = [...this.selectedContactList]; 
+        this.allSelectedContacts = [...this.selectedContactList];
+        this.filteredSelectedContacts = [...this.selectedContactList];
         this.totalSelected = this.selectedContactList.length;
         this.isContactSelected = this.selectedContactList.length <= 0;
     }
@@ -1133,6 +1129,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     sortData() {
         try {
+            // Helper: treat null / undefined / '' / '-' as "no value"
+            const isEmpty = (v) => v === null || v === undefined || v === '' || v === '-';
+
             this.processedContactData = [...this.processedContactData].sort((a, b) => {
                 let aValue, bValue;
 
@@ -1140,9 +1139,29 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     aValue = a.Name;
                     bValue = b.Name;
                 } else {
-                    aValue = a.orderedFields.find(field => field.fieldName === this.sortField).value;
-                    bValue = b.orderedFields.find(field => field.fieldName === this.sortField).value;
+                    const aField = a.orderedFields.find(field => field.fieldName === this.sortField);
+                    const bField = b.orderedFields.find(field => field.fieldName === this.sortField);
+
+                    // For DATE / DATETIME fields sort by raw timestamp, not formatted string
+                    const fieldMeta = this.fields.find(f => f.fieldName === this.sortField);
+                    const isDateField = fieldMeta &&
+                        (fieldMeta.fieldType === 'DATE' || fieldMeta.fieldType === 'DATETIME');
+
+                    if (isDateField) {
+                        aValue = aField.rawValue ? Date.parse(aField.rawValue) : null;
+                        bValue = bField.rawValue ? Date.parse(bField.rawValue) : null;
+                    } else {
+                        aValue = aField.value;
+                        bValue = bField.value;
+                    }
                 }
+
+                // Push null/empty to the very end on asc, very front on desc
+                const aEmpty = isEmpty(aValue);
+                const bEmpty = isEmpty(bValue);
+                if (aEmpty && bEmpty) return 0;
+                if (aEmpty) return this.sortOrder === 'asc' ? 1 : -1;
+                if (bEmpty) return this.sortOrder === 'asc' ? -1 : 1;
 
                 if (typeof aValue === 'string' && typeof bValue === 'string') {
                     aValue = aValue.toLowerCase();
@@ -1379,24 +1398,24 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
    * Created By:Vyom Soni
    */
     wrapFilter() {
-        try{
+        try {
             const toggleBtn = this.template.querySelector('.filter-toggle-btn');
             const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
             const div1 = this.template.querySelector('.innerDiv1');
             const div2 = this.template.querySelector('.innerDiv2');
-            
+
             if (this.wrapOn) {
                 // Currently hidden, show filter
                 toggleBtn.classList.add('active'); // Blue when filter showing
                 filterDiv.classList.remove('removeInnerDiv1');
                 div1.classList.remove('removeInnerDiv1');
-    
-                if(this.screenWidth >= 900){
+
+                if (this.screenWidth >= 900) {
                     div1.style.width = '22%';
                     div1.style.opacity = '1';
                     div1.style.marginLeft = '0.75rem';
                     div2.style.width = '78%';
-                }else{
+                } else {
                     div1.style.height = 'fit-content';
                     div1.style.width = '100%';
                     div1.style.opacity = '1';
@@ -1407,13 +1426,13 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             } else {
                 // Currently showing, hide filter
                 toggleBtn.classList.remove('active'); // White when filter hidden
-                
-                if(this.screenWidth >= 900){
+
+                if (this.screenWidth >= 900) {
                     div1.style.width = '0';
                     div1.style.opacity = '0';
                     div1.style.marginLeft = '0';
                     div2.style.width = '100%';
-                    
+
                     // Hide filter content and remove margin after animation starts
                     setTimeout(() => {
                         if (this.wrapOn) {
@@ -1421,7 +1440,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                             div1.classList.add('removeInnerDiv1');
                         }
                     }, 150);
-                }else{
+                } else {
                     filterDiv.classList.add('removeInnerDiv1');
                     div1.style.height = '0';
                     div1.style.opacity = '0';
@@ -1431,7 +1450,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 }
                 this.wrapOn = true;
             }
-        }catch(error){
+        } catch (error) {
             errorDebugger('MarketingListCmp', 'wrapFilter', error, 'warn', 'Error in wrapFilter');
         }
     }
@@ -1450,7 +1469,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
-openConfigureSettings(){
+    openConfigureSettings() {
         this.isConfigOpen = true;
     }
     handleCloseModal() {
@@ -1483,19 +1502,19 @@ openConfigureSettings(){
     //         }
 
     //         console.log('selectedContactList', JSON.stringify(this.selectedContactList));
-    
+
     //         const phoneNumbers = Array.from(this.selectedContactList)
     //         .map(recordId => {
     //             return recordId ? recordId.Phone : null;
     //         })
     //         .filter(Phone => Phone !== null && Phone !== '');
-      
-                
+
+
     //         const isUpdate = false;
-            
+
     //         const phoneField = 'Phone';
     //         // const listViewName = '00BdM00000XfLjwUAF';
-    
+
     //         const messageData = {
     //             objectApiName: this.selectedObject,
     //             listViewName: this.listViewId,
@@ -1506,11 +1525,11 @@ openConfigureSettings(){
     //             broadcastGroupId: null,
     //             phoneField: phoneField
     //         };
-    
+
     //         this.spinnerShow = true;
 
     //         console.log('messageData', JSON.stringify(messageData));
-    
+
     //         // Call the Apex method
     //         processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) })
     //         .then(() => {
@@ -1568,7 +1587,7 @@ openConfigureSettings(){
 
     handleInputChange(event) {
         const { name, value } = event.target;
-        switch(name) {
+        switch (name) {
             case 'name':
                 this.broadcastGroupName = value;
                 break;
@@ -1638,9 +1657,6 @@ openConfigureSettings(){
             communicationType: 'WhatsApp'
         };
 
-        console.log('Auto-creating broadcast group with data:', JSON.stringify(messageData));
-        
-
         try {
             const result = await processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) });
             this.broadcastGroupId = result;
@@ -1658,7 +1674,7 @@ openConfigureSettings(){
             return;
         }
 
-        if(this.tempBroadcastGroupName == this.broadcastGroupName){
+        if (this.tempBroadcastGroupName == this.broadcastGroupName) {
             this.popupHeader = 'Choose Template';
             return;
         }
@@ -1749,22 +1765,22 @@ openConfigureSettings(){
     }
 
     navigateToBroadcastComponent(broadcastId) {
-            let componentDef = {
-                componentDef: "MVEX:broadcastReportComp",
-                attributes: {
-                    recordId: broadcastId
-                }
-            };
+        let componentDef = {
+            componentDef: "MVEX:broadcastReportComp",
+            attributes: {
+                recordId: broadcastId
+            }
+        };
 
-            let encodedComponentDef = btoa(JSON.stringify(componentDef));
-    
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/one/one.app#' + encodedComponentDef
-                }
-            });
-}
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/one/one.app#' + encodedComponentDef
+            }
+        });
+    }
 
 
 
@@ -1793,11 +1809,8 @@ openConfigureSettings(){
     }
 
     handleSearch(event) {
-        console.log('event ', event);
-        
         const searchKey = event.detail.value?.toLowerCase() || '';
-        console.log('searchKey', searchKey);
-        
+
         if (!searchKey) {
             // If search is empty, show all selected contacts
             this.filteredSelectedContacts = [...this.allSelectedContacts];
@@ -1808,23 +1821,20 @@ openConfigureSettings(){
                 (contact.Phone && contact.Phone.toLowerCase().includes(searchKey))
             );
         }
-        
-        console.log('filteredSelectedContacts', this.filteredSelectedContacts);
-
     }
 
     handleRemoveContact(event) {
         const contactId = event.currentTarget.dataset.id;
-        
+
         // Remove from master list
         this.allSelectedContacts = this.allSelectedContacts.filter(
             contact => contact.Id !== contactId
         );
-        
+
         // Update display list (apply current search filter if any)
         const searchInput = this.template.querySelector('lightning-input[data-id="search-input"]');
         const currentSearchKey = searchInput?.value?.toLowerCase() || '';
-        
+
         if (currentSearchKey) {
             this.filteredSelectedContacts = this.allSelectedContacts.filter(contact =>
                 (contact.Name && contact.Name.toLowerCase().includes(currentSearchKey)) ||
@@ -1833,7 +1843,7 @@ openConfigureSettings(){
         } else {
             this.filteredSelectedContacts = [...this.allSelectedContacts];
         }
-        
+
         this.selectedContactList = [...this.allSelectedContacts];
 
         // Update the isChecked property in processedContactData
@@ -1843,7 +1853,7 @@ openConfigureSettings(){
             }
             return contact;
         });
-        
+
         // Update the isChecked property in unchangedProcessContact
         this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
             if (contact.Id === contactId) {
@@ -1851,10 +1861,10 @@ openConfigureSettings(){
             }
             return contact;
         });
-        
+
         // Update the shown data (current page)
         this.updateShownData();
-        
+
         // Update total selected count
         this.totalSelected = this.selectedContactList.length;
         this.isContactSelected = this.selectedContactList.length <= 0;
@@ -1869,20 +1879,20 @@ openConfigureSettings(){
         this.selectedContactList = [];
         this.allSelectedContacts = [];
         this.filteredSelectedContacts = [];
-        
+
         // Set isChecked to false for all contacts in processedContactData
         this.processedContactData = this.processedContactData.map(contact => {
             return { ...contact, isChecked: false };
         });
-        
+
         // Set isChecked to false for all contacts in unchangedProcessContact
         this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
             return { ...contact, isChecked: false };
         });
-        
+
         // Update the shown data (current page)
         this.updateShownData();
-        
+
         // Update total selected count
         this.totalSelected = 0;
         this.isContactSelected = true;
@@ -1922,7 +1932,7 @@ openConfigureSettings(){
                 if (result) {
                     this.showToast('Success', 'Broadcast scheduled successfully', 'success');
                     this.handleCloseTemplate();
-                     this.clearSelectedContacts();
+                    this.clearSelectedContacts();
                 } else {
                     this.showToast('Error', `Scheduling failed: ${result}`, 'error');
                 }

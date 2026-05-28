@@ -13,8 +13,8 @@ export default class TemplatePreviewModal extends LightningElement {
     @api templateType;
 
     _isActive
-    @api get isActive(){ return this._isActive}
-    set isActive(value){ this._isActive = (value === "true" ||  value === true) ? true : false }
+    @api get isActive() { return this._isActive }
+    set isActive(value) { this._isActive = (value === "true" || value === true) ? true : false }
 
     @track previewModalImg = previewModalImg;
     @track objectRecordList = null;
@@ -22,7 +22,7 @@ export default class TemplatePreviewModal extends LightningElement {
     @track selectedRecordName = null;
     @track isSpinner = false;
     @track showPreview = false;
-    @track vfPageSRC; 
+    @track vfPageSRC;
     @track errorDetail = {};
     @track objectLabel = '';
     @track recordLabelField;
@@ -33,7 +33,7 @@ export default class TemplatePreviewModal extends LightningElement {
     @track showQuickPreview = false;
     @track updatedBody = '';
     @track templateBody = '';
-    
+
     /**
     * Method Name : totalItems
     * @returns {String} - Returns label for the record picker
@@ -41,7 +41,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get label(){
+    get label() {
         return `Select ${this.objectLabel} record`;
     }
 
@@ -52,7 +52,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get placeHolder(){
+    get placeHolder() {
         return `Search ${this.objectLabel} by Name or Id...`;
     }
 
@@ -63,8 +63,8 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get helpText(){
-       return `Select ${this.objectLabel} Record To Dispay Data on Template.`;
+    get helpText() {
+        return `Select ${this.objectLabel} Record To Dispay Data on Template.`;
     }
 
     /**
@@ -74,7 +74,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get disableRecordPicker(){
+    get disableRecordPicker() {
         return this.recordId ? true : false;
     }
 
@@ -85,7 +85,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get disablePreviewBtn(){
+    get disablePreviewBtn() {
         return !this.selectedRecordId;
     }
 
@@ -96,8 +96,12 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get disableGenerateBtn(){
+    get disableGenerateBtn() {
         return !this.selectedRecordId || !this.isActive || this.templateType == 'Marketing Template';
+    }
+
+    get isDownloadButtonEnable() {
+        return this.templateType != 'Marketing Template';
     }
 
     /**
@@ -107,7 +111,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get loadingInfo(){
+    get loadingInfo() {
         var info = `To generate a preview, please select any ${this.objectLabel} record first.`;
         return this.isSpinner === false ? info : `Generating Preview...`
     }
@@ -119,7 +123,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    get isSimpleTemplatePreview(){
+    get isSimpleTemplatePreview() {
         return this.templateType === 'PDF Template' ? true : false;
     }
 
@@ -129,33 +133,33 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    connectedCallback(){
+    connectedCallback() {
         try {
             if (this.recordId) {
                 this.selectedRecordId = this.recordId;
                 this.generatePreview();
             } else {
                 this.isSpinner = true;
-                getObjectNameField({objectApiName: this.objectname})
-                .then(result => {
-                    console.log('getObjectNameField :  ', result);
-                    this.objectLabel = result.label;
-                    this.recordLabelField = result.nameField;
-                    if(result.nameFieldType === 'NUMBER' || result.nameFieldType === 'PERCENTAGE' || result.nameFieldType === 'CURRENCY'){
-                        this.recordLabelFieldType = 'number';
-                    }
-                    else{
+                getObjectNameField({ objectApiName: this.objectname })
+                    .then(result => {
+                        console.log('getObjectNameField :  ', result);
+                        this.objectLabel = result.label;
+                        this.recordLabelField = result.nameField;
+                        if (result.nameFieldType === 'NUMBER' || result.nameFieldType === 'PERCENTAGE' || result.nameFieldType === 'CURRENCY') {
+                            this.recordLabelFieldType = 'number';
+                        }
+                        else {
+                            this.recordLabelFieldType = 'text';
+                        }
+                    })
+                    .catch(() => {
+                        this.recordLabelField = 'Id';
                         this.recordLabelFieldType = 'text';
-                    }
-                })
-                .catch(() => {
-                    this.recordLabelField = 'Id';
-                    this.recordLabelFieldType = 'text';
-                })
-                .finally(() => {
-                    this.searchByField = `${this.recordLabelField}`;
-                    this.isSpinner = false;
-                })
+                    })
+                    .finally(() => {
+                        this.searchByField = `${this.recordLabelField}`;
+                        this.isSpinner = false;
+                    })
             }
         } catch (error) {
             console.warn('error in TemplatePreviewModal > connectedCallback', error.message);
@@ -168,30 +172,30 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    renderedCallback(){
+    renderedCallback() {
         try {
             if (!this.hasLibraryLoaded && this.templateType === 'Marketing Template') {
                 Promise.all([
                     loadScript(this, summerNoteEditor + '/jquery-3.7.1.min.js'),
                 ])
-                .then(() => { 
-                    Promise.all([
-                        loadStyle(this, summerNoteEditor + '/summernote-lite.css'),
-                        loadScript(this, summerNoteEditor + '/summernote-lite.js'),
-                    ])
                     .then(() => {
-                        this.hasLibraryLoaded = true;
+                        Promise.all([
+                            loadStyle(this, summerNoteEditor + '/summernote-lite.css'),
+                            loadScript(this, summerNoteEditor + '/summernote-lite.js'),
+                        ])
+                            .then(() => {
+                                this.hasLibraryLoaded = true;
+                            })
+                            .catch(err => {
+                                console.log('Error loading style:', err.stack);
+                            })
                     })
-                    .catch(err => {
-                        console.log('Error loading style:', err.stack);
+                    .catch(error => {
+                        console.log('Error loading style 001:', error.stack);
                     })
-                })
-                .catch(error => { 
-                    console.log('Error loading style 001:', error.stack);
-                })
             }
         }
-        catch(error){
+        catch (error) {
             console.log('Error loading style 002:', error.stack);
         }
     }
@@ -203,13 +207,13 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    onRecordSelect(event){
+    onRecordSelect(event) {
         try {
-            if(event.detail && event.detail.length){
+            if (event.detail && event.detail.length) {
                 this.selectedRecordId = event.detail[0].Id;
                 this.selectedRecordName = event.detail[0].Name;
             }
-            else{
+            else {
                 this.selectedRecordId = null;
             }
         } catch (error) {
@@ -223,7 +227,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    handleRecordPickerError(event){
+    handleRecordPickerError(event) {
         console.warn('handleRecordPickerError : ', event.detail);
     }
 
@@ -233,29 +237,29 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    generatePreview(){
+    generatePreview() {
         try {
-            if(this.templateType === 'PDF Template'){
+            if (this.templateType === 'PDF Template') {
                 this.isSpinner = true;
                 this.showPreview = false;
 
                 var previousSRC = this.vfPageSRC;
-    
+
                 var paraData = {
-                    'templateId' : this.templateid,
-                    'MVEX__Object_API_Name__c' : this.objectname,
-                    'recordId' : this.selectedRecordId,
-                    'useMode' : 'preview',
+                    'templateId': this.templateid,
+                    'MVEX__Object_API_Name__c': this.objectname,
+                    'recordId': this.selectedRecordId,
+                    'useMode': 'preview',
                 }
                 var paraDataStringify = JSON.stringify(paraData);
 
                 var newSRC = '/apex/MVEX__DocGeneratePage?paraData=' + paraDataStringify;
-    
-                if(newSRC !== previousSRC){
+
+                if (newSRC !== previousSRC) {
                     this.vfPageSRC = newSRC;
                     this.showPreview = true;
                 }
-                else{
+                else {
                     this.vfPageSRC = '/apex/MVEX__DocGeneratePage';
 
                     this.template.querySelector('[data-id="previewTimeout"]')?.setCustomTimeoutMethod(() => {
@@ -266,44 +270,44 @@ export default class TemplatePreviewModal extends LightningElement {
             } else if (this.templateType === 'Marketing Template') {
                 this.showQuickPreview = true;
                 this.isSpinner = true;
-                getRecordsByObject({recordId: this.selectedRecordId, templateId: this.templateid})
-                .then(result => {
-                    this.isSpinner = false;
-                    console.log('getRecordsByObject :  ', result);
-                    let bodyHtml = result.templateBody;
-                    const mappingValueString = result.mappingKeyVsMappingValues ? JSON.parse(result.mappingKeyVsMappingValues) : {};
-                    const salesforceImagesCV = result.salesforceImages ? JSON.parse(result.salesforceImages) : {};
-                    const listingMediaImages = result.listingMediaImages ? JSON.parse(result.listingMediaImages) : {};
+                getRecordsByObject({ recordId: this.selectedRecordId, templateId: this.templateid })
+                    .then(result => {
+                        this.isSpinner = false;
+                        console.log('getRecordsByObject :  ', result);
+                        let bodyHtml = result.templateBody;
+                        const mappingValueString = result.mappingKeyVsMappingValues ? JSON.parse(result.mappingKeyVsMappingValues) : {};
+                        const salesforceImagesCV = result.salesforceImages ? JSON.parse(result.salesforceImages) : {};
+                        const listingMediaImages = result.listingMediaImages ? JSON.parse(result.listingMediaImages) : {};
 
-                    for(let key in mappingValueString){
-                        bodyHtml = bodyHtml.replaceAll(key, mappingValueString[key]);
+                        for (let key in mappingValueString) {
+                            bodyHtml = bodyHtml.replaceAll(key, mappingValueString[key]);
 
-                    }
+                        }
 
-                    for(let src in salesforceImagesCV){
-                        bodyHtml = bodyHtml.replaceAll(src, salesforceImagesCV[src]);
-                    }
+                        for (let src in salesforceImagesCV) {
+                            bodyHtml = bodyHtml.replaceAll(src, salesforceImagesCV[src]);
+                        }
 
-                    // Replace listingMedia[n] image placeholders with actual property image URLs
-                    if(Object.keys(listingMediaImages).length > 0){
-                        const imgTagRegex = /<img[^>]*data-name="(listingMedia\[\d+\])"[^>]*>/g;
-                        bodyHtml = bodyHtml.replace(imgTagRegex, (fullMatch, mediaKey) => {
-                            const newSrc = listingMediaImages[mediaKey];
-                            if(newSrc){
-                                return fullMatch.replace(/src="[^"]*"/, `src="${newSrc}"`);
-                            }
-                            return fullMatch;
-                        });
-                    }
+                        // Replace listingMedia[n] image placeholders with actual property image URLs
+                        if (Object.keys(listingMediaImages).length > 0) {
+                            const imgTagRegex = /<img[^>]*data-name="(listingMedia\[\d+\])"[^>]*>/g;
+                            bodyHtml = bodyHtml.replace(imgTagRegex, (fullMatch, mediaKey) => {
+                                const newSrc = listingMediaImages[mediaKey];
+                                if (newSrc) {
+                                    return fullMatch.replace(/src="[^"]*"/, `src="${newSrc}"`);
+                                }
+                                return fullMatch;
+                            });
+                        }
 
-                    this.templateBody = bodyHtml;
+                        this.templateBody = bodyHtml;
 
-                    this.updateRichTextContent();
-                })
-                .catch(error => {
-                    this.isSpinner = false;
-                    console.log('Error fetching records:', error.stack);
-                })
+                        this.updateRichTextContent();
+                    })
+                    .catch(error => {
+                        this.isSpinner = false;
+                        console.log('Error fetching records:', error.stack);
+                    })
             }
         } catch (error) {
             console.warn('error in TemplatePreviewModal > previewData', error.message);
@@ -316,26 +320,26 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    contentLoaded(){
+    contentLoaded() {
         try {
             this.isSpinner = false;
         } catch (error) {
             console.warn('error in TemplatePreviewModal > contentLoaded', error.message);
         }
     }
-  
+
     /**
     * Method Name : fileDownloaded
     * @description : Used to hide spinner when file is downloaded.
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    fileDownloaded(){
+    fileDownloaded() {
         try {
             this.isSpinner = false;
             this.showPreview = false;
         } catch (error) {
-            console.log('error in TemplatePreviewModal > fileDownloaded', error.message);  
+            console.log('error in TemplatePreviewModal > fileDownloaded', error.message);
         }
     }
 
@@ -345,26 +349,26 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    generateDocument(){
-        try{
+    generateDocument() {
+        try {
             const previewTimeout = this.template.querySelector('[data-id="previewTimeout"]');
 
             this.showPreview = true;
             this.isSpinner = true;
             let previousSRC = this.vfGeneratePageSRC;
             let paraData2 = {
-                'templateId' : this.templateid,
-                'recordId' : this.selectedRecordId,
-                'selectedExtension' : '.pdf',
-                'selectedChannels' : 'Download',
-                'fileName' : this.selectedRecordName
+                'templateId': this.templateid,
+                'recordId': this.selectedRecordId,
+                'selectedExtension': '.pdf',
+                'selectedChannels': 'Download',
+                'fileName': this.selectedRecordName
             }
             let paraDataStringify2 = JSON.stringify(paraData2);
             let newSRC = '/apex/MVEX__DocGeneratePage?paraData=' + encodeURIComponent(paraDataStringify2);
 
-            if(newSRC !== previousSRC){
+            if (newSRC !== previousSRC) {
                 this.vfGeneratePageSRC = newSRC;
-            } else{
+            } else {
                 this.vfGeneratePageSRC = '/apex/MVEX__DocGeneratePage';
 
                 previewTimeout?.setCustomTimeoutMethod(() => {
@@ -372,7 +376,7 @@ export default class TemplatePreviewModal extends LightningElement {
                 }, 300);
             }
         }
-        catch(e){
+        catch (e) {
             console.log('Error in generateDocument : ', e.stack);
         }
     }
@@ -383,7 +387,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    closeTemplatePreview(){
+    closeTemplatePreview() {
         try {
             this.showPreview = true;
             this.dispatchEvent(new CustomEvent('closemodal'));
@@ -398,11 +402,11 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    closeGenerate(){
+    closeGenerate() {
         try {
             this.isGenerate = false;
         } catch (error) {
-            console.log('error in TemplatePreviewModal > closeGenerate', error.message); 
+            console.log('error in TemplatePreviewModal > closeGenerate', error.message);
         }
     }
 
@@ -412,13 +416,13 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    runTimeoutMethod(event){
+    runTimeoutMethod(event) {
         try {
-            if(event?.detail?.function){
+            if (event?.detail?.function) {
                 event.detail.function();
             }
         } catch (error) {
-            console.log('error in TemplatePreviewModal > runTimeoutMethod', error.message); 
+            console.log('error in TemplatePreviewModal > runTimeoutMethod', error.message);
         }
     }
 
@@ -448,7 +452,7 @@ export default class TemplatePreviewModal extends LightningElement {
     * Created Date: 20/08/2024
     * Created By: Karan Singh
     */
-    setTempValue(value){
+    setTempValue(value) {
         return `<div class=" note-editor2 note-frame2">
                     <div class="note-editing-area2">
                         <div aria-multiline="true" role="textbox" class="note-editable2">

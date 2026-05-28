@@ -1,9 +1,11 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track, api, wire } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import designcss from '@salesforce/resourceUrl/listingManagerCss';
 import getListingData from '@salesforce/apex/ListingManagerController.getListingData';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { NavigationMixin } from 'lightning/navigation';
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import LISTING_OBJECT from '@salesforce/schema/Listing__c';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 import USER_CURRENCY from '@salesforce/i18n/currency';
@@ -41,6 +43,27 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     @track listingLoading = false;
     isConfigOpen = false;
     hasInitializedFilter = false;
+
+    // ── Record-type picker ─────────────────────────────────────
+    @track showRecordTypePicker = false;
+    @track recordTypeOptions = [];
+    @track selectedRecordTypeId = null;
+
+    @wire(getObjectInfo, { objectApiName: LISTING_OBJECT })
+    wiredObjectInfo({ data, error }) {
+        if (data) {
+            const rtMap = data.recordTypeInfos;
+            const options = Object.values(rtMap)
+                .filter(rt => rt.available && !rt.master)
+                .map(rt => ({ label: rt.name, value: rt.recordTypeId, isDefault: false }));
+            // Pre-select the first option
+            if (options.length > 0) {
+                options[0].isDefault = true;
+                this.selectedRecordTypeId = options[0].value;
+            }
+            this.recordTypeOptions = options;
+        }
+    }
 
     /**
     * Method Name : totalItems
@@ -419,8 +442,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     listing.isActive = listing.MVEX__Status__c === 'Active' ? true : false;
                 })
 
-                console.log('Listing Data:', this.listingData);
-
                 this.unchangedListingData = this.listingData;
                 this.processListings();
             })
@@ -487,6 +508,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     return {
                         fieldName: field.fieldName,
                         value: fieldValueraw,
+                        rawValue: (rawValue === null || rawValue === undefined || rawValue === '') ? null : rawValue,
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
@@ -571,9 +593,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     handleFilteredListings(event) {
         try {
-            this.sortField = 'Name';
-            this.sortOrder = 'asc';
-
             this.sortField = 'Name';
             this.sortOrder = 'asc';
 
@@ -838,24 +857,59 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name : goTONewListing
-    * @description : Redirect the new listing page
+    * @description : Opens a record-type picker when the object has multiple record
+    *   types (mirroring Salesforce standard behaviour), then navigates to the new
+    *   listing form with the chosen recordTypeId.
     * date: 3/06/2024
     * Created By:Vyom Soni
     */
     goTONewListing() {
         try {
+            if (this.recordTypeOptions.length > 1) {
+                // Pre-select the first option
+                this.selectedRecordTypeId = this.recordTypeOptions[0].value;
+                this.showRecordTypePicker = true;
+            } else {
+                // Only one (or zero) record types — navigate directly
+                const rtId = this.recordTypeOptions.length === 1
+                    ? this.recordTypeOptions[0].value
+                    : null;
+                this._navigateNewListing(rtId);
+            }
+        } catch (error) {
+            errorDebugger('ListingManager', 'goTONewListing', error, 'warn', 'Error in goTONewListing');
+        }
+    }
+
+    handleRecordTypeSelect(event) {
+        this.selectedRecordTypeId = event.target.value;
+    }
+
+    handleRecordTypeContinue() {
+        this.showRecordTypePicker = false;
+        this._navigateNewListing(this.selectedRecordTypeId);
+    }
+
+    handleRecordTypePickerClose() {
+        this.showRecordTypePicker = false;
+    }
+
+    _navigateNewListing(recordTypeId) {
+        try {
+            const state = { c__customParam: 'ListingManager' };
+            if (recordTypeId) {
+                state.recordTypeId = recordTypeId;
+            }
             this[NavigationMixin.Navigate]({
                 type: 'standard__objectPage',
                 attributes: {
                     objectApiName: 'MVEX__Listing__c',
                     actionName: 'new'
                 },
-                state: {
-                    c__customParam: 'ListingManager'
-                }
+                state
             });
         } catch (error) {
-            errorDebugger('ListingManager', 'goTONewListing', error, 'warn', 'Error in goTONewListing');
+            errorDebugger('ListingManager', '_navigateNewListing', error, 'warn', 'Error in _navigateNewListing');
         }
     }
 
@@ -935,6 +989,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     sortData() {
         try {
+            // Helper: returns true if a value represents an empty/null display value
+            const isEmpty = (v) => v === null || v === undefined || v === '' || v === '-';
+
             this.processedListingData = [...this.processedListingData].sort((a, b) => {
                 let aValue, bValue;
 
@@ -942,9 +999,30 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     aValue = a.Name;
                     bValue = b.Name;
                 } else {
-                    aValue = a.orderedFields.find(field => field.fieldName === this.sortField).value;
-                    bValue = b.orderedFields.find(field => field.fieldName === this.sortField).value;
+                    const aField = a.orderedFields.find(field => field.fieldName === this.sortField);
+                    const bField = b.orderedFields.find(field => field.fieldName === this.sortField);
+
+                    // For DATE / DATETIME fields use the raw Salesforce value so we
+                    // sort chronologically, not by the locale-formatted display string.
+                    const fieldMeta = this.fields.find(f => f.fieldName === this.sortField);
+                    const isDateField = fieldMeta &&
+                        (fieldMeta.fieldType === 'DATE' || fieldMeta.fieldType === 'DATETIME');
+
+                    if (isDateField) {
+                        aValue = aField.rawValue ? Date.parse(aField.rawValue) : null;
+                        bValue = bField.rawValue ? Date.parse(bField.rawValue) : null;
+                    } else {
+                        aValue = aField.value;
+                        bValue = bField.value;
+                    }
                 }
+
+                // Push null/empty to the very end on asc, very front on desc
+                const aEmpty = isEmpty(aValue);
+                const bEmpty = isEmpty(bValue);
+                if (aEmpty && bEmpty) return 0;
+                if (aEmpty) return this.sortOrder === 'asc' ? 1 : -1;
+                if (bEmpty) return this.sortOrder === 'asc' ? -1 : 1;
 
                 if (typeof aValue === 'string' && typeof bValue === 'string') {
                     aValue = aValue.toLowerCase();

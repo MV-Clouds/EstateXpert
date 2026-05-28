@@ -233,13 +233,19 @@
                                 <label class="slds-form-element__label">Custom Logic</label>
                                 <lightning-input type="text" value={currentRule.logicalExpression}
                                     onchange={handleLogicChange} placeholder="e.g., (1 AND 2) OR 3"
+                                    disabled={isLogicDisabled}
                                     variant="label-hidden"></lightning-input>
                                 <template if:true={logicError}>
                                     <p class="logic-error-css">{logicError}</p>
                                 </template>
-                                <p class="logic-hint">Use condition numbers with AND/OR operators (e.g., (1 AND 2) OR
-                                    3).
-                                    Leave blank for all AND.</p>
+                                <p class="logic-hint">
+                                    <template if:true={isLogicDisabled}>
+                                        Add more than 1 condition to enable custom logic.
+                                    </template>
+                                    <template if:false={isLogicDisabled}>
+                                        Use condition numbers with AND/OR operators (e.g., (1 AND 2) OR 3). All condition numbers must be included. Leave blank for all AND.
+                                    </template>
+                                </p>
                             </div>
                         </div>
                         <div class="footerbtns">

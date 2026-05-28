@@ -62,6 +62,10 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         return (this.currentRule?.conditions?.length || 0) >= 10;
     }
 
+    get isLogicDisabled() {
+        return (this.currentRule?.conditions?.length || 0) <= 1;
+    }
+
     connectedCallback() {
         this.isLoading = true;
         loadStyle(this, MulishFontCss);
@@ -500,8 +504,16 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         this.currentRule.conditions = this.currentRule.conditions
             .filter((_, cIndex) => cIndex !== conditionIndex)
             .map((condition, index) => ({ ...condition, order: index + 1 }));
+        // Clear logic when only 1 condition remains
+        if (this.currentRule.conditions.length <= 1) {
+            this.currentRule.logicalExpression = '';
+            this.currentRule.displayLogicalExpression = 'All conditions must be true (AND)';
+            this.logicError = '';
+        }
         this.currentRule = { ...this.currentRule };
-        this.validateLogicalExpression(this.currentRule.logicalExpression, this.currentRule.conditions.length); // Re-validate logic
+        if (this.currentRule.conditions.length > 1) {
+            this.validateLogicalExpression(this.currentRule.logicalExpression, this.currentRule.conditions.length);
+        }
     }
 
     saveRule() {
@@ -598,54 +610,136 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         }
 
         try {
-            // Check for valid characters (numbers, AND, OR, parentheses, spaces)
-            const validSyntax = /^[0-9\s()ANDOR]+$/;
-            if (!validSyntax.test(expression)) {
-                this.logicError = 'Invalid characters in logic. Use only condition numbers, AND, OR, parentheses, and spaces.';
+            const trimmed = expression.trim();
+
+            // 1. Valid characters only: digits, spaces, parentheses, A, N, D, O, R
+            if (!/^[0-9\s()ANDORandor]+$/.test(trimmed)) {
+                this.logicError = 'Invalid characters. Use only condition numbers, AND, OR, and parentheses.';
                 return false;
             }
 
-            // Check condition numbers
-            const numbers = expression.match(/\b\d+\b/g) || [];
+            // 2. Normalize to uppercase for token checks
+            const norm = trimmed.toUpperCase();
+
+            // 3. Tokenize — split on spaces but keep parentheses as their own tokens
+            const rawTokens = norm.replace(/\(/g, ' ( ').replace(/\)/g, ' ) ').split(/\s+/).filter(t => t);
+
+            if (rawTokens.length === 0) {
+                this.logicError = 'Logic expression cannot be empty.';
+                return false;
+            }
+
+            // 4. Each token must be a number, AND, OR, ( or )
+            const validToken = /^(\d+|AND|OR|\(|\))$/;
+            for (const tok of rawTokens) {
+                if (!validToken.test(tok)) {
+                    this.logicError = `Invalid token "${tok}". Use condition numbers, AND, OR, and parentheses.`;
+                    return false;
+                }
+            }
+
+            // 5. Condition numbers must be between 1 and conditionCount
+            const numbers = rawTokens.filter(t => /^\d+$/.test(t));
             if (numbers.length === 0) {
                 this.logicError = 'Logic must include at least one condition number.';
                 return false;
             }
-
-            const validNumbers = numbers.every(num => {
+            for (const num of numbers) {
                 const n = parseInt(num, 10);
-                return n > 0 && n <= conditionCount;
-            });
-            if (!validNumbers) {
-                this.logicError = `Condition numbers must be between 1 and ${conditionCount}.`;
-                return false;
-            }
-
-            // Basic bracket matching
-            let openBrackets = 0;
-            for (let char of expression) {
-                if (char === '(') openBrackets++;
-                if (char === ')') openBrackets--;
-                if (openBrackets < 0) {
-                    this.logicError = 'Unmatched closing parenthesis.';
+                if (n < 1 || n > conditionCount) {
+                    this.logicError = `Condition number ${n} is invalid. Must be between 1 and ${conditionCount}.`;
                     return false;
                 }
             }
-            if (openBrackets !== 0) {
+
+            // 6. All condition numbers 1..conditionCount must appear at least once
+            const usedNumbers = new Set(numbers.map(n => parseInt(n, 10)));
+            for (let i = 1; i <= conditionCount; i++) {
+                if (!usedNumbers.has(i)) {
+                    this.logicError = `Condition ${i} is missing from the logic expression.`;
+                    return false;
+                }
+            }
+
+            // 7. Balanced parentheses with no empty () pairs
+            let depth = 0;
+            for (let i = 0; i < rawTokens.length; i++) {
+                const tok = rawTokens[i];
+                if (tok === '(') {
+                    depth++;
+                    if (rawTokens[i + 1] === ')') {
+                        this.logicError = 'Empty parentheses () are not allowed.';
+                        return false;
+                    }
+                    if (rawTokens[i + 1] === 'AND' || rawTokens[i + 1] === 'OR') {
+                        this.logicError = 'An operator cannot immediately follow an opening parenthesis.';
+                        return false;
+                    }
+                } else if (tok === ')') {
+                    depth--;
+                    if (depth < 0) {
+                        this.logicError = 'Unmatched closing parenthesis.';
+                        return false;
+                    }
+                    if (rawTokens[i + 1] && /^\d+$/.test(rawTokens[i + 1])) {
+                        this.logicError = 'A condition number after a closing parenthesis must be preceded by AND or OR.';
+                        return false;
+                    }
+                }
+            }
+            if (depth !== 0) {
                 this.logicError = 'Unmatched opening parenthesis.';
                 return false;
             }
 
-            // Check for valid operator usage
-            const tokens = expression.split(/\s+/).filter(t => t);
-            for (let i = 0; i < tokens.length; i++) {
-                if (['AND', 'OR'].includes(tokens[i]) && (i === 0 || i === tokens.length - 1)) {
-                    this.logicError = 'AND/OR operators cannot be at the start or end of expression.';
-                    return false;
+            // 8. Expression must start with a number or (
+            const first = rawTokens[0];
+            if (first !== '(' && !/^\d+$/.test(first)) {
+                this.logicError = 'Expression must start with a condition number or an opening parenthesis.';
+                return false;
+            }
+
+            // 9. Expression must end with a number or )
+            const last = rawTokens[rawTokens.length - 1];
+            if (last !== ')' && !/^\d+$/.test(last)) {
+                this.logicError = 'Expression must end with a condition number or a closing parenthesis.';
+                return false;
+            }
+
+            // 10. Operator placement and adjacency checks
+            for (let i = 0; i < rawTokens.length; i++) {
+                const tok = rawTokens[i];
+                const next = rawTokens[i + 1];
+                const prev = rawTokens[i - 1];
+
+                if (tok === 'AND' || tok === 'OR') {
+                    // Cannot be first or last
+                    if (i === 0 || i === rawTokens.length - 1) {
+                        this.logicError = `${tok} cannot be at the start or end of the expression.`;
+                        return false;
+                    }
+                    // Consecutive operators
+                    if (next === 'AND' || next === 'OR') {
+                        this.logicError = `Consecutive operators (${tok} ${next}) are not allowed.`;
+                        return false;
+                    }
+                    // Operator before closing paren
+                    if (next === ')') {
+                        this.logicError = `An operator cannot immediately precede a closing parenthesis.`;
+                        return false;
+                    }
                 }
-                if (['AND', 'OR'].includes(tokens[i]) && ['AND', 'OR'].includes(tokens[i + 1])) {
-                    this.logicError = 'Consecutive AND/OR operators are not allowed.';
-                    return false;
+
+                // Two numbers or ) followed by ( or number without operator
+                if (/^\d+$/.test(tok) || tok === ')') {
+                    if (next && /^\d+$/.test(next)) {
+                        this.logicError = `Missing AND/OR operator between "${tok}" and "${next}".`;
+                        return false;
+                    }
+                    if (next === '(') {
+                        this.logicError = `Missing AND/OR operator between "${tok}" and "(".`;
+                        return false;
+                    }
                 }
             }
 

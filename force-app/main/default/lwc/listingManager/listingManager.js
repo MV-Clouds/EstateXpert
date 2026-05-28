@@ -144,6 +144,15 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name : filterIconColor
+    * @description : Return filter icon color based on active state.
+    * Black when closed (wrapOn = true), White when open (wrapOn = false)
+    */
+    get filterIconColor() {
+        return this.wrapOn ? '#000000' : '#ffffff';
+    }
+
+    /**
     * Method Name : pageNumbers
     * @description : set the list for page number in pagination.
     * * Date: 20/08/2024

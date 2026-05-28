@@ -68,6 +68,20 @@ export default class AwsFileUploader extends LightningElement {
     }
 
     /**
+    * Method Name: getFormattedSize
+    * @description: Format file size from bytes to KB or MB
+    * @param {number} sizeInBytes - File size in bytes
+    * @returns {string} Formatted size with unit (KB or MB)
+    */
+    getFormattedSize(sizeInBytes) {
+        const sizeInKB = sizeInBytes / 1024;
+        if (sizeInKB > 1000) {
+            return (sizeInKB / 1024).toFixed(2) + ' MB';
+        }
+        return sizeInKB.toFixed(2) + ' KB';
+    }
+
+    /**
     * Method Name: connectedCallback
     * @description: Used to load css and fetch data.
     * Created Date: 27/06/2024
@@ -469,6 +483,7 @@ export default class AwsFileUploader extends LightningElement {
                             const fileData = {
                                 name: file.name,
                                 size: file.size,
+                                formattedSize: this.getFormattedSize(file.size),
                                 preview: file.type != 'video/mp4' ? URL.createObjectURL(file) : await this.createThumbnail(file)
                             };
                             this.imageToShowFiles.push(fileData);
@@ -889,6 +904,7 @@ export default class AwsFileUploader extends LightningElement {
                                 Id: Date.now() + '-' + file,
                                 name: file.name,
                                 size: file.size,
+                                formattedSize: this.getFormattedSize(file.size),
                                 preview: file.type != 'video/mp4' ? URL.createObjectURL(file) : await this.createThumbnail(file)
                             };
                             this.imageToShowFiles.push(fileData);

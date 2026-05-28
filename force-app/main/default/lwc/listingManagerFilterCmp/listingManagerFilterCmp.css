@@ -130,11 +130,16 @@
     height: 1rem;
 }
 
-.combobox .operator-div{
-    color: #6b7280;
-    font-size: 12px;
+.combobox .operator-div {
+    color: #0176D3;
+    font-size: 11px;
     font-weight: 500;
-    margin-left: 0.5rem;
+    font-style: italic;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
 }
 
 .combobox .pill-section .pill-body svg{
@@ -651,14 +656,36 @@
 
 .filter-index-label {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    margin-bottom: 0.5rem;
+    gap: 0.35rem;
+    margin-bottom: 0.4rem;
+    line-height: 1.4;
 }
 
+/* Plain numbered prefix — same look as the field label */
 .filter-index {
-    color: #6b7280;
+    font-size: 13px;
     font-weight: 500;
-    margin-right: 0.25rem;
+    color: #1f2937;
+    flex-shrink: 0;
+}
+
+/* Field name label — sits right of the number on the same row */
+.filter-index-label .custom-field-lable {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1f2937;
+    margin-bottom: 0;
+    display: inline;
+    flex-shrink: 0;
+}
+
+/* Operator spans stay centred inline */
+.filter-index-label > span {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .no-filter{

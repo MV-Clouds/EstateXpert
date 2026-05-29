@@ -50,18 +50,81 @@ export default class MapFields extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name: dropDownPairsWithIndex
-    * @description: handle the dropdown pairs with index.
-    * Date: 18/09/2024
+    * @description: Enriches each dropdown pair with computed display labels, search-
+    *   filtered option lists, open/closed state, disabled flags, placeholder text, and
+    *   CSS class strings required by the custom searchable combobox UI.
+    * Date: 18/09/2024 | Updated: 29/05/2026
     * Created By: Karan Singh
     */
     get dropDownPairsWithIndex() {
-        return this.dropDownPairs.map((pair, index) => ({
-            ...pair,
-            displayIndex: index + 1
-        }));
+        return this.dropDownPairs.map((pair, index) => {
+            const listingSearch = pair.listingSearch || '';
+            const propertySearch = pair.propertySearch || '';
+
+            // Filter listing options by current search text; annotate the selected item
+            const listingFiltered = (pair.listingOptions || [])
+                .filter(o => !listingSearch || o.label.toLowerCase().includes(listingSearch.toLowerCase()))
+                .map(o => ({
+                    ...o,
+                    itemClass: o.value === pair.selectedListing
+                        ? 'combobox-option combobox-option-selected'
+                        : 'combobox-option'
+                }));
+
+            // Filter property options by current search text; annotate the selected item
+            const propertyFiltered = (pair.propertyOptions || [])
+                .filter(o => !propertySearch || o.label.toLowerCase().includes(propertySearch.toLowerCase()))
+                .map(o => ({
+                    ...o,
+                    itemClass: o.value === pair.selectedProperty
+                        ? 'combobox-option combobox-option-selected'
+                        : 'combobox-option'
+                }));
+
+            // Resolve human-readable labels for the selected values
+            const listingOption = (pair.listingOptions || []).find(o => o.value === pair.selectedListing)
+                || (this.MainListingOptions || []).find(o => o.value === pair.selectedListing);
+            const propertyOption = (pair.propertyOptions || []).find(o => o.value === pair.selectedProperty)
+                || (this.MainPropertyOptions || []).find(o => o.value === pair.selectedProperty);
+
+            const listingDisplayLabel = listingOption ? listingOption.label : '';
+            const propertyDisplayLabel = propertyOption ? propertyOption.label : '';
+
+            // When open  : show the live search text so the user can type to filter.
+            // When closed : show the selected label (empty if nothing selected yet).
+            const listingInputValue = pair.listingOpen ? listingSearch : listingDisplayLabel;
+            const propertyInputValue = pair.propertyOpen ? propertySearch : propertyDisplayLabel;
+
+            // Property field is locked until a listing field has been chosen
+            const isPropertyDisabled = !pair.selectedListing || this.isAutoSyncEnabled;
+
+            return {
+                ...pair,
+                _index: index,
+                displayIndex: index + 1,
+                listingFiltered,
+                propertyFiltered,
+                listingHasNoResults: listingFiltered.length === 0,
+                propertyHasNoResults: propertyFiltered.length === 0,
+                listingInputValue,
+                propertyInputValue,
+                isPropertyDisabled,
+                // Show hint text below the property combobox before a listing is selected
+                showPropertyHint: !pair.selectedListing && !this.isAutoSyncEnabled,
+                propertyPlaceholder: !pair.selectedListing
+                    ? 'Select Listing Field first'
+                    : 'Search Property Field…',
+                listingComboboxClass: this.isAutoSyncEnabled
+                    ? 'custom-combobox disabled'
+                    : 'custom-combobox',
+                propertyComboboxClass: isPropertyDisabled
+                    ? 'custom-combobox disabled'
+                    : 'custom-combobox'
+            };
+        });
     }
 
-    get isDropDownpairAvailable(){
+    get isDropDownpairAvailable() {
         return this.dropDownPairs.length > 0;
     }
 
@@ -96,12 +159,12 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 return;
             }
         }
-        
+
         loadStyle(this, externalCss);
         this.getMappingMetadata();
     }
-    
-    renderedCallback(){
+
+    renderedCallback() {
         if (this.isScroll) {
             const container = this.template.querySelector('.table-content');
             if (container) {
@@ -120,15 +183,15 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     getMappingMetadata() {
         try {
             getObjectFields({ objectName: 'MVEX__Listing__c' })
-            .then(data => {
-                this.handleListingObjectFields(data);
-                if (this.MainListingOptions.length !== 0) {
-                    this.callPropertyFields();
-                }
-            })
-            .catch(error => {
-                errorDebugger('MapFields', 'getMappingMetadata', error, 'warn', 'Error in getMappingMetadata');
-            });
+                .then(data => {
+                    this.handleListingObjectFields(data);
+                    if (this.MainListingOptions.length !== 0) {
+                        this.callPropertyFields();
+                    }
+                })
+                .catch(error => {
+                    errorDebugger('MapFields', 'getMappingMetadata', error, 'warn', 'Error in getMappingMetadata');
+                });
 
             this.filterAndUpdateListingOptions();
         } catch (error) {
@@ -145,15 +208,15 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     callPropertyFields() {
         try {
             getObjectFields({ objectName: 'MVEX__Property__c' })
-            .then(data => {
-                this.handlePropertyObjectFields(data);
-                if (this.MainPropertyOptions.length !== 0) {
-                    this.getMetadataFunction();
-                }
-            })
-            .catch(error => {
-                errorDebugger('MapFields', 'callPropertyFields', error, 'warn', 'Error in callPropertyFields');
-            });
+                .then(data => {
+                    this.handlePropertyObjectFields(data);
+                    if (this.MainPropertyOptions.length !== 0) {
+                        this.getMetadataFunction();
+                    }
+                })
+                .catch(error => {
+                    errorDebugger('MapFields', 'callPropertyFields', error, 'warn', 'Error in callPropertyFields');
+                });
         } catch (error) {
             errorDebugger('MapFields', 'callPropertyFields', error, 'warn', 'Error in callPropertyFields');
         }
@@ -213,20 +276,21 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     getMetadataFunction() {
         try {
             getMetadata()
-            .then(result => {
-                if (result[0] != null) {
-                    this.parseAndSetMappings(result[0]);
-                }
-                if (result[1] == null) {
-                    this.setCheckboxValue(result[0]);
-                } else {
-                    this.setCheckboxValue(result[1]);
-                }
+                .then(result => {
+                    if (result[0] != null) {
+                        this.parseAndSetMappings(result[0]);
+                    }
+                    if (result[1] == null) {
+                        this.setCheckboxValue(result[0]);
+                    } else {
+                        this.setCheckboxValue(result[1]);
+                    }
+                    // Store AFTER both mappings and checkbox value are fully set
+                    this.storeOriginalState();
+                }).catch(error => {
+                    errorDebugger('MapFields', 'getMetadataFunction', error, 'warn', 'Error in getMetadataFunction');
 
-            }).catch(error => {
-                errorDebugger('MapFields', 'getMetadataFunction', error, 'warn', 'Error in getMetadataFunction');
-
-            });
+                });
             this.filterAndUpdateListingOptions();
             this.filterAndUpdatePropertyOptions();
         } catch (error) {
@@ -255,7 +319,12 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                             selectedProperty: selectedProperty,
                             listingOptions: this.ListingOptions,
                             propertyOptions: this.filterPropertyOptions(selectedListing),
-                            isPropertyPicklistDisabled: false
+                            isPropertyPicklistDisabled: false,
+                            // Custom combobox open/search state
+                            listingOpen: false,
+                            propertyOpen: false,
+                            listingSearch: '',
+                            propertySearch: ''
                         };
                         this.dropDownPairs.push(newPair);
                         this.filterAndUpdateListingOptions();
@@ -265,8 +334,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                     this.isLoading = false;
                 });
                 this.isLoading = false;
-                // Store original state after loading
-                this.storeOriginalState();
             }
         } catch (error) {
             errorDebugger('MapFields', 'parseAndSetMappings', error, 'warn', 'Error in parseAndSetMappings');
@@ -289,25 +356,38 @@ export default class MapFields extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name: filterPropertyOptions
-    * @description: set property option according listing data-type
-    * @param: selectedListing string vlaue
-    * Date: 28/06/2024
+    * @description: Filters available property field options based on the selected listing
+    *   field data type. Uses MainListingOptions for the type lookup so it remains correct
+    *   even after filterAndUpdateListingOptions has excluded the option from ListingOptions.
+    *   Special rule: PICKLIST listing fields may map to both PICKLIST and TEXT property
+    *   fields, enabling broader mapping flexibility.
+    * @param: selectedListing string value
+    * Date: 28/06/2024 | Updated: 29/05/2026
     * Created By: Vyom Soni
     */
     filterPropertyOptions(selectedListing) {
         try {
-            if (!selectedListing) return; 
+            if (!selectedListing) return [];
             this.filterAndUpdatePropertyOptions();
-            const selectedListingField = this.ListingOptions.find(
+            // Use MainListingOptions so the lookup works regardless of filtering state
+            const selectedListingField = this.MainListingOptions.find(
                 (option) => option.value === selectedListing
             );
             if (!selectedListingField || !selectedListingField.dataType) {
-                return;
+                return this.PropertyOptions;
             }
             this.PropertyOptions = [...this.PropertyOptions];
-            this.PropertyOptions = this.PropertyOptions.filter((option) => {
-                return option.dataType === selectedListingField.dataType;
-            });
+            const listingDataType = selectedListingField.dataType;
+
+            if (listingDataType === 'PICKLIST') {
+                this.PropertyOptions = this.PropertyOptions.filter((option) => {
+                    return option.dataType === 'PICKLIST' || option.dataType === 'STRING';
+                });
+            } else {
+                this.PropertyOptions = this.PropertyOptions.filter((option) => {
+                    return option.dataType === listingDataType;
+                });
+            }
             return this.PropertyOptions;
         } catch (error) {
             errorDebugger('MapFields', 'filterPropertyOptions', error, 'warn', 'Error in filterPropertyOptions');
@@ -437,9 +517,9 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     * Created By: Vyom Soni
     */
     excludeSelectedOptionFromListing(selectedValue) {
-        try{
+        try {
             this.updateListing = this.updateListing.filter(option => option.value !== selectedValue);
-        }catch(error){
+        } catch (error) {
             errorDebugger('MapFields', 'excludeSelectedOptionFromListing', error, 'warn', 'Error in excludeSelectedOptionFromListing');
         }
     }
@@ -452,9 +532,9 @@ export default class MapFields extends NavigationMixin(LightningElement) {
      * Created By: Vyom Soni
      */
     excludeSelectedOptionFromProperty(selectedValue) {
-        try{
+        try {
             this.updateProperty = this.updateProperty.filter(option => option.value !== selectedValue);
-        }catch(error){
+        } catch (error) {
             errorDebugger('MapFields', 'excludeSelectedOptionFromProperty', error, 'warn', 'Error in excludeSelectedOptionFromProperty');
         }
     }
@@ -475,7 +555,12 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 selectedProperty: '',
                 listingOptions: this.ListingOptions,
                 propertyOptions: [],
-                isPropertyPicklistDisabled: true
+                isPropertyPicklistDisabled: true,
+                // Custom combobox open/search state
+                listingOpen: false,
+                propertyOpen: false,
+                listingSearch: '',
+                propertySearch: ''
             };
 
             this.dropDownPairs.push(newPair);
@@ -594,7 +679,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             }
 
             const selectedProperties = this.dropDownPairs.map(pair => pair.selectedProperty);
-            const duplicateIndex = selectedProperties.findIndex((property, index) => 
+            const duplicateIndex = selectedProperties.findIndex((property, index) =>
                 selectedProperties.indexOf(property) !== index
             );
 
@@ -702,7 +787,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 })),
                 checkbox: this.checkboxValue
             });
-            
+
             const originalState = JSON.stringify({
                 pairs: this.originalDropDownPairs.map(pair => ({
                     selectedListing: pair.selectedListing,
@@ -710,7 +795,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 })),
                 checkbox: this.originalCheckboxValue
             });
-            
+
             this.hasChanges = currentState !== originalState;
         } catch (error) {
             errorDebugger('MapFields', 'checkForChanges', error, 'warn', 'Error in checkForChanges');
@@ -734,6 +819,161 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             this.showToast('Success', 'Changes have been reverted', 'success');
         } catch (error) {
             errorDebugger('MapFields', 'revertChanges', error, 'warn', 'Error in revertChanges');
+        }
+    }
+
+    // ── Custom Combobox Handlers ─────────────────────────────────────────────
+
+    /**
+    * Method Name: handleComboFocus
+    * @description: Opens the custom combobox dropdown for the focused field.
+    *   Also closes any other open dropdowns on any row.
+    *   Blocked when Auto Sync is on, or when the Property combobox is focused
+    *   before a Listing field has been selected for that row.
+    * Date: 29/05/2026
+    * Created By: Karan Singh
+    */
+    handleComboFocus(event) {
+        try {
+            const index = parseInt(event.currentTarget.dataset.index, 10);
+            const field = event.currentTarget.dataset.field;
+
+            if (this.isAutoSyncEnabled) return;
+            if (field === 'property' && !this.dropDownPairs[index].selectedListing) return;
+
+            // Open the targeted dropdown; close every other open dropdown
+            this.dropDownPairs = this.dropDownPairs.map((pair, i) => {
+                if (i === index) {
+                    return {
+                        ...pair,
+                        listingOpen: field === 'listing',
+                        propertyOpen: field === 'property',
+                        // Clear search so the user sees the full unfiltered list on open
+                        listingSearch: field === 'listing' ? '' : pair.listingSearch,
+                        propertySearch: field === 'property' ? '' : pair.propertySearch
+                    };
+                }
+                return { ...pair, listingOpen: false, propertyOpen: false, listingSearch: '', propertySearch: '' };
+            });
+        } catch (error) {
+            errorDebugger('MapFields', 'handleComboFocus', error, 'warn', 'Error in handleComboFocus');
+        }
+    }
+
+    /**
+    * Method Name: handleComboBlur
+    * @description: Closes the custom combobox dropdown when the input loses focus.
+    *   A 200 ms delay is intentional: it lets onmousedown on a dropdown option
+    *   fire and register the selection BEFORE blur closes the dropdown.
+    * Date: 29/05/2026
+    * Created By: Karan Singh
+    */
+    handleComboBlur(event) {
+        try {
+            const index = parseInt(event.currentTarget.dataset.index, 10);
+            const field = event.currentTarget.dataset.field;
+
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
+            setTimeout(() => {
+                this.dropDownPairs = this.dropDownPairs.map((pair, i) => {
+                    if (i === index) {
+                        return {
+                            ...pair,
+                            listingOpen: field === 'listing' ? false : pair.listingOpen,
+                            propertyOpen: field === 'property' ? false : pair.propertyOpen,
+                            listingSearch: field === 'listing' ? '' : pair.listingSearch,
+                            propertySearch: field === 'property' ? '' : pair.propertySearch
+                        };
+                    }
+                    return pair;
+                });
+            }, 200);
+        } catch (error) {
+            errorDebugger('MapFields', 'handleComboBlur', error, 'warn', 'Error in handleComboBlur');
+        }
+    }
+
+    /**
+    * Method Name: handleSearchInput
+    * @description: Updates the live search text for the active combobox field
+    *   as the user types. The dropDownPairsWithIndex getter re-computes the
+    *   filtered option list reactively on every keystroke.
+    * Date: 29/05/2026
+    * Created By: Karan Singh
+    */
+    handleSearchInput(event) {
+        try {
+            const index = parseInt(event.currentTarget.dataset.index, 10);
+            const field = event.currentTarget.dataset.field;
+            const searchText = event.target.value;
+
+            this.dropDownPairs = this.dropDownPairs.map((pair, i) => {
+                if (i === index) {
+                    return {
+                        ...pair,
+                        listingSearch: field === 'listing' ? searchText : pair.listingSearch,
+                        propertySearch: field === 'property' ? searchText : pair.propertySearch
+                    };
+                }
+                return pair;
+            });
+        } catch (error) {
+            errorDebugger('MapFields', 'handleSearchInput', error, 'warn', 'Error in handleSearchInput');
+        }
+    }
+
+    /**
+    * Method Name: handleOptionSelect
+    * @description: Fired via onmousedown (not onclick) on each dropdown option so
+    *   it executes BEFORE the input's onblur event, ensuring the selection registers
+    *   before the dropdown closes. event.preventDefault() prevents the browser
+    *   from moving focus away from the input during the mousedown.
+    *   Mirrors the logic of handleSourceFieldChange / handleDestinationFieldChange.
+    * Date: 29/05/2026
+    * Created By: Karan Singh
+    */
+    handleOptionSelect(event) {
+        try {
+            // Prevent mousedown from causing the input to lose focus prematurely
+            event.preventDefault();
+
+            const index = parseInt(event.currentTarget.dataset.index, 10);
+            const field = event.currentTarget.dataset.field;
+            const value = event.currentTarget.dataset.value;
+
+            if (field === 'listing') {
+                // Mirror handleSourceFieldChange:
+                // Derive property options BEFORE filterAndUpdateListingOptions
+                // removes this value from ListingOptions.
+                this.dropDownPairs[index].selectedListing = value;
+                this.dropDownPairs[index].propertyOptions = this.filterPropertyOptions(value);
+                this.dropDownPairs[index].isPropertyPicklistDisabled = false;
+                this.dropDownPairs[index].selectedProperty = '';
+                this.dropDownPairs[index].listingOpen = false;
+                this.dropDownPairs[index].listingSearch = '';
+                this.updateListingOptionsAfterIndex(index);
+                this.filterAndUpdateListingOptions();
+                // Spread to trigger LWC reactive update
+                this.dropDownPairs = [...this.dropDownPairs];
+            } else {
+                // Mirror handleDestinationFieldChange
+                this.dropDownPairs[index].selectedProperty = value;
+                this.dropDownPairs[index].propertyOpen = false;
+                this.dropDownPairs[index].propertySearch = '';
+
+                const isPropertyValid = this.dropDownPairs.every(pair => pair.selectedProperty);
+                const isListingValid = this.dropDownPairs.every(pair => pair.selectedListing);
+                if (isListingValid && isPropertyValid) {
+                    this.savebutton = false;
+                }
+                this.filterAndUpdatePropertyOptions();
+                // Spread to trigger LWC reactive update
+                this.dropDownPairs = [...this.dropDownPairs];
+            }
+
+            this.checkForChanges();
+        } catch (error) {
+            errorDebugger('MapFields', 'handleOptionSelect', error, 'warn', 'Error in handleOptionSelect');
         }
     }
 

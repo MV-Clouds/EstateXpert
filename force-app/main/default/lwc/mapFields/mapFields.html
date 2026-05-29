@@ -29,7 +29,7 @@
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
                                     fill="currentColor" />
                             </svg>
-                            <template if:false={isMobileOrTablet}>Save Mapping</template>
+                            <template if:false={isMobileOrTablet}>Save Changes</template>
                         </button>
                         <button disabled={isRevertDisabled} onclick={revertChanges} class="blue-btn-css">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -63,35 +63,93 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template for:each={dropDownPairsWithIndex} for:item="pair" for:index="index">
-                                    <tr key={pair.Id}>
+                                <template for:each={dropDownPairsWithIndex} for:item="pair">
+                                    <tr key={pair.id}>
                                         <td data-label="S.No.">
                                             <div class="index-display">{pair.displayIndex}</div>
                                         </td>
-                                        <td data-label="Template Name">
+
+                                        <!-- Listing Field — always selectable (unless Auto Sync) -->
+                                        <td data-label="Listing Field">
                                             <div class="combobox_cls">
-                                                <lightning-combobox label="Listing Field" options={pair.listingOptions}
-                                                    placeholder="Select Listing Field" data-index={index}
-                                                    value={pair.selectedListing} onchange={handleSourceFieldChange}
-                                                    disabled={isAutoSyncEnabled} class="disabled"
-                                                    variant="label-hidden">
-                                                </lightning-combobox>
+                                                <div class={pair.listingComboboxClass}>
+                                                    <input type="text" class="combobox-input"
+                                                        value={pair.listingInputValue}
+                                                        placeholder="Search Listing Field&#8230;"
+                                                        data-index={pair._index} data-field="listing"
+                                                        onfocus={handleComboFocus} onblur={handleComboBlur}
+                                                        oninput={handleSearchInput} disabled={isAutoSyncEnabled}
+                                                        autocomplete="off" />
+                                                    <span class="combobox-chevron">
+                                                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M1 1L6 6L11 1" stroke="currentColor"
+                                                                stroke-width="1.5" stroke-linecap="round"
+                                                                stroke-linejoin="round" />
+                                                        </svg>
+                                                    </span>
+                                                    <template if:true={pair.listingOpen}>
+                                                        <div class="combobox-dropdown">
+                                                            <template for:each={pair.listingFiltered} for:item="opt">
+                                                                <div key={opt.value} class={opt.itemClass}
+                                                                    data-value={opt.value} data-index={pair._index}
+                                                                    data-field="listing"
+                                                                    onmousedown={handleOptionSelect}>
+                                                                    {opt.label}
+                                                                </div>
+                                                            </template>
+                                                            <template if:true={pair.listingHasNoResults}>
+                                                                <div class="combobox-no-results">No results
+                                                                    found</div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td data-label="Status">
+
+                                        <!-- Property Field — locked until a Listing Field is chosen -->
+                                        <td data-label="Property Field">
                                             <div class="combobox_cls">
-                                                <lightning-combobox label="Property Field"
-                                                    options={pair.propertyOptions} data-index={index}
-                                                    value={pair.selectedProperty} placeholder="Select Property Field"
-                                                    onchange={handleDestinationFieldChange} disabled={isAutoSyncEnabled}
-                                                    variant="label-hidden" class="disabled">
-                                                </lightning-combobox>
+                                                <div class={pair.propertyComboboxClass}>
+                                                    <input type="text" class="combobox-input"
+                                                        value={pair.propertyInputValue}
+                                                        placeholder={pair.propertyPlaceholder} data-index={pair._index}
+                                                        data-field="property" onfocus={handleComboFocus}
+                                                        onblur={handleComboBlur} oninput={handleSearchInput}
+                                                        disabled={pair.isPropertyDisabled} autocomplete="off" />
+                                                    <span class="combobox-chevron">
+                                                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M1 1L6 6L11 1" stroke="currentColor"
+                                                                stroke-width="1.5" stroke-linecap="round"
+                                                                stroke-linejoin="round" />
+                                                        </svg>
+                                                    </span>
+                                                    <template if:true={pair.propertyOpen}>
+                                                        <div class="combobox-dropdown">
+                                                            <template for:each={pair.propertyFiltered} for:item="opt">
+                                                                <div key={opt.value} class={opt.itemClass}
+                                                                    data-value={opt.value} data-index={pair._index}
+                                                                    data-field="property"
+                                                                    onmousedown={handleOptionSelect}>
+                                                                    {opt.label}
+                                                                </div>
+                                                            </template>
+                                                            <template if:true={pair.propertyHasNoResults}>
+                                                                <div class="combobox-no-results">No results
+                                                                    found</div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
                                             </div>
                                         </td>
+
                                         <td data-label="Actions">
                                             <div class="action-btn">
-                                                <button class="delete-icon-css" data-id={index} onclick={deletePair}
-                                                    disabled={isAutoSyncEnabled}>
+                                                <button class="delete-icon-css" data-id={pair._index}
+                                                    onclick={deletePair} disabled={isAutoSyncEnabled}>
                                                     <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path

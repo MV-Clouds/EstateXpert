@@ -9,7 +9,6 @@ public with sharing class ListingTriggerHandler {
     Boolean isDelete = false;
     Boolean isUndelete = false;
     private static final string CLASS_NAME = 'ListingTriggerHandler';
-    public static Boolean isFirstTime = true;
 
     // Added for Test Coverage to bypass metadata query
     @TestVisible
@@ -29,333 +28,205 @@ public with sharing class ListingTriggerHandler {
     public void afterInsertEvent() {
         handleListingAfterInsert();
     }
-
-    public void afterUpdateEvent(){
-        handleListingAfterUpdate();
-    }
     
-    //Main Methods
     public void handleListingAfterInsert() {
+        // If the property is already assigned at creation time, nothing to do.
+        List<Listing__c> listingsNeedingProperty = new List<Listing__c>();
+        for (Listing__c listing : recordNewList) {
+            if (listing.Property__c == null) {
+                listingsNeedingProperty.add(listing);
+            }
+        }
+
+        if (listingsNeedingProperty.isEmpty()) {
+            return; 
+        }
+
+        Boolean propertiesInserted = false;
+        List<Property__c> propertiesToInsert = new List<Property__c>();
+
         try {
-            //Get mapping from the metadata record
             Mapping_Metadata__mdt metaData;
-            if(Test.isRunningTest() && mockMetadata != null) {
+            if (Test.isRunningTest() && mockMetadata != null) {
                 metaData = mockMetadata;
             } else {
-                metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
-            }
-            
-            Map<String, String> fieldMappings = new Map<String, String>();
-            
-            if(metaData.Mapping_String__c != null){
-                String[] mappingPairs = metaData.Mapping_String__c.split(';');
-                for (String pair : mappingPairs) {
-                    String[] parts = pair.split(':');
-                    if (parts.size() == 2) {
-                        fieldMappings.put(parts[0], parts[1]);
-                    }
-                }
+                metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c
+                            FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
             }
 
-            
-            //Get All fields and exclude the audit and unwritable fields
             Map<String, Schema.SObjectField> listingFieldsMap = Schema.SObjectType.Listing__c.fields.getMap();
-            Set<String> listingFields = listingFieldsMap.keySet();
-            
             Map<String, Schema.SObjectField> propertyFieldsMap = Schema.SObjectType.Property__c.fields.getMap();
-            Set<String> propertyFields = propertyFieldsMap.keySet();
 
-            //When Automatic sync is on
-            if(metaData.Automatic_Sync__c != null && metaData.Automatic_Sync__c == true){
-                
-                Set<String> auditFields = new Set<String>(metaData.BlockedFields__c.split(';'));
-                for (String auditField : auditFields) {
-                    if (listingFields.contains(auditField)) {
-                        listingFields.remove(auditField);
-                    }
-                    if (propertyFields.contains(auditField)) {
-                        propertyFields.remove(auditField);
-                    }
-                }
-                
-                Set<String> unwritableFieldsForListing = new Set<String>();
-                for (String fieldName : listingFields) {
-                    if (!listingFieldsMap.get(fieldName).getDescribe().isUpdateable()) {
-                        unwritableFieldsForListing.add(fieldName);
-                    }
-                }
-                listingFields.removeAll(unwritableFieldsForListing);
-                
-                Set<String> unwritableFieldsForProperty = new Set<String>();
-                for (String fieldName : propertyFields) {
-                    if (!propertyFieldsMap.get(fieldName).getDescribe().isUpdateable()) {
-                        unwritableFieldsForProperty.add(fieldName);
-                    }
-                }
-                propertyFields.removeAll(unwritableFieldsForProperty);
-                
-                Set<String> matchingFields = new Set<String>(listingFields);
-                matchingFields.retainAll(propertyFields);
+            Boolean isAutoSync = metaData.Automatic_Sync__c == true;
 
-                List<Property__c> newProperties = new List<Property__c>();
-
-                Map<Id, Property__c> existingPropertiesMap = new Map<Id, Property__c>();
-
-                for (Listing__c newListing : recordNewList) {
-                    if (newListing.Property__c != null) {
-                        existingPropertiesMap.put(newListing.Id, new Property__c(Id = newListing.Property__c));
+            if (isAutoSync) {
+                Set<String> writableListingFields = new Set<String>();
+                for (String f : listingFieldsMap.keySet()) {
+                    if (listingFieldsMap.get(f).getDescribe().isUpdateable()) {
+                        writableListingFields.add(f); // keys are already lowercase
                     }
                 }
 
-                Map<String, Property__c> matchingPropertiesMap = new Map<String, Property__c>();
-                
-                for (Property__c existingProperty : [SELECT Id, Name, Address__c, Bedrooms__c, Bathrooms__c FROM Property__c WITH USER_MODE LIMIT 5000]) {
-                    String propertyKey = existingProperty.Name + '|' + existingProperty.Address__c + '|' + existingProperty.Bedrooms__c + '|' + existingProperty.Bathrooms__c;
-                    matchingPropertiesMap.put(propertyKey, existingProperty);
+                Set<String> writablePropertyFields = new Set<String>();
+                for (String f : propertyFieldsMap.keySet()) {
+                    if (propertyFieldsMap.get(f).getDescribe().isUpdateable()) {
+                        writablePropertyFields.add(f);
+                    }
                 }
-                
-                for (Listing__c newListing : recordNewList) {
-                    if (newListing.Property__c == null) {
-                        String propertyKey = newListing.Name + '|' + newListing.Address__c + '|' + newListing.Bedrooms__c	 + '|' + newListing.Bathrooms__c;
-                        if (matchingPropertiesMap.containsKey(propertyKey)) {
-                            Property__c existingProperty = matchingPropertiesMap.get(propertyKey);
-                            for (String field : matchingFields) {
-                                if (field != 'Id' && field != 'Name' && field != 'RecordTypeId' && listingFieldsMap.get(field).getDescribe().getType() == propertyFieldsMap.get(field).getDescribe().getType()) {
-                                    existingProperty.put(field, newListing.get(field));
-                                }
-                            }
-                            newProperties.add(existingProperty);
-                        } else {
-                            // Create a new property
-                            Property__c property = new Property__c();
-                            for (String field : matchingFields) {
-                                if (field != 'RecordTypeId' && listingFieldsMap.get(field).getDescribe().getType() == propertyFieldsMap.get(field).getDescribe().getType()) {
-                                    property.put(field, newListing.get(field));
-                                }
-                            }
-                            newProperties.add(property);
+
+                // Intersection: fields with the same API name on both objects
+                Set<String> matchingFields = new Set<String>(writableListingFields);
+                matchingFields.retainAll(writablePropertyFields);
+
+                // Build one Property record per qualifying listing
+                for (Listing__c listing : listingsNeedingProperty) {
+                    Property__c prop = new Property__c();
+                    for (String fieldName : matchingFields) {
+                        // Skip system-managed fields that must not be set manually
+                        if (fieldName.equalsIgnoreCase('Id') ||
+                                fieldName.equalsIgnoreCase('RecordTypeId')) {
+                            continue;
                         }
-                    } else {
-                        Property__c property = existingPropertiesMap.get(newListing.Id);
-                        for (String field : matchingFields) {
-                            if (field != 'RecordTypeId' && field != 'Id' && field != 'Name' && listingFieldsMap.get(field).getDescribe().getType() == propertyFieldsMap.get(field).getDescribe().getType()) {
-                                property.put(field, newListing.get(field));
+                        try {
+                            Object val = listing.get(fieldName);
+                            if (val != null) {
+                                prop.put(fieldName, val);
                             }
-                        }
-                        newProperties.add(property);
-                    }
-                }
-
-                
-                if (!newProperties.isEmpty()) {
-                    if(Schema.sObjectType.Property__c.isCreateable() && Schema.sObjectType.Property__c.isUpdateable()){
-                        upsert as user newProperties;
-                    }
-
-                    List<Listing__c> listingsToUpdate = new List<Listing__c>();
-                    for (Integer i = 0; i < recordNewList.size(); i++) {
-                        if (recordNewList[i].Property__c == null) {
-                            listingsToUpdate.add(new Listing__c(
-                                Id = recordNewList[i].Id,
-                                Property__c = newProperties[i].Id
-                            ));
+                        } catch (Exception ignored) {
+                            // Field is absent on this Listing record — skip silently
                         }
                     }
-                    
-                    if(Schema.sObjectType.Listing__c.isUpdateable()){
-                        update as user listingsToUpdate;
+
+                    final String LISTING_ADDR_PREFIX  = 'mvex__listing_address__';
+                    final String PROPERTY_ADDR_PREFIX = 'mvex__property_address__';
+                    for (String listingFieldKey : listingFieldsMap.keySet()) {
+                        if (!listingFieldKey.startsWith(LISTING_ADDR_PREFIX)) {
+                            continue;
+                        }
+                        // Sub-field suffix, e.g. 'street__s', 'city__s'
+                        String suffix = listingFieldKey.substring(LISTING_ADDR_PREFIX.length());
+                        String propertyFieldKey = PROPERTY_ADDR_PREFIX + suffix;
+
+                        if (!propertyFieldsMap.containsKey(propertyFieldKey)) {
+                            continue; // Matching address sub-field does not exist on Property
+                        }
+                        Schema.DescribeFieldResult propAddrDescribe =
+                            propertyFieldsMap.get(propertyFieldKey).getDescribe();
+                        if (!propAddrDescribe.isCreateable() && !propAddrDescribe.isUpdateable()) {
+                            continue; // Sub-field is read-only — skip
+                        }
+                        try {
+                            Object val = listing.get(listingFieldKey);
+                            if (val != null) {
+                                prop.put(propertyFieldKey, val);
+                            }
+                        } catch (Exception ignored) {
+                            // Sub-field not populated — skip silently
+                        }
                     }
+
+                    propertiesToInsert.add(prop);
                 }
+
             } else {
-                //when Automatic sync is off
-                List<Property__c> newProperties = new List<Property__c>();
-
-                Map<Id, Property__c> existingPropertiesMap = new Map<Id, Property__c>();
-
-                for (Listing__c newListing : recordNewList) {
-                    if (newListing.Property__c != null) {
-                        existingPropertiesMap.put(newListing.Id, new Property__c(Id = newListing.Property__c));
+                Map<String, String> fieldMappings = new Map<String, String>();
+                if (metaData.Mapping_String__c != null) {
+                    for (String pair : metaData.Mapping_String__c.split(';')) {
+                        List<String> parts = pair.split(':');
+                        if (parts.size() == 2 &&
+                                String.isNotBlank(parts[0]) &&
+                                String.isNotBlank(parts[1])) {
+                            fieldMappings.put(parts[0].trim(), parts[1].trim());
+                        }
                     }
                 }
-                
-                Map<String, Property__c> matchingPropertiesMap = new Map<String, Property__c>();
-                
-                for (Property__c existingProperty : [SELECT Id, Name, Address__c, Bedrooms__c, Bathrooms__c FROM Property__c WITH USER_MODE LIMIT 5000]) {
-                    String propertyKey = existingProperty.Name + '|' + existingProperty.Address__c + '|' + existingProperty.Bedrooms__c + '|' + existingProperty.Bathrooms__c;
-                    matchingPropertiesMap.put(propertyKey, existingProperty);
-                }
-                
-                
-                for (Listing__c listing : recordNewList) {
-                    if (listing.Property__c == null) {
-                        String propertyKey = listing.Name + '|' + listing.Address__c + '|' + listing.Bedrooms__c	 + '|' + listing.Bathrooms__c;
-                        if (matchingPropertiesMap.containsKey(propertyKey)) {
-                            Property__c existingProperty = matchingPropertiesMap.get(propertyKey);
-                            for (String listingField : fieldMappings.keySet()) {
-                                if (listing.get(listingField) != null) {
-                                    String propertyField = fieldMappings.get(listingField);
-                                    if(propertyField != 'Id' && Schema.SObjectType.Property__c.fields.getMap().get(propertyField).getDescribe().isUpdateable() && propertyField != 'RecordTypeId' && listingFieldsMap.get(propertyField).getDescribe().getType() == propertyFieldsMap.get(propertyField).getDescribe().getType()){
-                                        existingProperty.put(propertyField, listing.get(listingField));  
-                                    }
-                                }
-                            }
-                            newProperties.add(existingProperty);
-                        }
-                        else{
-                            Property__c property = new Property__c(); 
-                            for (String listingField : fieldMappings.keySet()) {
-                                if (listing.get(listingField) != null) {
-                                    String propertyField = fieldMappings.get(listingField);
-                                    if(propertyField != 'Id' && Schema.SObjectType.Property__c.fields.getMap().get(propertyField).getDescribe().isUpdateable() && propertyField != 'RecordTypeId'&& listingFieldsMap.get(propertyField).getDescribe().getType() == propertyFieldsMap.get(propertyField).getDescribe().getType()){
-                                        property.put(propertyField, listing.get(listingField));  
-                                    }
-                                }
-                            }
-                            newProperties.add(property);
+
+                for (Listing__c listing : listingsNeedingProperty) {
+                    Property__c prop = new Property__c();
+
+                    for (String listingField : fieldMappings.keySet()) {
+                        String propertyField = fieldMappings.get(listingField);
+
+                        // Guard: skip reserved / system fields
+                        if (String.isBlank(propertyField) ||
+                                propertyField.equalsIgnoreCase('Id') ||
+                                propertyField.equalsIgnoreCase('RecordTypeId')) {
+                            continue;
                         }
 
+                        // Guard: verify the target field exists on Property__c
+                        Schema.SObjectField propFieldToken =
+                            propertyFieldsMap.get(propertyField.toLowerCase());
+                        if (propFieldToken == null) {
+                            continue; // Field doesn't exist on Property — skip
+                        }
+
+                        // Guard: field must be settable (createable or updateable)
+                        Schema.DescribeFieldResult propDescribe = propFieldToken.getDescribe();
+                        if (!propDescribe.isCreateable() && !propDescribe.isUpdateable()) {
+                            continue; // Read-only field — skip
+                        }
+
+                        try {
+                            Object val = listing.get(listingField);
+                            if (val != null) {
+                                prop.put(propertyField, val);
+                            }
+                        } catch (Exception ignored) {
+                            // Field absent or incompatible — skip silently
+                        }
                     }
-                    else{
-                        Property__c property = existingPropertiesMap.get(listing.Id);
-                        for (String listingField : fieldMappings.keySet()) {
-                            if (listing.get(listingField) != null && listingField != 'Name') {
-                                String propertyField = fieldMappings.get(listingField);
-                                if(propertyField != 'Id' && Schema.SObjectType.Property__c.fields.getMap().get(propertyField).getDescribe().isUpdateable() && propertyField != 'RecordTypeId' && listingFieldsMap.get(propertyField).getDescribe().getType() == propertyFieldsMap.get(propertyField).getDescribe().getType()){
-                                    property.put(propertyField, listing.get(listingField));  
-                                }
-                            }
-                        }
-                        newProperties.add(property);
+                    propertiesToInsert.add(prop);
+                }
+            }
 
+            if (!propertiesToInsert.isEmpty()) {
+                insert as user propertiesToInsert;
+                propertiesInserted = true;
+            }
+            List<Listing__c> listingsToUpdate = new List<Listing__c>();
+            for (Integer i = 0; i < listingsNeedingProperty.size(); i++) {
+                listingsToUpdate.add(new Listing__c(
+                    Id         = listingsNeedingProperty[i].Id,
+                    Property__c = propertiesToInsert[i].Id
+                ));
+            }
+
+            if (!listingsToUpdate.isEmpty()) {
+                update as user listingsToUpdate;
+            }
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'ListingTriggerHandler', 'handleListingAfterInsert', 'Error while executing listing trigger handler');
+            if (!propertiesInserted) {
+                try {
+                    List<Property__c> fallbackProperties = new List<Property__c>();
+                    for (Listing__c listing : listingsNeedingProperty) {
+                        Property__c fallback = new Property__c();
+                        fallback.Name = listing.Name;
+                        fallback.MVEX__Failed_Mapping_Reason__c = e.getMessage();
+                        fallbackProperties.add(fallback);
                     }
 
-                }
-                
-                if (!newProperties.isEmpty() && Schema.sObjectType.Property__c.isCreateable() && Schema.sObjectType.Property__c.isUpdateable()) {
-                    upsert as user newProperties;
-                    
+                    if (!fallbackProperties.isEmpty()) {
+                        insert as user fallbackProperties;
+                    }
+
                     List<Listing__c> listingsToUpdate = new List<Listing__c>();
-                    for (Integer i = 0; i < recordNewList.size(); i++) {
+                    for (Integer i = 0; i < listingsNeedingProperty.size(); i++) {
                         listingsToUpdate.add(new Listing__c(
-                            Id = recordNewList[i].Id,
-                            Property__c = newProperties[i].Id
+                            Id          = listingsNeedingProperty[i].Id,
+                            Property__c = fallbackProperties[i].Id
                         ));
                     }
-                    
-                    if(Schema.sObjectType.Listing__c.isUpdateable()){
+                    if (!listingsToUpdate.isEmpty()) {
                         update as user listingsToUpdate;
                     }
+
+                } catch (Exception fallbackEx) {
+                    ErrorHandler.insertErrordata(fallbackEx, 'ListingTriggerHandler', 'handleListingAfterInsert', 'Error creating fallback property record');
                 }
             }
-        } catch(Exception e) {
-            ErrorHandler.insertErrordata(e, 'ListingTriggerHandler', 'handleListingAfterInsert', 'Error while exectuing logicc listing trigger handler');
         }
     }
-
-    public void handleListingAfterUpdate() {
-        try {
-            Mapping_Metadata__mdt metaData;
-            if(Test.isRunningTest() && mockMetadata != null) {
-                metaData = mockMetadata;
-            } else {
-                metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
-            }
-            
-            Map<String, String> fieldMappings = new Map<String, String>();
-
-            if(metaData.Mapping_String__c !=  null){
-                String[] mappingPairs = metaData.Mapping_String__c.split(';');
-                for (String pair : mappingPairs) {
-                    String[] parts = pair.split(':');
-                    if (parts.size() == 2) {
-                        fieldMappings.put(parts[0], parts[1]);
-                        
-                    }
-                }
-            }
-
-            if (recordNewList.isEmpty()) {
-                return;
-            }
-            
-            //When Automatic sync is on
-            if (metaData.Automatic_Sync__c != null && metaData.Automatic_Sync__c == true) {
-                List<Property__c> propertiesToUpdate = new List<Property__c>();
-                Set<Id> propertyIds = new Set<Id>();
-                for (Listing__c newListing : recordNewList) {
-                    if (newListing.Property__c != null) {
-                        propertyIds.add(newListing.Property__c);
-                    }
-                }
-                Map<Id, Property__c> existingPropertiesMap = new Map<Id, Property__c>();
-                if (!propertyIds.isEmpty()) {
-                    for (Property__c existingProperty : [SELECT Id FROM Property__c WHERE Id IN :propertyIds WITH USER_MODE LIMIT 5000]) {
-                        existingPropertiesMap.put(existingProperty.Id, existingProperty);
-                    }
-                }
-                
-                for (Listing__c newListing : recordNewList) {
-                    if (newListing.Property__c != null && existingPropertiesMap.containsKey(newListing.Property__c)) {
-                        Property__c existingProperty = existingPropertiesMap.get(newListing.Property__c);
-                        Map<String, Object> listingFields = newListing.getPopulatedFieldsAsMap();
-                        for (String fieldName : listingFields.keySet()) {
-                            if (!fieldName.startsWith('System') && Schema.SObjectType.Property__c.fields.getMap().containsKey(fieldName) && Schema.SObjectType.Property__c.fields.getMap().get(fieldName).getDescribe().isUpdateable() && fieldName != 'Id' && fieldName != 'RecordTypeId') {
-                                Schema.DescribeFieldResult listingFieldDescribe = Schema.SObjectType.Listing__c.fields.getMap().get(fieldName).getDescribe();
-                                Schema.DescribeFieldResult propertyFieldDescribe = Schema.SObjectType.Property__c.fields.getMap().get(fieldName).getDescribe();
-                                if (listingFieldDescribe.getType() == propertyFieldDescribe.getType()) {
-                                    existingProperty.put(fieldName, newListing.get(fieldName));
-                                }
-                            }
-                        }
-                        propertiesToUpdate.add(existingProperty);
-                    }
-                }
-                
-                
-                if (!propertiesToUpdate.isEmpty() && Schema.sObjectType.Property__c.isUpdateable()) {
-                    update as user propertiesToUpdate;
-                }
-            }
-            else {
-                // When Automatic sync is off
-                List<Property__c> propertiesToUpdate = new List<Property__c>();
-            
-                Map<Id, Property__c> existingPropertiesMap = new Map<Id, Property__c>();
-                
-                for (Listing__c newListing : recordNewList) {
-                    if (newListing.Property__c != null) {
-                        existingPropertiesMap.put(newListing.Id, new Property__c(Id = newListing.Property__c));
-                    }
-                }
-            
-                for (Listing__c newListing : recordNewList) {
-                    if (newListing.Property__c != null) {
-                        Property__c property = existingPropertiesMap.get(newListing.Id);
-                        if (property != null) {
-                            for (String listingField : fieldMappings.keySet()) {
-                                String propertyField = fieldMappings.get(listingField);
-                                if (newListing.get(listingField) != null && !metaData.BlockedFields__c.contains(propertyField) && propertyField != 'Id') {
-                                    Schema.DescribeFieldResult listingFieldDescribe = Schema.SObjectType.Listing__c.fields.getMap().get(listingField).getDescribe();
-                                    Schema.DescribeFieldResult propertyFieldDescribe = Schema.SObjectType.Property__c.fields.getMap().get(propertyField).getDescribe();
-                                    if (listingFieldDescribe.getType() == propertyFieldDescribe.getType()) {
-                                        property.put(propertyField, newListing.get(listingField));
-                                    }
-                                }
-                            }
-                            propertiesToUpdate.add(property);
-                        }
-                    }
-                }
-    
-            
-                if (!propertiesToUpdate.isEmpty() && Schema.sObjectType.Property__c.isUpdateable()) {
-                    update as user propertiesToUpdate; 
-                }
-            }
-            
-            
-        } catch(Exception e) {
-            ErrorHandler.insertErrordata(e, 'ListingTriggerHandler', 'handleListingAfterUpdate', 'Error while exectuing logicc listing trigger handler');
-        }
-    }    
 }

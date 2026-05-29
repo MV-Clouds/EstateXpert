@@ -298,6 +298,7 @@ public without sharing class ContactTriggerHandler {
             Set<Id> ownerIdsToNotify = new Set<Id>();
             Map<Id, String> ownerIdToLeadName = new Map<Id, String>();
             Map<Id, Id> ownerIdToLeadId = new Map<Id, Id>();
+            List<Contact> welcomeEmailContacts = new List<Contact>();
 
             for (Contact newLead : newLeads) {
                 Boolean isInsert = (oldLeadMap == null || !oldLeadMap.containsKey(newLead.Id));
@@ -316,49 +317,75 @@ public without sharing class ContactTriggerHandler {
                     ownerIdToLeadName.put(newLead.OwnerId, fullName);
                     ownerIdToLeadId.put(newLead.OwnerId, newLead.Id);
                 }
+
+                // Collect newly-inserted Buyer / Renter contacts for welcome email
+                if (isInsert && String.isNotBlank(newLead.MVEX__Contact_Type__c)) {
+                    Boolean isBuyerOrRenter = false;
+                    for (String ct : newLead.MVEX__Contact_Type__c.split(';')) {
+                        if (ct.trim() == 'Buyer' || ct.trim() == 'Renter') {
+                            isBuyerOrRenter = true;
+                            break;
+                        }
+                    }
+                    if (isBuyerOrRenter) {
+                        welcomeEmailContacts.add(newLead);
+                    }
+                }
             }
 
-            if (ownerIdsToNotify.isEmpty()) {
-                return;
-            }
-
-            if (!Schema.sObjectType.User.isAccessible()) {
-                return;
-            }
-
-            Map<Id, User> userMap = new Map<Id, User>([SELECT Id, Email FROM User WHERE Id IN :ownerIdsToNotify AND Email != null]);
-
-            if (!Schema.sObjectType.CustomNotificationType.isAccessible()) {
-                return;
-            }
-
-            List<CustomNotificationType> cnTypes = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'LeadAssignmentRule' LIMIT 1];
-
-            if (cnTypes.isEmpty()) {
-                return;
-            }
-
-            CustomNotificationType cnType = cnTypes[0];
-
-            List<EmailTemplate> templates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Assigned_Notification' LIMIT 1];
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
-            for (Id ownerId : ownerIdsToNotify) {
-                String leadName = ownerIdToLeadName.get(ownerId);
-                Id leadId = ownerIdToLeadId.get(ownerId);
-                Messaging.CustomNotification customNotification = new Messaging.CustomNotification();
-                customNotification.setTitle('New Lead Assigned');
-                customNotification.setBody('You have been assigned a new lead: ' + leadName);
-                customNotification.setNotificationTypeId(cnType.Id);
-                customNotification.setTargetId(leadId);
-                customNotification.setSenderId(UserInfo.getUserId());
-                customNotification.send(new Set<String>{ownerId});
 
-                if (userMap.containsKey(ownerId)) {
-                    if (!templates.isEmpty()) {
+            if (!welcomeEmailContacts.isEmpty()) {
+                List<EmailTemplate> welcomeTemplates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Welcome_Email' LIMIT 1];
+                if (!welcomeTemplates.isEmpty()) {
+                    for (Contact con : welcomeEmailContacts) {
+                        Messaging.SingleEmailMessage welcomeMail = new Messaging.SingleEmailMessage();
+                        welcomeMail.setTargetObjectId(con.Id);
+                        welcomeMail.setTreatTargetObjectAsRecipient(true);
+                        welcomeMail.setTemplateId(welcomeTemplates[0].Id);
+                        welcomeMail.setSaveAsActivity(false);
+                        emails.add(welcomeMail);
+                    }
+                }
+            }
+
+            // ── Owner notification emails ────────────────────────────────────────────
+            if (!ownerIdsToNotify.isEmpty()) {
+                if (!Schema.sObjectType.User.isAccessible()) {
+                    return;
+                }
+
+                Map<Id, User> userMap = new Map<Id, User>([SELECT Id, Email FROM User WHERE Id IN :ownerIdsToNotify AND Email != null]);
+
+                if (!Schema.sObjectType.CustomNotificationType.isAccessible()) {
+                    return;
+                }
+
+                List<CustomNotificationType> cnTypes = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'LeadAssignmentRule' LIMIT 1];
+                if (cnTypes.isEmpty()) {
+                    return;
+                }
+
+                CustomNotificationType cnType = cnTypes[0];
+                List<EmailTemplate> ownerTemplates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Assigned_Notification' LIMIT 1];
+
+                for (Id ownerId : ownerIdsToNotify) {
+                    String leadName = ownerIdToLeadName.get(ownerId);
+                    Id leadId = ownerIdToLeadId.get(ownerId);
+
+                    Messaging.CustomNotification customNotification = new Messaging.CustomNotification();
+                    customNotification.setTitle('New Lead Assigned');
+                    customNotification.setBody('You have been assigned a new lead: ' + leadName);
+                    customNotification.setNotificationTypeId(cnType.Id);
+                    customNotification.setTargetId(leadId);
+                    customNotification.setSenderId(UserInfo.getUserId());
+                    customNotification.send(new Set<String>{ownerId});
+
+                    if (userMap.containsKey(ownerId) && !ownerTemplates.isEmpty()) {
                         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                         mail.setTargetObjectId(ownerId);
                         mail.setWhatId(leadId);
-                        mail.setTemplateId(templates[0].Id);
+                        mail.setTemplateId(ownerTemplates[0].Id);
                         mail.setSaveAsActivity(false);
                         emails.add(mail);
                     }
@@ -366,17 +393,13 @@ public without sharing class ContactTriggerHandler {
             }
 
             if (!emails.isEmpty()) {
-                Messaging.SendEmailResult[] results = Messaging.sendEmail(emails, false);
-                for (Messaging.SendEmailResult result : results) {
-                    if (!result.isSuccess()) {
-                        System.debug('notifyOwner: Email sending failed: ' + result.getErrors()[0].getMessage());
-                    }
-                }
+                Messaging.sendEmail(emails, false);
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'LeadAssignmentHandler', 'notifyOwner', 'Error during notifyOwner');
         }
     }
+
 
     private static void sendSocialMediaNotifications(List<Contact> leads) {
         try {
@@ -403,11 +426,9 @@ public without sharing class ContactTriggerHandler {
             }
             if (emailList.isEmpty()) return;
 
-            // Fetch Template
             List<EmailTemplate> templates = [SELECT Id, Subject FROM EmailTemplate WHERE DeveloperName = 'Social_Media_Lead_Notification' LIMIT 1];
             if (templates.isEmpty()) return;
 
-            // Requirement: Use Org-Wide Email Address for Guest User context
             Id orgWideEmailId = null;
             List<OrgWideEmailAddress> owea = [SELECT Id FROM OrgWideEmailAddress WHERE DisplayName = 'GuestUserMail' LIMIT 1];
             if (!owea.isEmpty()) {
@@ -417,13 +438,11 @@ public without sharing class ContactTriggerHandler {
             List<Messaging.SingleEmailMessage> emailQueue = new List<Messaging.SingleEmailMessage>();
             
             for (Contact con : buyerSocialLeads) {
-                // Messaging.SingleEmailMessage renderedEmail = Messaging.renderStoredEmailTemplate(templates[0].Id, null, con.Id);
                 for (String email : emailList) {
                     Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                     mail.setToAddresses(new List<String>{email});
                     mail.setTargetObjectId(con.Id);
                     mail.setTreatTargetObjectAsRecipient(false); 
-                    // mail.setWhatId(con.Id);
                     mail.setTemplateId(templates[0].Id);
                     mail.setSaveAsActivity(false);
                     
@@ -435,14 +454,8 @@ public without sharing class ContactTriggerHandler {
                 }
             }
 
-            system.debug('emailQueue:'+emailQueue);
             if (!emailQueue.isEmpty()) {
-                Messaging.SendEmailResult[] results = Messaging.sendEmail(emailQueue, false);
-                for (Messaging.SendEmailResult result : results) {
-                    if (!result.isSuccess()) {
-                        System.debug('notifyOwner: Email sending failed: ' + result.getErrors()[0].getMessage());
-                    }
-                }
+                Messaging.sendEmail(emailQueue, false);
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'LeadAssignmentHandler', 'sendSocialMediaNotifications', 'Failed to send social template email');

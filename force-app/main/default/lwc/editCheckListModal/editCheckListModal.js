@@ -1,4 +1,4 @@
-import { LightningElement, track, api} from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import getObjectFields from '@salesforce/apex/CheckListItemController.getObjectFields';
 import manageChecklistRecords from '@salesforce/apex/CheckListItemController.manageChecklistRecords';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -25,16 +25,24 @@ export default class EditCheckListModal extends LightningElement {
     @track dragStartIndex = null;
     scrollInterval = null;
 
-    operatorOptions = [
+    // Numeric field types that support comparison operators
+    NUMERIC_FIELD_TYPES = ['NUMBER', 'CURRENCY', 'INTEGER', 'DECIMAL', 'DOUBLE', 'PERCENT'];
+
+    // Base operators available for all field types
+    BASE_OPERATOR_OPTIONS = [
         { label: 'Equals', value: 'Equals' },
         { label: 'Not Equals to', value: 'Not Equals to' },
         { label: 'Is Null', value: 'Is Null' },
+        { label: 'Contains', value: 'Contains' },
+        { label: 'Not Contains', value: 'Not Contains' },
+    ];
+
+    // Comparison operators only for numeric/currency fields
+    NUMERIC_OPERATOR_OPTIONS = [
         { label: 'Greater Than', value: 'Greater Than' },
         { label: 'Greater Than Equal To', value: 'Greater Than Equal To' },
         { label: 'Less Than', value: 'Less Than' },
         { label: 'Less Than Equal To', value: 'Less Than Equal To' },
-        { label: 'Contains', value: 'Contains' },
-        { label: 'Not Contains', value: 'Not Contains' },
     ];
 
     /**
@@ -55,14 +63,14 @@ export default class EditCheckListModal extends LightningElement {
     * Created By: Karan Singh
     * Updated By: Karan Singh
     */
-    connectedCallback(){
+    connectedCallback() {
         try {
             loadStyle(this, MulishFontCss);
             this.getObjectFieldsAndName();
         } catch (error) {
             errorDebugger('EditCheckListModal', 'connectedCallback', error, 'warn', 'error in connectedCallback');
         }
-	}
+    }
 
     /**
     * Method Name: renderedCallback
@@ -72,9 +80,9 @@ export default class EditCheckListModal extends LightningElement {
     * Created By: Karan Singh
     * Updated By: Karan Singh
     */
-    renderedCallback(){
+    renderedCallback() {
         try {
-            if(this.setScroll){
+            if (this.setScroll) {
                 const container = this.template.querySelector('.table-content');
                 container.scrollTop = container.scrollHeight;
                 this.setScroll = false;
@@ -98,18 +106,44 @@ export default class EditCheckListModal extends LightningElement {
                     this.checklistItems = JSON.parse(JSON.stringify(result.checklist));
                     this.checklistRecords = JSON.parse(JSON.stringify(result.checklist));
                     this.listOfFields = result.fields;
-    
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL','CURRENCY'];
+
+                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL', 'CURRENCY'];
                     const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                     const referenceFieldTypes = ['REFERENCE'];
-    
-                    this.checklistItems.forEach(item => {
+
+                    this.selectedObjectName = result.label;
+                    this.fieldoptions = result.fields.map(field => {
+                        return { label: field.label, value: field.value };
+                    }).sort((a, b) => a.label.localeCompare(b.label));
+
+                    this.checklistItems = this.checklistItems.map(item => {
                         const fieldType = item.MVEX__Data_Type__c;
-    
+
                         item.isPrimary = primaryFieldTypes.includes(fieldType);
                         item.isPicklist = picklistFieldTypes.includes(fieldType);
                         item.isReference = referenceFieldTypes.includes(fieldType);
-    
+                        item.isNumericField = this.NUMERIC_FIELD_TYPES.includes(fieldType);
+
+                        // Operator options filtered by field type
+                        item.operatorOptionsForRow = item.isNumericField
+                            ? [...this.BASE_OPERATOR_OPTIONS, ...this.NUMERIC_OPERATOR_OPTIONS]
+                            : [...this.BASE_OPERATOR_OPTIONS];
+
+                        // Custom searchable combobox state
+                        item.isFieldComboboxOpen = false;
+                        item.fieldSearchTerm = '';
+                        item.filteredFieldOptions = this.fieldoptions.map(opt => ({
+                            ...opt,
+                            optionClass: opt.value === item.MVEX__Field_Name__c
+                                ? 'combobox-option combobox-option--selected'
+                                : 'combobox-option'
+                        }));
+                        item.noFieldResults = false;
+                        // Display label for the trigger
+                        const matchedField = this.fieldoptions.find(f => f.value === item.MVEX__Field_Name__c);
+                        item.fieldDisplayLabel = matchedField ? matchedField.label : 'Select a field...';
+                        item.fieldComboboxTriggerClass = matchedField ? 'combobox-trigger-text' : 'combobox-trigger-text combobox-placeholder';
+
                         // If isPicklist is true, get picklist values from result.fields
                         if (item.isPicklist) {
                             const field = result.fields.find(f => f.value === item.MVEX__Field_Name__c);
@@ -126,22 +160,18 @@ export default class EditCheckListModal extends LightningElement {
                         }
 
                         if (item.MVEX__Operator__c && item.MVEX__Operator__c.includes('Is Null')) {
-
                             item.isPrimary = false;
                             item.isPicklist = true;
                             item.isReference = false;
-
                             item.picklistValues = [
                                 { label: 'True', value: 'true' },
                                 { label: 'False', value: 'false' }
                             ];
                         }
+
+                        return item;
                     });
-    
-                    this.selectedObjectName = result.label;
-                    this.fieldoptions = result.fields.map(field => {
-                        return { label: field.label, value: field.value };
-                    }).sort((a, b) => a.label.localeCompare(b.label));
+
                     this.isSpinner = false;
                 })
                 .catch(error => {
@@ -201,30 +231,30 @@ export default class EditCheckListModal extends LightningElement {
             event.preventDefault();
             const row = event.currentTarget;
             row.classList.add('drop-over');
-        
+
             // Auto-scroll functionality
             const container = this.template.querySelector('.tableContainer');
             if (!container) return;
-        
+
             const bounding = container.getBoundingClientRect();
             const mouseY = event.clientY;
             const scrollMargin = 70;
             const scrollSpeed = 20;
             const maxScroll = container.scrollHeight - container.clientHeight;
             const currentScroll = container.scrollTop;
-        
+
             // Clear any existing interval to prevent duplicates
             if (this.scrollInterval) {
                 clearInterval(this.scrollInterval);
                 this.scrollInterval = null;
             }
-        
+
             // Top zone scrolling
             if (mouseY < bounding.top + scrollMargin && currentScroll > 0) {
                 this.scrollInterval = setInterval(() => {
                     container.scrollTop = Math.max(0, container.scrollTop - scrollSpeed);
                 }, 16);
-            } 
+            }
             // Bottom zone scrolling
             else if (mouseY > bounding.bottom - scrollMargin && currentScroll < maxScroll) {
                 this.scrollInterval = setInterval(() => {
@@ -276,7 +306,7 @@ export default class EditCheckListModal extends LightningElement {
             this.template.querySelectorAll('.popup__data-row').forEach(row => {
                 row.classList.remove('dragged', 'drop-over');
             });
-            
+
             // Clear interval
             if (this.scrollInterval) {
                 clearInterval(this.scrollInterval);
@@ -339,7 +369,18 @@ export default class EditCheckListModal extends LightningElement {
                 MVEX__Value__c: '',
                 MVEX__Description__c: '',
                 MVEX__Data_Type__c: 'TEXT',
-                isPrimary: true
+                isPrimary: true,
+                isPicklist: false,
+                isReference: false,
+                isNumericField: false,
+                operatorOptionsForRow: [...this.BASE_OPERATOR_OPTIONS],
+                // Custom searchable combobox defaults
+                isFieldComboboxOpen: false,
+                fieldSearchTerm: '',
+                filteredFieldOptions: this.fieldoptions.map(opt => ({ ...opt, optionClass: 'combobox-option' })),
+                noFieldResults: false,
+                fieldDisplayLabel: 'Select a field...',
+                fieldComboboxTriggerClass: 'combobox-trigger-text combobox-placeholder'
             };
             this.checklistItems = [...this.checklistItems, newItem];
             this.setScroll = true;
@@ -356,46 +397,193 @@ export default class EditCheckListModal extends LightningElement {
     * Created By: Karan Singh
     * Updated By: Karan Singh
     */
-    handleFieldNameChange(event) {
+    handleFieldNameChange(index, value) {
         try {
-            const index = event.currentTarget.dataset.index;
-            const value = event.currentTarget.value;
             this.checklistItems[index].MVEX__Field_Name__c = value;
             this.checklistItems[index].MVEX__Value__c = '';
             this.checklistItems[index].MVEX__Operator__c = '';
-        
-            // Find the matching field from listoffields
+
+            // Update display label and trigger class
+            const matchedOpt = this.fieldoptions.find(f => f.value === value);
+            this.checklistItems[index].fieldDisplayLabel = matchedOpt ? matchedOpt.label : 'Select a field...';
+            this.checklistItems[index].fieldComboboxTriggerClass = matchedOpt
+                ? 'combobox-trigger-text'
+                : 'combobox-trigger-text combobox-placeholder';
+
+            // Find the matching field from listOfFields
             const selectedField = this.listOfFields.find(field => field.value === value);
             if (selectedField) {
                 const fieldType = selectedField.type;
 
-                const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL','CURRENCY'];
+                const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL', 'CURRENCY'];
                 const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                 const referenceFieldTypes = ['REFERENCE'];
-        
+
                 this.checklistItems[index].isPrimary = primaryFieldTypes.includes(fieldType);
                 this.checklistItems[index].isPicklist = picklistFieldTypes.includes(fieldType);
                 this.checklistItems[index].isReference = referenceFieldTypes.includes(fieldType);
+                this.checklistItems[index].isNumericField = this.NUMERIC_FIELD_TYPES.includes(fieldType);
                 this.checklistItems[index].MVEX__Data_Type__c = fieldType;
 
-                if (fieldType == 'REFERENCE') {
+                // Rebuild operator options based on whether field is numeric
+                this.checklistItems[index].operatorOptionsForRow = this.checklistItems[index].isNumericField
+                    ? [...this.BASE_OPERATOR_OPTIONS, ...this.NUMERIC_OPERATOR_OPTIONS]
+                    : [...this.BASE_OPERATOR_OPTIONS];
+
+                if (fieldType === 'REFERENCE') {
                     this.checklistItems[index].objectApiName = selectedField.referenceTo;
                 } else {
-                    if (this.checklistItems[index].isPicklist && selectedField.picklistValues.length > 0) {
+                    if (this.checklistItems[index].isPicklist && selectedField.picklistValues && selectedField.picklistValues.length > 0) {
                         this.checklistItems[index].picklistValues = selectedField.picklistValues.map(picklistValue => {
                             return { label: picklistValue, value: picklistValue };
                         });
                     } else {
                         this.checklistItems[index].picklistValues = null;
                     }
-                }        
+                }
+            } else {
+                // No field selected — reset to defaults
+                this.checklistItems[index].isPrimary = true;
+                this.checklistItems[index].isPicklist = false;
+                this.checklistItems[index].isReference = false;
+                this.checklistItems[index].isNumericField = false;
+                this.checklistItems[index].operatorOptionsForRow = [...this.BASE_OPERATOR_OPTIONS];
             }
+
             this.checklistItems = [...this.checklistItems]; // Force reactivity
         } catch (error) {
             errorDebugger('EditCheckListModal', 'handleFieldNameChange', error, 'warn', 'error in handleFieldNameChange');
         }
     }
-    
+
+    /**
+    * Method Name: closeAllFieldComboboxes
+    * @description: Closes all open field combobox dropdowns.
+    */
+    closeAllFieldComboboxes() {
+        if (!this.checklistItems) return;
+        this.checklistItems = this.checklistItems.map(item => ({ ...item, isFieldComboboxOpen: false }));
+    }
+
+    /**
+    * Method Name: handleFieldComboboxOpen
+    * @description: Toggles the custom searchable field combobox for a given row.
+    */
+    handleFieldComboboxOpen(event) {
+        try {
+            const index = parseInt(event.currentTarget.dataset.index, 10);
+            const isCurrentlyOpen = this.checklistItems[index].isFieldComboboxOpen;
+
+            // Close all first
+            this.checklistItems = this.checklistItems.map((item, i) => ({
+                ...item,
+                isFieldComboboxOpen: i === index ? !isCurrentlyOpen : false
+            }));
+        } catch (error) {
+            errorDebugger('EditCheckListModal', 'handleFieldComboboxOpen', error, 'warn', 'error in handleFieldComboboxOpen');
+        }
+    }
+
+    /**
+    * Method Name: handleFieldSearch
+    * @description: Filters field options based on the search term typed in the custom combobox.
+    */
+    handleFieldSearch(event) {
+        try {
+            const index = parseInt(event.currentTarget.dataset.index, 10);
+            const searchTerm = event.target.value.toLowerCase().trim();
+            this.checklistItems[index].fieldSearchTerm = event.target.value;
+
+            const currentValue = this.checklistItems[index].MVEX__Field_Name__c;
+            const filtered = this.fieldoptions.filter(opt =>
+                opt.label.toLowerCase().includes(searchTerm)
+            ).map(opt => ({
+                ...opt,
+                optionClass: opt.value === currentValue
+                    ? 'combobox-option combobox-option--selected'
+                    : 'combobox-option'
+            }));
+
+            this.checklistItems[index].filteredFieldOptions = filtered;
+            this.checklistItems[index].noFieldResults = filtered.length === 0;
+            this.checklistItems = [...this.checklistItems];
+        } catch (error) {
+            errorDebugger('EditCheckListModal', 'handleFieldSearch', error, 'warn', 'error in handleFieldSearch');
+        }
+    }
+
+    /**
+    * Method Name: handleSearchInputClick
+    * @description: Prevents the click inside the search input from bubbling to the trigger.
+    */
+    handleSearchInputClick(event) {
+        event.stopPropagation();
+    }
+
+    /**
+    * Method Name: handleFieldComboboxFocusOut
+    * @description: Closes the custom field combobox dropdown when focus moves outside the
+    *               combobox wrapper. Uses relatedTarget to distinguish between focus moving to
+    *               a child element (keep open) versus focus leaving entirely (close).
+    */
+    handleFieldComboboxFocusOut(event) {
+        try {
+            const wrapper = event.currentTarget;
+            const relatedTarget = event.relatedTarget;
+
+            // If the new focus target is still inside this combobox wrapper, keep it open
+            if (relatedTarget && wrapper.contains(relatedTarget)) {
+                return;
+            }
+
+            // Focus left the combobox — close it and reset search
+            const index = parseInt(wrapper.dataset.index, 10);
+            if (!isNaN(index) && this.checklistItems && this.checklistItems[index]) {
+                this.checklistItems[index].isFieldComboboxOpen = false;
+                this.checklistItems[index].fieldSearchTerm = '';
+                // Restore full options list (no lingering filter)
+                const currentValue = this.checklistItems[index].MVEX__Field_Name__c;
+                this.checklistItems[index].filteredFieldOptions = this.fieldoptions.map(opt => ({
+                    ...opt,
+                    optionClass: opt.value === currentValue
+                        ? 'combobox-option combobox-option--selected'
+                        : 'combobox-option'
+                }));
+                this.checklistItems[index].noFieldResults = false;
+                this.checklistItems = [...this.checklistItems];
+            }
+        } catch (error) {
+            errorDebugger('EditCheckListModal', 'handleFieldComboboxFocusOut', error, 'warn', 'error in handleFieldComboboxFocusOut');
+        }
+    }
+
+    /**
+    * Method Name: handleFieldOptionSelect
+    * @description: Handles selecting a field option from the custom combobox dropdown.
+    */
+    handleFieldOptionSelect(event) {
+        try {
+            event.stopPropagation();
+            const index = parseInt(event.currentTarget.dataset.index, 10);
+            const value = event.currentTarget.dataset.value;
+
+            // Close the dropdown
+            this.checklistItems[index].isFieldComboboxOpen = false;
+            this.checklistItems[index].fieldSearchTerm = '';
+            // Reset filtered list
+            this.checklistItems[index].filteredFieldOptions = this.fieldoptions.map(opt => ({
+                ...opt,
+                optionClass: opt.value === value ? 'combobox-option combobox-option--selected' : 'combobox-option'
+            }));
+            this.checklistItems[index].noFieldResults = false;
+
+            // Delegate to the existing change handler
+            this.handleFieldNameChange(index, value);
+        } catch (error) {
+            errorDebugger('EditCheckListModal', 'handleFieldOptionSelect', error, 'warn', 'error in handleFieldOptionSelect');
+        }
+    }
+
 
     /**
     * Method Name: handleOperatorChange
@@ -425,12 +613,8 @@ export default class EditCheckListModal extends LightningElement {
                 this.checklistItems[index].isPrimary = true;
                 this.checklistItems[index].isPicklist = false;
                 this.checklistItems[index].isReference = false;
-                // this.checklistItems[index].MVEX__Data_Type__c = 'NUMBER';
-               const selectedField = this.listOfFields.find(field => field.value === fieldApiName);
-                console.log('selectedField for Operator Change: ', selectedField);
-                console.log('selectedField type for Operator Change: ', selectedField ? selectedField.type : 'N/A');
-                
-                
+                const selectedField = this.listOfFields.find(field => field.value === fieldApiName);
+
                 if (selectedField) {
                     this.checklistItems[index].MVEX__Data_Type__c = selectedField.type;
                 }
@@ -439,10 +623,10 @@ export default class EditCheckListModal extends LightningElement {
                 if (selectedField) {
                     const fieldType = selectedField.type;
 
-                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL','CURRENCY'];
+                    const primaryFieldTypes = ['TEXT', 'DATETIME', 'DATE', 'NUMBER', 'EMAIL', 'CURRENCY'];
                     const picklistFieldTypes = ['PICKLIST', 'BOOLEAN', 'MULTIPICKLIST'];
                     const referenceFieldTypes = ['REFERENCE'];
-            
+
                     this.checklistItems[index].isPrimary = primaryFieldTypes.includes(fieldType);
                     this.checklistItems[index].isPicklist = picklistFieldTypes.includes(fieldType);
                     this.checklistItems[index].isReference = referenceFieldTypes.includes(fieldType);
@@ -458,7 +642,7 @@ export default class EditCheckListModal extends LightningElement {
                         } else {
                             this.checklistItems[index].picklistValues = null;
                         }
-                    }        
+                    }
                 }
             }
 
@@ -493,7 +677,7 @@ export default class EditCheckListModal extends LightningElement {
     * Created Date: 09/07/2024
     * Created By: Karan Singh
     */
-    saveChecklistRecords(){
+    saveChecklistRecords() {
         try {
             this.isSpinner = true;
 
@@ -511,7 +695,7 @@ export default class EditCheckListModal extends LightningElement {
                 this.isSpinner = false;
                 return;
             }
-            
+
             // Check if there are any changes
             if (JSON.stringify(this.checklistItems) === JSON.stringify(this.checklistRecords)) {
                 this.toast('Success', 'Checklist updated successfully', 'success');
@@ -580,14 +764,22 @@ export default class EditCheckListModal extends LightningElement {
             const removeUnwantedFields = (item) => {
                 // Create a copy of the item to avoid mutating the original object
                 const newItem = { ...item };
-                
-                // Remove unwanted properties
+
+                // Remove unwanted properties (UI-only state)
                 delete newItem.isPrimary;
                 delete newItem.isPicklist;
                 delete newItem.isReference;
+                delete newItem.isNumericField;
                 delete newItem.picklistValues;
                 delete newItem.objectApiName;
-                
+                delete newItem.operatorOptionsForRow;
+                delete newItem.isFieldComboboxOpen;
+                delete newItem.fieldSearchTerm;
+                delete newItem.filteredFieldOptions;
+                delete newItem.noFieldResults;
+                delete newItem.fieldDisplayLabel;
+                delete newItem.fieldComboboxTriggerClass;
+
                 return newItem;
             };
 
@@ -626,20 +818,20 @@ export default class EditCheckListModal extends LightningElement {
                 itemsToUpdate: itemsToUpdate,
                 itemsToDelete: itemsToDelete
             })
-            .then(result => {
-                this.isSpinner = false;
-                if (result === 'success') {
-                    this.toast('Success', 'Checklist updated successfully', 'success');
-                    this.handleRefresh();
-                } else {
-                    this.toast('Error', result, 'error');
-                }
-            })
-            .catch(error => {
-                this.isSpinner = false;
-                this.toast('Error', 'Error while updating checklist', 'error');
-                errorDebugger('EditCheckListModal', 'saveChecklistRecords', error, 'warn', 'error in saveChecklistRecords');
-            });
+                .then(result => {
+                    this.isSpinner = false;
+                    if (result === 'success') {
+                        this.toast('Success', 'Checklist updated successfully', 'success');
+                        this.handleRefresh();
+                    } else {
+                        this.toast('Error', result, 'error');
+                    }
+                })
+                .catch(error => {
+                    this.isSpinner = false;
+                    this.toast('Error', 'Error while updating checklist', 'error');
+                    errorDebugger('EditCheckListModal', 'saveChecklistRecords', error, 'warn', 'error in saveChecklistRecords');
+                });
         } catch (error) {
             errorDebugger('EditCheckListModal', 'saveChecklistRecords', error, 'warn', 'error in saveChecklistRecords');
             this.isSpinner = false;
@@ -654,7 +846,7 @@ export default class EditCheckListModal extends LightningElement {
     * Created By: Karan Singh
     * Updated By: Karan Singh
     */
-    handleRefresh(){
+    handleRefresh() {
         try {
             let custEvent = new CustomEvent('hidepopupandrefresh', {
                 details: false

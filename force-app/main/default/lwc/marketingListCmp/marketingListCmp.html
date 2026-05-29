@@ -74,16 +74,18 @@
 
                                 <div class="filter-tab-wrapper">
                                     <div class="filter-toggle-btn" onclick={wrapFilter}>
-                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
                                             <g id="SVGRepo_bgCarrier" stroke-width="1.5"></g>
-                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                stroke-linejoin="round"></g>
                                             <g id="SVGRepo_iconCarrier">
                                                 <path d="M0 3H16V1H0V3Z" fill={filterIconColor}></path>
                                                 <path d="M2 7H14V5H2V7Z" fill={filterIconColor}></path>
                                                 <path d="M4 11H12V9H4V11Z" fill={filterIconColor}></path>
                                                 <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
                                             </g>
-                                        </svg>                                         
+                                        </svg>
                                     </div>
                                 </div>
                             </div>
@@ -149,7 +151,7 @@
                                                                 <div
                                                                     class="slds-has-flexi-truncate center-trancate-head">
                                                                     <span class="slds-truncate"
-                                                                        title="Title">{contact.fieldLabel}</span>
+                                                                        title={contact.fieldLabel}>{contact.fieldLabel}</span>
                                                                     <span
                                                                         class="slds-icon_container slds-icon-utility-arrowdown">
                                                                         <svg data-index={contact.fieldName}

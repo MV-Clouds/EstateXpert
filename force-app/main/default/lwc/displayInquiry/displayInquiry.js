@@ -193,12 +193,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
  * Date: 26/03/2026
  */
     get isApplyButtonDisabled() {
-        // Check if the current condition type requires mappings
-        const requiresMappings = this.conditiontype === 'all' ||
-            this.conditiontype === 'any' ||
-            this.conditiontype === 'custom';
+        // Custom logic requires at least 2 conditions to build a meaningful expression
+        if (this.conditiontype === 'custom') {
+            return !this.mappings || this.mappings.length < 2;
+        }
 
-        // If it requires mappings, check if mappings exist
+        // all / any require at least 1 mapping
+        const requiresMappings = this.conditiontype === 'all' ||
+            this.conditiontype === 'any';
+
         if (requiresMappings) {
             return !this.mappings || this.mappings.length === 0;
         }
@@ -1330,6 +1333,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             if (this.conditiontype === 'custom') {
                 this.selectedConditionType = 'Custom Logic Is Met';
+
+                // Require at least 2 conditions for custom logic
+                if (this.mappings.length < 2) {
+                    this.showToast('Error', 'Custom Logic requires at least 2 conditions to build an expression.', 'error');
+                    return;
+                }
+
                 if (!this.logicalExpression || this.logicalExpression.trim() === '') {
                     this.logicalExpression = this.mappings.map(m => m.id).join(' AND ');
                 }
@@ -1337,74 +1347,26 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                 if (this.logicalExpression.trim() === '') {
                     if (inputElement) {
-                        inputElement.setCustomValidity('Expression cannot be empty');
+                        inputElement.setCustomValidity('Expression cannot be empty.');
                         inputElement.reportValidity();
                     }
                     return;
                 }
 
                 const mappinglength = this.mappings.length;
-                const regex = /\d+\s*(?:AND|OR)\s*\d+/i;
+                const validationError = this.validateLogicalExpression(this.logicalExpression.trim(), mappinglength);
 
-                if (!regex.test(this.logicalExpression) && mappinglength > 1) {
+                if (validationError) {
                     if (inputElement) {
-                        inputElement.setCustomValidity('Invalid condition syntax. Use numbers, AND, OR, spaces, and parentheses only.');
+                        inputElement.setCustomValidity(validationError);
                         inputElement.reportValidity();
                     }
                     return;
                 }
 
-                const numbers = this.logicalExpression.match(/\d+/g);
-                if (numbers) {
-                    const numberSet = new Set(numbers.map(Number));
-                    const invalidIndex = Array.from(numberSet).some(num => num >= mappinglength + 1 || num < 1);
-
-                    if (invalidIndex) {
-                        if (inputElement) {
-                            inputElement.setCustomValidity('Condition uses invalid index. Use indices from 1 to ' + mappinglength + '.');
-                            inputElement.reportValidity();
-                        }
-                        return;
-                    }
-
-                    if (numberSet.size !== mappinglength) {
-                        if (inputElement) {
-                            inputElement.setCustomValidity('Condition must include all indices.');
-                            inputElement.reportValidity();
-                        }
-                        return;
-                    }
-
-                    let openParens = 0;
-                    for (let char of this.logicalExpression) {
-                        if (char === '(') openParens++;
-                        if (char === ')') openParens--;
-                        if (openParens < 0) {
-                            if (inputElement) {
-                                inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                                inputElement.reportValidity();
-                            }
-                            return;
-                        }
-                    }
-                    if (openParens !== 0) {
-                        if (inputElement) {
-                            inputElement.setCustomValidity('Unbalanced parentheses in custom logic expression.');
-                            inputElement.reportValidity();
-                        }
-                        return;
-                    }
-
-                    if (inputElement) {
-                        inputElement.setCustomValidity('');
-                        inputElement.reportValidity();
-                    }
-                } else {
-                    if (inputElement) {
-                        inputElement.setCustomValidity('Condition syntax is correct but contains no indices');
-                        inputElement.reportValidity();
-                    }
-                    return;
+                if (inputElement) {
+                    inputElement.setCustomValidity('');
+                    inputElement.reportValidity();
                 }
 
                 this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry => {
@@ -1828,84 +1790,111 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
 
         const mappingLength = this.mappings.length;
+        const validationError = this.validateLogicalExpression(expr, mappingLength);
 
-        // Rule 1: Only allow digits, AND, OR, spaces and parentheses
-        const allowedCharsRegex = /^[\d\s()ANDORandor]+$/;
-        if (!allowedCharsRegex.test(expr)) {
-            if (inputElement) {
-                inputElement.setCustomValidity('Invalid characters. Use only numbers, AND, OR, spaces, and parentheses.');
-                inputElement.reportValidity();
+        if (inputElement) {
+            inputElement.setCustomValidity(validationError || '');
+            inputElement.reportValidity();
+        }
+    }
+
+    /**
+    * Method Name: validateLogicalExpression
+    * @description: Token-based validation of a custom logic expression.
+    *   Returns an error string if invalid, or null if valid.
+    *   Validates:
+    *   - Only valid tokens: integers, AND, OR, and parentheses (catches ORR / ANDD typos)
+    *   - Parentheses are balanced
+    *   - No dangling operator at start/end (e.g. "(1 AND 2) OR")
+    *   - No consecutive operators (e.g. "1 AND OR 2")
+    *   - No consecutive operands without an operator (e.g. "1 2 AND 3")
+    *   - Indices are within range [1..N]
+    *   - All condition indices are referenced
+    * Date: 01/06/2026
+    * Created By: Karan Singh
+    */
+    validateLogicalExpression(expr, mappingLength) {
+        // Tokenise: split into meaningful tokens (numbers, AND, OR, parens)
+        // Replace parentheses with spaced versions so they split cleanly
+        const tokenised = expr.replace(/\(/g, ' ( ').replace(/\)/g, ' ) ');
+        const rawTokens = tokenised.trim().split(/\s+/).filter(t => t.length > 0);
+
+        // Rule 1: Every token must be a valid keyword — catches ORR, ANDD, etc.
+        const validToken = /^(\d+|AND|OR|\(|\))$/i;
+        for (const token of rawTokens) {
+            if (!validToken.test(token)) {
+                return `Invalid token "${token}". Use only numbers, AND, OR, and parentheses.`;
             }
-            return;
         }
 
-        // Rule 2: When more than 1 condition exists, must have AND/OR connecting terms
-        const andOrRegex = /\d+\s*(?:AND|OR)\s*\d+/i;
-        if (mappingLength > 1 && !andOrRegex.test(expr)) {
-            if (inputElement) {
-                inputElement.setCustomValidity('Invalid syntax. Use numbers connected by AND / OR (e.g. "1 AND 2 OR 3").');
-                inputElement.reportValidity();
-            }
-            return;
-        }
-
-        const numbers = expr.match(/\d+/g);
-        if (numbers) {
-            const numberSet = new Set(numbers.map(Number));
-
-            // Rule 3: No index should be out of range
-            const hasOutOfRange = Array.from(numberSet).some(num => num < 1 || num > mappingLength);
-            if (hasOutOfRange) {
-                if (inputElement) {
-                    inputElement.setCustomValidity(`Condition indices must be between 1 and ${mappingLength}.`);
-                    inputElement.reportValidity();
-                }
-                return;
-            }
-
-            // Rule 4: All condition indices must be referenced
-            if (numberSet.size !== mappingLength) {
-                if (inputElement) {
-                    inputElement.setCustomValidity(`All ${mappingLength} condition(s) must be included in the expression.`);
-                    inputElement.reportValidity();
-                }
-                return;
-            }
-        } else {
-            // No numbers found but expression is not empty
-            if (inputElement) {
-                inputElement.setCustomValidity('Expression must reference at least one condition number.');
-                inputElement.reportValidity();
-            }
-            return;
-        }
-
-        // Rule 5: Balanced parentheses
+        // Rule 2: Balanced parentheses (also catches premature close)
         let openParens = 0;
-        for (let char of expr) {
-            if (char === '(') openParens++;
-            if (char === ')') openParens--;
+        for (const token of rawTokens) {
+            if (token === '(') openParens++;
+            if (token === ')') openParens--;
             if (openParens < 0) {
-                if (inputElement) {
-                    inputElement.setCustomValidity('Unbalanced parentheses: unexpected closing ")".');
-                    inputElement.reportValidity();
-                }
-                return;
+                return 'Unbalanced parentheses: unexpected closing ")".';
             }
         }
         if (openParens !== 0) {
-            if (inputElement) {
-                inputElement.setCustomValidity('Unbalanced parentheses: missing closing ")".');
-                inputElement.reportValidity();
-            }
-            return;
+            return 'Unbalanced parentheses: missing closing ")".';
         }
 
-        // All validations passed
-        if (inputElement) {
-            inputElement.setCustomValidity('');
-            inputElement.reportValidity();
+        // Rule 3: Structural / sequence checks
+        // Build a flat token type sequence for pattern checking
+        // Type: 'num' | 'op' | 'open' | 'close'
+        const typeSeq = rawTokens.map(t => {
+            if (t === '(') return 'open';
+            if (t === ')') return 'close';
+            if (/^(AND|OR)$/i.test(t)) return 'op';
+            return 'num';
+        });
+
+        for (let i = 0; i < typeSeq.length; i++) {
+            const cur = typeSeq[i];
+            const prev = i > 0 ? typeSeq[i - 1] : null;
+            const next = i < typeSeq.length - 1 ? typeSeq[i + 1] : null;
+
+            // Operator must be preceded by a number or ')'
+            if (cur === 'op' && prev !== 'num' && prev !== 'close') {
+                return `Operator "${rawTokens[i]}" cannot appear here — it must follow a condition number or ")".'`;
+            }
+            // Operator must be followed by a number or '('
+            if (cur === 'op' && next !== 'num' && next !== 'open') {
+                return `Operator "${rawTokens[i]}" must be followed by a condition number or "(".`;
+            }
+            // Two consecutive numbers without an operator
+            if (cur === 'num' && prev === 'num') {
+                return `Missing AND / OR between condition ${rawTokens[i - 1]} and ${rawTokens[i]}.`;
+            }
+            // Number immediately after ')' without operator
+            if (cur === 'num' && prev === 'close') {
+                return `Missing AND / OR after ")" before condition ${rawTokens[i]}.`;
+            }
+            // ')' immediately after '(' — empty group
+            if (cur === 'close' && prev === 'open') {
+                return 'Empty parentheses "()" are not allowed.';
+            }
+            // '(' immediately after a number — missing operator
+            if (cur === 'open' && prev === 'num') {
+                return `Missing AND / OR before "(" after condition ${rawTokens[i - 1]}.`;
+            }
         }
+
+        // Rule 4: Index range check
+        const numbers = rawTokens.filter(t => /^\d+$/.test(t)).map(Number);
+        const numberSet = new Set(numbers);
+        const hasOutOfRange = Array.from(numberSet).some(num => num < 1 || num > mappingLength);
+        if (hasOutOfRange) {
+            return `Condition indices must be between 1 and ${mappingLength}.`;
+        }
+
+        // Rule 5: All conditions must be referenced
+        if (numberSet.size !== mappingLength) {
+            return `All ${mappingLength} condition(s) must be included in the expression.`;
+        }
+
+        return null; // valid
     }
 
     /**

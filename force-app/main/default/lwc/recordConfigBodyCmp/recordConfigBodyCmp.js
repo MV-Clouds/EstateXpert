@@ -24,6 +24,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
     @track setIndex = 0;
     @track dragStartIndex = null;
     scrollInterval = null;
+    scrollToFirstError = false;
 
     @track dateOptions = [
         { label: 'DD-MM-YYYY', value: 'ddmmyyyy' },
@@ -63,6 +64,22 @@ export default class RecordConfigBodyCmp extends LightningElement {
         return this.checklistItems && this.checklistItems.length > 0;
     }
 
+    /**
+    * Method Name: computeRowClass
+    * @description: Returns the CSS class string for a table row.
+    *   Adds 'row-error' when the row has no field selected and the user
+    *   has attempted to save, making the background light-red.
+    * Date: 01/06/2026
+    * Created By: Karan Singh
+    */
+    computeRowClass(hasError) {
+        return hasError ? 'popup__data-row row-error' : 'popup__data-row';
+    }
+
+    computeRowDuplicateClass(isDuplicate) {
+        return isDuplicate ? 'popup__data-row row-duplicate' : 'popup__data-row';
+    }
+
     connectedCallback() {
         loadStyle(this, MulishFontCss)
             .then(() => {
@@ -78,7 +95,13 @@ export default class RecordConfigBodyCmp extends LightningElement {
     }
 
     renderedCallback() {
-        if (this.setScroll) {
+        if (this.scrollToFirstError) {
+            const firstErrorRow = this.template.querySelector('.popup__data-row.row-error, .popup__data-row.row-duplicate');
+            if (firstErrorRow) {
+                firstErrorRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            this.scrollToFirstError = false;
+        } else if (this.setScroll) {
             const rows = this.template.querySelectorAll('.popup__data-row');
             if (rows && rows.length > 0) {
                 rows[rows.length - 1].scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -147,7 +170,9 @@ export default class RecordConfigBodyCmp extends LightningElement {
                             format: item.format,
                             isDisable: item.format === '' || item.format == null,
                             picklist: item.fieldType === 'DATE' ? this.dateOptions :
-                                item.fieldType === 'DATETIME' ? this.dateTimeOptions : null
+                                item.fieldType === 'DATETIME' ? this.dateTimeOptions : null,
+                            hasError: false,
+                            rowClass: this.computeRowClass(false)
                         }));
                     }
                     if (result.metadataRecords[1]) {
@@ -267,6 +292,8 @@ export default class RecordConfigBodyCmp extends LightningElement {
         item.fieldType = type;
         item.referenceObjectName = referenceObjectName;
         item.relationshipName = relationshipName;
+        item.hasError = false; // Clear validation error once a field is selected
+        item.rowClass = this.computeRowClass(false);
 
         if (type === 'DATE') {
             item.isDisable = false;
@@ -308,7 +335,9 @@ export default class RecordConfigBodyCmp extends LightningElement {
             value: '',
             searchTerm: '',
             label: '',
-            isDisable: true
+            isDisable: true,
+            hasError: false,
+            rowClass: this.computeRowClass(false)
         };
         this.checklistItems = [...this.checklistItems, newItem];
         this.setScroll = true;
@@ -407,27 +436,49 @@ export default class RecordConfigBodyCmp extends LightningElement {
                 return;
             }
 
-            // Validate field selections
-            for (let i = 0; i < this.checklistItems.length; i++) {
-                if (!this.checklistItems[i].fieldName) {
-                    this.toast('Error', `Please select field for row ${i + 1}`, 'error');
-                    return;
+            // Validate field selections — highlight ALL empty rows at once
+            this.checklistItems = this.checklistItems.map((item) => {
+                if (!item.fieldName) {
+                    return { ...item, hasError: true, rowClass: this.computeRowClass(true) };
                 }
+                return { ...item, hasError: false, rowClass: this.computeRowClass(false) };
+            });
+
+            const hasEmptyRows = this.checklistItems.some(item => item.hasError);
+            if (hasEmptyRows) {
+                this.scrollToFirstError = true;
+                this.toast(
+                    'Error',
+                    'Please fill in all highlighted fields before saving.',
+                    'error'
+                );
+                return;
             }
 
-            // Duplicate Check
-            const fieldNames = new Set();
-            let errorFields = [];
+            // Duplicate Check — highlight ALL duplicate rows and scroll to the first one
+            const fieldNameCount = {};
             this.checklistItems.forEach(item => {
-                if (fieldNames.has(item.fieldName)) {
-                    errorFields.push(item.label);
-                } else {
-                    fieldNames.add(item.fieldName);
+                if (item.fieldName) {
+                    fieldNameCount[item.fieldName] = (fieldNameCount[item.fieldName] || 0) + 1;
                 }
             });
 
-            if (errorFields.length > 0) {
-                this.toast('Error', `Duplicate field name found: ${errorFields.join(', ')}`, 'error');
+            const seenFieldNames = new Set();
+            this.checklistItems = this.checklistItems.map(item => {
+                if (item.fieldName && fieldNameCount[item.fieldName] > 1) {
+                    if (seenFieldNames.has(item.fieldName)) {
+                        // Only the 2nd+ occurrence gets highlighted
+                        return { ...item, rowClass: this.computeRowDuplicateClass(true) };
+                    }
+                    seenFieldNames.add(item.fieldName);
+                }
+                return { ...item, rowClass: this.computeRowDuplicateClass(false) };
+            });
+
+            const hasDuplicates = this.checklistItems.some(item => item.rowClass.includes('row-duplicate'));
+            if (hasDuplicates) {
+                this.scrollToFirstError = true;
+                this.toast('Error', 'Please remove the highlighted duplicate fields before saving.', 'error');
                 return;
             }
 

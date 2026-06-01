@@ -157,6 +157,48 @@
     transition: all 0.2s ease;
 }
 
+/* Validation error highlight — empty field rows */
+.popup__data-row.row-error {
+    background-color: #fff5f5;
+    animation: rowErrorPulse 0.35s ease-out;
+}
+
+.popup__data-row.row-error .combobox-input {
+    border-color: #e53e3e;
+    box-shadow: 0 0 0 1px #e53e3e;
+}
+
+@keyframes rowErrorPulse {
+    0% {
+        background-color: #fed7d7;
+    }
+
+    100% {
+        background-color: #fff5f5;
+    }
+}
+
+/* Duplicate field highlight — second+ occurrence of the same field */
+.popup__data-row.row-duplicate {
+    background-color: #fffbeb;
+    animation: rowDuplicatePulse 0.35s ease-out;
+}
+
+.popup__data-row.row-duplicate .combobox-input {
+    border-color: #d97706;
+    box-shadow: 0 0 0 1px #d97706;
+}
+
+@keyframes rowDuplicatePulse {
+    0% {
+        background-color: #fde68a;
+    }
+
+    100% {
+        background-color: #fffbeb;
+    }
+}
+
 /* Inputs & Combobox */
 .combobox-cover {
     width: 100%;

@@ -65,7 +65,7 @@
                                         </thead>
                                         <tbody>
                                             <template for:each={checklistItems} for:item="item" for:index="index">
-                                                <tr key={item.id} class="popup__data-row" draggable="true"
+                                                <tr key={item.id} class={item.rowClass} draggable="true"
                                                     data-index={index} ondragstart={handleDragStart}
                                                     ondragover={handleDragOver} ondrop={handleDrop}
                                                     ondragleave={handleDragLeave} ondragend={handleDragEnd}>

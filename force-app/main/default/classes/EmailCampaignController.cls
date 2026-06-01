@@ -215,12 +215,6 @@ public with sharing class EmailCampaignController {
             
             optionsMap.put('Single Messaging Service', 'single');
             
-            // Retrieve custom metadata: Outlook_Data__mdt
-            OutlookConfig__c outlookConfig = OutlookConfig__c.getOrgDefaults();
-            if (outlookConfig != null && !String.isBlank(outlookConfig.Refresh_Token_1__c)) {
-                optionsMap.put('Outlook', 'outlook');
-            }
-            
             // Retrieve custom setting: GmailConfig__c
             GmailConfig__c gmailConfig = GmailConfig__c.getOrgDefaults();
             if (gmailConfig != null && !String.isBlank(gmailConfig.Refresh_Token__c)) {
@@ -270,7 +264,6 @@ public with sharing class EmailCampaignController {
                     selectedPrimaryRecipientsSet.add(String.valueOf(recipient));
                 }
             }
-            System.debug('DEBUG: Initial individual recipients count: ' + selectedPrimaryRecipientsSet.size());
 
             // Extract broadcast groups (IDs) from JSON payload
             List<String> selectedBroadcastGroups = new List<String>();
@@ -279,7 +272,6 @@ public with sharing class EmailCampaignController {
                     selectedBroadcastGroups.add(String.valueOf(groupId));
                 }
             }
-            System.debug('DEBUG: Selected broadcast groups count: ' + selectedBroadcastGroups.size());
 
             // 2. Query recipients from broadcast groups if any selected and add to the same set
             if (!selectedBroadcastGroups.isEmpty()) {
@@ -303,13 +295,9 @@ public with sharing class EmailCampaignController {
                         broadcastRecipientIds.add(recipientId);
                     }
                 }
-                
-                System.debug('DEBUG: Recipients found in groups: ' + broadcastRecipientIds.size());
-                
+
                 // 3. Add broadcast group recipients to selected primary recipients set (Set naturally handles duplicates)
                 selectedPrimaryRecipientsSet.addAll(broadcastRecipientIds);
-                
-                System.debug('DEBUG: Total unique recipients after merge: ' + selectedPrimaryRecipientsSet.size());
             }
             
             // Convert Set back to List for further processing
@@ -1161,8 +1149,6 @@ public with sharing class EmailCampaignController {
             
             return campaign.Id;
         } catch (Exception e) {
-            System.debug('Error in updateCampaignAndEmails: ' + e.getMessage());
-            System.debug('Stack Trace: ' + e.getStackTraceString());
             ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'updateCampaignAndEmails', 'Error while updating campaign records.');
             return null;
         }
@@ -1488,16 +1474,11 @@ public with sharing class EmailCampaignController {
     @InvocableMethod(label='Send Emails (Specific Date)' description='Send emails to primary, cc, and bcc recipients for specific date campaigns')
     public static void sendEmails(List<EmailRequests> emailRequests) {
         try {
-   
-            System.debug('email request==> '+ emailRequests);
-            System.debug('template body ==> '+ emailRequests[0].body);
-
             Map<String, Map<String, String>> contactEmailInfoMap = new Map<String, Map<String, String>>();
             Map<Id, String> templateBodyMap = new Map<Id, String>();
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
 
             List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
-            List<OutlookIntegrationController.EmailWrapper> outlookMails = new List<OutlookIntegrationController.EmailWrapper>();
             Set<String> campaignIds = new Set<String>();
             Set<String> recipientIds = new Set<String>();
 
@@ -1639,535 +1620,265 @@ public with sharing class EmailCampaignController {
                     emailMembersToUpdate.put(key, em);
                 }
             }
-
-            // if (emailRequests[0].templateType == 'EmailTemplate') {
-            //     System.debug('Processing EmailTemplate type emails: ' + emailRequests);
-            
-            //     Map<String, Set<String>> globalFieldMap = new Map<String, Set<String>>();
-            
-            //     // 1. Query templates
-            //     List<EmailTemplate> templates = [
-            //         SELECT Id, HtmlValue, Body
-            //         FROM EmailTemplate
-            //         WHERE Id IN :templateIds
-            //         WITH USER_MODE
-            //     ];
-            
-            //     // 2. Extract referenced object + fields
-            //     for (EmailTemplate template : templates) {
-            //         String body = String.isNotBlank(template.HtmlValue) ? template.HtmlValue : template.Body;
-            //         if (body == null) continue;
-            
-            //         Pattern pattern = Pattern.compile('\\{!([a-zA-Z0-9_]+)\\.([a-zA-Z0-9_.]+)\\}');
-            //         Matcher matcher = pattern.matcher(body);
-            
-            //         while (matcher.find()) {
-            //             String objectName = matcher.group(1); 
-            //             String fieldPath = matcher.group(2);   // e.g., Owner.FullName
-            
-            //             if (!globalFieldMap.containsKey(objectName)) {
-            //                 globalFieldMap.put(objectName, new Set<String>());
-            //             }
-            //             globalFieldMap.get(objectName).add(fieldPath);
-            //         }
-            //     }
-            
-            //     // 3. Build SOQL queries for each object
-            //     Map<String, String> objectToQueryMap = new Map<String, String>();
-            //     for (String objectName : globalFieldMap.keySet()) {
-            //         Set<String> fieldPaths = globalFieldMap.get(objectName);
-            //         String fieldListStr = String.join(new List<String>(fieldPaths), ',');
-            //         String soql = 'SELECT ' + fieldListStr + ' FROM ' + objectName;
-            //         objectToQueryMap.put(objectName, soql);
-            //     }
-            
-            //     // 4. Build and Execute a single Composite Request
-            //     Map<String, List<SObject>> objectToRecords = new Map<String, List<SObject>>();
-
-            //     // The referenceId is used to link the request to its result.
-            //     Integer counter = 0; 
-            //     List<Map<String, Object>> compositeRequests = new List<Map<String, Object>>();
-
-            //     // Build the list of sub-requests
-            //     for (String objectName : objectToQueryMap.keySet()) {
-            //         String soql = objectToQueryMap.get(objectName);
-
-            //         Map<String, Object> subRequest = new Map<String, Object>();
-            //         subRequest.put('method', 'GET');
-            //         // The referenceId must be unique within the call
-            //         subRequest.put('referenceId', objectName + '_' + counter); 
-            //         // The URL for a SOQL query
-            //         subRequest.put('url', '/services/data/v58.0/query?q=' + EncodingUtil.urlEncode(soql, 'UTF-8'));
-                    
-            //         compositeRequests.add(subRequest);
-            //         counter++;
-            //     }
-
-            //     String sessionId = Page.UserSessionIdPage.getContent().toString();
-
-            //     // Create the main composite request body
-            //     Map<String, Object> compositeBody = new Map<String, Object>();
-            //     compositeBody.put('allOrNone', false); // false = process all requests even if one fails
-            //     compositeBody.put('compositeRequest', compositeRequests);
-
-            //     // 5. Make a single callout 🚀
-            //     HttpRequest req = new HttpRequest();
-            //     req.setEndpoint(URL.getOrgDomainUrl().toExternalForm() + '/services/data/v58.0/composite');
-            //     req.setMethod('POST');
-            //     req.setHeader('Content-Type', 'application/json');
-            //     // Sets the session ID for authentication
-            //     req.setHeader('Authorization', 'Bearer ' + sessionId); 
-            //     req.setBody(JSON.serialize(compositeBody));
-
-            //     Http http = new Http();
-            //     HttpResponse res = http.send(req);
-
-            //     // 6. Parse the response
-            //     if (res.getStatusCode() == 200) {
-            //         Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-            //         List<Object> compositeResponses = (List<Object>) results.get('compositeResponse');
-
-            //         for (Object subResponseObj : compositeResponses) {
-            //             Map<String, Object> subResponse = (Map<String, Object>) subResponseObj;
-            //             String referenceId = (String) subResponse.get('referenceId');
-            //             String objectName = referenceId.split('_')[0];
-
-            //             if ((Integer) subResponse.get('httpStatusCode') == 200) {
-            //                 Map<String, Object> body = (Map<String, Object>) subResponse.get('body');
-            //                 List<SObject> records = (List<SObject>) JSON.deserialize(JSON.serialize(body.get('records')), List<SObject>.class);
-            //                 objectToRecords.put(objectName, records);
-            //             } else {
-            //                 System.debug('⚠️ Failed query for ' + objectName + ': ' + subResponse.get('body'));
-            //             }
-            //         }
-            //     } else {
-            //         System.debug('Composite API call failed: ' + res.getBody());
-            //     }
-
-            //     // Now the objectToRecords map is populated, just like in your original code.
-            //     System.debug(objectToRecords);
-
-
-            //     for (EmailRequests request : emailRequests) {
-            //         processedBody = request.body;
-
-            //         for (String toAddress : request.toAddresses) {
-
-            //             Marketing_Campaign__c campaignRecord = campaignMap.get(request.campaignId);
-            //             if (campaignRecord.Schedule_Type__c != 'Specific Date') {
-            //                 continue; // Skip if not specific date
-            //             }
-
-            //             String emailType = campaignRecord.Email_Type__c;
-                        
-            //             SObject recipient = emailToRecipientMap.get(toAddress);
-            //             if (recipient == null) {
-            //                 continue;
-            //             } 
-                        
-            //             String recipientId = recipient.Id;
-
-            //             Set<Id> emailIds = campaignToEmailIdsMap.get(request.campaignId);
-            //             if (emailIds == null) {
-            //                 continue;
-            //             }
-
-            //             String matchedKey;
-            //             for (Id emailId : emailIds) {
-            //                 String key = recipientId + '-' + emailId;
-            //                 if (emailMembersToUpdate.containsKey(key) && !processedKeys.contains(key)) {
-            //                     matchedKey = key;
-            //                     break;
-            //                 }
-            //             }
-            //             if (matchedKey == null) continue;
-            //             processedKeys.add(matchedKey);
-
-            //             String body = getTemplateBodyById(request.templateDataId, templates); // Utility to get template body
-
-            //             System.debug('Processing email for recipient: ' + toAddress + ', body: ' + body);
-            //             System.debug('Object to Records Map: ' + objectToRecords);
-            //             processedBody = replaceMergeFields(body, objectToRecords);
-
-            //             System.debug('Processed Body: ' + processedBody);
-
-            //             if (emailType == 'single') {
-            //                 Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-            //                 String replyToEmail = Label.EmailMessageEmailService;
-            //                 if (replyToEmail != null) {
-            //                     email.setReplyTo(replyToEmail);
-            //                 }
-            //                 email.setToAddresses(new List<String>{toAddress});
-            //                 if (request.ccAddresses != null) {
-            //                     List<String> ccEmails = parseEmailAddresses(request.ccAddresses);
-            //                     email.setCcAddresses(ccEmails);
-
-            //                     System.debug('CC Emails: ' + ccEmails);
-            //                 }
-            //                 if (request.bccContacts != null) {
-            //                     List<String> bccEmails = parseEmailAddresses(request.bccContacts);
-            //                     email.setBccAddresses(bccEmails);
-            //                 }
-            //                 email.setSubject(request.subject);
-            //                 email.setHtmlBody(processedBody);
-            //                 emails.add(email);
-            //                 contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
-            //                     'subject' => request.subject,
-            //                     'body' => processedBody,
-            //                     'email' => toAddress,
-            //                     'cc' => request.ccAddresses,
-            //                     'bcc' => request.bccContacts
-            //                 });
-            //         } else if (emailType == 'gmail') {
-            //             GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
-            //             singleGmail.toAddresses = new List<String>{toAddress};
-            //             if (request.ccAddresses != null) {
-            //                 List<String> ccEmails = parseEmailAddresses(request.ccAddresses);
-            //                 singleGmail.ccAddresses = ccEmails;
-            //             }
-            //             if (request.bccContacts != null) {
-            //                 List<String> bccEmails = parseEmailAddresses(request.bccContacts);
-            //                 singleGmail.bccAddresses = bccEmails;
-            //             }
-            //             singleGmail.subject = request.subject;
-            //             singleGmail.body = processedBody;
-            //             if (singleGmail.contactEmailInfoMap == null) {
-            //                 singleGmail.contactEmailInfoMap = new Map<String, Map<String, String>>();
-            //             }
-            //             singleGmail.contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
-            //                 'subject' => request.subject,
-            //                 'body' => processedBody,
-            //                 'email' => toAddress,
-            //                 'cc' => request.ccAddresses,
-            //                 'bcc' => request.bccContacts
-            //             });
-            //             gmails.add(singleGmail);
-            //         } else if (emailType == 'outlook') {
-            //             OutlookIntegrationController.EmailWrapper singleOutlookMail = new OutlookIntegrationController.EmailWrapper();
-            //             singleOutlookMail.toAddresses = new List<String>{toAddress};
-            //             if (request.ccAddresses != null) {
-            //                 List<String> ccEmails = parseEmailAddresses(request.ccAddresses);
-            //                 singleOutlookMail.ccAddresses = ccEmails;
-            //             }
-            //             if (request.bccContacts != null) {
-            //                 List<String> bccEmails = parseEmailAddresses(request.bccContacts);
-            //                 singleOutlookMail.bccAddresses = bccEmails;
-            //             }
-            //             singleOutlookMail.subject = request.subject;
-            //             singleOutlookMail.body = processedBody;
-            //             if (singleOutlookMail.contactEmailInfoMap == null) {
-            //                 singleOutlookMail.contactEmailInfoMap = new Map<String, Map<String, String>>();
-            //             }
-            //             singleOutlookMail.contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
-            //                 'subject' => request.subject,
-            //                 'body' => processedBody,
-            //                 'email' => toAddress,
-            //                 'cc' => request.ccAddresses,
-            //                 'bcc' => request.bccContacts
-            //             });
-            //             outlookMails.add(singleOutlookMail);
-            //         }
-                    
-            //         if (remainingEmailsMap.containsKey(request.campaignId) && remainingEmailsMap.get(request.campaignId) > 0) {
-            //             remainingEmailsMap.put(request.campaignId, remainingEmailsMap.get(request.campaignId) - 1);
-            //         }
-                        
-            //         }
-                    
-            //     }
-            
-            // }                    
-            // else 
-            if(emailRequests[0].templateType == 'EstateXpertTemplate') {
                 
-                List<Template__c> temps = [
-                    SELECT Id, Name, Object_API_Name__c, Template_Name__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate,
-                        (SELECT Id, Name, Template_Value_Simple__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC)
-                    FROM Template__c 
-                    WHERE Id IN :templateIds WITH USER_MODE
-                ];                    
+            List<Template__c> temps = [
+                SELECT Id, Name, Object_API_Name__c, Template_Name__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate,
+                    (SELECT Id, Name, Template_Value_Simple__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC)
+                FROM Template__c 
+                WHERE Id IN :templateIds WITH USER_MODE
+            ];                    
+            
+            Set<Id> recipientObjectIds = new Set<Id>();
+            for (EmailRequests request : emailRequests) {
+                for (String toAddress : request.toAddresses) {
+                    SObject recipient = emailToRecipientMap.get(toAddress);
+                    if (recipient != null) {
+                        recipientObjectIds.add(recipient.Id);
+                    }
+                }
+            }
+
+            Map<Id, Id> listingIdToPropertyId = new Map<Id, Id>();
+            Map<String, Map<String, String>> listingImages = new Map<String, Map<String, String>>();
+
+            for (Listing__c listing : [
+                SELECT Id, Property__c 
+                FROM Listing__c 
+                WHERE Id IN :listingIds
+                WITH USER_MODE
+            ]) {
+                listingIdToPropertyId.put(listing.Id, listing.Property__c);
+            }
+    
+            // Step 2: Get all Property_File__c records in a single query
+            Map<Id, List<Property_File__c>> propertyIdToFiles = new Map<Id, List<Property_File__c>>();
+            for (Property_File__c file : [
+                SELECT Id, BaseUrl__c, Property__c 
+                FROM Property_File__c 
+                WHERE Property__c IN :listingIdToPropertyId.values() 
+                AND IsOnExpose__c = true 
+                AND Size__c != null 
+                WITH USER_MODE
+                ORDER BY Sort_on_Expose__c ASC NULLS LAST, Name ASC
+            ]) {
+                if (!propertyIdToFiles.containsKey(file.Property__c)) {
+                    propertyIdToFiles.put(file.Property__c, new List<Property_File__c>());
+                }
+                propertyIdToFiles.get(file.Property__c).add(file);
+            }
+    
+            // Step 3: Build the result map
+            for (Id listingId : listingIds) {
+                Map<String, String> imageMap = new Map<String, String>();
+                Id propertyId = listingIdToPropertyId.get(listingId);
+    
+                if (propertyId != null && propertyIdToFiles.containsKey(propertyId)) {
+                    List<Property_File__c> mediaList = propertyIdToFiles.get(propertyId);
+                    for (Integer i = 0; i < mediaList.size(); i++) {
+                        imageMap.put('listingMedia[' + (i + 1) + ']', mediaList[i].BaseUrl__c);
+                    }
+                }
+    
+                listingImages.put(listingId, imageMap);
+            }
+            
+            for (EmailRequests request : emailRequests) {
+
+                Marketing_Campaign__c campaignRecord = campaignMap.get(request.campaignId);
+                if (campaignRecord.Schedule_Type__c != 'Specific Date') {
+                    continue; // Skip if not specific date
+                }
+
+                String emailType = campaignRecord.Email_Type__c;
+                String relatedObject = campaignRecord.RelatedObject__c;
+    
+                String extractedKeyString = '';
+                List<Template__c> fieldData = new List<Template__c>();
+                if (!temps.isEmpty() && request.templateDataId != null) {
+                    for (Template__c tempData : temps) {
+                        if (tempData.Id == request.templateDataId) {
+                            fieldData.add(tempData);
+                        }
+                    }
+                    if (!fieldData.isEmpty()) {
+                        extractedKeyString += fieldData[0].Template_Data__r.size() > 0 ? fieldData[0].Template_Data__r[0].Template_Value_Simple__c : '';
+                    }
+                }
+                extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
+                String sourceObjectAPI = temps[0].Object_API_Name__c;
+                Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);            
                 
-                Set<Id> recipientObjectIds = new Set<Id>();
-                for (EmailRequests request : emailRequests) {
-                    for (String toAddress : request.toAddresses) {
-                        SObject recipient = emailToRecipientMap.get(toAddress);
-                        if (recipient != null) {
-                            recipientObjectIds.add(recipient.Id);
-                        }
+                for (String toAddress : request.toAddresses) {
+                    // Reset body per-recipient so substitutions from one recipient
+                    // don't carry over into the next recipient's email.
+                    processedBody = request.body;
+                    SObject recipient = emailToRecipientMap.get(toAddress);
+                    if (recipient == null) {
+                        continue;
                     }
-                }
-
-                Map<Id, Id> listingIdToPropertyId = new Map<Id, Id>();
-                Map<String, Map<String, String>> listingImages = new Map<String, Map<String, String>>();
-
-                for (Listing__c listing : [
-                    SELECT Id, Property__c 
-                    FROM Listing__c 
-                    WHERE Id IN :listingIds
-                    WITH USER_MODE
-                ]) {
-                    listingIdToPropertyId.put(listing.Id, listing.Property__c);
-                }
-        
-                // Step 2: Get all Property_File__c records in a single query
-                Map<Id, List<Property_File__c>> propertyIdToFiles = new Map<Id, List<Property_File__c>>();
-                for (Property_File__c file : [
-                    SELECT Id, BaseUrl__c, Property__c 
-                    FROM Property_File__c 
-                    WHERE Property__c IN :listingIdToPropertyId.values() 
-                    AND IsOnExpose__c = true 
-                    AND Size__c != null 
-                    WITH USER_MODE
-                    ORDER BY Sort_on_Expose__c ASC NULLS LAST, Name ASC
-                ]) {
-                    if (!propertyIdToFiles.containsKey(file.Property__c)) {
-                        propertyIdToFiles.put(file.Property__c, new List<Property_File__c>());
-                    }
-                    propertyIdToFiles.get(file.Property__c).add(file);
-                }
-        
-                // Step 3: Build the result map
-                for (Id listingId : listingIds) {
-                    Map<String, String> imageMap = new Map<String, String>();
-                    Id propertyId = listingIdToPropertyId.get(listingId);
-        
-                    if (propertyId != null && propertyIdToFiles.containsKey(propertyId)) {
-                        List<Property_File__c> mediaList = propertyIdToFiles.get(propertyId);
-                        for (Integer i = 0; i < mediaList.size(); i++) {
-                            imageMap.put('listingMedia[' + (i + 1) + ']', mediaList[i].BaseUrl__c);
-                        }
-                    }
-        
-                    listingImages.put(listingId, imageMap);
-                }
-                
-                for (EmailRequests request : emailRequests) {
-
-                    Marketing_Campaign__c campaignRecord = campaignMap.get(request.campaignId);
-                    if (campaignRecord.Schedule_Type__c != 'Specific Date') {
-                        continue; // Skip if not specific date
-                    }
-
-                    String emailType = campaignRecord.Email_Type__c;
-                    String relatedObject = campaignRecord.RelatedObject__c;
-     
-                    String extractedKeyString = '';
-                    List<Template__c> fieldData = new List<Template__c>();
-                    if (!temps.isEmpty() && request.templateDataId != null) {
-                        for (Template__c tempData : temps) {
-                            if (tempData.Id == request.templateDataId) {
-                                fieldData.add(tempData);
-                            }
-                        }
-                        if (!fieldData.isEmpty()) {
-                            extractedKeyString += fieldData[0].Template_Data__r.size() > 0 ? fieldData[0].Template_Data__r[0].Template_Value_Simple__c : '';
-                        }
-                    }
-                    extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
-                    String sourceObjectAPI = temps[0].Object_API_Name__c;
-                    Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);            
                     
-                    for (String toAddress : request.toAddresses) {
-                        // Reset body per-recipient so substitutions from one recipient
-                        // don't carry over into the next recipient's email.
-                        processedBody = request.body;
-                        SObject recipient = emailToRecipientMap.get(toAddress);
-                        if (recipient == null) {
-                            continue;
+                    String recipientId = recipient.Id;
+                    Set<Id> emailIds = campaignToEmailIdsMap.get(request.campaignId);
+                    if (emailIds == null) {
+                        continue;
+                    }
+                    
+                    String matchedKey;
+                    for (Id emailId : emailIds) {
+                        String key = recipientId + '-' + emailId;
+                        if (emailMembersToUpdate.containsKey(key) && !processedKeys.contains(key)) {
+                            matchedKey = key;
+                            break;
                         }
-                        
-                        String recipientId = recipient.Id;
-                        Set<Id> emailIds = campaignToEmailIdsMap.get(request.campaignId);
-                        if (emailIds == null) {
-                            continue;
+                    }
+                    
+                    if (matchedKey == null) {
+                        continue;
+                    }
+
+                    Map<String, Map<String, String>> mappingKeys;
+                    String relObj = request.RelatedObjectName;
+                    
+                    if (String.isNotBlank(relObj)) {
+                        if (relObj.equalsIgnoreCase('MVEX__Listing__c') || relObj.equalsIgnoreCase('Listing__c')) {
+                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, listingIds, true);
+                        } else if (relObj.equalsIgnoreCase('Contact')) {
+                            Set<Id> idsToMap = new Set<Id>{recipient.Id};
+                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
+                        } else {
+                            // Default fallback for other objects, assuming recipient.Id is the relevant ID
+                            Set<Id> idsToMap = new Set<Id>{recipient.Id};
+                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
                         }
-                        
-                        String matchedKey;
-                        for (Id emailId : emailIds) {
-                            String key = recipientId + '-' + emailId;
-                            if (emailMembersToUpdate.containsKey(key) && !processedKeys.contains(key)) {
-                                matchedKey = key;
-                                break;
-                            }
+                    }
+
+                    processedKeys.add(matchedKey);
+                    if (recipient != null) {
+                        Map<String, String> mappingKeyVsMappingValues = mappingKeys.get('objectNGeneral');
+                        Map<String, String> salesforceImages = mappingKeys.get('salesforceImages');
+                        for (String key : mappingKeyVsMappingValues.keySet()) {
+                            String escapedKey = Pattern.quote(key);
+                            processedBody = processedBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
                         }
-                        
-                        if (matchedKey == null) {
-                            continue;
+                        for (String src : salesforceImages.keySet()) {
+                            String escapedSrc = Pattern.quote(src);
+                            processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
                         }
 
-                        Map<String, Map<String, String>> mappingKeys;
-                        String relObj = request.RelatedObjectName;
-                        
-                        if (String.isNotBlank(relObj)) {
-                            if (relObj.equalsIgnoreCase('MVEX__Listing__c') || relObj.equalsIgnoreCase('Listing__c')) {
-                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, listingIds, true);
-                            } else if (relObj.equalsIgnoreCase('Contact')) {
-                                Set<Id> idsToMap = new Set<Id>{recipient.Id};
-                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
-                            } else {
-                                // Default fallback for other objects, assuming recipient.Id is the relevant ID
-                                Set<Id> idsToMap = new Set<Id>{recipient.Id};
-                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
-                            }
-                        }
-
-                        System.debug('mappingKeys: ' + mappingKeys);
-
-                        processedKeys.add(matchedKey);
-                        if (recipient != null) {
-                            Map<String, String> mappingKeyVsMappingValues = mappingKeys.get('objectNGeneral');
-                            Map<String, String> salesforceImages = mappingKeys.get('salesforceImages');
-                            for (String key : mappingKeyVsMappingValues.keySet()) {
-                                String escapedKey = Pattern.quote(key);
-                                processedBody = processedBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
-                            }
-                            for (String src : salesforceImages.keySet()) {
-                                String escapedSrc = Pattern.quote(src);
-                                processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
-                            }
-
-                            // --- Recipient field replacement for Listing templates ---
-                            // Replace {{EXPRecipient.<FieldAPI>}} keys with values from the To-recipient
-                            // Contact's own fields. CC/BCC contacts are intentionally excluded here.
-                            String relObjName = request.RelatedObjectName;
-                            if (String.isNotBlank(relObjName) &&
-                                    (relObjName.equalsIgnoreCase('MVEX__Listing__c') || relObjName.equalsIgnoreCase('Listing__c'))) {
-                                Set<String> recipientFieldKeys = DataMappingControllerV2.collectRecipientFieldKeys(extractedKeyMap);
-                                if (!recipientFieldKeys.isEmpty()) {
-                                    Contact recipientContact = (Contact) emailToRecipientMap.get(toAddress);
-                                    if (recipientContact != null) {
-                                        Map<String, String> recipientReplacements =
-                                            DataMappingControllerV2.getRecipientFieldReplacements(recipientFieldKeys, recipientContact);
-                                        for (String rKey : recipientReplacements.keySet()) {
-                                            processedBody = processedBody.replaceAll(
-                                                Pattern.quote(rKey),
-                                                recipientReplacements.get(rKey) != null ? recipientReplacements.get(rKey) : ''
-                                            );
-                                        }
+                        // --- Recipient field replacement for Listing templates ---
+                        // Replace {{EXPRecipient.<FieldAPI>}} keys with values from the To-recipient
+                        // Contact's own fields. CC/BCC contacts are intentionally excluded here.
+                        String relObjName = request.RelatedObjectName;
+                        if (String.isNotBlank(relObjName) &&
+                                (relObjName.equalsIgnoreCase('MVEX__Listing__c') || relObjName.equalsIgnoreCase('Listing__c'))) {
+                            Set<String> recipientFieldKeys = DataMappingControllerV2.collectRecipientFieldKeys(extractedKeyMap);
+                            if (!recipientFieldKeys.isEmpty()) {
+                                Contact recipientContact = (Contact) emailToRecipientMap.get(toAddress);
+                                if (recipientContact != null) {
+                                    Map<String, String> recipientReplacements =
+                                        DataMappingControllerV2.getRecipientFieldReplacements(recipientFieldKeys, recipientContact);
+                                    for (String rKey : recipientReplacements.keySet()) {
+                                        processedBody = processedBody.replaceAll(
+                                            Pattern.quote(rKey),
+                                            recipientReplacements.get(rKey) != null ? recipientReplacements.get(rKey) : ''
+                                        );
                                     }
                                 }
                             }
                         }
+                    }
 
 
-                        if (recipient != null && listingImages != null && request.listingId != null) {
-                            Map<String, String> imageMap = listingImages.get(request.listingId);
-                        
-                            if (imageMap != null) {
-                                // Regex to match entire <img> tag with listingMedia[n] and extract the full tag
-                                String imgTagRegex = '<img[^>]*data-name="(listingMedia\\[\\d+\\])"[^>]*src="[^"]+"[^>]*>';
-                                Matcher matcher = Pattern.compile(imgTagRegex).matcher(processedBody);
-                        
-                                while (matcher.find()) {
-                                    String fullMatch = matcher.group(0); // The entire <img ...> tag
-                                    String mediaKey = null;
-                        
-                                    // Extract the actual media key from the tag
-                                    Matcher keyMatcher = Pattern.compile('data-name="(listingMedia\\[\\d+\\])"').matcher(fullMatch);
-                                    if (keyMatcher.find()) {
-                                        mediaKey = keyMatcher.group(1);
-                                    }
-                        
-                                    if (mediaKey != null && imageMap.containsKey(mediaKey)) {
-                                        String newSrc = imageMap.get(mediaKey);
-                        
-                                        if (newSrc != null) {
-                                            // Replace only the src value inside the tag
-                                            String updatedTag = fullMatch.replaceFirst('src="[^"]+"', 'src="' + newSrc + '"');
-                        
-                                            // Replace the old tag with the updated one in the body
-                                            processedBody = processedBody.replace(fullMatch, updatedTag);
-                                        }
+                    if (recipient != null && listingImages != null && request.listingId != null) {
+                        Map<String, String> imageMap = listingImages.get(request.listingId);
+                    
+                        if (imageMap != null) {
+                            // Regex to match entire <img> tag with listingMedia[n] and extract the full tag
+                            String imgTagRegex = '<img[^>]*data-name="(listingMedia\\[\\d+\\])"[^>]*src="[^"]+"[^>]*>';
+                            Matcher matcher = Pattern.compile(imgTagRegex).matcher(processedBody);
+                    
+                            while (matcher.find()) {
+                                String fullMatch = matcher.group(0); // The entire <img ...> tag
+                                String mediaKey = null;
+                    
+                                // Extract the actual media key from the tag
+                                Matcher keyMatcher = Pattern.compile('data-name="(listingMedia\\[\\d+\\])"').matcher(fullMatch);
+                                if (keyMatcher.find()) {
+                                    mediaKey = keyMatcher.group(1);
+                                }
+                    
+                                if (mediaKey != null && imageMap.containsKey(mediaKey)) {
+                                    String newSrc = imageMap.get(mediaKey);
+                    
+                                    if (newSrc != null) {
+                                        // Replace only the src value inside the tag
+                                        String updatedTag = fullMatch.replaceFirst('src="[^"]+"', 'src="' + newSrc + '"');
+                    
+                                        // Replace the old tag with the updated one in the body
+                                        processedBody = processedBody.replace(fullMatch, updatedTag);
                                     }
                                 }
                             }
                         }
-                        
-                        if (emailType == 'single') {
-                                Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-                                String replyToEmail = Label.EmailMessageEmailService;
-                                if (replyToEmail != null) {
-                                    email.setReplyTo(replyToEmail);
-                                }
-                                email.setToAddresses(new List<String>{toAddress});
-                                if (request.ccAddresses != null) {
-                                    List<String> ccEmails = parseEmailAddresses(request.ccAddresses);
-                                    email.setCcAddresses(ccEmails);
-                                }
-                                if (request.bccContacts != null) {
-                                    List<String> bccEmails = parseEmailAddresses(request.bccContacts);
-                                    email.setBccAddresses(bccEmails);
-                                }
-                                email.setSubject(request.subject);
-                                email.setHtmlBody(processedBody);
-                                emails.add(email);
-                                contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
-                                    'subject' => request.subject,
-                                    'body' => processedBody,
-                                    'email' => toAddress,
-                                    'cc' => request.ccAddresses,
-                                    'bcc' => request.bccContacts
-                                });
-                        } else if (emailType == 'gmail') {
-                            GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
-                            singleGmail.toAddresses = new List<String>{toAddress};
+                    }
+                    
+                    if (emailType == 'single') {
+                            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+                            String replyToEmail = Label.EmailMessageEmailService;
+                            if (replyToEmail != null) {
+                                email.setReplyTo(replyToEmail);
+                            }
+                            email.setToAddresses(new List<String>{toAddress});
                             if (request.ccAddresses != null) {
                                 List<String> ccEmails = parseEmailAddresses(request.ccAddresses);
-                                singleGmail.ccAddresses = ccEmails;
+                                email.setCcAddresses(ccEmails);
                             }
                             if (request.bccContacts != null) {
                                 List<String> bccEmails = parseEmailAddresses(request.bccContacts);
-                                singleGmail.bccAddresses = bccEmails;
+                                email.setBccAddresses(bccEmails);
                             }
-                            singleGmail.subject = request.subject;
-                            singleGmail.body = processedBody;
-                            if (singleGmail.contactEmailInfoMap == null) {
-                                singleGmail.contactEmailInfoMap = new Map<String, Map<String, String>>();
-                            }
-                            singleGmail.contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
+                            email.setSubject(request.subject);
+                            email.setHtmlBody(processedBody);
+                            emails.add(email);
+                            contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
                                 'subject' => request.subject,
                                 'body' => processedBody,
                                 'email' => toAddress,
                                 'cc' => request.ccAddresses,
                                 'bcc' => request.bccContacts
                             });
-                            gmails.add(singleGmail);
-                        } else if (emailType == 'outlook') {
-                            OutlookIntegrationController.EmailWrapper singleOutlookMail = new OutlookIntegrationController.EmailWrapper();
-                            singleOutlookMail.toAddresses = new List<String>{toAddress};
-                            if (request.ccAddresses != null) {
-                                List<String> ccEmails = parseEmailAddresses(request.ccAddresses);
-                                singleOutlookMail.ccAddresses = ccEmails;
-                            }
-                            if (request.bccContacts != null) {
-                                List<String> bccEmails = parseEmailAddresses(request.bccContacts);
-                                singleOutlookMail.bccAddresses = bccEmails;
-                            }
-                            singleOutlookMail.subject = request.subject;
-                            singleOutlookMail.body = processedBody;
-                            if (singleOutlookMail.contactEmailInfoMap == null) {
-                                singleOutlookMail.contactEmailInfoMap = new Map<String, Map<String, String>>();
-                            }
-                            singleOutlookMail.contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
-                                'subject' => request.subject,
-                                'body' => processedBody,
-                                'email' => toAddress,
-                                'cc' => request.ccAddresses,
-                                'bcc' => request.bccContacts
-                            });
-                            outlookMails.add(singleOutlookMail);
+                    } else if (emailType == 'gmail') {
+                        GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
+                        singleGmail.toAddresses = new List<String>{toAddress};
+                        if (request.ccAddresses != null) {
+                            List<String> ccEmails = parseEmailAddresses(request.ccAddresses);
+                            singleGmail.ccAddresses = ccEmails;
                         }
-                        
-                        if (remainingEmailsMap.containsKey(request.campaignId) && remainingEmailsMap.get(request.campaignId) > 0) {
-                            remainingEmailsMap.put(request.campaignId, remainingEmailsMap.get(request.campaignId) - 1);
+                        if (request.bccContacts != null) {
+                            List<String> bccEmails = parseEmailAddresses(request.bccContacts);
+                            singleGmail.bccAddresses = bccEmails;
                         }
-                    }      
-                }
+                        singleGmail.subject = request.subject;
+                        singleGmail.body = processedBody;
+                        if (singleGmail.contactEmailInfoMap == null) {
+                            singleGmail.contactEmailInfoMap = new Map<String, Map<String, String>>();
+                        }
+                        singleGmail.contactEmailInfoMap.put(recipient.Id, new Map<String, String>{
+                            'subject' => request.subject,
+                            'body' => processedBody,
+                            'email' => toAddress,
+                            'cc' => request.ccAddresses,
+                            'bcc' => request.bccContacts
+                        });
+                        gmails.add(singleGmail);
+                    }
+                    
+                    if (remainingEmailsMap.containsKey(request.campaignId) && remainingEmailsMap.get(request.campaignId) > 0) {
+                        remainingEmailsMap.put(request.campaignId, remainingEmailsMap.get(request.campaignId) - 1);
+                    }
+                }      
             }
-            else{
-                System.debug('Unsupported template type: ' + emailRequests[0].templateType);
-                return;
-            }
+
 
             try {
                 List<Email_Member__c> emailMembersToUpdateList = new List<Email_Member__c>();
@@ -2185,12 +1896,9 @@ public with sharing class EmailCampaignController {
                 
                 if (!emails.isEmpty()) {
                     Messaging.sendEmail(emails);
-                    // CreateActivityFromMail.createCaseEmailMessage(contactEmailInfoMap);
                     System.enqueueJob(new CampaignUpdateQueueable(remainingEmailsMap, campaignMap, emails.size(), 'Success', null));
                 } else if (!gmails.isEmpty()) {
                     GmailIntegrationControllerV1.requestNewAccessToken(gmails, remainingEmailsMap, campaignMap, true);
-                } else if (!outlookMails.isEmpty()) {
-                    OutlookIntegrationController.requestNewAccessToken(outlookMails, remainingEmailsMap, campaignMap, true);
                 }
                 
                 // Recalculate campaign counts for all affected campaigns
@@ -2224,9 +1932,6 @@ public with sharing class EmailCampaignController {
             }
             
         } catch (Exception e) {
-            System.debug('Error in sendEmails: ' + e.getMessage() + ' Line Number' + e.getLineNumber());
-            System.debug('Stack Trace: ' + e.getStackTraceString());
-            
             ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'sendEmails', 'Error while sending mail');
         }
     }

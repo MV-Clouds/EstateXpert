@@ -1,6 +1,5 @@
-<apex:page showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false"
-    controller="OutlookIntegrationController">
-    <apex:pageMessages />
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false">
+    <!-- <apex:pageMessages />
     <html>
 
     <head>
@@ -216,5 +215,5 @@
         </div>
     </body>
 
-    </html>
+    </html> -->
 </apex:page>

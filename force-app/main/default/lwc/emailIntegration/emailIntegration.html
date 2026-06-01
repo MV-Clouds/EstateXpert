@@ -29,16 +29,6 @@
                                 <button class="deactivate-btn" onclick={handleDeactivateClick}>Deactivate</button>
                             </template>
                         </template>
-
-                        <template if:true={isOutlook}>
-                            <template if:false={outlookData.isValid}>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="Outlook">New</button>
-                            </template>
-                            <template if:true={outlookData.isValid}>
-                                <button class="save-btn" onclick={newIntegrationModal} data-name="Outlook">Edit</button>
-                                <button class="deactivate-btn" onclick={handleDeactivateClick}>Deactivate</button>
-                            </template>
-                        </template>
                     </div>
                 </div>
             </div>
@@ -54,11 +44,6 @@
                         <template if:true={featureAvailability.Email_Integration}>
                             <li class={gmailClass} onclick={handleGmailClick}>
                                 <img src="/resource/MVEX__controlcenterimg/gmail.png" alt="Gmail" draggable="false"> Gmail
-                            </li>
-                        </template>
-                        <template if:true={featureAvailability.Email_Integration}>
-                            <li class={outlookClass} onclick={handleOutlookClick}>
-                                <img src="/resource/MVEX__controlcenterimg/outlook.png" alt="Outlook" draggable="false"> Outlook
                             </li>
                         </template>
                         <template if:true={featureAvailability.Social_Media_Integration}>
@@ -98,33 +83,6 @@
                                 </template>
                             </div>
                         </template>
-
-                        <template if:true={isOutlook}>
-                            <div class="field-section">
-                                <template if:true={outlookData.isValid}>
-                                    <div class="data_cls"><strong>Client Id :</strong><p>{displayedClientId}</p></div>
-                                    <div class="data_cls">
-                                        <strong>Client Secret :</strong>
-                                        <p>{displayedClientSecret}</p>
-                                    </div>
-                                    <div class="data_cls"><strong>Redirect URI :</strong><p>{outlookData.integrationData.MVEX__Redirect_URI__c}</p></div>
-                                    <div class="data_cls"><strong>Refresh Token :</strong><p>{displayedRefreshToken}</p></div>
-                                    <div class="data_cls"><strong>Created Date:</strong><p>{outlookData.integrationData.CreatedDate}</p></div>
-                                    <div class="data_cls"><strong>Last Modified Date:</strong><p>{outlookData.integrationData.LastModifiedDate}</p></div>
-                                </template>
-                                <template if:false={outlookData.isValid}>
-                                    <div class="empty-state">
-                                        <div class="empty-state__content">
-                                            <div class="empty-state__icon">
-                                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                            </div>
-                                            <div class="empty-state__message">No Data Available to Show.</div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
                     </div>
                 </div>
             </div>

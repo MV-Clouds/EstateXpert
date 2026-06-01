@@ -391,7 +391,6 @@ public with sharing class PropertySearchController {
             }
             
             List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
-            List<OutlookIntegrationController.EmailWrapper> outlookMails = new List<OutlookIntegrationController.EmailWrapper>();
             String templateBody = '';
             
             List<Template__c> temp = [SELECT Id, Template_Name__c,Subject__c,
@@ -470,25 +469,6 @@ public with sharing class PropertySearchController {
                             'bcc' => ''
                         });
                         
-                    } else if (sendMethod == 'outlook') {
-                        OutlookIntegrationController.EmailWrapper singleOutlookMail = new OutlookIntegrationController.EmailWrapper();
-                        singleOutlookMail.toAddresses = new List<String>{contact.Email};
-                        singleOutlookMail.subject = temp[0].Subject__c;
-                        singleOutlookMail.body = templateBody;
-                        
-                        if (singleOutlookMail.contactEmailInfoMap == null) {
-                            singleOutlookMail.contactEmailInfoMap = new Map<String, Map<String, String>>();
-                        }
-                        
-                        singleOutlookMail.contactEmailInfoMap.put(contact.Id, new Map<String, String>{
-                            'subject' =>  temp[0].Subject__c,
-                            'body' => templateBody,
-                            'email' => contact.Email,
-                            'cc' => '',
-                            'bcc' => ''
-                        });
-                        
-                        outlookMails.add(singleOutlookMail);
                     } else if (sendMethod == 'gmail') {
                         GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
                         singleGmail.toAddresses = new List<String>{contact.Email};
@@ -533,10 +513,6 @@ public with sharing class PropertySearchController {
             // Send emails through Gmail
             else if (!gmails.isEmpty()) {
                 GmailIntegrationControllerV1.requestNewAccessToken(gmails,null,null,false);
-            }
-            // Send emails through Outlook
-            else if (!outlookMails.isEmpty()) {
-                OutlookIntegrationController.requestNewAccessToken(outlookMails,null,null,false);
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'PropertySearchController', 'sendEmail', 'Error while sending email.');

@@ -292,7 +292,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         this.openComponent(
             'storageIntegration', 
             'Integration Hub',
-            'The "Integration Hub" modal simplifies storage, email, outlook, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location.'
+            'The "Integration Hub" modal simplifies storage, email, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location.'
         );
     }
 

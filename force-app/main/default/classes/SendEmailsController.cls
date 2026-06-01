@@ -7,11 +7,6 @@ public with sharing class SendEmailsController {
             Map<String, String> optionsMap = new Map<String, String>();
             optionsMap.put('Single Messaging Service', 'single');
             
-            OutlookConfig__c outlookConfig = OutlookConfig__c.getOrgDefaults();
-            if (outlookConfig != null && !String.isBlank(outlookConfig.Refresh_Token_1__c)) {
-                optionsMap.put('Outlook', 'outlook');
-            }
-            
             GmailConfig__c gmailConfig = GmailConfig__c.getOrgDefaults();
             if (gmailConfig != null && !String.isBlank(gmailConfig.Refresh_Token__c)) {
                 optionsMap.put('Gmail', 'gmail');

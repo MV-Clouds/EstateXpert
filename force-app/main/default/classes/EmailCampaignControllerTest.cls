@@ -19,9 +19,6 @@ private class EmailCampaignControllerTest {
         GmailConfig__c gmailConfig = new GmailConfig__c(Refresh_Token__c = 'test-token-gmail');
         insert gmailConfig;
         
-        OutlookConfig__c outlookConfig = new OutlookConfig__c(Refresh_Token_1__c = 'test-token-outlook');
-        insert outlookConfig;
-        
         Property__c property = new Property__c(Name = 'Test Property');
         insert property;
         
@@ -146,7 +143,7 @@ private class EmailCampaignControllerTest {
     @isTest
     static void testGetMessagingServiceOptions() {
         List<Map<String, String>> result = EmailCampaignController.getMessagingServiceOptions();
-        System.assertEquals(3, result.size(), 'Expected three messaging service options');
+        System.assertEquals(2, result.size(), 'Expected three messaging service options');
     }
     
     @isTest
@@ -526,63 +523,6 @@ private class EmailCampaignControllerTest {
         // Valid @@@-delimited format that parseEmailAddresses splits on
         req.ccAddresses = 'id1:cc@test.com@@@id2:cc2@test.com';
         req.bccContacts = 'id3:bcc@test.com';
-
-        Test.startTest();
-        EmailCampaignController.sendEmails(new List<EmailCampaignController.EmailRequests>{req});
-        Test.stopTest();
-    }
-
-    /**
-     * Covers sendEmails with 'outlook' emailType (lines ~2087-2111).
-     */
-    @isTest
-    static void testSendEmailsOutlookType() {
-        Contact c = [SELECT Id FROM Contact WHERE Email != null LIMIT 1];
-
-        Marketing_Campaign__c outlookCampaign = new Marketing_Campaign__c(
-            Label__c = 'Outlook Campaign',
-            Email_Type__c = 'outlook',
-            Schedule_Type__c = 'Specific Date',
-            RelatedObject__c = 'Contact',
-            Start_Date__c = Date.today()
-        );
-        insert outlookCampaign;
-
-        insert new Marketing_Campaign_Member__c(
-            Marketing_Campaign__c = outlookCampaign.Id,
-            RecipientId__c = c.Id,
-            Contact_Type__c = 'Primary'
-        );
-
-        Template__c tmpl = [SELECT Id FROM Template__c LIMIT 1];
-        Marketing_Email__c me = new Marketing_Email__c(
-            Marketing_Campaign__c = outlookCampaign.Id,
-            Subject__c = 'Outlook Test',
-            Name = 'Outlook Test Email',
-            Template_Id__c = tmpl.Id,
-            Days_After_Start_Date__c = 0,
-            TimeToSend__c = Time.newInstance(9, 0, 0, 0),
-            Send_Date_Time__c = DateTime.now().addMinutes(5)
-        );
-        insert me;
-
-        insert new Email_Member__c(
-            RecipientId__c = c.Id,
-            Marketing_Email__c = me.Id,
-            Schedule_Date_and_Time__c = DateTime.now().addDays(1),
-            Status__c = 'Pending'
-        );
-
-        EmailCampaignController.EmailRequests req = new EmailCampaignController.EmailRequests();
-        req.toAddresses = new List<String>{c.Id};
-        req.subject = 'Outlook Test';
-        req.body = 'Hello Outlook';
-        req.campaignId = outlookCampaign.Id;
-        req.templateDataId = tmpl.Id;
-        req.RelatedObjectName = 'Contact';
-        req.templateType = 'EstateXpertTemplate';
-        req.ccAddresses = 'id1:cc@test.com';
-        req.bccContacts = 'id2:bcc@test.com';
 
         Test.startTest();
         EmailCampaignController.sendEmails(new List<EmailCampaignController.EmailRequests>{req});

@@ -236,26 +236,6 @@ public class PropertySearchControllerTest {
         Test.stopTest();
     }
 
-    @IsTest
-    static void testSendEmail_Outlook() {
-        Inquiry__c iq = [SELECT Id, Contact__c FROM Inquiry__c LIMIT 1];
-        Listing__c lst = [SELECT Id FROM Listing__c LIMIT 1];
-
-        Map<String,Object> inquiryMap = new Map<String,Object>{
-            'mvex__contact__c' => iq.Contact__c
-        };
-
-        Map<String,Object> payload = new Map<String,Object>{
-            'sendMethod' => 'outlook',
-            'listingId' => lst.Id,
-            'inquiry' => new List<Object>{ inquiryMap }
-        };
-
-        Test.startTest();
-        PropertySearchController.sendEmail(JSON.serialize(payload));
-        Test.stopTest();
-    }
-
     /**
      * Covers sendEmail exception path.
      */

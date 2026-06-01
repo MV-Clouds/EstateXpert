@@ -49,17 +49,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
     }
 
     /**
-    * Method Name: isOutlook
-    * @description: Used to check integration name.
-    * @returns {Boolean} - Returns true if Outlook integration name.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    get isOutlook() {
-        return this.integrationname === 'Outlook';
-    }
-
-    /**
     * Method Name: isWhatsApp
     * @description: Used to check integration name.
     * @returns {Boolean} - Returns true if Whatsapp integration name.
@@ -125,7 +114,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                 .then(data => {
                     this.isLoading = true;
                     if (data) {
-                        if (this.integrationname === 'Outlook' || this.integrationname === 'Gmail' || this.integrationname === 'Instagram') {
+                        if (this.integrationname === 'Gmail' || this.integrationname === 'Instagram') {
                             if (data.objectData) {
                                 data.objectData.MVEX__Redirect_URI__c = data.siteUrl;
                                 this.fieldsData = { ...data.objectData };
@@ -181,22 +170,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                             if (data.objectData.MVEX__Refresh_Token__c) {
                                 this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
                                 this.fieldsData.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
-                            }
-                        }
-                        
-                        // Store original Outlook credentials if editing (only if values exist)
-                        if (this.integrationname === 'Outlook' && data.objectData) {
-                            if (data.objectData.MVEX__Client_ID__c) {
-                                this.originalCredentials.MVEX__Client_ID__c = data.objectData.MVEX__Client_ID__c;
-                                this.fieldsData.MVEX__Client_ID__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            }
-                            if (data.objectData.MVEX__Client_Secret__c) {
-                                this.originalCredentials.MVEX__Client_Secret__c = data.objectData.MVEX__Client_Secret__c;
-                                this.fieldsData.MVEX__Client_Secret__c = this.CREDENTIAL_DISPLAY_TEXT;
-                            }
-                            if (data.objectData.MVEX__Refresh_Token__c) {
-                                this.originalCredentials.MVEX__Refresh_Token__c = data.objectData.MVEX__Refresh_Token__c;
-                                this.fieldsData.MVEX__Refresh_Token__c = this.CREDENTIAL_DISPLAY_TEXT;
                             }
                         }
                         
@@ -373,14 +346,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                     this.fieldsData[field] = value;
                 }
             } else if (this.integrationname === 'Gmail' && 
-                (field === 'MVEX__Client_ID__c' || field === 'MVEX__Client_Secret__c' || field === 'MVEX__Refresh_Token__c')) {
-                // If the value is still the placeholder, don't update
-                if (value !== this.CREDENTIAL_DISPLAY_TEXT && value !== '') {
-                    this.fieldsData[field] = value;
-                } else if (value === '') {
-                    this.fieldsData[field] = value;
-                }
-            } else if (this.integrationname === 'Outlook' && 
                 (field === 'MVEX__Client_ID__c' || field === 'MVEX__Client_Secret__c' || field === 'MVEX__Refresh_Token__c')) {
                 // If the value is still the placeholder, don't update
                 if (value !== this.CREDENTIAL_DISPLAY_TEXT && value !== '') {
@@ -567,19 +532,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                         dataToSave.MVEX__Refresh_Token__c = this.fieldsData.MVEX__Refresh_Token__c;
                     }
                 }
-                
-                // For Outlook, restore original credentials if placeholder is still there
-                if (this.integrationname === 'Outlook') {
-                    if (dataToSave.MVEX__Client_ID__c === this.CREDENTIAL_DISPLAY_TEXT) {
-                        dataToSave.MVEX__Client_ID__c = this.originalCredentials.MVEX__Client_ID__c;
-                    }
-                    if (dataToSave.MVEX__Client_Secret__c === this.CREDENTIAL_DISPLAY_TEXT) {
-                        dataToSave.MVEX__Client_Secret__c = this.originalCredentials.MVEX__Client_Secret__c;
-                    }
-                    if (dataToSave.MVEX__Refresh_Token__c === this.CREDENTIAL_DISPLAY_TEXT) {
-                        dataToSave.MVEX__Refresh_Token__c = this.originalCredentials.MVEX__Refresh_Token__c;
-                    }
-                }
 
                 // For Instagram, restore original credentials if placeholder is still there
                 if (this.integrationname === 'Instagram') {
@@ -741,8 +693,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
         try {
             if (this.integrationname == 'Gmail') {
                 this.redirectToGmailLoginPage();
-            } else if (this.integrationname == 'Outlook') {
-                this.redirectToOutlookLoginPage();
             } else if (this.integrationname == 'Instagram') {
                 this.redirectToInstagramLoginPage();
             }
@@ -804,36 +754,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
             });
         } catch (error) {
             console.log('error in redirectToGmailLoginPage ->', error.stack);
-        }
-    }
-
-    /**
-    * Method Name : redirectToOutlookLoginPage
-    * @description : redirect to outlook login page
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    redirectToOutlookLoginPage() {
-        try {
-            const requiredFields = ['MVEX__Redirect_URI__c', 'MVEX__Client_ID__c', 'MVEX__Client_Secret__c'];
-
-            for (let i = 0; i < requiredFields.length; i++) {
-                const field = requiredFields[i];
-                if (!this.fieldsData[field]) {
-                    this.showToast('Error', `${field.replace('', '').replace('__c', '').replace(/_/g, ' ')} is empty. Please fill it before proceeding.`, 'error');
-                    return;
-                }
-            }
- 
-            this.saveTempData(this.fieldsData.MVEX__Client_ID__c, this.fieldsData.MVEX__Client_Secret__c, this.fieldsData.MVEX__Redirect_URI__c);
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=' + this.fieldsData.MVEX__Client_ID__c + '&response_type=code&redirect_uri=' + this.fieldsData.MVEX__Redirect_URI__c + '&response_mode=query&scope=offline_access%20User.Read%20Mail.Read%20Mail.Send&state=12345&prompt=login'
-                }
-            });
-        } catch (error) {
-            console.log('error in redirectToOutlookLoginPage ->', error.stack);
         }
     }
 

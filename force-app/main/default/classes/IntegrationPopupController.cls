@@ -53,30 +53,6 @@ public with sharing class IntegrationPopupController {
 
                 upsert as user gmailSettings;
 
-            } else if (integrationType == 'Outlook') {
-                OutlookConfig__c outlookSettings = OutlookConfig__c.getOrgDefaults();
-                if (outlookSettings == null) {
-                    outlookSettings = new OutlookConfig__c();
-                    outlookSettings.SetupOwnerId = UserInfo.getOrganizationId();
-                }
-    
-                for (String apiName : stringFieldMap.keySet()) {
-                    if (apiName == 'MVEX__Refresh_Token__c') {
-                        String refreshToken = (String) stringFieldMap.get(apiName);
-                        if (refreshToken != null && refreshToken.length() > 255) {
-                            outlookSettings.Refresh_Token_1__c = refreshToken.substring(0, 255);
-                            outlookSettings.Refresh_Token_2__c = refreshToken.substring(255);
-                        } else {
-                            outlookSettings.Refresh_Token_1__c = refreshToken;
-                            outlookSettings.Refresh_Token_2__c = '';
-                        }
-                    } else {
-                        outlookSettings.put(apiName, stringFieldMap.get(apiName));
-                    }
-                }
-    
-                upsert as user outlookSettings;
-
             } else if (integrationType == 'Instagram') {
                 IG_Configuration__c instagramSettings = IG_Configuration__c.getOrgDefaults();
                 if (instagramSettings == null) {
@@ -165,10 +141,6 @@ public with sharing class IntegrationPopupController {
                 } else {
                     result.siteUrl = getSiteUrl(settings.MVEX__Redirect_URI__c, 'Gmail');
                 }
-            } else if (integrationType == 'Outlook') {
-                OutlookConfig__c outlookSettings = OutlookConfig__c.getOrgDefaults();
-                result.objectData = outlookSettings;
-                result.siteUrl = getSiteUrl(outlookSettings.Redirect_URI__c, 'Outlook');
             } else if (integrationType == 'Instagram') {
                 IG_Configuration__c instaSettings = IG_Configuration__c.getOrgDefaults();
 
@@ -215,9 +187,6 @@ public with sharing class IntegrationPopupController {
                 switch on integrationName {
                     when 'Gmail' {
                         integraName = 'MVEX__GmailIntPage';
-                    }
-                    when 'Outlook' {
-                        integraName = 'MVEX__AzureADLoc';
                     }
                     when 'Instagram' {
                         integraName = 'MVEX__InstagramAccessToken';
@@ -362,15 +331,7 @@ public with sharing class IntegrationPopupController {
             // Fetching integration details
             AWS_Config__c awsCredential = AWS_Config__c.getOrgDefaults();
             GmailConfig__c gmailCredential = GmailConfig__c.getOrgDefaults();
-            OutlookConfig__c outlookCredential = OutlookConfig__c.getOrgDefaults();
             IG_Configuration__c instagramCredential = IG_Configuration__c.getOrgDefaults();
-
-            // Outlook Integration
-            FieldWrapperData outlookWrapper = new FieldWrapperData();
-            outlookWrapper.integrationName = 'Outlook';
-            outlookWrapper.integrationData = outlookCredential;
-            outlookWrapper.isValid = outlookCredential.Client_ID__c != null && outlookCredential.Client_Secret__c != null && outlookCredential.Redirect_URI__c != null && outlookCredential.Refresh_Token_1__c != null;
-            wrapperList.add(outlookWrapper);
 
             // Gmail Integration
             FieldWrapperData gmailWrapper = new FieldWrapperData();
@@ -451,61 +412,6 @@ public with sharing class IntegrationPopupController {
             return 'success';
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'deleteGmailConfig', 'Error while deleting gmail config.');
-            return e.getMessage();
-        }
-    }
-
-    /**
-    * Method Name : revokeOutlookAccess
-    * @param refreshToken : String to stored the refresh token.
-    * @param recordId : String to stored the record id.
-    * @return String : Status of revoke access.
-    * @description : Method to revoke outlook access.
-    */
-    @AuraEnabled
-    public static String revokeOutlookAccess(String refreshToken, String recordId) {
-        String status;
-        try {
-            // Initialize the HTTP request
-            HttpRequest req = new HttpRequest();
-            req.setEndpoint('https://login.microsoftonline.com/common/oauth2/v2.0/logout');
-            req.setMethod('POST');
-            
-            // Set the parameters for the request
-            String requestBody = 'token=' + refreshToken;
-            req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-            req.setBody(requestBody);
-            
-            // Send the request
-            Http http = new Http();
-            HttpResponse res = http.send(req);
-            
-            // Check the response
-            if (res.getStatusCode() == 200) {
-                status = deleteOutlookMetadata(recordId);
-            } else {
-                status = res.getBody();
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeOutlookAccess', 'Error while revoking outlook access.');
-            status = e.getMessage();
-        }
-
-        return status;
-    }
-
-    /**
-    * Method Name : deleteOutlookMetadata
-    * @param recordId : String to stored the record id.
-    * @return String : Status of revoke access.
-    * @description : Method to delete outlook config.
-    */
-    public static String deleteOutlookMetadata(String recordId){
-        try {
-            delete as user new OutlookConfig__c(Id = recordId);
-            return 'success';
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'deleteOutlookMetadata', 'Error while deleting outlook metadata.');
             return e.getMessage();
         }
     }

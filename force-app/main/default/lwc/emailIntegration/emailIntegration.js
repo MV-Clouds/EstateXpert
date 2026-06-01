@@ -5,7 +5,6 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
-import revokeOutlookAccess from '@salesforce/apex/IntegrationPopupController.revokeOutlookAccess';
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 
 export default class EmailIntegration extends NavigationMixin(LightningElement) {
@@ -15,7 +14,6 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
     @track isSpinner = true;
     @track integrationName;
     @track integrationLabel;
-    @track outlookData;
     @track gmailData;
     @track isClientSecretHidden = true;
     @track featureAvailability = {};
@@ -52,17 +50,6 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
     }
 
     /**
-    * Method Name: isOutlook
-    * @description: Used to check if Outlook tab is active.
-    * @returns {Boolean} - Returns true if Outlook tab is active.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    get isOutlook() {
-        return this.activeTab === 'Outlook';
-    }
-
-    /**
     * Method Name: gmailClass
     * @description: Used to check if Gmail tab is active.
     * @returns {Boolean} - Returns true if Gmail tab is active.
@@ -71,17 +58,6 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
     */
     get gmailClass() {
         return this.activeTab === 'Gmail' ? 'active' : '';
-    }
-
-    /**
-    * Method Name: outlookClass
-    * @description: Used to check if Outlook tab is active.
-    * @returns {Boolean} - Returns true if Outlook tab is active.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    get outlookClass() {
-        return this.activeTab === 'Outlook' ? 'active' : '';
     }
 
     /**
@@ -151,17 +127,7 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
             this.isSpinner = true;
             getIntegrationDetails()
             .then(data => {
-                data.forEach(item => {
-                    if (item.integrationName === 'Outlook') {
-                        if (item.integrationData && item.integrationData.CreatedDate) {
-                            item.integrationData.CreatedDate = this.formatDate(item.integrationData.CreatedDate);
-                        }
-                        if (item.integrationData && item.integrationData.LastModifiedDate) {
-                            item.integrationData.LastModifiedDate = this.formatDate(item.integrationData.LastModifiedDate);
-                        }
-                        this.outlookData = item;
-                    } 
-                    
+                data.forEach(item => {                    
                     if (item.integrationName === 'Gmail') {
                         if (item.integrationData && item.integrationData.CreatedDate) {
                             item.integrationData.CreatedDate = this.formatDate(item.integrationData.CreatedDate);
@@ -242,20 +208,6 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
     }
 
     /**
-    * Method Name: handleOutlookClick
-    * @description: Used to set active tab.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    handleOutlookClick() {
-        try {
-            this.activeTab = 'Outlook';   
-        } catch (error) {
-            console.log('Error in handleOutlookClick:', error);
-        }
-    }
-
-    /**
     * Method Name: deactivateGmail
     * @description: Used to deactivate Gmail.
     * Created Date: 27/12/2024
@@ -294,41 +246,9 @@ export default class EmailIntegration extends NavigationMixin(LightningElement) 
                 case 'Gmail':
                     this.deactivateGmail();
                     break;
-                case 'Outlook':
-                    this.deactivateOutlook();
-                    break;
                 default:
                     break;
             }
-        }
-    }
-
-    /**
-    * Method Name: deactivateOutlook
-    * @description: Used to deactivate Outlook.
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    deactivateOutlook() {
-        try {
-            this.isSpinner = true;
-            revokeOutlookAccess({ refreshToken: this.outlookData.integrationData.MVEX__Refresh_Token__c, recordId: this.outlookData.integrationData.Id })
-            .then(data => {
-                if (data === 'success') {
-                    this.showToast('Success', 'Changes has been done successfully.', 'success');
-                    this.getSocialMediaDataToShow();
-                } else {
-                    this.showToast('Error', data, 'error');
-                }
-                this.isSpinner = false;
-            })
-            .catch(error => {
-                console.log('Error in fetching data -->', error);
-                this.isSpinner = false;
-            });
-        } catch (error) {
-            console.log('Error in deactivateOutlook:', error);    
-            this.isSpinner = false;
         }
     }
 

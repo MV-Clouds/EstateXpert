@@ -1796,11 +1796,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         const estimatedTotalPrimary = this.selectedPrimaryRecipients.length + this.estimatedContactsFromGroups;
         const totalRecipients = estimatedTotalPrimary + this.selectedBCCRecipients.length + this.selectedCCRecipients.length;
         
-        if (this.navigationStateString.messagingService === 'outlook' && totalRecipients > 20){
-            this.showToast('Error', 'In Outlook there is a limit of 20 recipients. Please select a smaller group of recipients or use another messaging service.', 'error');
-            this.isLoading = false;
-            return;
-        } else if(this.navigationStateString.messagingService === 'gmail' && totalRecipients > 100){
+        if(this.navigationStateString.messagingService === 'gmail' && totalRecipients > 100){
             this.showToast('Error', 'In Gmail there is a limit of 100 recipients. Please select a smaller group of recipients or use another messaging service.', 'error');
             this.isLoading = false;
             return;

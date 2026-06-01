@@ -8,7 +8,6 @@ import getSettings from '@salesforce/apex/IntegrationPopupController.getSettings
 import saveCustomTempData from '@salesforce/apex/IntegrationPopupController.saveCustomTempData';
 import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeAWSAccess';
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
-import revokeOutlookAccess from '@salesforce/apex/IntegrationPopupController.revokeOutlookAccess';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -22,7 +21,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track integrationLabel;
     @track awsData = { isValid: false, integrationData: {}, showDetails: false };
     @track gmailData = { isValid: false, integrationData: {}, showDetails: false };
-    @track outlookData = { isValid: false, integrationData: {}, showDetails: false };
     @track instagramData = { isValid: false, integrationData: {}, showDetails: false };
     @track isWaterMarkUploader = false;
     @track featureAvailability = {};
@@ -144,9 +142,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     } else if (item.integrationName === 'Gmail') {
                         this.gmailData = { ...item, showDetails: false };
                         if (item.isValid) activeCount++;
-                    } else if (item.integrationName === 'Outlook') {
-                        this.outlookData = { ...item, showDetails: false };
-                        if (item.isValid) activeCount++;
                     } else if (item.integrationName === 'Instagram') {
                         this.instagramData = { ...item, showDetails: false };
                         if (item.isValid) activeCount++;
@@ -220,9 +215,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     break;
                 case 'Gmail':
                     this.deactivateGmail();
-                    break;
-                case 'Outlook':
-                    this.deactivateOutlook();
                     break;
                 case 'Instagram':
                     this.deactivateInstagram();
@@ -300,7 +292,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
     /**
     * Method Name: newIntegrationModal
-    * @description: Used to open the modal (AWS and Outlook only).
+    * @description: Used to open the modal (AWS only).
     * Created Date: 27/12/2024
     * Created By: Karan Singh
     */
@@ -365,8 +357,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 shouldShow = !this.awsData.showDetails;
             } else if (integration === 'Gmail') {
                 shouldShow = !this.gmailData.showDetails;
-            } else if (integration === 'Outlook') {
-                shouldShow = !this.outlookData.showDetails;
             } else if (integration === 'Instagram') {
                 shouldShow = !this.instagramData.showDetails;
             }
@@ -374,7 +364,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             // Close all cards first to ensure only one is open
             this.awsData = { ...this.awsData, showDetails: false };
             this.gmailData = { ...this.gmailData, showDetails: false };
-            this.outlookData = { ...this.outlookData, showDetails: false };
             this.instagramData = { ...this.instagramData, showDetails: false };
             
             // Then set the selected card to its new state
@@ -382,8 +371,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 this.awsData = { ...this.awsData, showDetails: shouldShow };
             } else if (integration === 'Gmail') {
                 this.gmailData = { ...this.gmailData, showDetails: shouldShow };
-            } else if (integration === 'Outlook') {
-                this.outlookData = { ...this.outlookData, showDetails: shouldShow };
             } else if (integration === 'Instagram') {
                 this.instagramData = { ...this.instagramData, showDetails: shouldShow };
             }
@@ -681,35 +668,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             });
         } catch (error) {
             errorDebugger('StorageIntegration', 'deactivateGmail', error, 'warn', 'Error occurred while deactivating Gmail');
-            this.isSpinner = false;            
-        }
-    }
-
-    /**
-    * Method Name: deactivateOutlook
-    * @description: Used to deactivate Outlook integration.
-    * Created Date: 10/02/2026
-    * Created By: Karan Singh
-    */
-    deactivateOutlook() {
-        try {
-            this.isSpinner = true;
-            revokeOutlookAccess({ refreshToken: this.outlookData.integrationData.MVEX__Refresh_Token__c, recordId: this.outlookData.integrationData.Id })
-            .then(data => {
-                if (data === 'success') {
-                    this.showToast('Success', 'Changes has been done successfully.', 'success');
-                    this.getSocialMediaDataToShow();
-                } else {
-                    this.showToast('Error', data, 'error');
-                }
-                this.isSpinner = false;
-            })
-            .catch(error => {
-                errorDebugger('StorageIntegration', 'deactivateOutlook', error, 'warn', 'Error occurred while deactivating Outlook');
-                this.isSpinner = false;
-            });
-        } catch (error) {
-            errorDebugger('StorageIntegration', 'deactivateOutlook', error, 'warn', 'Error occurred while deactivating Outlook');
             this.isSpinner = false;            
         }
     }

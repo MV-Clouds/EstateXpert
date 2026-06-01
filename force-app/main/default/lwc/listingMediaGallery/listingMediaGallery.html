@@ -39,19 +39,21 @@
                     <img src={currentImageUrl} alt="Current Image" draggable="false" />
                 </div>
                 
-                <button class="nav-arrow nav-arrow-left" onclick={showPreviousImage} title="Previous">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-                
-                <button class="nav-arrow nav-arrow-right" onclick={showNextImage} title="Next">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
+                <template if:true={hasMultipleImages}>
+                    <button class="nav-arrow nav-arrow-left" onclick={showPreviousImage} title="Previous">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="nav-arrow nav-arrow-right" onclick={showNextImage} title="Next">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
 
-                <div class="image-counter">{imageCounter}</div>
+                    <div class="image-counter">{imageCounter}</div>
+                </template>
                 
                 <div class="preview-control" onclick={openImageModel} title="Preview Image">
                     <div class="preview-btn">
@@ -62,27 +64,29 @@
                     <span class="preview-text">Preview</span>
                 </div>
                 
-                <div class="auto-play-control">
-                    <button class="play-pause-btn" onclick={toggleAutoPlay} title="Toggle Auto-play">
+                <template if:true={hasMultipleImages}>
+                    <div class="auto-play-control">
+                        <button class="play-pause-btn" onclick={toggleAutoPlay} title="Toggle Auto-play">
+                            <template if:true={isAutoPlaying}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="6" y="4" width="4" height="16" fill="white"/>
+                                    <rect x="14" y="4" width="4" height="16" fill="white"/>
+                                </svg>
+                            </template>
+                            <template if:false={isAutoPlaying}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 5V19L19 12L8 5Z" fill="white"/>
+                                </svg>
+                            </template>
+                        </button>
                         <template if:true={isAutoPlaying}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="6" y="4" width="4" height="16" fill="white"/>
-                                <rect x="14" y="4" width="4" height="16" fill="white"/>
-                            </svg>
+                            <span class="auto-play-text">Auto</span>
                         </template>
                         <template if:false={isAutoPlaying}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M8 5V19L19 12L8 5Z" fill="white"/>
-                            </svg>
+                            <span class="auto-play-text">Paused</span>
                         </template>
-                    </button>
-                    <template if:true={isAutoPlaying}>
-                        <span class="auto-play-text">Auto</span>
-                    </template>
-                    <template if:false={isAutoPlaying}>
-                        <span class="auto-play-text">Paused</span>
-                    </template>
-                </div>
+                    </div>
+                </template>
             </div>
         </div>
     </template>

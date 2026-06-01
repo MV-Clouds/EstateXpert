@@ -85,6 +85,16 @@ export default class ListingMediaGallery extends LightningElement {
         return tags;
     }
 
+    /**
+    * Method Name: hasMultipleImages
+    * @description: Used to check if there are multiple images to show/hide controls.
+    * Created Date: 01/06/2026
+    * Created By: Karan Singh
+    */
+    get hasMultipleImages() {
+        return this.data && this.data.length > 1;
+    }
+
     @wire(MessageContext)
     messageContext;
 
@@ -146,7 +156,7 @@ export default class ListingMediaGallery extends LightningElement {
                     this.data = result.listingImages;
                     this.isdata = result.listingImages?.length > 0;
                     this.showSpinner = false;
-                    if (this.isdata && this.isAutoPlaying) {
+                    if (this.hasMultipleImages && this.isAutoPlaying) {
                         this.startAutoPlay();
                     }
                 })

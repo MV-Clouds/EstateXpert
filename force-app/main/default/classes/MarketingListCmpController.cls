@@ -153,7 +153,6 @@ public with sharing class MarketingListCmpController {
             String selectedListing = (String) emailData.get('selectedListing');
 
             List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
-            List<OutlookIntegrationController.EmailWrapper> outlookMails = new List<OutlookIntegrationController.EmailWrapper>();
 
             String originalTemplateBody = ''; // Store original template body
 
@@ -207,12 +206,6 @@ public with sharing class MarketingListCmpController {
                         allContactIds.add(member.Contact_Id__c);
                     }
                 }
-            }
-            
-            // Validate total recipients for messaging service limits
-            if (sendMethod == 'outlook' && allContactIds.size() > 20) {
-                ErrorHandler.insertErrorData(null, 'MarketingListCmpController', 'sendEmail', 'Outlook has a limit of 20 recipients. Total recipients: ' + allContactIds.size() + ' and error at line 214.');
-                return; // Outlook has a limit of 20 recipients per email
             }
             
             // Convert contact IDs to contact objects for processing
@@ -298,14 +291,6 @@ public with sharing class MarketingListCmpController {
                         }
 
                         emails.add(email);
-                    } else if(sendMethod == 'outlook') {
-                        OutlookIntegrationController.EmailWrapper singleOutlookMail = new OutlookIntegrationController.EmailWrapper();
-
-                        singleOutlookMail.toAddresses = new List<String>{contactEmail};
-                        singleOutlookMail.subject = temps[0].Subject__c;
-                        singleOutlookMail.body = personalizedTemplateBody; // Use personalized body
-
-                        outlookMails.add(singleOutlookMail);
                     } else if(sendMethod == 'gmail'){
                         GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
                         singleGmail.toAddresses = new List<String>{contactEmail};
@@ -320,10 +305,8 @@ public with sharing class MarketingListCmpController {
             if (!emails.isEmpty()) {
                 Messaging.sendEmail(emails);
                 CreateActivityFromMail2.createCaseEmailMessage(contactEmailInfoMap);
-            }else if(!gmails.isEmpty()){
+            } else if(!gmails.isEmpty()){
                 GmailIntegrationControllerV1.requestNewAccessToken(gmails,null,null,false);
-            }else if(!outlookMails.isEmpty()){
-                OutlookIntegrationController.requestNewAccessToken(outlookMails,null,null,false);
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MarketingListCmpController', 'sendEmail', 'Error while sending email.');

@@ -23,18 +23,6 @@ public class EmailCampaignSchedulerTest {
             Status__c = 'New',
             Total_Sent_Mails__c = 0
         ));
-        campaigns.add(new Marketing_Campaign__c(
-            Label__c = 'Test Campaign 3',
-            Is_Marketing_Campaign_Template__c = true,
-            Email_Type__c = 'outlook',
-            Schedule_Type__c = 'Specific Date',
-            Start_Date__c = Date.today(),
-            Campaign_Start_Date__c = Date.today(),
-            RelatedObject__c = 'Contact',
-            Remaining_Emails__c = 10,
-            Status__c = 'New',
-            Total_Sent_Mails__c = 0
-        ));
         insert campaigns;
 
         // Create Marketing Campaign Members

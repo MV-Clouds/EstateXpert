@@ -3,15 +3,6 @@ public class SendEmailsControllerTest {
 
     @testSetup
     static void setupData() {
-
-        /* ---------------- CUSTOM SETTINGS ---------------- */
-
-        OutlookConfig__c outlook = new OutlookConfig__c(
-            SetupOwnerId = UserInfo.getOrganizationId(),
-            Refresh_Token_1__c = 'test-refresh-token'
-        );
-        insert outlook;
-
         GmailConfig__c gmail = new GmailConfig__c(
             SetupOwnerId = UserInfo.getOrganizationId(),
             Refresh_Token__c = 'test-refresh-token'
@@ -84,7 +75,6 @@ public class SendEmailsControllerTest {
         }
 
         System.assert(values.contains('single'));
-        System.assert(values.contains('outlook'));
         System.assert(values.contains('gmail'));
     }
 

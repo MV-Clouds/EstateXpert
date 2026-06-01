@@ -81,10 +81,6 @@ public class IntegrationPopupControllerTest {
         String gmailJson = '{"MVEX__Client_ID__c": "gmail_client_id", "MVEX__Client_Secret__c": "gmail_secret", "MVEX__Redirect_URI__c": "https://test.com"}';
         IntegrationPopupController.saveSettings(gmailJson, 'Gmail');
         
-        // Test Outlook
-        String outlookJson = '{"MVEX__Client_ID__c": "outlook_client_id", "MVEX__Client_Secret__c": "outlook_secret", "MVEX__Redirect_URI__c": "https://test.com"}';
-        IntegrationPopupController.saveSettings(outlookJson, 'Outlook');
-        
         // Test Instagram
         String instaJson = '{"MVEX__ClientId__c": "insta_client_id", "MVEX__ClientSecret__c": "insta_secret"}';
         IntegrationPopupController.saveSettings(instaJson, 'Instagram');
@@ -99,14 +95,12 @@ public class IntegrationPopupControllerTest {
         
         Test.startTest();
         IntegrationPopupController.FieldWrapper gmailResult = IntegrationPopupController.getSettings('Gmail');
-        IntegrationPopupController.FieldWrapper outlookResult = IntegrationPopupController.getSettings('Outlook');
         IntegrationPopupController.FieldWrapper instaResult = IntegrationPopupController.getSettings('Instagram');
         IntegrationPopupController.FieldWrapper googleResult = IntegrationPopupController.getSettings('Google');
         IntegrationPopupController.FieldWrapper metaResult = IntegrationPopupController.getSettings('Meta');
         Test.stopTest();
         
         System.assertNotEquals(null, gmailResult, 'Gmail result should not be null');
-        System.assertNotEquals(null, outlookResult, 'Outlook result should not be null');
         System.assertNotEquals(null, instaResult, 'Instagram result should not be null');
         System.assertNotEquals(null, googleResult, 'Google result should not be null');
         System.assertNotEquals(null, metaResult, 'Meta result should not be null');
@@ -122,15 +116,6 @@ public class IntegrationPopupControllerTest {
             Refresh_Token__c = 'test_refresh_token'
         );
         insert gmailConfig;
-        
-        // Setup Outlook config
-        OutlookConfig__c outlookConfig = new OutlookConfig__c(
-            Client_ID__c = 'test_client_id',
-            Client_Secret__c = 'test_secret',
-            Redirect_URI__c = 'https://test.com',
-            Refresh_Token_1__c = 'test_refresh_token'
-        );
-        insert outlookConfig;
         
         // Setup WhatsApp config
         WhatsAppConfig__c whatsappConfig = new WhatsAppConfig__c();
@@ -164,7 +149,6 @@ public class IntegrationPopupControllerTest {
         
         Test.startTest();
         String gmailStatus = IntegrationPopupController.revokeGmailAccess('test_refresh_token', gmailConfig.Id);
-        String outlookStatus = IntegrationPopupController.revokeOutlookAccess('test_refresh_token', outlookConfig.Id);
         String instaStatus = IntegrationPopupController.revokeInstagramAccess(instaConfig.Id);
         String googleStatus = IntegrationPopupController.revokeGoogleAccess(googleConfig.Id, 'Google');
         String metaStatus = IntegrationPopupController.revokeGoogleAccess(metaConfig.Id, 'Meta');
@@ -172,7 +156,6 @@ public class IntegrationPopupControllerTest {
         Test.stopTest();
         
         System.assertNotEquals(null, gmailStatus, 'Gmail status should not be null');
-        System.assertNotEquals(null, outlookStatus, 'Outlook status should not be null');
         System.assertEquals('success', instaStatus, 'Instagram should be revoked successfully');
     }
 
@@ -198,7 +181,6 @@ public class IntegrationPopupControllerTest {
         Test.startTest();
         IntegrationPopupController.saveCustomTempData('test_client_id', 'test_secret', 'https://test.com');
         String gmailUrl = IntegrationPopupController.getSiteUrl(null, 'Gmail');
-        String outlookUrl = IntegrationPopupController.getSiteUrl(null, 'Outlook');
         String instaUrl = IntegrationPopupController.getSiteUrl(null, 'Instagram');
         String existingUrl = IntegrationPopupController.getSiteUrl('https://existing.com', 'Gmail');
         Test.stopTest();

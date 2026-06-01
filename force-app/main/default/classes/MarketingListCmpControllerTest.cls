@@ -205,33 +205,6 @@ private class MarketingListCmpControllerTest {
         
     }
 
-
-    @isTest
-    static void testOutlookSendEmail() {
-        Contact testCon = [SELECT Id, Email FROM Contact LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c LIMIT 1];
-
-        Map<String, Object> contactMap = new Map<String, Object>{
-            'Id' => testCon.Id,
-            'Email' => testCon.Email
-        };
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'outlook',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>{contactMap},
-            'objectName' => 'Contact'
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
-
-        Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
-        Test.stopTest();
-
-        
-    }
-
     @isTest
     static void testSendEmailWithBroadcastGroups() {
         Broadcast_Group__c broadcastGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
@@ -295,32 +268,6 @@ private class MarketingListCmpControllerTest {
             'contacts' => new List<Object>{contactMap},
             'objectName' => 'Contact',
             'selectedListing' => listing.Id
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
-
-        Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
-        Test.stopTest();
-    }
-
-    @isTest
-    static void testSendEmailWithMixedContactsAndBroadcastGroups() {
-        Contact testCon = [SELECT Id, Email FROM Contact WHERE Email = 'test@example.com' LIMIT 1];
-        Broadcast_Group__c broadcastGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c WHERE Object_API_Name__c = 'Contact' LIMIT 1];
-
-        Map<String, Object> contactMap = new Map<String, Object>{
-            'Id' => testCon.Id,
-            'Email' => testCon.Email
-        };
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'outlook',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>{contactMap},
-            'broadcastGroups' => new List<String>{broadcastGroup.Id},
-            'objectName' => 'Contact'
         };
 
         String jsonInput = JSON.serialize(requestMap);

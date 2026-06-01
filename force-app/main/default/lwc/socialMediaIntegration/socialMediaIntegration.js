@@ -170,24 +170,6 @@ export default class SocialMediaIntegration extends NavigationMixin(LightningEle
         });
     }
 
-    handleOutlookClick(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:emailIntegration",
-            attributes: {
-                activeTab: 'Outlook'
-            }
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
     deactivateInstagram() {
         this.showMessagePopup('Warning','Delete Integration','Are you sure you want to delete this integration? This action cannot be undone.');
     }

@@ -1245,12 +1245,6 @@ export default class SendEmails extends LightningElement {
     // Handle single campaign - create campaign record and send immediately
     handleSingleCampaignSend() {
         try {
-            // Validate recipients limit for single messaging service
-            const estimatedTotalRecipients = this.selectedContactsDetails.length + this.estimatedContactsFromGroups;
-            if (this.campaignDetails.messagingService === 'outlook' && estimatedTotalRecipients > 20) {
-                throw new Error('Outlook has a limit of 20 recipients. Please select fewer recipients or use a different messaging service.');
-            }
-
             // Create a single email record for immediate sending
             const currentDateTime = new Date();
             const singleEmailRecord = {
@@ -1318,12 +1312,6 @@ export default class SendEmails extends LightningElement {
     // Handle drip campaign - create campaign records like emailCampaignTemplateForm.js
     handleDripCampaignCreate() {
         try {
-            // Validate recipients limit
-            const totalRecipients = this.selectedContactsDetails.length + this.selectedCCContactsDetails.length;
-            if (this.campaignDetails.messagingService === 'outlook' && totalRecipients > 20) {
-                throw new Error('Outlook has a limit of 20 recipients. Please select fewer recipients.');
-            }
-
             // Transform drip emails to match EmailCampaignController structure
             const transformedEmails = this.dripSequence.map(drip => ({
                 id: drip.id,

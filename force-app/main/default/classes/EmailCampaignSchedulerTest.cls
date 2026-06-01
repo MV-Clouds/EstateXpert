@@ -31,10 +31,6 @@ public class EmailCampaignSchedulerTest {
             Marketing_Campaign__c = campaigns[0].Id,
             Contact__c = contacts[0].Id
         ));
-        members.add(new Marketing_Campaign_Member__c(
-            Marketing_Campaign__c = campaigns[1].Id,
-            Contact__c = contacts[1].Id
-        ));
         insert members;
 
         // Create Templates
@@ -79,15 +75,6 @@ public class EmailCampaignSchedulerTest {
             TimeToSend__c = Time.newInstance(12, 0, 0, 0),
             Send_Date_Time__c = DateTime.now().addDays(1)
         ));
-        marketingEmails.add(new Marketing_Email__c(
-            Marketing_Campaign__c = campaigns[1].Id,
-            Subject__c = 'Test Email 2',
-            Name = 'Test Email 2',
-            Template_Id__c = template.Id,
-            Days_After_Start_Date__c = 0,
-            TimeToSend__c = Time.newInstance(14, 0, 0, 0),
-            Send_Date_Time__c = DateTime.now().addDays(2)
-        ));
         insert marketingEmails;
 
         // Create Email Members
@@ -97,12 +84,6 @@ public class EmailCampaignSchedulerTest {
             Marketing_Email__c = marketingEmails[0].Id,
             Schedule_Date_and_Time__c = DateTime.now().addDays(1),
             Status__c = 'Sent'
-        ));
-        emailMembers.add(new Email_Member__c(
-            RecipientId__c = contacts[1].Id,
-            Marketing_Email__c = marketingEmails[1].Id,
-            Schedule_Date_and_Time__c = DateTime.now().addDays(2),
-            Status__c = 'Success'
         ));
         insert emailMembers;
     }
@@ -145,8 +126,6 @@ public class EmailCampaignSchedulerTest {
         Test.startTest();
         EmailCampaignScheduler.sendEmails(new List<EmailCampaignScheduler.EmailRequest>{request});
         Test.stopTest();
-        
-        // Should skip non-contact field campaigns
     }
 
     @isTest

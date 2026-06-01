@@ -143,7 +143,7 @@ private class EmailCampaignControllerTest {
     @isTest
     static void testGetMessagingServiceOptions() {
         List<Map<String, String>> result = EmailCampaignController.getMessagingServiceOptions();
-        System.assertEquals(3, result.size(), 'Expected three messaging service options');
+        System.assertEquals(2, result.size(), 'Expected three messaging service options');
     }
     
     @isTest

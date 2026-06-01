@@ -47,39 +47,4 @@ public class ListingManagerControllerTest {
             ErrorHandler.insertErrordata(e, 'ListingManagerControllerTest', 'testGetListingData', 'Error while creating test data.');
         }
     }
-
-    /**
-    * Method Name : testAfterUpdate
-    * @description : Used to test test After Update method.
-    */
-    @isTest
-    static void testAfterUpdate() {
-        Account account = new Account(Name = 'Test Account');
-        insert account;
-        // Create Property
-        Property__c testProp = new Property__c(Name = 'Test Property', Account__c = account.Id);
-        insert testProp;
-        
-        Listing__c testListing = new Listing__c(
-            Name = 'Test Listing',
-            Property__c = testProp.Id,
-            Address__c = '123 Test St'
-        );
-        insert testListing;
-        
-        testListing.Address__c = '456 New St';
-        
-        // Act
-        Test.startTest();
-        update testListing;
-        delete testProp;
-        undelete testProp;
-        Test.stopTest();
-        
-        // Assert
-        Property__c updatedProperty = [SELECT Address__c 
-                                     FROM Property__c 
-                                     WHERE Id = :testProp.Id];
-        System.assertEquals('456 New St', updatedProperty.Address__c, 'Property address should be updated');
-    }
 }

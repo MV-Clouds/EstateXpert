@@ -557,7 +557,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 relationshipName: field.relationshipName,
                                 sortable: true
                             })),
-                            // { label: 'Actions', fieldName: 'actions', type: 'action' }
                         ];
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                     } catch (e) {
@@ -1335,9 +1334,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     updateMapMarkers() {
         const startIndex = (this.currentPage - 1) * this.pageSize;
         const currentPageData = this.pagedFilteredListingData.slice(startIndex, startIndex + this.pageSize);
-        console.log('current Page Data -> ', currentPageData);
-        console.log('this.pagedFilteredListingData -> ', this.pagedFilteredListingData);
-        
+
 
         this.mapMarkers = currentPageData.map(listing => ({
             id: listing.id,
@@ -2060,9 +2057,9 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             // --- Validation 2: No duplicate conditions ---
             // A duplicate is defined as the same field + operator + value combination
             const currentField = this.listingFieldObject.MVEX__Field_Name__c;
-            const currentOp    = this.selectedConditionOperator;
+            const currentOp = this.selectedConditionOperator;
             const currentValue = this.selectedInquiryValue;
-            const currentType  = this.isConstant ? 'constant' : 'field';
+            const currentType = this.isConstant ? 'constant' : 'field';
 
             const isDuplicate = this.mappings.some(mapping => {
                 // When editing, skip the mapping being edited
@@ -2147,15 +2144,44 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         this.isConfigOpen = true;
     }
 
-
-
     handleCloseModal() {
         this.isConfigOpen = false;
-        this.fetchListingConfiguration();
-        this.sortField = 'name';
-        this.sortOrder = 'asc';
-        this.hasUpdatedSortIcons = false;
-        this.sortData();
+        this.isLoading = true;
+        return getConfigObjectFields({ objectApiName: 'MVEX__Listing__c', featureName: 'Suggested_Listing_Fields' })
+            .then(result => {
+                if (result && result.metadataRecords && result.metadataRecords.length > 0) {
+                    try {
+                        const fieldsData = JSON.parse(result.metadataRecords[0]);
+                        const filteredFieldsData = fieldsData.filter(field => (field.fieldName || field.value || '').toLowerCase() !== 'name');
+                        this.listingColumns = [
+                            { label: '', fieldName: 'media_url', type: 'image', sortable: false },
+                            { label: 'Name', fieldName: 'name', type: 'text', sortable: true },
+                            ...filteredFieldsData.map(field => ({
+                                label: field.label || field.fieldLabel,
+                                fieldName: (field.fieldName || field.value || '').toLowerCase(),
+                                type: this.getColumnType(field.fieldType),
+                                fieldType: field.fieldType,
+                                format: field.format,
+                                referenceObjectName: field.referenceObjectName,
+                                relationshipName: field.relationshipName,
+                                sortable: true
+                            })),
+                        ];
+                        this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
+                    } catch (e) {
+                        console.error('Error parsing listing configuration:', e);
+                        this.listingColumns = this.defaultColumns;
+                    }
+                } else {
+                    this.listingColumns = this.defaultColumns;
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching listing configuration:', error);
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
     }
 
     /**
@@ -2184,8 +2210,8 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
      */
     sortData() {
         this.pagedFilteredListingData = [...this.pagedFilteredListingData].sort((a, b) => {
-            let aValue = a[this.sortField];
-            let bValue = b[this.sortField];
+            let aValue = this.getFieldValue(a, this.sortField);
+            let bValue = this.getFieldValue(b, this.sortField);
 
             // Handle null/undefined values
             if (aValue == null) aValue = '';
@@ -2205,7 +2231,24 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 ? aValue.localeCompare(bValue)
                 : bValue.localeCompare(aValue);
         });
+    }
 
+    /**
+     * Method Name : getFieldValue
+     * @description : Resolves a field value from a row object supporting dotted
+     *                lookup paths (e.g. "recordtype.name") with case-insensitive
+     *                key matching so "RecordType.Name" and "recordtype.name" both work.
+     */
+    getFieldValue(record, fieldPath) {
+        if (!fieldPath || !record) return null;
+        const parts = fieldPath.toLowerCase().split('.');
+        let current = record;
+        for (let i = 0; i < parts.length; i++) {
+            if (current == null || typeof current !== 'object') return null;
+            const key = Object.keys(current).find(k => k.toLowerCase() === parts[i]);
+            current = key ? current[key] : null;
+        }
+        return current;
     }
 
     /**
@@ -2224,15 +2267,9 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
             // Set active header
             const currentHeader = this.template.querySelector('[data-id="' + this.sortField + '"]');
-            console.log('currentHeader', currentHeader);
-            console.log('currentHeader.classList', currentHeader.classList);
-
 
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
-                console.log('currentHeader.classList', currentHeader.classList);
-
-
                 // Find the sort icon within this header
                 // Updated selector to match our new HTML structure
                 const icon = currentHeader.querySelector('.listing-manager-icon');

@@ -46,7 +46,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track currentShowingId = null;
     @track currentContactId = null;
     @track mobileNumber = null;
-    
+
     @track selectedAction = 'Schedule'; // New state driver
     @track selectedDate = '';
     @track selectedTime = '';
@@ -127,29 +127,29 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         if (status === 'Not Scheduled' || status === 'Cancelled') {
             options.push({ label: 'Schedule New Showing', value: 'Schedule' });
         }
-        
+
         if (status === 'Waiting For Confirmation') {
             options.push({ label: 'Confirm Showing', value: 'Confirm' });
         }
-        
+
         if (status === 'Scheduled' || status === 'Rescheduled' || status === 'Waiting For Confirmation') {
             options.push({ label: 'Reschedule Showing', value: 'Reschedule' });
             options.push({ label: 'Cancel Showing', value: 'Cancel' });
         }
 
         if (status === 'Scheduled' || status === 'Rescheduled') {
-             options.push({ label: 'Mark as Completed', value: 'Complete' });
+            options.push({ label: 'Mark as Completed', value: 'Complete' });
         }
-        
+
         // Ensure "Confirm" is an option if a showing exists
         if (status !== 'Not Scheduled' && status !== 'Completed' && status !== 'Cancelled' && status !== 'Waiting For Confirmation') {
-             if (!options.find(opt => opt.value === 'Confirm')) {
-                 options.push({ label: 'Confirm Showing', value: 'Confirm' });
-             }
+            if (!options.find(opt => opt.value === 'Confirm')) {
+                options.push({ label: 'Confirm Showing', value: 'Confirm' });
+            }
         }
 
         // Add default if nothing else matches
-        if(options.length === 0 && status === 'Completed') {
+        if (options.length === 0 && status === 'Completed') {
             options.push({ label: 'Marked as Completed', value: 'Complete' });
         }
 
@@ -179,7 +179,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             default: return 'Save';
         }
     }
-    
+
     // --- LIFECYCLE HOOKS ---
 
     connectedCallback() {
@@ -245,7 +245,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             //     this.initializeManageCalendar();
             // }
 
-              // Update sort icons after DOM is rendered
+            // Update sort icons after DOM is rendered
             if (!this.isLoading && this.contacts.length > 0) {
                 this.updateSortIcons();
             }
@@ -259,7 +259,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             }
         }
     }
-    
+
     // --- DATA LOADING ---
 
     loadPropertyData() {
@@ -269,10 +269,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.images = data.images.map(file => file.MVEX__BaseUrl__c);
                 this.contacts = data.contacts.map(contact => {
                     const scheduleDate = contact.ScheduleDate ? new Date(contact.ScheduleDate) : (contact.RescheduleDate ? new Date(contact.RescheduleDate) : null);
-                    
+
                     // Create a copy for JSON.stringify to avoid circular refs
-                    const contactData = { ...contact }; 
-                    
+                    const contactData = { ...contact };
+
                     const contactObj = {
                         ...contact,
                         Json: JSON.stringify(contactData), // Stringify the contact data for the button
@@ -302,7 +302,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.showToast('Error', 'Failed to load property data: ' + error.body?.message, 'error');
             })
             .finally(() => {
-                this.isLoading = false; 
+                this.isLoading = false;
             });
     }
 
@@ -344,9 +344,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             });
     }
 
-     /**
-     * @description Sort contacts by specified field
-     */
+    /**
+    * @description Sort contacts by specified field
+    */
     sortData() {
         this.contacts = [...this.contacts].sort((a, b) => {
             let aValue = a[this.sortField] || '';
@@ -358,8 +358,8 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 bValue = b.ScheduleDate || b.RescheduleDate || '';
                 const aDate = new Date(aValue);
                 const bDate = new Date(bValue);
-                return this.sortOrder === 'asc' ? 
-                    (aDate > bDate ? 1 : (aDate < bDate ? -1 : 0)) : 
+                return this.sortOrder === 'asc' ?
+                    (aDate > bDate ? 1 : (aDate < bDate ? -1 : 0)) :
                     (aDate < bDate ? 1 : (aDate > bDate ? -1 : 0));
             }
 
@@ -399,11 +399,11 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         try {
             let svgElements = this.template.querySelectorAll('svg.listing-manager-icon');
             let clickedSortField = event ? event.currentTarget.dataset.id : this.sortField;
-            
+
             this.template.querySelectorAll('.sorting_header').forEach(el => {
                 el.classList.remove('active-sort');
             });
-            
+
             if (event) {
                 event.currentTarget.classList.add('active-sort');
             } else if (this.sortField) {
@@ -495,7 +495,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.handleDateSelection(newDate);
             });
             window.jQuery(calendarEl).on('click', '.showing-link', this.handleShowingLinkClick.bind(this));
-            
+
             this.manageCalendarInitialized = true;
         } catch (error) {
             console.error('Error initializing Manage Calendar:', error);
@@ -514,7 +514,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         if (this.scheduleCalendarInitialized) {
             const calendarEl = this.template.querySelector('.evo-calendar.schedule-calendar');
             if (calendarEl && window.jQuery.fn.evoCalendar) {
-                try { window.jQuery(calendarEl).evoCalendar('destroy'); } catch(e) { console.warn(e); }
+                try { window.jQuery(calendarEl).evoCalendar('destroy'); } catch (e) { console.warn(e); }
             }
             this.scheduleCalendarInitialized = false;
         }
@@ -528,7 +528,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             this.currentShowingId = this.currentContact.ShowingId;
             this.currentContactId = this.currentContact.Id;
             this.mobileNumber = this.currentContact.MobilePhone;
-            
+
             // Set initial action
             const status = this.currentContact.ShowingStatus || 'Not Scheduled';
             if (status === 'Not Scheduled' || status === 'Cancelled') {
@@ -543,8 +543,16 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
             // Set initial date/time
             const scheduleDate = this.currentContact.ScheduleDate ? new Date(this.currentContact.ScheduleDate) : (this.currentContact.RescheduleDate ? new Date(this.currentContact.RescheduleDate) : new Date());
-            this.selectedDate = scheduleDate.toISOString().slice(0, 10);
-            this.selectedTime = scheduleDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:mm
+            // Extract date/time parts in the user's Salesforce profile timezone
+            const userTZ = this.userTimeZone;
+            const dtFormatter = new Intl.DateTimeFormat('en-CA', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hour12: false,
+                timeZone: userTZ
+            });
+            const parts = dtFormatter.formatToParts(scheduleDate).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
+            this.selectedDate = `${parts.year}-${parts.month}-${parts.day}`;
+            this.selectedTime = `${parts.hour}:${parts.minute}`; // HH:mm in browser local time
 
             // Set communication method based on configuration and existing data
             const savedMethod = this.currentContact.CommunicationMethod;
@@ -556,7 +564,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 // Default based on configuration
                 this.selectedCommunicationMethod = this.hasBusinessAccountConfigured ? 'WhatsApp' : 'Email';
             }
-            
+
             this.selectedTemplate = '';
             this.previewEmailHtml = '';
             this.previewEmailSubject = '';
@@ -577,7 +585,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         if (this.manageCalendarInitialized) {
             const calendarEl = this.template.querySelector('.evo-calendar.manage-calendar');
             if (calendarEl && window.jQuery.fn.evoCalendar) {
-                try { window.jQuery(calendarEl).evoCalendar('destroy'); } catch(e) { console.warn(e); }
+                try { window.jQuery(calendarEl).evoCalendar('destroy'); } catch (e) { console.warn(e); }
             }
             this.manageCalendarInitialized = false;
         }
@@ -604,17 +612,17 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         // Reset calendar initialization state if date/time inputs are shown/hidden
         if (this.manageCalendarInitialized && !this.showDateTimeInputs) {
             const calendarEl = this.template.querySelector('.evo-calendar.manage-calendar');
-             if (calendarEl && window.jQuery.fn.evoCalendar) {
-                try { window.jQuery(calendarEl).evoCalendar('destroy'); } catch(e) { console.warn(e); }
+            if (calendarEl && window.jQuery.fn.evoCalendar) {
+                try { window.jQuery(calendarEl).evoCalendar('destroy'); } catch (e) { console.warn(e); }
             }
             this.manageCalendarInitialized = false;
         }
-        
+
         if (this.selectedCommunicationMethod === 'Email' && this.showCommunicationInputs) {
             this.loadEmailPreview();
         }
     }
-    
+
     handleDateSelection(selectedDate) {
         // From calendar click
         const date = new Date(selectedDate);
@@ -652,7 +660,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     handleTemplateChange(event) {
         this.selectedTemplate = event.target.value;
-        this.handleRefreshClick(); 
+        this.handleRefreshClick();
     }
 
     handleRefreshClick() {
@@ -675,19 +683,52 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     // --- SAVE & EXECUTION LOGIC ---
 
+    /**
+     * Converts a date string (YYYY-MM-DD) and time string (HH:mm) that represent
+     * a local time in the user's Salesforce timezone into a UTC ISO 8601 string.
+     *
+     * Strategy: build an approximate UTC candidate, format it back to the user's
+     * timezone with Intl to discover the real offset, then apply the correction.
+     * This handles DST transitions correctly.
+     */
+    localDateTimeToUtcISO(dateStr, timeStr) {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const [hours, minutes] = timeStr.split(':').map(Number);
+
+        // Step 1: Treat the input as UTC to get a rough epoch
+        const approxUtcMs = Date.UTC(year, month - 1, day, hours, minutes, 0, 0);
+
+        // Step 2: Find out what that epoch looks like in the user's timezone
+        const fmt = new Intl.DateTimeFormat('en-CA', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false, timeZone: this.userTimeZone
+        });
+        const parts = fmt.formatToParts(new Date(approxUtcMs))
+            .reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
+
+        // Step 3: Compute the offset between what we want and what Intl shows
+        const displayedUtcMs = Date.UTC(
+            Number(parts.year), Number(parts.month) - 1, Number(parts.day),
+            Number(parts.hour), Number(parts.minute), Number(parts.second)
+        );
+        const offsetMs = approxUtcMs - displayedUtcMs; // e.g. +19800000 for IST (+5:30)
+
+        // Step 4: Apply offset to get the real UTC epoch
+        return new Date(approxUtcMs + offsetMs).toISOString();
+    }
+
     validateInputs() {
         if (this.showDateTimeInputs) {
             if (!this.selectedDate || !this.selectedTime) {
                 this.showToast('Error', 'Please select a date and time.', 'error');
                 return false;
             }
-            
-            const [hours, minutes] = this.selectedTime.split(':');
-            const newDateTime = new Date(this.selectedDate);
-            newDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-            this.selectedDateTime = newDateTime.toISOString();
 
-            if (newDateTime < new Date()) {
+            // Build the UTC ISO string from the user's local date + time
+            this.selectedDateTime = this.localDateTimeToUtcISO(this.selectedDate, this.selectedTime);
+
+            if (new Date(this.selectedDateTime) < new Date()) {
                 this.showToast('Error', 'Schedule date and time cannot be in the past.', 'error');
                 return false;
             }
@@ -766,16 +807,16 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     executeConfirm() {
         updateShowingStatus({ showingId: this.currentShowingId, status: 'Scheduled' })
             .then(result => {
-                if(result) {
+                if (result) {
                     if (this.isWhatsAppSelected) {
                         this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Scheduled'));
                     } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null,isReschedule: false })
+                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null, isReschedule: false })
                             .then(() => this.handleApexSuccess('Confirmation email sent successfully.'))
                             .catch(error => this.handleApexError(error, 'Error sending confirmation email.'));
                     }
                 } else {
-                     throw new Error('Failed to update showing status.');
+                    throw new Error('Failed to update showing status.');
                 }
             })
             .catch(error => this.handleApexError(error, 'Error updating showing status.'));
@@ -828,7 +869,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         const isReschedule = (this.selectedAction === 'Reschedule');
 
         console.log('loadEmailPreview', this.currentShowingId, this.currentContactId, this.recordId, this.selectedDate, this.selectedTime);
-        
+
         previewEmailTemplate({
             showingId: this.currentShowingId || null,
             isReschedule: isReschedule,
@@ -837,21 +878,21 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             dateStr: this.selectedDate,
             timeStr: this.selectedTime,
         })
-        .then(result => {
-            this.previewEmailHtml = result.htmlBody || '<p>No content.</p>';
-            this.previewEmailSubject = result.subject || 'No Subject';
-        })
-        .catch(err => {
-            let errorMsg = 'Email preview failed: ' + (err.body?.message || err.message);
-            if(err.body?.message?.includes('EMAIL_ADDRESS_BOUNCED')){
-                errorMsg = 'Email preview failed: The inquiry email address is incorrect, and the message bounced back.';
-            }
-            this.previewEmailHtml = `<p style="color:red;">${errorMsg}</p>`;
-            this.showToast('Error', errorMsg, 'error');
-        })
-        .finally(() => {
-            this.isLoading = false;
-        });
+            .then(result => {
+                this.previewEmailHtml = result.htmlBody || '<p>No content.</p>';
+                this.previewEmailSubject = result.subject || 'No Subject';
+            })
+            .catch(err => {
+                let errorMsg = 'Email preview failed: ' + (err.body?.message || err.message);
+                if (err.body?.message?.includes('EMAIL_ADDRESS_BOUNCED')) {
+                    errorMsg = 'Email preview failed: The inquiry email address is incorrect, and the message bounced back.';
+                }
+                this.previewEmailHtml = `<p style="color:red;">${errorMsg}</p>`;
+                this.showToast('Error', errorMsg, 'error');
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
     }
 
     // --- OTHER HELPERS ---
@@ -994,37 +1035,37 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     phoneNumber: this.mobileNumber
                 }
             })
-            .then(chat => {
-                if (chat) {
-                    const buttonValue = this.templateData.MVEX__WBButton_Body__c ? JSON.parse(this.templateData.MVEX__WBButton_Body__c) : '';
-                    const templatePayload = this.createJSONBody(this.mobileNumber, 'template', {
-                        templateName: this.templateData?.MVEX__Template_Name__c,
-                        languageCode: this.templateData?.MVEX__Language__c,
-                        headerImageURL: this.templateData?.MVEX__WBHeader_Body__c,
-                        headerType: this.templateData?.MVEX__Header_Type__c,
-                        headerParameters: this.headerParams,
-                        bodyParameters: this.bodyParams || '',
-                        buttonLabel: this.templateData?.MVEX__Button_Label__c || '',
-                        buttonType: this.templateData?.MVEX__Button_Type__c || '',
-                        buttonValue: buttonValue
-                    });
-                    sendWhatsappMessage({
-                        jsonData: templatePayload,
-                        chatId: chat.Id,
-                        showingId: this.currentShowingId,
-                        status: status
-                    })
-                    .then(result => {
-                        this.dispatchEvent(new CustomEvent('message', { detail: result }));
-                        this.handleApexSuccess('WhatsApp message sent successfully.');
-                    })
-                    .catch(error => this.handleApexError(error, 'Error sending WhatsApp message.'));
-                } else {
-                    this.isLoading = false;
-                    this.showToast('Error', 'Error creating chat record.', 'error');
-                }
-            })
-            .catch(error => this.handleApexError(error, 'Error creating chat.'));
+                .then(chat => {
+                    if (chat) {
+                        const buttonValue = this.templateData.MVEX__WBButton_Body__c ? JSON.parse(this.templateData.MVEX__WBButton_Body__c) : '';
+                        const templatePayload = this.createJSONBody(this.mobileNumber, 'template', {
+                            templateName: this.templateData?.MVEX__Template_Name__c,
+                            languageCode: this.templateData?.MVEX__Language__c,
+                            headerImageURL: this.templateData?.MVEX__WBHeader_Body__c,
+                            headerType: this.templateData?.MVEX__Header_Type__c,
+                            headerParameters: this.headerParams,
+                            bodyParameters: this.bodyParams || '',
+                            buttonLabel: this.templateData?.MVEX__Button_Label__c || '',
+                            buttonType: this.templateData?.MVEX__Button_Type__c || '',
+                            buttonValue: buttonValue
+                        });
+                        sendWhatsappMessage({
+                            jsonData: templatePayload,
+                            chatId: chat.Id,
+                            showingId: this.currentShowingId,
+                            status: status
+                        })
+                            .then(result => {
+                                this.dispatchEvent(new CustomEvent('message', { detail: result }));
+                                this.handleApexSuccess('WhatsApp message sent successfully.');
+                            })
+                            .catch(error => this.handleApexError(error, 'Error sending WhatsApp message.'));
+                    } else {
+                        this.isLoading = false;
+                        this.showToast('Error', 'Error creating chat record.', 'error');
+                    }
+                })
+                .catch(error => this.handleApexError(error, 'Error creating chat.'));
         } catch (error) {
             this.handleApexError(error, 'Unexpected error while sending message.');
         }
@@ -1055,7 +1096,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             if (data.bodyParameters && data.bodyParameters.length > 0) {
                 let bodyParams = data.bodyParameters.map((param) => ({ type: "text", text: param }));
                 components.push({ type: "body", parameters: bodyParams });
-            } else if(this.templateData.MVEX__Template_Category__c == 'Authentication'){
+            } else if (this.templateData.MVEX__Template_Category__c == 'Authentication') {
                 components.push({ type: "body", parameters: [{ type: "text", text: randomCodeStr }] });
             }
             if (data.buttonValue && data.buttonValue.length > 0) {
@@ -1071,11 +1112,11 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                             break;
                         case 'COPY_CODE':
                         case "COUPON_CODE":
-                            components.push({ type: "button", sub_type: "copy_code", index: index, parameters: [{ type :'coupon_code', coupon_code : button.example }] }); 
+                            components.push({ type: "button", sub_type: "copy_code", index: index, parameters: [{ type: 'coupon_code', coupon_code: button.example }] });
                             break;
                         case "OTP":
                             if (button.otp_type && button.otp_type.toUpperCase() === "COPY_CODE") {
-                                components.push({ type: "button", sub_type: "url", index: index, parameters: [{ type : 'text', text : randomCodeStr }] });
+                                components.push({ type: "button", sub_type: "url", index: index, parameters: [{ type: 'text', text: randomCodeStr }] });
                             } else { console.warn(`OTP button at index ${index} missing otp_code parameter.`); return null; }
                             break;
                         default: console.warn(`Unknown button type: ${button.type}`); return null;

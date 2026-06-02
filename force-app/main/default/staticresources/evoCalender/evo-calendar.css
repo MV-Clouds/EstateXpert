@@ -432,35 +432,63 @@
     white-space: nowrap;
 }
 
+@keyframes eventIndicatorGlow {
+    0%, 100% {
+        opacity: 0.5;
+        filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.8)) drop-shadow(0 0 8px rgba(76, 175, 80, 0.4));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(76, 175, 80, 1)) drop-shadow(0 0 16px rgba(76, 175, 80, 0.8)) drop-shadow(0 0 24px rgba(76, 175, 80, 0.5));
+    }
+}
+
 .event-indicator {
     position: absolute;
-    width: -moz-max-content;
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-    top: 100%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -100%);
-    -ms-transform: translate(-50%, -100%);
-    transform: translate(-50%, -100%);
-    display: flex;
-    overflow: hidden;
-    height: inherit;
-    flex-flow: wrap;
-    flex-direction: column-reverse;
-    justify-content: center;
-    align-items: center;
+    width: auto !important;
+    height: auto !important;
+    top: 27px !important;
+    right: 0 !important;
+    left: auto !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 2 !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    -ms-transform: none !important;
+    display: block !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    opacity: 1 !important;
+    animation: eventIndicatorGlow 2s ease-in-out infinite !important;
+}
+
+.event-indicator::before {
+    content: '🏠' !important;
+    display: block !important;
+    font-size: 12px !important;
+    position: absolute;
+    right: 32px;
+    top: -9px;
+}
+
+.event-indicator:empty {
+    display: none !important;
 }
 
 .event-indicator>.type-bullet {
-    float: left;
-    padding: 1px
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .event-indicator>.type-bullet>div {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .event-container>.event-icon>div {
@@ -726,13 +754,26 @@
     }
 
     .event-indicator {
-        -webkit-transform: translate(-50%, calc(-100% + -3px));
-        -ms-transform: translate(-50%, calc(-100% + -3px));
-        transform: translate(-50%, calc(-100% + -3px))
+        position: absolute;
+        width: auto !important;
+        height: auto !important;
+        top: 27px !important;
+        right: 0 !important;
+        left: auto !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+        -ms-transform: none !important;
+        font-size: 14px !important;
+        opacity: 0.8 !important;
+        animation: eventIndicatorGlow 2s ease-in-out infinite !important;
     }
 
     .event-indicator>.type-bullet {
-        padding: 0 1px 3px 1px
+        display: none !important;
+        padding: 0 !important;
     }
 
     .calendar-events {
@@ -963,31 +1004,46 @@
     }
 
     .event-indicator {
-        -webkit-transform: translate(-50%, calc(-100% + -3px));
-        -ms-transform: translate(-50%, calc(-100% + -3px));
-        transform: translate(-50%, calc(-100% + -3px))
+        position: absolute;
+        width: auto !important;
+        height: auto !important;
+        top: 27px !important;
+        right: 0 !important;
+        left: auto !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+        -ms-transform: none !important;
+        font-size: 14px !important;
+        opacity: 0.8 !important;
+        animation: eventIndicatorGlow 2s ease-in-out infinite !important;
     }
 
     .event-indicator>.type-bullet {
-        padding: 1px
+        display: none !important;
+        padding: 0 !important;
     }
 
     .event-indicator>.type-bullet>div {
-        width: 6px;
-        height: 6px
-    }
-
-    .event-indicator {
-        -webkit-transform: translate(-50%, 0);
-        -ms-transform: translate(-50%, 0);
-        transform: translate(-50%, 0)
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
 
     .calendar-container tr.calendar-body .calendar-day .day.calendar-today .event-indicator,
     .calendar-container tr.calendar-body .calendar-day .day.calendar-active .event-indicator {
-        -webkit-transform: translate(-50%, 3px);
-        -ms-transform: translate(-50%, 3px);
-        transform: translate(-50%, 3px)
+        position: absolute;
+        width: auto !important;
+        height: auto !important;
+        top: 27px !important;
+        right: 0 !important;
+        left: auto !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+        -ms-transform: none !important;
+        animation: eventIndicatorGlow 2s ease-in-out infinite !important;
     }
 
     .calendar-events {

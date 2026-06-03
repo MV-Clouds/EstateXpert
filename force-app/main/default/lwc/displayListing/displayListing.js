@@ -1942,7 +1942,12 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             if (fieldType === 'REFERENCE') {
                 this.listingFieldObject.objectApiName = selectedField.referenceTo;
             } else {
-                if (this.listingFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
+                const entries = selectedField.picklistEntries;
+                if (this.listingFieldObject.isPicklist && entries && entries.length > 0) {
+                    this.listingFieldObject.picklistValues = entries.map(entry => {
+                        return { label: entry.label, value: entry.value };
+                    });
+                } else if (this.listingFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
                     this.listingFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
                         return { label: picklistValue, value: picklistValue };
                     });

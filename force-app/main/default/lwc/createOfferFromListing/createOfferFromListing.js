@@ -58,15 +58,15 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
                 if (result && result.isSuccess) {
                     // Set the object type from the response
                     this.sourceObjectType = result.objectType;
-                    
+
                     // Initialize fields based on object type
                     this.initializeFields();
-                    
+
                     // Update field values from the response
                     if (result.firstOfferId) {
                         this.firstOfferId = result.firstOfferId;
                     }
-                    
+
                     this.updateFieldValues({
                         listingId: result.listingId,
                         listingType: result.listingType,
@@ -106,7 +106,7 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
             { id: 4, fieldName: 'MVEX__Listing_Price__c', label: 'Listing Price', required: false, disabled: true, value: '' },
             { id: 5, fieldName: 'MVEX__Seller_Contact__c', label: 'Seller Contact', required: false, disabled: true, value: '' },
             { id: 6, fieldName: 'MVEX__Buyer_Contact__c', label: 'Buyer Contact', required: true, disabled: false, value: '' },
-            { id: 7, fieldName: 'MVEX__Offer_made_by__c', label: 'Offer Made By', required: false, disabled: false, value: '' },
+            { id: 7, fieldName: 'MVEX__Offer_made_by__c', label: 'Offer Made By', required: true, disabled: false, value: '' },
             { id: 8, fieldName: 'MVEX__Offer_Amount__c', label: 'Offer Amount', required: true, disabled: false, value: '' },
             { id: 9, fieldName: 'MVEX__Status__c', label: 'Status', required: true, disabled: false, value: '' },
             { id: 10, fieldName: 'MVEX__Offer_Expiration_Date__c', label: 'Offer Expiration Date', required: false, disabled: false, value: '' },
@@ -116,14 +116,14 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
 
         // Add Counter Offer field if source is Offer
         if (this.sourceObjectType === 'Offer') {
-            baseFields.splice(2, 0, { 
-                id: 13, 
-                fieldName: 'MVEX__Counter_Offer_for__c', 
-                label: 'Counter Offer For', 
-                required: false, 
-                disabled: true, 
-                value: this.recordId, 
-                hidden: false 
+            baseFields.splice(2, 0, {
+                id: 13,
+                fieldName: 'MVEX__Counter_Offer_for__c',
+                label: 'Counter Offer For',
+                required: false,
+                disabled: true,
+                value: this.recordId,
+                hidden: false
             });
         }
 
@@ -138,7 +138,7 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
      */
     updateFieldValues(data) {
         this.offerFields = this.offerFields.map(field => {
-            switch(field.fieldName) {
+            switch (field.fieldName) {
                 case 'MVEX__Listing__c':
                     return { ...field, value: data.listingId };
                 case 'MVEX__Listing_Type__c':
@@ -180,7 +180,7 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
      */
     handleSaveClick() {
         const form = this.template.querySelector('lightning-record-edit-form');
-        
+
         if (form) {
             // Collect all field values from the form
             const fields = {};
@@ -196,7 +196,7 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
             if (this.firstOfferId) {
                 fields.MVEX__First_Offer_Id__c = this.firstOfferId;
             }
-            
+
             form.submit(fields);
         }
     }
@@ -209,7 +209,7 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
      */
     handleSuccess(event) {
         const offerId = event.detail.id;
-        
+
         // Update old offer status to 'Countered' if this is a counter offer
         if (this.sourceObjectType === 'Offer') {
             updateOfferRecord({ sourceObjectType: 'Offer', offerId: this.recordId })
@@ -232,12 +232,12 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
                     console.error('Error updating First Offer ID:', error);
                 });
         }
-        
+
         this.showToast('Success', 'Offer created successfully!', 'success');
-        
+
         // Close the quick action modal
         this.dispatchEvent(new CloseActionScreenEvent());
-        
+
         // Navigate to the newly created offer record
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',

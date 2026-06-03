@@ -5,15 +5,34 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
 export default class ChatBot extends LightningElement {
-    userInput = '';
     isLoading = false;
-    conversationState = 'WELCOME';
-    messages = [];
-    propertyCriteria = {};
-    showChat = true;
     formSubject = '';
     formDescription = '';
     uploadedImages = [];
+    MAX_SUBJECT_LENGTH = 255;
+    MAX_DESCRIPTION_LENGTH = 32000;
+
+    get subjectCharCount() {
+        return this.formSubject.length;
+    }
+
+    get subjectCounterClass() {
+        const ratio = this.subjectCharCount / this.MAX_SUBJECT_LENGTH;
+        if (ratio >= 1) return 'char-counter char-counter--error';
+        if (ratio >= 0.9) return 'char-counter char-counter--warning';
+        return 'char-counter';
+    }
+
+    get descriptionCharCount() {
+        return this.formDescription.length;
+    }
+
+    get descriptionCounterClass() {
+        const ratio = this.descriptionCharCount / this.MAX_DESCRIPTION_LENGTH;
+        if (ratio >= 1) return 'char-counter char-counter--error';
+        if (ratio >= 0.9) return 'char-counter char-counter--warning';
+        return 'char-counter';
+    }
 
     connectedCallback() {
         loadStyle(this, MulishFontCss);
@@ -21,6 +40,23 @@ export default class ChatBot extends LightningElement {
 
     handleFormInputChange(event) {
         const field = event.target.dataset.field;
+        if (field === 'formSubject') {
+            const val = event.target.value;
+            if (val.length > this.MAX_SUBJECT_LENGTH) {
+                event.target.value = val.substring(0, this.MAX_SUBJECT_LENGTH);
+                this.formSubject = event.target.value;
+                return;
+            }
+        }
+        if (field === 'formDescription') {
+            // Enforce character limit client-side; trim silently if pasted over the limit
+            const val = event.target.value;
+            if (val.length > this.MAX_DESCRIPTION_LENGTH) {
+                event.target.value = val.substring(0, this.MAX_DESCRIPTION_LENGTH);
+                this.formDescription = event.target.value;
+                return;
+            }
+        }
         this[field] = event.target.value;
     }
 
@@ -62,6 +98,14 @@ export default class ChatBot extends LightningElement {
     async handleFormSubmit() {
         if (!this.formSubject || !this.formDescription) {
             this.showToast('Error', 'Please fill out all required fields.', 'error');
+            return;
+        }
+        if (this.formSubject.length > this.MAX_SUBJECT_LENGTH) {
+            this.showToast('Error', `Subject must not exceed ${this.MAX_SUBJECT_LENGTH} characters.`, 'error');
+            return;
+        }
+        if (this.formDescription.length > this.MAX_DESCRIPTION_LENGTH) {
+            this.showToast('Error', `Description must not exceed ${this.MAX_DESCRIPTION_LENGTH.toLocaleString()} characters.`, 'error');
             return;
         }
 

@@ -455,18 +455,18 @@
     top: 1px;
 }
 
-.switch input:checked + .slider {
+.switch input:checked+.slider {
     background: #747474;
 }
 
-.switch input:checked + .slider:before {
+.switch input:checked+.slider:before {
     -webkit-transform: translateX(38px);
     -ms-transform: translateX(38px);
     transform: translateX(38px);
     content: "";
 }
 
-.switch input:checked + .slider:after {
+.switch input:checked+.slider:after {
     content: "Chat";
     color: #ffffff;
     position: absolute;
@@ -494,4 +494,22 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.char-counter {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    text-align: right;
+    transition: color 0.3s ease;
+    user-select: none;
+}
+
+.char-counter--warning {
+    color: #d97706;
+    font-weight: 600;
+}
+
+.char-counter--error {
+    color: #ef4444;
+    font-weight: 700;
 }

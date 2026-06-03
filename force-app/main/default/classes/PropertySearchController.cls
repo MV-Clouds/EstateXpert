@@ -547,6 +547,7 @@ public with sharing class PropertySearchController {
         @AuraEnabled public String value;
         @AuraEnabled public String type;
         @AuraEnabled public List<String> picklistValues;
+        @AuraEnabled public List<Map<String, String>> picklistEntries;
         @AuraEnabled public String referenceTo;
     }
     
@@ -584,11 +585,16 @@ public with sharing class PropertySearchController {
                 }
                 
                 fieldInfo.picklistValues = new List<String>();
+                fieldInfo.picklistEntries = new List<Map<String, String>>();
                 
                 if (fieldDescribe.getType() == Schema.DisplayType.Picklist || fieldDescribe.getType() == Schema.DisplayType.MultiPicklist) {
                     List<Schema.PicklistEntry> picklistEntries = fieldDescribe.getPicklistValues();
                     for (Schema.PicklistEntry entry : picklistEntries) {
                         fieldInfo.picklistValues.add(entry.getLabel());
+                        fieldInfo.picklistEntries.add(new Map<String, String>{
+                            'label' => entry.getLabel(),
+                            'value' => entry.getValue()
+                        });
                     }
                 }
                 

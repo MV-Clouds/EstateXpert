@@ -2164,7 +2164,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (fieldType === 'REFERENCE') {
                     this.inquiryFieldObject.objectApiName = selectedField.referenceTo;
                 } else {
-                    if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
+                    const entries = selectedField.picklistEntries;
+                    if (this.inquiryFieldObject.isPicklist && entries && entries.length > 0) {
+                        this.inquiryFieldObject.picklistValues = entries.map(entry => {
+                            return { label: entry.label, value: entry.value };
+                        });
+                    } else if (this.inquiryFieldObject.isPicklist && selectedField.picklistValues.length > 0) {
                         this.inquiryFieldObject.picklistValues = selectedField.picklistValues.map(picklistValue => {
                             return { label: picklistValue, value: picklistValue };
                         });

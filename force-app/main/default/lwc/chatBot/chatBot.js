@@ -28,10 +28,12 @@ export default class ChatBot extends LightningElement {
         const files = Array.from(event.target.files);
         const maxTotalSize = 4 * 1024 * 1024; // 4MB in bytes
         const validFormats = ['image/jpeg', 'image/jpg', 'image/png'];
+        const validExtensions = ['jpg', 'jpeg', 'png'];
         let totalSize = this.uploadedImages.reduce((sum, img) => sum + img.file.size, 0);
 
         files.forEach(file => {
-            if (!validFormats.includes(file.type)) {
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            if (!validFormats.includes(file.type) || !validExtensions.includes(fileExtension)) {
                 this.showToast('Error', `${file.name} is not a valid image format (jpg, jpeg, or png only).`, 'error');
                 return;
             }
@@ -91,6 +93,10 @@ export default class ChatBot extends LightningElement {
         this.formSubject = '';
         this.formDescription = '';
         this.uploadedImages = [];
+        const textarea = this.template.querySelector('textarea');
+        if (textarea) {
+            textarea.value = '';
+        }
     }
 
     async readFileAsBase64(file) {

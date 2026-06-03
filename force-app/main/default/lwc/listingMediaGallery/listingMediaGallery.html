@@ -4,9 +4,14 @@
             <div class="gallery-header">
                 <div class="header-left">
                     <h2 class="gallery-title">Listing Media Gallery</h2>
-                    <p class="image-name">{currentImageName}</p>
+                    <p class="image-name" title={currentImageName}>{currentImageName}</p>
                 </div>
                 <div class="header-actions">
+                    <button onclick={openImageModel} class="action-btn" title="Preview Image">
+                        <svg height="18" width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5C7 5 2.73 8.11 1 12.5C2.73 16.89 7 20 12 20C17 20 21.27 16.89 23 12.5C21.27 8.11 17 5 12 5ZM12 17.5C9.24 17.5 7 15.26 7 12.5C7 9.74 9.24 7.5 12 7.5C14.76 7.5 17 9.74 17 12.5C17 15.26 14.76 17.5 12 17.5ZM12 9.5C10.34 9.5 9 10.84 9 12.5C9 14.16 10.34 15.5 12 15.5C13.66 15.5 15 14.16 15 12.5C15 10.84 13.66 9.5 12 9.5Z" fill="#0176D3"/>
+                        </svg>
+                    </button>
                     <button onclick={reloadComponent} class="action-btn" title="Reload">
                         <svg height="18" width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 21C16.9706 21 21 16.9706 21 12C21 9.69494 20.1334 7.59227 18.7083 6L16 3M12 3C7.02944 3 3 7.02944 3 12C3 14.3051 3.86656 16.4077 5.29168 18L8 21M21 3H16M16 3V8M3 21H8M8 21V16" stroke="#0176D3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -55,38 +60,7 @@
                     <div class="image-counter">{imageCounter}</div>
                 </template>
                 
-                <div class="preview-control" onclick={openImageModel} title="Preview Image">
-                    <div class="preview-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5C7 5 2.73 8.11 1 12.5C2.73 16.89 7 20 12 20C17 20 21.27 16.89 23 12.5C21.27 8.11 17 5 12 5ZM12 17.5C9.24 17.5 7 15.26 7 12.5C7 9.74 9.24 7.5 12 7.5C14.76 7.5 17 9.74 17 12.5C17 15.26 14.76 17.5 12 17.5ZM12 9.5C10.34 9.5 9 10.84 9 12.5C9 14.16 10.34 15.5 12 15.5C13.66 15.5 15 14.16 15 12.5C15 10.84 13.66 9.5 12 9.5Z" fill="white"/>
-                        </svg>
-                    </div>
-                    <span class="preview-text">Preview</span>
-                </div>
-                
-                <template if:true={hasMultipleImages}>
-                    <div class="auto-play-control">
-                        <button class="play-pause-btn" onclick={toggleAutoPlay} title="Toggle Auto-play">
-                            <template if:true={isAutoPlaying}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="6" y="4" width="4" height="16" fill="white"/>
-                                    <rect x="14" y="4" width="4" height="16" fill="white"/>
-                                </svg>
-                            </template>
-                            <template if:false={isAutoPlaying}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M8 5V19L19 12L8 5Z" fill="white"/>
-                                </svg>
-                            </template>
-                        </button>
-                        <template if:true={isAutoPlaying}>
-                            <span class="auto-play-text">Auto</span>
-                        </template>
-                        <template if:false={isAutoPlaying}>
-                            <span class="auto-play-text">Paused</span>
-                        </template>
-                    </div>
-                </template>
+
             </div>
         </div>
     </template>

@@ -16,10 +16,8 @@ export default class ListingMediaGallery extends LightningElement {
     @track currentIndex = 0;
     @track subscription = null;
     @track isModalOpen = false;
-    @track isAutoPlaying = true;
     @track imageLoading = false;
     @track modalImageUrl = '';
-    autoPlayInterval = null;
 
     /**
     * Method Name: currentImageUrl
@@ -132,7 +130,6 @@ export default class ListingMediaGallery extends LightningElement {
     */
     disconnectedCallback() {
         try {
-            this.stopAutoPlay();
             unsubscribe(this.subscription);
             this.subscription = null;
         } catch (error) {
@@ -156,9 +153,6 @@ export default class ListingMediaGallery extends LightningElement {
                     this.data = result.listingImages;
                     this.isdata = result.listingImages?.length > 0;
                     this.showSpinner = false;
-                    if (this.hasMultipleImages && this.isAutoPlaying) {
-                        this.startAutoPlay();
-                    }
                 })
                 .catch(error => {
                     errorDebugger('ListingMediaGallery', 'fetchingdata', error, 'warn', 'Error in fetchingdata');
@@ -212,59 +206,6 @@ export default class ListingMediaGallery extends LightningElement {
     }
 
     /**
-    * Method Name: startAutoPlay
-    * @description: Starts the auto-play carousel.
-    * Created Date: 05/03/2026
-    * Created By: Karan Singh
-    */
-    startAutoPlay() {
-        try {
-            this.stopAutoPlay();
-            this.autoPlayInterval = setInterval(() => {
-                this.showNextImage();
-            }, 3000);
-        } catch (error) {
-            errorDebugger('ListingMediaGallery', 'startAutoPlay', error, 'warn', 'Error in startAutoPlay');
-        }
-    }
-
-    /**
-    * Method Name: stopAutoPlay
-    * @description: Stops the auto-play carousel.
-    * Created Date: 05/03/2026
-    * Created By: Karan Singh
-    */
-    stopAutoPlay() {
-        try {
-            if (this.autoPlayInterval) {
-                clearInterval(this.autoPlayInterval);
-                this.autoPlayInterval = null;
-            }
-        } catch (error) {
-            errorDebugger('ListingMediaGallery', 'stopAutoPlay', error, 'warn', 'Error in stopAutoPlay');
-        }
-    }
-
-    /**
-    * Method Name: toggleAutoPlay
-    * @description: Toggles auto-play on/off.
-    * Created Date: 05/03/2026
-    * Created By: Karan Singh
-    */
-    toggleAutoPlay() {
-        try {
-            this.isAutoPlaying = !this.isAutoPlaying;
-            if (this.isAutoPlaying) {
-                this.startAutoPlay();
-            } else {
-                this.stopAutoPlay();
-            }
-        } catch (error) {
-            errorDebugger('ListingMediaGallery', 'toggleAutoPlay', error, 'warn', 'Error in toggleAutoPlay');
-        }
-    }
-
-    /**
     * Method Name: reloadComponent
     * @description: Used to reload the component and fetch the data again from apex.
     * Created Date: 27/06/2024
@@ -275,7 +216,6 @@ export default class ListingMediaGallery extends LightningElement {
     reloadComponent() {
         try {
             this.showSpinner = true;
-            this.stopAutoPlay();
             this.fetchingdata();
             this.currentIndex = 0;
         } catch (error) {

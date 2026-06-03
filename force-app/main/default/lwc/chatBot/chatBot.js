@@ -91,6 +91,10 @@ export default class ChatBot extends LightningElement {
         this.formSubject = '';
         this.formDescription = '';
         this.uploadedImages = [];
+        const textarea = this.template.querySelector('textarea');
+        if (textarea) {
+            textarea.value = '';
+        }
     }
 
     async readFileAsBase64(file) {

@@ -4341,7 +4341,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const serializedWrapper = JSON.stringify(template);
             const payload = JSON.stringify(buildPayload(template));
             
-            if (this.metaTemplateId && !this.isTemplateClone) {
+            // Route to edit if we have a real Meta template ID (not the 'DRAFT' sentinel
+            // set on freshly-cloned WhatsApp templates that have not yet been submitted to Meta).
+            if (this.metaTemplateId && this.metaTemplateId !== 'DRAFT' && !this.isTemplateClone) {
                 editWhatsappTemplate({ serializedWrapper: serializedWrapper, payloadWrapper: payload, templateId: this.metaTemplateId })
                     .then(result => {
                         if (result && result.success) {

@@ -1354,4 +1354,92 @@ public with sharing class WBTemplateController {
         @AuraEnabled public List<Map<String, String>> templateVariables; 
         @AuraEnabled public Boolean isImgUrl;
     }
+
+    /*
+    *********************************************************
+    @description     : Clones a WhatsappTemplate__c record and its Template_Variable__c
+                       children (via WB_Template_Variables__r) as a pure Salesforce-side
+                       operation.  Template_Id__c (Meta API ID) and Status__c are NOT
+                       copied — the clone has not yet been submitted to Meta, so those
+                       fields must be populated through the normal create flow later.
+                       Name is an auto-number field and is generated automatically on insert.
+    @param           : templateId - Id of the source WhatsappTemplate__c to clone.
+                       newName    - Value for Template_Name__c on the cloned record.
+    @return          : Map<String,String> with keys:
+                         status   — 'success' or 'error'
+                         message  — human-readable result message
+                         clonedId — Id of the newly inserted WhatsappTemplate__c (on success)
+    Created Date: 04/06/2026
+    Created By: Karan Singh
+    ********************************************************
+    */
+    @AuraEnabled
+    public static Map<String, String> cloneWBTemplate(String templateId, String newName) {
+        Map<String, String> result = new Map<String, String>();
+        try {
+            String escapedTemplateId = String.escapeSingleQuotes(templateId);
+            String escapedNewName    = String.escapeSingleQuotes(newName);
+
+            List<WhatsappTemplate__c> sourceTemplates = [SELECT Id, Template_Name__c, Template_Category__c, Language__c, Header_Type__c, WBHeader_Body__c, File_Name__c,
+                                                        WBImage_Header_Handle__c, WBTemplate_Body__c, WBFooter_Body__c, WBButton_Body__c, Button_Label__c, Button_Type__c,
+                                                        Template_Type__c, Template_Miscellaneous_Data__c,
+                                                        (SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c FROM WB_Template_Variables__r
+                                                        ORDER BY Name ASC)
+                                                        FROM WhatsappTemplate__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
+
+            if (sourceTemplates.isEmpty()) {
+                result.put('status',  'error');
+                result.put('message', 'Template not found.');
+                return result;
+            }
+
+            WhatsappTemplate__c source = sourceTemplates[0];
+
+            WhatsappTemplate__c cloned = new WhatsappTemplate__c(
+                Template_Name__c              = escapedNewName,
+                Template_Id__c                = 'DRAFT',
+                Template_Category__c          = source.Template_Category__c,
+                Language__c                   = source.Language__c,
+                Header_Type__c                = source.Header_Type__c,
+                WBHeader_Body__c              = source.WBHeader_Body__c,
+                File_Name__c                  = source.File_Name__c,
+                WBImage_Header_Handle__c      = source.WBImage_Header_Handle__c,
+                WBTemplate_Body__c            = source.WBTemplate_Body__c,
+                WBFooter_Body__c              = source.WBFooter_Body__c,
+                WBButton_Body__c              = source.WBButton_Body__c,
+                Button_Label__c               = source.Button_Label__c,
+                Button_Type__c                = source.Button_Type__c,
+                Template_Type__c              = source.Template_Type__c,
+                Template_Miscellaneous_Data__c = source.Template_Miscellaneous_Data__c
+            );
+
+            insert as user cloned;
+
+            List<Template_Variable__c> variablesToInsert = new List<Template_Variable__c>();
+            for (Template_Variable__c tv : source.WB_Template_Variables__r) {
+                variablesToInsert.add(new Template_Variable__c(
+                    Name                 = tv.Name,
+                    WhatsappTemplate__c  = cloned.Id,
+                    Object_Name__c       = tv.Object_Name__c,
+                    Field_Name__c        = tv.Field_Name__c,
+                    Type__c              = tv.Type__c,
+                    Alternate_Text__c    = tv.Alternate_Text__c
+                ));
+            }
+            if (!variablesToInsert.isEmpty()) {
+                insert as user variablesToInsert;
+            }
+
+            result.put('status',    'success');
+            result.put('message',   'WhatsApp template cloned successfully.');
+            result.put('clonedId',  cloned.Id);
+            return result;
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WBTemplateController', 'cloneWBTemplate', e.getMessage());
+            result.put('status',  'error');
+            result.put('message', 'Error cloning template: ' + e.getMessage());
+            return result;
+        }
+    }
 }

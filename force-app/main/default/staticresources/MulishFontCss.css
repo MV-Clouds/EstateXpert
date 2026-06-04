@@ -54,6 +54,7 @@
 
 .white-btn-css:disabled {
   background-color: #b2aeae;
+  color: white;
   border: none;
   cursor: not-allowed;
 }

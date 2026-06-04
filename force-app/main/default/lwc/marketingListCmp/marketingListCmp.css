@@ -378,9 +378,10 @@ span {
     align-items: center;
 }
 
-.table-content .slds-table_resizable-cols thead th{
-     width:12rem
+.table-content .slds-table_resizable-cols thead th {
+    width: 12rem
 }
+
 .noresult {
     flex: 1;
     min-height: 0;
@@ -864,10 +865,6 @@ input[type=checkbox]::before {
     height: fit-content;
     border-radius: 10px;
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .broadcast-btns {
@@ -1589,11 +1586,11 @@ c-template-preview {
     box-shadow: rgba(15, 23, 42, 0.24) 0px 14px 36px -12px;
 }
 
-.popup-table .delete-icon-css{
+.popup-table .delete-icon-css {
     margin: auto;
 }
 
-.center-trancate-text{
+.center-trancate-text {
     overflow: visible;
 }
 
@@ -1601,7 +1598,7 @@ c-template-preview {
     width: auto;
 }
 
-.popup-table{
+.popup-table {
     border-radius: 8px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }

@@ -25,10 +25,6 @@
     height: 100%;
     border-radius: 8px;
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .main_header {

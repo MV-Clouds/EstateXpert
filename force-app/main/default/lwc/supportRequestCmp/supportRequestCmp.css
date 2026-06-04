@@ -194,19 +194,11 @@ img {
     margin-top: -0.75rem;
     height: calc(100% + 1.5rem);
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
 }
 
 .outer-cover {
     overflow: auto;
     padding: 16px;
-    /* background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg/'); */
 }
 
 .maindiv {

@@ -43,8 +43,6 @@ input[type=number]::-webkit-outer-spin-button {
   width: 100%;
   height: 100%;
   background-color: aliceblue;
-  background: transparent url('/resource/MVEX__newImageandMediaBg') 0% 0% no-repeat padding-box;
-  background-size: 100%;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -62,10 +60,6 @@ input[type=number]::-webkit-outer-spin-button {
   overflow: hidden;
   position: relative;
   background-color: #f5f7fa;
-  /* background-repeat: no-repeat;
-  background-size: cover;
-  background-position: unset;
-  background-image: url('/resource/MVEX__newImageandMediaBg') !important; */
 }
 
 /* ---- TAB SECTION CSS --- START ---- */
@@ -2055,9 +2049,11 @@ input[type="radio"]:checked+label .sizeInputLable {
   max-width: 900px;
   margin: 0 auto;
 }
+
 .aiPromptSection {
   position: relative;
 }
+
 .aiHint {
   font-size: 0.8rem;
   color: #54698d;
@@ -2093,7 +2089,7 @@ input[type="radio"]:checked+label .sizeInputLable {
   color: #9fa8da;
 }
 
-.aiGenerateBtn{
+.aiGenerateBtn {
   --slds-c-button-radius-border: 1rem;
   position: absolute;
   bottom: 10px;
@@ -2203,17 +2199,17 @@ input[type="radio"]:checked+label .sizeInputLable {
 }
 
 .ai-close-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .ai-chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: #f8f9fa;
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8f9fa;
 }
 
 .ai-message {
@@ -2223,6 +2219,7 @@ input[type="radio"]:checked+label .sizeInputLable {
   animation: fadeIn 0.3s ease;
   align-items: center;
 }
+
 .ai-message[data-ai=true] {
   justify-content: right;
   flex-direction: row-reverse;
@@ -2243,7 +2240,9 @@ input[type="radio"]:checked+label .sizeInputLable {
   flex-shrink: 0;
 }
 
-.ai-bot .ai-avatar { background: #00a1e0; }
+.ai-bot .ai-avatar {
+  background: #00a1e0;
+}
 
 .ai-chat-input {
   display: flex;
@@ -2294,34 +2293,53 @@ input[type="radio"]:checked+label .sizeInputLable {
 
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ai-chat-mode-toggle {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    background: #eaeaea;
-}
-.ai-chat-mode-toggle .mode-btn {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    background: rgb(0 121 221 / 29%);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 8px -4px;
-}
-.ai-chat-mode-toggle .mode-btn.active {
-    background: #0070d2;
-    font-weight: bold;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  background: #eaeaea;
 }
 
-.ai-user { align-self: flex-end; flex-direction: row-reverse; }
-.ai-user .ai-bubble { background: #0070d2; color: white; }
-.ai-user .ai-avatar svg { fill: white; }
+.ai-chat-mode-toggle .mode-btn {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  background: rgb(0 121 221 / 29%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 8px -4px;
+}
+
+.ai-chat-mode-toggle .mode-btn.active {
+  background: #0070d2;
+  font-weight: bold;
+}
+
+.ai-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.ai-user .ai-bubble {
+  background: #0070d2;
+  color: white;
+}
+
+.ai-user .ai-avatar svg {
+  fill: white;
+}
 
 .ai-history .ai-bubble {
   background: #e6f7ff;
@@ -2336,7 +2354,7 @@ input[type="radio"]:checked+label .sizeInputLable {
   line-height: 1.4;
   background: white;
   border: 1px solid #ddd;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   max-width: 72%;
   word-wrap: break-word;
 }
@@ -2383,7 +2401,7 @@ input[type="radio"]:checked+label .sizeInputLable {
 }
 
 .ai-restore-btn:hover {
-  background: rgba(0,161,224,0.1);
+  background: rgba(0, 161, 224, 0.1);
 }
 
 .ai-chat-empty {
@@ -2393,6 +2411,7 @@ input[type="radio"]:checked+label .sizeInputLable {
   padding: 20px;
   font-size: 13px;
 }
+
 /* Duplicate template name error shown below name input in Basic Details tab */
 .templateNameDuplicateError {
   font-size: 12px;

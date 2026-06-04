@@ -27,10 +27,6 @@
 
 .field-mapping-container {
   background-color: #f5f7fa;
-  /* background-repeat: no-repeat;
-  background-size: cover;
-  background-position: unset;
-  background-image: url('/resource/MVEX__newImageandMediaBg'); */
   padding: 16px;
   height: 100%;
   width: 100%;
@@ -180,10 +176,6 @@
   padding: 16px;
   border-radius: 8px;
   background-color: aliceblue;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: bottom;
-  background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .main_sub_header {
@@ -233,8 +225,8 @@
   line-height: 22px;
   text-align: center;
   color: #35353A;
-  white-space: normal; 
-  overflow-wrap: anywhere; 
+  white-space: normal;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
@@ -292,6 +284,6 @@ lightning-combobox .slds-dropdown,
   display: none;
 }
 
-.table-content .column1{
+.table-content .column1 {
   width: 15rem;
 }

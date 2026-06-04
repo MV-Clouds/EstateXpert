@@ -25,10 +25,6 @@
     height: 100%;
     border-radius: 8px;
     background-color: #f5f7fa;
-    /* background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-image: url('/resource/MVEX__newImageandMediaBg'); */
 }
 
 .main_header {
@@ -326,10 +322,6 @@
 
 .popdiv_cls {
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
 }
@@ -377,10 +369,6 @@
 
 .main_header_cls {
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -446,10 +434,6 @@
 
 .main_content_cls {
     background-color: #f5f7fa;
-    /* background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg'); */
     border-radius: unset;
     display: flex;
     flex-direction: column;
@@ -698,7 +682,8 @@
 .combobox-input {
     width: 100%;
     height: 36px;
-    padding: 0 2.25rem 0 0.75rem; /* right padding for chevron */
+    padding: 0 2.25rem 0 0.75rem;
+    /* right padding for chevron */
     border: 1.5px solid #d1d5db;
     border-radius: 6px;
     font-size: 13px;
@@ -735,7 +720,8 @@
     right: 0.55rem;
     top: 50%;
     transform: translateY(-50%);
-    pointer-events: none; /* clicks pass through to the input behind */
+    pointer-events: none;
+    /* clicks pass through to the input behind */
     color: #6b7280;
     display: flex;
     align-items: center;
@@ -812,4 +798,4 @@
     font-style: italic;
     line-height: 1.4;
     user-select: none;
-}
+}

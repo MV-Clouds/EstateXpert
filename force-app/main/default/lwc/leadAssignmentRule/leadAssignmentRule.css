@@ -29,10 +29,6 @@
 
 .main-header {
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -351,10 +347,6 @@
 
 .background_css {
     background-color: #f5f7fa;
-    /* background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg/'); */
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
 }
@@ -630,7 +622,7 @@
     overflow: auto;
 }
 
-.condition-heading{
+.condition-heading {
     display: flex;
     justify-content: space-between;
 }
@@ -667,25 +659,25 @@
 
 /* Fix combobox dropdown alignment to left */
 .combobox_cls {
-  text-align: left !important;
+    text-align: left !important;
 }
 
 .combobox_cls lightning-combobox,
 .combobox_cls .slds-combobox {
-  text-align: left !important;
+    text-align: left !important;
 }
 
 .combobox_cls lightning-combobox .slds-combobox__input,
 .combobox_cls .slds-input {
-  text-align: left !important;
+    text-align: left !important;
 }
 
 lightning-combobox .slds-dropdown,
 .slds-dropdown {
-  text-align: left !important;
-  left: 0 !important;
-  right: auto !important;
-  margin-left: 0 !important;
+    text-align: left !important;
+    left: 0 !important;
+    right: auto !important;
+    margin-left: 0 !important;
 }
 
 .value-width-css {
@@ -730,7 +722,8 @@ lightning-combobox .slds-dropdown,
 /* Prevent td content from overflowing its fixed cell */
 .popup-table-content .slds-table td {
     overflow: hidden !important;
-    max-width: 0 !important; /* forces table-layout:fixed to respect widths */
+    max-width: 0 !important;
+    /* forces table-layout:fixed to respect widths */
 }
 
 /* Inputs always fill their fixed cell */

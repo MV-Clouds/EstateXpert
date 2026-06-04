@@ -23,10 +23,6 @@
     gap: 1rem;
     border-radius: 8px;
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .header_block_css {
@@ -89,7 +85,7 @@
     border-radius: 5px;
 }
 
-.cards_row > * {
+.cards_row>* {
     min-width: 0;
 }
 
@@ -213,6 +209,7 @@
         transform: translateY(-10px);
         max-height: 0;
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -230,16 +227,28 @@
     animation: fadeInUp 0.4s ease-out both;
 }
 
-.detail_row:nth-child(1) { animation-delay: 0.05s; }
-.detail_row:nth-child(2) { animation-delay: 0.1s; }
-.detail_row:nth-child(3) { animation-delay: 0.15s; }
-.detail_row:nth-child(4) { animation-delay: 0.2s; }
+.detail_row:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.detail_row:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.detail_row:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.detail_row:nth-child(4) {
+    animation-delay: 0.2s;
+}
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -303,7 +312,7 @@
     background: #78C9F5;
     color: white;
     border: 1px solid #78C9F5;
-    
+
 }
 
 .action_btn.secondary:hover {
@@ -333,10 +342,6 @@
     padding: 1rem;
     height: 100%;
     background-color: #f5f7fa;
-    /* background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg'); */
     border-radius: 8px;
     overflow: auto;
     scroll-behavior: smooth;

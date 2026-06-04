@@ -349,37 +349,13 @@ public without sharing class ContactTriggerHandler {
                 }
             }
 
-            // ── Owner notification emails ────────────────────────────────────────────
             if (!ownerIdsToNotify.isEmpty()) {
-                if (!Schema.sObjectType.User.isAccessible()) {
-                    return;
-                }
-
                 Map<Id, User> userMap = new Map<Id, User>([SELECT Id, Email FROM User WHERE Id IN :ownerIdsToNotify AND Email != null]);
 
-                if (!Schema.sObjectType.CustomNotificationType.isAccessible()) {
-                    return;
-                }
-
-                List<CustomNotificationType> cnTypes = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'LeadAssignmentRule' LIMIT 1];
-                if (cnTypes.isEmpty()) {
-                    return;
-                }
-
-                CustomNotificationType cnType = cnTypes[0];
                 List<EmailTemplate> ownerTemplates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Assigned_Notification' LIMIT 1];
 
                 for (Id ownerId : ownerIdsToNotify) {
-                    String leadName = ownerIdToLeadName.get(ownerId);
                     Id leadId = ownerIdToLeadId.get(ownerId);
-
-                    Messaging.CustomNotification customNotification = new Messaging.CustomNotification();
-                    customNotification.setTitle('New Lead Assigned');
-                    customNotification.setBody('You have been assigned a new lead: ' + leadName);
-                    customNotification.setNotificationTypeId(cnType.Id);
-                    customNotification.setTargetId(leadId);
-                    customNotification.setSenderId(UserInfo.getUserId());
-                    customNotification.send(new Set<String>{ownerId});
 
                     if (userMap.containsKey(ownerId) && !ownerTemplates.isEmpty()) {
                         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();

@@ -5,10 +5,6 @@
 
 .forBGSetup {
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-bottom-left-radius: 8px !important;
     border-bottom-right-radius: 8px !important;
 }

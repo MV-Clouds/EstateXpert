@@ -147,19 +147,22 @@
 .sort-icon-container {
     margin-left: 6px;
     transition: transform 0.3s ease;
-    display: flex; /* Changed from 'none' to 'flex' */
+    display: flex;
+    /* Changed from 'none' to 'flex' */
     flex-shrink: 0;
     width: 16px;
     height: 16px;
     align-items: center;
     justify-content: center;
-    opacity: 0; /* Use opacity instead of display */
+    opacity: 0;
+    /* Use opacity instead of display */
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .sortable-header:hover .sort-icon-container,
 .sortable-header.currently-sorted .sort-icon-container {
-    opacity: 1; /* Show icon with opacity */
+    opacity: 1;
+    /* Show icon with opacity */
 }
 
 /* Header content */
@@ -280,10 +283,6 @@
 /* Custom Pagination Container */
 .custom-pagination-wrapper {
     background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
     padding: 16px;
     border-top: 1px solid #e5e5e5;
     border-radius: 0 0 8px 8px;
@@ -292,10 +291,6 @@
 /* Keep original pagination-container for backward compatibility */
 .pagination-container {
     background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
     padding: 16px;
     border-top: 1px solid #e5e5e5;
     border-radius: 0 0 8px 8px;
@@ -509,7 +504,8 @@
 .datatable-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: auto !important; /* Force auto layout for content-based sizing */
+    table-layout: auto !important;
+    /* Force auto layout for content-based sizing */
 }
 
 /* Header cell styles */
@@ -560,7 +556,8 @@
     color: #585858;
     border: none;
     width: auto;
-    min-width: 120px !important; /* Increased minimum width */
+    min-width: 120px !important;
+    /* Increased minimum width */
     height: 45px;
     line-height: 1.4;
     /* Ensure no truncation */
@@ -940,6 +937,7 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+
     /* Enable horizontal scrolling for the table container */
     .table-scrollable {
         overflow-x: auto !important;
@@ -947,21 +945,23 @@
         -webkit-overflow-scrolling: touch;
         width: 100%;
     }
-    
+
     /* Set minimum width for table to trigger horizontal scroll */
     .datatable-table {
-        min-width: 1200px !important; /* Increased to ensure scrolling */
+        min-width: 1200px !important;
+        /* Increased to ensure scrolling */
         width: max-content !important;
         table-layout: auto !important;
         font-size: 12px;
     }
-    
+
     /* Container adjustments */
     .datatable-container {
         width: 100%;
-        overflow: visible !important; /* Changed from hidden */
+        overflow: visible !important;
+        /* Changed from hidden */
     }
-    
+
     /* Remove ALL text truncation for mobile */
     .datatable-table .data-cell,
     .datatable-table .header-cell,
@@ -975,26 +975,27 @@
         white-space: nowrap !important;
         overflow: visible !important;
         text-overflow: clip !important;
-        text-overflow: unset !important; /* Completely remove ellipsis */
+        text-overflow: unset !important;
+        /* Completely remove ellipsis */
         min-width: fit-content !important;
         padding: 4px 8px;
         font-size: 12px;
         max-width: none !important;
     }
-    
+
     /* Ensure all columns have adequate width for mobile */
     .datatable-table .data-cell {
         min-width: 120px !important;
         width: auto !important;
         max-width: none !important;
     }
-    
+
     .datatable-table .header-cell {
         min-width: 120px !important;
         width: auto !important;
         max-width: none !important;
     }
-    
+
     /* Specific column widths for mobile */
     .checkbox-header,
     .checkbox-cell {
@@ -1032,49 +1033,49 @@
         max-width: 80px !important;
         padding: 4px;
     }
-    
+
     /* Header and content adjustments */
     .header-main-container {
         flex-direction: column;
         align-items: stretch;
         gap: 1rem;
     }
-    
+
     .search-container {
         max-width: none;
         min-width: auto;
     }
-    
+
     .header-actions-container {
         justify-content: center;
         flex-wrap: wrap;
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .header-action-btn {
         flex: 1;
         min-width: 120px;
         justify-content: center;
     }
-    
+
     /* Pagination adjustments */
     .pagination-main-container {
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .pagination-nav-button {
         padding: 6px 8px;
         font-size: 11px;
     }
-    
+
     .pagination-nav-button:first-child,
     .pagination-nav-button:last-child {
         gap: 0.25rem;
         padding: 6px 8px;
     }
-    
+
     /* Action button adjustments */
     .row-actions-container {
         gap: 4px;
@@ -1085,7 +1086,7 @@
         height: 24px;
         padding: 2px;
     }
-    
+
     /* Image adjustments */
     .cell-image {
         width: 35px;
@@ -1102,7 +1103,8 @@
 .datatable-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* Changed from 'auto' to 'fixed' for consistent widths */
+    table-layout: fixed;
+    /* Changed from 'auto' to 'fixed' for consistent widths */
 }
 
 /* Set specific widths for different column types */
@@ -1115,7 +1117,8 @@
 
 .actions-header,
 .actions-cell {
-    width: 140px !important; /* Increased width */
+    width: 140px !important;
+    /* Increased width */
     min-width: 140px !important;
     max-width: 140px !important;
 }
@@ -1130,10 +1133,11 @@
 /* Data columns should have more space */
 .data-column-header {
     width: auto;
-    min-width: 150px !important; /* Increased minimum width */
+    min-width: 150px !important;
+    /* Increased minimum width */
 }
 
-.toggle-input > lightning-primitive-input-toggle > .slds-form-element__control > label {
+.toggle-input>lightning-primitive-input-toggle>.slds-form-element__control>label {
     display: flex;
     justify-content: center !important;
     align-items: center !important;

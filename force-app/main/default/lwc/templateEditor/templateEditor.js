@@ -6,6 +6,7 @@ import getS3ConfigSettings from "@salesforce/apex/ImageAndMediaController.getS3C
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import summerNoteEditor from "@salesforce/resourceUrl/summerNoteEditor";
 import getTemplateData from '@salesforce/apex/TemplateBuilderController.getTemplateData';
+import getTemplates from '@salesforce/apex/TemplateBuilderController.getTemplates';
 import saveTemplateApex from '@salesforce/apex/TemplateBuilderController.saveTemplateApex';
 import saveTempDataRecordsInBatch from '@salesforce/apex/TemplateBuilderController.saveTempDataRecordsInBatch';
 import { initializeSummerNote } from './editorConf.js';
@@ -49,6 +50,9 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     noTemplateFound = false;                        // To check weather template available for not
 
     editorDataChanges = false;                      // To identify any editor data change or not
+
+    allTemplates = [];                              // All existing templates for duplicate-name check
+    templateNameError = '';                         // Error message when name clashes with an existing template
 
     listingImageCount = 0;                          // To store count of inserted related list table
 
@@ -143,7 +147,8 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
         try {
             this.getS3ConfigDataAsync();
             this.currentTab = this.activeTabName ? this.activeTabName : this.defaultTab;
-            
+            this.loadAllTemplates();
+
             if (this.templateId) {
                 this.isSpinner = true;
                 this.getTemplateValues();
@@ -223,6 +228,38 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
             this.showSpinner = false;
             console.log('error in getS3ConfigDataAsync -> ', error.stack);
         }
+    }
+
+    /**
+     * Method Name: loadAllTemplates
+     * @description: Fetches all existing templates so we can validate name uniqueness on the client side.
+     *               Called once on connectedCallback.
+     */
+    loadAllTemplates() {
+        getTemplates()
+            .then(data => {
+                this.allTemplates = data || [];
+            })
+            .catch(error => {
+                // Non-critical — name check degrades gracefully if this fails
+                console.warn('TemplateEditor: could not load templates for duplicate check', error);
+            });
+    }
+
+    /**
+     * Method Name: checkDuplicateName
+     * @description: Returns true if the given name already belongs to a DIFFERENT template record.
+     *               The current template is excluded so renaming to its own saved name never blocks saving.
+     * @param {String} name - the name to validate
+     * @return {Boolean} true = duplicate found, false = name is available
+     */
+    checkDuplicateName(name) {
+        if (!name || !Array.isArray(this.allTemplates)) return false;
+        const normalised = name.trim().toLowerCase();
+        return this.allTemplates.some(t =>
+            t.Id !== this.templateId &&
+            t.MVEX__Template_Name__c?.trim().toLowerCase() === normalised
+        );
     }
 
     initialize_Content_Editor() {
@@ -356,13 +393,18 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     saveTemplateData(event) {
         this.listingImageCount = event.detail;
         if (this.lastRelatedListTableCount <= this.maxRelatedLIstTableLimit) {
-            if (this.templateRecord?.MVEX__Template_Name__c) {
-                this.isSpinner = true;
-                this.saveTemplateValue('save');
-            }
-            else {
+            const name = this.templateRecord?.MVEX__Template_Name__c;
+            if (!name) {
                 this.showMessagePopup('error', 'Template Name Empty!', `Template Name is Required, You can not save template without a name.`);
+                return;
             }
+            if (this.checkDuplicateName(name)) {
+                this.showMessagePopup('error', 'Duplicate Template Name!',
+                    `A template named "${name}" already exists. Please enter a unique name before saving.`);
+                return;
+            }
+            this.isSpinner = true;
+            this.saveTemplateValue('save');
         }
         else {
             this.showMessagePopup('error', 'Warning !', `Related List Table Limit Exceeded. You Can Not Add More Then ${this.maxRelatedLIstTableLimit} Related List Tables.`);
@@ -676,13 +718,18 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     handleSaveNPreview(event) {
         this.listingImageCount = event.detail;
         if (this.lastRelatedListTableCount <= this.maxRelatedLIstTableLimit) {
-            if (this.templateRecord?.MVEX__Template_Name__c) {
-                this.isSpinner = true;
-                this.saveTemplateValue('preview');
-            }
-            else {
+            const name = this.templateRecord?.MVEX__Template_Name__c;
+            if (!name) {
                 this.showMessagePopup('error', 'Template Name Empty!', `Template Name is Required, You can not save template without a name.`);
-            };
+                return;
+            }
+            if (this.checkDuplicateName(name)) {
+                this.showMessagePopup('error', 'Duplicate Template Name!',
+                    `A template named "${name}" already exists. Please enter a unique name before saving.`);
+                return;
+            }
+            this.isSpinner = true;
+            this.saveTemplateValue('preview');
         }
         else {
             this.showMessagePopup('error', 'Warning !', `Related List Table Limit Exceeded. You Can Not Add More Then ${this.maxRelatedLIstTableLimit} Related List Tables.`);
@@ -797,6 +844,13 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
             }
             else {
                 this.templateRecord[targetInput] = (event.target.value).trim();
+            }
+            // Real-time duplicate check when the template name changes
+            if (targetInput === 'MVEX__Template_Name__c') {
+                const isDup = this.checkDuplicateName(this.templateRecord[targetInput]);
+                this.templateNameError = isDup
+                    ? `A template named "${this.templateRecord[targetInput]}" already exists. Please choose a different name.`
+                    : '';
             }
         } catch (error) {
             errorDebugger('TemplateEditor', 'handleEditDetail', error, 'warn');

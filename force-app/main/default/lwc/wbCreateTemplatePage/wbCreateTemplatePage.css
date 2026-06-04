@@ -18,30 +18,30 @@
     --color-background-selected: #e8f4fd;
     --color-danger: #E62D2D;
     --color-error: #c23934;
-    
+
     /* Button Colors */
     --button-bg: #0176D3;
     --button-text: #FFFFFF;
     --button-disabled-bg: #c7c7c7;
-    
+
     /* Spacing */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
-    
+
     /* Border Radius */
     --radius-sm: 0.25rem;
     --radius-md: 0.4rem;
     --radius-lg: 0.5rem;
     --border-radius: 5px;
-    
+
     /* Shadows */
     --shadow-sm: 0 1px 8px 0 rgba(0, 0, 0, 0.18);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-lg: 0px 3px 9px rgba(0, 0, 0, 0.3);
     --box-shadow-card: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 1px 8px 0 rgba(0, 0, 0, 0.19);
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease-in-out;
     --transition-normal: 0.3s ease;
@@ -98,7 +98,7 @@
 .category-selection-header .heading-text {
     color: white;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
 }
 
@@ -220,7 +220,7 @@
 
 .tempHead {
     font-size: 21px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text-primary);
 }
 
@@ -432,14 +432,14 @@ textarea {
 
 .add-variable .body-title {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 500;
     margin-bottom: 0.75rem;
     color: var(--color-text-primary);
 }
 
 .body-title {
     font-size: 21px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--color-text-primary);
 }
 
@@ -455,7 +455,7 @@ textarea {
     font-size: 16px;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text-primary);
 }
 
@@ -845,7 +845,7 @@ textarea {
 .TextHeadingWP {
     color: black;
     font-size: larger;
-    font-weight: 700;
+    font-weight: 500;
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
@@ -952,7 +952,7 @@ textarea {
     z-index: 9999;
 }
 
-.dropdown{
+.dropdown {
     padding: 0.5rem 0.75rem;
     border-radius: 5px;
     border: 1px solid #c7c4c4;
@@ -968,14 +968,14 @@ textarea {
     width: 100%;
 }
 
-.true-div > .var {
+.true-div>.var {
     flex-shrink: 0;
     margin-top: 0;
     height: auto;
     padding: 0.5rem;
     min-width: 50px;
     text-align: center;
-    font-weight: 600;
+    font-weight: 500;
     border-radius: 4px;
     color: var(--color-text-primary);
 }
@@ -994,7 +994,7 @@ textarea {
     border-radius: 5px;
 }
 
-.merge-field-selector-container{
+.merge-field-selector-container {
     flex: 1;
 }
 
@@ -1024,13 +1024,14 @@ textarea {
     padding: 0;
 }
 
-.dropdown-visible{
+.dropdown-visible {
     position: relative;
 }
 
 .dropdown-container .custom-dropdown {
     position: absolute;
-    bottom: 100%; /* Open upwards */
+    bottom: 100%;
+    /* Open upwards */
     left: 0;
     z-index: 10;
     background-color: white;
@@ -1043,7 +1044,7 @@ textarea {
 
 
 .quick-action-head {
-    font-weight: 600;
+    font-weight: 500;
     padding: 8px 0;
     font-size: 15px;
     color: rgba(0, 119, 182, 1);
@@ -1052,7 +1053,7 @@ textarea {
 }
 
 .dropdown-section-header {
-    font-weight: 600;
+    font-weight: 500;
     padding: 8px 0;
     font-size: 15px;
     color: rgba(0, 119, 182, 1);
@@ -1297,7 +1298,7 @@ textarea {
 
 .flow-name {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     color: #080707;
     flex: 1;
     overflow: hidden;
@@ -1331,7 +1332,7 @@ textarea {
     border: none;
 }
 
-.select-button{
+.select-button {
     display: flex;
     gap: 0.5rem;
     border: 1px solid var(--color-border);
@@ -1346,12 +1347,12 @@ textarea {
     transition: all var(--transition-fast);
 }
 
-.select-button.disabled{
+.select-button.disabled {
     cursor: not-allowed;
     background-color: var(--button-disabled-bg);
 }
 
-.main .slds-form-element .slds-combobox__input{
+.main .slds-form-element .slds-combobox__input {
     border-radius: 5px;
     padding: 0.11rem;
     padding-left: 0.5rem;
@@ -1359,7 +1360,7 @@ textarea {
     box-shadow: none;
 }
 
-.phone-btn{
+.phone-btn {
     margin: 0;
     border: none;
     width: 100%;
@@ -1443,7 +1444,7 @@ textarea {
 }
 
 .label-bold {
-    font-weight: bold;
+    font-weight: 500;
 }
 
 .tempHead-large {
@@ -1831,4 +1832,53 @@ textarea {
 .custom-button:disabled .native-add-icon {
     fill: var(--color-text-muted);
     opacity: 0.5;
+}
+
+.clone-blue-header {
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
+}
+
+.clone-modalbody {
+    background-color: #F9FAFB !important;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 160px);
+    overflow: hidden;
+}
+
+.clone-content_body {
+    flex: 1;
+    padding: 1.25rem;
+    overflow-y: auto;
+}
+
+.clone-footerbtns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
+}
+
+.review-modal-subtitle {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.review-lang-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
 }

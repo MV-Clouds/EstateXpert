@@ -19,14 +19,10 @@
 
 .Outer-div {
     padding: 1rem;
-    background-color: #E3E5E7;
     height: 100%;
     display: flex;
     flex-direction: column;
     background-color: aliceblue;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
-    background-position: center;
-    background-size: cover;
     position: relative;
 }
 

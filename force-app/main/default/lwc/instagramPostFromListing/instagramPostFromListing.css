@@ -3,14 +3,14 @@
     user-select: none;
 }
 
-.content-body{
+.content-body {
     padding: 1.5rem;
 }
 
 /* Spinner Css */
 
-.loading-spinner{
-   
+.loading-spinner {
+
     position: absolute;
     top: 167px;
     /* left: 0; */
@@ -48,10 +48,6 @@
     height: 21rem;
     width: 22rem;
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: right;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
 }
 
 .upload-animation {
@@ -76,6 +72,7 @@
     0% {
         transform: translate(0, 0);
     }
+
     100% {
         transform: translate(0, -200px);
     }
@@ -118,22 +115,27 @@
     max-width: 60%;
 }
 
-.saturationAnimation{
+.saturationAnimation {
     animation: saturate 4s cubic-bezier(0.34, 0.05, 0.12, 0.95) infinite 0s forwards;
 }
-@keyframes saturate{
+
+@keyframes saturate {
     0% {
         filter: grayscale(1) brightness(1.5);
     }
+
     15% {
         filter: grayscale(0) brightness(1);
     }
+
     50% {
         filter: grayscale(1) brightness(1.5);
     }
+
     65% {
         filter: grayscale(0) brightness(1);
     }
+
     100% {
         filter: grayscale(1) brightness(1.5);
     }
@@ -174,16 +176,16 @@
     height: 10rem;
 }
 
-.media_upload_css{
+.media_upload_css {
     margin-bottom: 1.5rem;
 }
 
-.media_upload_css h3{
+.media_upload_css h3 {
     font-size: 20px;
     font-weight: 500;
 }
 
-.media_upload_css p{
+.media_upload_css p {
     color: #6D6D6D;
     font-size: 14px;
     font-weight: 400;
@@ -249,11 +251,11 @@
 
 }
 
-.wrapper-instagram-post{
+.wrapper-instagram-post {
     position: relative;
 }
 
-.wrapper-instagram-post .slds-modal__content{
+.wrapper-instagram-post .slds-modal__content {
     overflow: scroll !important;
 }
 
@@ -264,7 +266,7 @@
     align-items: center;
 }
 
-.no-file-image img{
+.no-file-image img {
     height: 150px;
     width: auto;
 }
@@ -287,7 +289,7 @@
     font-weight: 400;
 }
 
-.image-preview-container-wrapper{
+.image-preview-container-wrapper {
     margin-top: 1rem;
     border: 1px solid #0076d3;
     border-radius: 8px;
@@ -350,11 +352,11 @@
     text-overflow: ellipsis;
 }
 
-.highlight{
+.highlight {
     border: 2px solid #0076d3;
 }
 
-.dragging{
+.dragging {
     border: 2px solid #0076d3;
 }
 
@@ -371,7 +373,7 @@
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
-     box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
+    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
     margin: 0 auto;
     display: block;
     height: 40px;
@@ -395,7 +397,7 @@
         margin-top: 1rem;
     }
 
-    .no-file-image img{
+    .no-file-image img {
         height: 120px !important;
     }
 }
@@ -405,9 +407,9 @@
 }
 
 .blue-header {
-  background-color: #0176D3;
-  color: white;
-  border-bottom-style: unset;
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
 }
 
 /* Credentials Missing State */
@@ -459,12 +461,12 @@
     margin-bottom: 1rem;
 }
 
-.custom-icon-edit { 
+.custom-icon-edit {
     --sds-c-icon-color-foreground-default: #0176d3;
     padding-right: 0.5rem;
 }
 
-.custom-upload-icon{
+.custom-upload-icon {
     --sds-c-icon-color-foreground-default: white;
 }
 
@@ -713,11 +715,11 @@
     font-weight: 300;
 } */
 
-.add-icon{
+.add-icon {
     --sds-c-icon-color-foreground-default: #0176D3;
 }
 
-.close-icon{
+.close-icon {
     --sds-c-icon-color-foreground-default: #d32f2f;
 }
 

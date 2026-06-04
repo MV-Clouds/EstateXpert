@@ -22,10 +22,6 @@
     height: 100%;
     gap: 1rem;
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-radius: 8px;
 }
 
@@ -153,10 +149,6 @@
 
 .main_header_cls {
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-radius: 8px;
     padding: 16px;
     display: flex;

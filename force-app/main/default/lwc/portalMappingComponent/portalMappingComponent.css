@@ -15,10 +15,6 @@
 
 .main_header_cls {
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: bottom;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -28,10 +24,6 @@
 
 .main_body {
     background-color: #f5f7fa;
-    /* background-repeat: no-repeat;
-    background-size: cover;
-    background-position: unset;
-    background-image: url('/resource/MVEX__newImageandMediaBg'); */
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -574,10 +566,6 @@
 
 .modalbody {
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-image: url('/resource/MVEX__newImageandMediaBg/');
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
@@ -609,10 +597,6 @@
     font-family: Arial, sans-serif;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     background-color: aliceblue;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-image: url('/resource/MVEX__newImageandMediaBg');
 }
 
 .access-denied h2 {

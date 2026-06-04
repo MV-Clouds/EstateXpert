@@ -3,13 +3,13 @@
   font-family: 'Mulish';
 }
 
-.btn-div{
-    display: flex;
-    gap: 16px;
-    margin: 16px;
+.btn-div {
+  display: flex;
+  gap: 16px;
+  margin: 16px;
 }
 
-.main-div{
+.main-div {
   width: calc(100% + 1.5rem);
   height: calc(100% + 1.5rem);
   margin-left: -0.75rem;
@@ -17,20 +17,17 @@
   background-color: white;
 }
 
-.Outer-div{
+.Outer-div {
   padding: 1rem;
   background-color: #E3E5E7;
   height: 100%;
   display: flex;
   flex-direction: column;
   background-color: aliceblue;
-  background-image: url('/resource/MVEX__newImageandMediaBg/');
-  background-position: center;
-  background-size: cover;
   position: relative;
 }
 
-.heading-div{
+.heading-div {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -40,14 +37,14 @@
   border: 1px solid #9B9A9C
 }
 
-.header-text{
+.header-text {
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 12px;
 }
 
-.header-text img{
+.header-text img {
   height: 43px;
 }
 
@@ -62,7 +59,7 @@
   border-radius: 8px;
 }
 
-.heading-tag{
+.heading-tag {
   font-size: 24px;
   margin-left: 16px;
   font-weight: 500;
@@ -88,7 +85,7 @@
   margin-bottom: 4px;
 }
 
-.copy-title_cls{
+.copy-title_cls {
   font-size: 16px;
   font-weight: 400;
   color: #505050;
@@ -128,11 +125,11 @@
   margin-left: 5px;
 }
 
-.listing-div{
+.listing-div {
   display: flex;
 }
 
-.anchor-div{
+.anchor-div {
   width: 75%;
 }
 
@@ -167,7 +164,7 @@
   margin: 8px 8px 8px 24px;
 }
 
-.add_cls .image-div img{
+.add_cls .image-div img {
   width: 60px;
   height: 50px;
 }
@@ -196,83 +193,84 @@
   width: 100%;
 }
 
-.div-cover{
-  height:100%;
+.div-cover {
+  height: 100%;
   overflow-y: auto;
 }
 
-.property-div{
-  display: flex;align-items:center;
+.property-div {
+  display: flex;
+  align-items: center;
 }
 
-.fields-cover{
+.fields-cover {
   width: 100%;
 }
 
-.radio-input{
+.radio-input {
   margin-right: 4px;
   z-index: 1;
 }
 
-.radio-div{
-  width:24px;
+.radio-div {
+  width: 24px;
   display: flex;
 }
 
-.anchor{
-  font-weight:400;
-  font-size:16px;
+.anchor {
+  font-weight: 400;
+  font-size: 16px;
   color: #0176D3;
   width: fit-content;
 }
 
-.title-anchor{
+.title-anchor {
   color: #1b1b1b;
   text-decoration: none;
-  font-size:16px;
+  font-size: 16px;
   font-weight: 400;
 }
 
-.anchor:hover{
+.anchor:hover {
   text-decoration: underline;
 }
 
-.addresh{
+.addresh {
   font-family: Salesforce Sans, Arial, sans-serif;
   font-size: 13px;
-  font-weight:500;
+  font-weight: 500;
 }
 
-.active-listing{
+.active-listing {
   margin-left: 24px;
   display: flex;
   gap: 4px;
 }
 
-.listing-title{
+.listing-title {
   display: flex;
 }
 
-.listing-opener{
+.listing-opener {
   color: #0176D3;
   cursor: pointer;
   font-size: 14px;
 }
 
-.listing-opener:hover{
+.listing-opener:hover {
   text-decoration: underline;
 }
 
-.listing-opener:last-child span{
+.listing-opener:last-child span {
   display: none;
 }
 
-.property-heading{
-  margin-top:14px;
-  font-size:15px;
+.property-heading {
+  margin-top: 14px;
+  font-size: 15px;
 }
 
-.btn{
+.btn {
   padding: 6px 20px;
   font-size: 14px;
   color: #0176D3;
@@ -283,67 +281,69 @@
   width: 6rem;
 }
 
-.btn:hover{
+.btn:hover {
   background-color: rgb(229, 229, 229);
 }
 
-.save-button{
+.save-button {
   background-color: #0176D3;
   color: white;
 }
 
-.save-button:hover{
+.save-button:hover {
   background-color: #0363b3;
 }
 
-.custom-grid1{
-    width: 50%;
+.custom-grid1 {
+  width: 50%;
 }
 
-.custom-grid1 .fields-cover{
-    padding:0rem 2rem 2rem 1rem;
+.custom-grid1 .fields-cover {
+  padding: 0rem 2rem 2rem 1rem;
 }
 
-.custom-grid2{
-    width: 50%;
+.custom-grid2 {
+  width: 50%;
 }
 
-.empty-state{
+.empty-state {
   flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.propertyNotAvl{
+.propertyNotAvl {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
 
-.propertyNotAvl img{
+.propertyNotAvl img {
   width: 100%;
 }
 
-.record-type-div{
+.record-type-div {
   margin-bottom: 0.5rem;
   padding: 0rem 0.2rem;
 }
 
-@media only screen and (max-width: 768px) { 
-    .div-cover{
-        display: flex;
-        flex-direction: column;
-    }
-    .custom-grid1{
-        width: 100%;
-    }
-    .custom-grid2{
-        width: 100%;
-    }
+@media only screen and (max-width: 768px) {
+  .div-cover {
+    display: flex;
+    flex-direction: column;
+  }
 
-    .heading-tag{
-        font-size: 16px;
-    }
+  .custom-grid1 {
+    width: 100%;
+  }
+
+  .custom-grid2 {
+    width: 100%;
+  }
+
+  .heading-tag {
+    font-size: 16px;
+  }
 }

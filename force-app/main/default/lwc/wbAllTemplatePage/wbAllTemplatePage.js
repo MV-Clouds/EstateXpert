@@ -15,6 +15,7 @@ import { LightningElement, track } from 'lwc';
 import getWhatsAppTemplates from '@salesforce/apex/WBTemplateController.getWhatsAppTemplates';
 import getCategoryAndStatusPicklistValues from '@salesforce/apex/WBTemplateController.getCategoryAndStatusPicklistValues';
 import deleteTemplete from '@salesforce/apex/WBTemplateController.deleteTemplete';
+import cloneWBTemplate from '@salesforce/apex/WBTemplateController.cloneWBTemplate';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { NavigationMixin } from 'lightning/navigation';
@@ -44,6 +45,10 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     @track subscription = null;
     @track sortField = 'LastModifiedDate';
     @track sortOrder = 'desc';
+    @track isCloneModalOpen = false;
+    @track cloneTemplateName = '';
+    @track cloneNameError = '';
+    @track selectedCloneTemplateId;
     showFilters = false;
     channelName = '/event/MVEX__Template_Update__e';
 
@@ -523,6 +528,153 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
 
     handlePopupClose() {
         this.showPopup = false; 
+    }
+
+    /**
+    * Method Name: handleCloneClick
+    * @description: Opens the clone modal and stores the template Id to clone
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneClick(event) {
+        try {
+            this.selectedCloneTemplateId = event.currentTarget.dataset.id;
+            this.cloneTemplateName = '';
+            this.cloneNameError = '';
+            this.isCloneModalOpen = true;
+        } catch (error) {
+            console.log('Error in handleCloneClick ==> ', error.stack);
+        }
+    }
+
+    /**
+    * Method Name: handleCloneModalClose
+    * @description: Closes the clone modal and resets state
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneModalClose() {
+        try {
+            this.isCloneModalOpen = false;
+            this.cloneTemplateName = '';
+            this.cloneNameError = '';
+            this.selectedCloneTemplateId = null;
+        } catch (error) {
+            console.log('Error in handleCloneModalClose ==> ', error.stack);
+        }
+    }
+
+    /**
+    * Method Name: handleCloneNameChange
+    * @description: Auto-formats the clone name input (spaces → underscores, lowercase)
+    *               and validates against Meta template naming rules:
+    *               - Only lowercase letters, numbers, and underscores
+    *               - Name must not already exist in allRecords
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneNameChange(event) {
+        // Auto-format: match the same transform applied in wbCreateTemplatePage
+        const formatted = event.target.value.replace(/\s+/g, '_').toLowerCase();
+        this.cloneTemplateName = formatted;
+
+        // Clear error when field is empty (required is enforced by isCloneDisabled)
+        if (!formatted || formatted.trim() === '') {
+            this.cloneNameError = '';
+            return;
+        }
+
+        // Meta only allows lowercase letters, numbers, and underscores
+        if (!/^[a-z0-9_]+$/.test(formatted)) {
+            this.cloneNameError = 'Name can only contain lowercase letters, numbers, and underscores.';
+            return;
+        }
+
+        // Uniqueness check against existing templates already loaded on this page
+        const nameExists = (this.allRecords || []).some(
+            r => r.MVEX__Template_Name__c &&
+                 r.MVEX__Template_Name__c !== '-' &&
+                 r.MVEX__Template_Name__c.toLowerCase() === formatted
+        );
+        if (nameExists) {
+            this.cloneNameError = 'A template with this name already exists.';
+            return;
+        }
+
+        this.cloneNameError = '';
+    }
+
+    /**
+    * Method Name: get isCloneDisabled
+    * @description: Returns true when Clone button should be disabled —
+    *               name is empty, has a validation error, or is whitespace only.
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    get isCloneDisabled() {
+        return !this.cloneTemplateName ||
+               this.cloneTemplateName.trim() === '' ||
+               !!this.cloneNameError;
+    }
+
+    /**
+    * Method Name: handleCloneConfirm
+    * @description: Calls WBTemplateController.cloneWBTemplate; on success navigates to
+    *               wbTemplateParent editor for the newly cloned WhatsApp template.
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneConfirm() {
+        try {
+            if (!this.cloneTemplateName || this.cloneTemplateName.trim() === '') {
+                this.showToastError('Please enter a name for the cloned template.');
+                return;
+            }
+            if (this.cloneNameError) {
+                this.showToastError(this.cloneNameError);
+                return;
+            }
+            this.isLoading = true;
+            this.isCloneModalOpen = false;
+            const clonedName = this.cloneTemplateName.trim();
+            cloneWBTemplate({
+                templateId: this.selectedCloneTemplateId,
+                newName: clonedName
+            })
+                .then(result => {
+                    this.isLoading = false;
+                    if (result && result.status === 'success') {
+                        this.showToastSuccess(`Template cloned as '${clonedName}' successfully.`);
+                        // Navigate to editor for the cloned template (same pattern as editTemplate)
+                        let cmpDef = {
+                            componentDef: 'MVEX:wbTemplateParent',
+                            attributes: {
+                                edittemplateid: result.clonedId
+                            }
+                        };
+                        let encodedDef = btoa(JSON.stringify(cmpDef));
+                        this[NavigationMixin.Navigate]({
+                            type: 'standard__webPage',
+                            attributes: {
+                                url: '/one/one.app#' + encodedDef
+                            }
+                        });
+                    } else {
+                        this.showToastError((result && result.message) ? result.message : 'Error cloning template.');
+                    }
+                    this.cloneTemplateName = '';
+                    this.selectedCloneTemplateId = null;
+                })
+                .catch(error => {
+                    this.isLoading = false;
+                    this.showToastError(error?.body?.message || 'Error cloning template.');
+                    this.cloneTemplateName = '';
+                    this.selectedCloneTemplateId = null;
+                });
+        } catch (error) {
+            this.isLoading = false;
+            console.log('Error in handleCloneConfirm ==> ', error.stack);
+        }
     }
 
     showToastError(message) {

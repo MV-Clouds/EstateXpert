@@ -24,7 +24,8 @@
                                 class="input-campaign" variant="label-hidden"></lightning-input>
                         </div>
                         <button class="blue-btn-css" onclick={handleAdd}>
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white" />
                             </svg>
                             Add New
@@ -89,7 +90,8 @@
                                                     onchange={handleDateFromChange}
                                                     variant="label-hidden"></lightning-input>
                                                 <lightning-input type="date" name="dateTo" value={dateTo}
-                                                    onchange={handleDateToChange} variant="label-hidden"></lightning-input>
+                                                    onchange={handleDateToChange}
+                                                    variant="label-hidden"></lightning-input>
                                             </div>
                                         </div>
                                     </div>
@@ -250,6 +252,19 @@
                                                                     stroke-linecap="round" stroke-linejoin="round" />
                                                             </svg>
                                                         </button>
+                                                        <button class="clone-icon-css" onclick={handleCloneClick}
+                                                            data-id={template.Id}
+                                                            data-objectapi={template.MVEX__Object_API_Name__c}
+                                                            data-type={template.MVEX__Template_pattern__c}>
+                                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M8 8H7.2C6.0799 8 5.51984 8 5.09202 8.21799C4.71569 8.40973 4.40973 8.71569 4.21799 9.09202C4 9.51984 4 10.0799 4 11.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H12.8C13.9201 20 14.4802 20 14.908 19.782C15.2843 19.5903 15.5903 19.2843 15.782 18.908C16 18.4802 16 17.9201 16 16.8V16M11.2 16H16.8C17.9201 16 18.4802 16 18.908 15.782C19.2843 15.5903 19.5903 15.2843 19.782 14.908C20 14.4802 20 13.9201 20 12.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H11.2C10.0799 4 9.51984 4 9.09202 4.21799C8.71569 4.40973 8.40973 4.71569 8.21799 5.09202C8 5.51984 8 6.07989 8 7.2V12.8C8 13.9201 8 14.4802 8.21799 14.908C8.40973 15.2843 8.71569 15.5903 9.09202 15.782C9.51984 16 10.0799 16 11.2 16Z"
+                                                                    stroke="#000000" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                </path>
+                                                            </svg>
+                                                        </button>
                                                     </template>
                                                     <button class="delete-icon-css" onclick={handleDelete}
                                                         data-id={template.Id}>
@@ -327,6 +342,65 @@
         <c-template-preview-modal objectname={selectedObjectName} is-active={selectedTempStatus}
             templateid={selectedTemplateId} template-type={templateType}
             onclosemodal={handleCloseModal}></c-template-preview-modal>
+    </template>
+
+    <!-- Clone Template Modal -->
+    <template if:true={isCloneModalOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="clone-modal-heading" aria-modal="true"
+            aria-describedby="clone-modal-content" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close close-icon-css" onclick={handleCloneModalClose}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="#1F2937" />
+                    </svg>
+                </div>
+                <div class="slds-modal__header clone-blue-header">
+                    <h1 id="clone-modal-heading" class="slds-modal__title slds-hyphenate" tabindex="-1">Clone Template
+                    </h1>
+                </div>
+                <div class="slds-modal__content clone-modalbody" id="clone-modal-content">
+                    <div class="clone-content_body">
+                        <div class="clone-custom-input-container">
+                            <div class="clone-label-container">
+                                <label><span class="clone-red">*</span>New Template Name</label>
+                            </div>
+                            <div class="clone-input-container">
+                                <lightning-input placeholder="Enter name for the cloned template"
+                                    name="cloneTemplateName" value={cloneTemplateName} variant="label-hidden"
+                                    onchange={handleCloneNameChange} maxlength="255">
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clone-footerbtns">
+                        <button onclick={handleCloneModalClose} class="white-btn-css">
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <button onclick={handleCloneConfirm} class="blue-btn-css" disabled={isCloneDisabled}>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <rect x="8" y="8" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path
+                                    d="M16 8V5C16 3.89543 15.1046 3 14 3H5C3.89543 3 3 3.89543 3 5V14C3 15.1046 3.89543 16 5 16H8"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            Clone
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
     </template>
 
     <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>

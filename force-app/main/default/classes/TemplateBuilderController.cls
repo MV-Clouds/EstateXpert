@@ -653,13 +653,7 @@ public with sharing class TemplateBuilderController {
     }
 
     // ── Contact Email (uses TargetObjectId correctly) ─────────────────────
-    private static Messaging.SingleEmailMessage buildContactEmail(
-        Id contactId,
-        String subject,
-        String body,
-        Blob pdfBlob,
-        String fileName
-    ) {
+    private static Messaging.SingleEmailMessage buildContactEmail(Id contactId, String subject, String body, Blob pdfBlob, String fileName) {
         Messaging.EmailFileAttachment att = new Messaging.EmailFileAttachment();
         att.setFileName(fileName);
         att.setBody(pdfBlob);
@@ -680,13 +674,7 @@ public with sharing class TemplateBuilderController {
     }
 
     // ── Manual Email ─────────────────────────────────────────────────────
-    private static Messaging.SingleEmailMessage buildManualEmail(
-        String email,
-        String subject,
-        String body,
-        Blob pdfBlob,
-        String fileName
-    ) {
+    private static Messaging.SingleEmailMessage buildManualEmail(String email, String subject, String body, Blob pdfBlob, String fileName) {
         Messaging.EmailFileAttachment att = new Messaging.EmailFileAttachment();
         att.setFileName(fileName);
         att.setBody(pdfBlob);
@@ -704,6 +692,100 @@ public with sharing class TemplateBuilderController {
         mail.setSaveAsActivity(false);
 
         return mail;
+    }
+
+    /**
+     * Method Name: cloneTemplate
+     * @param templateId - Id of the template to clone.
+     * @param newName    - Name for the cloned template.
+     * @return Map<String,String> with keys: status ('success'/'error'), message, clonedId,
+     *         objectApiName, templateType — so the LWC can navigate to the editor directly.
+     * @description: Clones a Template__c parent record and all its child Template_Data__c and Template_Page__c records.
+     * Created Date: 04/06/2026
+     * Created By: Karan Singh
+     */
+    @AuraEnabled
+    public static Map<String, String> cloneTemplate(String templateId, String newName) {
+        Map<String, String> result = new Map<String, String>();
+        try {
+            String escapedTemplateId = String.escapeSingleQuotes(templateId);
+            String escapedNewName    = String.escapeSingleQuotes(newName);
+
+            List<Template__c> sourceTemplates = [SELECT Id, Template_Name__c, Object_Name__c, Object_API_Name__c, Template_Status__c, Template_Body__c,
+                                                Template_pattern__c, Description__c, Subject__c, ListingMediaCount__c,
+                                                (SELECT Template_Value_Simple__c, Order_No_Simple__c, Value_Type__c FROM Template_Data__r
+                                                ORDER BY Order_No_Simple__c ASC),
+                                                (SELECT Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c,
+                                                Header_margin_top__c, Footer_margin_bottom__c, Page_Number__c FROM Template_Pages__r ORDER BY Page_Number__c ASC)
+                                                FROM Template__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
+
+            if (sourceTemplates.isEmpty()) {
+                result.put('status', 'error');
+                result.put('message', 'Template not found.');
+                return result;
+            }
+
+            Template__c source = sourceTemplates[0];
+
+            Template__c cloned = new Template__c(
+                Template_Name__c     = escapedNewName,
+                Object_Name__c       = source.Object_Name__c,
+                Object_API_Name__c   = source.Object_API_Name__c,
+                Template_Status__c   = source.Template_Status__c,
+                Template_Body__c     = source.Template_Body__c,
+                Template_pattern__c  = source.Template_pattern__c,
+                Description__c       = source.Description__c,
+                Subject__c           = source.Subject__c,
+                ListingMediaCount__c = source.ListingMediaCount__c
+            );
+
+            insert as user cloned;
+
+            List<Template_Data__c> dataToInsert = new List<Template_Data__c>();
+            for (Template_Data__c td : source.Template_Data__r) {
+                dataToInsert.add(new Template_Data__c(
+                    Template__c              = cloned.Id,
+                    Template_Value_Simple__c = td.Template_Value_Simple__c,
+                    Order_No_Simple__c       = td.Order_No_Simple__c,
+                    Value_Type__c            = td.Value_Type__c
+                ));
+            }
+            if (!dataToInsert.isEmpty()) {
+                insert as user dataToInsert;
+            }
+
+            List<Template_Page__c> pagesToInsert = new List<Template_Page__c>();
+            for (Template_Page__c tp : source.Template_Pages__r) {
+                pagesToInsert.add(new Template_Page__c(
+                    Template__c             = cloned.Id,
+                    Page_Margin__c          = tp.Page_Margin__c,
+                    Page_Orientation__c     = tp.Page_Orientation__c,
+                    Page_Size__c            = tp.Page_Size__c,
+                    Unit_of_Page_Configs__c = tp.Unit_of_Page_Configs__c,
+                    Show_Header__c          = tp.Show_Header__c,
+                    Show_Footer__c          = tp.Show_Footer__c,
+                    Header_margin_top__c    = tp.Header_margin_top__c,
+                    Footer_margin_bottom__c = tp.Footer_margin_bottom__c,
+                    Page_Number__c          = tp.Page_Number__c
+                ));
+            }
+            if (!pagesToInsert.isEmpty()) {
+                insert as user pagesToInsert;
+            }
+
+            result.put('status',        'success');
+            result.put('message',       'Template cloned successfully.');
+            result.put('clonedId',      cloned.Id);
+            result.put('objectApiName', source.Object_API_Name__c != null ? source.Object_API_Name__c : '');
+            result.put('templateType',  source.Template_pattern__c != null ? source.Template_pattern__c : '');
+            return result;
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'TemplateBuilderController', 'cloneTemplate', e.getMessage());
+            result.put('status',  'error');
+            result.put('message', 'Error cloning template: ' + e.getMessage());
+            return result;
+        }
     }
 
 }

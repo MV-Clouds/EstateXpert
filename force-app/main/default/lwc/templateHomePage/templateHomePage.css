@@ -75,7 +75,7 @@
     min-width: max-content;
 }
 
-.btn:hover{
+.btn:hover {
     background: #0157a0;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
@@ -333,6 +333,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -362,6 +363,7 @@
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -490,11 +492,11 @@
     padding-left: 10px;
 }
 
-.table-content .slds-table_resizable-cols thead th{
-    width:12rem;
+.table-content .slds-table_resizable-cols thead th {
+    width: 12rem;
 }
 
-.table-content .slds-table td{
+.table-content .slds-table td {
     max-width: 16rem;
 }
 
@@ -505,4 +507,68 @@
         margin-top: unset;
         margin-left: unset;
     }
+}
+
+/* ── Clone Modal Styles (inline modal scoped to this component) ─────────── */
+
+.clone-blue-header {
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
+}
+
+.clone-modalbody {
+    background-color: #F9FAFB !important;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 160px);
+    overflow: hidden;
+}
+
+.clone-content_body {
+    flex: 1;
+    padding: 1.25rem;
+    overflow-y: auto;
+}
+
+.clone-footerbtns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
+}
+
+.clone-custom-input-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.clone-label-container {
+    flex: 0 0 35%;
+    margin-right: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    color: #1F2937;
+}
+
+.clone-input-container {
+    flex: 1;
+}
+
+.clone-red {
+    color: red;
+}
+
+.action-css .min_width_css {
+    min-width: 10rem !important;
 }

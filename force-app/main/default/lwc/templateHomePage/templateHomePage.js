@@ -1,6 +1,7 @@
 import { LightningElement, track } from 'lwc';
 import getTemplates from '@salesforce/apex/TemplateBuilderController.getTemplates';
 import deleteTemplate from '@salesforce/apex/TemplateBuilderController.deleteTemplate';
+import cloneTemplate from '@salesforce/apex/TemplateBuilderController.cloneTemplate';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import externalCss from '@salesforce/resourceUrl/templateCss';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -22,6 +23,11 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     @track isModalOpen = false;
     @track isLoading = false;
     @track isPreviewModal = false;
+    @track isCloneModalOpen = false;
+    @track cloneTemplateName = '';
+    @track selectedCloneTemplateId;
+    @track selectedCloneObjectApi = '';
+    @track selectedCloneTemplateType = '';
     @track visiblePages = 5;
     @track pageSize = PAGE_SIZE;
     @track pageNumber = 1;
@@ -125,7 +131,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             fieldName: 'actions',
             type: 'action',
             isSortable: false,
-            class: 'truncate_css',
+            class: 'truncate_css action-css',
             dataLabel: 'Actions'
         }
     ];
@@ -152,7 +158,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             isLastModifiedDate: col.key === 'LastModifiedDate'
         }));
     }
-    
+
     get filterIconName() {
         return this.showMoreFilters ? 'utility:close' : 'utility:filter';
     }
@@ -348,12 +354,12 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
         }
     }
 
-        /**
-    * Method Name: renderedCallback
-    * @description: Ensure sort icons are updated after DOM is rendered
-    * Created Date: 25/03/2026
-    * Created By: Kajal Tiwari
-    */
+    /**
+* Method Name: renderedCallback
+* @description: Ensure sort icons are updated after DOM is rendered
+* Created Date: 25/03/2026
+* Created By: Kajal Tiwari
+*/
     renderedCallback() {
         // Only update sort icons if we have data loaded
         if (this.templates && this.templates.length > 0) {
@@ -528,7 +534,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     formatDate(dateStr) {
         try {
             if (!dateStr) return '-';
-            
+
             let formatdate = new Date(dateStr);
 
             const day = formatdate.getDate();
@@ -541,7 +547,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             let hours = formatdate.getHours();
             const minutes = formatdate.getMinutes();
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            
+
             hours = hours % 12;
             hours = hours ? hours : 12; // the hour '0' should be '12'
             const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
@@ -573,7 +579,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                 rowIndex: index + 1,
             }));
             this.currentPage = 1;
-            
+
             this.updateShownData();
             this.sortData();
         } catch (error) {
@@ -696,6 +702,124 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
             this.isModalOpen = true;
         } catch (error) {
             console.log('Error in handleAdd ==> ', error.stack);
+        }
+    }
+
+    /**
+    * Method Name: handleCloneClick
+    * @description: Opens the clone modal and stores the template Id, object API and type to clone
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneClick(event) {
+        try {
+            this.selectedCloneTemplateId   = event.currentTarget.dataset.id;
+            this.selectedCloneObjectApi    = event.currentTarget.dataset.objectapi || '';
+            this.selectedCloneTemplateType = event.currentTarget.dataset.type || '';
+            this.cloneTemplateName = '';
+            this.isCloneModalOpen = true;
+        } catch (error) {
+            console.log('Error in handleCloneClick ==> ', error.stack);
+        }
+    }
+
+    /**
+    * Method Name: handleCloneModalClose
+    * @description: Closes the clone modal and resets state
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneModalClose() {
+        try {
+            this.isCloneModalOpen = false;
+            this.cloneTemplateName = '';
+            this.selectedCloneTemplateId   = null;
+            this.selectedCloneObjectApi    = '';
+            this.selectedCloneTemplateType = '';
+        } catch (error) {
+            console.log('Error in handleCloneModalClose ==> ', error.stack);
+        }
+    }
+
+    /**
+    * Method Name: handleCloneNameChange
+    * @description: Tracks the clone template name input
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneNameChange(event) {
+        this.cloneTemplateName = event.target.value;
+    }
+
+    /**
+    * Method Name: get isCloneDisabled
+    * @description: Returns true when clone name input is empty
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    get isCloneDisabled() {
+        return !this.cloneTemplateName || this.cloneTemplateName.trim() === '';
+    }
+
+    /**
+    * Method Name: handleCloneConfirm
+    * @description: Calls the Apex cloneTemplate method; on success navigates to the
+    *               template editor for the newly created clone (same as handleEdit).
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloneConfirm() {
+        try {
+            if (!this.cloneTemplateName || this.cloneTemplateName.trim() === '') {
+                this.showToast('Error', 'Please enter a name for the cloned template.', 'error');
+                return;
+            }
+            this.isLoading = true;
+            this.isCloneModalOpen = false;
+            const clonedName = this.cloneTemplateName.trim();
+            cloneTemplate({
+                templateId: this.selectedCloneTemplateId,
+                newName: clonedName
+            })
+                .then(result => {
+                    this.isLoading = false;
+                    if (result && result.status === 'success') {
+                        this.showToast('Success', `Template cloned as '${clonedName}' successfully.`, 'success');
+                        // Navigate to editor for the new clone — same pattern as handleEdit
+                        const componentDef = {
+                            componentDef: 'MVEX:templateEditor',
+                            attributes: {
+                                objectName:   result.objectApiName || this.selectedCloneObjectApi,
+                                templateId:   result.clonedId,
+                                templateType: result.templateType  || this.selectedCloneTemplateType
+                            }
+                        };
+                        const encodedDef = btoa(JSON.stringify(componentDef));
+                        this[NavigationMixin.Navigate]({
+                            type: 'standard__webPage',
+                            attributes: {
+                                url: '/one/one.app#' + encodedDef
+                            }
+                        });
+                    } else {
+                        this.showToast('Error', (result && result.message) ? result.message : 'Error cloning template.', 'error');
+                    }
+                    this.cloneTemplateName         = '';
+                    this.selectedCloneTemplateId   = null;
+                    this.selectedCloneObjectApi    = '';
+                    this.selectedCloneTemplateType = '';
+                })
+                .catch(error => {
+                    this.isLoading = false;
+                    this.showToast('Error', error?.body?.message || 'Error cloning template.', 'error');
+                    this.cloneTemplateName         = '';
+                    this.selectedCloneTemplateId   = null;
+                    this.selectedCloneObjectApi    = '';
+                    this.selectedCloneTemplateType = '';
+                });
+        } catch (error) {
+            this.isLoading = false;
+            console.log('Error in handleCloneConfirm ==> ', error.stack);
         }
     }
 
@@ -870,7 +994,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     }
 
     handleConfirmation(event) {
-        if(event.detail === true){
+        if (event.detail === true) {
             this.isLoading = true;
             const templateId = this.selectedTemplateId;
             const templateIndex = this.templates.findIndex(tmpl => tmpl.Id === templateId);
@@ -919,7 +1043,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     handleOutsideClick(event) {
         const dropdown = this.template.querySelector('.filter-dropdown-box');
         const filterIcon = this.template.querySelector('.filter-icon-container');
-        
+
         // Only close if the click is outside both the dropdown and filter icon
         if (dropdown && filterIcon && !event.composedPath().includes(dropdown) && !event.composedPath().includes(filterIcon)) {
             this.showMoreFilters = false;
@@ -1038,7 +1162,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                     fromDate.setHours(0, 0, 0, 0);
                     const toDate = new Date(this.dateTo);
                     toDate.setHours(23, 59, 59, 999);
-                    
+
                     if (templateDate.getTime() < fromDate.getTime() || templateDate.getTime() > toDate.getTime()) {
                         matches = false;
                     }

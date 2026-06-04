@@ -2393,3 +2393,10 @@ input[type="radio"]:checked+label .sizeInputLable {
   padding: 20px;
   font-size: 13px;
 }
+/* Duplicate template name error shown below name input in Basic Details tab */
+.templateNameDuplicateError {
+  font-size: 12px;
+  color: #DC2626;
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}

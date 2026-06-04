@@ -335,7 +335,7 @@
     </div>
 
     <template if:true={isModalOpen}>
-        <c-custom-modal onclose={handleModalClose}></c-custom-modal>
+        <c-custom-modal onclose={handleModalClose} existing-templates={templates}></c-custom-modal>
     </template>
 
     <template if:true={isPreviewModal}>
@@ -349,31 +349,46 @@
         <section role="dialog" tabindex="-1" aria-labelledby="clone-modal-heading" aria-modal="true"
             aria-describedby="clone-modal-content" class="slds-modal slds-fade-in-open slds-modal_small">
             <div class="slds-modal__container">
+
+                <!-- Close (X) button -->
                 <div class="slds-modal__close close-icon-css" onclick={handleCloneModalClose}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                            fill="#1F2937" />
+                            fill="currentColor" />
                     </svg>
                 </div>
+
+                <!-- Header -->
                 <div class="slds-modal__header clone-blue-header">
                     <h1 id="clone-modal-heading" class="slds-modal__title slds-hyphenate" tabindex="-1">Clone Template
                     </h1>
                 </div>
+
+                <!-- Body + Footer -->
                 <div class="slds-modal__content clone-modalbody" id="clone-modal-content">
                     <div class="clone-content_body">
-                        <div class="clone-custom-input-container">
-                            <div class="clone-label-container">
-                                <label><span class="clone-red">*</span>New Template Name</label>
-                            </div>
-                            <div class="clone-input-container">
-                                <lightning-input placeholder="Enter name for the cloned template"
-                                    name="cloneTemplateName" value={cloneTemplateName} variant="label-hidden"
-                                    onchange={handleCloneNameChange} maxlength="255">
-                                </lightning-input>
-                            </div>
+                        <p class="clone-modal-subtitle">
+                            Enter a unique name for the cloned template. The template content, layout, and
+                            configuration will be duplicated as a new inactive copy — so you can customise
+                            it independently without affecting the original.
+                        </p>
+                        <div class="clone-name-field">
+                            <label class="clone-name-label" for="cloneTemplateNameInput">
+                                <span class="clone-red">*</span> New Template Name
+                            </label>
+                            <input id="cloneTemplateNameInput" type="text" class="clone-name-input"
+                                placeholder="Enter name for the cloned template"
+                                value={cloneTemplateName}
+                                maxlength="255"
+                                oninput={handleCloneNameChange} />
+                            <template if:true={cloneNameError}>
+                                <p class="clone-name-error">{cloneNameError}</p>
+                            </template>
                         </div>
                     </div>
+
+                    <!-- Footer buttons -->
                     <div class="clone-footerbtns">
                         <button onclick={handleCloneModalClose} class="white-btn-css">
                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
@@ -398,6 +413,7 @@
                         </button>
                     </div>
                 </div>
+
             </div>
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>

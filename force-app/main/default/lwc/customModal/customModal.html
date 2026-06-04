@@ -23,6 +23,9 @@
                             <lightning-input placeholder="Template Name" name="templateName" value={templateNameValue}
                                 variant="label-hidden" onchange={handleInputChange} maxlength="255">
                             </lightning-input>
+                            <template if:true={templateNameError}>
+                                <p class="template-name-error">{templateNameError}</p>
+                            </template>
                         </div>
                     </div>
                     <div class="custom-input-container">

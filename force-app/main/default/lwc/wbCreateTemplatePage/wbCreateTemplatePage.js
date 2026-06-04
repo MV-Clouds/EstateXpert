@@ -2555,11 +2555,16 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     checkTemplateExistence() {
         try {
-
             if (Array.isArray(this.allTemplates)) {
-                this.templateExists = this.allTemplates.some(
-                    template => template.MVEX__Template_Name__c?.toLowerCase() === this.templateName?.toLowerCase()
-                );
+                this.templateExists = this.allTemplates.some(template => {
+                    // When editing (not cloning), skip the current template's own record
+                    const isCurrentTemplate = this.isEditTemplate && !this.isTemplateClone
+                        && template.MVEX__Template_Id__c
+                        && this.metaTemplateId
+                        && template.MVEX__Template_Id__c === this.metaTemplateId;
+                    if (isCurrentTemplate) return false;
+                    return template.MVEX__Template_Name__c?.toLowerCase() === this.templateName?.toLowerCase();
+                });
             } else {
                 console.warn('allTemplates is not an array or is null/undefined');
                 this.templateExists = false;
@@ -2567,7 +2572,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         } catch (error) {
             this.showToast(error.message || 'An error occurred while checking template existence.', 'error');
         }
-
     }
 
     handleRemove(event) {

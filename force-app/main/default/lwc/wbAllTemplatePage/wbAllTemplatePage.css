@@ -586,31 +586,57 @@
     flex-shrink: 0;
 }
 
+/* Subtitle description paragraph */
+.clone-modal-subtitle {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+}
+
+/* Name field wrapper (label above input) */
+.clone-name-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.clone-name-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Input sits below the label */
+.clone-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* Kept for legacy selectors that used the old side-by-side layout */
 .clone-custom-input-container {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
     gap: 0.75rem;
 }
 
 .clone-label-container {
-    flex: 0 0 35%;
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;
     color: #1F2937;
 }
 
-.clone-input-container {
-    flex: 1;
-}
-
 .clone-red {
-    color: red;
+    color: #DC2626;
+    margin-right: 2px;
 }
 
 .clone-name-error {
-    font-size: 0.75rem;
-    margin-top: 4px;
+    font-size: 12px;
+    color: #DC2626;
+    margin: 0;
     display: block;
 }
 

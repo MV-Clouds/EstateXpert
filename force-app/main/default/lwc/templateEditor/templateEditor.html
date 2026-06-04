@@ -162,6 +162,9 @@
                             message-when-pattern-mismatch="Complete this field." maxlength="255" required="true"
                             variant="label-hidden" class="fieldInput" value={templateRecord.MVEX__Template_Name__c}
                             data-name="MVEX__Template_Name__c" onkeyup={handleEditDetail}></lightning-input>
+                          <template if:true={templateNameError}>
+                            <p class="templateNameDuplicateError">{templateNameError}</p>
+                          </template>
                         </div>
                         <div class="editDescription editField">
                           <div class="floatingLabel">Description</div>

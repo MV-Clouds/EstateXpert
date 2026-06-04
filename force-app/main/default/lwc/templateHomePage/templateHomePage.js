@@ -25,6 +25,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     @track isPreviewModal = false;
     @track isCloneModalOpen = false;
     @track cloneTemplateName = '';
+    @track cloneNameError = '';
     @track selectedCloneTemplateId;
     @track selectedCloneObjectApi = '';
     @track selectedCloneTemplateType = '';
@@ -732,7 +733,8 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     handleCloneModalClose() {
         try {
             this.isCloneModalOpen = false;
-            this.cloneTemplateName = '';
+            this.cloneTemplateName         = '';
+            this.cloneNameError            = '';
             this.selectedCloneTemplateId   = null;
             this.selectedCloneObjectApi    = '';
             this.selectedCloneTemplateType = '';
@@ -743,22 +745,49 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
 
     /**
     * Method Name: handleCloneNameChange
-    * @description: Tracks the clone template name input
+    * @description: Tracks the clone template name input and validates for duplicates in real-time.
     * Created Date: 04/06/2026
     * Created By: Karan Singh
     */
     handleCloneNameChange(event) {
         this.cloneTemplateName = event.target.value;
+        this.validateCloneName(this.cloneTemplateName);
+    }
+
+    /**
+    * Method Name: validateCloneName
+    * @description: Returns true if valid; sets cloneNameError otherwise.
+    *               Checks the name is non-empty and not already used by any existing template.
+    * Created Date: 04/06/2026
+    * Created By: Karan Singh
+    */
+    validateCloneName(name) {
+        const trimmed = (name || '').trim();
+        if (!trimmed) {
+            this.cloneNameError = 'Template name is required.';
+            return false;
+        }
+        const duplicate = this.templates.find(
+            t => t.MVEX__Template_Name__c
+             && t.MVEX__Template_Name__c !== '-'
+             && t.MVEX__Template_Name__c.trim().toLowerCase() === trimmed.toLowerCase()
+        );
+        if (duplicate) {
+            this.cloneNameError = 'A template with this name already exists. Please choose a different name.';
+            return false;
+        }
+        this.cloneNameError = '';
+        return true;
     }
 
     /**
     * Method Name: get isCloneDisabled
-    * @description: Returns true when clone name input is empty
+    * @description: Returns true when clone name input is empty or has a validation error.
     * Created Date: 04/06/2026
     * Created By: Karan Singh
     */
     get isCloneDisabled() {
-        return !this.cloneTemplateName || this.cloneTemplateName.trim() === '';
+        return !this.cloneTemplateName || this.cloneTemplateName.trim() === '' || !!this.cloneNameError;
     }
 
     /**
@@ -770,8 +799,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     */
     handleCloneConfirm() {
         try {
-            if (!this.cloneTemplateName || this.cloneTemplateName.trim() === '') {
-                this.showToast('Error', 'Please enter a name for the cloned template.', 'error');
+            if (!this.validateCloneName(this.cloneTemplateName)) {
                 return;
             }
             this.isLoading = true;
@@ -805,6 +833,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                         this.showToast('Error', (result && result.message) ? result.message : 'Error cloning template.', 'error');
                     }
                     this.cloneTemplateName         = '';
+                    this.cloneNameError            = '';
                     this.selectedCloneTemplateId   = null;
                     this.selectedCloneObjectApi    = '';
                     this.selectedCloneTemplateType = '';
@@ -813,6 +842,7 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
                     this.isLoading = false;
                     this.showToast('Error', error?.body?.message || 'Error cloning template.', 'error');
                     this.cloneTemplateName         = '';
+                    this.cloneNameError            = '';
                     this.selectedCloneTemplateId   = null;
                     this.selectedCloneObjectApi    = '';
                     this.selectedCloneTemplateType = '';

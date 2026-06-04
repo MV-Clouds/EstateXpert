@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getAllObjectNames from '@salesforce/apex/TemplateBuilderController.getAllObjectNames';
 import insertTemplate from '@salesforce/apex/TemplateBuilderController.insertTemplate';
@@ -12,6 +12,7 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
     @track backupObjectOptions;
     @track templateTypeOptions;
     @track templateNameValue = '';
+    @track templateNameError = '';       // inline error for duplicate / empty names
     @track descriptionValue = '';
     @track selectedObjectAPIName = '';
     @track selectedObjectLabel = '';
@@ -23,6 +24,12 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
     @track isSaving = false;
 
     /**
+    * @api existingTemplates - List of template records passed in by the parent (templateHomePage).
+    *   Used for client-side duplicate-name validation without an extra Apex call.
+    */
+    @api existingTemplates = [];
+
+    /**
     * @description: Returns true while the form is incomplete or a save is already in flight.
     *               Drives the disabled state of the Save button.
     */
@@ -32,6 +39,8 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
             this.templateTypeSelectValue &&
             this.selectedObjectAPIName;
         if (!baseFieldsFilled) return true;
+        // Block if the name is a duplicate
+        if (this.templateNameError) return true;
         // Subject is required only for Marketing Template
         if (this.templateTypeSelectValue === 'Marketing Template' && !this.subjectValue) return true;
         // Disable while the save callout is in-flight
@@ -107,6 +116,32 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
         } catch (error) {
             console.log('Error in fetchObjectNames -> ', error.stack);
         }
+    }
+
+    /**
+    * Method Name: validateTemplateName
+    * @description: Sets templateNameError if the entered name already belongs to an existing
+    *               template (checked against the list passed in by the parent component);
+    *               clears the error otherwise.
+    * @param {String} name - the name typed by the user
+    * @return {Boolean} true = valid (no duplicate), false = duplicate found
+    */
+    validateTemplateName(name) {
+        const trimmed = (name || '').trim();
+        if (!trimmed) {
+            this.templateNameError = 'Template name is required.';
+            return false;
+        }
+        const templates = Array.isArray(this.existingTemplates) ? this.existingTemplates : [];
+        const duplicate = templates.find(
+            t => t.MVEX__Template_Name__c?.trim().toLowerCase() === trimmed.toLowerCase()
+        );
+        if (duplicate) {
+            this.templateNameError = 'A template with this name already exists. Please choose a different name.';
+            return false;
+        }
+        this.templateNameError = '';
+        return true;
     }
 
     /**
@@ -210,6 +245,7 @@ export default class CustomModal extends NavigationMixin(LightningElement) {
 
             if (field === 'templateName') {
                 this.templateNameValue = value?.trim();
+                this.validateTemplateName(this.templateNameValue);
             } else if (field === 'description') {
                 this.descriptionValue = value?.trim();
             } else if (field === 'objectSelect') {

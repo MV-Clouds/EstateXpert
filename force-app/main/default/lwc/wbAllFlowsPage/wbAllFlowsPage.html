@@ -2,7 +2,7 @@
     <template if:true={isLoading}>
         <c-spinner-component></c-spinner-component>
     </template>
-    
+
     <template if:false={isNameClicked}>
         <template if:true={isFlowVisible}>
             <div class="slds-theme_default main">
@@ -44,8 +44,8 @@
                         </div>
                     </div>
                 </div>
-    
-    
+
+
                 <div class="main_content_cls">
                     <template if:true={paginatedData.length}>
                         <div class="table-content">
@@ -55,11 +55,11 @@
                                         <th scope="col" class="sno">
                                             <div>No.</div>
                                         </th>
-                                        <th data-id="MVEX__Flow_Name__c" onclick={sortClick}
-                                            aria-sort="none"
+                                        <th data-id="MVEX__Flow_Name__c" onclick={sortClick} aria-sort="none"
                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                             scope="col">
-                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                role="button" tabindex="0">
                                                 <span class="slds-truncate" title="Title">Flow Name</span>
                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                     <svg data-index="MVEX__Flow_Name__c" class="listing-manager-icon"
@@ -70,11 +70,11 @@
                                                 </span>
                                             </div>
                                         </th>
-                                        <th data-id="MVEX__Flow_Id__c" onclick={sortClick}
-                                            aria-sort="none"
+                                        <th data-id="MVEX__Flow_Id__c" onclick={sortClick} aria-sort="none"
                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                             scope="col">
-                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                role="button" tabindex="0">
                                                 <span class="slds-truncate" title="Title">Flow ID</span>
                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                     <svg data-index="MVEX__Flow_Id__c" class="listing-manager-icon"
@@ -85,11 +85,11 @@
                                                 </span>
                                             </div>
                                         </th>
-                                        <th data-id="MVEX__Status__c" onclick={sortClick}
-                                            aria-sort="none"
+                                        <th data-id="MVEX__Status__c" onclick={sortClick} aria-sort="none"
                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                             scope="col">
-                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                role="button" tabindex="0">
                                                 <span class="slds-truncate" title="Title">Status</span>
                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                     <svg data-index="MVEX__Status__c" class="listing-manager-icon"
@@ -100,11 +100,11 @@
                                                 </span>
                                             </div>
                                         </th>
-                                        <th data-id="LastModifiedDate" onclick={sortClick}
-                                            aria-sort="none"
+                                        <th data-id="LastModifiedDate" onclick={sortClick} aria-sort="none"
                                             class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
                                             scope="col">
-                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                role="button" tabindex="0">
                                                 <span class="slds-truncate" title="Title">Last Updated</span>
                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                     <svg data-index="LastModifiedDate" class="listing-manager-icon"
@@ -127,8 +127,8 @@
                                                 <div>{record.serialNumber}</div>
                                             </td>
                                             <td data-label="Flow Name" class="truncate_css">
-                                                <a onclick={handleFlowNameClick} data-id={record.MVEX__Flow_Id__c} 
-                                                data-name={record.MVEX__Flow_Name__c}>{record.MVEX__Flow_Name__c}</a>
+                                                <a onclick={handleFlowNameClick} data-id={record.MVEX__Flow_Id__c}
+                                                    data-name={record.MVEX__Flow_Name__c}>{record.MVEX__Flow_Name__c}</a>
                                             </td>
                                             <td data-label="Flow Id" class="truncate_css">
                                                 <div>{record.MVEX__Flow_Id__c}</div>
@@ -146,8 +146,10 @@
                                                             <button class="preview-icon-css" data-id={record.Id}
                                                                 onclick={previewTemplate}>
                                                                 <svg width="15" height="15" fill="#000000"
-                                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                                                                    enable-background="new 0 0 52 52" xml:space="preserve">
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 52 52"
+                                                                    enable-background="new 0 0 52 52"
+                                                                    xml:space="preserve">
                                                                     <path
                                                                         d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
                                                                     </path>
@@ -158,21 +160,39 @@
                                                             </button>
                                                         </template>
                                                         <template if:true={record.isEditable}>
-                                                            <button class="edit-icon-css" data-id={record.Id} data-name={record.MVEX__Flow_Name__c}
+                                                            <button class="edit-icon-css" data-id={record.Id}
+                                                                data-name={record.MVEX__Flow_Name__c}
                                                                 data-status={record.MVEX__Status__c} onclick={editFlow}>
-                                                                <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                <svg width="15" height="15" viewBox="0 0 14 14"
+                                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                     <path
                                                                         d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
                                                                         stroke="#212529" stroke-width="1.25"
-                                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round" />
+                                                                </svg>
+                                                            </button>
+                                                        </template>
+                                                        <template if:false={record.isDeprecated}>
+                                                            <button class="clone-icon-css" title="Clone Flow"
+                                                                data-id={record.Id}
+                                                                data-name={record.MVEX__Flow_Name__c}
+                                                                onclick={openCloneModal}>
+                                                                <svg width="15" height="15" viewBox="0 0 24 24"
+                                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M8 8H7.2C6.0799 8 5.51984 8 5.09202 8.21799C4.71569 8.40973 4.40973 8.71569 4.21799 9.09202C4 9.51984 4 10.0799 4 11.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H12.8C13.9201 20 14.4802 20 14.908 19.782C15.2843 19.5903 15.5903 19.2843 15.782 18.908C16 18.4802 16 17.9201 16 16.8V16M11.2 16H16.8C17.9201 16 18.4802 16 18.908 15.782C19.2843 15.5903 19.5903 15.2843 19.782 14.908C20 14.4802 20 13.9201 20 12.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H11.2C10.0799 4 9.51984 4 9.09202 4.21799C8.71569 4.40973 8.40973 4.71569 8.21799 5.09202C8 5.51984 8 6.07989 8 7.2V12.8C8 13.9201 8 14.4802 8.21799 14.908C8.40973 15.2843 8.71569 15.5903 9.09202 15.782C9.51984 16 10.0799 16 11.2 16Z"
+                                                                        stroke="#000000" stroke-width="2"
+                                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                                    </path>
                                                                 </svg>
                                                             </button>
                                                         </template>
                                                     </template>
                                                     <template if:true={record.isPublished}>
                                                         <button class="delete-icon-css" data-id={record.Id}
-                                                            data-status={record.MVEX__Status__c} onclick={deprecateFlow}>
+                                                            data-status={record.MVEX__Status__c}
+                                                            onclick={deprecateFlow}>
                                                             <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
                                                                 <path
@@ -224,7 +244,7 @@
                                 </svg>
                                 Previous
                             </button>
-    
+
                             <template for:each={pageNumbers} for:item="page">
                                 <template if:false={page.isEllipsis}>
                                     <button key={page.number} data-id={page.number} class={page.className}
@@ -236,7 +256,7 @@
                                     <span key={page.number} class="pagination-ellipsis">...</span>
                                 </template>
                             </template>
-    
+
                             <button class="pagination-button" disabled={isLastPage} onclick={handleNext}>
                                 Next
                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
@@ -248,7 +268,7 @@
                         </div>
                     </template>
                 </div>
-    
+
                 <template if:true={showPopup}>
                     <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
                         aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
@@ -258,7 +278,8 @@
                                     <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Flow Preview</h1>
                                 </div>
                                 <div class="previewContainer">
-                                    <c-wb-flow-preview jsonstringdata={selectedFlowJson} flowname={selectedFlowName} selectedtheme="light"></c-wb-flow-preview>
+                                    <c-wb-flow-preview jsonstringdata={selectedFlowJson} flowname={selectedFlowName}
+                                        selectedtheme="light"></c-wb-flow-preview>
                                 </div>
                                 <div class="footer">
                                     <button class="white-btn-css" onclick={closePopup}>
@@ -276,23 +297,93 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                     </section>
                     <div class="slds-backdrop slds-backdrop_open" onclick={closePopup}></div>
                 </template>
             </div>
         </template>
-        
+
         <template if:true={iscreateflowvisible}>
             <div>
-                <c-create-flow-management is-edit-mode={isEditMode} is-clone-flow={isCloneFlow} selected-flow-id={selectedFlowId} clone-flow-name={cloneFlowName} onprevious={handleBack}></c-create-flow-management>
+                <c-create-flow-management is-edit-mode={isEditMode} is-clone-flow={isCloneFlow}
+                    selected-flow-id={selectedFlowId} clone-flow-name={cloneFlowName}
+                    onprevious={handleBack}></c-create-flow-management>
             </div>
         </template>
     </template>
-    
+
     <template if:true={isNameClicked}>
         <c-wb-flows-report selected-flow-id={selectedFlowId} selected-flow-name={selectedFlowName}></c-wb-flows-report>
     </template>
-    
+
     <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
+
+    <!-- Clone Flow Modal -->
+    <template if:true={showCloneModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="clone-flow-modal-heading" aria-modal="true"
+            aria-describedby="clone-flow-modal-content" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+
+                <!-- Close (X) button -->
+                <div class="slds-modal__close close-icon-css" onclick={cancelClone}>
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="currentColor" />
+                    </svg>
+                </div>
+
+                <!-- Header -->
+                <header class="slds-modal__header clone-blue-header">
+                    <h1 id="clone-flow-modal-heading" class="slds-modal__title slds-hyphenate">
+                        Clone Flow
+                    </h1>
+                </header>
+
+                <!-- Body + Footer -->
+                <div class="slds-modal__content clone-modalbody" id="clone-flow-modal-content">
+                    <div class="clone-content_body">
+                        <p class="clone-modal-subtitle">
+                            Enter a unique name for the cloned flow. The flow and all its screens
+                            will be duplicated as a new Draft in your account.
+                        </p>
+                        <div class="clone-name-field">
+                            <label class="clone-name-label" for="cloneFlowNameInput">Flow Name</label>
+                            <input id="cloneFlowNameInput" type="text" class="clone-name-input"
+                                placeholder="Enter clone name" value={cloneNameInput} maxlength={MAX_FLOW_NAME_LENGTH}
+                                oninput={handleCloneNameInput} />
+                            <template if:true={cloneNameError}>
+                                <p class="clone-name-error">{cloneNameError}</p>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Footer buttons -->
+                    <div class="clone-footerbtns">
+                        <button class="white-btn-css" onclick={cancelClone} disabled={isCloning}>
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <button class="blue-btn-css" onclick={confirmClone} disabled={isCloneSubmitDisabled}>
+                            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M16.7071 5.29289C17.0976 5.68342 17.0976 6.31658 16.7071 6.70711L8.70711 14.7071C8.31658 15.0976 7.68342 15.0976 7.29289 14.7071L3.29289 10.7071C2.90237 10.3166 2.90237 9.68342 3.29289 9.29289C3.68342 8.90237 4.31658 8.90237 4.70711 9.29289L8 12.5858L15.2929 5.29289C15.6834 4.90237 16.3166 4.90237 16.7071 5.29289Z"
+                                    fill="white" />
+                            </svg>
+                            Clone Flow
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" onclick={cancelClone}></div>
+    </template>
 </template>

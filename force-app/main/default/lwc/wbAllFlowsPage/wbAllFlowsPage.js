@@ -4,6 +4,7 @@ import publishWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.publish
 import deleteWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.deleteWhatsAppFlow';
 import deprecateWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.deprecateWhatsAppFlow';
 import getFlowByIdWithScreens from '@salesforce/apex/WhatsAppFlowControllerV2.getFlowByIdWithScreens';
+import cloneWhatsAppFlow from '@salesforce/apex/WhatsAppFlowControllerV2.cloneWhatsAppFlow';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo, getPicklistValues } from "lightning/uiObjectInfoApi";
 import FLOW_OBJECT from "@salesforce/schema/Flow__c";
@@ -28,6 +29,15 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     @track isEditMode = false;
     @track isCloneFlow = false;
     @track cloneFlowName = '';
+
+    // Clone modal state
+    @track showCloneModal = false;
+    @track cloneNameInput = '';
+    @track cloneNameError = '';
+    @track isCloning = false;
+    @track cloneSourceId = '';       // Salesforce record Id of the flow being cloned
+
+    MAX_FLOW_NAME_LENGTH = 150;
     @track selectedFlowId = '';
     @track currentPage = 1;
     @track pageSize = 20;
@@ -434,6 +444,114 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         this.isFlowVisible = false;
         this.iscreateflowvisible = true;
     }
+
+    /**
+     * Method Name : openCloneModal
+     * @description : Opens the clone-name modal for a given flow record.
+     * Created By: Karan Singh
+     */
+    openCloneModal(event) {
+        try {
+            this.cloneSourceId  = event.currentTarget.dataset.id;
+            const sourceName    = event.currentTarget.dataset.name || '';
+            this.cloneNameInput = sourceName + '_copy';
+            this.cloneNameError = '';
+            this.showCloneModal = true;
+        } catch (error) {
+            console.error('Error in openCloneModal:', error);
+        }
+    }
+
+    /**
+     * Method Name : handleCloneNameInput
+     * @description : Validates clone name in real-time.
+     */
+    handleCloneNameInput(event) {
+        this.cloneNameInput = event.target.value;
+        this.validateCloneName(this.cloneNameInput);
+    }
+
+    /**
+     * Method Name : validateCloneName
+     * @description : Returns true if valid, sets cloneNameError otherwise.
+     */
+    validateCloneName(name) {
+        const trimmed = name.trim();
+        if (!trimmed) {
+            this.cloneNameError = 'Flow name is required.';
+            return false;
+        }
+        if (trimmed.length > this.MAX_FLOW_NAME_LENGTH) {
+            this.cloneNameError = `Flow name must not exceed ${this.MAX_FLOW_NAME_LENGTH} characters.`;
+            return false;
+        }
+        // Uniqueness check against already-loaded records
+        const duplicate = this.allRecords.find(
+            r => r.MVEX__Flow_Name__c.trim().toLowerCase() === trimmed.toLowerCase()
+        );
+        if (duplicate) {
+            this.cloneNameError = 'A flow with this name already exists. Please choose a different name.';
+            return false;
+        }
+        this.cloneNameError = '';
+        return true;
+    }
+
+    get isCloneSubmitDisabled() {
+        return this.isCloning || !this.cloneNameInput.trim() || !!this.cloneNameError;
+    }
+
+    /**
+     * Method Name : cancelClone
+     * @description : Closes the clone modal without action.
+     */
+    cancelClone() {
+        this.showCloneModal  = false;
+        this.cloneNameInput  = '';
+        this.cloneNameError  = '';
+        this.cloneSourceId   = '';
+        this.isCloning       = false;
+    }
+
+    /**
+     * Method Name : confirmClone
+     * @description : Calls Apex cloneWhatsAppFlow, then redirects to the
+     *               flow editor in edit mode so the user can start using
+     *               the cloned flow immediately.
+     */
+    async confirmClone() {
+        try {
+            if (!this.validateCloneName(this.cloneNameInput)) {
+                return;
+            }
+            this.isCloning  = true;
+            const resultStr = await cloneWhatsAppFlow({
+                flowId      : this.cloneSourceId,
+                newFlowName : this.cloneNameInput.trim()
+            });
+            const result = JSON.parse(resultStr);
+            if (result.success) {
+                this.showToast('Success', 'Flow cloned successfully', 'success');
+                this.showCloneModal      = false;
+                this.cloneNameInput      = '';
+                this.cloneNameError      = '';
+                this.cloneSourceId       = '';
+                // Navigate to the flow editor with the newly cloned flow
+                this.selectedFlowId      = result.flowRecordId;
+                this.isEditMode          = true;
+                this.isCloneFlow         = false;
+                this.isFlowVisible       = false;
+                this.iscreateflowvisible = true;
+            } else {
+                this.cloneNameError = result.message || 'Failed to clone flow. Please try again.';
+            }
+        } catch (error) {
+            console.error('Error in confirmClone:', error);
+            this.cloneNameError = error.body?.message || 'An unexpected error occurred while cloning.';
+        } finally {
+            this.isCloning = false;
+        }
+    }
     
     deleteFlow(event){
         this.selectedFlowId = event.currentTarget.dataset.id;
@@ -591,12 +709,12 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
 
     handleBack(){
         this.iscreateflowvisible = false;
-        this.isNameClicked = false;
-        this.isFlowVisible = true;
-        this.isEditMode = false;
-        this.isCloneFlow = false;
-        this.selectedFlowId = '';
-        this.cloneFlowName = '';
+        this.isNameClicked       = false;
+        this.isFlowVisible       = true;
+        this.isEditMode          = false;
+        this.isCloneFlow         = false;
+        this.selectedFlowId      = '';
+        this.cloneFlowName       = '';
         this.fetchWhatsAppFlows();
     }
 }

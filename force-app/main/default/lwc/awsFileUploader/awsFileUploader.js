@@ -8,6 +8,7 @@ import buffer from 'c/buffer';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
+import thumbnailUrl from '@salesforce/label/c.thumbnail';
 
 export default class AwsFileUploader extends LightningElement {
 
@@ -29,7 +30,7 @@ export default class AwsFileUploader extends LightningElement {
     @track selectedUrlType = 'Image';
     @track currentDateTimeWithSeconds = '';
     @track logo;
-    @track thumbnail = 'https://estatexpertlistingimages.s3.us-east-1.amazonaws.com/videothumbnail.jpeg';
+    @track thumbnail = thumbnailUrl;
     @track fileURL = [];
     @track isContentVersionDataIsAvailable = false;
     @track isAWS = true;

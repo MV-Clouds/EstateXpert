@@ -544,6 +544,11 @@
     color: #999;
 }
 
+.char-count-warning {
+    color: #d32f2f;
+    font-weight: 600;
+}
+
 .caption-textarea {
     width: 100%;
     padding: 12px;

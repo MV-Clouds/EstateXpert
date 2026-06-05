@@ -125,6 +125,7 @@
                     <div class="caption-label-wrapper">
                         <label for="caption"><lightning-icon icon-name='utility:edit' class="custom-icon-edit"
                                 alternative-text='edit' size='x-small' title='edit'></lightning-icon>Caption</label>
+                        <span class={captionCountClass}>{captionLength} / 2200</span>
                     </div>
                     <textarea data-id="caption" placeholder="Write your caption here... Share your story!"
                         maxlength="2200" class="caption-textarea" value={caption}

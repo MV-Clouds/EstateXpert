@@ -29,6 +29,7 @@ export default class InstagramPostFromListing extends LightningElement {
     @track isAwsSdkInitialized = true;
     @track picaInstance;
     @track caption = '';
+    @track captionLength = 0;
     @track noUploadImageLink = NoUploadImage;
     @track progressText = 'Uploading Files...';
     @track progressStyle = 'width: 0%';
@@ -70,6 +71,10 @@ export default class InstagramPostFromListing extends LightningElement {
         return this.isFileAvailable
             ? 'submit-button-selected'
             : 'submit-button-empty';
+    }
+
+    get captionCountClass() {
+        return this.captionLength >= 2100 ? 'char-count char-count-warning' : 'char-count';
     }
 
     @wire(CurrentPageReference)
@@ -345,6 +350,7 @@ export default class InstagramPostFromListing extends LightningElement {
     handleCaptionChange(event) {
         const caption = event.target.value;
         this.caption = caption;
+        this.captionLength = caption.length;
     }
 
     /**

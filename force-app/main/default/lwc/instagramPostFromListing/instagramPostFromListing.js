@@ -76,7 +76,6 @@ export default class InstagramPostFromListing extends LightningElement {
     setCurrentPageReference(pageRef) {
         if (pageRef && pageRef.state && pageRef.state.recordId) {
             this.listingId = pageRef.state.recordId;
-            console.log('listingId-->', this.listingId);
             this.fetchPropertyMediaUrls();
         }
     }
@@ -89,13 +88,7 @@ export default class InstagramPostFromListing extends LightningElement {
     * Last modified by : Rachit Shah
     */
     connectedCallback() {
-        loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('Css loaded successfully');
-            })
-            .catch(error => {
-                console.log('Error loading Css', error);
-            });
+        loadStyle(this, MulishFontCss);
 
         this.getS3ConfigDataAsync();
         this.checkInstagramCredentials();
@@ -107,7 +100,6 @@ export default class InstagramPostFromListing extends LightningElement {
             if (this.isAwsSdkInitialized) {
                 Promise.all([loadScript(this, AWS_SDK), loadScript(this, picaLib)])
                     .then(() => {
-                        console.log('Script loaded successfully');
                         this.picaInstance = window.pica();
                     })
                     .catch((error) => {
@@ -117,7 +109,7 @@ export default class InstagramPostFromListing extends LightningElement {
                 this.isAwsSdkInitialized = false;
             }
         } catch (error) {
-            console.log('error in renderedcallback -> ', error);
+            console.error('error in renderedcallback -> ', error);
         }
     }
 
@@ -125,7 +117,6 @@ export default class InstagramPostFromListing extends LightningElement {
         if (this.listingId) {
             getPropertyMediaUrls({ listingId: this.listingId })
                 .then(result => {
-                    console.log('result-->', result);
                     for (const key in result) {
                         if (Object.prototype.hasOwnProperty.call(result, key)) {
                             const fileUrl = result[key];
@@ -153,7 +144,6 @@ export default class InstagramPostFromListing extends LightningElement {
         try {
             getS3ConfigSettings()
                 .then(result => {
-                    console.log('result--> ', result);
                     if (result.status) {
                         this.confData = result.awsConfigData;
                         this.isContentVersionDataIsAvailable = result.contentVersionData !== '' ? true : false;
@@ -161,17 +151,17 @@ export default class InstagramPostFromListing extends LightningElement {
                         this.initializeAwsSdk(this.confData);
                     } else {
                         this.hasAWSCredentials = false;
-                        console.log('AWS credentials not configured');
+                        console.error('AWS credentials not configured');
                     }
                     this.isLoading = false;
                 }).catch(error => {
                     this.hasAWSCredentials = false;
-                    console.log('error in apex -> ', error.stack);
+                    console.error('error in apex -> ', error.stack);
                     this.isLoading = false;
                 });
         } catch (error) {
             this.hasAWSCredentials = false;
-            console.log('error in getS3ConfigDataAsync -> ', error.stack);
+            console.error('error in getS3ConfigDataAsync -> ', error.stack);
             this.isLoading = false;
         }
     }
@@ -182,18 +172,18 @@ export default class InstagramPostFromListing extends LightningElement {
                 .then(result => {
                     this.hasInstagramCredentials = result;
                     if (!result) {
-                        console.log('Instagram credentials not configured');
+                        console.error('Instagram credentials not configured');
                     }
                     this.isLoading = false;
                 })
                 .catch(error => {
                     this.hasInstagramCredentials = false;
-                    console.log('error checking Instagram credentials -> ', error);
+                    console.error('error checking Instagram credentials -> ', error);
                     this.isLoading = false;
                 });
         } catch (error) {
             this.hasInstagramCredentials = false;
-            console.log('error in checkInstagramCredentials -> ', error.stack);
+            console.error('error in checkInstagramCredentials -> ', error.stack);
             this.isLoading = false;
         }
     }
@@ -219,7 +209,7 @@ export default class InstagramPostFromListing extends LightningElement {
 
         } catch (error) {
             this.showSpinner = false;
-            console.log("error initializeAwsSdk ", error);
+            console.error("error initializeAwsSdk ", error);
         }
     }
 
@@ -309,9 +299,6 @@ export default class InstagramPostFromListing extends LightningElement {
                 this.showToast('Error', `File(s) too large: ${this.largeImageFiles.join(', ')}`, 'error');
             }
 
-            console.log('selectedFileWithPreview:', this.selectedFileWithPreview);
-            console.log('selectedFilesToUpload:', this.selectedFilesToUpload);
-
         } catch (error) {
             console.error('Error in file drop handling:', error.stack);
         }
@@ -334,7 +321,7 @@ export default class InstagramPostFromListing extends LightningElement {
             const jpegBlob = await this.picaInstance.toBlob(canvas, 'image/jpeg', 0.90);
             return new File([jpegBlob], file.name.replace(/\.[^/.]+$/, ".jpeg"), { type: 'image/jpeg' });
         } catch (error) {
-            console.log('error in convertToJpeg -> ', error.stack);
+            console.error('error in convertToJpeg -> ', error.stack);
         }
     }
 
@@ -503,20 +490,31 @@ export default class InstagramPostFromListing extends LightningElement {
                 const isCarousel = this.selectedFileWithPreview.length > 0 || files.length > 1;
 
                 const fileProcessingPromises = [];
+                let invalidFileTypes = [];
 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const fileType = file.type;
                     const fileSizeInKB = Math.floor(file.size / 1024);
-                    const fileSizeInMB = file.size / (1024 * 1024);
+
+                    // Validate file type — must be one of the accepted types (also blocks .jfif via extension)
+                    const acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'];
+                    const blockedExtensions = ['.jfif', '.jpe'];
+                    const lowerFileName = file.name.toLowerCase();
+                    const isValidFileType = acceptedTypes.includes(fileType) && !blockedExtensions.some(ext => lowerFileName.endsWith(ext));
+                    if (!isValidFileType) {
+                        invalidFileTypes.push(file.name);
+                        continue;
+                    }
 
                     // Check basic file size limits
-                    const isAllowedSize = fileType === 'video/mp4'
+                    const isVideo = fileType === 'video/mp4' || fileType === 'video/quicktime';
+                    const isAllowedSize = isVideo
                         ? fileSizeInKB <= 25000  // 25MB for videos
                         : fileSizeInKB <= 8000;   // 8MB for images
 
                     // For videos, validate duration with explicit carousel flag
-                    if (fileType === 'video/mp4') {
+                    if (isVideo) {
                         const validation = await this.validateVideo(file, isCarousel);
                         if (!validation.isValid) {
                             this.invalidVideoDuration.push(validation.errorMessage);
@@ -525,7 +523,7 @@ export default class InstagramPostFromListing extends LightningElement {
                     }
 
                     if (isAllowedSize) {
-                        if (this.picaInstance && file.type !== 'video/mp4') {
+                        if (this.picaInstance && !isVideo) {
                             const jpegFilePromise = this.convertToJpeg(file).then(jpegFile => {
                                 this.selectedFilesToUpload.push(jpegFile);
                                 return {
@@ -557,6 +555,10 @@ export default class InstagramPostFromListing extends LightningElement {
                 this.selectedFileWithPreview = [...this.selectedFileWithPreview, ...fileDataArray];
 
                 // Show error messages for invalid files
+                if (invalidFileTypes.length > 0) {
+                    this.showToast('Error', `Invalid file type(s): ${invalidFileTypes.join(', ')}. Accepted formats: JPG, PNG, WEBP, MP4, MOV`, 'error');
+                }
+
                 if (this.invalidVideoDuration.length > 0) {
                     this.showToast('Error', `Video validation errors:\n${this.invalidVideoDuration.join('\n')}`, 'error');
                 }
@@ -567,9 +569,6 @@ export default class InstagramPostFromListing extends LightningElement {
             }
 
             this.template.querySelector('.slds-file-selector__input').value = null;
-
-            console.log('selectedFileWithPreview:', this.selectedFileWithPreview);
-            console.log('selectedFilesToUpload:', this.selectedFilesToUpload);
 
         } catch (error) {
             console.error('Error in file upload:', error.stack);
@@ -596,7 +595,6 @@ export default class InstagramPostFromListing extends LightningElement {
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
                         const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
-                        console.log('canvas.toDataURL-->', thumbnailDataUrl);
 
                         resolve(thumbnailDataUrl);
                     });
@@ -652,9 +650,6 @@ export default class InstagramPostFromListing extends LightningElement {
 
         }
 
-        console.log('selectedFileWithPreview-->', this.selectedFileWithPreview);
-        console.log('JSON selectedFileWithPreview-->', JSON.stringify(this.selectedFileWithPreview));
-
         this.template.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
         this.template.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
 
@@ -699,7 +694,6 @@ export default class InstagramPostFromListing extends LightningElement {
             this.fileURLs = this.selectedFileWithPreview.map(file => file.preview);
             postToInstagram({ mediaUrls: this.fileURLs, caption: this.caption, awsObjectKeys: this.awsObjectKeys, awsObjectKeysToPreserve: this.awsObjectKeysToPreserve })
                 .then(result => {
-                    console.log('Post to Instagram result -> ', result);
                     if (result.status === 'SUCCESS') {
                         this.showToast('Success', result.message, 'success');
                         this.clearFiles();
@@ -735,8 +729,6 @@ export default class InstagramPostFromListing extends LightningElement {
     }
 
     async uploadToAWS() {
-        console.log('uploadToAWS-->');
-
         if (this.selectedFilesToUpload.length > 0) {
             this.initializeAwsSdk(this.confData);
             this.showSpinner = true;
@@ -759,8 +751,6 @@ export default class InstagramPostFromListing extends LightningElement {
 
                 this.selectedFileWithPreview.forEach(file => {
                     const result = results.find(res => res.key === file.name);
-                    console.log('JSON-->', JSON.stringify(result));
-
 
                     if (result) {
                         file.preview = result.Location;
@@ -772,9 +762,7 @@ export default class InstagramPostFromListing extends LightningElement {
 
                 return true;
             } catch (error) {
-                console.error("Error during AWS upload:", error);
-                console.log('Error Stack-->', error.stack);
-
+                console.error('Error Stack-->', error.stack);
                 return false;
             } finally {
                 setTimeout(() => {

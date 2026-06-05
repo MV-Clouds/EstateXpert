@@ -91,22 +91,27 @@ export default class WaterMarkImageUploader extends LightningElement {
                 return;
             }
 
-            if (files.length > 0 && files[0].type === 'image/png') {
-                if (files[0].size > 4500000) {
+            if (files.length > 0) {
+                const file = files[0];
+                const isPng = file.type === 'image/png' && file.name.toLowerCase().endsWith('.png');
+
+                if (!isPng) {
+                    this.toast('Error', 'Invalid file type. Only PNG images are allowed.', 'error');
+                    return;
+                }
+
+                if (file.size > 4500000) {
                     this.toast('Error', 'File Size is too large', 'error');
                     return;
                 }
 
-                this.filesUploaded.push(files[0]);
-                this.fileName = files[0].name;
-                this.showImagePreview(files[0]);
+                this.filesUploaded.push(file);
+                this.fileName = file.name;
+                this.showImagePreview(file);
                 this.isImageData = true;
                 this.fromData = false;
                 this.fromUploader = true;
                 this.uploaderFlipClass = 'flip-card';
-            }
-            else {
-                this.toast('Error', 'File type incorrect', 'error');
             }
         } catch (error) {
             errorDebugger('WaterMarkImageUploader', 'handleDrop', error, 'warn', 'Error occurred while handling the drop');
@@ -143,18 +148,28 @@ export default class WaterMarkImageUploader extends LightningElement {
             }
 
             if (event.target.files.length > 0) {
-                if (event.target.files[0].size > 4500000) {
-                    this.toast('Error', 'File Size is too large', 'error');
+                const file = event.target.files[0];
+                const isPng = file.type === 'image/png' && file.name.toLowerCase().endsWith('.png');
+
+                if (!isPng) {
+                    this.toast('Error', 'Invalid file type. Only PNG images are allowed.', 'error');
+                    this.template.querySelector('.slds-file-selector__input').value = null;
                     return;
                 }
 
-                this.filesUploaded.push(event.target.files[0]);
-                this.fileName = event.target.files[0].name;
-                this.showImagePreview(event.target.files[0]);
+                if (file.size > 4500000) {
+                    this.toast('Error', 'File Size is too large', 'error');
+                    this.template.querySelector('.slds-file-selector__input').value = null;
+                    return;
+                }
+
+                this.filesUploaded.push(file);
+                this.fileName = file.name;
+                this.showImagePreview(file);
                 this.isImageData = true;
                 this.fromData = false;
                 this.fromUploader = true;
-                this.uploaderFlipClass = 'flip-card'; // Reset flip class
+                this.uploaderFlipClass = 'flip-card';
             }
 
             this.template.querySelector('.slds-file-selector__input').value = null;

@@ -112,25 +112,25 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
             { id: 3, fieldName: 'MVEX__Listing_Type__c', label: 'Listing Type', required: false, disabled: true, value: '' },
             // Listing price fields — Sale shows Listing Price, Rent shows Listed Rent Price + Frequency
             ...(isRent ? [
-                { id: 4,  fieldName: 'MVEX__Listed_Rent_Price__c',     label: 'Listed Rent Price',     required: false, disabled: true,  value: '' },
-                { id: 14, fieldName: 'MVEX__Listed_Rent_Frequency__c', label: 'Listed Rent Frequency', required: false, disabled: true,  value: '' }
+                { id: 4, fieldName: 'MVEX__Listed_Rent_Price__c', label: 'Listed Rent Price', required: false, disabled: true, value: '' },
+                { id: 14, fieldName: 'MVEX__Listed_Rent_Frequency__c', label: 'Listed Rent Frequency', required: false, disabled: true, value: '' }
             ] : [
-                { id: 4,  fieldName: 'MVEX__Listing_Price__c',         label: 'Listing Price',         required: false, disabled: true,  value: '' }
+                { id: 4, fieldName: 'MVEX__Listing_Price__c', label: 'Listing Price', required: false, disabled: true, value: '' }
             ]),
-            { id: 5, fieldName: 'MVEX__Seller_Contact__c', label: 'Seller Contact', required: false, disabled: true,  value: '' },
-            { id: 6, fieldName: 'MVEX__Buyer_Contact__c',  label: 'Buyer Contact',  required: true,  disabled: false, value: '' },
-            { id: 7, fieldName: 'MVEX__Offer_made_by__c', label: 'Offer Made By',   required: true,  disabled: false, value: '' },
+            { id: 5, fieldName: 'MVEX__Seller_Contact__c', label: 'Seller/Lessor Contact', required: false, disabled: true, value: '' },
+            { id: 6, fieldName: 'MVEX__Buyer_Contact__c', label: 'Buyer/Tenant Contact', required: true, disabled: false, value: '' },
+            { id: 7, fieldName: 'MVEX__Offer_made_by__c', label: 'Offer Made By', required: true, disabled: false, value: '' },
             // Agent offer fields — Sale shows Offer Amount, Rent shows Offered Rent Amount + Frequency
             ...(isRent ? [
-                { id: 8,  fieldName: 'MVEX__Offered_Rent_Amount__c',    label: 'Offered Rent Amount',    required: true, disabled: false, value: '' },
+                { id: 8, fieldName: 'MVEX__Offered_Rent_Amount__c', label: 'Offered Rent Amount', required: true, disabled: false, value: '' },
                 { id: 15, fieldName: 'MVEX__Offered_Rent_Frequency__c', label: 'Offered Rent Frequency', required: true, disabled: false, value: '' }
             ] : [
-                { id: 8,  fieldName: 'MVEX__Offer_Amount__c',           label: 'Offer Amount',           required: true, disabled: false, value: '' }
+                { id: 8, fieldName: 'MVEX__Offer_Amount__c', label: 'Offer Amount', required: true, disabled: false, value: '' }
             ]),
-            { id: 9,  fieldName: 'MVEX__Status__c',               label: 'Status',               required: true,  disabled: false, value: '' },
+            { id: 9, fieldName: 'MVEX__Status__c', label: 'Status', required: true, disabled: false, value: '' },
             { id: 10, fieldName: 'MVEX__Offer_Expiration_Date__c', label: 'Offer Expiration Date', required: false, disabled: false, value: '' },
-            { id: 11, fieldName: 'MVEX__Target_Close_Date__c',     label: 'Target Close Date',    required: false, disabled: false, value: '' },
-            { id: 12, fieldName: 'MVEX__Description__c',           label: 'Description',          required: false, disabled: false, value: '' }
+            { id: 11, fieldName: 'MVEX__Target_Close_Date__c', label: 'Target Close Date', required: false, disabled: false, value: '' },
+            { id: 12, fieldName: 'MVEX__Description__c', label: 'Description', required: false, disabled: false, value: '' }
         ];
 
         // Add Counter Offer field if source is Offer

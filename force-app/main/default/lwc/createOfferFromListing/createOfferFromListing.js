@@ -10,6 +10,7 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 export default class CreateOfferFromListing extends NavigationMixin(LightningElement) {
     @track recordId; // Record ID from quick action
     @track sourceObjectType; // 'Listing' or 'Offer'
+    @track listingType; // 'Sale' or 'Rent'
     @track todayDate;
     @track isLoading = true;
     @track offerFields = [];
@@ -56,10 +57,12 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
         getRecordDetails({ recordId: this.recordId })
             .then(result => {
                 if (result && result.isSuccess) {
-                    // Set the object type from the response
                     this.sourceObjectType = result.objectType;
 
-                    // Initialize fields based on object type
+                    // Store listing type before initializing fields so initializeFields can branch correctly
+                    this.listingType = result.listingType;
+
+                    // Initialize fields based on object type and listing type
                     this.initializeFields();
 
                     // Update field values from the response
@@ -71,6 +74,8 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
                         listingId: result.listingId,
                         listingType: result.listingType,
                         listingPrice: result.listingPrice,
+                        rentalPrice: result.rentalPrice,
+                        rentFrequency: result.rentFrequency,
                         sellerContact: result.sellerContact,
                         buyerContact: result.buyerContact,
                         offerMadeBy: result.offerMadeBy,
@@ -99,19 +104,33 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
      * Created By: Karan Singh
      */
     initializeFields() {
+        const isRent = this.listingType === 'Rent';
+
         const baseFields = [
             { id: 1, fieldName: 'MVEX__Offer_Date__c', label: 'Offer Date', required: true, disabled: true, value: this.todayDate },
             { id: 2, fieldName: 'MVEX__Listing__c', label: 'Listing', required: false, disabled: false, value: '', hidden: true },
             { id: 3, fieldName: 'MVEX__Listing_Type__c', label: 'Listing Type', required: false, disabled: true, value: '' },
-            { id: 4, fieldName: 'MVEX__Listing_Price__c', label: 'Listing Price', required: false, disabled: true, value: '' },
-            { id: 5, fieldName: 'MVEX__Seller_Contact__c', label: 'Seller Contact', required: false, disabled: true, value: '' },
-            { id: 6, fieldName: 'MVEX__Buyer_Contact__c', label: 'Buyer Contact', required: true, disabled: false, value: '' },
-            { id: 7, fieldName: 'MVEX__Offer_made_by__c', label: 'Offer Made By', required: true, disabled: false, value: '' },
-            { id: 8, fieldName: 'MVEX__Offer_Amount__c', label: 'Offer Amount', required: true, disabled: false, value: '' },
-            { id: 9, fieldName: 'MVEX__Status__c', label: 'Status', required: true, disabled: false, value: '' },
+            // Listing price fields — Sale shows Listing Price, Rent shows Listed Rent Price + Frequency
+            ...(isRent ? [
+                { id: 4,  fieldName: 'MVEX__Listed_Rent_Price__c',     label: 'Listed Rent Price',     required: false, disabled: true,  value: '' },
+                { id: 14, fieldName: 'MVEX__Listed_Rent_Frequency__c', label: 'Listed Rent Frequency', required: false, disabled: true,  value: '' }
+            ] : [
+                { id: 4,  fieldName: 'MVEX__Listing_Price__c',         label: 'Listing Price',         required: false, disabled: true,  value: '' }
+            ]),
+            { id: 5, fieldName: 'MVEX__Seller_Contact__c', label: 'Seller Contact', required: false, disabled: true,  value: '' },
+            { id: 6, fieldName: 'MVEX__Buyer_Contact__c',  label: 'Buyer Contact',  required: true,  disabled: false, value: '' },
+            { id: 7, fieldName: 'MVEX__Offer_made_by__c', label: 'Offer Made By',   required: true,  disabled: false, value: '' },
+            // Agent offer fields — Sale shows Offer Amount, Rent shows Offered Rent Amount + Frequency
+            ...(isRent ? [
+                { id: 8,  fieldName: 'MVEX__Offered_Rent_Amount__c',    label: 'Offered Rent Amount',    required: true, disabled: false, value: '' },
+                { id: 15, fieldName: 'MVEX__Offered_Rent_Frequency__c', label: 'Offered Rent Frequency', required: true, disabled: false, value: '' }
+            ] : [
+                { id: 8,  fieldName: 'MVEX__Offer_Amount__c',           label: 'Offer Amount',           required: true, disabled: false, value: '' }
+            ]),
+            { id: 9,  fieldName: 'MVEX__Status__c',               label: 'Status',               required: true,  disabled: false, value: '' },
             { id: 10, fieldName: 'MVEX__Offer_Expiration_Date__c', label: 'Offer Expiration Date', required: false, disabled: false, value: '' },
-            { id: 11, fieldName: 'MVEX__Target_Close_Date__c', label: 'Target Close Date', required: false, disabled: false, value: '' },
-            { id: 12, fieldName: 'MVEX__Description__c', label: 'Description', required: false, disabled: false, value: '' }
+            { id: 11, fieldName: 'MVEX__Target_Close_Date__c',     label: 'Target Close Date',    required: false, disabled: false, value: '' },
+            { id: 12, fieldName: 'MVEX__Description__c',           label: 'Description',          required: false, disabled: false, value: '' }
         ];
 
         // Add Counter Offer field if source is Offer
@@ -143,8 +162,14 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
                     return { ...field, value: data.listingId };
                 case 'MVEX__Listing_Type__c':
                     return { ...field, value: data.listingType };
+                // Sale listing price
                 case 'MVEX__Listing_Price__c':
                     return { ...field, value: data.listingPrice };
+                // Rent listing price defaults (pre-filled from listing record)
+                case 'MVEX__Listed_Rent_Price__c':
+                    return { ...field, value: data.rentalPrice };
+                case 'MVEX__Listed_Rent_Frequency__c':
+                    return { ...field, value: data.rentFrequency };
                 case 'MVEX__Seller_Contact__c':
                     return { ...field, value: data.sellerContact };
                 case 'MVEX__Counter_Offer_for__c':

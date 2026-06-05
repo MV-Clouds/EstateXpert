@@ -20,6 +20,8 @@ public with sharing class CreateOfferFromListingController {
         @AuraEnabled public String description { get; set; }
         @AuraEnabled public Id counterOfferFor { get; set; }
         @AuraEnabled public String firstOfferId { get; set; }
+        @AuraEnabled public Decimal rentalPrice { get; set; }
+        @AuraEnabled public String rentFrequency { get; set; }
         
         public RecordDetailsWrapper() {
             this.isSuccess = true;
@@ -49,6 +51,8 @@ public with sharing class CreateOfferFromListingController {
                 wrapper.listingType = listing.MVEX__Listing_Type__c;
                 wrapper.listingPrice = listing.MVEX__Listing_Price__c;
                 wrapper.sellerContact = listing.MVEX__Property_OwnerContact__c;
+                wrapper.rentalPrice = listing.MVEX__Rental_Price__c;
+                wrapper.rentFrequency = listing.MVEX__Rent_Frequency__c;
             } else if (objectName == 'MVEX__Offer__c') {
                 wrapper.objectType = 'Offer';
                 MVEX__Offer__c offer = getOfferDetails(recordId);
@@ -65,6 +69,8 @@ public with sharing class CreateOfferFromListingController {
                 wrapper.description = offer.MVEX__Description__c;
                 wrapper.counterOfferFor = recordId;
                 wrapper.firstOfferId = offer.MVEX__First_Offer_Id__c;
+                wrapper.rentalPrice = offer.MVEX__Listing__r.MVEX__Rental_Price__c;
+                wrapper.rentFrequency = offer.MVEX__Listing__r.MVEX__Rent_Frequency__c;
             } else {
                 wrapper.isSuccess = false;
                 wrapper.errorMessage = 'Invalid record type. Expected Listing or Offer.';
@@ -88,8 +94,8 @@ public with sharing class CreateOfferFromListingController {
     @AuraEnabled
     public static MVEX__Listing__c getListingDetails(Id listingId) {
         try {
-            MVEX__Listing__c listing = [SELECT Id, MVEX__Listing_Type__c, MVEX__Listing_Price__c, MVEX__Property_OwnerContact__c
-                                        FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Listing_Type__c, MVEX__Listing_Price__c, MVEX__Property_OwnerContact__c, MVEX__Rental_Price__c, 
+                                        MVEX__Rent_Frequency__c FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
 
             return listing;
         } catch (Exception e) {
@@ -109,7 +115,8 @@ public with sharing class CreateOfferFromListingController {
     @AuraEnabled
     public static MVEX__Offer__c getOfferDetails(Id offerId) {
         try {
-            MVEX__Offer__c offer = [SELECT Id, MVEX__Listing__c, MVEX__Listing_Type__c, MVEX__Listing_Price__c, MVEX__Seller_Contact__c, MVEX__Buyer_Contact__c,
+            MVEX__Offer__c offer = [SELECT Id, MVEX__Listing__c, MVEX__Listing_Type__c, MVEX__Listing_Price__c, MVEX__Seller_Contact__c, MVEX__Buyer_Contact__c, 
+                                    MVEX__Listing__r.MVEX__Rental_Price__c, MVEX__Listing__r.MVEX__Rent_Frequency__c,
                                     MVEX__Offer_made_by__c, MVEX__Offer_Amount__c, MVEX__Status__c, MVEX__Offer_Expiration_Date__c, MVEX__Target_Close_Date__c,
                                     MVEX__Description__c, MVEX__First_Offer_Id__c FROM MVEX__Offer__c WHERE Id = :offerId WITH USER_MODE LIMIT 1];
 

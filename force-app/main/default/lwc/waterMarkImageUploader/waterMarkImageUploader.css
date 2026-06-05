@@ -216,10 +216,15 @@
 }
 
 .img_css {
-    width: 15%;
+    /* width: 15%; */
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.img_css img {
+    width: 60px;
+    height: 60px;
 }
 
 .closs_icon_css {

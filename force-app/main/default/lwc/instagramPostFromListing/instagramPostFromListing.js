@@ -210,11 +210,9 @@ export default class InstagramPostFromListing extends LightningElement {
                     Bucket: confData.MVEX__S3_Bucket_Name__c
                 }
             });
-
-
         } catch (error) {
             this.showSpinner = false;
-            console.error("error initializeAwsSdk ", error);
+            console.error("error initializeAwsSdk ", error.stack);
         }
     }
 

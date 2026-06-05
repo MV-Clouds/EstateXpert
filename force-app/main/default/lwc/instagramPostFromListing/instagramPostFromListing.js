@@ -348,9 +348,11 @@ export default class InstagramPostFromListing extends LightningElement {
     }
 
     handleCaptionChange(event) {
-        const caption = event.target.value;
-        this.caption = caption;
-        this.captionLength = caption.length;
+        this.caption = event.target.value;
+    }
+
+    handleCaptionInput(event) {
+        this.captionLength = event.target.value.length;
     }
 
     /**

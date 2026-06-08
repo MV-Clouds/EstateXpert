@@ -191,9 +191,18 @@
             <div class="email-modal">
                 <!-- To: Contact Record Picker with Pills -->
                 <div class="email_field_group">
-                    <label class="email_field_label">
-                        To
-                    </label>
+                    <div class="email_field_label_row">
+                        <label class="email_field_label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            To
+                        </label>
+                        <span class="email_recipient_counter">{recipientCount} / {maxRecipients} recipients</span>
+                    </div>
                     <div class="email_pills_input_wrapper" onclick={focusContactSearch}>
                         <!-- Selected Contact Pills -->
                         <template for:each={selectedContacts} for:item="contact">
@@ -214,10 +223,15 @@
                                 </button>
                             </span>
                         </template>
-                        <!-- Search Input -->
-                        <input type="text" class="email_contact_search_input" placeholder={contactInputPlaceholder}
-                            value={contactSearchTerm} oninput={handleContactSearch} onkeydown={handleContactKeydown}
-                            onblur={hideContactDropdown} data-id="contactSearchInput" />
+                        <!-- Search Input (hidden when limit reached) -->
+                        <template if:false={recipientLimitReached}>
+                            <input type="text" class="email_contact_search_input" placeholder={contactInputPlaceholder}
+                                value={contactSearchTerm} oninput={handleContactSearch} onkeydown={handleContactKeydown}
+                                onblur={hideContactDropdown} data-id="contactSearchInput" />
+                        </template>
+                        <template if:true={recipientLimitReached}>
+                            <span class="email_recipient_limit_msg">Max {maxRecipients} recipients reached</span>
+                        </template>
                     </div>
                     <!-- Contact Dropdown Results -->
                     <div if:true={showContactDropdown} class="email_contact_dropdown" onmousedown={preventContactHide}>
@@ -282,20 +296,35 @@
 
                 <!-- Subject -->
                 <div class="email_field_group">
-                    <label class="email_field_label" for="emailSubjectInput">
-                        Subject
-                    </label>
+                    <div class="email_field_label_row">
+                        <label class="email_field_label" for="emailSubjectInput">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Subject
+                        </label>
+                        <span class={subjectCounterClass}>{subjectCharsLeft} / {maxSubjectLen}</span>
+                    </div>
                     <input type="text" id="emailSubjectInput" class="email_text_input" value={emailSubject}
-                        oninput={handleSubjectChange} placeholder="Enter email subject..." />
+                        oninput={handleSubjectChange} placeholder="Enter email subject..."
+                        maxlength={maxSubjectLen} />
                 </div>
 
                 <!-- Body -->
                 <div class="email_field_group email_body_group">
-                    <label class="email_field_label" for="emailBodyTextarea">
-                        Message
-                    </label>
+                    <div class="email_field_label_row">
+                        <label class="email_field_label" for="emailBodyTextarea">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Message
+                        </label>
+                        <span class={bodyCounterClass}>{bodyCharsLeft} / {maxBodyLen}</span>
+                    </div>
                     <textarea id="emailBodyTextarea" class="email_body_textarea" value={emailBody}
-                        oninput={handleBodyChange} placeholder="Enter your message...">{emailBody}
+                        oninput={handleBodyChange} placeholder="Enter your message..."
+                        maxlength={maxBodyLen}>{emailBody}
                 </textarea>
                 </div>
 

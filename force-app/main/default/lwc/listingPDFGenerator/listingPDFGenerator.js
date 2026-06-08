@@ -8,6 +8,15 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import listingpdfcss from '@salesforce/resourceUrl/listingpdfcss';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
+// ── Salesforce SingleEmailMessage limits ─────────────────────────────────
+//   • Max recipients per Messaging.sendEmail() call = 100 (SF limit).
+//     We cap at 10 as a practical UI guard (per-transaction safe usage).
+//   • Subject: 255 chars max (safe across all email clients + SF)
+//   • Plain-text body: 32 000 chars max
+const MAX_RECIPIENTS  = 10;
+const MAX_SUBJECT_LEN = 255;
+const MAX_BODY_LEN    = 32000;
+
 export default class ListingPDFGenerator extends LightningElement {
 
     @track templateid;
@@ -47,6 +56,39 @@ export default class ListingPDFGenerator extends LightningElement {
         return this.freeTypedEmail && !this.isContactSearching;
     }
 
+    // ── Limit-related getters ─────────────────────────────────────────────
+    get maxRecipients()  { return MAX_RECIPIENTS; }
+    get maxSubjectLen()  { return MAX_SUBJECT_LEN; }
+    get maxBodyLen()     { return MAX_BODY_LEN; }
+
+    get recipientLimitReached() {
+        return this.selectedContacts.length >= MAX_RECIPIENTS;
+    }
+    get recipientCount() {
+        return this.selectedContacts.length;
+    }
+
+    get subjectCharsLeft() {
+        return MAX_SUBJECT_LEN - (this.emailSubject ? this.emailSubject.length : 0);
+    }
+    get subjectOverLimit() {
+        return this.subjectCharsLeft < 0;
+    }
+    get subjectCounterClass() {
+        return this.subjectCharsLeft <= 20 ? 'char-counter char-counter--warn' : 'char-counter';
+    }
+
+    get bodyCharsLeft() {
+        return MAX_BODY_LEN - (this.emailBody ? this.emailBody.length : 0);
+    }
+    get bodyOverLimit() {
+        return this.bodyCharsLeft < 0;
+    }
+    get bodyCounterClass() {
+        return this.bodyCharsLeft <= 200 ? 'char-counter char-counter--warn' : 'char-counter';
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
         if (currentPageReference) {
@@ -61,6 +103,7 @@ export default class ListingPDFGenerator extends LightningElement {
     }
 
     get contactInputPlaceholder() {
+        if (this.recipientLimitReached) return '';
         return this.selectedContacts.length === 0 ? 'Search contacts by name...' : '';
     }
 
@@ -399,6 +442,13 @@ export default class ListingPDFGenerator extends LightningElement {
     }
 
     addEmailAsPill(email) {
+        if (this.recipientLimitReached) {
+            this.showToast('Warning', `You can add a maximum of ${MAX_RECIPIENTS} recipients.`, 'warning');
+            this.contactSearchTerm = '';
+            this.freeTypedEmail = '';
+            this.showContactDropdown = false;
+            return;
+        }
         const alreadyAdded = this.selectedContacts.some(c => c.email === email);
         if (!alreadyAdded) {
             this.selectedContacts = [
@@ -433,6 +483,14 @@ export default class ListingPDFGenerator extends LightningElement {
         const email = event.currentTarget.dataset.email;
         const initials = event.currentTarget.dataset.initials;
 
+        if (this.recipientLimitReached) {
+            this.showToast('Warning', `You can add a maximum of ${MAX_RECIPIENTS} recipients.`, 'warning');
+            this.contactSearchTerm = '';
+            this.contactSearchResults = [];
+            this.showContactDropdown = false;
+            return;
+        }
+
         // Prevent duplicates
         const alreadyAdded = this.selectedContacts.some(c => c.id === id);
         if (!alreadyAdded) {
@@ -465,11 +523,21 @@ export default class ListingPDFGenerator extends LightningElement {
     }
 
     handleSubjectChange(event) {
-        this.emailSubject = event.target.value;
+        const val = event.target.value;
+        // Hard-clamp at the server-side limit
+        this.emailSubject = val.length > MAX_SUBJECT_LEN ? val.slice(0, MAX_SUBJECT_LEN) : val;
+        if (val.length > MAX_SUBJECT_LEN) {
+            event.target.value = this.emailSubject;
+        }
     }
 
     handleBodyChange(event) {
-        this.emailBody = event.target.value;
+        const val = event.target.value;
+        // Hard-clamp at the server-side limit
+        this.emailBody = val.length > MAX_BODY_LEN ? val.slice(0, MAX_BODY_LEN) : val;
+        if (val.length > MAX_BODY_LEN) {
+            event.target.value = this.emailBody;
+        }
     }
 
 
@@ -495,15 +563,27 @@ export default class ListingPDFGenerator extends LightningElement {
 
     sendEmail() {
         if (!this.selectedContacts || this.selectedContacts.length === 0) {
-            this.showToast('Error', 'Please select at least one contact.', 'error');
+            this.showToast('Error', 'Please select at least one recipient.', 'error');
+            return;
+        }
+        if (this.selectedContacts.length > MAX_RECIPIENTS) {
+            this.showToast('Error', `You can send to a maximum of ${MAX_RECIPIENTS} recipients at a time.`, 'error');
             return;
         }
         if (!this.emailSubject?.trim()) {
             this.showToast('Error', 'Please enter an email subject.', 'error');
             return;
         }
+        if (this.emailSubject.length > MAX_SUBJECT_LEN) {
+            this.showToast('Error', `Subject must be ${MAX_SUBJECT_LEN} characters or fewer.`, 'error');
+            return;
+        }
         if (!this.emailBody?.trim()) {
             this.showToast('Error', 'Please enter an email body.', 'error');
+            return;
+        }
+        if (this.emailBody.length > MAX_BODY_LEN) {
+            this.showToast('Error', `Message body must be ${MAX_BODY_LEN.toLocaleString()} characters or fewer.`, 'error');
             return;
         }
 

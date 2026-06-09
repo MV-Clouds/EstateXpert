@@ -227,6 +227,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     phonePattern = '^[0-9]+$';
     phoneErrorMessage = 'Enter a valid phone number';
     originalTempBody = '';
+    originalTemplateName = '';
     originalHeader = '';
     menuButtonSelected;
     headerHandle = '';
@@ -1554,6 +1555,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     setTimeout(() => {
 
                         this.templateName = template.MVEX__Template_Name__c || '';
+                        this.originalTemplateName = this.templateName; // Store before appending _clone
                         this.templateName += this.isTemplateClone ? '_clone' : '';
                         this.metaTemplateId = template.MVEX__Template_Id__c || '';
                         const headerBody = template.MVEX__WBHeader_Body__c || '';
@@ -2551,12 +2553,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         try {
             if (Array.isArray(this.allTemplates)) {
                 this.templateExists = this.allTemplates.some(template => {
-                    // When editing (not cloning), skip the current template's own record
-                    const isCurrentTemplate = this.isEditTemplate && !this.isTemplateClone
-                        && template.MVEX__Template_Id__c
-                        && this.metaTemplateId
-                        && template.MVEX__Template_Id__c === this.metaTemplateId;
-                    if (isCurrentTemplate) return false;
+                    if (this.isEditTemplate && !this.isTemplateClone) {
+                        const matchesById = template.MVEX__Template_Id__c
+                            && this.metaTemplateId
+                            && template.MVEX__Template_Id__c === this.metaTemplateId;
+                        const matchesByOriginalName = this.originalTemplateName
+                            && template.MVEX__Template_Name__c?.toLowerCase() === this.originalTemplateName?.toLowerCase();
+                        if (matchesById || matchesByOriginalName) return false;
+                    }
                     return template.MVEX__Template_Name__c?.toLowerCase() === this.templateName?.toLowerCase();
                 });
             } else {

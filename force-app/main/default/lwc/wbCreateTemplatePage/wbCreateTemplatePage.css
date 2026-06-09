@@ -259,7 +259,7 @@
 
 .nameInput {
     padding: 0.5rem;
-    padding-right: 4rem;
+    padding-right: 5rem;
     border: 1px solid #c7c4c4;
     border-radius: 5px;
 }
@@ -274,7 +274,6 @@ label {
 .templateContent4 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
-    /* width: 95%; */
     padding: var(--spacing-md);
     padding-bottom: 2.5rem;
     margin-top: var(--spacing-md);
@@ -556,7 +555,6 @@ textarea {
 .templateContent5 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
-    /* width: 95%; */
     padding: 1rem;
     padding-bottom: 2.5rem;
     margin-top: 1rem;
@@ -861,7 +859,6 @@ textarea {
     justify-content: flex-end;
     font-size: smaller;
     position: relative;
-    /* top: 10px; */
 }
 
 .imagedivWP {
@@ -1031,7 +1028,6 @@ textarea {
 .dropdown-container .custom-dropdown {
     position: absolute;
     bottom: 100%;
-    /* Open upwards */
     left: 0;
     z-index: 10;
     background-color: white;
@@ -1141,7 +1137,6 @@ textarea {
 .authContent1 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
-    /* width: 95%; */
     padding: var(--spacing-md);
     padding-bottom: 2.5rem;
     margin-top: var(--spacing-md);
@@ -1150,7 +1145,6 @@ textarea {
 .authContent2 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
-    /* width: 95%; */
     padding: var(--spacing-md);
     padding-bottom: 2.5rem;
     margin-top: var(--spacing-md);
@@ -1241,7 +1235,6 @@ textarea {
 .authContent3 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
-    /* width: 95%; */
     padding: var(--spacing-md);
     padding-bottom: 2.5rem;
     margin-top: var(--spacing-md);
@@ -1267,7 +1260,6 @@ textarea {
 .authContent5 {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
-    /* width: 95%; */
     padding: var(--spacing-md);
     padding-bottom: 2.5rem;
     margin-top: var(--spacing-md);

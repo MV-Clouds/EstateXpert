@@ -147,18 +147,6 @@
                                     <p>Fill in the header, body and footer sections of your template.</p>
                                 </div>
 
-                                <!-- Type of variable dropdown - Hidden for now, will be added in future -->
-                                <!-- <div class="variable-type-container global-variable-type">
-                                    <label class="object-selector-label">Type of variable</label>
-                                    <lightning-combobox 
-                                        class="variable-type-dropdown"
-                                        variant="label-hidden"
-                                        value={selectedVariableType}
-                                        options={variableTypeOptions}
-                                        onchange={handleGlobalVariableTypeChange}>
-                                    </lightning-combobox>
-                                </div> -->
-
                                 <template if:true={showDefaultBtn}>
                                     <div class="formatted-text3">
                                         <span class="seg-header">Header</span>
@@ -571,7 +559,6 @@
                                 <div class="footer-div">
                                     <div class="formatted-text3">
                                         <span class="seg-header">Footer</span>
-                                        <!-- <span class="dot2">•</span> -->
                                         <span class="seg-opt">Optional</span>
                                     </div>
                                     <div class="footer-input">
@@ -649,7 +636,6 @@
                                         <div class="true-btn">
                                             <div class="formatted-text3">
                                                 <span class="seg-header">Call to action</span>
-                                                <!-- <span class="dot2">•</span> -->
                                                 <span class="seg-opt">Optional</span>
                                             </div>
                                         </div>
@@ -657,7 +643,6 @@
                                         <div class="parentCreateBtn">
                                             <template for:each={buttonList} for:item="button" for:index="index">
                                                 <div key={button.id} class="createbtn">
-                                                    <!-- <template if:true={showCommonFields}> -->
                                                     <div class="typeaction">
                                                         <label for="action" class="label">Type of action</label>
                                                         <lightning-combobox variant="label-hidden" class="actionInput"
@@ -683,7 +668,6 @@
                                                             </p>
                                                         </template>
                                                     </div>
-                                                    <!-- </template> -->
 
                                                     <!-- 'Visit Website' specific fields -->
                                                     <template if:true={button.isVisitSite}>
@@ -731,9 +715,7 @@
                                                                 <p class="char-count btn-count">
                                                                     {button.phonenum.length}/{LIMITS.maxPhonetxt}</p>
                                                             </div>
-
                                                         </div>
-
                                                     </template>
 
                                                     <!-- 'Copy Offer Code' specific fields -->
@@ -985,12 +967,6 @@
                                         additional content from the options below.
                                     </p>
                                 </div>
-                                <!-- <lightning-checkbox-group
-                                        options={contentOption}
-                                        name="selectContent"
-                                        value={selectContent}
-                                        onchange={handleInputChange}>
-                                    </lightning-checkbox-group> -->
                                 <lightning-input type="checkbox" name="prevContent" label="Add security recommendation"
                                     value="Add security recommendation" checked={prevContent}
                                     onchange={handleInputChange}>
@@ -1065,9 +1041,6 @@
                                     <div class="tempHead tempHead-large">
                                         <p class="content">Validity period</p>
                                     </div>
-                                    <!-- <lightning-combobox variant="label-hidden" class="urlInput" name="selectedTime" value={selectedTime}
-                                                            options={expireTime}
-                                                        onchange={handleInputChange}></lightning-combobox> -->
                                     <lightning-combobox variant="label-hidden" class="urlInput" name="selectedTime"
                                         value={selectedTime} options={expireTime} onchange={handleInputChange}>
                                     </lightning-combobox>

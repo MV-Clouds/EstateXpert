@@ -1036,8 +1036,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         } catch (error) {
             console.error('Error loading relationship children:', error.stack);
         }
-
-        // After loading all children, regenerate labels for variables
     }
 
     /**

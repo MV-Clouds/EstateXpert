@@ -3787,35 +3787,34 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const formatType = button.dataset.format;
 
             const textarea = this.template.querySelector('textarea');
-            const cursorPos = textarea.selectionStart;
+            const selStart = textarea.selectionStart;
+            const selEnd = textarea.selectionEnd;
             const currentText = textarea.value;
-            let marker;
-            let markerLength;
-            switch (formatType) {
-                case 'bold':
-                    marker = '**';
-                    markerLength = 1;
-                    break;
-                case 'italic':
-                    marker = '__';
-                    markerLength = 1;
-                    break;
-                case 'strikethrough':
-                    marker = '~~';
-                    markerLength = 1;
-                    break;
-                case 'codeIcon':
-                    marker = '``````';
-                    markerLength = 3;
-                    break;
-                default:
-                    return;
-            }
-            const newText = this.applyFormattingAfter(currentText, cursorPos, marker);
-            const newCursorPos = cursorPos + markerLength;
+
+            // Map data-format (Pascal-case from HTML) → WhatsApp single-char marker
+            const markerMap = {
+                'Bold': '*',
+                'Italic': '_',
+                'Strikethrough': '~',
+                'Code': '```'
+            };
+
+            const marker = markerMap[formatType];
+            if (!marker) return;
+
+            const selectedText = currentText.slice(selStart, selEnd);
+            // Wrap selected text (or place paired markers at cursor if nothing selected)
+            const wrapped = marker + selectedText + marker;
+            const newText = currentText.slice(0, selStart) + wrapped + currentText.slice(selEnd);
 
             this.tempBody = newText;
-            this.updateCursor(newCursorPos);
+            this.formatedTempBody = this.formatText(newText);
+
+            // Place cursor: if text was selected keep it selected inside the markers;
+            // otherwise position cursor between the two markers
+            const newSelStart = selStart + marker.length;
+            const newSelEnd = newSelStart + selectedText.length;
+            this.updateCursorRange(newSelStart, newSelEnd);
         } catch (error) {
             console.error('Something wrong while handling rich text.', error);
         }
@@ -3845,6 +3844,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         textarea.value = this.tempBody;
         textarea.focus();
         textarea.selectionStart = textarea.selectionEnd = cursorPos;
+    }
+
+    updateCursorRange(selStart, selEnd) {
+        const textarea = this.template.querySelector('textarea');
+        textarea.value = this.tempBody;
+        textarea.focus();
+        textarea.selectionStart = selStart;
+        textarea.selectionEnd = selEnd;
     }
 
     validateTemplate() {

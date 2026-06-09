@@ -30,7 +30,8 @@
                         <template if:false={isMobileOrTablet}>
                             <div class="slds-col header-search-bar-css">
                                 <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
-                                    type="search" placeholder="Search Name" onchange={handleChange}></lightning-input>
+                                    type="search" placeholder="Search Template Name..."
+                                    onchange={handleChange}></lightning-input>
                             </div>
                             <button class="blue-btn-css" onclick={showCreateTemplate}>
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
@@ -366,9 +367,9 @@
                             </label>
                             <div class="clone-input-container">
                                 <lightning-input id="wbCloneTemplateNameInput"
-                                    placeholder="Enter name for the cloned template"
-                                    name="wbCloneTemplateName" value={cloneTemplateName} variant="label-hidden"
-                                    onchange={handleCloneNameChange} maxlength="255">
+                                    placeholder="Enter name for the cloned template" name="wbCloneTemplateName"
+                                    value={cloneTemplateName} variant="label-hidden" onchange={handleCloneNameChange}
+                                    maxlength="255">
                                 </lightning-input>
                                 <template if:true={cloneNameError}>
                                     <p class="clone-name-error clone-red">{cloneNameError}</p>

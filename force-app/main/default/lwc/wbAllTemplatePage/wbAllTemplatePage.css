@@ -435,7 +435,6 @@
     color: #0c9a58;
     box-shadow: 0 1px 3px rgba(12, 154, 88, 0.12);
     transition: all 0.2s ease;
-    z-index: 1000;
 }
 
 .refresh-icon-container:hover {
@@ -462,6 +461,51 @@
     display: block;
     color: inherit;
 }
+
+.config-icon-container {
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
+    border-radius: 6px;
+    color: #0176D3;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.12);
+    transition: all 0.2s ease;
+}
+
+.config-icon-container:hover {
+    background: #F3F6F9;
+    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.22);
+    transform: translateY(-1px);
+}
+
+.config-modal-body {
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(85vh - 90px);
+    background: #f5f7fa;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+}
+
+.config-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.config-modal-body::-webkit-scrollbar-thumb {
+    background-color: #0170d27d;
+    border-radius: 4px;
+}
+
+.config-modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 
 .filter-backdrop {
     position: fixed;

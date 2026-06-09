@@ -51,6 +51,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     @track selectedCloneTemplateId;
     showFilters = false;
     channelName = '/event/MVEX__Template_Update__e';
+    @track showConfigPopup = false;
 
     // Pagination properties
     @track pageSize = 20;
@@ -739,7 +740,36 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         }
     }
 
+    /**
+    * Method Name: handleOpenConfigPopup
+    * @description: Opens the WhatsApp Configuration popup (objectConfigComp).
+    * Created Date: 09/06/2026
+    * Created By: Karan Singh
+    */
+    handleOpenConfigPopup() {
+        try {
+            this.showConfigPopup = true;
+        } catch (error) {
+            console.error('Error in handleOpenConfigPopup:', error);
+        }
+    }
+
+    /**
+    * Method Name: handleCloseConfigPopup
+    * @description: Closes the WhatsApp Configuration popup.
+    * Created Date: 09/06/2026
+    * Created By: Karan Singh
+    */
+    handleCloseConfigPopup() {
+        try {
+            this.showConfigPopup = false;
+        } catch (error) {
+            console.error('Error in handleCloseConfigPopup:', error);
+        }
+    }
+
     showMessagePopup(Status, Title, Message) {
+
         const messageContainer = this.template.querySelector('c-message-popup')
         if (messageContainer) {
             messageContainer.showMessagePopup({

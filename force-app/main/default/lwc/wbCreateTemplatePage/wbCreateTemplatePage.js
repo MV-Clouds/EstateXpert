@@ -622,8 +622,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     }
 
     get templateNameDisabled() {
-        return this.isEditTemplate && (this.isTemplateClone == false);
+        return this.isEditTemplate && !this.isTemplateClone;
     }
+
 
     // ============================
     // UI CONDITIONALS

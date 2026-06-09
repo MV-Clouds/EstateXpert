@@ -720,6 +720,25 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         this.showFilters = !this.showFilters;
     }
 
+    /**
+    * Method Name: handleRefresh
+    * @description: Resets all active filters and reloads the full template list from the server.
+    * Created Date: 09/06/2026
+    * Created By: Karan Singh
+    */
+    handleRefresh() {
+        try {
+            this.searchInput = '';
+            this.categoryValue = '';
+            this.statusValues = '';
+            this.timePeriodValue = '';
+            this.currentPage = 1;
+            this.fetchAllTemplate(true);
+        } catch (error) {
+            console.error('Error in handleRefresh:', error);
+        }
+    }
+
     showMessagePopup(Status, Title, Message) {
         const messageContainer = this.template.querySelector('c-message-popup')
         if (messageContainer) {

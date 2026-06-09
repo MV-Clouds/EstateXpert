@@ -141,7 +141,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     _cachedQuickReplyOptions; // Cached quick reply options
     _cachedCallToActionOptions; // Cached call to action options
     _lastActiveTab; // Track activeTab for cache invalidation
-    
+
     file;
     fileName = '';
     fileSize = 0;
@@ -429,7 +429,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         return this.marketingOpt >= 1;
     }
 
-    get maxtelephonelength(){
+    get maxtelephonelength() {
         return this.countryPhoneMap[this.selectedCountryType] || 15;
     }
 
@@ -473,9 +473,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const hasAlternateTextError = !!this.bodyVarAlternateTextErrors[varItem.id];
             const isNameType = varItem.variableType === 'Name';
             const isNumberType = varItem.variableType === 'Number';
-            
+
             // For Name type, display the content from nameValue; for Number type, show {{1}}, {{2}} etc.
-            const displayIndex = isNameType 
+            const displayIndex = isNameType
                 ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
                 : varItem.index;
 
@@ -510,15 +510,15 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const hasAlternateTextError = !!this.headerVarAlternateTextErrors[varItem.id];
             const isNameType = varItem.variableType === 'Name';
             const isNumberType = varItem.variableType === 'Number' || !varItem.variableType;
-            
+
             // For Name type, display the content from nameValue
-            const displayIndex = isNameType 
+            const displayIndex = isNameType
                 ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
                 : varItem.index;
-            
+
             // Dynamic placeholder based on variable type
             const placeholderText = isNameType ? 'Enter example' : 'Enter alternative text';
-            
+
             return {
                 ...varItem,
                 ...computed,
@@ -569,13 +569,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const hasButtonListError = this.buttonList.some(button => button.hasError);
 
         // Header validation        
-        const headerImageNotSelected = this.selectedContentType === 'Image' && !this.headerHandle;        
+        const headerImageNotSelected = this.selectedContentType === 'Image' && !this.headerHandle;
         const headerVideoNotSelected = this.selectedContentType === 'Video' && !this.headerHandle;
         const headerDocumentNotSelected = this.selectedContentType === 'Document' && !this.headerHandle;
         const headerTextNotSelected = this.selectedContentType === 'Text' && !this.header;
-        
+
         const hasHeaderError = !!this.headerError;
-                
+
         let headerFileNotSelected = false;
         if (this.selectedContentType === 'Document') {
             headerFileNotSelected = headerDocumentNotSelected;
@@ -589,8 +589,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             switch (currentTemplate) {
                 case 'Marketing':
                 case 'Utility':
-                
-                    if (this.flowBooleanCheck) {                        
+
+                    if (this.flowBooleanCheck) {
                         return !(this.selectedFlow !== undefined && this.templateName && this.tempBody &&
                             areButtonFieldsFilled && areCustomButtonFilled && !this.templateExists &&
                             !hasCustomButtonError && !hasButtonListError && !headerFileNotSelected &&
@@ -616,7 +616,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             }
 
         })();
-        
+
         return result;
     }
 
@@ -703,14 +703,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('External Css Loaded');
-            })
-            .catch(error => {
-                console.log('Error occuring during loading external css', error);
-            });
-
+            loadStyle(this, MulishFontCss);
             this.isLoading = true;
             this.iseditTemplatevisible = true;
             if (this.selectedTab != undefined && this.selectedOption != undefined) {
@@ -738,7 +731,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         } catch (e) {
             console.error('Error in connectedCallback:', e.message);
         }
-        
+
         // Store bound reference for proper cleanup in disconnectedCallback
         this._boundHandleOutsideClick = this.handleOutsideClick.bind(this);
         document.addEventListener('click', this._boundHandleOutsideClick);
@@ -802,7 +795,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const fieldOptions = this.fields || [];
         const selectedField = fieldOptions.find(field => field.value === varItem.field);
         const fieldLabel = varItem.fieldLabel || selectedField?.label || varItem.field || 'Search fields...';
-        
+
         return {
             fieldLabel,
             options: fieldOptions.map(field => ({
@@ -888,7 +881,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         finally {
             this.isLoading = false;
         }
-}
+    }
 
     /**
      * Extract all unique object names from a field path
@@ -896,7 +889,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
      */
     extractObjectsFromFieldPath(objectName, fieldPath) {
         const objects = [objectName];
-        
+
         if (!fieldPath || !fieldPath.includes('.')) {
             return objects;
         }
@@ -904,10 +897,10 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         // Split by dots and process each relationship
         const parts = fieldPath.split('.');
         let currentObject = objectName;
-        
+
         for (let i = 0; i < parts.length - 1; i++) {
             const fieldName = parts[i];
-            
+
             // Try to find the field in our cached object field map
             const cachedFields = this.allObjectFieldsMap[currentObject];
             if (cachedFields) {
@@ -918,7 +911,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 }
             }
         }
-        
+
         return objects;
     }
 
@@ -927,18 +920,18 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
      */
     getAllRequiredObjects() {
         const objectSet = new Set();
-        
+
         // Add the main selected object
         if (this.selectedObject) {
             objectSet.add(this.selectedObject);
         }
-        
+
         // Extract objects from body variables
         if (this.variables && this.variables.length > 0) {
             this.variables.forEach(variable => {
                 if (variable.object) {
                     objectSet.add(variable.object);
-                    
+
                     // Extract objects from nested field paths
                     if (variable.field && variable.field.includes('.')) {
                         const objects = this.extractObjectsFromFieldPath(variable.object, variable.field);
@@ -953,7 +946,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             this.header_variables.forEach(variable => {
                 if (variable.object) {
                     objectSet.add(variable.object);
-                    
+
                     // Extract objects from nested field paths
                     if (variable.field && variable.field.includes('.')) {
                         const objects = this.extractObjectsFromFieldPath(variable.object, variable.field);
@@ -971,21 +964,21 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
      */
     async prefetchAllObjectFields() {
         const requiredObjects = this.getAllRequiredObjects();
-        
+
         if (requiredObjects.length === 0) {
             return;
-        }        
-        
+        }
+
         try {
             // Use the unified method with multiple objects and empty relationship paths
-            const result = await getObjectFieldsWithRelationships({ 
+            const result = await getObjectFieldsWithRelationships({
                 objectNames: requiredObjects,
                 relationshipPaths: []
             });
-            
+
             // Store all fields in the map
             this.allObjectFieldsMap = result || {};
-            
+
             // Now load relationship children for nested field paths and regenerate labels
             this.loadRelationshipChildrenForVariables();
         } catch (error) {
@@ -1001,7 +994,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         try {
             // Collect all unique relationship paths from variables
             const relationshipPaths = new Set();
-            
+
             const processVariable = (variable) => {
                 if (variable.field && variable.field.includes('.')) {
                     const parts = variable.field.split('.');
@@ -1011,26 +1004,26 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     }
                 }
             };
-            
+
             // Process body variables
             if (this.variables && this.variables.length > 0) {
                 this.variables.forEach(processVariable);
             }
-            
+
             // Process header variables
             if (this.header_variables && this.header_variables.length > 0) {
                 this.header_variables.forEach(processVariable);
             }
-            
+
             if (relationshipPaths.size === 0) {
                 return;
             }
-            
+
             const resultMap = await getObjectFieldsWithRelationships({
                 objectNames: [this.selectedObject],
                 relationshipPaths: Array.from(relationshipPaths)
             });
-            
+
             for (const [path, childFields] of Object.entries(resultMap)) {
                 if (childFields && childFields.length > 0) {
                     this.updateFieldOptionsTree(path, childFields);
@@ -1038,11 +1031,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             }
 
             this.regenerateVariableLabels();
-            
+
         } catch (error) {
             console.error('Error loading relationship children:', error.stack);
         }
-        
+
         // After loading all children, regenerate labels for variables
     }
 
@@ -1060,7 +1053,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 };
             });
         }
-        
+
         // Regenerate labels for header variables
         if (this.header_variables && this.header_variables.length > 0) {
             this.header_variables = this.header_variables.map(variable => {
@@ -1090,7 +1083,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         };
 
         this.fieldOptionsWithRelationships = updateChildren(
-            this.fieldOptionsWithRelationships, 
+            this.fieldOptionsWithRelationships,
             relationshipPath
         );
     }
@@ -1113,13 +1106,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         this.selectedFlowId = selectedFlow; // Get selected Flow ID
         this.iframeSrc = iframeSrc;
         this.selectedFlow = flows; // Store the entire list of flows
-        setTimeout(()=>{
+        setTimeout(() => {
             this.getAllFlowScreens();
-        },400);
+        }, 400);
 
         this.isFlowSelected = true; // Hide "Choose Flow" button after selection
         this.NoFileSelected = false; // Hide text after selection
-        
+
         // Add flow button if it doesn't exist in buttonList
         const hasFlowButton = this.buttonList.some(button => button.isFlow);
         if (!hasFlowButton && this.flowCount < 1) {
@@ -1142,16 +1135,16 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 hasError: false,
                 errorMessage: ''
             };
-            
+
             this.buttonList.push(newFlowButton);
             this.flowCount++;
             this.totalButtonsCount++;
             this.createButton = true;
-            
+
             this.updateButtonErrors();
             this.updateButtonDisabledState();
         }
-        
+
         this.closeModal();
     }
 
@@ -1161,18 +1154,18 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         this.selectedFlowId = '';
         this.selectedFlow = undefined;
         this.NoFileSelected = true;
-        
+
         // Also remove any FLOW button from buttonList
         const flowButtonIndex = this.buttonList.findIndex(button => button.isFlow);
         if (flowButtonIndex !== -1) {
             this.buttonList = this.buttonList.filter((_, i) => i !== flowButtonIndex);
             this.flowCount--;
             this.totalButtonsCount--;
-            
+
             if (this.buttonList.length === 0) {
                 this.createButton = false;
             }
-            
+
             this.updateButtonDisabledState();
         }
     }
@@ -1325,7 +1318,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     handleOutsideClick(event) {
         const target = event.target;
-        
+
         // Handle emoji picker close
         if (this.showEmojis) {
             const emojiContainer = this.template.querySelector('.toolbar-button');
@@ -1337,9 +1330,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 this.showEmojis = false;
             }
         }
-        
+
         // Note: Field picker dropdown closing is now handled by wbMergeFieldSelector component
-        
+
         // Close button dropdown when clicking outside
         if (this.isDropdownOpen) {
             const dropdownContainer = this.template.querySelector('.dropdown-container');
@@ -1354,15 +1347,15 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     flattenFieldsForDropdown(fields, parentLabel = '') {
         let result = [];
         if (!fields || !Array.isArray(fields)) return result;
-        
+
         fields.forEach(field => {
             const displayLabel = parentLabel ? `${parentLabel} > ${field.label}` : field.label;
             const displayValue = parentLabel ? `${parentLabel.replace(/ > /g, '.')}.${field.value}` : field.value;
-            
+
             if (!field.isRelationship) {
                 result.push({ label: displayLabel, value: displayValue });
             }
-            
+
             if (field.children && field.children.length > 0) {
                 result = result.concat(this.flattenFieldsForDropdown(field.children, displayLabel));
             }
@@ -1373,23 +1366,23 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     // Generate a display label from a field path (e.g., "Account.Owner.Name" -> "Account (Account) > Owner (User) > Name")
     generateFieldLabelFromPath(fieldPath) {
         if (!fieldPath) return 'Search fields...';
-        
+
         // If it's a simple field (no dots), just return it
         if (!fieldPath.includes('.')) {
             // Try to find the label from fieldOptionsWithRelationships - use exact match only
             const field = this.fieldOptionsWithRelationships?.find(f => f.value === fieldPath || f.apiName === fieldPath);
             return field?.label || fieldPath;
         }
-        
+
         // For relationship paths, build the label from the path parts
         const pathParts = fieldPath.split('.');
         let labelParts = [];
         let currentFields = this.fieldOptionsWithRelationships || [];
-        
+
         for (let i = 0; i < pathParts.length; i++) {
             const part = pathParts[i];
             const isLastPart = i === pathParts.length - 1;
-            
+
             if (isLastPart) {
                 // Last part is the field name - find it in current fields using EXACT match only
                 const field = currentFields.find(f => {
@@ -1407,9 +1400,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 const relationshipField = currentFields.find(f => {
                     if (!f.isRelationship) return false;
                     // Use strict matching for relationships
-                    return f.apiName === part || 
-                           f.relationshipName === part ||
-                           f.value === part;
+                    return f.apiName === part ||
+                        f.relationshipName === part ||
+                        f.value === part;
                 });
                 if (relationshipField) {
                     labelParts.push(relationshipField.label);
@@ -1421,7 +1414,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 }
             }
         }
-        
+
         return labelParts.join(' > ') || fieldPath;
     }
 
@@ -1434,22 +1427,22 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const simpleFields = this.flattenFieldsForDropdown(cachedFields);
             this.objectFieldMap[objectName] = simpleFields;
             this.fields = simpleFields;
-            
+
             // Update any existing variables with empty fields
             this.updateVariablesWithDefaultFields(simpleFields, objectName);
-            
+
             return cachedFields;
         }
-        
+
         // Call the unified method with list parameter
-        const resultMap = await getObjectFieldsWithRelationships({ 
-            objectNames: [objectName], 
+        const resultMap = await getObjectFieldsWithRelationships({
+            objectNames: [objectName],
             relationshipPaths: relationshipPath ? [relationshipPath] : []
         });
-        
+
         // Extract the field options for the requested object (key is path if provided, else objectName)
         const fieldOptions = relationshipPath ? (resultMap[relationshipPath] || []) : (resultMap[objectName] || []);
-        
+
         if (!relationshipPath) {
             // Root level - store in main cache
             this.fieldOptionsWithRelationships = fieldOptions;
@@ -1458,11 +1451,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             this.fields = simpleFields;
             // Also cache in allObjectFieldsMap
             this.allObjectFieldsMap[objectName] = fieldOptions;
-            
+
             // Update any existing variables with empty fields
             this.updateVariablesWithDefaultFields(simpleFields, objectName);
         }
-        
+
         return fieldOptions;
     }
 
@@ -1473,11 +1466,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
      */
     updateVariablesWithDefaultFields(fields, objectName) {
         if (!fields || fields.length === 0) return;
-        
+
         const firstField = fields[0];
         let variablesUpdated = false;
         let headerVariablesUpdated = false;
-        
+
         // Update body variables with empty field values
         if (this.variables.length > 0) {
             this.variables = this.variables.map(varItem => {
@@ -1493,14 +1486,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 }
                 return varItem;
             });
-            
+
             if (variablesUpdated) {
                 this.formatedTempBody = this.formatText(this.tempBody);
                 this.updateTextarea();
                 this.updatePreviewContent(this.formatedTempBody, 'body');
             }
         }
-        
+
         // Update header variables with empty field values
         if (this.header_variables.length > 0) {
             this.header_variables = this.header_variables.map(varItem => {
@@ -1515,7 +1508,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 }
                 return varItem;
             });
-            
+
             if (headerVariablesUpdated) {
                 this.updatePreviewContent(this.header, 'header');
             }
@@ -1609,8 +1602,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                             this.awsFileName = templateMiscellaneousData?.awsFileName
                             this.catalogName = templateMiscellaneousData?.selectedCatalog
                             this.flowScreenIds = templateMiscellaneousData?.flowNavigationScreen
-                                
-                            if(this.awsFileName && !this.isAWSEnabled){
+
+                            if (this.awsFileName && !this.isAWSEnabled) {
                                 this.showToast('AWS Configration missing.', 'warning');
                             }
 
@@ -1659,13 +1652,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
 
                         this.selectedContentType = template.MVEX__Header_Type__c || 'None';
-                        
+
                         // Set IsHeaderText flag and header value when header type is Text
                         if (this.selectedContentType === 'Text') {
                             this.IsHeaderText = true;
                             this.header = headerBody || '';
                         }
-                        
+
                         this.btntext = template.MVEX__Button_Label__c || '';
 
                         const tvs = templateVariables.map(tv => ({
@@ -1679,7 +1672,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
                         // Identify all unique objects
                         const uniqueObjects = [...new Set(tvs.map(tv => tv.object))];
-                        
+
                         // Set the selectedObject from template variables for Body type
                         const bodyVariables = tvs.filter(tv => tv.type === 'Body');
                         if (bodyVariables.length > 0 && bodyVariables[0].object) {
@@ -1705,17 +1698,17 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                 // Split variables into body and header groups
                                 const tempfieldsBody = tvs.filter(tv => tv.type === 'Body').map(tv => tv.field);
                                 const tempfieldsHead = tvs.filter(tv => tv.type === 'Header').map(tv => tv.field);
-                                
+
                                 // Body variables with individual field options and proper fieldLabel
                                 this.variables = tvs
                                     .filter(tv => tv.type === 'Body')
                                     .map((variable, index) => {
                                         const objectFields = this.objectFieldMap[variable.object] || [];
                                         const fieldValue = tempfieldsBody[index] || variable.field;
-                                        
+
                                         // Generate fieldLabel from field path (e.g., "Account.Owner.Name" -> "Account (Account) > Owner (User) > Name")
                                         const fieldLabel = this.generateFieldLabelFromPath(fieldValue);
-                                        
+
                                         return {
                                             ...variable,
                                             field: fieldValue,
@@ -1725,8 +1718,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                             options: objectFields
                                         };
                                     });
-                                
-                             
+
+
 
                                 // Header variables with individual field options and proper fieldLabel
                                 this.header_variables = tvs
@@ -1734,10 +1727,10 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                     .map((variable, index) => {
                                         const objectFields = this.objectFieldMap[variable.object] || [];
                                         const fieldValue = tempfieldsHead[index] || variable.field;
-                                        
+
                                         // Generate fieldLabel from field path for header variables too
                                         const fieldLabel = this.generateFieldLabelFromPath(fieldValue);
-                                        
+
                                         return {
                                             ...variable,
                                             field: fieldValue,
@@ -1746,7 +1739,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                             nameValue: variable.nameValue || variable.alternateText || '',
                                             options: objectFields
                                         };
-                                    });                            
+                                    });
 
                                 // Toggle flags
                                 this.addHeaderVar = this.header_variables.length > 0;
@@ -1755,7 +1748,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                 // Update preview
                                 this.updatePreviewContent(this.previewHeader, 'header');
                                 this.updatePreviewContent(this.previewBody, 'body');
-                                
+
                                 // Pre-fetch all required object fields for edit mode (after variables are set)
                                 return this.prefetchAllObjectFields();
                             })
@@ -1808,15 +1801,15 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                     let parsedPhoneNum = '';
                                     let parsedCountryCode = '';
                                     let parsedCountryLabel = 'India (+91)';
-                                    
-                                    if(button?.type === 'PHONE_NUMBER' && button?.phone_number) {
+
+                                    if (button?.type === 'PHONE_NUMBER' && button?.phone_number) {
                                         const phone = button.phone_number;
-                                        
+
                                         // If phone starts with +, find matching country code
                                         if (phone.startsWith('+')) {
                                             const countryCodes = Object.keys(this.countryCodeToLabelMap).sort((a, b) => b.length - a.length); // Sort by length descending
                                             const matchedCode = countryCodes.find(code => phone.startsWith(code));
-                                            
+
                                             if (matchedCode) {
                                                 parsedCountryCode = matchedCode;
                                                 parsedCountryLabel = this.countryCodeToLabelMap[matchedCode] || parsedCountryLabel;
@@ -1836,7 +1829,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                             }
                                         }
                                     }
-                                    
+
                                     // Handle regular buttons
                                     let newButton = {
                                         id: index + 1, // Unique ID for button
@@ -1857,7 +1850,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                                         errorMessage: ''
                                     };
 
-                                    this.selectedCountryType = newButton.selectedCountryType; 
+                                    this.selectedCountryType = newButton.selectedCountryType;
                                     this.selectedCountryTypeLabel = newButton.selectedCountryTypeLabel;
 
                                     // Call handleMenuSelect() to process button creation correctly
@@ -1903,26 +1896,26 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         try {
             if (this.isFlowSelected && this.selectedFlow && (this.selectedFlow.id || this.selectedFlow.flow_id)) {
                 let selectedId = this.selectedFlow.id || this.selectedFlow.flow_id;
-                
+
                 getPreviewURLofWhatsAppFlow({ flowId: this.flowId })
-                .then((data) => {
-                    if (data && data.status !== 'failed') {
-                        const urlValue = typeof data === 'object' ? data.previewUrl : data;
-                        if (urlValue) {
-                            this.iframeSrc = urlValue;
+                    .then((data) => {
+                        if (data && data.status !== 'failed') {
+                            const urlValue = typeof data === 'object' ? data.previewUrl : data;
+                            if (urlValue) {
+                                this.iframeSrc = urlValue;
+                            } else {
+                                console.error('URL key not found in the returned Map:', data);
+                            }
                         } else {
-                            console.error('URL key not found in the returned Map:', data);
+                            console.error('Error: Backend returned "failed" or empty data');
                         }
-                    } else {
-                        console.error('Error: Backend returned "failed" or empty data');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error in getting Flow Preview URL:', error);
-                })
-                .finally(() => {
-                    this.isLoading = false;
-                });
+                    })
+                    .catch(error => {
+                        console.error('Error in getting Flow Preview URL:', error);
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
             }
         } catch (error) {
             console.error('Error in fetchFlowPreviewId :', error);
@@ -1947,22 +1940,35 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // Handle file selection
     async handleFileChange(event) {
         try {
             const file = event.target.files[0];
 
             if (file) {
+                const allowedTypeMap = {
+                    'Image': { mimes: ['image/png', 'image/jpeg', 'image/jpg'], label: 'JPG or PNG' },
+                    'Video': { mimes: ['video/mp4'], label: 'MP4' },
+                    'Document': { mimes: ['application/pdf'], label: 'PDF' }
+                };
+
+                const typeConfig = allowedTypeMap[this.selectedContentType];
+                if (typeConfig && !typeConfig.mimes.includes(file.type)) {
+                    this.showToast(
+                        `Invalid file type. Please upload a valid ${typeConfig.label} file.`,
+                        'error'
+                    );
+                    event.target.value = '';
+                    return;
+                }
+
                 this.file = file;
                 this.fileName = file.name;
                 this.fileType = file.type;
                 this.fileSize = file.size;
 
-                // if (this.isAWSEnabled) {
-                let isValid = false;
                 let maxSize = 4;
                 let fileSizeMB = Math.floor(file.size / (1024 * 1024));
-                isValid = fileSizeMB <= maxSize;
+                let isValid = fileSizeMB <= maxSize;
 
                 if (isValid) {
                     this.selectedFilesToUpload.push(file);
@@ -2155,9 +2161,9 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
     // Delete file from ContentVersion
     handleDelete() {
-        const isOriginalFileInEditMode = (this.isEditTemplate || this.isTemplateClone) && 
-                                          this.originalContentVersionId !== null && 
-                                          this.contentVersionId === this.originalContentVersionId;
+        const isOriginalFileInEditMode = (this.isEditTemplate || this.isTemplateClone) &&
+            this.originalContentVersionId !== null &&
+            this.contentVersionId === this.originalContentVersionId;
 
         if (isOriginalFileInEditMode) {
             this.resetFileData();
@@ -2243,24 +2249,19 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 fileLength: this.fileSize,
                 fileType: this.fileType
             })
-            .then(result => {
-                if (result) {
-                    this.uploadSessionId = result;
-                    console.log('Upload seesion Id ::',result);
-                    console.log('Upload seesion Id ::',this.uploadSessionId);
-                    
-                    this.uploadChunksToMeta();
-                    console.log('After chunk');
-                    
-                } else {
-                    this.showToast('Failed to start upload session.', 'error');
+                .then(result => {
+                    if (result) {
+                        this.uploadSessionId = result;
+                        this.uploadChunksToMeta();
+                    } else {
+                        this.showToast('Failed to start upload session.', 'error');
+                        this.isLoading = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed upload session.', error.body);
                     this.isLoading = false;
-                }
-            })
-            .catch(error => {
-                console.error('Failed upload session.', error.body);
-                this.isLoading = false;
-            });
+                });
         } catch (error) {
             console.error('Error starting upload session: ', error);
         }
@@ -2272,8 +2273,6 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
      */
     uploadChunksToMeta() {
         try {
-            console.log('INside upload chunk');
-            
             let chunkStart = 0;
             const uploadNextChunk = () => {
 
@@ -2293,17 +2292,12 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         isLastChunk: isLastChunk
                     };
                     const serializedWrapper = JSON.stringify(fileChunkWrapper);
-                    console.log('Serialized File Chunk Wrapper ::', serializedWrapper);
-                    console.log('Is AWS Enabled :: ',this.isAWSEnabled);
-                    
                     // Pass isAWSEnabled to backend - it will skip ContentVersion creation when AWS is enabled
                     uploadFileChunk({ serializedWrapper: serializedWrapper, isAWSEnabled: this.isAWSEnabled })
                         .then(result => {
                             if (result) {
                                 let serializeResult = JSON.parse(result);
                                 this.headerHandle = serializeResult.headerHandle;
-                                console.log('Header Handle :::',this.headerHandle);
-                                
                                 // Only set contentDocumentId when NOT using AWS (local Salesforce storage)
                                 if (!this.isAWSEnabled && serializeResult.contentDocumentId) {
                                     this.contentDocumentId = serializeResult.contentDocumentId;
@@ -2370,14 +2364,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             if (this.contentVersionId != null) {
                 this.handleDelete();
             }
-    
+
             this.clearEditTemplateData();
-    
-            if( this.isTemplateClone || this.isEditTemplate){
+
+            if (this.isTemplateClone || this.isEditTemplate) {
                 this.closeAndReturnToTemplateList();
                 return;
-            } 
-    
+            }
+
             const previousEvent = new CustomEvent('previous', {
                 detail: {
                     selectedTab: this.selectedTab,
@@ -2385,7 +2379,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     activeTab: this.activeTab
                 }
             });
-            this.dispatchEvent(previousEvent);   
+            this.dispatchEvent(previousEvent);
         } catch (error) {
             console.error('Error in handlePrevclick: ', error);
         }
@@ -2427,7 +2421,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             this.isImgSelected = false;
             this.isDocFile = false;
             this.isFlowSelected = false;
-    
+
             this.isautofillChecked = false;
             this.isExpiration = false;
             // Reset original content version ID
@@ -2610,10 +2604,10 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const selectedValue = event.currentTarget.dataset.value;
             this.menuButtonSelected = selectedValue;
             let buttonData = event.currentTarget.dataset.buttonData;
-            
+
             // Check if this is edit mode (buttonData exists and already has button configured)
             const isEditMode = buttonData && (buttonData.isCallPhone || buttonData.isVisitSite || buttonData.isOfferCode || buttonData.isFlow);
-            
+
             let newButton = buttonData ? buttonData : {
                 id: this.buttonList.length + 1,
                 selectedActionType: selectedValue,
@@ -2662,7 +2656,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         newButton.isCallPhone = true;
                         newButton.btntext = buttonData?.btntext || 'Call Phone Number';
                         this.btntext = buttonData?.btntext || 'Call Phone Number';
-                        
+
                         if (!isEditMode) {
                             this.callPhoneNumber++;
                         } else {
@@ -2678,7 +2672,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         this.isVisitSite = true;
                         newButton.btntext = buttonData?.btntext || 'Visit Website';
                         this.btntext = buttonData?.btntext || 'Visit Website';
-                        
+
                         if (!isEditMode) {
                             this.visitWebsiteCount++;
                         } else {
@@ -2695,7 +2689,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         newButton.isOfferCode = true;
                         newButton.btntext = buttonData?.btntext || 'Copy Offer Code';
                         this.btntext = newButton.btntext;
-                        
+
                         if (!isEditMode) {
                             this.copyOfferCode++;
                         } else {
@@ -2714,7 +2708,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         newButton.isFlow = true;
                         newButton.btntext = buttonData?.btntext || 'View flow';
                         this.btntext = buttonData?.btntext || 'View flow';
-                        
+
                         // Only increment if not in edit mode (to avoid double counting)
                         if (!isEditMode) {
                             this.flowCount++;
@@ -2742,7 +2736,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
                     this.buttonList.push(newButton);
                     this.totalButtonsCount++;
-                    
+
                 }
             }
 
@@ -2962,7 +2956,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             };
 
             this.variables = [...this.variables, newVariable];
-            
+
             // Initialize error for both Name and Number types - alternate text is required for both
             this.bodyVarAlternateTextErrors = {
                 ...this.bodyVarAlternateTextErrors,
@@ -3009,7 +3003,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const { fieldPath, fieldLabel } = event.detail;
         const variableIndex = event.currentTarget.dataset.index;
         const isHeader = event.currentTarget.dataset.isHeader === 'true';
-        
+
         // Update the appropriate variable array
         if (isHeader) {
             // Update header variables
@@ -3043,14 +3037,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const variableIndex = String(event.target.dataset.index);
         const variableId = String(event.target.dataset.id);
         const nameValue = event.target.value.trim();
-        
+
         // Update the variables array with nameValue
         this.variables = this.variables.map(varItem =>
             String(varItem.index) === variableIndex
                 ? { ...varItem, nameValue }
                 : varItem
         );
-        
+
         // Validate name value
         if (!nameValue) {
             this.bodyVarAlternateTextErrors = {
@@ -3063,26 +3057,26 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             delete updatedErrors[variableId];
             this.bodyVarAlternateTextErrors = updatedErrors;
         }
-        
+
         // Update the preview with the new name value
         this.updatePreviewContentWithNameValue();
     }
 
     handleGlobalVariableTypeChange(event) {
         const newVariableType = event.detail.value;
-        
+
         // Simply switch the type - errors will update automatically
         this.selectedVariableType = newVariableType;
-        
+
         // Re-validate format errors with the new type
         this.updateFormatErrors();
-        
+
         // Update all existing body variables to use the new type
         this.variables = this.variables.map(varItem => ({
             ...varItem,
             variableType: newVariableType
         }));
-        
+
         // Update all existing header variables to use the new type
         this.header_variables = this.header_variables.map(varItem => ({
             ...varItem,
@@ -3091,7 +3085,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
         // Sync variables from body after type change
         this.syncVariablesFromBody();
-        
+
         // Sync header variables after type change
         this.syncHeaderVariablesFromText();
 
@@ -3114,7 +3108,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
         // Update preview
         this.updatePreviewContent(this.formatedTempBody, 'body');
-        
+
         // Revalidate body placement
         this.checkBodyVariablePlacement();
     }
@@ -3130,29 +3124,30 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         if (!text) {
             return { isValid: true, errorMessage: '' };
         }
-        
+
         // Find all variables in the text
         const allVariables = text.match(/\{\{([^}]*)\}\}/g) || [];
-        
+
         if (allVariables.length === 0) {
             return { isValid: true, errorMessage: '' };
         }
-        
+
         // Check for empty {{}} - not allowed in strict mode (submission)
         if (strictMode) {
             const hasEmptyVars = allVariables.some(v => v === '{{}}');
             if (hasEmptyVars) {
                 return {
                     isValid: false,
-                    errorMessage: 'Variable parameters cannot be empty. Please provide a name for all variables).'                };
+                    errorMessage: 'Variable parameters cannot be empty. Please provide a name for all variables).'
+                };
             }
         }
-        
+
         if (variableType === 'Number') {
             // For Number type: variables must be whole numbers like {{1}}, {{2}}
             const numberPattern = /^\{\{\d+\}\}$/;
             const invalidVars = allVariables.filter(v => !numberPattern.test(v));
-            
+
             if (invalidVars.length > 0) {
                 return {
                     isValid: false,
@@ -3162,13 +3157,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         } else if (variableType === 'Name') {
             const namePattern = /^\{\{([a-zA-Z_][a-zA-Z0-9_]*|)\}\}$/;
             const pureNumberPattern = /^\{\{\d+\}\}$/;
-            
+
             const invalidVars = allVariables.filter(v => {
                 if (v === '{{}}') return false;
                 if (pureNumberPattern.test(v)) return true;
                 return !namePattern.test(v);
             });
-            
+
             if (invalidVars.length > 0) {
                 return {
                     isValid: false,
@@ -3176,7 +3171,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 };
             }
         }
-        
+
         return { isValid: true, errorMessage: '' };
     }
 
@@ -3187,7 +3182,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     updateFormatErrors() {
         const bodyValidation = this.validateVariableFormat(this.tempBody, this.selectedVariableType);
         this.bodyVariableFormatError = bodyValidation.isValid ? '' : bodyValidation.errorMessage;
-        
+
         const headerValidation = this.validateVariableFormat(this.header, this.selectedVariableType);
         this.headerVariableFormatError = headerValidation.isValid ? '' : headerValidation.errorMessage;
     }
@@ -3195,7 +3190,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     handleVariableTypeChange(event) {
         const variableIndex = String(event.target.dataset.index);
         const variableType = event.target.value;
-        
+
         // Update the variables array with the new variable type
         this.variables = this.variables.map(varItem =>
             String(varItem.index) === variableIndex
@@ -3207,12 +3202,12 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     updatePreviewContentWithNameValue() {
         try {
             let updatedContent = this.tempBody;
-            
+
             this.variables.forEach(varItem => {
                 const variablePlaceholder = varItem.index;
                 // Use nameValue for display in preview when variableType is 'Name'
-                const replacementValue = varItem.variableType === 'Name' && varItem.nameValue 
-                    ? `{{${varItem.nameValue}}}` 
+                const replacementValue = varItem.variableType === 'Name' && varItem.nameValue
+                    ? `{{${varItem.nameValue}}}`
                     : `{{${varItem.object}.${varItem.field}}}`;
 
                 let index = updatedContent.indexOf(variablePlaceholder);
@@ -3237,7 +3232,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             // Match all {{...}} patterns including empty {{}}
             const variablePattern = /\{\{([^}]*)\}\}/g;
             const matches = [...this.tempBody.matchAll(variablePattern)];
-            
+
             if (matches.length === 0) {
                 // No variables in body, clear all variables
                 this.variables = [];
@@ -3292,7 +3287,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             });
 
             this.variables = updatedVariables;
-            
+
             // Show the variable section if there are variables
             if (this.variables.length > 0) {
                 this.addVar = true;
@@ -3310,11 +3305,11 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             if (!this.header) {
                 return;
             }
-            
+
             // Match all {{...}} patterns including empty {{}}
             const variablePattern = /\{\{([^}]*)\}\}/g;
             const matches = [...this.header.matchAll(variablePattern)];
-            
+
             if (matches.length === 0) {
                 // No variables in header, clear header variables
                 this.header_variables = [];
@@ -3359,7 +3354,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             });
 
             this.header_variables = updatedHeaderVariables;
-            
+
             // Show the header variable section if there are variables
             if (this.header_variables.length > 0) {
                 this.addHeaderVar = true;
@@ -3373,14 +3368,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         const variableIndex = String(event.target.dataset.index);
         const variableId = String(event.target.dataset.id);
         const alternateText = event.target.value.trim();
-        
+
         // Update the variables array - store in alternateText field for both Name and Number types
         this.variables = this.variables.map(varItem =>
             String(varItem.index) === variableIndex
                 ? { ...varItem, alternateText }
                 : varItem
         );
-        
+
         // Validate alternate text - required for both Name and Number types
         if (!alternateText) {
             this.bodyVarAlternateTextErrors = {
@@ -3407,25 +3402,25 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         try {
             const index = event.currentTarget.dataset.index;
             const varToRemove = this.variables[parseInt(index)];
-            
+
             if (this.selectedVariableType === 'Name') {
                 // For Name type, remove the variable by its content or empty placeholder
-                const variableToRemove = varToRemove.nameValue 
-                    ? `{{${varToRemove.nameValue}}}` 
+                const variableToRemove = varToRemove.nameValue
+                    ? `{{${varToRemove.nameValue}}}`
                     : `{{}}`;
                 let updatedTempBody = this.tempBody.replace(variableToRemove, '');
                 this.variables = this.variables.filter((_, i) => i !== parseInt(index));
-                
+
                 // Re-index remaining variables
                 this.variables = this.variables.map((varItem, idx) => ({
                     ...varItem,
                     id: idx + 1
                 }));
-                
+
                 this.tempBody = updatedTempBody.trim();
                 this.originalTempBody = this.tempBody;
                 this.formatedTempBody = this.formatText(this.tempBody);
-                
+
                 // Sync variables from body after removal
                 this.syncVariablesFromBody();
             } else {
@@ -3442,7 +3437,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         index: `{{${newIndex}}}`
                     };
                 });
-                
+
                 let placeholders = updatedTempBody.match(/\{\{\d+\}\}/g) || [];
                 placeholders.forEach((placeholder, idx) => {
                     const newIndex = `{{${idx + 1}}}`;
@@ -3452,7 +3447,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 this.originalTempBody = this.tempBody;
                 this.formatedTempBody = this.originalTempBody;
             }
-            
+
             // Clear errors and rebuild for remaining variables
             const updatedErrors = {};
             this.variables.forEach(varItem => {
@@ -3482,15 +3477,15 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             this.addHeaderVar = true;
             const defaultField = this.fields[0]?.value || '';
             const defaultFieldLabel = this.fields[0]?.label || 'Search fields...';
-            
+
             // Use the currently selected variable type
             const currentVariableType = this.selectedVariableType || 'Name';
             const isNameType = currentVariableType === 'Name';
-            
+
             // For Name type, use empty placeholder; for Number type, use numbered placeholder
             const displayIndex = isNameType ? `{{}}` : `{{${this.headIndex}}}`;
             const placeholderToAdd = isNameType ? '{{}}' : `{{${this.headIndex}}}`;
-            
+
             const newVariable = {
                 id: this.headIndex,
                 object: this.selectedObject,
@@ -3503,13 +3498,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             };
 
             this.header_variables = [...this.header_variables, newVariable];
-            
+
             // Initialize error for new variable - alternate text is required for both Name and Number types
             this.headerVarAlternateTextErrors = {
                 ...this.headerVarAlternateTextErrors,
                 [this.headIndex]: 'This field is required'
             };
-            
+
             this.originalHeader = (this.originalHeader || this.header || '') + ` ${placeholderToAdd}`;
             this.header = this.originalHeader;
             this.updatePreviewContent(this.header, 'header');
@@ -3542,14 +3537,14 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     handleAlternateTextChange(event) {
         const variableId = String(event.target.dataset.id);
         const alternateText = event.target.value.trim();
-        
+
         // Update the header_variables array
         this.header_variables = this.header_variables.map(varItem =>
             String(varItem.id) === variableId
                 ? { ...varItem, alternateText }
                 : varItem
         );
-        
+
         // Validate alternate text - required for both Name and Number types
         if (!alternateText) {
             this.headerVarAlternateTextErrors = {
@@ -3601,13 +3596,13 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             const index = event.currentTarget.dataset.index;
             const varToRemove = this.header_variables[parseInt(index)];
             const isNameType = this.selectedVariableType === 'Name';
-            
+
             let updatedHeader = this.header;
-            
+
             if (isNameType) {
                 // For Name type, remove by nameValue or empty placeholder
-                const variableToRemove = varToRemove.nameValue 
-                    ? `{{${varToRemove.nameValue}}}` 
+                const variableToRemove = varToRemove.nameValue
+                    ? `{{${varToRemove.nameValue}}}`
                     : `{{}}`;
                 updatedHeader = this.header.replace(variableToRemove, '');
             } else {
@@ -3616,12 +3611,12 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 const variableToRemove = `{{${varIndexToRemove}}}`;
                 updatedHeader = this.header.replace(variableToRemove, '');
             }
-            
+
             // Get the variable ID before removing it
             const removedVarId = this.header_variables[parseInt(index)]?.id;
-            
+
             this.header_variables = this.header_variables.filter((_, i) => i !== parseInt(index));
-            
+
             if (isNameType) {
                 // Re-index remaining variables for Name type
                 this.header_variables = this.header_variables.map((varItem, idx) => ({
@@ -3639,7 +3634,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         placeholder: `Enter content for {{${newIndex}}}`
                     };
                 });
-                
+
                 // Renumber placeholders in header text
                 let placeholders = updatedHeader.match(/\{\{\d+\}\}/g) || [];
                 placeholders.forEach((placeholder, idx) => {
@@ -3647,7 +3642,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     updatedHeader = updatedHeader.replace(placeholder, newIndex);
                 });
             }
-            
+
             // Clear error for removed variable and rebuild errors object for remaining variables
             const updatedErrors = {};
             this.header_variables.forEach(varItem => {
@@ -3656,7 +3651,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 }
             });
             this.headerVarAlternateTextErrors = updatedErrors;
-            
+
             this.header = updatedHeader.trim();
             this.originalHeader = this.header;
             this.updatePreviewContent(this.originalHeader, 'header');
@@ -3691,8 +3686,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             .catch((e) => console.error('There was an error fetching the emoji.', e));
     }
 
-    fetchCountries(){
-        try{
+    fetchCountries() {
+        try {
             fetch(COUNTRY_PHONE_LENGTHS)
                 .then(response => response.json())
                 .then(data => {
@@ -3708,16 +3703,16 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         this.countryCodeToLabelMap[item?.code] = item?.label;
                         this.countryPhoneMap[item?.code] = item.lengths;
                     });
-                    
+
                     this.updatePhonePattern(this.selectedCountryType);
                 })
                 .catch(error => console.error('Error loading country codes', error));
         }
-        catch(e){
+        catch (e) {
             console.error('Something wrong while fetching country data:', e);
         }
     }
-        
+
     updatePhonePattern(code) {
         const validLengths = this.countryPhoneMap[code];
         if (validLengths && validLengths.length > 0) {
@@ -3864,7 +3859,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 this.showToast('Template Body is required', 'error');
                 return false;
             }
-            
+
             // Check if body starts or ends with a variable
             if (this.checkBodyVariablePlacement()) {
                 this.showToast(this.bodyVariablePlacementError, 'error');
@@ -3935,17 +3930,17 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
         // Normalize the body by replacing all whitespace (including newlines) with single spaces and trim
         const normalizedBody = this.tempBody.replace(/\s+/g, ' ').trim();
-        
+
         // Pattern to match variables - handle both {{1}} and {{name}} formats based on type
         const variablePattern = this.selectedVariableType === 'Name' ? /\{\{[^}]*\}\}/ : /\{\{\d+\}\}/;
         const variablePatternGlobal = this.selectedVariableType === 'Name' ? /\{\{[^}]*\}\}/g : /\{\{\d+\}\}/g;
-        
+
         const startsWithVariable = new RegExp(`^${variablePattern.source}`).test(normalizedBody);
         const endsWithVariable = new RegExp(`${variablePattern.source}$`).test(normalizedBody);
 
         // Check for back-to-back variables (e.g., {{1}}{{2}} or {{name}}{{other}} without any separator)
-        const backToBackPattern = this.selectedVariableType === 'Name' 
-            ? /\{\{[^}]*\}\}\{\{[^}]*\}\}/ 
+        const backToBackPattern = this.selectedVariableType === 'Name'
+            ? /\{\{[^}]*\}\}\{\{[^}]*\}\}/
             : /\{\{\d+\}\}\{\{\d+\}\}/;
         const hasBackToBackVariables = backToBackPattern.test(normalizedBody);
 
@@ -3953,7 +3948,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         if (hasBackToBackVariables) {
             errors.push('Variables cannot be placed directly next to each other. Please add text or a space between variables');
         }
-        
+
         if (startsWithVariable && endsWithVariable) {
             errors.push('Template body cannot start and end with a variable. Please add static text before and after the variables');
         } else if (startsWithVariable) {
@@ -3990,10 +3985,10 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         // Count the number of variables - handle both {{1}} and {{name}} formats
         const numberedVarMatches = body.match(/\{\{\d+\}\}/g) || [];
         const namedVarMatches = body.match(/\{\{[^}]*\}\}/g) || [];
-        
+
         // Use named vars for Name type, numbered for Number type
-        const variableCount = this.selectedVariableType === 'Name' 
-            ? namedVarMatches.length 
+        const variableCount = this.selectedVariableType === 'Name'
+            ? namedVarMatches.length
             : numberedVarMatches.length;
 
         // If no variables, no need to check
@@ -4023,7 +4018,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         if (this.selectedVariableType === 'Name') {
             return null;
         }
-        
+
         // Extract all unique variable numbers from the body
         const variableNumbers = new Set();
         const variablePattern = /\{\{(\d+)\}\}/g;
@@ -4038,7 +4033,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         // Find max and check if all numbers from 1 to max are present
         const maxVar = Math.max(...variableNumbers);
         const missingNumbers = [];
-        
+
         for (let i = 1; i <= maxVar; i++) {
             if (!variableNumbers.has(i)) missingNumbers.push(i);
         }
@@ -4073,7 +4068,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             this.showToast(bodyFormatValidation.errorMessage, 'error');
             return;
         }
-        
+
         // Also validate header if it has content
         if (this.header) {
             const headerFormatValidation = this.validateVariableFormat(this.header, this.selectedVariableType, true);
@@ -4082,29 +4077,29 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 return;
             }
         }
-        
+
         // Check for missing alternate text in header variables (both Name and Number types)
         const headerMissingAlt = this.header_variables.some(varItem => {
             // AlternateText is required for both Name and Number types
             return !varItem.alternateText || varItem.alternateText.trim() === '';
         });
-        
+
         // Check for missing alternate text in body variables (both Name and Number types)
         const bodyMissingValue = this.variables.some(varItem => {
             // AlternateText is required for both Name and Number types
             return !varItem.alternateText || varItem.alternateText.trim() === '';
         });
-        
+
         if (headerMissingAlt) {
             this.showToast('Example/Alternative Text value is required for all header variables', 'error');
             return;
         }
-        
+
         if (bodyMissingValue) {
             this.showToast('Example/Alternative Text value is required for all body variables', 'error');
             return;
         }
-        
+
         this.showReviewTemplate = true;
     }
     handleCloseTemplate() {
@@ -4287,36 +4282,36 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 templateCategory: this.activeTab || null,
                 templateType: this.selectedOption || null,
                 tempLanguage: this.selectedLanguage || null,
-                
+
                 // Header fields
                 tempHeaderFormat: this.selectedContentType || null,
                 tempHeaderHandle: this.headerHandle || null,
                 tempHeaderText: this.header || '',
                 tempHeaderExample: (this.tempHeaderExample && this.tempHeaderExample.length > 0) ? this.tempHeaderExample : null,
-                
+
                 // Media header fields
                 tempImgUrl: this.filePreview || null,
                 tempImgId: this.contentVersionId || null,
                 tempImgName: this.fileName || null,
-                
+
                 // Body fields
                 templateBody: this.tempBody || '',
                 templateBodyText: (this.templateBodyText && this.templateBodyText.length > 0) ? this.templateBodyText : null,
-                
+
                 // Footer field
                 tempFooterText: (this.activeTab === 'Authentication') ? '' : (this.footer || null),
-                
+
                 // Button fields
                 typeOfButton: buttonData.length > 0 ? JSON.stringify(buttonData) : null,
                 marketingOptText: marketingOptText,
-                
+
                 // Authentication template fields
                 packagename: formData.length > 0 ? formData.map(pkg => pkg.packagename) : null,
                 signaturename: formData.length > 0 ? formData.map(pkg => pkg.signaturename) : null,
-                
+
                 // Miscellaneous data (for UI state restoration)
                 templateMiscellaneousData: templateMiscellaneousData ? JSON.stringify(templateMiscellaneousData) : null,
-                
+
                 // Variable mappings for Template_Variable__c records
                 variables: this.variables ? this.variables.map(v => ({
                     placeholder: v.index,
@@ -4332,7 +4327,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     fieldName: v.field,
                     variableType: v.variableType
                 })) : [],
-                
+
                 // Fields needed by buildPayload for Meta API (not stored in Apex)
                 selectedVariableType: this.selectedVariableType || 'Name',
                 isSecurityRecommedation: this.prevContent || null,
@@ -4344,7 +4339,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
 
             const serializedWrapper = JSON.stringify(template);
             const payload = JSON.stringify(buildPayload(template));
-            
+
             // Route to edit if we have a real Meta template ID (not the 'DRAFT' sentinel
             // set on freshly-cloned WhatsApp templates that have not yet been submitted to Meta).
             if (this.metaTemplateId && this.metaTemplateId !== 'DRAFT' && !this.isTemplateClone) {
@@ -4389,7 +4384,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                     });
 
             } else {
-                
+
                 createWhatsappTemplate({ serializedWrapper: serializedWrapper, payloadWrapper: payload, templateName: this.templateName })
                     .then(result => {
 
@@ -4472,7 +4467,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
             event.stopPropagation();
             this.isDropdownOpen = !this.isDropdownOpen;
             this.dropdownClass = this.isDropdownOpen ? 'dropdown-visible' : 'dropdown-hidden';
-        } catch(error) {
+        } catch (error) {
             console.error('Error in toggleDropdown:', error);
         }
     }

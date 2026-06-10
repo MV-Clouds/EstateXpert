@@ -3,6 +3,7 @@ import getWhatsAppFlows from '@salesforce/apex/WhatsAppFlowController.getWhatsAp
 import publishWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.publishWhatsAppFlow';
 import deleteWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.deleteWhatsAppFlow';
 import deprecateWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.deprecateWhatsAppFlow';
+import publishAndDeprecateWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.publishAndDeprecateWhatsAppFlow';
 import getFlowByIdWithScreens from '@salesforce/apex/WhatsAppFlowControllerV2.getFlowByIdWithScreens';
 import cloneWhatsAppFlow from '@salesforce/apex/WhatsAppFlowControllerV2.cloneWhatsAppFlow';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -197,9 +198,10 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                         return {
                             ...record,
                             serialNumber: index + 1,
-                            isEditable: record.MVEX__Status__c === 'Published' || record.MVEX__Status__c === 'Draft',
+                            isEditable: record.MVEX__Status__c === 'Published' || record.MVEX__Status__c === 'Draft' || record.MVEX__Status__c === 'Published Draft',
                             isDraft: record.MVEX__Status__c === 'Draft',
                             isPublished: record.MVEX__Status__c === 'Published',
+                            isPublishedDraft: record.MVEX__Status__c === 'Published Draft',
                             isDeprecated: record.MVEX__Status__c === 'Deprecated',
                             statusClass: this.getStatusClass(record.MVEX__Status__c),
                             LastModifiedDate: this.formatDate(record.LastModifiedDate)
@@ -226,6 +228,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         switch (status) {
             case 'Draft': return 'status-draft-class';
             case 'Published': return 'status-published-class';
+            case 'Published Draft': return 'status-published-draft-class';
             case 'Deprecated': return 'status-deprecated-class';
             default: return 'status-default-class';
         }
@@ -556,6 +559,19 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     deleteFlow(event) {
         this.selectedFlowId = event.currentTarget.dataset.id;
         this.selectedFlowStatus = event.currentTarget.dataset.status;
+
+        if (this.selectedFlowStatus === 'Published Draft') {
+            // This flow has unsaved edits on top of a previously published version.
+            // Meta requires it to be published before it can be deprecated.
+            // Show a clear confirmation explaining the two-step process.
+            this.showMessagePopup(
+                'Warning',
+                'Deprecate Published Draft Flow',
+                'This flow has edits that were saved after it was published. To deprecate it, we will automatically:\n\n1. Publish the latest edits to WhatsApp\n2. Immediately deprecate the flow\n\nThe flow will no longer be available to users. This action cannot be undone.'
+            );
+            return;
+        }
+
         this.showMessagePopup('Warning', 'Delete WhatsApp Flow', 'Are you sure you want to delete this whatsapp flow? This action cannot be undone.');
     }
 
@@ -572,7 +588,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
 
             let matchingRecord = this.filteredRecords.find(record => record.Id === recordId);
             if (matchingRecord) {
-                this.isFlowDraft = matchingRecord.MVEX__Status__c === 'Draft';
+                this.isFlowDraft = matchingRecord.MVEX__Status__c === 'Draft' || matchingRecord.MVEX__Status__c === 'Published Draft';
                 this.selectedFlowId = recordId;
                 this.selectedFlowName = matchingRecord.MVEX__Flow_Name__c || '';
 
@@ -677,6 +693,11 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                             this.showToast('Error', 'Failed to delete flow', 'error');
                             console.error('Failed to delete flow : ', error);
                         })
+                        .finally(() => {
+                            this.isLoading = false;
+                            this.selectedFlowStatus = '';
+                            this.selectedFlowId = '';
+                        });
                 }
             } else if (this.selectedFlowStatus === 'Published') {
                 this.isLoading = true;
@@ -695,6 +716,36 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                             this.showToast('Error', 'Failed to deprecate flow', 'error');
                             console.error('Failed to deprecate flow : ', error);
                         })
+                        .finally(() => {
+                            this.isLoading = false;
+                            this.selectedFlowStatus = '';
+                            this.selectedFlowId = '';
+                        });
+                }
+            } else if (this.selectedFlowStatus === 'Published Draft') {
+                // Automatically publish the latest edits first, then deprecate — all in one Apex call
+                this.isLoading = true;
+                let matchingRecord = this.filteredRecords.find(record => record.Id === this.selectedFlowId);
+                if (matchingRecord) {
+                    publishAndDeprecateWhatsAppFlow({ flowId: matchingRecord.MVEX__Flow_Id__c })
+                        .then((resultStr) => {
+                            const result = JSON.parse(resultStr);
+                            if (result.success) {
+                                this.showToast('Success', 'Flow published and deprecated successfully.', 'success');
+                                this.fetchWhatsAppFlows();
+                            } else {
+                                this.showToast('Error', result.message || 'Failed to publish and deprecate flow.', 'error');
+                            }
+                        })
+                        .catch((error) => {
+                            this.showToast('Error', 'An unexpected error occurred.', 'error');
+                            console.error('Failed to publish and deprecate flow:', error);
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                            this.selectedFlowStatus = '';
+                            this.selectedFlowId = '';
+                        });
                 }
             } else {
                 this.showToast('Error', 'Only flows in Draft or Published status can be deleted.', 'error');

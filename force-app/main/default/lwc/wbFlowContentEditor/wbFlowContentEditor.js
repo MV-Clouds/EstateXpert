@@ -14,6 +14,7 @@ export default class WbFlowContentEditor extends LightningElement {
     @track imageOperationInProgress = {}; 
 
     screenTitle = 'Thank you';
+    screenTitleError = false;
     buttonLabel = 'Done';
     isScreenTitleExpanded = true;
     isButtonSectionExpanded = true;
@@ -64,6 +65,14 @@ export default class WbFlowContentEditor extends LightningElement {
 
     get screenTitleCharCount() {
         return this.screenTitle ? this.screenTitle.length : 0;
+    }
+
+    get screenTitleInputClass() {
+        return this.screenTitleError ? 'native-input error' : 'native-input';
+    }
+
+    get screenTitleCharCounterClass() {
+        return this.screenTitleError ? 'char-counter-inside error' : 'char-counter-inside';
     }
 
     get buttonCharCount() {
@@ -133,8 +142,9 @@ export default class WbFlowContentEditor extends LightningElement {
                 return;
             }
             
-            // Set screen title
+            // Set screen title and reset any validation error
             this.screenTitle = screenData.title || 'Thank you';
+            this.screenTitleError = false;
             
             // Reset button label to default before processing
             this.buttonLabel = 'Done';
@@ -937,7 +947,18 @@ export default class WbFlowContentEditor extends LightningElement {
     }
 
     handleScreenTitleChange(event) {
-        this.screenTitle = event.target.value;
+        const newTitle = event.target.value;
+        this.screenTitle = newTitle;
+
+        // Validate: screen title cannot be empty
+        if (!newTitle || !newTitle.trim()) {
+            this.screenTitleError = true;
+            // Do NOT dispatch content update — prevent blank title from propagating
+            return;
+        }
+
+        // Clear error and dispatch update
+        this.screenTitleError = false;
         this.dispatchContentUpdate();
     }
 

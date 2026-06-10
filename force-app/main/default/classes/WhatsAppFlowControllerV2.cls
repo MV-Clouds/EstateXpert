@@ -145,8 +145,24 @@ public with sharing class WhatsAppFlowControllerV2 {
             // Now save/update in Salesforce using upsert
             MVEX__Flow__c flowRecord = new MVEX__Flow__c();
             
-            if (String.isNotBlank(flowRecordId)) {
+            Boolean isExistingFlow = String.isNotBlank(flowRecordId);
+            
+            if (isExistingFlow) {
                 flowRecord.Id = flowRecordId;
+                // For existing flows, check their current status to decide the new status
+                List<MVEX__Flow__c> existingFlows = [SELECT Id, Status__c FROM MVEX__Flow__c WHERE Id = :flowRecordId LIMIT 1];
+                if (!existingFlows.isEmpty() && existingFlows[0].Status__c == 'Published') {
+                    // Published flow has been edited — mark as 'Published Draft'
+                    flowRecord.Status__c = 'Published Draft';
+                } else if (!existingFlows.isEmpty() && (existingFlows[0].Status__c == 'Draft' || existingFlows[0].Status__c == 'Published Draft')) {
+                    // Keep existing draft/published-draft status unchanged
+                    flowRecord.Status__c = existingFlows[0].Status__c;
+                } else {
+                    flowRecord.Status__c = 'Draft';
+                }
+            } else {
+                // Brand new flow — always starts as Draft
+                flowRecord.Status__c = 'Draft';
             }
             
             flowRecord.Flow_Name__c = flowName;
@@ -154,7 +170,6 @@ public with sharing class WhatsAppFlowControllerV2 {
             flowRecord.Category__c = String.join(categories, ';');
             flowRecord.Flow_JSON__c = flowJsonForStorage;
             flowRecord.Template_Type__c = templateType;
-            flowRecord.Status__c = 'Draft';
             
             upsert flowRecord;
             flowRecordId = flowRecord.Id;

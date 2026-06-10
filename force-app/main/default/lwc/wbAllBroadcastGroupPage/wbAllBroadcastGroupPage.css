@@ -101,7 +101,7 @@
 }
 
 .main_content_cls {
-     background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -247,7 +247,7 @@ span {
 }
 
 
-.close-btn{
+.close-btn {
     border: 1px solid #c7c7c7;
     border-radius: 3px;
     color: black;
@@ -289,14 +289,14 @@ span {
     max-width: 100%;
 }
 
-.action-buttons{
+.action-buttons {
     padding: 0;
     border: none;
     background: transparent;
     cursor: pointer;
 }
 
-.action{
+.action {
     width: 27px;
     color: black;
     border: 1px solid #dfdddd;
@@ -306,11 +306,11 @@ span {
     cursor: pointer;
 }
 
-.trash{
+.trash {
     padding: 0.37rem;
 }
 
-.edit{
+.edit {
     padding: 0.2rem;
 }
 
@@ -327,7 +327,7 @@ span {
     position: relative;
 }
 
-.header{
+.header {
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -365,7 +365,7 @@ span {
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 500;
     text-align: left;
     gap: 15px;

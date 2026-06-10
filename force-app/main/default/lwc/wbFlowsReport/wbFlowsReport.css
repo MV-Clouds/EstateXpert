@@ -44,7 +44,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 500;
     text-align: left;
     gap: 15px;
@@ -114,10 +114,19 @@
     flex-grow: 1;
 }
 
-.sno, .name, .phone, .date, .details-field, .details-user, .details-screen {
+.sno,
+.name,
+.phone,
+.date,
+.details-field,
+.details-user,
+.details-screen {
     /* Set some standard widths if desired */
 }
-.sno { width: 5%; }
+
+.sno {
+    width: 5%;
+}
 
 .table-content {
     border-radius: 8px;
@@ -128,6 +137,7 @@
     background-color: transparent;
     height: 100%;
 }
+
 .table-content::-webkit-scrollbar {
     display: none;
 }
@@ -279,14 +289,14 @@
     background-color: #fafbfc;
 }
 
-.accordion-content .table-content{
+.accordion-content .table-content {
     border-radius: 8px;
     max-height: 300px;
     overflow: auto;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
-.action-icon-container{
+.action-icon-container {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -307,7 +317,7 @@
     pointer-events: none;
 }
 
-.table-content .slds-table:not(.slds-no-row-hover) tbody tr:hover>th{
+.table-content .slds-table:not(.slds-no-row-hover) tbody tr:hover>th {
     background-color: #0476d3;
 }
 

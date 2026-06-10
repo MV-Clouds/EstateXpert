@@ -107,9 +107,9 @@
 }
 
 .table-content .slds-table .marketing-campaign-name,
-.table-content .slds-table .marketing-camapign-template, 
-.table-content .slds-table .total-emails, 
-.table-content .slds-table .remaining-emails, 
+.table-content .slds-table .marketing-camapign-template,
+.table-content .slds-table .total-emails,
+.table-content .slds-table .remaining-emails,
 .table-content .slds-table .start-date,
 .table-content .slds-table .created-date,
 .table-content .slds-table .actions,
@@ -118,7 +118,7 @@
     width: auto;
 }
 
-.sno{
+.sno {
     width: 4rem;
 }
 
@@ -153,6 +153,7 @@
 span {
     margin: 0 5px;
 }
+
 .container {
     position: relative;
     top: 4px;
@@ -207,7 +208,7 @@ span {
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 500;
     text-align: left;
     gap: 15px;
@@ -348,6 +349,7 @@ span {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -437,7 +439,7 @@ span {
     cursor: default;
 }
 
-.pending-class{
+.pending-class {
     background-color: #fff0d3;
     color: orange;
     font-weight: 300;
@@ -448,7 +450,7 @@ span {
     border-radius: 14px;
 }
 
-.in-progress-class{
+.in-progress-class {
     background-color: #DFEEF9;
     color: #008eff;
     font-weight: 300;
@@ -459,7 +461,7 @@ span {
     border-radius: 14px;
 }
 
-.completed-class{
+.completed-class {
     background-color: #E1FCEF;
     color: green;
     font-weight: 300;
@@ -765,6 +767,6 @@ span {
     transition: all 0.3s ease;
 }
 
-.table-content .slds-table td{
+.table-content .slds-table td {
     max-width: 5rem;
 }

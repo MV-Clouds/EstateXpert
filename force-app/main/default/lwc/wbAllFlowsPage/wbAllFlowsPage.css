@@ -95,6 +95,17 @@
     border-radius: 14px;
 }
 
+.status-published-draft-class {
+    background-color: #FFF3CD;
+    color: #92600a;
+    font-weight: 300;
+    display: flex;
+    justify-content: center;
+    margin: 0 10%;
+    padding: 4px 0px;
+    border-radius: 14px;
+}
+
 .status-default-class {
     background-color: #f0f0f0;
     color: #555555;
@@ -416,7 +427,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 500;
     text-align: left;
     gap: 15px;

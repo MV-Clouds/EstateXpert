@@ -10,7 +10,7 @@
                     <div class="sub_main_header_css">
                         <div slot="title" class="header_block_css">
                             <div class="svg_back_icon" onclick={backToControlCenter}>
-                                <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
+                                <svg width="24" height="22" viewBox="0 0 30 26" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
@@ -25,7 +25,7 @@
                             <template if:false={isMobileOrTablet}>
                                 <div class="search-input header-search-bar-css">
                                     <lightning-input type="search" onchange={handleSearchInputChange}
-                                        placeholder="Search Name..." class="input-campaign"
+                                        placeholder="Search Flow Name..." class="input-campaign"
                                         variant="label-hidden"></lightning-input>
                                 </div>
                                 <div class="status-select header-combobox">
@@ -115,6 +115,21 @@
                                                 </span>
                                             </div>
                                         </th>
+                                        <th data-id="CreatedDate" onclick={sortClick} aria-sort="none"
+                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header"
+                                            scope="col">
+                                            <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                                role="button" tabindex="0">
+                                                <span class="slds-truncate" title="Title">Created Date</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index="CreatedDate" class="listing-manager-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </th>
                                         <th scope="col" class="actions">
                                             <div>Actions</div>
                                         </th>
@@ -138,6 +153,9 @@
                                             </td>
                                             <td data-label="Last Updated">
                                                 <div>{record.LastModifiedDate}</div>
+                                            </td>
+                                            <td data-label="Created Date">
+                                                <div>{record.CreatedDate}</div>
                                             </td>
                                             <td data-label="Actions">
                                                 <div class="action-btn">
@@ -193,6 +211,20 @@
                                                         <button class="delete-icon-css" data-id={record.Id}
                                                             data-status={record.MVEX__Status__c}
                                                             onclick={deprecateFlow}>
+                                                            <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                                    stroke="#212529" stroke-width="1.25"
+                                                                    stroke-linecap="round" stroke-linejoin="round" />
+                                                            </svg>
+                                                        </button>
+                                                    </template>
+                                                    <template if:true={record.isPublishedDraft}>
+                                                        <button class="delete-icon-css"
+                                                            title="Cannot delete — publish first, then deprecate"
+                                                            data-id={record.Id} data-status={record.MVEX__Status__c}
+                                                            onclick={deleteFlow}>
                                                             <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
                                                                 <path

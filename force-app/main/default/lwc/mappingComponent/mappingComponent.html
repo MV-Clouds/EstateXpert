@@ -8,7 +8,8 @@
                 <div class="sub_main_header_css">
                     <div slot="title" class="header_block_css">
                         <div class="svg_back_icon" onclick={backToControlCenter}>
-                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="24" height="22" viewBox="0 0 30 26" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
                                     fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
@@ -28,7 +29,8 @@
                 <div class="slds-m-around_medium navbar">
                     <div class="selected-condition">
                         <!-- <p><b>Condition Type</b>: {selectedConditionLabel} <template if:true={showCondtionStringListing}>({logicalConditionListing})</template></p> -->
-                        <p><b>Condition Type</b>: {selectedConditionLabelinquiry} <template if:true={showCondtionStringInquiry}>({logicalConditionInquiry})</template></p>
+                        <p><b>Condition Type</b>: {selectedConditionLabelinquiry} <template
+                                if:true={showCondtionStringInquiry}>({logicalConditionInquiry})</template></p>
                     </div>
                     <!-- <div class="save-btn">
                         <button onclick={handleModalOpen} class="btn display_css2">
@@ -41,7 +43,8 @@
                 </div>
 
                 <lightning-accordion allow-multiple-sections-open active-section-name={activeSections}>
-                    <lightning-accordion-section name="inquirySection" label="Inquiry Mapping(For Suggested Inquiries on Listing Record Page)">
+                    <lightning-accordion-section name="inquirySection"
+                        label="Inquiry Mapping(For Suggested Inquiries on Listing Record Page)">
                         <div class="table-content">
 
                             <template if:true={isInquirydropDownAvailable}>
@@ -66,24 +69,28 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <template for:each={inquiryDropDownPairsWithIndex} for:item="pair" for:index="index">
+                                        <template for:each={inquiryDropDownPairsWithIndex} for:item="pair"
+                                            for:index="index">
                                             <tr key={pair.Id}>
                                                 <td data-label="S.No.">
                                                     <div class="index-display">{pair.displayIndex}</div>
                                                 </td>
                                                 <td data-label="Status">
                                                     <div class="flex-item">
-                                                        <lightning-combobox label={pair.firstlabel} options={pair.firstOptions}
-                                                            data-index={index} value={pair.selectedFirst}
-                                                            data-object={inquiryObject} onchange={handleFirstFieldChange} dropdown-alignment="auto"
+                                                        <lightning-combobox label={pair.firstlabel}
+                                                            options={pair.firstOptions} data-index={index}
+                                                            value={pair.selectedFirst} data-object={inquiryObject}
+                                                            onchange={handleFirstFieldChange} dropdown-alignment="auto"
                                                             variant="label-hidden"></lightning-combobox>
                                                     </div>
                                                 </td>
                                                 <td data-label="Object Name">
                                                     <div class="flex-item">
-                                                        <lightning-combobox label="Condition" options={pair.conditionsOptions}
-                                                            data-index={index} value={pair.selectedCondition}
-                                                            onchange={handleConditionChange} variant="label-hidden" dropdown-alignment="auto"
+                                                        <lightning-combobox label="Condition"
+                                                            options={pair.conditionsOptions} data-index={index}
+                                                            value={pair.selectedCondition}
+                                                            onchange={handleConditionChange} variant="label-hidden"
+                                                            dropdown-alignment="auto"
                                                             data-object={inquiryObject}></lightning-combobox>
                                                     </div>
                                                 </td>
@@ -91,8 +98,8 @@
                                                     <div class="flex-item">
                                                         <lightning-combobox label={pair.secondlabel}
                                                             options={pair.secondOptions} data-index={index}
-                                                            value={pair.selectedSecond} data-object={inquiryObject}  dropdown-alignment="auto"
-                                                            onchange={handleSecondFieldChange}
+                                                            value={pair.selectedSecond} data-object={inquiryObject}
+                                                            dropdown-alignment="auto" onchange={handleSecondFieldChange}
                                                             variant="label-hidden"></lightning-combobox>
                                                     </div>
                                                 </td>
@@ -104,8 +111,8 @@
                                                                 xmlns="http://www.w3.org/2000/svg">
                                                                 <path
                                                                     d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                                    stroke-linejoin="round" />
+                                                                    stroke="#212529" stroke-width="1.25"
+                                                                    stroke-linecap="round" stroke-linejoin="round" />
                                                             </svg>
                                                         </button>
                                                     </div>
@@ -117,12 +124,12 @@
                             </template>
 
 
-                        <template if:false={isInquirydropDownAvailable}>
+                            <template if:false={isInquirydropDownAvailable}>
 
-                            <div class="no-data-available">
-                                No Mapping Found
-                            </div>
-                        </template>
+                                <div class="no-data-available">
+                                    No Mapping Found
+                                </div>
+                            </template>
 
                         </div>
 
@@ -140,14 +147,16 @@
                             </div>
                         </div>
                     </lightning-accordion-section>
-                    
+
 
                     <div class="selected-condition custom-heading">
                         <!-- <p><b>Condition Type</b>: {selectedConditionLabelinquiry} <template if:true={showCondtionStringInquiry}>({logicalConditionInquiry})</template></p> -->
-                        <p><b>Condition Type</b>: {selectedConditionLabel} <template if:true={showCondtionStringListing}>({logicalConditionListing})</template></p>
+                        <p><b>Condition Type</b>: {selectedConditionLabel} <template
+                                if:true={showCondtionStringListing}>({logicalConditionListing})</template></p>
                     </div>
 
-                    <lightning-accordion-section name="listingSection" label="Listing Mapping(For Suggested Listings on Inquiry Record Page)">
+                    <lightning-accordion-section name="listingSection"
+                        label="Listing Mapping(For Suggested Listings on Inquiry Record Page)">
 
                         <template if:true={isListingdropDownAvaialble}>
                             <div class="table-content">
@@ -191,8 +200,8 @@
                                                     <div class="flex-item">
                                                         <lightning-combobox label="Condition"
                                                             options={pair.conditionsOptions} data-index={index}
-                                                            value={pair.selectedCondition} onchange={handleConditionChange}
-                                                            variant="label-hidden"
+                                                            value={pair.selectedCondition}
+                                                            onchange={handleConditionChange} variant="label-hidden"
                                                             data-object={listingObject}></lightning-combobox>
                                                     </div>
                                                 </td>
@@ -249,7 +258,7 @@
                             </div>
                         </div>
                     </lightning-accordion-section>
-                    
+
                 </lightning-accordion>
 
             </div>
@@ -270,7 +279,8 @@
                     </div>
 
                     <div class="slds-modal__header blue-header">
-                        <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Confirmation</h1>
+                        <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Confirmation
+                        </h1>
                     </div>
                     <div class="slds-modal__content slds-p-around_medium popdiv_cls" id="modal-content-id-1">
                         <p class="slds-text-align_center con-msg">Are you sure you want to save the changes?</p>
@@ -305,8 +315,9 @@
 
                             <template if:true={isModalListing}>
                                 <div class="condition-container-item">
-                                    <lightning-combobox label="Select Condition Logic" value={selectedConditionTypeListing}
-                                        placeholder="Select an option" options={conditionTypeOptions} data-name="listing"
+                                    <lightning-combobox label="Select Condition Logic"
+                                        value={selectedConditionTypeListing} placeholder="Select an option"
+                                        options={conditionTypeOptions} data-name="listing"
                                         onchange={handleConditionTypeChange}>
                                     </lightning-combobox>
                                 </div>
@@ -314,8 +325,9 @@
                                 <template if:true={isCustomLogicSelectedListing}>
                                     <div class="condition-container-input">
                                         <lightning-input type="text" class="condition-input" label="Logical Expression"
-                                            data-id="condition-input" value={logicalConditionListing} data-name="listing"
-                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2" message-when-value-missing=" "
+                                            data-id="condition-input" value={logicalConditionListing}
+                                            data-name="listing" onkeyup={handleConditionInputChange}
+                                            placeholder="Example : 1 && 2" message-when-value-missing=" "
                                             required></lightning-input>
                                         <template if:true={listingLogicError}>
                                             <div class="slds-text-color_error">{listingLogicError}</div>
@@ -337,8 +349,9 @@
                             <template if:false={isModalListing}>
 
                                 <div class="condition-container-item">
-                                    <lightning-combobox label="Select Condition Logic" value={selectedConditionTypeInquiry}
-                                        placeholder="Select an option" options={conditionTypeOptions} data-name="inquiry"
+                                    <lightning-combobox label="Select Condition Logic"
+                                        value={selectedConditionTypeInquiry} placeholder="Select an option"
+                                        options={conditionTypeOptions} data-name="inquiry"
                                         onchange={handleConditionTypeChange}>
                                     </lightning-combobox>
                                 </div>
@@ -346,8 +359,9 @@
                                 <template if:true={isCustomLogicSelectedInquiry}>
                                     <div class="condition-container-input">
                                         <lightning-input type="text" class="condition-input" label="Logical Expression"
-                                            data-id="condition-input-2" value={logicalConditionInquiry} data-name="inquiry"
-                                            onkeyup={handleConditionInputChange} placeholder="Example : 1 && 2" message-when-value-missing=" "
+                                            data-id="condition-input-2" value={logicalConditionInquiry}
+                                            data-name="inquiry" onkeyup={handleConditionInputChange}
+                                            placeholder="Example : 1 && 2" message-when-value-missing=" "
                                             required></lightning-input>
                                         <template if:true={inquiryLogicError}>
                                             <div class="slds-text-color_error">{inquiryLogicError}</div>
@@ -379,10 +393,13 @@
         <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
             <div class="invalid-access">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                        fill="currentColor" />
                 </svg>
                 <h1>Invalid Access Path</h1>
-                <p>This page can only be accessed from the Control Center. Please navigate to Control Center to configure listing and inquiry mappings.</p>
+                <p>This page can only be accessed from the Control Center. Please navigate to Control Center to
+                    configure listing and inquiry mappings.</p>
             </div>
         </div>
     </template>

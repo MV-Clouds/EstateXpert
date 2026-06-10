@@ -502,4 +502,92 @@ public with sharing class WhatsAppFlowController {
             return new Map<String,String>{'status' => 'failed', 'error' => 'failed'};
         }
     }
+
+    /**
+     ***********************************************************************************************************************************
+     * Method Name     : publishAndDeprecateWhatsAppFlow
+     * @description    : For a 'Published Draft' flow — publishes the latest edits to Meta first,
+     *                   then immediately deprecates the flow. This is the required two-step process
+     *                   because Meta does not allow direct deletion/deprecation of a published flow
+     *                   that has pending draft edits.
+     * @param flowId   : The Meta Flow ID (Flow_Id__c) of the flow to publish and then deprecate.
+     * @return         : JSON string with success status and message.
+     ***********************************************************************************************************************************
+     */
+    @AuraEnabled
+    public static String publishAndDeprecateWhatsAppFlow(String flowId) {
+        Map<String, Object> response = new Map<String, Object>();
+        try {
+            if (wbConfig == null) {
+                response.put('success', false);
+                response.put('message', 'WhatsApp Business configuration not found.');
+                return JSON.serialize(response);
+            }
+
+            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '')
+                               + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
+
+            // ── Step 1: Publish the flow ──────────────────────────────────────────────
+            String publishEndpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + flowId + '/publish';
+            HttpRequest publishReq = new HttpRequest();
+            publishReq.setEndpoint(publishEndpoint);
+            publishReq.setMethod('POST');
+            publishReq.setHeader('Authorization', 'Bearer ' + accessToken);
+
+            Http http = new Http();
+            HttpResponse publishRes = http.send(publishReq);
+
+            if (publishRes.getStatusCode() != 200) {
+                response.put('success', false);
+                response.put('message', 'Failed to publish flow before deprecating: ' + publishRes.getBody());
+                ErrorHandler.insertErrordata(null, 'WhatsAppFlowController', 'publishAndDeprecateWhatsAppFlow', 'Publish step failed: ' + publishRes.getBody());
+                return JSON.serialize(response);
+            }
+
+            Map<String, Object> publishMap = (Map<String, Object>) JSON.deserializeUntyped(publishRes.getBody());
+            Boolean publishSuccess = (Boolean) publishMap.get('success');
+            if (publishSuccess != true) {
+                response.put('success', false);
+                response.put('message', 'Meta did not confirm flow publish. Deprecation aborted.');
+                return JSON.serialize(response);
+            }
+
+            // ── Step 2: Deprecate the (now-published) flow ───────────────────────────
+            String deprecateEndpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + flowId + '/deprecate';
+            HttpRequest deprecateReq = new HttpRequest();
+            deprecateReq.setEndpoint(deprecateEndpoint);
+            deprecateReq.setMethod('POST');
+            deprecateReq.setHeader('Authorization', 'Bearer ' + accessToken);
+
+            HttpResponse deprecateRes = http.send(deprecateReq);
+
+            if (deprecateRes.getStatusCode() != 200) {
+                // Publish succeeded but deprecate failed — at least update Salesforce to Published
+                List<Flow__c> flowRecs = [SELECT Id, Status__c FROM Flow__c WHERE Flow_Id__c = :flowId LIMIT 1];
+                if (!flowRecs.isEmpty()) {
+                    flowRecs[0].Status__c = 'Published';
+                    update as user flowRecs[0];
+                }
+                response.put('success', false);
+                response.put('message', 'Flow was published successfully but deprecation failed: ' + deprecateRes.getBody());
+                ErrorHandler.insertErrordata(null, 'WhatsAppFlowController', 'publishAndDeprecateWhatsAppFlow', 'Deprecate step failed: ' + deprecateRes.getBody());
+                return JSON.serialize(response);
+            }
+
+            // ── Step 3: Update Salesforce record to Deprecated ───────────────────────
+            List<Flow__c> flowRecs = [SELECT Id, Status__c FROM Flow__c WHERE Flow_Id__c = :flowId LIMIT 1];
+            if (!flowRecs.isEmpty()) {
+                flowRecs[0].Status__c = 'Deprecated';
+                update as user flowRecs[0];
+            }
+
+            response.put('success', true);
+            response.put('message', 'Flow published and deprecated successfully.');
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WhatsAppFlowController', 'publishAndDeprecateWhatsAppFlow', e.getMessage());
+            response.put('success', false);
+            response.put('message', e.getMessage());
+        }
+        return JSON.serialize(response);
+    }
 }

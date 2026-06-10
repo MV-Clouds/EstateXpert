@@ -284,6 +284,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                             LanguageLabel: this.handleEmptyValue(record.LanguageLabel),
                             MVEX__Status__c: this.handleEmptyValue(record.MVEX__Status__c),
                             LastModifiedDate: this.formatDate(record.LastModifiedDate) || '-',
+                            CreatedDate: this.formatDate(record.CreatedDate) || '-',
                             isButtonDisabled,
                             cssClass: isButtonDisabled ? 'action edit disabled' : 'action edit',
                             editRestrictionMessage: editRestriction.message,
@@ -373,8 +374,17 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
   
     formatDate(dateString) {
         if (!dateString) return '-';
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
+        const date = new Date(dateString);
+        return date.toLocaleString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+            timeZone: 'UTC'
+        });
     }
 
     /**

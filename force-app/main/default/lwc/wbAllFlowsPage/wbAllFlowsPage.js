@@ -204,7 +204,8 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                             isPublishedDraft: record.MVEX__Status__c === 'Published Draft',
                             isDeprecated: record.MVEX__Status__c === 'Deprecated',
                             statusClass: this.getStatusClass(record.MVEX__Status__c),
-                            LastModifiedDate: this.formatDate(record.LastModifiedDate)
+                            LastModifiedDate: this.formatDate(record.LastModifiedDate),
+                            CreatedDate: this.formatDate(record.CreatedDate)
                         };
                     });
                     this.sortData();

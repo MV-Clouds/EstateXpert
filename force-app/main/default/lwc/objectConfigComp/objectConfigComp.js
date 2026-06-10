@@ -30,7 +30,6 @@ export default class ObjectConfigComp extends LightningElement {
 
     @api isPopup = false;
 
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
     async connectedCallback() {
         try {
             this.isLoading = true;

@@ -9,18 +9,18 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 const MAX_FLOW_NAME_LENGTH = 150;
 
-export default class WbCreateFlowManagement extends LightningElement {
-    
+export default class CreateFlowManagement extends LightningElement {
+
     @api isEditMode = false;
     @api isCloneFlow = false;
     @api selectedFlowId = null;
     @api cloneFlowName = '';
-    
+
     // @track only needed for arrays/objects that are mutated
     @track selectedCategories = [];
     @track templateTypeOptions = [];
     @track jsonDataMap = {};
-    
+
     selectedCategory = '';
     templateType = 'Default';
     flowName = '';
@@ -65,12 +65,12 @@ export default class WbCreateFlowManagement extends LightningElement {
     get isCreateDisabled() {
         return (this.flowName.trim() == '') || (this.selectedCategories.length == 0 || (this.selectedCategories.length == 1 && this.selectedCategories[0] == ''));
     }
-    
-    get headerNameLengthError(){
+
+    get headerNameLengthError() {
         return this.flowName.length > MAX_FLOW_NAME_LENGTH;
     }
-    
-    get maxFlowNameLength(){
+
+    get maxFlowNameLength() {
         return MAX_FLOW_NAME_LENGTH;
     }
 
@@ -94,7 +94,7 @@ export default class WbCreateFlowManagement extends LightningElement {
      * Method : connectedCallback
      * @description : Initializes component and loads all JSON data.
      */
-    connectedCallback(){
+    connectedCallback() {
         loadStyle(this, MulishFontCss)
             .then(() => {
                 console.log('External Css Loaded');
@@ -103,15 +103,15 @@ export default class WbCreateFlowManagement extends LightningElement {
                 console.log('Error occuring during loading external css', error);
             });
         // Load existing flow data if in edit mode
-        
+
         if (this.isEditMode && this.selectedFlowId) {
             this.loadExistingFlowData();
         } else if (this.isCloneFlow && this.cloneFlowName) {
             this.flowName = this.cloneFlowName;
-        } else{
+        } else {
             this.loadAllJSONData();
         }
-        
+
     }
 
     /**
@@ -122,26 +122,26 @@ export default class WbCreateFlowManagement extends LightningElement {
         this.isLoading = true;
 
         getAllJSONData()
-        .then(data => {
-            if (data) {
-                // Process JSON to convert inline read more screens
-                const processedData = {};
-                Object.keys(data).forEach(key => {
-                    processedData[key] = this.processReadMoreScreens(data[key]);
-                });
-                this.jsonDataMap = processedData;
-                this.buildTemplateTypeOptions();
-                this.setJSONForTemplateType();
-            } else {
-                console.error('No JSON data received');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading all JSON data:', error);
-        })
-        .finally(() => {
-            this.isLoading = false;
-        });
+            .then(data => {
+                if (data) {
+                    // Process JSON to convert inline read more screens
+                    const processedData = {};
+                    Object.keys(data).forEach(key => {
+                        processedData[key] = this.processReadMoreScreens(data[key]);
+                    });
+                    this.jsonDataMap = processedData;
+                    this.buildTemplateTypeOptions();
+                    this.setJSONForTemplateType();
+                } else {
+                    console.error('No JSON data received');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading all JSON data:', error);
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
     }
 
     /**
@@ -151,13 +151,13 @@ export default class WbCreateFlowManagement extends LightningElement {
     async loadExistingFlowData() {
         this.isLoading = true;
         try {
-            
+
             const resultString = await getFlowById({ flowId: this.selectedFlowId });
             const result = JSON.parse(resultString);
-            
+
             if (result && result.success) {
                 const flowData = result.data;
-                
+
                 // Set flow details
                 this.flowName = flowData.MVEX__Flow_Name__c || '';
                 this.flowRecordId = flowData.Id;
@@ -165,22 +165,22 @@ export default class WbCreateFlowManagement extends LightningElement {
                 this.parentFlowId = flowData.MVEX__Parent_Flow__c || null;
                 this.isParentFlow = result.isParentFlow || false;
                 this.templateType = flowData.MVEX__Template_Type__c || 'Default';
-                
+
                 // Set categories
                 if (flowData.MVEX__Category__c) {
                     this.selectedCategories = flowData.MVEX__Category__c.split(';');
                 }
-                
+
                 // Set flow JSON
                 if (flowData.MVEX__Flow_JSON__c) {
                     // Process read more screens to ensure proper ID prefixes and ordering
                     this.jsonString = this.processReadMoreScreens(flowData.MVEX__Flow_JSON__c);
                     this.initialJsonString = this.jsonString;
                     this.isFlowSaved = true;
-                    
+
                     // Automatically show the flow builder
                     this.showFlowBuilder = true;
-                    
+
                     // Parse JSON to select first screen
                     try {
                         const parsedJson = JSON.parse(this.jsonString);
@@ -192,7 +192,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                         console.error('Error parsing flow JSON:', parseError);
                     }
                 }
-                
+
             } else {
                 this.showToast('Error', result.message || 'Failed to load flow data', 'error');
             }
@@ -208,11 +208,11 @@ export default class WbCreateFlowManagement extends LightningElement {
      * Method : handleInputChange
      * @description : Updates flow name from input field.
      */
-    handleInputChange(event){
+    handleInputChange(event) {
         try {
-            this.flowName = event.target.value;  
+            this.flowName = event.target.value;
         } catch (error) {
-            console.error('Error in handleInputChange : ' , error);
+            console.error('Error in handleInputChange : ', error);
         }
     }
 
@@ -229,7 +229,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                 this.selectedCategories = [...this.selectedCategories, selectedValue];
             }
         } catch (error) {
-            console.error('Error in handleCategories : ' , error);
+            console.error('Error in handleCategories : ', error);
         }
     }
 
@@ -263,12 +263,12 @@ export default class WbCreateFlowManagement extends LightningElement {
         this.templateType = event.target.value;
         this.setJSONForTemplateType();
     }
-  
+
     /**
      * Method : handleCreate
      * @description : Creates flow in Meta first, then shows the flow builder screen.
      */
-    async handleCreate(){
+    async handleCreate() {
         this.flowName = this.flowName.trim();
 
         if (!this.hasValidFlowName || !this.hasValidCategories) {
@@ -286,9 +286,9 @@ export default class WbCreateFlowManagement extends LightningElement {
 
         // Process read more screens before creating (migration and cleanup)
         this.jsonString = this.processReadMoreScreens(this.jsonString);
-        
+
         this.isLoading = true;
-        
+
         try {
             // Create flow in Meta first
             const result = await saveWhatsAppFlow({
@@ -299,19 +299,19 @@ export default class WbCreateFlowManagement extends LightningElement {
                 flowRecordId: null,
                 metaFlowId: null
             });
-            
+
             const response = JSON.parse(result);
-            
+
             if (response.success) {
                 // Store the created flow IDs
                 this.flowRecordId = response.flowRecordId;
                 this.metaFlowId = response.metaFlowId;
                 this.initialJsonString = this.jsonString;
                 this.isFlowSaved = true;
-                
+
                 // Show the flow builder
                 this.showFlowBuilder = true;
-                
+
                 // Initialize selectedScreenId with first screen (skip READ_MORE_ screens)
                 try {
                     if (this.jsonString) {
@@ -325,7 +325,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                 } catch (error) {
                     console.error('Error initializing selectedScreenId:', error);
                 }
-                
+
                 this.showToast('Success', 'Flow created successfully in Meta', 'success');
             } else {
                 // Handle Meta API error
@@ -343,7 +343,7 @@ export default class WbCreateFlowManagement extends LightningElement {
      * Method : handleBackToForm
      * @description : Returns to all flows page.
      */
-    handleBackToForm(){
+    handleBackToForm() {
         // Always go back to all flows page
         this.dispatchEvent(new CustomEvent('previous', {
             bubbles: true,
@@ -359,7 +359,7 @@ export default class WbCreateFlowManagement extends LightningElement {
     processReadMoreScreens(jsonString) {
         try {
             if (!jsonString) return jsonString;
-            
+
             const jsonData = JSON.parse(jsonString);
             if (!jsonData.screens || jsonData.screens.length === 0) return jsonString;
 
@@ -438,19 +438,19 @@ export default class WbCreateFlowManagement extends LightningElement {
                         if (!readMoreScreen.id.startsWith('READ_MORE_')) {
                             readMoreScreen.id = `READ_MORE_${this.sanitizeScreenId(readMoreScreen.id)}`;
                         }
-                        
+
                         // Add to parent's read more list
                         if (!updatedParentToReadMore.has(screen.id)) {
                             updatedParentToReadMore.set(screen.id, []);
                         }
                         updatedParentToReadMore.get(screen.id).push(readMoreScreen.id);
-                        
+
                         // Add to screens array if not already present
                         if (!jsonData.screens.find(s => s.id === readMoreScreen.id)) {
                             jsonData.screens.push(readMoreScreen);
                         }
                     });
-                    
+
                     // Update parent screen's OptIn sections to use on-click-action
                     if (screen.layout && screen.layout.children) {
                         screen.layout.children.forEach(layoutChild => {
@@ -458,10 +458,10 @@ export default class WbCreateFlowManagement extends LightningElement {
                                 layoutChild.children.forEach(formChild => {
                                     if (formChild.type === 'OptIn' && formChild.hasReadMoreScreen && formChild.readMoreScreenData) {
                                         const readMoreScreenId = formChild.readMoreScreenData.id;
-                                        const properReadMoreId = readMoreScreenId.startsWith('READ_MORE_') 
-                                            ? readMoreScreenId 
+                                        const properReadMoreId = readMoreScreenId.startsWith('READ_MORE_')
+                                            ? readMoreScreenId
                                             : `READ_MORE_${this.sanitizeScreenId(readMoreScreenId)}`;
-                                        
+
                                         formChild['on-click-action'] = {
                                             name: 'navigate',
                                             payload: {},
@@ -475,7 +475,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                             }
                         });
                     }
-                    
+
                     // Remove the nested readMoreScreens array
                     delete screen.readMoreScreens;
                 }
@@ -485,22 +485,22 @@ export default class WbCreateFlowManagement extends LightningElement {
             const orderedScreens = [];
             const processedScreenIds = new Set();
             const readMoreScreensSet = new Set();
-            
+
             // Collect all read more screen IDs
             updatedParentToReadMore.forEach(children => {
                 children.forEach(childId => readMoreScreensSet.add(childId));
             });
-            
+
             jsonData.screens.forEach(screen => {
                 // Skip if already processed or if it's a read-more screen (will be added after parent)
                 if (processedScreenIds.has(screen.id) || readMoreScreensSet.has(screen.id)) {
                     return;
                 }
-                
+
                 // Add main screen
                 orderedScreens.push(screen);
                 processedScreenIds.add(screen.id);
-                
+
                 // Add its read-more screens immediately after
                 const readMoreIds = updatedParentToReadMore.get(screen.id) || [];
                 readMoreIds.forEach(readMoreId => {
@@ -518,7 +518,7 @@ export default class WbCreateFlowManagement extends LightningElement {
             // Clean all screens - remove internal tracking properties
             jsonData.screens = jsonData.screens.map(screen => {
                 const cleanScreen = { ...screen };
-                
+
                 // Keep only valid WhatsApp Flow screen properties
                 const validScreenProps = ['id', 'title', 'data', 'terminal', 'success', 'layout'];
                 Object.keys(cleanScreen).forEach(key => {
@@ -531,7 +531,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                 if (cleanScreen.layout && cleanScreen.layout.children) {
                     cleanScreen.layout.children = this.cleanLayoutChildren(cleanScreen.layout.children);
                 }
-                
+
                 return cleanScreen;
             });
 
@@ -548,22 +548,22 @@ export default class WbCreateFlowManagement extends LightningElement {
      */
     cleanLayoutChildren(children) {
         if (!Array.isArray(children)) return children;
-        
+
         return children.map(child => {
             const cleanChild = { ...child };
-            
+
             // Remove internal tracking properties (not allowed in WhatsApp Flow)
             delete cleanChild.hasReadMoreScreen;
             delete cleanChild.readMoreScreenData;
             delete cleanChild.isReadMoreScreen;
             delete cleanChild.parentSectionId;
             delete cleanChild.readMoreScreens;
-            
+
             // Recursively clean nested children
             if (cleanChild.children && Array.isArray(cleanChild.children)) {
                 cleanChild.children = this.cleanLayoutChildren(cleanChild.children);
             }
-            
+
             return cleanChild;
         });
     }
@@ -573,9 +573,9 @@ export default class WbCreateFlowManagement extends LightningElement {
     * Method : buildTemplateTypeOptions
     * @description  : Builds template type options dynamically from metadata keys.
     */
-    buildTemplateTypeOptions(){
+    buildTemplateTypeOptions() {
         try {
-            if(this.jsonDataMap){
+            if (this.jsonDataMap) {
                 this.templateTypeOptions = Object.keys(this.jsonDataMap).map(key => ({
                     label: key,
                     value: key,
@@ -591,9 +591,9 @@ export default class WbCreateFlowManagement extends LightningElement {
     * Method : setJSONForTemplateType
     * @description  : Sets the JSON string based on current template type from cached data.
     */
-    setJSONForTemplateType(){
+    setJSONForTemplateType() {
         try {
-            if(this.jsonDataMap && this.jsonDataMap[this.templateType]){
+            if (this.jsonDataMap && this.jsonDataMap[this.templateType]) {
                 this.jsonString = this.jsonDataMap[this.templateType];
             } else {
                 console.error('No JSON data found for template type:', this.templateType);
@@ -611,7 +611,7 @@ export default class WbCreateFlowManagement extends LightningElement {
     updateJSON(screens) {
         try {
             let parsedJson;
-            
+
             // Parse existing JSON or create new structure
             if (this.jsonString) {
                 parsedJson = JSON.parse(this.jsonString);
@@ -631,7 +631,7 @@ export default class WbCreateFlowManagement extends LightningElement {
 
             // Convert back to string
             this.jsonString = JSON.stringify(parsedJson, null, 2);
-            
+
             // Track changes for save button
             this.checkForChanges();
         } catch (error) {
@@ -655,9 +655,9 @@ export default class WbCreateFlowManagement extends LightningElement {
      */
     async handleSaveFlow() {
         if (this.isSaveDisabled) return;
-                
+
         this.isLoading = true;
-        
+
         try {
             // Update existing flow
             const result = await saveWhatsAppFlow({
@@ -670,14 +670,14 @@ export default class WbCreateFlowManagement extends LightningElement {
             });
 
             const response = JSON.parse(result);
-            
+
             if (response.success) {
                 this.flowRecordId = response.flowRecordId;
                 this.metaFlowId = response.metaFlowId;
                 this.initialJsonString = this.jsonString;
                 this.hasUnsavedChanges = false;
                 this.isFlowSaved = true;
-                
+
                 this.showToast('Success', 'Flow updated successfully', 'success');
             } else {
                 this.handleMetaError(response);
@@ -696,17 +696,17 @@ export default class WbCreateFlowManagement extends LightningElement {
      */
     async handlePublishFlow() {
         if (this.isPublishDisabled) return;
-        
+
         this.isLoading = true;
-        
+
         try {
             const result = await publishWhatsAppFlow({
                 metaFlowId: this.metaFlowId,
                 flowRecordId: this.flowRecordId
             });
-            
+
             const response = JSON.parse(result);
-            
+
             if (response.success) {
                 this.showToast('Success', 'Flow published successfully', 'success');
             } else {
@@ -727,17 +727,17 @@ export default class WbCreateFlowManagement extends LightningElement {
     handleScreenAdded(event) {
         try {
             const { screenId, title, order, defaultSection } = event.detail;
-            
+
             let parsedJson = this.jsonString ? JSON.parse(this.jsonString) : {};
             let screens = parsedJson.screens || [];
 
             // Build layout children array with default section if provided
             const layoutChildren = [];
-            
+
             if (defaultSection) {
                 // Build Form element with default section
                 const formChildren = [];
-                
+
                 // Generate sanitized name for default section
                 const defaultSectionName = this.sanitizeScreenId(defaultSection.label);
 
@@ -749,15 +749,15 @@ export default class WbCreateFlowManagement extends LightningElement {
                     required: defaultSection.isRequired || false,
                     'input-type': defaultSection.inputType || 'text'
                 };
-                
+
                 // Add optional fields if they exist
                 if (defaultSection.placeholder) element.placeholder = defaultSection.placeholder;
                 if (defaultSection.helpText) element['helper-text'] = defaultSection.helpText;
                 if (defaultSection.minLength) element['min-length'] = defaultSection.minLength;
                 if (defaultSection.maxLength) element['max-length'] = defaultSection.maxLength;
-                
+
                 formChildren.push(element);
-                
+
                 // Add Form to layout children
                 layoutChildren.push({
                     type: 'Form',
@@ -765,7 +765,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                     children: formChildren
                 });
             }
-            
+
             // Add Footer element to new screens (even if no default section)
             if (layoutChildren.length === 0) {
                 // If no default section, create a Form with just Footer
@@ -812,16 +812,16 @@ export default class WbCreateFlowManagement extends LightningElement {
 
             // Insert screen at the correct position based on order
             screens.splice(order || 0, 0, newScreen);
-            
+
             // Update terminal property: only last screen should be terminal
             this.updateTerminalProperty(screens);
-            
+
             // Update navigation chain - ensure each screen points to the next one
             this.updateNavigationChain(screens);
-            
+
             // Set as selected screen
             this.selectedScreenId = screenId;
-            
+
             // Exit read more mode when adding a new screen
             setTimeout(() => {
                 const screenEditor = this.template.querySelector('c-wb-flow-screen-editor');
@@ -829,7 +829,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                     screenEditor.setReadMoreMode(false);
                 }
             }, 50);
-            
+
             this.updateJSON(screens);
         } catch (error) {
             console.error('🔴 Error handling screen added:', error);
@@ -844,14 +844,14 @@ export default class WbCreateFlowManagement extends LightningElement {
     handleScreenDeleted(event) {
         try {
             const { screenId } = event.detail;
-            
+
             let parsedJson = this.jsonString ? JSON.parse(this.jsonString) : {};
             let screens = parsedJson.screens || [];
 
             // If deleting a parent screen, also collect IDs of its read more screens to delete
             const screenToDelete = screens.find(s => s.id === screenId);
             const screensToDelete = [screenId];
-            
+
             // Only collect read more screens if we're deleting a parent (non-read-more) screen
             if (screenToDelete && (!screenToDelete.id || !screenToDelete.id.startsWith('READ_MORE_'))) {
                 // Find sections in this screen that might have read more screens
@@ -862,7 +862,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                                 // Check if this section has a read more screen
                                 if (formChild.type === 'OptIn' && formChild['on-click-action']) {
                                     const readMoreScreenId = formChild['on-click-action'].next?.name ||
-                                                            formChild['on-click-action'].payload?.screen;
+                                        formChild['on-click-action'].payload?.screen;
                                     if (readMoreScreenId && readMoreScreenId.startsWith('READ_MORE_')) {
                                         screensToDelete.push(readMoreScreenId);
                                     }
@@ -875,10 +875,10 @@ export default class WbCreateFlowManagement extends LightningElement {
 
             // Remove screen and its read more screens from array
             screens = screens.filter(screen => !screensToDelete.includes(screen.id));
-            
+
             // Update terminal property: only last screen should be terminal
             this.updateTerminalProperty(screens);
-            
+
             this.updateJSON(screens);
 
         } catch (error) {
@@ -894,20 +894,20 @@ export default class WbCreateFlowManagement extends LightningElement {
         try {
             const { screenId } = event.detail;
             this.selectedScreenId = screenId;
-            
+
             // Update screen navigation component
             const screenNavigation = this.template.querySelector('c-wb-flow-screen-navigation');
             if (screenNavigation) {
                 screenNavigation.selectedScreenId = screenId;
             }
-            
+
             // Check if selected screen is a read more screen
             const parsedJson = this.jsonString ? JSON.parse(this.jsonString) : {};
             const screens = parsedJson.screens || [];
-            
+
             // Determine if this is a read more screen (by checking screen ID pattern)            
             const isReadMoreScreen = screenId.startsWith('READ_MORE_');
-            
+
             // Set read more mode on screen editor
             setTimeout(() => {
                 const screenEditor = this.template.querySelector('c-wb-flow-screen-editor');
@@ -915,7 +915,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                     screenEditor.setReadMoreMode(isReadMoreScreen);
                 }
             }, 0);
-            
+
         } catch (error) {
             console.error('Error handling screen selected:', error.stack);
         }
@@ -929,10 +929,10 @@ export default class WbCreateFlowManagement extends LightningElement {
     handleEditReadMore(event) {
         try {
             const { sectionId, shouldNavigate } = event.detail;
-            
+
             let parsedJson = this.jsonString ? JSON.parse(this.jsonString) : {};
             let screens = parsedJson.screens || [];
-            
+
             // Find the parent screen by searching for the section
             let parentScreen = null;
             let parentScreenIndex = -1;
@@ -954,38 +954,38 @@ export default class WbCreateFlowManagement extends LightningElement {
                 }
                 if (parentScreen) break;
             }
-            
+
             if (!parentScreen) {
                 console.error('Parent screen not found for section:', sectionId);
                 return;
             }
-            
+
             // Generate read more screen ID
             const readMoreScreenId = this.sanitizeScreenId(`READ_MORE_${sectionId}`);
-            
+
             // Check if read more screen already exists:
             let readMoreScreen = screens.find(s => s.id === readMoreScreenId);
-            
+
             // If not found by ID, check if the section has on-click-action pointing to another screen
             if (!readMoreScreen && optInSection && optInSection['on-click-action']) {
-                const existingScreenRef = optInSection['on-click-action'].next?.name || 
-                                         optInSection['on-click-action'].payload?.screen;
+                const existingScreenRef = optInSection['on-click-action'].next?.name ||
+                    optInSection['on-click-action'].payload?.screen;
                 if (existingScreenRef) {
                     readMoreScreen = screens.find(s => s.id === existingScreenRef);
                     // If we found it, rename it to proper ID for consistency
                     if (readMoreScreen && readMoreScreen.id !== readMoreScreenId) {
                         const oldId = readMoreScreen.id;
                         readMoreScreen.id = readMoreScreenId;
-                        
+
                         // Update any references to the old ID in navigation
                         screens.forEach(scr => {
                             if (scr.layout && scr.layout.children) {
                                 scr.layout.children.forEach(layoutChild => {
                                     if (layoutChild.type === 'Form' && layoutChild.children) {
                                         layoutChild.children.forEach(formChild => {
-                                            if (formChild['on-click-action'] && 
-                                                (formChild['on-click-action'].next?.name === oldId || 
-                                                 formChild['on-click-action'].payload?.screen === oldId)) {
+                                            if (formChild['on-click-action'] &&
+                                                (formChild['on-click-action'].next?.name === oldId ||
+                                                    formChild['on-click-action'].payload?.screen === oldId)) {
                                                 if (formChild['on-click-action'].next) {
                                                     formChild['on-click-action'].next.name = readMoreScreenId;
                                                 }
@@ -1001,12 +1001,12 @@ export default class WbCreateFlowManagement extends LightningElement {
                     }
                 }
             }
-            
+
             if (!readMoreScreen) {
                 // Get first available text type from metadata (dynamic)
                 const screenEditor = this.template.querySelector('c-wb-flow-screen-editor');
                 let defaultTextType = 'TextHeading';  // Fallback
-                
+
                 if (screenEditor && screenEditor.flowElementTypes && screenEditor.flowElementTypes.Text) {
                     const textTypes = screenEditor.flowElementTypes.Text;
                     if (textTypes && textTypes.length > 0) {
@@ -1016,13 +1016,13 @@ export default class WbCreateFlowManagement extends LightningElement {
                         }
                     }
                 }
-                
+
                 // Create default text element for read more screen
                 const defaultTextElement = {
                     type: defaultTextType,
                     text: 'Read more content'
                 };
-                
+
                 // Create new read more screen in main array
                 readMoreScreen = {
                     id: readMoreScreenId,
@@ -1039,11 +1039,11 @@ export default class WbCreateFlowManagement extends LightningElement {
                         ]
                     }
                 };
-                
+
                 // Insert read more screen right after parent screen
                 screens.splice(parentScreenIndex + 1, 0, readMoreScreen);
             }
-            
+
             // Update the OptIn section to have on-click-action
             if (parentScreen.layout && parentScreen.layout.children) {
                 for (const child of parentScreen.layout.children) {
@@ -1064,22 +1064,22 @@ export default class WbCreateFlowManagement extends LightningElement {
                     }
                 }
             }
-            
+
             // Update JSON
             this.updateJSON(screens);
-            
+
             // Only navigate to read more screen if shouldNavigate is true (Edit content click)
             if (shouldNavigate) {
                 // Navigate to the read more screen
                 this.selectedScreenId = readMoreScreen.id;
-                
+
                 // Update screen navigation component to highlight the read more screen
                 setTimeout(() => {
                     const screenNavigation = this.template.querySelector('c-wb-flow-screen-navigation');
                     if (screenNavigation) {
                         screenNavigation.selectedScreenId = readMoreScreen.id;
                     }
-                    
+
                     // Set read more mode on screen editor
                     const screenEditor = this.template.querySelector('c-wb-flow-screen-editor');
                     if (screenEditor) {
@@ -1087,7 +1087,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                     }
                 }, 50);
             }
-            
+
         } catch (error) {
             console.error('Error handling edit read more:', error.stack);
         }
@@ -1101,10 +1101,10 @@ export default class WbCreateFlowManagement extends LightningElement {
     handleDeleteReadMore(event) {
         try {
             const { sectionId } = event.detail;
-            
+
             let parsedJson = this.jsonString ? JSON.parse(this.jsonString) : {};
             let screens = parsedJson.screens || [];
-            
+
             // Find the parent screen by searching for the section
             let parentScreen = null;
             for (const screen of screens) {
@@ -1120,18 +1120,18 @@ export default class WbCreateFlowManagement extends LightningElement {
                 }
                 if (parentScreen) break;
             }
-            
+
             if (!parentScreen) {
                 console.error('Parent screen not found for section:', sectionId);
                 return;
             }
-            
+
             // Generate read more screen ID
             const readMoreScreenId = this.sanitizeScreenId(`READ_MORE_${sectionId}`);
-            
+
             // Remove read more screen from main screens array
             screens = screens.filter(s => s.id !== readMoreScreenId);
-            
+
             // Remove on-click-action from the OptIn section
             if (parentScreen.layout && parentScreen.layout.children) {
                 for (const child of parentScreen.layout.children) {
@@ -1144,10 +1144,10 @@ export default class WbCreateFlowManagement extends LightningElement {
                     }
                 }
             }
-            
+
             // Update JSON
             this.updateJSON(screens);
-            
+
         } catch (error) {
             console.error('Error handling delete read more:', error);
         }
@@ -1160,7 +1160,7 @@ export default class WbCreateFlowManagement extends LightningElement {
     handleScreenReordered(event) {
         try {
             const { screens } = event.detail;
-            
+
             // Parse current JSON
             let parsedJson = this.jsonString ? JSON.parse(this.jsonString) : {};
             let currentScreens = parsedJson.screens || [];
@@ -1179,13 +1179,13 @@ export default class WbCreateFlowManagement extends LightningElement {
 
             // Update navigation chain before updating terminal property
             this.updateNavigationChain(reorderedScreens);
-            
+
             // Update terminal property after reordering
             this.updateTerminalProperty(reorderedScreens);
-            
+
             // Update JSON with new order
             this.updateJSON(reorderedScreens);
-            
+
             // Mark preview component that this is a reorder operation
             const previewComponent = this.template.querySelector('c-wb-flow-preview');
             if (previewComponent) {
@@ -1233,7 +1233,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                     const footer = form.children?.find(child => child.type === 'Footer');
                     if (footer && footer['on-click-action']) {
                         const isLastScreen = index === regularScreens.length - 1;
-                        
+
                         if (isLastScreen) {
                             // Last screen should complete (keep payload, just remove next)
                             footer['on-click-action'].name = 'complete';
@@ -1257,7 +1257,7 @@ export default class WbCreateFlowManagement extends LightningElement {
         }
     }
 
-    handleInputBlur(){
+    handleInputBlur() {
         this.flowName = this.flowName.trim();
     }
 
@@ -1276,15 +1276,15 @@ export default class WbCreateFlowManagement extends LightningElement {
      */
     sanitizeScreenId(screenId) {
         if (!screenId) return screenId;
-        
+
         // Replace all non-alphanumeric characters (except underscores) with underscores
         let sanitized = screenId.replace(/[^a-zA-Z0-9_]/g, '_');
-        
+
         // Ensure it doesn't start with a number
         if (/^[0-9]/.test(sanitized)) {
             sanitized = 'screen_' + sanitized;
         }
-        
+
         return sanitized;
     }
 
@@ -1397,7 +1397,7 @@ export default class WbCreateFlowManagement extends LightningElement {
             // Store current selected screen to preserve it after JSON update
             const currentSelectedScreen = this.selectedScreenId;
             const { screenId, screenTitle, buttonLabel, sections, metadataMap } = event.detail;
-            
+
             if (!screenId) {
                 console.warn('⚠️ No screenId provided in content update');
                 return;
@@ -1410,11 +1410,11 @@ export default class WbCreateFlowManagement extends LightningElement {
             // Find the screen in main screens array (read more screens are now in main array)
             let screenIndex = screens.findIndex(s => s.id === screenId);
             let targetScreen = null;
-            
+
             if (screenIndex !== -1) {
                 targetScreen = screens[screenIndex];
             }
-            
+
             if (!targetScreen) {
                 console.warn('⚠️ Screen not found:', screenId);
                 return;
@@ -1423,8 +1423,8 @@ export default class WbCreateFlowManagement extends LightningElement {
             // Determine if this is a read more screen (by checking screen ID pattern)
             const isReadMoreScreen = screenId.startsWith('READ_MORE_');
 
-            // Update screen title
-            if (screenTitle !== undefined) {
+            // Update screen title - skip if the title is blank (validation enforced in content editor)
+            if (screenTitle !== undefined && screenTitle.trim() !== '') {
                 targetScreen.title = screenTitle;
             }
 
@@ -1433,18 +1433,18 @@ export default class WbCreateFlowManagement extends LightningElement {
                 // Build Form children from sections using metadata
                 const formChildren = [];
                 const inputFields = []; // Track input fields for payload generation
-                
+
                 sections.forEach((section, index) => {
-                    
+
                     // Get metadata config for this section
                     const metadata = metadataMap?.[section.itemName];
                     const config = metadata ? this.parseMetadata(metadata) : null;
-                    
+
                     if (config) {
                         const element = this.buildWhatsAppJsonElement(section, config);
                         if (element) {
                             formChildren.push(element);
-                            
+
                             // Track input fields for payload and data schema
                             if (this.isInputField(config.jsonType)) {
                                 inputFields.push({
@@ -1453,7 +1453,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                                     screenIndex: screenIndex
                                 });
                             }
-                            
+
                         }
                     }
                 });
@@ -1489,7 +1489,7 @@ export default class WbCreateFlowManagement extends LightningElement {
 
                 // Build complete layout structure with Form containing all elements + Footer
                 const layoutChildren = [];
-                
+
                 // Add Form element with all sections + Footer
                 if (formChildren.length > 0) {
                     layoutChildren.push({
@@ -1512,7 +1512,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                 // Build data schema - only for regular screens
                 if (!isReadMoreScreen) {
                     targetScreen.data = this.buildDataSchema(screenIndex, screens);
-                    
+
                     // Rebuild data schemas and Footer payloads for all subsequent screens
                     // They reference this screen's fields, so indices may have changed
                     for (let i = screenIndex + 1; i < screens.length; i++) {
@@ -1521,7 +1521,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                         if (subsequentScreen && subsequentScreen.id && !subsequentScreen.id.startsWith('READ_MORE_')) {
                             // Rebuild data schema
                             subsequentScreen.data = this.buildDataSchema(i, screens);
-                            
+
                             // Rebuild Footer payload
                             this.rebuildScreenFooter(subsequentScreen, i, screens);
                         }
@@ -1530,23 +1530,23 @@ export default class WbCreateFlowManagement extends LightningElement {
                     // Read more screens don't need data schema
                     targetScreen.data = {};
                 }
-                
+
             }
 
             // Update JSON string
             this.updateJSON(screens);
-            
+
             // Preserve the selected screen after JSON update (if it still exists)
             // This prevents the preview from jumping to the first screen during edits
             if (currentSelectedScreen) {
                 // All screens are now in main array, so just check there
                 const screenStillExists = screens.some(s => s.id === currentSelectedScreen);
-                
+
                 if (screenStillExists) {
                     this.selectedScreenId = currentSelectedScreen;
                 }
             }
-                        
+
         } catch (error) {
             console.error('🔴 Error handling content update:', error);
         }
@@ -1564,10 +1564,10 @@ export default class WbCreateFlowManagement extends LightningElement {
     generateUniqueId(baseName, uniquifier = '') {
         // Sanitize base name: remove numbers and non-alphabetic chars except underscores
         let sanitized = baseName.replace(/[^a-zA-Z_]/g, '_');
-        
+
         // Remove consecutive underscores and trim
         sanitized = sanitized.replace(/_+/g, '_').replace(/^_+|_+$/g, '');
-        
+
         // Generate hash from uniquifier
         const hashInput = uniquifier ? String(uniquifier) : String(Date.now() + Math.random());
         let hash = 0;
@@ -1576,10 +1576,10 @@ export default class WbCreateFlowManagement extends LightningElement {
             hash = ((hash << 5) - hash) + char;
             hash = hash & hash;
         }
-        
+
         // Convert hash to alphabetic-only suffix
         const alphabeticHash = this.hashToAlphabetic(Math.abs(hash));
-        
+
         return `${sanitized}_${alphabeticHash}`.toUpperCase();
     }
 
@@ -1615,7 +1615,7 @@ export default class WbCreateFlowManagement extends LightningElement {
      */
     buildFooterPayload(currentScreenIndex, currentInputFields, allScreens) {
         const payload = {};
-        
+
         // Add current screen's form fields
         currentInputFields.forEach((field, idx) => {
             const key = `screen_${currentScreenIndex}_${field.name}_${idx}`;
@@ -1628,17 +1628,17 @@ export default class WbCreateFlowManagement extends LightningElement {
             const prevScreen = allScreens[i];
             // Skip read more screens - they don't participate in the data flow
             if (prevScreen?.id?.startsWith('READ_MORE_')) continue;
-            
+
             if (!prevScreen?.layout?.children) continue;
-            
+
             const formElement = prevScreen.layout.children.find(child => child.type === 'Form');
             if (!formElement?.children) continue;
-            
+
             // Extract input fields from previous screen's form
             let inputFieldIndex = 0;
             formElement.children.forEach((element) => {
                 if (element.type === 'Footer') return;
-                
+
                 if (this.isInputField(element.type)) {
                     const key = `screen_${i}_${element.name}_${inputFieldIndex}`;
                     payload[key] = `\${data.${key}}`;
@@ -1690,7 +1690,7 @@ export default class WbCreateFlowManagement extends LightningElement {
                     if (dataType === 'array') {
                         dataSchema[key].items = { type: 'string' };
                     }
-                    
+
                     inputFieldIndex++; // Increment only for input fields
                 }
             });
@@ -1715,10 +1715,10 @@ export default class WbCreateFlowManagement extends LightningElement {
             // Extract input fields from this screen
             const inputFields = [];
             let inputFieldIndex = 0;
-            
+
             formElement.children.forEach((element) => {
                 if (element.type === 'Footer') return;
-                
+
                 const jsonType = element.type;
                 if (this.isInputField(jsonType)) {
                     inputFields.push({
@@ -1736,10 +1736,10 @@ export default class WbCreateFlowManagement extends LightningElement {
 
             // Rebuild Footer payload
             const newPayload = this.buildFooterPayload(screenIndex, inputFields, allScreens);
-            
+
             // Update Footer's on-click-action payload
             footerElement['on-click-action'].payload = newPayload;
-            
+
         } catch (error) {
             console.error('Error rebuilding screen footer:', error);
         }
@@ -1765,18 +1765,18 @@ export default class WbCreateFlowManagement extends LightningElement {
     handleMetaError(response) {
         let errorMessage = 'Failed to process flow';
         let errorDetails = '';
-        
+
         try {
             // Check if response.message is a JSON string containing error details
             if (response.message && response.message.includes('error')) {
                 const errorData = JSON.parse(response.message);
-                
+
                 if (errorData.error && errorData.error.error_user_msg) {
                     errorMessage = errorData.error.error_user_msg;
                 } else if (errorData.error && errorData.error.message) {
                     errorMessage = errorData.error.message;
                 }
-                
+
                 // Extract additional details
                 if (errorData.error && errorData.error.error_subcode) {
                     errorDetails = `Error Code: ${errorData.error.error_subcode}`;
@@ -1788,10 +1788,10 @@ export default class WbCreateFlowManagement extends LightningElement {
             // If parsing fails, use the message as is
             errorMessage = response.message || errorMessage;
         }
-        
+
         // Show toast with error
         this.showToast('Error', errorMessage, 'error');
-        
+
         console.error('Meta API Error:', response);
     }
 

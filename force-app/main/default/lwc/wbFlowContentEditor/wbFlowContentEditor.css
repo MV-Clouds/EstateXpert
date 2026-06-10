@@ -288,6 +288,12 @@
     align-items: center;
 }
 
+.screen-title-error {
+    margin-top: -0.5rem;
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+}
+
 /* Button Section */
 .button-section .section-content {
     display: flex;

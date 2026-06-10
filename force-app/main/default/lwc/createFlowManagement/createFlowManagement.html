@@ -1,8 +1,6 @@
 <template>
     <template if:true={isLoading}>
-        <div class="spinner-overlay">
-            <c-spinner-component></c-spinner-component>
-        </div>
+        <c-spinner-component></c-spinner-component>
     </template>
 
     <template if:false={showFlowBuilder}>

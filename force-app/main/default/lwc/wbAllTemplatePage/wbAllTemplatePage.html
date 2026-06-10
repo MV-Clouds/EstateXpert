@@ -30,7 +30,8 @@
                         <template if:false={isMobileOrTablet}>
                             <div class="slds-col header-search-bar-css">
                                 <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
-                                    type="search" placeholder="Search Name" onchange={handleChange}></lightning-input>
+                                    type="search" placeholder="Search Template Name..."
+                                    onchange={handleChange}></lightning-input>
                             </div>
                             <button class="blue-btn-css" onclick={showCreateTemplate}>
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
@@ -39,6 +40,26 @@
                                 </svg>
                                 Create Template
                             </button>
+                            <div class="refresh-icon-container" onclick={handleRefresh} title="Refresh templates">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Refresh">
+                                    <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <!-- WhatsApp Configuration gear icon -->
+                            <div class="config-icon-container" onclick={handleOpenConfigPopup}
+                                title="WhatsApp Configuration">
+                                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WhatsApp Configuration">
+                                    <path fill-rule="evenodd"
+                                        d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
                             <div class="filter-icon-container" onclick={toggleFilterVisibility}>
                                 <template if:false={showFilters}>
                                     <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20"
@@ -366,9 +387,9 @@
                             </label>
                             <div class="clone-input-container">
                                 <lightning-input id="wbCloneTemplateNameInput"
-                                    placeholder="Enter name for the cloned template"
-                                    name="wbCloneTemplateName" value={cloneTemplateName} variant="label-hidden"
-                                    onchange={handleCloneNameChange} maxlength="255">
+                                    placeholder="Enter name for the cloned template" name="wbCloneTemplateName"
+                                    value={cloneTemplateName} variant="label-hidden" onchange={handleCloneNameChange}
+                                    maxlength="255">
                                 </lightning-input>
                                 <template if:true={cloneNameError}>
                                     <p class="clone-name-error clone-red">{cloneNameError}</p>
@@ -409,4 +430,36 @@
     </template>
 
     <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
+
+    <!-- WhatsApp Configuration Popup -->
+    <template if:true={showConfigPopup}>
+        <section role="dialog" tabindex="-1" aria-labelledby="wb-config-modal-heading" aria-modal="true"
+            aria-describedby="wb-config-modal-content" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+
+                <!-- Close (X) button -->
+                <div class="slds-modal__close close-icon-css" onclick={handleCloseConfigPopup}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="currentColor" />
+                    </svg>
+                </div>
+
+                <!-- Header -->
+                <div class="slds-modal__header clone-blue-header">
+                    <h1 id="wb-config-modal-heading" class="slds-modal__title slds-hyphenate" tabindex="-1">WhatsApp
+                        Configuration</h1>
+                </div>
+
+                <!-- Body: objectConfigComp -->
+                <div class="slds-modal__content config-modal-body" id="wb-config-modal-content">
+                    <c-object-config-comp></c-object-config-comp>
+                </div>
+
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
 </template>

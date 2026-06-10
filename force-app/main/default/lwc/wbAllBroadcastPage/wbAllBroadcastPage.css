@@ -151,7 +151,10 @@
     box-shadow: 0 2px 6px rgba(1, 118, 211, 0.3);
 }
 
-.modern-progress-fill[data-progress="0"] { background: #c0392b; }
+.modern-progress-fill[data-progress="0"] {
+    background: #c0392b;
+}
+
 .modern-progress-fill[data-progress="1"],
 .modern-progress-fill[data-progress="2"],
 .modern-progress-fill[data-progress="3"],
@@ -303,7 +306,7 @@
     font-weight: 500;
 }
 
-.pop-up{
+.pop-up {
     height: auto;
     max-height: 74vh;
     padding: 0;
@@ -318,7 +321,7 @@
     flex-direction: column;
 }
 
-.pop-heading{
+.pop-heading {
     font-size: 20px;
     position: sticky;
     top: 0;
@@ -331,7 +334,7 @@
     background: #0176D3;
 }
 
-.box-container{
+.box-container {
     display: grid;
     max-height: 20rem;
     overflow: scroll;
@@ -340,7 +343,7 @@
     flex-grow: 1;
 }
 
-.box-data{
+.box-data {
     display: flex;
     gap: 6px;
     padding: 10px;
@@ -363,7 +366,7 @@
 }
 
 
-.action{
+.action {
     width: 27px;
     color: black;
     border: 1px solid #dfdddd;
@@ -375,11 +378,11 @@
 
 }
 
-.trash{
+.trash {
     padding: 0.37rem;
 }
 
-.edit{
+.edit {
 
     padding: 0.2rem;
 }
@@ -396,7 +399,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8); /* Dark overlay */
+    background: rgba(0, 0, 0, 0.8);
+    /* Dark overlay */
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -405,7 +409,8 @@
 
 /* Centered popup */
 .popup-container {
-    background: #b71c1c; /* Dark red for warning */
+    background: #b71c1c;
+    /* Dark red for warning */
     color: white;
     padding: 24px 30px;
     border-radius: 10px;
@@ -460,7 +465,7 @@
     align-items: center;
 }
 
-.header{
+.header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -472,7 +477,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 500;
     text-align: left;
     gap: 15px;
@@ -1031,7 +1036,8 @@
 }
 
 .confirm-modal {
-    z-index: 9200; /* Higher than backdrop */
+    z-index: 9200;
+    /* Higher than backdrop */
 }
 
 .confirm-modal .slds-modal__container {

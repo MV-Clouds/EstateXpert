@@ -8,7 +8,8 @@
                 <div class="sub_main_header_css">
                     <div class="header_block_css">
                         <div class="svg_back_icon" onclick={handleBack}>
-                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="24" height="22" viewBox="0 0 30 26" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
                                     fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
@@ -42,32 +43,41 @@
                                     <th scope="col" class="sno">
                                         <div>No.</div>
                                     </th>
-                                    <th data-id="MVEX__Submitter_Name__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action-mode sorting_header name" scope="col">
+                                    <th data-id="MVEX__Submitter_Name__c" onclick={sortClick} aria-sort="none"
+                                        class="slds-is-sortable slds-cell_action-mode sorting_header name" scope="col">
                                         <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                             <span class="slds-truncate" title="Submitter Name">Submitter Name</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
                                             </span>
                                         </div>
                                     </th>
-                                    <th data-id="MVEX__Submitter_Phone__c" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header phone" scope="col">
+                                    <th data-id="MVEX__Submitter_Phone__c" onclick={sortClick} aria-sort="none"
+                                        class="slds-is-sortable slds-cell_action_mode sorting_header phone" scope="col">
                                         <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                             <span class="slds-truncate" title="Submitter Phone">Submitter Phone</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
                                             </span>
                                         </div>
                                     </th>
-                                    <th data-id="CreatedDate" onclick={sortClick} aria-sort="none" class="slds-is-sortable slds-cell_action_mode sorting_header date" scope="col">
+                                    <th data-id="CreatedDate" onclick={sortClick} aria-sort="none"
+                                        class="slds-is-sortable slds-cell_action_mode sorting_header date" scope="col">
                                         <div class="sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                             <span class="slds-truncate" title="Submission Date">Submission Date</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                <svg class="listing-manager-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
                                             </span>
                                         </div>
@@ -79,13 +89,15 @@
                                     <!-- Parent Row -->
                                     <tr key={row.Id} class={row.rowClass}>
                                         <td data-label="" class="expand-cell">
-                                            <div class="action-icon-container" data-record-id={row.Id} onclick={handleNameClick}>
-                                                <svg class="action-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <div class="action-icon-container" data-record-id={row.Id}
+                                                onclick={handleNameClick}>
+                                                <svg class="action-arrow" viewBox="0 0 24 24"
+                                                    xmlns="http://www.w3.org/2000/svg">
                                                     <template if:true={row.isExpanded}>
-                                                        <path d="M7 10l5 5 5-5z" fill="currentColor"/>
+                                                        <path d="M7 10l5 5 5-5z" fill="currentColor" />
                                                     </template>
                                                     <template if:false={row.isExpanded}>
-                                                        <path d="M10 17l5-5-5-5z" fill="currentColor"/>
+                                                        <path d="M10 17l5-5-5-5z" fill="currentColor" />
                                                     </template>
                                                 </svg>
                                             </div>
@@ -94,7 +106,8 @@
                                             <div>{row.index}</div>
                                         </td>
                                         <td data-label="Submitter Name" class="truncate_css">
-                                            <div data-name={row.MVEX__Submitter_Name__c}>{row.MVEX__Submitter_Name__c}</div>
+                                            <div data-name={row.MVEX__Submitter_Name__c}>{row.MVEX__Submitter_Name__c}
+                                            </div>
                                         </td>
                                         <td data-label="Submitter Phone">
                                             <div>{row.MVEX__Submitter_Phone__c}</div>
@@ -103,7 +116,7 @@
                                             <div>{row.CreatedDate}</div>
                                         </td>
                                     </tr>
-                                    
+
                                     <!-- Accordion Content Row -->
                                     <template if:true={row.isExpanded}>
                                         <tr key={row.accordionKey} class="accordion-row">
@@ -114,9 +127,12 @@
                                                             <thead>
                                                                 <tr class="table_tr_cls">
                                                                     <th scope="col" class="nested-sno">No.</th>
-                                                                    <th scope="col" class="nested-member">Flow Field</th>
-                                                                    <th scope="col" class="nested-member">User Response</th>
-                                                                    <th scope="col" class="nested-member">Flow Screen</th>
+                                                                    <th scope="col" class="nested-member">Flow Field
+                                                                    </th>
+                                                                    <th scope="col" class="nested-member">User Response
+                                                                    </th>
+                                                                    <th scope="col" class="nested-member">Flow Screen
+                                                                    </th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -124,15 +140,21 @@
                                                                     <template for:each={row.details} for:item="detail">
                                                                         <tr key={detail.id}>
                                                                             <td class="truncate_css">{detail.index}</td>
-                                                                            <td class="truncate_css">{detail.flowField}</td>
-                                                                            <td class="truncate_css">{detail.userInput}</td>
-                                                                            <td class="truncate_css">{detail.flowScreen}</td>
+                                                                            <td class="truncate_css">{detail.flowField}
+                                                                            </td>
+                                                                            <td class="truncate_css">{detail.userInput}
+                                                                            </td>
+                                                                            <td class="truncate_css">{detail.flowScreen}
+                                                                            </td>
                                                                         </tr>
                                                                     </template>
                                                                 </template>
                                                                 <template if:false={row.details.length}>
                                                                     <tr>
-                                                                        <td colspan="4" style="text-align: center; padding: 15px;">No details available for this submission.</td>
+                                                                        <td colspan="4"
+                                                                            style="text-align: center; padding: 15px;">
+                                                                            No details available for this submission.
+                                                                        </td>
                                                                     </tr>
                                                                 </template>
                                                             </tbody>
@@ -166,12 +188,14 @@
                     <template if:true={showPagination}>
                         <div class="paginationDiv">
                             <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                    <path d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                    fill="#fff">
+                                    <path
+                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
                                 </svg>
                                 Previous
                             </button>
-            
+
                             <template for:each={pageNumbers} for:item="page">
                                 <template if:false={page.isEllipsis}>
                                     <button key={page.number} data-id={page.number} class={page.className}
@@ -183,11 +207,13 @@
                                     <span key={page.number} class="pagination-ellipsis">...</span>
                                 </template>
                             </template>
-            
+
                             <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
                                 Next
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
-                                    <path d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                    fill="#fff">
+                                    <path
+                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                                 </svg>
                             </button>
                         </div>
@@ -196,7 +222,7 @@
             </div>
         </div>
     </template>
-   
+
     <template if:false={flowReport}>
         <c-wb-all-flows-page></c-wb-all-flows-page>
     </template>

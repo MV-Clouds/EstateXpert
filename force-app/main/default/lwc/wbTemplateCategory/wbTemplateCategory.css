@@ -2,6 +2,7 @@
     font-family: 'Mulish';
     user-select: none;
 }
+
 .main {
     border-radius: 5px;
     overflow: auto;
@@ -19,36 +20,37 @@
     position: relative;
 }
 
-.slds-template_default{
+.slds-template_default {
     overflow-y: hidden;
 }
 
-.texttemp{
+.texttemp {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: 0.5rem;
     margin-bottom: 0.7rem;
 }
+
 .templateHeading {
     font-weight: 500;
     font-size: 23px;
     color: #0f1419;
 }
 
-.displayMainContent{
+.displayMainContent {
     display: grid;
     height: 100%;
     grid-template-columns: auto 21rem;
 }
 
-.selectCategoryBlock{
+.selectCategoryBlock {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.categoryBlock{
+.categoryBlock {
     min-height: 65%;
     max-height: fit-content;
     background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
@@ -59,24 +61,25 @@
     overflow: hidden;
 }
 
-.categoryBlockHeader{
+.categoryBlockHeader {
     font-weight: 500;
     font-size: 1.5rem;
     color: #0f1419;
 }
 
-.categoryBlockDesp{
+.categoryBlockDesp {
     font-size: 0.9rem;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     color: #737171;
 }
 
-.slds-button-group{
-    display: flex;;
+.slds-button-group {
+    display: flex;
+    ;
 }
 
-.slds-button-group > button{
+.slds-button-group>button {
     flex-grow: 1;
     font-weight: 500;
     padding: 0;
@@ -91,15 +94,18 @@
     margin-top: 2%;
 }
 
-.radio1, .radio2, .radio3 {
+.radio1,
+.radio2,
+.radio3 {
     margin-bottom: 1%;
 }
+
 .radiobtn {
     display: flex;
     align-items: center;
 }
 
-.txtwithlabel{
+.txtwithlabel {
     font-weight: 500;
 }
 
@@ -114,12 +120,12 @@
 }
 
 /* template preview coding */
-.templatePreview{  
+.templatePreview {
     padding: 0;
     padding-left: 15px;
 }
 
-.templatePreviewmain{
+.templatePreviewmain {
     background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
     border-radius: 12px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
@@ -127,13 +133,13 @@
     position: relative;
 }
 
-.templatePreviewmain > h1{
+.templatePreviewmain>h1 {
     font-weight: 500;
     font-size: 1.2em;
     color: #0f1419;
 }
 
-.templatePreviewBlock{
+.templatePreviewBlock {
     background: url('/resource/MVEX__wbiBg');
     background-color: antiquewhite;
     padding: 15px;
@@ -150,11 +156,11 @@
     position: relative;
 }
 
-.paratext{
+.paratext {
     margin-top: 10px;
 }
 
-.chatBubbleTime{
+.chatBubbleTime {
     margin-top: 1%;
     display: flex;
     justify-content: end;
@@ -196,27 +202,31 @@
 }
 
 @media screen and (orientation: landscape) {
-    .slds-button-group > button{
+    .slds-button-group>button {
         font-size: 1.2rem;
         padding: 6px;
     }
 }
 
 @media screen and (max-width: 400px) and (orientation: portrait) {
-    .displayMainContent{
+    .displayMainContent {
         grid-template-columns: auto;
     }
-    .selectCategoryBlock{
+
+    .selectCategoryBlock {
         order: 2;
     }
-    .templatePreview{
+
+    .templatePreview {
         order: 1;
     }
-    .templatePreview{
+
+    .templatePreview {
         padding: 0;
         padding-bottom: 15px;
     }
-    .templateNavigationButton{
+
+    .templateNavigationButton {
         margin-top: 6px;
     }
 }
@@ -254,7 +264,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 500;
     text-align: left;
     gap: 15px;

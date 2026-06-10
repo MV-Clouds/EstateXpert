@@ -11,7 +11,7 @@
                 <div class="sub_main_header_css">
                     <div slot="title" class="header_block_css">
                         <div class="svg_back_icon" onclick={handleDiscard}>
-                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
+                            <svg width="24" height="22" viewBox="0 0 30 26" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
@@ -48,55 +48,46 @@
                 <div class="flow-container container-padding">
                     <div class="form-container margin-top-medium">
                         <div class="form-field">
-                            <label class="form-label" for="flowName">Enter Flow Name <span class="required-marker">*</span></label>
-                            <input type="text" id="flowName" data-id="flow-name-input" class="form-input" value={flowName} maxlength="150" placeholder="WBC Flow 1" oninput={handleInputChange} onblur={handleInputBlur} required/>
+                            <label class="form-label" for="flowName">Enter Flow Name <span
+                                    class="required-marker">*</span></label>
+                            <input type="text" id="flowName" data-id="flow-name-input" class="form-input"
+                                value={flowName} maxlength="150" placeholder="WBC Flow 1" oninput={handleInputChange}
+                                onblur={handleInputBlur} required />
                             <p class="char-count tempname-count">{flowName.length}/{maxFlowNameLength}</p>
                         </div>
                         <template if:true={headerNameLengthError}>
-                            <div style="color: #b3042b;"> Header text cannot exceed {maxFlowNameLength} characters.</div>
+                            <div style="color: #b3042b;"> Header text cannot exceed {maxFlowNameLength} characters.
+                            </div>
                         </template>
 
-                        
-                        <label class="form-label" for="flowName">Categories <span class="required-marker">*</span></label>
+
+                        <label class="form-label" for="flowName">Categories <span
+                                class="required-marker">*</span></label>
                         <div class="combobox-wrapper">
-                            <lightning-combobox
-                                data-id="category-combobox"
-                                name="categories"
-                                label="Select Categories"
-                                variant="label-hidden"
-                                value={selectedCategory}
-                                options={typeOptions}
-                                onchange={handleCategories}
-                                required>
+                            <lightning-combobox data-id="category-combobox" name="categories" label="Select Categories"
+                                variant="label-hidden" value={selectedCategory} options={typeOptions}
+                                onchange={handleCategories} required>
                             </lightning-combobox>
                         </div>
 
                         <template if:true={hasSelectedCategories}>
                             <div class="selected-categories margin-top-small pills-wrapper">
                                 <template for:each={selectedCategories} for:item="category">
-                                    <lightning-pill
-                                        key={category}
-                                        label={category}
-                                        name={category}
+                                    <lightning-pill key={category} label={category} name={category}
                                         onremove={handleRemoveCategory}>
                                     </lightning-pill>
                                 </template>
                             </div>
                         </template>
-                        
+
                         <div class="form-field margin-top-medium">
                             <label class="form-label">Template Type</label>
                             <div class="radio-group radio-wrapper">
                                 <template for:each={templateTypeOptions} for:item="option" for:index="index">
                                     <div class="radio-item" key={option.value}>
                                         <div class="radio">
-                                            <lightning-input 
-                                                type="radio" 
-                                                class="radio-name" 
-                                                name="templateType" 
-                                                value={option.value} 
-                                                label={option.label} 
-                                                checked={option.checked}
+                                            <lightning-input type="radio" class="radio-name" name="templateType"
+                                                value={option.value} label={option.label} checked={option.checked}
                                                 onchange={handleTypeChange}>
                                             </lightning-input>
                                         </div>
@@ -105,12 +96,14 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="decorative-hr"></div>
 
                     <div class="note-section note-container margin-top-large">
                         <p class="note-text">
-                            <strong>Note:</strong><br>When utilising template flow JSON, you are responsible for customising the experience to suit your use case, adhering to applicable laws and complying with WhatsApp Business Messaging Policy.
+                            <strong>Note:</strong><br>When utilising template flow JSON, you are responsible for
+                            customising the experience to suit your use case, adhering to applicable laws and complying
+                            with WhatsApp Business Messaging Policy.
                         </p>
                     </div>
                 </div>
@@ -127,7 +120,7 @@
                 <div class="sub_main_header_css">
                     <div slot="title" class="header_block_css">
                         <div class="svg_back_icon" onclick={handleBackToForm}>
-                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
+                            <svg width="24" height="22" viewBox="0 0 30 26" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
@@ -180,29 +173,21 @@
             </div>
             <div class="flow-builder-panels">
                 <div class="panel left-panel">
-                    <c-wb-flow-screen-navigation 
-                        json-data={jsonString}
-                        selected-screen-id={selectedScreenId}
-                        onaddscreen={handleScreenAdded}
-                        ondeletescreen={handleScreenDeleted}
-                        onscreenselect={handleScreenSelected}
-                        onreorderscreen={handleScreenReordered}>
+                    <c-wb-flow-screen-navigation json-data={jsonString} selected-screen-id={selectedScreenId}
+                        onaddscreen={handleScreenAdded} ondeletescreen={handleScreenDeleted}
+                        onscreenselect={handleScreenSelected} onreorderscreen={handleScreenReordered}>
                     </c-wb-flow-screen-navigation>
                 </div>
                 <div class="panel middle-panel">
-                    <c-wb-flow-screen-editor 
-                        json-data={jsonString}
-                        current-screen-id={selectedScreenId}
-                        parent-flow-id={parentFlowId}
-                        is-parent-flow={isParentFlow}
-                        oncontentupdate={handleContentUpdate}
-                        oneditreadmore={handleEditReadMore}
-                        ondeletereadmore={handleDeleteReadMore}
-                        onshowerror={handleShowError}>
+                    <c-wb-flow-screen-editor json-data={jsonString} current-screen-id={selectedScreenId}
+                        parent-flow-id={parentFlowId} is-parent-flow={isParentFlow}
+                        oncontentupdate={handleContentUpdate} oneditreadmore={handleEditReadMore}
+                        ondeletereadmore={handleDeleteReadMore} onshowerror={handleShowError}>
                     </c-wb-flow-screen-editor>
                 </div>
                 <div class="panel right-panel">
-                    <c-wb-flow-preview flowname={flowName} jsonstringdata={jsonString} currentscreenid={selectedScreenId}></c-wb-flow-preview>
+                    <c-wb-flow-preview flowname={flowName} jsonstringdata={jsonString}
+                        currentscreenid={selectedScreenId}></c-wb-flow-preview>
                 </div>
             </div>
         </div>

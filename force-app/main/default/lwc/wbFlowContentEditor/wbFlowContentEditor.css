@@ -8,12 +8,12 @@
     --color-background-white: #ffffff;
     --color-background-hover: #f5f5f5;
     --color-toggle-inactive: #ccd0d5;
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease-in-out;
-    
+
     font-family: 'Mulish';
-    
+
     /* Layout properties for proper scrolling */
     display: flex;
     flex-direction: column;
@@ -34,7 +34,7 @@
 
 .editor-title {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text-dark);
     margin: 0 0 1rem 0;
 }
@@ -94,13 +94,13 @@
 
 .section-label {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text-dark);
 }
 
 .section-type {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text-dark);
     flex-shrink: 0;
 }
@@ -203,7 +203,7 @@
     display: flex;
 }
 
-.input-wrapper .native-textarea ~ .char-counter-inside {
+.input-wrapper .native-textarea~.char-counter-inside {
     top: 0.75rem;
     transform: none;
 }
@@ -222,9 +222,9 @@
     box-sizing: border-box;
 }
 
-.native-input-height{
+.native-input-height {
     padding: 0.625rem 1rem 0.625rem 0.75rem !important;
-;
+    ;
 }
 
 .native-input:focus {
@@ -282,7 +282,8 @@
 .error-message {
     color: #dc2626;
     margin-bottom: -0.5rem;
-    padding: 0 4px;;
+    padding: 0 4px;
+    ;
     display: flex;
     align-items: center;
 }
@@ -360,11 +361,11 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.toggle-switch input:checked + .toggle-slider {
+.toggle-switch input:checked+.toggle-slider {
     background-color: var(--color-primary);
 }
 
-.toggle-switch input:checked + .toggle-slider:before {
+.toggle-switch input:checked+.toggle-slider:before {
     transform: translateX(20px);
 }
 
@@ -523,7 +524,7 @@
 .add-read-more-btn {
     color: #080707;
     width: fit-content;
-    margin-top : 0.5rem;
+    margin-top: 0.5rem;
 }
 
 
@@ -655,6 +656,7 @@
     color: #444444;
     font-weight: 500;
 }
+
 /* Lightning Combobox Overrides */
 .type-dropdown {
     --slds-c-input-radius-border: 0.375rem;

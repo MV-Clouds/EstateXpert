@@ -11,7 +11,7 @@
     --color-border-light: #dddbda;
     --color-background-disabled: #c7c7c7;
     --color-scrollbar: #f1f1f1;
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease-in-out;
 }
@@ -88,7 +88,7 @@
 
 .flow-heading,
 .builder-title {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 23px;
     max-width: 350px;
     overflow: hidden;
@@ -145,7 +145,7 @@
 }
 
 .section-header {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 1.5rem;
     color: var(--color-text-primary);
 }
@@ -299,7 +299,7 @@
     border: none;
     border-radius: 0.25rem;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
     background-color: var(--color-background-white);
@@ -346,6 +346,7 @@
     padding: 0.5rem;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
+    background: white;
 }
 
 .middle-panel {
@@ -353,12 +354,12 @@
     padding: 0.5rem;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
+    background: white;
 }
 
 .right-panel {
     width: 30%;
     min-width: 320px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
     --webkit-scrollbar-width: 6px;
     scrollbar-color: var(--color-primary) var(--color-scrollbar);

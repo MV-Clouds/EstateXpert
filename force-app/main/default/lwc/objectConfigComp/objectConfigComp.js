@@ -24,11 +24,9 @@ export default class ObjectConfigComp extends LightningElement {
 
     // ── UI state ─────────────────────────────────────────────────────────────
     @track activeSectionName = ['chatWindowConfig', 'webhookConfig'];
-    @track isWebhookConfigEdit = false;
-    @track isChatWindowConfigEdit = false;
+    @track isEditMode = false;   // single flag controls both sections
+    @track isDirty = false;      // single dirty flag for Save button
     @track isLoading = false;
-    @track isChatDirty = false;
-    @track isWebhookDirty = false;
 
     @api isPopup = false;
 
@@ -54,15 +52,12 @@ export default class ObjectConfigComp extends LightningElement {
                     if (config != '{}') {
                         this.selectedObject = 'Contact'; // always Contact
                         const savedPhoneField = config?.phoneField || '';
-
                         const savedFieldValues = config.requiredFields?.reduce((acc, field) => {
                             acc[field.name] = field.value;
                             return acc;
                         }, {});
-
                         this.loadRequiredFields(savedPhoneField, savedFieldValues);
                     } else {
-                        this.isWebhookConfigEdit = true;
                         this.loadRequiredFields('', {});
                     }
 
@@ -83,7 +78,6 @@ export default class ObjectConfigComp extends LightningElement {
                             return row;
                         });
                     } else {
-                        // No saved config — silently initialise a Contact row (stay in view mode)
                         this.handleAddRow();
                     }
                 })
@@ -104,7 +98,6 @@ export default class ObjectConfigComp extends LightningElement {
             this.isLoading = true;
             getRequiredFields({ objectName: this.selectedObject })
                 .then(data => {
-                    // Build phone fields list
                     const rawPhoneFields = data[0]?.phoneFields || [];
                     this.phoneFields = rawPhoneFields.map(field => ({ ...field, isSelected: false }));
 
@@ -130,7 +123,6 @@ export default class ObjectConfigComp extends LightningElement {
                         this.selectedPhoneFieldLabel = '';
                     }
 
-                    // Build required fields list
                     this.requiredFields = (data[0]?.requiredFields || []).map(field => ({
                         apiName: field.name,
                         label: field.label,
@@ -209,7 +201,7 @@ export default class ObjectConfigComp extends LightningElement {
             const fieldIndex = this.requiredFields.findIndex(f => f.apiName === fieldName);
             if (fieldIndex !== -1) {
                 this.requiredFields[fieldIndex].value = event.target.value;
-                this.isWebhookDirty = true;
+                this.isDirty = true;
             }
         } catch (error) {
             console.error('Error in input : ', error);
@@ -222,7 +214,7 @@ export default class ObjectConfigComp extends LightningElement {
             const fieldIndex = this.requiredFields.findIndex(f => f.apiName === fieldName);
             if (fieldIndex !== -1) {
                 this.requiredFields[fieldIndex].value = event.target.checked;
-                this.isWebhookDirty = true;
+                this.isDirty = true;
             }
         } catch (error) {
             console.error('Error in checkbox value change : ', error);
@@ -234,7 +226,7 @@ export default class ObjectConfigComp extends LightningElement {
             const fieldName = event.target.dataset.field;
             const selectedRecord = event.detail;
             if (selectedRecord?.recordId != null) {
-                this.isWebhookDirty = true;
+                this.isDirty = true;
                 this.requiredFields = this.requiredFields.map(field =>
                     field.apiName === fieldName ? { ...field, value: selectedRecord?.recordId } : field
                 );
@@ -261,14 +253,13 @@ export default class ObjectConfigComp extends LightningElement {
                 this.selectedPhoneFieldLabel = match.label;
                 this.phoneFields = this.phoneFields.map(f => ({ ...f, isSelected: f.value === selected }));
             }
-            this.isWebhookDirty = true;
+            this.isDirty = true;
         } catch (error) {
             console.error('Error in webhook phone combo change:', error);
         }
     }
 
     // ── Chat window handlers ──────────────────────────────────────────────────
-    // Add a Contact row (object is always fixed to Contact)
     async handleAddRow() {
         try {
             const newRow = {
@@ -281,7 +272,6 @@ export default class ObjectConfigComp extends LightningElement {
             };
             this.chatWindowRows = [...this.chatWindowRows, newRow];
             await this.fetchFieldsForObject(newRow.id, 'Contact');
-            // Preselect first phone field
             this.chatWindowRows = this.chatWindowRows.map(row => {
                 if (row.id === newRow.id) {
                     return {
@@ -296,7 +286,6 @@ export default class ObjectConfigComp extends LightningElement {
         }
     }
 
-    // Fetch phone (and name) fields for Contact to populate the combobox
     async fetchFieldsForObject(rowId, objectName) {
         try {
             const result = await getTextAndPhoneFields({ objectName });
@@ -310,7 +299,6 @@ export default class ObjectConfigComp extends LightningElement {
                     return {
                         ...row,
                         phoneFieldOptions: phoneFields.map(f => ({ label: `${f.label} (${f.value})`, value: f.value })),
-                        // Keep nameField/emailField stored in the row for JSON compat even though not shown in UI
                         nameFieldOptions: textFields.map(f => ({ label: f.label, value: f.value })),
                         emailFieldOptions: emailFields.map(f => ({ label: `${f.label} (${f.value})`, value: f.value })),
                     };
@@ -322,7 +310,6 @@ export default class ObjectConfigComp extends LightningElement {
         }
     }
 
-    // Handle Phone field selection in chat window edit mode
     handlePhoneFieldChange(event) {
         try {
             const rowId = event.target.dataset.rowId;
@@ -333,7 +320,7 @@ export default class ObjectConfigComp extends LightningElement {
                 }
                 return row;
             });
-            this.isChatDirty = true;
+            this.isDirty = true;
         } catch (error) {
             console.error('Error in changing Phone picklist : ', error);
         }
@@ -341,27 +328,27 @@ export default class ObjectConfigComp extends LightningElement {
 
     // ── Edit / Cancel / Save ──────────────────────────────────────────────────
     handleEdit() {
-        this.isWebhookConfigEdit = true;
-        this.isWebhookDirty = false;
-    }
-
-    handleEditChatConfig() {
-        this.isChatWindowConfigEdit = true;
-        this.isChatDirty = false;
+        this.isEditMode = true;
+        this.isDirty = false;
     }
 
     handleCancel() {
         this.isLoading = true;
+        this.isEditMode = false;
+        this.isDirty = false;
         this.loadSavedValues();
-        this.isWebhookConfigEdit = false;
-        this.isChatWindowConfigEdit = false;
-        this.isWebhookDirty = false;
-        this.isChatDirty = false;
     }
 
-    // Save webhook config — JSON format unchanged: { objectApiName, phoneField, requiredFields: [...] }
-    handleSave() {
+    /*
+    * Method Name: handleSaveAll
+    * @description: Saves both Chat Window config and Webhook config together.
+    *               JSON formats are unchanged:
+    *   Chat:    { "Contact": { nameField, phoneField, emailField } }
+    *   Webhook: { objectApiName, phoneField, requiredFields: [{name, value, type}] }
+    */
+    handleSaveAll() {
         try {
+            // Validate webhook required fields
             const invalidFields = this.requiredFields.filter(field =>
                 !field.isBoolean &&
                 (field.isString || field.isNumber || field.isDate || field.isDateTime || field.isPicklist || field.isReference || field.isTextArea) &&
@@ -373,8 +360,17 @@ export default class ObjectConfigComp extends LightningElement {
                 return;
             }
 
+            // Validate chat window
+            const invalidChatRows = this.chatWindowRows.filter(row => !row.selectedObject || !row.selectedPhoneField);
+            if (invalidChatRows.length > 0) {
+                this.showToast('Error', 'Please select a Phone Field under Chat Window Configuration.', 'error');
+                return;
+            }
+
             this.isLoading = true;
-            const jsonData = JSON.stringify({
+
+            // Build webhook JSON — format unchanged
+            const webhookJson = JSON.stringify({
                 objectApiName: this.selectedObject,
                 phoneField: this.selectedPhoneFieldVal,
                 requiredFields: this.requiredFields.map(field => ({
@@ -384,15 +380,33 @@ export default class ObjectConfigComp extends LightningElement {
                 }))
             });
 
-            saveUserConfig({ jsonData })
-                .then(response => {
-                    if (response == 'Success') {
+            // Build chat window JSON — format unchanged
+            const chatConfig = {};
+            this.chatWindowRows.forEach(row => {
+                if (row.selectedObject && row.selectedPhoneField) {
+                    chatConfig[row.selectedObject] = {
+                        nameField: row.selectedNameField || '',
+                        phoneField: row.selectedPhoneField,
+                        emailField: row.selectedEmailField || ''
+                    };
+                }
+            });
+            const chatJson = JSON.stringify(chatConfig);
+
+            // Save both configs in parallel
+            Promise.all([
+                saveUserConfig({ jsonData: webhookJson }),
+                saveUserConfig({ jsonDataForChat: chatJson })
+            ])
+                .then(([webhookResp, chatResp]) => {
+                    if (webhookResp == 'Success' && chatResp == 'Success') {
                         this.showToast('Success', 'Configuration saved successfully', 'success');
                         this.populateReferenceNames();
-                        this.isWebhookConfigEdit = false;
-                        this.isWebhookDirty = false;
+                        this.isEditMode = false;
+                        this.isDirty = false;
                     } else {
-                        this.showToast('Error', response, 'error');
+                        const errMsg = webhookResp != 'Success' ? webhookResp : chatResp;
+                        this.showToast('Error', errMsg, 'error');
                     }
                 })
                 .catch(error => console.error('Error saving config:', error))
@@ -402,50 +416,7 @@ export default class ObjectConfigComp extends LightningElement {
         }
     }
 
-    // Save chat window config — JSON format unchanged: { "Contact": { nameField, phoneField, emailField } }
-    async handleSaveChatWindowConfig() {
-        try {
-            if (this.chatWindowRows.length === 0) {
-                this.showToast('Error', 'At least one object row must be configured.', 'error');
-                return;
-            }
-            const invalidRows = this.chatWindowRows.filter(row => !row.selectedObject || !row.selectedPhoneField);
-            if (invalidRows.length > 0) {
-                this.showToast('Error', 'Please select a Phone Field to continue.', 'error');
-                return;
-            }
-
-            this.isLoading = true;
-            const config = {};
-            this.chatWindowRows.forEach(row => {
-                if (row.selectedObject && row.selectedPhoneField) {
-                    config[row.selectedObject] = {
-                        nameField: row.selectedNameField || '',
-                        phoneField: row.selectedPhoneField,
-                        emailField: row.selectedEmailField || ''
-                    };
-                }
-            });
-            const configJson = JSON.stringify(config);
-
-            saveUserConfig({ jsonDataForChat: configJson })
-                .then(response => {
-                    if (response == 'Success') {
-                        this.showToast('Success', 'Configuration saved successfully', 'success');
-                        this.isChatWindowConfigEdit = false;
-                        this.isChatDirty = false;
-                    } else {
-                        this.showToast('Error', response, 'error');
-                    }
-                })
-                .catch(error => console.error('Error saving config:', error))
-                .finally(() => { this.isLoading = false; });
-        } catch (error) {
-            this.showToast('Error', 'Error saving configuration: ' + error?.body?.message, 'error');
-        }
-    }
-
-    // ── Accordion / Section toggles ───────────────────────────────────────────
+    // ── Accordion toggles ─────────────────────────────────────────────────────
     handleToggleSection(event) {
         const sectionName = event.currentTarget.dataset.section;
         const isOpen = this.activeSectionName.includes(sectionName);
@@ -470,12 +441,9 @@ export default class ObjectConfigComp extends LightningElement {
         return `accordion-item ${this.isWebhookSectionOpen ? 'open' : ''}`;
     }
 
-    get isChatSaveDisabled() {
-        return !this.isChatDirty;
-    }
-
-    get isWebhookSaveDisabled() {
-        return !this.isWebhookDirty;
+    // Save button is disabled until something changes
+    get isSaveDisabled() {
+        return !this.isDirty;
     }
 
     // Options for the webhook phone-field combobox

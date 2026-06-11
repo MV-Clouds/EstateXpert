@@ -1755,6 +1755,9 @@ export default class CreateFlowManagement extends LightningElement {
         // Screen 0 (first screen) should have empty data since it receives nothing
         for (let i = 0; i < currentScreenIndex; i++) {
             const screen = allScreens[i];
+            // Skip read more screens — they have no user-input fields and are
+            // not part of the data forwarding chain (consistent with buildFooterPayload).
+            if (screen?.id?.startsWith('READ_MORE_')) continue;
             if (!screen?.layout?.children) continue;
 
             // Extract form children
@@ -1771,12 +1774,27 @@ export default class CreateFlowManagement extends LightningElement {
                 if (this.isInputField(jsonType)) {
                     const fieldName = element.name;
                     const key = `screen_${i}_${fieldName}_${inputFieldIndex}`;
-                    const dataType = this.getFieldDataType(jsonType);
 
-                    dataSchema[key] = {
-                        type: dataType,
-                        __example__: dataType === 'array' ? [] : (dataType === 'boolean' ? false : 'Example')
-                    };
+                    // BUGFIX: Pass element['input-type'] so TextInput number fields get
+                    // dataType = 'number' instead of 'string'.  Meta validates that the
+                    // declared type matches the field's actual input type at publish time.
+                    const dataType = this.getFieldDataType(jsonType, element['input-type']);
+
+                    // BUGFIX: __example__ must be the same JS type as 'dataType' —
+                    // using the string 'Example' for a number field causes Meta's schema
+                    // validator to reject the flow JSON.
+                    let exampleValue;
+                    if (dataType === 'array') {
+                        exampleValue = [];
+                    } else if (dataType === 'boolean') {
+                        exampleValue = false;
+                    } else if (dataType === 'number') {
+                        exampleValue = 0;
+                    } else {
+                        exampleValue = 'Example';
+                    }
+
+                    dataSchema[key] = { type: dataType, __example__: exampleValue };
 
                     // Add items for array type
                     if (dataType === 'array') {

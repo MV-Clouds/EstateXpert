@@ -35,6 +35,7 @@ export default class CreateFlowManagement extends LightningElement {
     parentFlowId = null;
     isParentFlow = false;
     initialJsonString = '';
+    flowStatus = null; // null = new unsaved flow; 'Draft' | 'Published Draft' | 'Published'
 
     get hasValidFlowName() {
         return this.flowName.trim() !== '';
@@ -79,7 +80,18 @@ export default class CreateFlowManagement extends LightningElement {
     }
 
     get isPublishDisabled() {
-        return !this.isFlowSaved || this.hasUnsavedChanges || this.isLoading;
+        // Disable if flow not saved, has pending changes, is loading,
+        // OR if status is not 'Draft' / 'Published Draft' (already published or not yet created).
+        const statusAllowsPublish = this.flowStatus === 'Draft' || this.flowStatus === 'Published Draft';
+        return !this.isFlowSaved || this.hasUnsavedChanges || this.isLoading || !statusAllowsPublish;
+    }
+
+    /**
+     * Only show the Publish button when the flow is in a publishable state.
+     * Meta only allows publishing 'Draft' or 'Published Draft' flows.
+     */
+    get showPublishButton() {
+        return this.flowStatus === 'Draft' || this.flowStatus === 'Published Draft';
     }
 
     get saveButtonClass() {
@@ -170,6 +182,9 @@ export default class CreateFlowManagement extends LightningElement {
                 if (flowData.MVEX__Category__c) {
                     this.selectedCategories = flowData.MVEX__Category__c.split(';');
                 }
+
+                // Set flow status
+                this.flowStatus = flowData.Status__c || 'Draft';
 
                 // Set flow JSON
                 if (flowData.MVEX__Flow_JSON__c) {
@@ -308,6 +323,7 @@ export default class CreateFlowManagement extends LightningElement {
                 this.metaFlowId = response.metaFlowId;
                 this.initialJsonString = this.jsonString;
                 this.isFlowSaved = true;
+                this.flowStatus = 'Draft'; // New flows always start as Draft
 
                 // Show the flow builder
                 this.showFlowBuilder = true;
@@ -696,6 +712,8 @@ export default class CreateFlowManagement extends LightningElement {
         }
 
         this.isLoading = true;
+        console.log('flowJson----->', this.jsonString);
+        console.log('metaFlowId----->', this.metaFlowId);
 
         try {
             // Update existing flow
@@ -716,6 +734,15 @@ export default class CreateFlowManagement extends LightningElement {
                 this.initialJsonString = this.jsonString;
                 this.hasUnsavedChanges = false;
                 this.isFlowSaved = true;
+
+                // Update local status to mirror what Apex sets:
+                // Published → Published Draft (edits pending re-publish)
+                // Draft / Published Draft → unchanged
+                if (this.flowStatus === 'Published') {
+                    this.flowStatus = 'Published Draft';
+                } else if (!this.flowStatus) {
+                    this.flowStatus = 'Draft';
+                }
 
                 this.showToast('Success', 'Flow updated successfully', 'success');
             } else {
@@ -747,6 +774,7 @@ export default class CreateFlowManagement extends LightningElement {
             const response = JSON.parse(result);
 
             if (response.success) {
+                this.flowStatus = 'Published'; // Hide publish button after successful publish
                 this.showToast('Success', 'Flow published successfully', 'success');
             } else {
                 this.handleMetaError(response);
@@ -917,6 +945,10 @@ export default class CreateFlowManagement extends LightningElement {
 
             // Update terminal property: only last screen should be terminal
             this.updateTerminalProperty(screens);
+
+            // BUGFIX: Rebuild navigation so the previous screen's footer no longer
+            // references the deleted screen's ID.
+            this.updateNavigationChain(screens);
 
             this.updateJSON(screens);
 
@@ -1408,6 +1440,19 @@ export default class CreateFlowManagement extends LightningElement {
             case 'OptIn':
                 element.label = section.value || defaults?.label || '';
                 element.required = section.required !== undefined ? section.required : (defaults?.required || true);
+                // BUGFIX: Re-attach the read-more navigation action every time the element is
+                // rebuilt (e.g. on a title change).  Without this the on-click-action is lost,
+                // breaking Meta's JSON validation on the next publish.
+                if (section.hasReadMoreScreen && section.readMoreScreenData && section.readMoreScreenData.id) {
+                    element['on-click-action'] = {
+                        name: 'navigate',
+                        payload: {},
+                        next: {
+                            name: section.readMoreScreenData.id,
+                            type: 'screen'
+                        }
+                    };
+                }
                 break;
 
             case 'Image':
@@ -1497,8 +1542,16 @@ export default class CreateFlowManagement extends LightningElement {
                     }
                 });
 
-                const isTerminal = isReadMoreScreen ? false : (screenIndex === screens.length - 1);
-                const nextScreenId = (!isTerminal && !isReadMoreScreen) ? screens[screenIndex + 1]?.id : null;
+                // BUGFIX: Determine terminal/next using only regular (non-READ_MORE_) screens.
+                // Using raw array indices could land on a READ_MORE_ screen, which Meta rejects.
+                const regularScreens = screens.filter(s => !s.id || !s.id.startsWith('READ_MORE_'));
+                const currentRegularIndex = regularScreens.findIndex(s => s.id === screenId);
+                const isTerminal = isReadMoreScreen
+                    ? false
+                    : (currentRegularIndex === -1 || currentRegularIndex === regularScreens.length - 1);
+                const nextScreenId = (!isTerminal && !isReadMoreScreen && currentRegularIndex !== -1)
+                    ? regularScreens[currentRegularIndex + 1]?.id
+                    : null;
 
                 // Build Footer payload - only for regular screens, not read more screens
                 const footerPayload = isReadMoreScreen ? {} : this.buildFooterPayload(screenIndex, inputFields, screens);

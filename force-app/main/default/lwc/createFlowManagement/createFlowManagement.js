@@ -655,6 +655,45 @@ export default class CreateFlowManagement extends LightningElement {
      */
     async handleSaveFlow() {
         if (this.isSaveDisabled) return;
+        // Step 1: Check via component's validate() method — this catches the case where the user
+        // has cleared the screen title in the UI (the JSON still holds the last valid title because
+        // handleContentUpdate skips blank title updates, but the component's internal state knows it's blank).
+        const screenEditor = this.template.querySelector('c-wb-flow-screen-editor');
+        if (screenEditor) {
+            let isValid = false;
+            try {
+                isValid = screenEditor.validate();
+            } catch (validationErr) {
+                console.warn('Screen editor validation error:', validationErr);
+                isValid = true; // fallback: allow save if validate() itself throws
+            }
+            if (!isValid) {
+                this.showToast(
+                    'Validation Error',
+                    'Screen title cannot be empty. Please fill in the screen title before saving.',
+                    'error'
+                );
+                return;
+            }
+        }
+
+        // Step 2: Also validate from JSON (catches screens where title was never set — e.g. first time).
+        if (this.jsonString) {
+            try {
+                const parsed = JSON.parse(this.jsonString);
+                const emptyTitleScreen = (parsed.screens || []).find(s => !s.title || !s.title.trim());
+                if (emptyTitleScreen) {
+                    this.showToast(
+                        'Validation Error',
+                        'Screen title cannot be empty. Please fill in the screen title before saving.',
+                        'error'
+                    );
+                    return;
+                }
+            } catch (parseErr) {
+                console.warn('Could not parse JSON for title validation:', parseErr);
+            }
+        }
 
         this.isLoading = true;
 

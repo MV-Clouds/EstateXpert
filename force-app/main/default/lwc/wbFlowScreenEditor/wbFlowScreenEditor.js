@@ -8,7 +8,7 @@ export default class WbFlowScreenEditor extends LightningElement {
     @api isParentFlow = false;
 
     @track metadataMap = {};
-    
+
     flowElementTypes = null;
     showDropdown = false;
     activeCategory = null;
@@ -99,11 +99,11 @@ export default class WbFlowScreenEditor extends LightningElement {
 
     fetchFlowElementTypes() {
         getFlowElementTypes()
-            .then(result => {                
+            .then(result => {
                 this.flowElementTypes = result;
-                
+
                 const tempMetadataMap = {};
-                
+
                 Object.entries(result || {}).forEach(([categoryKey, categoryItems]) => {
                     if (Array.isArray(categoryItems)) {
                         categoryItems.forEach((item) => {
@@ -113,10 +113,10 @@ export default class WbFlowScreenEditor extends LightningElement {
                         });
                     }
                 });
-                
+
                 this.metadataMap = tempMetadataMap;
                 this.isMetadataReady = true;
-                
+
                 if (this.parsedJson && this.screenId) {
                     this.updateCurrentScreen();
                 }
@@ -167,7 +167,7 @@ export default class WbFlowScreenEditor extends LightningElement {
                 this.previousScreenId = this.screenId;
                 const screens = this.parsedJson.screens || [];
                 const foundScreen = screens.find(s => s.id === this.screenId);
-                
+
                 this.pendingScreenLoad = foundScreen;
                 this.loadScreenIntoEditor();
             }
@@ -204,13 +204,27 @@ export default class WbFlowScreenEditor extends LightningElement {
         }
     }
 
+    /**
+     * Method : validate
+     * @description : Delegates validation to the child content editor.
+     *                Returns true if all fields on the current screen are valid.
+     *                NOTE: Does NOT call this.template.querySelector (LWC @api restriction).
+     * @return {Boolean}
+     */
+    @api
+    validate() {
+        if (this.contentEditorRef) {
+            return this.contentEditorRef.validate();
+        }
+        return true;
+    }
+
     handleAddContent(event) {
         event.stopPropagation();
-        
         if (this.isMaxContentReached) {
             return;
         }
-        
+
         this.showDropdown = !this.showDropdown;
         if (!this.showDropdown) {
             this.closeDropdown();
@@ -220,7 +234,7 @@ export default class WbFlowScreenEditor extends LightningElement {
     handleCategoryClick(event) {
         event.stopPropagation();
         const clickedCategory = event.currentTarget.dataset.category;
-        
+
         // Toggle: if same category clicked, close it; otherwise open the new one
         if (this.activeCategory === clickedCategory) {
             this.activeCategory = null;
@@ -252,7 +266,7 @@ export default class WbFlowScreenEditor extends LightningElement {
     getTotalImageCount() {
         try {
             if (!this.parsedJson?.screens) return 0;
-            
+
             let totalImages = 0;
             this.parsedJson.screens.forEach(screen => {
                 if (screen.layout?.children) {
@@ -329,21 +343,21 @@ export default class WbFlowScreenEditor extends LightningElement {
         try {
             // Stop the original event from bubbling further - we'll dispatch a new one with screenId
             event.stopPropagation();
-            
+
             const contentData = event.detail;
-            
+
             if (!this.contentEditorRef) {
                 this.contentEditorRef = this.template.querySelector('c-wb-flow-content-editor');
             }
             if (this.contentEditorRef) {
                 this.contentCount = this.contentEditorRef.getContentCount();
             }
-            
+
             if (!this.screenId) {
                 console.warn('No screenId available in wbFlowScreenEditor - skipping content update dispatch');
                 return;
             }
-            
+
             this.dispatchEvent(new CustomEvent('contentupdate', {
                 detail: {
                     screenId: this.screenId,
@@ -360,7 +374,7 @@ export default class WbFlowScreenEditor extends LightningElement {
 
     handleEditReadMore(event) {
         const { sectionId, shouldNavigate, internalSectionId } = event.detail;
-        
+
         // Dispatch to parent to create/edit read more screen
         this.dispatchEvent(new CustomEvent('editreadmore', {
             detail: {

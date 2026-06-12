@@ -7,11 +7,11 @@ import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 
 export default class WbFlowContentEditor extends LightningElement {
 
-    @api parentFlowId = null; 
+    @api parentFlowId = null;
     @api isParentFlow = false;
 
     @track contentSections = [];
-    @track imageOperationInProgress = {}; 
+    @track imageOperationInProgress = {};
 
     screenTitle = 'Thank you';
     screenTitleError = false;
@@ -24,7 +24,7 @@ export default class WbFlowContentEditor extends LightningElement {
     confData;
     s3;
     isAwsSdkInitialized = false;
-    
+
     internalMetadataMap = {};
     sectionIdCounter = 0;
     draggedSectionId = null;
@@ -89,7 +89,7 @@ export default class WbFlowContentEditor extends LightningElement {
             // Build base class from section state (expanded/collapsed)
             const baseClass = section.isExpanded ? 'section-card expanded' : 'section-card collapsed';
             let containerClass = baseClass;
-            
+
             // Add drag states
             if (section.id === this.draggedSectionId) {
                 containerClass += ' dragging';
@@ -97,7 +97,7 @@ export default class WbFlowContentEditor extends LightningElement {
             if (section.id === this.dragOverSectionId) {
                 containerClass += ' drag-over';
             }
-            
+
             // Calculate max options validation for dropdown/selection elements
             const optionsCount = section.options?.length || 0;
             const config = this.getMetadataConfig(section.itemName);
@@ -106,10 +106,10 @@ export default class WbFlowContentEditor extends LightningElement {
             const addOptionButtonTitle = isMaxOptionsReached
                 ? `You can add a maximum of ${maxOptions} options.`
                 : 'Add option';
-            
+
             // Check if this section has an image operation in progress
             const isLoading = this.imageOperationInProgress[section.id] || false;
-            
+
             return {
                 ...section,
                 containerClass: containerClass,
@@ -141,37 +141,36 @@ export default class WbFlowContentEditor extends LightningElement {
                 this.contentSections = [];
                 return;
             }
-            
+
             // Set screen title and reset any validation error
             this.screenTitle = screenData.title || 'Thank you';
             this.screenTitleError = false;
-            
+
             // Reset button label to default before processing
             this.buttonLabel = 'Done';
-            
             // Parse layout children and populate contentSections
             this.contentSections = [];
             if (screenData.layout && screenData.layout.children) {
                 const layoutChildren = screenData.layout.children;
-                
+
                 // Find Form element if it exists
                 const formElement = layoutChildren.find(child => child.type === 'Form');
                 const childrenToProcess = formElement ? formElement.children : layoutChildren;
-                
+
                 // Parse each child element
                 childrenToProcess.forEach(child => {
                     // Check if this is a Footer element and extract button label
                     if (child.type === 'Footer' && child.label) {
                         this.buttonLabel = child.label;
                     }
-                    
+
                     const section = this.parseSectionFromJson(child);
                     if (section) {
                         this.contentSections.push(section);
                     }
                 });
             }
-            
+
         } catch (error) {
             console.error('Error loading screen data:', error);
         }
@@ -184,9 +183,9 @@ export default class WbFlowContentEditor extends LightningElement {
         if (this.contentSections.length >= 10) {
             return;
         }
-        
+
         const { category, itemName, itemData } = contentData;
-        
+
         // Check if adding an image and validate max image count per screen
         if (itemName === 'Image') {
             const currentImageCount = this.contentSections.filter(section => section.itemName === 'Image').length;
@@ -204,7 +203,7 @@ export default class WbFlowContentEditor extends LightningElement {
                 return;
             }
         }
-        
+
         const newSection = this.createSection(category, itemName, itemData);
         if (newSection) {
             this.contentSections = [...this.contentSections, newSection];
@@ -246,6 +245,28 @@ export default class WbFlowContentEditor extends LightningElement {
     }
 
     /**
+     * Method : validate
+     * @description : Public API method called by parent before saving.
+     *                Forces validation UI to show and returns false if the
+     *                screen title is empty, blocking the save operation.
+     * @return {Boolean} - true if all fields are valid, false otherwise
+     */
+    @api
+    validate() {
+        let isValid = true;
+
+        // Validate screen title
+        if (!this.screenTitle || !this.screenTitle.trim()) {
+            this.screenTitleError = true;
+            // Expand the section so the error is visible to the user
+            this.isScreenTitleExpanded = true;
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    /**
      * Method : connectedCallback
      * @description : Component initialization
      */
@@ -260,7 +281,7 @@ export default class WbFlowContentEditor extends LightningElement {
         this.getS3ConfigData();
     }
 
-    renderedCallback(){
+    renderedCallback() {
         if (!this.isAwsSdkInitialized) {
             Promise.all([loadScript(this, AWS_SDK)])
                 .then(() => {
@@ -280,7 +301,7 @@ export default class WbFlowContentEditor extends LightningElement {
      * @param {boolean} show - Whether to show Edit/Delete buttons (true) or Add link button (false)
      */
     toggleReadMoreButtons(sectionId, show) {
-        
+
         this.contentSections = this.contentSections.map(section => {
             if (section.id === sectionId) {
                 return {
@@ -291,7 +312,7 @@ export default class WbFlowContentEditor extends LightningElement {
             return section;
         });
 
-        
+
     }
 
     /**
@@ -300,29 +321,29 @@ export default class WbFlowContentEditor extends LightningElement {
     handleDragStart(event) {
         const sectionId = event.currentTarget.dataset.sectionId;
         const section = this.contentSections.find(s => s.id === sectionId);
-        
+
         // Don't allow dragging if somehow triggered incorrectly
         if (!section) {
             event.preventDefault();
             return;
         }
-        
+
         this.draggedSectionId = sectionId;
         this.isDragging = true;
         this.tempSectionList = [...this.contentSections];
         event.dataTransfer.effectAllowed = 'move';
         event.dataTransfer.setData('text/plain', sectionId);
-        
+
         // Cache the editor container rect for scroll calculations
         const editorContainer = this.template.querySelector('.editor-container');
         if (editorContainer) {
             this.editorContainerRect = editorContainer.getBoundingClientRect();
         }
-        
+
         // Add document-level drag listener for auto-scroll
         this.boundDragOverHandler = this.handleDocumentDragOver.bind(this);
         document.addEventListener('dragover', this.boundDragOverHandler);
-        
+
         // Add CSS class to draggable sections container
         setTimeout(() => {
             const container = this.template.querySelector('.draggable-sections-container');
@@ -336,36 +357,36 @@ export default class WbFlowContentEditor extends LightningElement {
      */
     handleDocumentDragOver(event) {
         if (!this.isDragging) return;
-        
+
         const container = this.template.querySelector('.editor-container');
         if (!container) return;
-        
+
         // Update cached rect periodically (in case of layout changes)
         const rect = container.getBoundingClientRect();
         const mouseY = event.clientY;
         const mouseX = event.clientX;
-        
+
         // Check if mouse is within the horizontal bounds of the container
         if (mouseX < rect.left - 50 || mouseX > rect.right + 50) {
             this.stopAutoScroll();
             return;
         }
-        
+
         const threshold = 50; // Distance from edge to start scrolling
         const maxSpeed = 10; // Maximum speed
         const minSpeed = 2; // Minimum speed
-        
+
         // Calculate distance from top and bottom of the container
         const distanceFromTop = mouseY - rect.top;
         const distanceFromBottom = rect.bottom - mouseY;
-        
+
         // Check if container is actually scrollable
         const isScrollable = container.scrollHeight > container.clientHeight;
         if (!isScrollable) {
             this.stopAutoScroll();
             return;
         }
-        
+
         // Determine scroll direction and speed based on proximity to edges
         if (distanceFromTop < threshold) {
             // Near top edge - scroll up (negative speed)
@@ -379,7 +400,7 @@ export default class WbFlowContentEditor extends LightningElement {
 
                 const proximity = threshold - Math.max(0, distanceFromTop);
                 const normalizedProximity = Math.min(proximity / threshold, 1);
-                
+
                 // Changed to Linear easing (removed square) for more predictable speed
                 // This prevents the "sudden jump" to max speed when crossing the edge
                 const speed = minSpeed + (normalizedProximity * (maxSpeed - minSpeed));
@@ -400,7 +421,7 @@ export default class WbFlowContentEditor extends LightningElement {
 
                 const proximity = threshold - Math.max(0, distanceFromBottom);
                 const normalizedProximity = Math.min(proximity / threshold, 1);
-                
+
                 // Changed to Linear easing
                 const speed = minSpeed + (normalizedProximity * (maxSpeed - minSpeed));
                 this.startAutoScroll(container, speed);
@@ -430,16 +451,16 @@ export default class WbFlowContentEditor extends LightningElement {
     handleDragEnter(event) {
         event.preventDefault();
         const sectionId = event.currentTarget.dataset.sectionId;
-        
+
         // Only update if it's a different section and not the dragged one
         if (sectionId && sectionId !== this.draggedSectionId && sectionId !== this.dragOverSectionId) {
             this.dragOverSectionId = sectionId;
-            
+
             // Reorder tempSectionList
             if (this.tempSectionList) {
                 const draggedIndex = this.tempSectionList.findIndex(s => s.id === this.draggedSectionId);
                 const targetIndex = this.tempSectionList.findIndex(s => s.id === sectionId);
-                
+
                 if (draggedIndex !== -1 && targetIndex !== -1) {
                     const reordered = [...this.tempSectionList];
                     const [draggedItem] = reordered.splice(draggedIndex, 1);
@@ -453,16 +474,16 @@ export default class WbFlowContentEditor extends LightningElement {
     handleDrop(event) {
         event.stopPropagation();
         event.preventDefault();
-        
+
         // Stop auto-scrolling
         this.stopAutoScroll();
-        
+
         // Remove document-level drag listener
         if (this.boundDragOverHandler) {
             document.removeEventListener('dragover', this.boundDragOverHandler);
             this.boundDragOverHandler = null;
         }
-        
+
         // Apply the final reordering if tempSectionList exists
         if (this.tempSectionList) {
             // Update contentSections with the reordered list and update order property
@@ -470,22 +491,22 @@ export default class WbFlowContentEditor extends LightningElement {
                 ...section,
                 order: index
             }));
-            
+
             // Dispatch update event to parent
             this.dispatchContentUpdate();
         }
-        
+
         // Clean up
         this.draggedSectionId = null;
         this.dragOverSectionId = null;
         this.isDragging = false;
         this.tempSectionList = null;
         this.editorContainerRect = null;
-        
+
         // Remove CSS class from draggable sections container
         const container = this.template.querySelector('.draggable-sections-container');
         if (container) container.classList.remove('is-dragging');
-        
+
         return false;
     }
 
@@ -493,7 +514,7 @@ export default class WbFlowContentEditor extends LightningElement {
         // Only clear if we're leaving the actual element (not just moving between children)
         const relatedTarget = event.relatedTarget;
         const currentTarget = event.currentTarget;
-        
+
         // Check if we're leaving the section-card element completely
         if (!currentTarget.contains(relatedTarget)) {
             if (this.dragOverSectionId === event.currentTarget.dataset.sectionId) {
@@ -505,19 +526,19 @@ export default class WbFlowContentEditor extends LightningElement {
     handleDragEnd() {
         // Stop auto-scrolling
         this.stopAutoScroll();
-        
+
         // Remove document-level drag listener
         if (this.boundDragOverHandler) {
             document.removeEventListener('dragover', this.boundDragOverHandler);
             this.boundDragOverHandler = null;
         }
-        
+
         this.draggedSectionId = null;
         this.dragOverSectionId = null;
         this.isDragging = false;
         this.tempSectionList = null;
         this.editorContainerRect = null;
-        
+
         // Remove CSS class from draggable sections container
         const container = this.template.querySelector('.draggable-sections-container');
         if (container) container.classList.remove('is-dragging');
@@ -529,57 +550,57 @@ export default class WbFlowContentEditor extends LightningElement {
     startAutoScroll(container, speed) {
         // Store the container reference
         this.scrollContainer = container;
-        
+
         // Store the scroll direction and speed separately
         // speed > 0 means scroll down, speed < 0 means scroll up
         this.scrollDirection = speed < 0 ? -1 : 1;
         this.scrollMagnitude = Math.abs(speed);
-        
+
         // If already scrolling, just update direction/speed (the loop will pick it up)
         if (this.scrollInterval) {
             return;
         }
-        
+
         // Use requestAnimationFrame for smoother scrolling
         const scrollStep = () => {
             const cont = this.scrollContainer;
-            
+
             // Stop if no longer dragging or container is gone
             if (!this.isDragging || !cont) {
                 this.stopAutoScroll();
                 return;
             }
-            
+
             // Get current scroll values
             const direction = this.scrollDirection;
             const magnitude = this.scrollMagnitude;
-            
+
             // If magnitude is 0, keep loop running but don't scroll
             if (magnitude === 0) {
                 this.scrollInterval = requestAnimationFrame(scrollStep);
                 return;
             }
-            
+
             // Get current and max scroll positions
             const currentScrollTop = cont.scrollTop;
             const maxScrollTop = cont.scrollHeight - cont.clientHeight;
 
-             // Check boundaries to stop unnecessary processing immediately
-             if ((direction === -1 && currentScrollTop <= 0) || 
-                 (direction === 1 && currentScrollTop >= maxScrollTop)) {
-                 this.stopAutoScroll();
-                 return;
-             }
-            
+            // Check boundaries to stop unnecessary processing immediately
+            if ((direction === -1 && currentScrollTop <= 0) ||
+                (direction === 1 && currentScrollTop >= maxScrollTop)) {
+                this.stopAutoScroll();
+                return;
+            }
+
             // Calculate delta (how much to scroll this frame)
             const delta = direction * magnitude;
-            
+
             // Calculate new scroll position
             let newScrollTop = currentScrollTop + delta;
-            
+
             // Clamp to valid range
             newScrollTop = Math.max(0, Math.min(maxScrollTop, newScrollTop));
-            
+
             // Only apply if there's a change
             if (newScrollTop !== currentScrollTop) {
                 cont.scrollTop = newScrollTop;
@@ -590,7 +611,7 @@ export default class WbFlowContentEditor extends LightningElement {
                 this.stopAutoScroll();
             }
         };
-        
+
         this.scrollInterval = requestAnimationFrame(scrollStep);
     }
 
@@ -662,8 +683,8 @@ export default class WbFlowContentEditor extends LightningElement {
         return inputTypes.map(type => {
             // Ensure type is a string and handle both string and object formats
             const typeValue = typeof type === 'string' ? type : (type?.value || type?.name || String(type));
-            const typeLabel = typeof type === 'object' && type?.label ? type.label : 
-                             (typeValue.charAt(0).toUpperCase() + typeValue.slice(1));
+            const typeLabel = typeof type === 'object' && type?.label ? type.label :
+                (typeValue.charAt(0).toUpperCase() + typeValue.slice(1));
             return {
                 label: typeLabel,
                 value: typeValue
@@ -825,7 +846,7 @@ export default class WbFlowContentEditor extends LightningElement {
 
         // Derive isInputElement from existing metadata properties
         const isInputElement = this.isInputElementFromMetadata(config);
-        
+
 
         // Build base section with metadata-driven properties
         const section = {
@@ -838,12 +859,12 @@ export default class WbFlowContentEditor extends LightningElement {
             toggleIcon: 'utility:chevronup',
             containerClass: 'section-card expanded',
             typeLabel: overrides.typeLabel || itemName.replace(/([A-Z])/g, ' $1').trim(),
-            
+
             // Metadata-driven properties
             jsonType: jsonType,
             uiFields: uiFields || {},
             constraints: constraints || {},
-            
+
             // UI control flags
             showTypeSwitch: uiFields?.showTypeSwitch || false,
             showLabel: uiFields?.showLabel || false,
@@ -853,7 +874,7 @@ export default class WbFlowContentEditor extends LightningElement {
             showOptions: uiFields?.showOptions || false,
             showImageProps: uiFields?.showImageProps || false,
             showReadMoreLink: uiFields?.showReadMoreLink || false,
-            
+
             // Type-specific flags for rendering - dynamically derived from metadata
             isTextElement: config.category === 'Text',
             isTextInput: jsonType === 'TextInput',
@@ -862,29 +883,29 @@ export default class WbFlowContentEditor extends LightningElement {
             isDatePicker: jsonType === 'DatePicker',
             isOptIn: jsonType === 'OptIn',
             isImage: jsonType === 'Image',
-            
+
             // Default values from metadata or overrides
             // For OptIn, default to true if required is not explicitly set
             value: overrides.value !== undefined ? overrides.value : (defaults?.text || defaults?.label || ''),
             required: overrides.required !== undefined ? overrides.required : (jsonType === 'OptIn' ? true : (defaults?.required || false)),
             inputType: overrides.inputType || defaults?.inputType || 'text',
             helperText: overrides.helperText || '',
-            
+
             // Read more link properties
             hasReadMoreScreen: overrides.hasReadMoreScreen || false,
             readMoreScreenData: overrides.readMoreScreenData || null,
-            
+
             // Type options for switching (if applicable)
             typeOptions: this.getTypeOptionsForSection(itemName),
-            
+
             // Input type options (for TextInput)
             inputTypeOptions: this.getInputTypeOptions(itemName),
-            
+
             // Constraints
             maxLength: constraints?.textMaxLength || constraints?.labelMaxLength || 4096,
             optionMaxLength: 30,
             helperTextMaxLength: constraints?.helperTextMaxLength || 80,
-            
+
             // Preview text from overrides or metadata defaults
             previewText: overrides.previewText || defaults?.text || 'Enter content'
         };
@@ -909,10 +930,10 @@ export default class WbFlowContentEditor extends LightningElement {
             section.height = overrides.height || 200;  // Default height
             section.imageScaleTypes = config.imageScaleTypes || ['cover', 'contain'];
             section.fileInputId = `file-input-${sectionId}`;  // Unique ID for file input
-            
+
             // Get max file size from metadata constraints
             section.maxFileSize = constraints?.maxFileSize ? `${constraints.maxFileSize}kb` : '300kb';
-            
+
             // Get allowed file types from metadata and format for display
             const allowedTypes = constraints?.allowedFileTypes || ['image/jpeg', 'image/png'];
             section.acceptableFileTypes = allowedTypes
@@ -977,24 +998,24 @@ export default class WbFlowContentEditor extends LightningElement {
                 const maxLength = section.maxLength || 4096;
                 const hasError = newValue.length > maxLength;
                 const errorMessage = hasError ? `This field cannot be longer than ${maxLength} characters` : '';
-                
+
                 const updatedSection = {
                     ...section,
                     [field]: newValue,
                     hasError: hasError,
                     errorMessage: errorMessage
                 };
-                
+
                 // Update preview text if value field changed
                 if (field === 'value') {
                     updatedSection.previewText = newValue || section.previewText;
                 }
-                
+
                 return updatedSection;
             }
             return section;
         });
-        
+
         // Force re-render by creating new array reference
         this.contentSections = [...this.contentSections];
         this.dispatchContentUpdate();
@@ -1007,17 +1028,17 @@ export default class WbFlowContentEditor extends LightningElement {
     handleEditReadMore(event) {
         event.stopPropagation();
         const sectionId = event.currentTarget.dataset.sectionId;
-        
+
         const section = this.contentSections.find(s => s.id === sectionId);
-        
-        const hasExistingReadMore = section?.hasReadMoreScreen === true;        
-        
+
+        const hasExistingReadMore = section?.hasReadMoreScreen === true;
+
         if (!hasExistingReadMore) {
             this.toggleReadMoreButtons(sectionId, true);
         }
-        
+
         this.dispatchEvent(new CustomEvent('editreadmore', {
-            detail: { 
+            detail: {
                 sectionId: section?.name || sectionId,  // Use name for JSON matching
                 internalSectionId: sectionId,  // Keep internal ID for UI updates
                 shouldNavigate: hasExistingReadMore  // Only navigate if already exists (Edit content)
@@ -1028,20 +1049,20 @@ export default class WbFlowContentEditor extends LightningElement {
     handleDeleteReadMoreLink(event) {
         event.stopPropagation();
         const sectionId = event.currentTarget.dataset.sectionId;
-        
+
         // Find the section to get its name
         const section = this.contentSections.find(s => s.id === sectionId);
-        
+
         // Update UI immediately
         this.toggleReadMoreButtons(sectionId, false);
-        
+
         // Dispatch event to parent to remove read more screen from JSON
         this.dispatchEvent(new CustomEvent('deletereadmore', {
-            detail: { 
+            detail: {
                 sectionId: section?.name || sectionId
             }
         }));
-        
+
         this.dispatchContentUpdate();
     }
 
@@ -1059,7 +1080,7 @@ export default class WbFlowContentEditor extends LightningElement {
             }
             return section;
         });
-        
+
         // Force re-render
         this.contentSections = [...this.contentSections];
         this.dispatchContentUpdate();
@@ -1068,7 +1089,7 @@ export default class WbFlowContentEditor extends LightningElement {
     handleHeightChange(event) {
         const sectionId = event.target.dataset.sectionId;
         let value = parseInt(event.target.value, 10);
-        
+
         // Ensure value is a valid positive number
         if (isNaN(value) || value < 1) {
             value = 200; // Reset to default if invalid
@@ -1118,7 +1139,7 @@ export default class WbFlowContentEditor extends LightningElement {
                     typeLabel: newItemName.replace(/([A-Z])/g, ' $1').trim(),
                     uiFields: uiFields || {},
                     constraints: constraints || {},
-                    
+
                     // Update UI control flags
                     showTypeSwitch: uiFields?.showTypeSwitch || false,
                     showLabel: uiFields?.showLabel || false,
@@ -1127,7 +1148,7 @@ export default class WbFlowContentEditor extends LightningElement {
                     showInputType: uiFields?.showInputType || false,
                     showOptions: uiFields?.showOptions || false,
                     showImageProps: uiFields?.showImageProps || false,
-                    
+
                     // Update type-specific flags - dynamically derived from metadata
                     isTextElement: newConfig.category === 'Text',
                     isTextInput: jsonType === 'TextInput',
@@ -1136,24 +1157,24 @@ export default class WbFlowContentEditor extends LightningElement {
                     isDatePicker: jsonType === 'DatePicker',
                     isOptIn: jsonType === 'OptIn',
                     isImage: jsonType === 'Image',
-                    
+
                     // Update constraints and validation state
                     maxLength: newMaxLength,
                     hasError: hasError,
                     errorMessage: errorMessage,
-                    
+
                     // Update type options (for next switch)
                     typeOptions: this.getTypeOptionsForSection(newItemName),
-                    
+
                     // Keep existing value
                     previewText: section.value || defaults?.text || 'Enter content'
                 };
-                
+
                 return updatedSection;
             }
             return section;
         });
-        
+
         // Force re-render
         this.contentSections = [...this.contentSections];
         this.dispatchContentUpdate();
@@ -1168,7 +1189,7 @@ export default class WbFlowContentEditor extends LightningElement {
             if (section.id === sectionId && section.options) {
                 return {
                     ...section,
-                    options: section.options.map(opt => 
+                    options: section.options.map(opt =>
                         opt.id === optionId ? { ...opt, label: newLabel } : opt
                     )
                 };
@@ -1222,15 +1243,15 @@ export default class WbFlowContentEditor extends LightningElement {
 
     deleteSection(event) {
         const sectionId = event.currentTarget.dataset.sectionId;
-        
+
         // Find the section to check if it has an image
         const section = this.contentSections.find(s => s.id === sectionId);
-        
+
         // If section has an image, delete it from S3 first
         if (section && section.imageUrl && section.awsKey) {
             this.deleteImageFromAWS(section.awsKey, sectionId);
         }
-        
+
         // Remove the section from contentSections
         this.contentSections = this.contentSections.filter(section => section.id !== sectionId);
         this.dispatchContentUpdate();
@@ -1420,7 +1441,7 @@ export default class WbFlowContentEditor extends LightningElement {
         const section = this.contentSections.find(s => s.id === sectionId);
 
         if (!section || !section.awsKey) {
-            
+
             this.contentSections = this.contentSections.map(s => {
                 if (s.id === sectionId) {
                     return { ...s, value: '', awsKey: '', src: '', imageUrl: null, imageSrc: '', hasImage: false };
@@ -1444,7 +1465,7 @@ export default class WbFlowContentEditor extends LightningElement {
             this.dispatchContentUpdate();
             return; // Exit the method - don't proceed to AWS deletion
         }
-        
+
         // Set loading state
         this.imageOperationInProgress = {
             ...this.imageOperationInProgress,
@@ -1479,7 +1500,7 @@ export default class WbFlowContentEditor extends LightningElement {
                 ...this.imageOperationInProgress,
                 [sectionId]: false
             };
-            
+
             if (err) {
                 console.error('Error deleting from S3:', err);
                 return;
@@ -1498,13 +1519,13 @@ export default class WbFlowContentEditor extends LightningElement {
                 }
                 return section;
             });
-            
+
             // Reset file input
             const fileInput = this.template.querySelector(`input[data-section-id="${sectionId}"]`);
             if (fileInput) {
                 fileInput.value = '';
             }
-            
+
             this.dispatchContentUpdate();
         });
     }
@@ -1531,10 +1552,10 @@ export default class WbFlowContentEditor extends LightningElement {
     generateSanitizedId(baseName, uniquifier = '') {
         // Sanitize base name: remove numbers and non-alphabetic chars except underscores
         let sanitized = baseName.replace(/[^a-zA-Z_]/g, '_');
-        
+
         // Remove consecutive underscores and trim
         sanitized = sanitized.replace(/_+/g, '_').replace(/^_+|_+$/g, '');
-        
+
         // Generate hash from uniquifier
         const hashInput = uniquifier ? String(uniquifier) : String(Date.now() + Math.random());
         let hash = 0;
@@ -1543,10 +1564,10 @@ export default class WbFlowContentEditor extends LightningElement {
             hash = ((hash << 5) - hash) + char;
             hash = hash & hash;
         }
-        
+
         // Convert hash to alphabetic-only suffix
         const alphabeticHash = this.hashToAlphabetic(Math.abs(hash));
-        
+
         return `${sanitized}_${alphabeticHash}`.toUpperCase();
     }
 
@@ -1560,23 +1581,23 @@ export default class WbFlowContentEditor extends LightningElement {
         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let result = '';
         let n = num;
-        
+
         do {
             result = letters[n % 26] + result;
             n = Math.floor(n / 26);
         } while (n > 0);
-        
+
         while (result.length < 6) {
             result = letters[Math.floor(Math.random() * 26)] + result;
         }
-        
+
         return result;
     }
 
     disconnectedCallback() {
         // Clean up auto-scroll
         this.stopAutoScroll();
-        
+
         // Remove document-level drag listener if component is destroyed during drag
         if (this.boundDragOverHandler) {
             document.removeEventListener('dragover', this.boundDragOverHandler);

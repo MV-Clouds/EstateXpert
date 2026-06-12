@@ -231,6 +231,10 @@
                                                             <label for={child.name}>
                                                                 <p class="truncate">{child.label}</p>
                                                             </label>
+                                                            <template if:true={child.helperText}>
+                                                                <p class="whatsapp-flow-previewer-helper-text">
+                                                                    {child.helperText}</p>
+                                                            </template>
                                                             <template if:true={child.errorMessage}>
                                                                 <p class="whatsapp-flow-previewer-error-message">
                                                                     {child.errorMessage}</p>

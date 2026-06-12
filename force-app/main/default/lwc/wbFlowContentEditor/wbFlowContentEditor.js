@@ -1090,11 +1090,6 @@ export default class WbFlowContentEditor extends LightningElement {
         const sectionId = event.target.dataset.sectionId;
         let value = parseInt(event.target.value, 10);
 
-        // Ensure value is a valid positive number
-        if (isNaN(value) || value < 1) {
-            value = 200; // Reset to default if invalid
-        }
-
         this.contentSections = this.contentSections.map(section => {
             if (section.id === sectionId) {
                 return { ...section, height: value };

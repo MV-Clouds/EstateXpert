@@ -516,7 +516,8 @@
     transition: border-color 0.3s;
     background: var(--input-bg-color, white);
     color: var(--input-text-color, #333);
-    margin-bottom: 0.5rem;
+    /* Reduced from 0.5rem so helper text sits tight under its input */
+    margin-bottom: 0.15rem;
 }
 
 /* Error state for inputs */
@@ -536,9 +537,13 @@
 .whatsapp-flow-previewer-helper-text {
     color: #666;
     font-size: 0.75rem;
-    margin-top: 0.25rem;
-    margin-bottom: 0.5rem;
+    /* No top gap — sit right under the input border */
+    margin-top: 0;
+    /* Generous bottom gap so it is clearly separated from the next field */
+    margin-bottom: 0.85rem;
     font-style: italic;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* Remove autofill background color */

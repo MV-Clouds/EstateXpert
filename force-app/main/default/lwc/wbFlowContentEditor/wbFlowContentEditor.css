@@ -192,7 +192,7 @@
 
 .char-counter-inside {
     position: absolute;
-    right: 0.75rem;
+    right: 14px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.75rem;

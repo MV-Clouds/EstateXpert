@@ -769,4 +769,22 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         this.cloneFlowName = '';
         this.fetchWhatsAppFlows();
     }
+
+    /**
+    * Method Name: handleRefresh
+    * @description: Resets all active filters and reloads the full flow list from the server.
+    * Created Date: 11/06/2026
+    * Created By: Karan Singh
+    */
+    handleRefresh() {
+        try {
+            this.searchInput = '';
+            this.statusValues = '';
+            this.currentPage = 1;
+            this.isLoading = true;
+            this.fetchWhatsAppFlows();
+        } catch (error) {
+            console.error('Error in handleRefresh:', error);
+        }
+    }
 }

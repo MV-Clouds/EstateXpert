@@ -604,3 +604,38 @@
     color: #DC2626;
     margin: 0;
 }
+
+.refresh-icon-container {
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0c9a58;
+    border-radius: 6px;
+    color: #0c9a58;
+    box-shadow: 0 1px 3px rgba(12, 154, 88, 0.12);
+    transition: all 0.2s ease;
+}
+
+.refresh-icon-container:hover {
+    background: #f0faf5;
+    box-shadow: 0 4px 8px rgba(12, 154, 88, 0.22);
+    transform: translateY(-1px);
+}
+
+.refresh-icon-container:active svg {
+    animation: spin 0.5s linear;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

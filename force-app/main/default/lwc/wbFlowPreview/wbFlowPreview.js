@@ -19,14 +19,14 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     @track inputErrors = {}; // Track validation errors for required fields
     @api selectedtheme = 'light';
     internalCurrentScreenId;
-    @track parsedJson = null; 
+    @track parsedJson = null;
     previousScreenId = null;
     @track navigationHistory = []; // Track navigation history for main flow
 
-    screenTitle = ''; 
-    @track screenChildren = []; 
-    hasFooter = false; 
-    footerLabel = ''; 
+    screenTitle = '';
+    @track screenChildren = [];
+    hasFooter = false;
+    footerLabel = '';
     footerAction = '';
     showBackButton = false;
     isReorderOperation = false; // Track if JSON change is due to reordering 
@@ -36,12 +36,12 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
         if (!this.iserror) {
             // Check if value has actually changed
             const hasChanged = this.internalJsonStringData !== value;
-            this.internalJsonStringData = value;            
+            this.internalJsonStringData = value;
             try {
-                if(value){
+                if (value) {
                     const parsed = JSON.parse(value);
                     const oldScreenCount = this.screens ? this.screens.length : 0;
-                    
+
                     // Always update screens from fresh parsed data
                     this.screens = parsed.screens || [];
                     const newScreenCount = this.screens.length;
@@ -56,7 +56,7 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                         });
                     });
                     this.detailsOptions = newOptions;
-                    
+
                     // Reset to first screen when screens are added/removed/reordered (keep preview open)
                     if (hasChanged && (this.isReorderOperation || newScreenCount !== oldScreenCount)) {
                         // Reset to first screen (don't close preview)
@@ -71,9 +71,9 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                         this.isReorderOperation = false; // Reset flag after use
                     } else {
                         // For content changes, keep current screen if it exists
-                        const currentScreenExists = this.internalCurrentScreenId && 
+                        const currentScreenExists = this.internalCurrentScreenId &&
                             this.detailsOptions.some(opt => opt.value === this.internalCurrentScreenId);
-                        
+
                         if (!currentScreenExists) {
                             // Fall back to first screen only if current screen no longer exists
                             this.detailsValue = this.detailsOptions.length ? this.detailsOptions[0].value : null;
@@ -83,10 +83,10 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                             this.detailsValue = this.internalCurrentScreenId;
                         }
                     }
-                    
+
                     // Always update parsedJson with fresh data
                     this.parsedJson = parsed;
-                    
+
                     // Always regenerate preview when data is received to ensure it reflects current order
                     this.generatePreview();
                 }
@@ -94,8 +94,8 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                 console.error('Error parsing JSON data in wbcp_flowPreview in wbcp_flowPreview:', e);
                 this.detailsOptions = [];
                 this.detailsValue = null;
-                this.parsedJson = null; 
-                this.screenChildren = []; 
+                this.parsedJson = null;
+                this.screenChildren = [];
             }
         }
     }
@@ -131,10 +131,10 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
         return !this.showPreview;
     }
 
-    getInputClass(name) { 
+    getInputClass(name) {
         const hasValue = this.inputFocus[name] || (this.inputValues[name] && this.inputValues[name] !== '');
         const hasError = this.inputErrors[name];
-        return `whatsapp-flow-previewer-input ${hasValue ? 'active' : ''} ${hasError ? 'error-border' : ''}`; 
+        return `whatsapp-flow-previewer-input ${hasValue ? 'active' : ''} ${hasError ? 'error-border' : ''}`;
     }
 
     /**
@@ -149,7 +149,7 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
             .catch(error => {
                 console.log('Error occuring during loading external css', error);
             });
-        window.addEventListener('resize', this.adjustContentHeight.bind(this)); 
+        window.addEventListener('resize', this.adjustContentHeight.bind(this));
         this.selectedtheme = this.theme;
     }
 
@@ -158,11 +158,11 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * @description : Lifecycle hook to set theme attribute and adjust content height after each render.
     */
     renderedCallback() {
-        const mainContainer = this.template.querySelector('.whatsapp-flow-previewer-main-container'); 
+        const mainContainer = this.template.querySelector('.whatsapp-flow-previewer-main-container');
         if (mainContainer) {
-            mainContainer.setAttribute('data-theme', this.selectedtheme); 
+            mainContainer.setAttribute('data-theme', this.selectedtheme);
         }
-        this.adjustContentHeight(); 
+        this.adjustContentHeight();
     }
 
     /**
@@ -172,7 +172,7 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     @api
     runPreview() {
         this.generatePreview();
-        this.adjustContentHeight(); 
+        this.adjustContentHeight();
     }
 
     /**
@@ -228,7 +228,7 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
             this.detailsValue = this.internalCurrentScreenId;
         }
         this.generatePreview();
-        this.adjustContentHeight(); 
+        this.adjustContentHeight();
     }
 
     /**
@@ -267,11 +267,11 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * Method : adjustContentHeight
     * @description : Adjusts the content height based on the presence of the footer to ensure proper layout.
     */
-    adjustContentHeight() { 
+    adjustContentHeight() {
         try {
-            const content = this.template.querySelector('.whatsapp-flow-previewer-content'); 
+            const content = this.template.querySelector('.whatsapp-flow-previewer-content');
             if (content) {
-                const contentHeight = this.hasFooter ? '66%' : '86%'; 
+                const contentHeight = this.hasFooter ? '66%' : '86%';
                 this.template.host.style.setProperty('--content-height', contentHeight);
             }
         } catch (error) {
@@ -283,32 +283,32 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * Method : generatePreview
     * @description : Generates the preview content based on the parsed JSON data.
     */
-    generatePreview() { 
+    generatePreview() {
         try {
             if (this.parsedJson) {
                 if (!this.internalCurrentScreenId) {
-                    this.internalCurrentScreenId = this.parsedJson.screens[0]?.id || null; 
+                    this.internalCurrentScreenId = this.parsedJson.screens[0]?.id || null;
                 }
 
                 // All screens are now in main array (including read more screens)
                 let screen = this.parsedJson.screens.find(screen => screen.id === this.internalCurrentScreenId);
-                
+
                 if (screen) {
-                    this.screenTitle = screen.title; 
+                    this.screenTitle = screen.title;
                     const newScreenChildren = []; // Build new array instead of mutating
-                    this.hasFooter = false; 
-                    this.footerLabel = ''; 
-                    this.footerAction = ''; 
-    
+                    this.hasFooter = false;
+                    this.footerLabel = '';
+                    this.footerAction = '';
+
                     const form = screen.layout.children.find(child => child.type === 'Form') || screen.layout;
-                    
+
                     // Initialize default values for fields that don't have values yet
                     form.children.forEach(child => {
                         if (child.name && this.inputValues[child.name] === undefined) {
                             if (child.type === 'CheckboxGroup' && child['init-value']) {
                                 // Initialize CheckboxGroup with init-value array
-                                this.inputValues[child.name] = Array.isArray(child['init-value']) 
-                                    ? [...child['init-value']] 
+                                this.inputValues[child.name] = Array.isArray(child['init-value'])
+                                    ? [...child['init-value']]
                                     : [child['init-value']];
                             } else if (child.type === 'OptIn' && child['init-value'] !== undefined) {
                                 // Initialize OptIn with boolean init-value
@@ -318,19 +318,19 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                                 this.inputValues[child.name] = child['init-value'];
                             }
                         }
-                    }); 
-    
-                    form.children.forEach(child => { 
+                    });
+
+                    form.children.forEach(child => {
                         // For OptIn, default required to true if not explicitly set to false
-                        const isRequired = child.type === 'OptIn' 
-                            ? (child.required !== false) 
+                        const isRequired = child.type === 'OptIn'
+                            ? (child.required !== false)
                             : (child.required || false);
-                        
-                        const commonProps = { 
-                            name: child.name, 
-                            label: child.label, 
-                            text: child.text, 
-                            dataSource: child['data-source'], 
+
+                        const commonProps = {
+                            name: child.name,
+                            label: child.label,
+                            text: child.text,
+                            dataSource: child['data-source'],
                             inputClass: this.getInputClass(child.name),
                             hasReadMore: child['on-click-action']?.name === 'navigate' && child['on-click-action']?.next?.name,
                             readMoreScreenId: child['on-click-action']?.next?.name || null,
@@ -340,79 +340,79 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                             placeholder: child.placeholder || ''
                         };
 
-                        if (child.type === 'TextHeading') { 
-                            newScreenChildren.push({ ...commonProps, isTextHeading: true }); 
-                        } else if (child.type === 'TextSubheading') { 
-                            newScreenChildren.push({ ...commonProps, isTextSubheading: true }); 
-                        } else if (child.type === 'TextBody') { 
-                            newScreenChildren.push({ ...commonProps, isTextBody: true }); 
-                        } else if (child.type === 'TextCaption') { 
-                            newScreenChildren.push({ ...commonProps, isTextCaption: true }); 
-                        } else if (child.type === 'TextInput') { 
-                            newScreenChildren.push({ ...commonProps, isTextInput: true, inputType: child['input-type'], errorMessage: this.inputErrors[child.name] || '' }); 
-                        } else if (child.type === 'TextArea') { 
-                            newScreenChildren.push({ ...commonProps, isTextArea: true, errorMessage: this.inputErrors[child.name] || '' }); 
-                        } else if (child.type === 'RadioButtonsGroup') { 
-                            const dataSourceWithOptions = (child['data-source'] || []).map(option => ({ 
+                        if (child.type === 'TextHeading') {
+                            newScreenChildren.push({ ...commonProps, isTextHeading: true });
+                        } else if (child.type === 'TextSubheading') {
+                            newScreenChildren.push({ ...commonProps, isTextSubheading: true });
+                        } else if (child.type === 'TextBody') {
+                            newScreenChildren.push({ ...commonProps, isTextBody: true });
+                        } else if (child.type === 'TextCaption') {
+                            newScreenChildren.push({ ...commonProps, isTextCaption: true });
+                        } else if (child.type === 'TextInput') {
+                            newScreenChildren.push({ ...commonProps, isTextInput: true, inputType: child['input-type'], errorMessage: this.inputErrors[child.name] || '' });
+                        } else if (child.type === 'TextArea') {
+                            newScreenChildren.push({ ...commonProps, isTextArea: true, errorMessage: this.inputErrors[child.name] || '' });
+                        } else if (child.type === 'RadioButtonsGroup') {
+                            const dataSourceWithOptions = (child['data-source'] || []).map(option => ({
                                 ...option,
-                                checked: this.inputValues[child.name] === option.id 
+                                checked: this.inputValues[child.name] === option.id
                             }));
-                            newScreenChildren.push({ ...commonProps, isRadioButtonsGroup: true, dataSource: dataSourceWithOptions, errorMessage: this.inputErrors[child.name] || '' }); 
-                        } else if (child.type === 'CheckboxGroup') { 
+                            newScreenChildren.push({ ...commonProps, isRadioButtonsGroup: true, dataSource: dataSourceWithOptions, errorMessage: this.inputErrors[child.name] || '' });
+                        } else if (child.type === 'CheckboxGroup') {
                             const currentValue = this.inputValues[child.name];
                             const checkedValues = Array.isArray(currentValue) ? currentValue : [];
-                            const dataSourceWithOptions = (child['data-source'] || []).map(option => ({ 
+                            const dataSourceWithOptions = (child['data-source'] || []).map(option => ({
                                 ...option,
-                                checked: checkedValues.includes(option.id) 
+                                checked: checkedValues.includes(option.id)
                             }));
-                            newScreenChildren.push({ ...commonProps, isCheckboxGroup: true, dataSource: dataSourceWithOptions, errorMessage: this.inputErrors[child.name] || '' }); 
-                        } else if (child.type === 'OptIn') { 
+                            newScreenChildren.push({ ...commonProps, isCheckboxGroup: true, dataSource: dataSourceWithOptions, errorMessage: this.inputErrors[child.name] || '' });
+                        } else if (child.type === 'OptIn') {
                             const isChecked = this.inputValues[child.name] === true || this.inputValues[child.name] === 'true';
-                            newScreenChildren.push({ 
+                            newScreenChildren.push({
                                 ...commonProps,
                                 isOptIn: true,
                                 checked: isChecked,
                                 errorMessage: this.inputErrors[child.name] || ''
                             });
-                        } else if (child.type === 'Dropdown') { 
-                            const dataSourceWithOptions = (child['data-source'] || []).map(option => ({ 
+                        } else if (child.type === 'Dropdown') {
+                            const dataSourceWithOptions = (child['data-source'] || []).map(option => ({
                                 ...option,
-                                selected: this.inputValues[child.name] === option.id 
+                                selected: this.inputValues[child.name] === option.id
                             }));
-                            newScreenChildren.push({ ...commonProps, isDropdown: true, dataSource: dataSourceWithOptions, errorMessage: this.inputErrors[child.name] || '' }); 
-                        } else if (child.type === 'DatePicker') { 
-                            newScreenChildren.push({ ...commonProps, isDatePicker: true, errorMessage: this.inputErrors[child.name] || '' }); 
-                        } else if (child.type === 'Image') { 
+                            newScreenChildren.push({ ...commonProps, isDropdown: true, dataSource: dataSourceWithOptions, errorMessage: this.inputErrors[child.name] || '' });
+                        } else if (child.type === 'DatePicker') {
+                            newScreenChildren.push({ ...commonProps, isDatePicker: true, errorMessage: this.inputErrors[child.name] || '' });
+                        } else if (child.type === 'Image') {
                             if (child.src) {
                                 const imageHeight = child.height || 200;
-                                newScreenChildren.push({ 
-                                    ...commonProps, 
-                                    isImage: true, 
-                                    src: child.src, 
+                                newScreenChildren.push({
+                                    ...commonProps,
+                                    isImage: true,
+                                    src: child.src,
                                     alt: child['alt-text'],
                                     height: imageHeight,
                                     imageStyle: `height: ${imageHeight}px;`
-                                }); 
+                                });
                             }
-                        } else if (child.type === 'Footer') { 
-                            this.hasFooter = true; 
-                            this.footerLabel = child.label; 
-                            this.footerAction = JSON.stringify(child['on-click-action']); 
+                        } else if (child.type === 'Footer') {
+                            this.hasFooter = true;
+                            this.footerLabel = child.label;
+                            this.footerAction = JSON.stringify(child['on-click-action']);
                         }
                     });
-                    
+
                     // Assign the new array to trigger reactivity
                     this.screenChildren = newScreenChildren;
-                    
+
                     // Show back button
                     this.showBackButton = this.previousScreenId !== null || this.navigationHistory.length > 0;
                     this.adjustContentHeight();
-                    
-                     
+
+
                 }
             }
         } catch (error) {
-            console.error('Error in generatePreview : ' , error);
+            console.error('Error in generatePreview : ', error);
         }
     }
 
@@ -420,16 +420,16 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * Method : handleInputChange
     * @description : Handles input changes for various input types and updates the inputValues state accordingly.
     */
-    handleInputChange(event) { 
+    handleInputChange(event) {
         try {
             const { name, value, type, checked } = event.target;
-            
+
             // Clear error for this field when user starts typing/interacting
             if (this.inputErrors[name]) {
                 const newErrors = { ...this.inputErrors };
                 delete newErrors[name];
                 this.inputErrors = newErrors;
-                
+
                 // Update the error message in screenChildren without full regeneration
                 this.screenChildren = this.screenChildren.map(child => {
                     if (child.name === name) {
@@ -438,25 +438,25 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                     return child;
                 });
             }
-            
+
             // Update inputValues based on field type
             if (type === 'checkbox') {
                 // Check if this is a CheckboxGroup (has value attribute) or OptIn (no value or single checkbox)
                 if (value && value !== 'on') {
                     // This is a CheckboxGroup - handle as array
-                    const currentValues = Array.isArray(this.inputValues[name]) ? [...this.inputValues[name]] : []; 
-                    if (checked) { 
-                        if (!currentValues.includes(value)) { 
-                            currentValues.push(value); 
+                    const currentValues = Array.isArray(this.inputValues[name]) ? [...this.inputValues[name]] : [];
+                    if (checked) {
+                        if (!currentValues.includes(value)) {
+                            currentValues.push(value);
                         }
-                    } else { 
-                        const index = currentValues.indexOf(value); 
-                        if (index > -1) { 
-                            currentValues.splice(index, 1); 
+                    } else {
+                        const index = currentValues.indexOf(value);
+                        if (index > -1) {
+                            currentValues.splice(index, 1);
                         }
                     }
                     this.inputValues = { ...this.inputValues, [name]: currentValues };
-                    
+
                     // Update checkbox state in screenChildren without full regeneration
                     this.screenChildren = this.screenChildren.map(child => {
                         if (child.name === name && child.isCheckboxGroup) {
@@ -471,7 +471,7 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                 } else {
                     // This is an OptIn - handle as boolean
                     this.inputValues = { ...this.inputValues, [name]: checked };
-                    
+
                     // Update OptIn checkbox state in screenChildren without full regeneration
                     this.screenChildren = this.screenChildren.map(child => {
                         if (child.name === name && child.isOptIn) {
@@ -480,9 +480,9 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                         return child;
                     });
                 }
-            } else if (type === 'radio') { 
+            } else if (type === 'radio') {
                 this.inputValues = { ...this.inputValues, [name]: value };
-                
+
                 // Update radio state in screenChildren without full regeneration
                 this.screenChildren = this.screenChildren.map(child => {
                     if (child.name === name && child.isRadioButtonsGroup) {
@@ -496,7 +496,7 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                 });
             } else if (type === 'select-one') {
                 this.inputValues = { ...this.inputValues, [name]: value };
-                
+
                 // Update dropdown state in screenChildren without full regeneration
                 this.screenChildren = this.screenChildren.map(child => {
                     if (child.name === name && child.isDropdown) {
@@ -508,32 +508,45 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                     }
                     return child;
                 });
-                
-                if (value) { 
-                    event.target.classList.add('active'); 
-                } else { 
-                    event.target.classList.remove('active'); 
+
+                if (value) {
+                    event.target.classList.add('active');
+                } else {
+                    event.target.classList.remove('active');
                 }
             } else if (type === 'date') {
-                this.inputValues = { ...this.inputValues, [name]: value };
-                
+                let validatedValue = value;
+                if (value) {
+                    const parts = value.split('-'); // YYYY-MM-DD
+                    if (parts.length >= 1) {
+                        const year = parseInt(parts[0], 10);
+                        if (!isNaN(year) && year > 9999) {
+                            parts[0] = '9999';
+                            validatedValue = parts.join('-');
+                            event.target.value = validatedValue;
+                        }
+                    }
+                }
+
+                this.inputValues = { ...this.inputValues, [name]: validatedValue };
+
                 // Update value in screenChildren without full regeneration
                 this.screenChildren = this.screenChildren.map(child => {
                     if (child.name === name && child.isDatePicker) {
-                        return { ...child, value: value, errorMessage: '', inputClass: this.getInputClass(name) };
+                        return { ...child, value: validatedValue, errorMessage: '', inputClass: this.getInputClass(name) };
                     }
                     return child;
                 });
-                
-                if (value) { 
-                    event.target.classList.add('active'); 
-                } else { 
-                    event.target.classList.remove('active'); 
+
+                if (validatedValue) {
+                    event.target.classList.add('active');
+                } else {
+                    event.target.classList.remove('active');
                 }
             }
-            else { 
+            else {
                 this.inputValues = { ...this.inputValues, [name]: value };
-                
+
                 // Update value in screenChildren for text inputs/textareas without full regeneration
                 this.screenChildren = this.screenChildren.map(child => {
                     if (child.name === name && (child.isTextInput || child.isTextArea)) {
@@ -551,11 +564,11 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * Method : handleInputFocus
     * @description : Handles input focus event to update focus state and apply active class.
     */
-    handleInputFocus(event) { 
-        const { name } = event.target; 
-        this.inputFocus = { ...this.inputFocus, [name]: true }; 
-        event.target.classList.add('active'); 
-        
+    handleInputFocus(event) {
+        const { name } = event.target;
+        this.inputFocus = { ...this.inputFocus, [name]: true };
+        event.target.classList.add('active');
+
         // Update inputClass in screenChildren to reflect focus state
         this.screenChildren = this.screenChildren.map(child => {
             if (child.name === name && (child.isTextInput || child.isTextArea || child.isDropdown || child.isDatePicker)) {
@@ -569,14 +582,14 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * Method : handleInputBlur
     * @description : Handles input blur event to update focus state and apply active class.
     */
-    handleInputBlur(event) { 
-        const { name, value } = event.target; 
-        this.inputFocus = { ...this.inputFocus, [name]: false }; 
+    handleInputBlur(event) {
+        const { name, value } = event.target;
+        this.inputFocus = { ...this.inputFocus, [name]: false };
         const trimmedValue = value ? value.trim() : '';
-        if (!trimmedValue) { 
-            event.target.classList.remove('active'); 
+        if (!trimmedValue) {
+            event.target.classList.remove('active');
         }
-        
+
         // Update inputClass in screenChildren to reflect blur state
         this.screenChildren = this.screenChildren.map(child => {
             if (child.name === name && (child.isTextInput || child.isTextArea || child.isDropdown || child.isDatePicker)) {
@@ -590,13 +603,13 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * Method : handleDropdownChange
     * @description : Handles dropdown change event to update input values and apply active class.
     */
-    handleDropdownChange(event) { 
-        this.handleInputChange(event); 
-        const selectElement = event.target; 
-        if (selectElement.value) { 
-            selectElement.classList.add('active'); 
-        } else { 
-            selectElement.classList.remove('active'); 
+    handleDropdownChange(event) {
+        this.handleInputChange(event);
+        const selectElement = event.target;
+        if (selectElement.value) {
+            selectElement.classList.add('active');
+        } else {
+            selectElement.classList.remove('active');
         }
     }
 
@@ -621,14 +634,14 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     */
     handleBackClick(event) {
         event.preventDefault();
-        
+
         // Check if we're in read more mode first
         if (this.previousScreenId) {
             this.internalCurrentScreenId = this.previousScreenId;
             this.detailsValue = this.previousScreenId;
             this.previousScreenId = null;
             this.generatePreview();
-        } 
+        }
         // Otherwise, go back in main flow navigation history
         else if (this.navigationHistory.length > 0) {
             const prevScreen = this.navigationHistory.pop();
@@ -642,37 +655,37 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * Method : handleContinueClick
     * @description : Handles navigation to the next screen.
     */
-    handleContinueClick(event) { 
+    handleContinueClick(event) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         // Validate required fields before navigation
         if (!this.validateRequiredFields()) {
             return; // Stop navigation if validation fails
         }
-        
-        const actionString = event.target.dataset.action; 
-        try { 
-            const action = JSON.parse(actionString); 
-            
-            if (action.name === 'navigate' && action.next) { 
+
+        const actionString = event.target.dataset.action;
+        try {
+            const action = JSON.parse(actionString);
+
+            if (action.name === 'navigate' && action.next) {
                 // Extract screen name from next object or use directly if string
                 const nextScreen = typeof action.next === 'object' ? action.next.name : action.next;
-                
+
                 if (nextScreen) {
                     // Add current screen to navigation history for main flow
                     if (this.internalCurrentScreenId && !this.navigationHistory.includes(this.internalCurrentScreenId)) {
                         this.navigationHistory.push(this.internalCurrentScreenId);
                     }
-                    
+
                     this.previousScreenId = null; // Reset read more tracking
                     this.internalCurrentScreenId = nextScreen;
                     this.detailsValue = nextScreen;
                     this.generatePreview();
                 }
             }
-        } catch (e) { 
-            console.error('Invalid action JSON:', e); 
+        } catch (e) {
+            console.error('Invalid action JSON:', e);
         }
     }
 
@@ -692,17 +705,17 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
             if (!screen) return true;
 
             const form = screen.layout.children.find(child => child.type === 'Form') || screen.layout;
-            
+
             // Check each field for required validation
             form.children.forEach(child => {
                 // For OptIn, default required to true if not explicitly set to false
-                const isRequired = child.type === 'OptIn' 
-                    ? (child.required !== false) 
+                const isRequired = child.type === 'OptIn'
+                    ? (child.required !== false)
                     : child.required;
-                    
+
                 if (isRequired) {
                     const value = this.inputValues[child.name];
-                    
+
                     // Check if field is empty based on type
                     if (child.type === 'CheckboxGroup') {
                         if (!value || !Array.isArray(value) || value.length === 0) {
@@ -722,7 +735,7 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                         } else {
                             // Additional validation based on input type
                             const inputType = child['input-type'] || 'text';
-                            
+
                             if (inputType === 'email') {
                                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                                 if (!emailRegex.test(value)) {
@@ -775,13 +788,13 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
             });
 
             this.inputErrors = errors;
-            
+
             // Update error messages in screenChildren without full DOM regeneration
             if (!isValid) {
                 this.screenChildren = this.screenChildren.map(child => {
                     if (child.name && errors[child.name]) {
-                        return { 
-                            ...child, 
+                        return {
+                            ...child,
                             errorMessage: errors[child.name],
                             inputClass: this.getInputClass(child.name)
                         };
@@ -802,6 +815,6 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
     * @description : Lifecycle hook to remove event listeners when component is removed from DOM.
     */
     disconnectedCallback() {
-        window.removeEventListener('resize', this.adjustContentHeight.bind(this)); 
+        window.removeEventListener('resize', this.adjustContentHeight.bind(this));
     }
 }

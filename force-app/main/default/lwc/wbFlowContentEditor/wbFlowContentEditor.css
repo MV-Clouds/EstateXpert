@@ -220,6 +220,11 @@
     background-color: var(--color-background-white);
     transition: border-color 0.15s ease;
     box-sizing: border-box;
+    /* Truncate long text with ellipsis instead of overflowing the box */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .native-input-height {

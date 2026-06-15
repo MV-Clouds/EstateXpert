@@ -1069,7 +1069,7 @@ export default class WbFlowContentEditor extends LightningElement {
     handleFieldChange(event) {
         const sectionId = event.target.dataset.sectionId;
         const field = event.target.dataset.field;
-        const newValue = event.detail.value !== undefined ? event.detail.value : event.target.checked;
+        const newValue = event.detail?.value !== undefined ? event.detail?.value : event.target.checked;
 
         this.contentSections = this.contentSections.map(section => {
             if (section.id === sectionId) {
@@ -1081,7 +1081,6 @@ export default class WbFlowContentEditor extends LightningElement {
             return section;
         });
 
-        // Force re-render
         this.contentSections = [...this.contentSections];
         this.dispatchContentUpdate();
     }

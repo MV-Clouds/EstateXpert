@@ -789,7 +789,9 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
 
     /**
     * Method : validateRequiredFields
-    * @description : Validates all required fields on current screen
+    * @description : Validates all required fields on current screen.
+    *                Uses screenChildren (not parsedJson) as the source of truth for required
+    *                so it always reflects the latest toggle state from the editor.
     * @returns {boolean} - True if all required fields are filled, false otherwise
     */
     validateRequiredFields() {
@@ -797,86 +799,88 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
             const errors = {};
             let isValid = true;
 
-            // Get current screen (all screens are in main array now)
-            let screen = this.parsedJson.screens.find(s => s.id === this.internalCurrentScreenId);
+            // Use screenChildren (already built from the latest parsedJson by generatePreview)
+            // instead of re-reading parsedJson directly.  This guarantees that the required
+            // flag we test matches what the user sees in the preview at this moment.
+            this.screenChildren.forEach(child => {
+                if (!child.name) return; // Skip text/image elements
 
-            if (!screen) return true;
-
-            const form = screen.layout.children.find(child => child.type === 'Form') || screen.layout;
-
-            // Check each field for required validation
-            form.children.forEach(child => {
-                // For OptIn, default required to true if not explicitly set to false
-                const isRequired = child.type === 'OptIn'
+                // For OptIn, required defaults to true unless explicitly false
+                const isRequired = child.isOptIn
                     ? (child.required !== false)
-                    : child.required;
+                    : (child.required === true);
 
-                if (isRequired) {
-                    const value = this.inputValues[child.name];
+                if (!isRequired) {
+                    // Field is optional — only run format validation if it has a value
+                    if (child.isTextInput) {
+                        const value = this.inputValues[child.name];
+                        const trimmed = value ? value.toString().trim() : '';
+                        if (trimmed) {
+                            // Has a value — validate its format
+                            const fmtError = this.validateTextInputValue(trimmed, child.inputType, false);
+                            if (fmtError) {
+                                errors[child.name] = fmtError;
+                                isValid = false;
+                            }
+                        }
+                    }
+                    return; // Skip the required-field check below
+                }
 
-                    // Check if field is empty based on type
-                    if (child.type === 'CheckboxGroup') {
-                        if (!value || !Array.isArray(value) || value.length === 0) {
-                            errors[child.name] = 'Please select at least one option';
-                            isValid = false;
-                        }
-                    } else if (child.type === 'OptIn') {
-                        if (value !== true && value !== 'true') {
-                            errors[child.name] = 'You must agree to continue';
-                            isValid = false;
-                        }
-                    } else if (child.type === 'TextInput') {
-                        // Delegate to shared validator so blur and Continue use identical rules
-                        const inputType = child['input-type'] || 'text';
-                        const errorMsg = this.validateTextInputValue(
-                            value ? value.toString().trim() : '',
-                            inputType,
-                            true // always treat as required here since isRequired is already true
-                        );
-                        if (errorMsg) {
-                            errors[child.name] = errorMsg;
-                            isValid = false;
-                        }
-                    } else if (child.type === 'TextArea') {
-                        if (!value || value.toString().trim() === '') {
-                            errors[child.name] = 'This field is required';
-                            isValid = false;
-                        }
-                    } else if (child.type === 'RadioButtonsGroup' || child.type === 'Dropdown') {
-                        if (!value || value.toString().trim() === '') {
-                            errors[child.name] = 'Please select an option';
-                            isValid = false;
-                        }
-                    } else if (child.type === 'DatePicker') {
-                        if (!value || value.toString().trim() === '') {
-                            errors[child.name] = 'Please select a date';
-                            isValid = false;
-                        }
-                    } else {
-                        // For other types
-                        if (!value || value.toString().trim() === '') {
-                            errors[child.name] = 'This field is required';
-                            isValid = false;
-                        }
+                const value = this.inputValues[child.name];
+
+                if (child.isCheckboxGroup) {
+                    if (!value || !Array.isArray(value) || value.length === 0) {
+                        errors[child.name] = 'Please select at least one option';
+                        isValid = false;
+                    }
+                } else if (child.isOptIn) {
+                    if (value !== true && value !== 'true') {
+                        errors[child.name] = 'You must agree to continue';
+                        isValid = false;
+                    }
+                } else if (child.isTextInput) {
+                    const trimmed = value ? value.toString().trim() : '';
+                    const errorMsg = this.validateTextInputValue(trimmed, child.inputType, true);
+                    if (errorMsg) {
+                        errors[child.name] = errorMsg;
+                        isValid = false;
+                    }
+                } else if (child.isTextArea) {
+                    if (!value || value.toString().trim() === '') {
+                        errors[child.name] = 'This field is required';
+                        isValid = false;
+                    }
+                } else if (child.isRadioButtonsGroup || child.isDropdown) {
+                    if (!value || value.toString().trim() === '') {
+                        errors[child.name] = 'Please select an option';
+                        isValid = false;
+                    }
+                } else if (child.isDatePicker) {
+                    if (!value || value.toString().trim() === '') {
+                        errors[child.name] = 'Please select a date';
+                        isValid = false;
+                    }
+                } else {
+                    if (!value || value.toString().trim() === '') {
+                        errors[child.name] = 'This field is required';
+                        isValid = false;
                     }
                 }
             });
 
             this.inputErrors = errors;
 
-            // Update error messages in screenChildren without full DOM regeneration
-            if (!isValid) {
-                this.screenChildren = this.screenChildren.map(child => {
-                    if (child.name && errors[child.name]) {
-                        return {
-                            ...child,
-                            errorMessage: errors[child.name],
-                            inputClass: this.getInputClass(child.name)
-                        };
-                    }
-                    return child;
-                });
-            }
+            // Update ALL screenChildren: set error for invalid fields, clear for valid/optional ones
+            this.screenChildren = this.screenChildren.map(child => {
+                if (!child.name) return child;
+                const errorMessage = errors[child.name] || '';
+                return {
+                    ...child,
+                    errorMessage,
+                    inputClass: this.getInputClass(child.name)
+                };
+            });
 
             return isValid;
         } catch (error) {

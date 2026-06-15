@@ -36,6 +36,21 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
         if (!this.iserror) {
             // Check if value has actually changed
             const hasChanged = this.internalJsonStringData !== value;
+            let prevInputTypes = {};
+            if (this.internalJsonStringData) {
+                try {
+                    const prevParsed = JSON.parse(this.internalJsonStringData);
+                    (prevParsed.screens || []).forEach(screen => {
+                        const form = (screen.layout?.children || []).find(c => c.type === 'Form') || screen.layout;
+                        (form?.children || []).forEach(child => {
+                            if (child.type === 'TextInput' && child.name) {
+                                prevInputTypes[child.name] = child['input-type'] || 'text';
+                            }
+                        });
+                    });
+                } catch (_) { /* ignore parse errors on old value */ }
+            }
+
             this.internalJsonStringData = value;
             try {
                 if (value) {
@@ -85,8 +100,20 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
 
                         // Clear stale validation errors — the editor may have changed a field's
                         // type (e.g. number → text), making a previously shown error invalid.
-                        // inputValues and inputFocus are kept so the user's typed content survives.
                         this.inputErrors = {};
+                        const newInputValues = { ...this.inputValues };
+                        (parsed.screens || []).forEach(screen => {
+                            const form = (screen.layout?.children || []).find(c => c.type === 'Form') || screen.layout;
+                            (form?.children || []).forEach(child => {
+                                if (child.type === 'TextInput' && child.name) {
+                                    const newType = child['input-type'] || 'text';
+                                    if (prevInputTypes[child.name] && prevInputTypes[child.name] !== newType) {
+                                        delete newInputValues[child.name];
+                                    }
+                                }
+                            });
+                        });
+                        this.inputValues = newInputValues;
                     }
 
                     // Always update parsedJson with fresh data
@@ -585,7 +612,10 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
 
     /**
     * Method : handleInputBlur
-    * @description : Handles input blur event to update focus state and apply active class.
+    * @description : Handles input blur event to update focus state, apply active class,
+    *                and run format-only validation for TextInput fields on focus-out.
+    *                Required-field errors are intentionally NOT shown on blur —
+    *                they only appear when the user clicks Continue.
     */
     handleInputBlur(event) {
         const { name, value } = event.target;
@@ -595,13 +625,76 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
             event.target.classList.remove('active');
         }
 
-        // Update inputClass in screenChildren to reflect blur state
-        this.screenChildren = this.screenChildren.map(child => {
-            if (child.name === name && (child.isTextInput || child.isTextArea || child.isDropdown || child.isDatePicker)) {
-                return { ...child, inputClass: this.getInputClass(name) };
+        const child = this.screenChildren.find(c => c.name === name && c.isTextInput);
+        if (child) {
+            const errorMsg = this.validateTextInputValue(trimmedValue, child.inputType, false);
+            const newErrors = { ...this.inputErrors };
+            if (errorMsg) {
+                newErrors[name] = errorMsg;
+            } else {
+                delete newErrors[name];
             }
-            return child;
-        });
+            this.inputErrors = newErrors;
+
+            this.screenChildren = this.screenChildren.map(c => {
+                if (c.name === name && c.isTextInput) {
+                    return { ...c, errorMessage: errorMsg, inputClass: this.getInputClass(name) };
+                }
+                return c;
+            });
+        } else {
+            // Non-TextInput: just update inputClass
+            this.screenChildren = this.screenChildren.map(c => {
+                if (c.name === name && (c.isTextArea || c.isDropdown || c.isDatePicker)) {
+                    return { ...c, inputClass: this.getInputClass(name) };
+                }
+                return c;
+            });
+        }
+    }
+
+    /**
+    * Method : validateTextInputValue
+    * @description : Validates a single TextInput value against its input-type rules.
+    *                Returns an error string, or '' if valid.
+    * @param {string} value     - Trimmed value entered by the user
+    * @param {string} inputType - The input-type of the field (text/email/number/phone/password/passcode)
+    * @param {boolean} required - Whether the field is required
+    */
+    validateTextInputValue(value, inputType, required) {
+        // Empty check (only error if required)
+        if (!value || value === '') {
+            return required ? 'This field is required' : '';
+        }
+
+        const type = (inputType || 'text').toLowerCase();
+
+        if (type === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) return 'Please enter a valid email address';
+
+        } else if (type === 'number') {
+            if (isNaN(value) || value.trim() === '') return 'Please enter a valid number';
+
+        } else if (type === 'phone' || type === 'tel') {
+            // Accept digits, spaces, +, -, (, ) — minimum 10 digits
+            const phoneRegex = /^[0-9+\-\s()]+$/;
+            if (!phoneRegex.test(value) || value.replace(/[^0-9]/g, '').length < 10) {
+                return 'Please enter a valid phone number (min 10 digits)';
+            }
+
+        } else if (type === 'password') {
+            if (value.length < 8) return 'Password must be at least 8 characters';
+
+        } else if (type === 'passcode') {
+            // Passcode: digits only
+            if (!/^[0-9]+$/.test(value)) return 'Passcode must contain digits only';
+
+        } else if (type === 'url') {
+            try { new URL(value); } catch { return 'Please enter a valid URL'; }
+        }
+
+        return ''; // valid
     }
 
     /**
@@ -733,39 +826,16 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                             isValid = false;
                         }
                     } else if (child.type === 'TextInput') {
-                        // Check if empty
-                        if (!value || value.toString().trim() === '') {
-                            errors[child.name] = 'This field is required';
+                        // Delegate to shared validator so blur and Continue use identical rules
+                        const inputType = child['input-type'] || 'text';
+                        const errorMsg = this.validateTextInputValue(
+                            value ? value.toString().trim() : '',
+                            inputType,
+                            true // always treat as required here since isRequired is already true
+                        );
+                        if (errorMsg) {
+                            errors[child.name] = errorMsg;
                             isValid = false;
-                        } else {
-                            // Additional validation based on input type
-                            const inputType = child['input-type'] || 'text';
-
-                            if (inputType === 'email') {
-                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                                if (!emailRegex.test(value)) {
-                                    errors[child.name] = 'Please enter a valid email address';
-                                    isValid = false;
-                                }
-                            } else if (inputType === 'number') {
-                                if (isNaN(value) || value === '') {
-                                    errors[child.name] = 'Please enter a valid number';
-                                    isValid = false;
-                                }
-                            } else if (inputType === 'tel') {
-                                const phoneRegex = /^[0-9+\-\s()]+$/;
-                                if (!phoneRegex.test(value) || value.replace(/[^0-9]/g, '').length < 10) {
-                                    errors[child.name] = 'Please enter a valid phone number';
-                                    isValid = false;
-                                }
-                            } else if (inputType === 'url') {
-                                try {
-                                    new URL(value);
-                                } catch {
-                                    errors[child.name] = 'Please enter a valid URL';
-                                    isValid = false;
-                                }
-                            }
                         }
                     } else if (child.type === 'TextArea') {
                         if (!value || value.toString().trim() === '') {

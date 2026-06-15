@@ -378,8 +378,7 @@
                                 <div class="body">
                                     <label for="body" class="body-label">Body</label>
                                     <textarea name="tempBody" class="body-area" oninput={handleInputChange}
-                                        onkeypress={handleKeyDown} maxlength="1024" rows="4"
-                                        cols="50">{tempBody}</textarea>
+                                        maxlength="1024" rows="4" cols="50">{tempBody}</textarea>
                                     <p class="char-count body-count">{tempBody.length}/{LIMITS.maxTempBodyLength}</p>
                                     <template if:true={bodyVariablePlacementError}>
                                         <p class="error-text">{bodyVariablePlacementError}</p>

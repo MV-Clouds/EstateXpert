@@ -82,6 +82,11 @@ export default class WbFlowPreview extends NavigationMixin(LightningElement) {
                             // Keep current screen
                             this.detailsValue = this.internalCurrentScreenId;
                         }
+
+                        // Clear stale validation errors — the editor may have changed a field's
+                        // type (e.g. number → text), making a previously shown error invalid.
+                        // inputValues and inputFocus are kept so the user's typed content survives.
+                        this.inputErrors = {};
                     }
 
                     // Always update parsedJson with fresh data

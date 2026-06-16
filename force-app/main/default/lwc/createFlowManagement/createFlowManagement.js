@@ -679,7 +679,7 @@ export default class CreateFlowManagement extends LightningElement {
             if (validationResult !== true) {
                 let errorMessage = 'Screen title cannot be empty. Please fill in the screen title before saving.';
                 if (validationResult === 'options') {
-                    errorMessage = 'Options cannot be empty. Please fill in all multiple choice options or remove blank ones before saving.';
+                    errorMessage = 'Options cannot be empty. Please fill in all options (multiple choice/dropdown) or remove blank ones before saving.';
                 }
                 this.showToast(
                     'Validation Error',
@@ -728,7 +728,7 @@ export default class CreateFlowManagement extends LightningElement {
                 if (hasBlankOptionInJson) {
                     this.showToast(
                         'Validation Error',
-                        'Options cannot be empty. Please fill in all multiple choice options or remove blank ones before saving.',
+                        'Options cannot be empty. Please fill in all options (multiple choice/dropdown) or remove blank ones before saving.',
                         'error'
                     );
                     return;

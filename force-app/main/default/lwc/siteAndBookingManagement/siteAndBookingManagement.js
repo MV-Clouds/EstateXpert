@@ -983,7 +983,11 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.headerBody = doc.documentElement.textContent || '';
                 this.templateBody = this.templateData?.MVEX__WBTemplate_Body__c;
                 if (this.templateData?.MVEX__Template_Category__c === 'Authentication') {
-                    this.templateBody = '{{code}} ' + this.templateBody;
+                    // Generate once so preview and payload always show the same code
+                    if (!this.generatedAuthCode) {
+                        this.generatedAuthCode = String(Math.floor(Math.random() * 900000) + 100000);
+                    }
+                    this.templateBody = this.generatedAuthCode + ' ' + this.templateBody;
                 }
                 this.footerBody = this.templateData?.MVEX__WBFooter_Body__c || '';
                 if (this.isImageHeader || this.isVideoHeader || this.isDocHeader) {
@@ -1013,12 +1017,14 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     getIconName(btntype) {
         switch (btntype) {
-            case 'QUICK_REPLY': return 'utility:reply';
+            case 'QUICK_REPLY':  return 'utility:reply';
             case 'PHONE_NUMBER': return 'utility:call';
-            case 'URL': return 'utility:new_window';
-            case 'COPY_CODE': return 'utility:copy';
-            case 'Flow': return 'utility:file';
-            default: return 'utility:question';
+            case 'URL':          return 'utility:new_window';
+            case 'COPY_CODE':
+            case 'COUPON_CODE':
+            case 'OTP':          return 'utility:copy';
+            case 'Flow':         return 'utility:file';
+            default:             return 'utility:question';
         }
     }
 
@@ -1073,8 +1079,8 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     createJSONBody(to, type, data) {
         try {
-            const randomCode = Math.floor(Math.random() * 900000) + 100000;
-            const randomCodeStr = String(randomCode);
+            // Reuse the same code that was shown in the pre-send preview
+            const randomCodeStr = this.generatedAuthCode || String(Math.floor(Math.random() * 900000) + 100000);
             let payload = {
                 messaging_product: "whatsapp",
                 to: to,
@@ -1097,7 +1103,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 let bodyParams = data.bodyParameters.map((param) => ({ type: "text", text: param }));
                 components.push({ type: "body", parameters: bodyParams });
             } else if (this.templateData.MVEX__Template_Category__c == 'Authentication') {
-                components.push({ type: "body", parameters: [{ type: "text", text: randomCodeStr }] });
+                // Reuse the same code shown in the preview
+                const authCode = this.generatedAuthCode || String(Math.floor(Math.random() * 900000) + 100000);
+                components.push({ type: "body", parameters: [{ type: "text", text: authCode }] });
             }
             if (data.buttonValue && data.buttonValue.length > 0) {
                 data.buttonValue.map((button, index) => {

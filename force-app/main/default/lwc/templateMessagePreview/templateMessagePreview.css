@@ -57,6 +57,11 @@
     box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1);
 }
 
+/* Flat bottom when action buttons are attached below the bubble */
+.tmp-chat-bubble--with-buttons {
+    border-radius: 5px 5px 0 0;
+}
+
 /* WhatsApp Tail */
 .tmp-chat-bubble::before {
     content: '';
@@ -171,26 +176,31 @@
     gap: 0;
     width: 100%;
     max-width: 100%;
-    margin-top: 4px;
+    margin-top: 0;
 }
 
-/* Mirror the templatePreview button-label-preview styles precisely */
+/* Match the template editor (wbPreviewTemplatePage) button design:
+   - buttons attach directly to the bubble separated by a top border
+   - only the last button gets rounded bottom corners */
 .tmp-button-label-preview {
     display: flex;
-    width: 100%;
     justify-content: center;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.5rem;
     background: white;
-    border-radius: 4px;
-    margin-top: 0.3rem;
-    padding: 0.4rem;
-    color: #03b1eb;
+    border-top: 2px solid #e2e5e5;
+    padding: 0.5rem 1.5rem;
+    color: #00aeff;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     box-sizing: border-box;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 0;
+    flex-shrink: 0;
+}
+
+.tmp-button-label-preview:last-child {
+    border-radius: 0 0 5px 5px;
 }
 
 .tmp-button-label-preview p {
@@ -198,7 +208,7 @@
 }
 
 .tmp-button-icon {
-    --slds-c-icon-color-foreground-default: #03b1eb;
+    --slds-c-icon-color-foreground-default: #00aeff;
 }
 
 /* ================== LIST PANEL (Interactive) =================== */

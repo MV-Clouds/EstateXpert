@@ -27,6 +27,7 @@ export default class TemplateSend extends LightningElement {
     bodyParams;
     isInteractiveTemplate = false;
     previewDataForChild;
+    generatedAuthCode = null;
 
     // ─── @track (reactive) ────────────────────────────────────────────────────
 
@@ -67,11 +68,20 @@ export default class TemplateSend extends LightningElement {
                     this.headerParams         = result.headerParams;
                     this.bodyParams           = result.bodyParams;
                     this.isInteractiveTemplate = this.detectIsInteractive(result.template);
+
+                    // Generate a one-time auth code so the preview and the actual
+                    // message sent to the recipient always show the same value.
+                    const isAuth = result.template?.MVEX__Template_Category__c === 'Authentication';
+                    if (isAuth && !this.generatedAuthCode) {
+                        this.generatedAuthCode = String(Math.floor(Math.random() * 900000) + 100000);
+                    }
+
                     this.previewDataForChild  = {
                         template:             result.template,
                         templateMergeDetails: null,
                         headerParams:         result.headerParams,
-                        bodyParams:           result.bodyParams
+                        bodyParams:           result.bodyParams,
+                        authCode:             this.generatedAuthCode
                     };
                     this.showSpinner = false;
                 })
@@ -211,7 +221,8 @@ export default class TemplateSend extends LightningElement {
 
     buildStandardPayload(data) {
         try {
-            const randomCode = String(Math.floor(Math.random() * 900000) + 100000);
+            // Reuse the code already shown in the preview so sender and recipient see the same code.
+            const randomCode = this.generatedAuthCode || String(Math.floor(Math.random() * 900000) + 100000);
             const isAuth = this.templateData?.MVEX__Template_Category__c === 'Authentication';
 
             const payload = {

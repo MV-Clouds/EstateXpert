@@ -751,7 +751,10 @@ public with sharing class ChatWindowController {
             if(chatRecs.size() > 0){
                 String templateMergeDetails = chatRecs[0].Sent_Template_Details__c;
                 if(String.isNotBlank(templateMergeDetails)){
+                    // Store just the raw JSON string so LWC doesn't need to navigate
+                    // SObject field names (which vary by namespace context)
                     templateData.put('templateMergeDetails', chatRecs[0]);
+                    templateData.put('sentTemplateDetails', templateMergeDetails);
                 }
             }
 

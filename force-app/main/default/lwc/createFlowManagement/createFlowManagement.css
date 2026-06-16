@@ -177,6 +177,12 @@
     width: 100%;
     font-size: 14px;
     line-height: 1.5;
+    /* Truncate long text with ellipsis instead of overflowing the box */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .form-input:focus {

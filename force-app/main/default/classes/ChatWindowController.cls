@@ -819,4 +819,54 @@ public with sharing class ChatWindowController {
         }
     }
 
+    /*
+    *********************************************************
+    @description     : Lightweight method to fetch only the templates for a given object type.
+                       Called from the ChatWindow LWC when a platform event signals that
+                       template data has changed (insert, update, delete, undelete) so the
+                       component can refresh its template list without re-fetching all chats.
+    @param           : objectApiName - {String} - API name of the current record object
+    @return          : List<WhatsappTemplate__c> - List of available templates
+    *********************************************************
+    */
+    @AuraEnabled
+    public static List<WhatsappTemplate__c> getTemplatesOnly(String objectApiName) {
+        try {
+            Set<Id> matchingTemplateIds = new Set<Id>();
+            Set<Id> allTemplateIdsWithVariables = new Set<Id>();
+            Map<Id, Set<String>> templateIdToObjectNames = new Map<Id, Set<String>>();
+            for (Template_Variable__c tv : [
+                SELECT WhatsappTemplate__c, Object_Name__c, WhatsappTemplate__r.Status__c
+                FROM Template_Variable__c
+            ]) {
+                allTemplateIdsWithVariables.add(tv.WhatsappTemplate__c);
+                if (tv.WhatsappTemplate__r.Status__c == 'Active-Quality Pending') {
+                    if (!templateIdToObjectNames.containsKey(tv.WhatsappTemplate__c)) {
+                        templateIdToObjectNames.put(tv.WhatsappTemplate__c, new Set<String>());
+                    }
+                    templateIdToObjectNames.get(tv.WhatsappTemplate__c).add(tv.Object_Name__c);
+                }
+            }
+            for (Id templateId : templateIdToObjectNames.keySet()) {
+                Set<String> objectNames = templateIdToObjectNames.get(templateId);
+                if (objectNames.size() == 1 && objectNames.contains(objectApiName)) {
+                    matchingTemplateIds.add(templateId);
+                }
+            }
+
+            return [
+                SELECT Id, Name, Template_Name__c, Template_Type__c
+                FROM WhatsappTemplate__c
+                WHERE Id IN :matchingTemplateIds
+                   OR (Status__c = 'Active-Quality Pending' AND Id NOT IN :allTemplateIdsWithVariables)
+                   OR Template_Type__c = 'Interactive Message'
+                WITH USER_MODE
+                ORDER BY LastModifiedDate DESC
+            ];
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'ChatWindowController', 'getTemplatesOnly', e.getMessage());
+            return new List<WhatsappTemplate__c>();
+        }
+    }
+
 }

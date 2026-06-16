@@ -110,6 +110,21 @@ export default class WbFlowContentEditor extends LightningElement {
             // Check if this section has an image operation in progress
             const isLoading = this.imageOperationInProgress[section.id] || false;
 
+            // Process options to map inputClass and show/hide delete icon
+            let processedOptions = [];
+            if (section.options) {
+                const isDeleteDisabled = section.options.length <= 2;
+                processedOptions = section.options.map(opt => {
+                    const isBlank = !opt.label || opt.label.trim() === '';
+                    return {
+                        ...opt,
+                        inputClass: isBlank ? 'native-input option-input error' : 'native-input option-input',
+                        showDelete: !isDeleteDisabled,
+                        hasError: isBlank
+                    };
+                });
+            }
+
             return {
                 ...section,
                 containerClass: containerClass,
@@ -121,7 +136,8 @@ export default class WbFlowContentEditor extends LightningElement {
                 isMaxOptionsReached: isMaxOptionsReached,
                 addOptionButtonTitle: addOptionButtonTitle,
                 isDraggable: true,
-                isLoading: isLoading
+                isLoading: isLoading,
+                options: processedOptions
             };
         });
     }
@@ -248,22 +264,45 @@ export default class WbFlowContentEditor extends LightningElement {
      * Method : validate
      * @description : Public API method called by parent before saving.
      *                Forces validation UI to show and returns false if the
-     *                screen title is empty, blocking the save operation.
+     *                screen title is empty or if any multiple choice options are blank.
      * @return {Boolean} - true if all fields are valid, false otherwise
      */
     @api
     validate() {
-        let isValid = true;
+        let validationResult = true;
 
         // Validate screen title
         if (!this.screenTitle || !this.screenTitle.trim()) {
             this.screenTitleError = true;
             // Expand the section so the error is visible to the user
             this.isScreenTitleExpanded = true;
-            isValid = false;
+            validationResult = 'title';
         }
 
-        return isValid;
+        // Validate selection options (cannot be blank)
+        let hasBlankOptionGlobal = false;
+        this.contentSections = this.contentSections.map(section => {
+            if (section.isSelection && section.options) {
+                const hasBlankOption = section.options.some(opt => !opt.label || opt.label.trim() === '');
+                if (hasBlankOption) {
+                    hasBlankOptionGlobal = true;
+                    // Expand the section so the error is visible to the user
+                    return {
+                        ...section,
+                        isExpanded: true,
+                        toggleIcon: 'utility:chevronup',
+                        containerClass: 'section-card expanded'
+                    };
+                }
+            }
+            return section;
+        });
+
+        if (hasBlankOptionGlobal && validationResult === true) {
+            validationResult = 'options';
+        }
+
+        return validationResult;
     }
 
     /**

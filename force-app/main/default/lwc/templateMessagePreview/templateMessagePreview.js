@@ -79,6 +79,19 @@ export default class TemplateMessagePreview extends LightningElement {
         return this.templateData?.MVEX__Template_Category__c === 'Authentication';
     }
 
+    get hasButtons() {
+        return this.buttonList?.length > 0
+            || this.isInteractiveLocationRequest
+            || this.isInteractiveButton
+            || this.isInteractiveList;
+    }
+
+    get chatBubbleClass() {
+        return this.hasButtons
+            ? 'tmp-chat-bubble tmp-chat-bubble--with-buttons'
+            : 'tmp-chat-bubble';
+    }
+
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     connectedCallback() {
@@ -170,7 +183,10 @@ export default class TemplateMessagePreview extends LightningElement {
         this.footerBody   = data?.MVEX__WBFooter_Body__c;
 
         if (data?.MVEX__Template_Category__c === 'Authentication') {
-            this.templateBody = '{{code}} ' + this.templateBody;
+            // Use the actual code generated for this send (passed via previewData.authCode)
+            // so the sender sees the same code the recipient will receive.
+            const authCode = this.inflightPreviewData?.authCode || '######';
+            this.templateBody = `${authCode} ` + this.templateBody;
             if (this.isSecurityRecommedation) {
                 this.templateBody += '\n For your security, do not share this code.';
             }
@@ -370,6 +386,8 @@ export default class TemplateMessagePreview extends LightningElement {
             PHONE_NUMBER: 'utility:call',
             URL:          'utility:new_window',
             COPY_CODE:    'utility:copy',
+            COUPON_CODE:  'utility:copy',
+            OTP:          'utility:copy',
             Flow:         'utility:file'
         };
         return ICON_MAP[btntype] ?? 'utility:question';

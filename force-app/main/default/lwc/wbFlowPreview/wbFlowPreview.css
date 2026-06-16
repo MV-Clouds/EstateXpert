@@ -504,6 +504,9 @@
     font-weight: 500;
     color: white;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .whatsapp-flow-previewer-floating-label {

@@ -148,6 +148,9 @@ export default class TemplatePreview extends LightningElement {
     processTemplateData(rawData) {
         this.templateData           = rawData.template;
         this.templateMergeDetails   = rawData.templateMergeDetails;
+        // sentTemplateDetails is the raw JSON string of Sent_Template_Details__c
+        // returned directly from Apex to avoid SObject namespace-prefix issues.
+        this.sentTemplateDetails    = rawData.sentTemplateDetails || null;
         this.resetPreviewState();
 
         if (this.resolveInteractivePreview()) {
@@ -186,7 +189,27 @@ export default class TemplatePreview extends LightningElement {
         this.footerBody   = data?.MVEX__WBFooter_Body__c;
 
         if (data?.MVEX__Template_Category__c === 'Authentication') {
-            this.templateBody = '{{code}} ' + this.templateBody;
+            // Extract the actual OTP code from the stored Sent_Template_Details__c
+            // components JSON (e.g. [{type:'body', parameters:[{type:'text', text:'123456'}]}])
+            let authCode = '######';
+            try {
+                // Prefer the clean string returned directly from Apex
+                const componentsStr = this.sentTemplateDetails
+                    || (this.safeJsonParse(this.templateMergeDetails) || this.templateMergeDetails)
+                        ?.MVEX__Sent_Template_Details__c
+                    || (this.safeJsonParse(this.templateMergeDetails) || this.templateMergeDetails)
+                        ?.Sent_Template_Details__c;
+
+                const components = this.safeJsonParse(componentsStr);
+                if (Array.isArray(components)) {
+                    const bodyComp = components.find(c => c.type === 'body');
+                    const codeParam = bodyComp?.parameters?.[0]?.text;
+                    if (codeParam) authCode = codeParam;
+                }
+            } catch (err) {
+                console.error('Error extracting auth code:', err);
+            }
+            this.templateBody = `${authCode} ` + this.templateBody;
             if (this.isSecurityRecommedation) {
                 this.templateBody += '\n For your security, do not share this code.';
             }
@@ -281,6 +304,8 @@ export default class TemplatePreview extends LightningElement {
     }
 
     getInteractiveSentPayload() {
+        // Prefer the clean string returned directly from Apex
+        if (this.sentTemplateDetails) return this.sentTemplateDetails;
         if (!this.templateMergeDetails) return null;
         const outer = this.safeJsonParse(this.templateMergeDetails) || this.templateMergeDetails;
         const sentDetails = outer?.MVEX__Sent_Template_Details__c || outer?.Sent_Template_Details__c;
@@ -305,6 +330,10 @@ export default class TemplatePreview extends LightningElement {
     // ─── Merge Field Helpers ──────────────────────────────────────────────────
 
     getParsedMergeDetails() {
+        // Prefer the clean string returned directly from Apex
+        if (this.sentTemplateDetails) {
+            return this.safeJsonParse(this.sentTemplateDetails) || [];
+        }
         const parsedOuter = this.safeJsonParse(this.templateMergeDetails) || this.templateMergeDetails;
         const detailsStr  = parsedOuter?.MVEX__Sent_Template_Details__c || parsedOuter?.Sent_Template_Details__c;
         return this.safeJsonParse(detailsStr) || [];
@@ -383,6 +412,8 @@ export default class TemplatePreview extends LightningElement {
             PHONE_NUMBER: 'utility:call',
             URL:          'utility:new_window',
             COPY_CODE:    'utility:copy',
+            COUPON_CODE:  'utility:copy',
+            OTP:          'utility:copy',
             Flow:         'utility:file'
         };
         return ICON_MAP[btntype] ?? 'utility:question';

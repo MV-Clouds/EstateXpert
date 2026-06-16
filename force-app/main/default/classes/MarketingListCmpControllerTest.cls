@@ -36,7 +36,16 @@ private class MarketingListCmpControllerTest {
         Property__c property = new Property__c(Name = 'Test Property');
         insert property;
 
-        Listing__c listing = new Listing__c(Property__c = property.Id);
+        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+        }
+
+        Listing__c listing = new Listing__c(
+            Property__c = property.Id,
+            Listing_Type__c = 'Rent',
+            RecordTypeId = listingRecordTypeMap.get('Rent')
+        );
         insert listing;
 
         // Insert template and related data

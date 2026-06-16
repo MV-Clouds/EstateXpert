@@ -281,7 +281,16 @@ private class TemplateBuilderControllerTest {
 
     @isTest
     static void testGetListingAndTemplates() {
-        Listing__c testListing = new Listing__c(Name = 'Test Listing');
+        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+        }
+
+        Listing__c testListing = new Listing__c(
+            Name = 'Test Listing',
+            Listing_Type__c = 'Rent',
+            RecordTypeId = listingRecordTypeMap.get('Rent')
+        );
         insert testListing;
 
         Template__c testTemplate = new Template__c(

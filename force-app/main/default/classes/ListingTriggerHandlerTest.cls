@@ -22,6 +22,11 @@ public class ListingTriggerHandlerTest {
             Mapping_String__c = 'Name:Name;Address__c:Address__c'
         );
 
+        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+        }
+
         List<Listing__c> newListings = new List<Listing__c>();
         
         // 1. Coverage for matchingPropertiesMap.containsKey(propertyKey) == true
@@ -29,7 +34,9 @@ public class ListingTriggerHandlerTest {
             Name = 'Match Me',
             Address__c = '123 Salesforce Lane',
             Bedrooms__c = 3,
-            Bathrooms__c = 2
+            Bathrooms__c = 2,
+            Listing_Type__c = 'Rent',
+            RecordTypeId = listingRecordTypeMap.get('Rent')
         ));
 
         // 2. Coverage for else branch (Create a new property)
@@ -37,7 +44,9 @@ public class ListingTriggerHandlerTest {
             Name = 'Unique Listing',
             Address__c = '789 Discovery Way',
             Bedrooms__c = 5,
-            Bathrooms__c = 4
+            Bathrooms__c = 4,
+            Listing_Type__c = 'Rent',
+            RecordTypeId = listingRecordTypeMap.get('Rent')
         ));
 
         // 3. Coverage for existingPropertiesMap branch (Property__c != null)
@@ -45,7 +54,9 @@ public class ListingTriggerHandlerTest {
         newListings.add(new Listing__c(
             Name = 'Manual Link',
             Property__c = existingProp.Id,
-            Address__c = '123 Salesforce Lane'
+            Address__c = '123 Salesforce Lane',
+            Listing_Type__c = 'Rent',
+            RecordTypeId = listingRecordTypeMap.get('Rent')
         ));
 
         Test.startTest();
@@ -62,19 +73,28 @@ public class ListingTriggerHandlerTest {
             Mapping_String__c = 'Name:Name;Address__c:Address__c;Bedrooms__c:Bedrooms__c'
         );
 
+        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+        }
+
         List<Listing__c> newListings = new List<Listing__c>();
         
         // Match existing
         newListings.add(new Listing__c(
             Name = 'Match Me',
             Address__c = '123 Salesforce Lane',
-            Bedrooms__c = 3
+            Bedrooms__c = 3,
+            Listing_Type__c = 'Sale',
+            RecordTypeId = listingRecordTypeMap.get('Sale')
         ));
 
         // Create new
         newListings.add(new Listing__c(
             Name = 'Sync Off New',
-            Address__c = '456 Off St'
+            Address__c = '456 Off St',
+            Listing_Type__c = 'Sale',
+            RecordTypeId = listingRecordTypeMap.get('Sale')
         ));
 
         // Create with existing property
@@ -82,7 +102,9 @@ public class ListingTriggerHandlerTest {
         newListings.add(new Listing__c(
             Name = 'Sync Off Existing Prop',
             Property__c = existingProp.Id,
-            Address__c = '123 Salesforce Lane'
+            Address__c = '123 Salesforce Lane',
+            Listing_Type__c = 'Sale',
+            RecordTypeId = listingRecordTypeMap.get('Sale')
         ));
 
         Test.startTest();

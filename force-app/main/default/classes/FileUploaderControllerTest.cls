@@ -6,16 +6,17 @@ public class FileUploaderControllerTest {
         // Generate a unique file name using date-time
         String timestamp = Datetime.now().format('yyyyMMdd_HHmmss');
         String uniqueFileName = 'TestFile_' + timestamp;
+        Id userId = UserInfo.getUserId();
 
         ContentVersion cv = new ContentVersion();
         cv.Title = uniqueFileName;
         cv.PathOnClient = '/' + uniqueFileName + '.txt';
         cv.VersionData = Blob.valueOf('Test file content');
+        cv.FirstPublishLocationId = userId;
         insert cv;
 
         // Get ContentDocument Id
         Id contentDocId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
-        Id userId = UserInfo.getUserId();
 
         // Avoid duplicate ContentDocumentLink
         List<ContentDocumentLink> existingLinks = [

@@ -15,11 +15,46 @@ public class FieldSetControllerTest {
 
     // Utility method to create a test Listing record
     private static Listing__c createTestListing(Id propertyId) {
-        Listing__c listing = new Listing__c(
-            Name = 'Test Listing',
-            Property__c = propertyId,
-            Status__c = 'Active'
-        );
+        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+        }
+
+        Listing__c listing = new Listing__c();
+        listing.Name = 'Dev Test 12';
+        listing.Property__c = propertyId;
+        listing.Status__c = 'Active';
+        listing.Listing_Type__c = 'Rent';
+        if (listingRecordTypeMap.containsKey(listing.Listing_Type__c)) {
+            listing.RecordTypeId = listingRecordTypeMap.get(listing.Listing_Type__c);
+        }
+        listing.Rent_Frequency__c = 'Monthly'; 
+        listing.Property_Type__c = 'Villa';
+        listing.Property_Sub_Type__c = 'Residential - Apartment';
+        listing.Property_Category__c = 'Residential';
+        listing.Country_Code__c = 'IN';
+        listing.Street__c = 'Dev Test';
+        listing.City__c = 'Dev Test';
+        listing.State__c = 'Dev Test';
+        listing.Zip_Postal_Code__c = '123456';
+        listing.Description__c = 'Dev Test';
+        listing.Listing_Price__c = 1000000;
+        listing.Bedrooms__c = 3;
+        listing.Bathrooms__c = 2;
+        listing.Size__c = 1000;
+        listing.Listed_Date__c = Date.today();
+        listing.Furnished__c = 'Yes';
+        listing.Property_Status__c = 'Vacant';
+        listing.Year_Built__c = '2020';
+        listing.Listing_Agent_Firstname__c = 'RK';
+        listing.Listing_Agent_Lastname__c = 'Dev';
+        listing.Listing_Agent_Email__c = 'rkdev@gmail.com';
+        listing.Private_Amenities__c = 'Private Garden';
+        listing.Completion_Status__c = 'Completed';
+        listing.Available_From__c = Date.today();
+        listing.Availability_Date__c = DateTime.now();
+        listing.Bedrooms__c = 3;
+        
         insert listing;
         return listing;
     }

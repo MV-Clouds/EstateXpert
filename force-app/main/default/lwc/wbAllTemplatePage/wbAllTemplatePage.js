@@ -153,6 +153,27 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         ];
     }
 
+    get categoryOptionsList() {
+        return this.categoryOptions.map(option => ({
+            ...option,
+            selected: option.value === this.categoryValue
+        }));
+    }
+
+    get statusOptionsList() {
+        return this.statusOptions.map(option => ({
+            ...option,
+            selected: option.value === this.statusValues
+        }));
+    }
+
+    get timePeriodOptionsList() {
+        return this.timePeriodOptions.map(option => ({
+            ...option,
+            selected: option.value === this.timePeriodValue
+        }));
+    }
+
     get filterClass() {
         return this.isFilterVisible ? 'combobox-container visible' : 'combobox-container hidden';
     }
@@ -348,7 +369,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                     this.statusValues = value;
                     break;
                 case 'searchInput':
-                    this.searchInput = value.toLowerCase();
+                    this.searchInput = value;
                     break;
                 default:
                     console.warn(`Unhandled field: ${fieldName}`);
@@ -487,7 +508,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             }
     
             if (this.searchInput) {
-                filtered = filtered.filter(record => record.MVEX__Template_Name__c.toLowerCase().includes(this.searchInput));
+                filtered = filtered.filter(record => record.MVEX__Template_Name__c.toLowerCase().includes(this.searchInput.toLowerCase()));
             }
     
             this.filteredRecords = filtered;

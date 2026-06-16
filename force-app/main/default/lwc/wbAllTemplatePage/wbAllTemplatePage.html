@@ -30,7 +30,7 @@
                         <template if:false={isMobileOrTablet}>
                             <div class="slds-col header-search-bar-css">
                                 <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
-                                    type="search" placeholder="Search Template Name..."
+                                    type="search" placeholder="Search Template Name..." value={searchInput}
                                     onchange={handleChange}></lightning-input>
                             </div>
                             <button class="blue-btn-css" onclick={showCreateTemplate}>
@@ -84,30 +84,27 @@
                             <div if:true={showFilters} class="filter-dropdown-box">
                                 <div class="filter-section">
                                     <label class="filter-label">Category</label>
-                                    <select name="category" class="filter filter-dropdown" value={categoryValue}
-                                        onchange={handleChange}>
-                                        <template for:each={categoryOptions} for:item="option">
-                                            <option key={option.value} value={option.value} class="filter-option">
+                                    <select name="category" class="filter filter-dropdown" onchange={handleChange}>
+                                        <template for:each={categoryOptionsList} for:item="option">
+                                            <option key={option.value} value={option.value} class="filter-option" selected={option.selected}>
                                                 {option.label}</option>
                                         </template>
                                     </select>
                                 </div>
                                 <div class="filter-section">
                                     <label class="filter-label">Status</label>
-                                    <select name="status" class="filter filter-dropdown" value={statusValues}
-                                        onchange={handleChange}>
-                                        <template for:each={statusOptions} for:item="option">
-                                            <option key={option.value} value={option.value} class="filter-option">
+                                    <select name="status" class="filter filter-dropdown" onchange={handleChange}>
+                                        <template for:each={statusOptionsList} for:item="option">
+                                            <option key={option.value} value={option.value} class="filter-option" selected={option.selected}>
                                                 {option.label}</option>
                                         </template>
                                     </select>
                                 </div>
                                 <div class="filter-section">
                                     <label class="filter-label">Time Period</label>
-                                    <select name="timePeriod" class="filter filter-dropdown" value={timePeriodValue}
-                                        onchange={handleChange}>
-                                        <template for:each={timePeriodOptions} for:item="option">
-                                            <option key={option.value} value={option.value} class="filter-option">
+                                    <select name="timePeriod" class="filter filter-dropdown" onchange={handleChange}>
+                                        <template for:each={timePeriodOptionsList} for:item="option">
+                                            <option key={option.value} value={option.value} class="filter-option" selected={option.selected}>
                                                 {option.label}</option>
                                         </template>
                                     </select>

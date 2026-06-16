@@ -69,6 +69,10 @@ export default class WbPreviewTemplatePage extends LightningElement {
         return `slds-box slds-theme_default templatepreviewchildWP chatWP-bubble ${this.hasButtons ? 'with-buttons' : 'no-buttons'}`;
     }
 
+    get phoneCharCount() {
+        return this.phoneNumber ? this.phoneNumber.length : 0;
+    }
+
     @api
     get templateid() {
         return this._templateid;
@@ -341,8 +345,24 @@ export default class WbPreviewTemplatePage extends LightningElement {
         }
     }
 
-    handlePhoneChange(event){
-        this.phoneNumber=event.target.value;
+    handlePhoneKeyDown(event) {
+        const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'];
+        if (allowedKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
+            return;
+        }
+        if (event.key < '0' || event.key > '9') {
+            event.preventDefault();
+        }
+    }
+
+    handlePhoneChange(event) {
+        let value = event.target.value;
+        value = value.replace(/\D/g, ''); // Keep only digits
+        if (value.length > 15) {
+            value = value.slice(0, 15);
+        }
+        this.phoneNumber = value;
+        event.target.value = value;
     }
 
     sendTemplatePreview() {

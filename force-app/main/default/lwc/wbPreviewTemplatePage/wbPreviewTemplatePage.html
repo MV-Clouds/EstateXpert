@@ -99,7 +99,10 @@
                         <lightning-combobox class="conInput" name="selectedCountryType" variant="label-hidden" value={selectedCountryType} options={countryType} onchange={handleCountryChange} disabled={isFieldDisabled}></lightning-combobox>
                     </div>
                     
-                    <input type="number" name="phone-num" class="phone-input" value={phoneNumber} oninput={handlePhoneChange} disabled={isFieldDisabled}>
+                    <div class="phone-input-wrapper">
+                        <input type="number" name="phone-num" class="phone-input" value={phoneNumber} oninput={handlePhoneChange} onkeydown={handlePhoneKeyDown} disabled={isFieldDisabled}>
+                        <span class="char-count">{phoneCharCount}/15</span>
+                    </div>
                     <button class={sendButtonClass} onclick={sendTemplatePreview} disabled={isSendDisabled} title="Send Preview">Send Preview</button>
                     <button class="close-btn" onclick={closePreview} title="Close">Close</button>
                 </div>

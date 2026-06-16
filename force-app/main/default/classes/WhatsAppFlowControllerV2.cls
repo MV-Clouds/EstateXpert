@@ -384,12 +384,12 @@ public with sharing class WhatsAppFlowControllerV2 {
                     System.debug('Failed to parse error response: ' + parseEx.getMessage());
                 }
                 
-                ErrorHandler.insertErrordata(null, 'WhatsAppFlowControllerV2', 'createFlowInMeta', 'Failed to create flow in Meta at line 372: ' + errorMessage);
+                ErrorHandler.insertErrordata(null, 'WhatsAppFlowControllerV2', 'createFlowInMeta', 'Failed to create flow in Meta at line 387: ' + errorMessage);
                 System.debug('Meta API Error: ' + response.getBody());
                 return new MetaFlowResult(false, null, errorMessage);
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WhatsAppFlowControllerV2', 'createFlowInMeta', 'Failed to create flow in Meta at line 377: ' + e.getMessage());
+            ErrorHandler.insertErrordata(e, 'WhatsAppFlowControllerV2', 'createFlowInMeta', 'Failed to create flow in Meta: ' + e.getMessage());
             return new MetaFlowResult(false, null, 'Failed to create flow in Meta: ' + e.getMessage());
         }
     }

@@ -107,13 +107,7 @@ export default class CreateFlowManagement extends LightningElement {
      * @description : Initializes component and loads all JSON data.
      */
     connectedCallback() {
-        loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('External Css Loaded');
-            })
-            .catch(error => {
-                console.log('Error occuring during loading external css', error);
-            });
+        loadStyle(this, MulishFontCss);
         // Load existing flow data if in edit mode
 
         if (this.isEditMode && this.selectedFlowId) {
@@ -672,21 +666,24 @@ export default class CreateFlowManagement extends LightningElement {
     async handleSaveFlow() {
         if (this.isSaveDisabled) return;
         // Step 1: Check via component's validate() method — this catches the case where the user
-        // has cleared the screen title in the UI (the JSON still holds the last valid title because
-        // handleContentUpdate skips blank title updates, but the component's internal state knows it's blank).
+        // has cleared the screen title or multiple choice options in the UI.
         const screenEditor = this.template.querySelector('c-wb-flow-screen-editor');
         if (screenEditor) {
-            let isValid = false;
+            let validationResult = true;
             try {
-                isValid = screenEditor.validate();
+                validationResult = screenEditor.validate();
             } catch (validationErr) {
                 console.warn('Screen editor validation error:', validationErr);
-                isValid = true; // fallback: allow save if validate() itself throws
+                validationResult = true; // fallback: allow save if validate() itself throws
             }
-            if (!isValid) {
+            if (validationResult !== true) {
+                let errorMessage = 'Screen title cannot be empty. Please fill in the screen title before saving.';
+                if (validationResult === 'options') {
+                    errorMessage = 'Options cannot be empty. Please fill in all options (multiple choice/dropdown) or remove blank ones before saving.';
+                }
                 this.showToast(
                     'Validation Error',
-                    'Screen title cannot be empty. Please fill in the screen title before saving.',
+                    errorMessage,
                     'error'
                 );
                 return;
@@ -697,6 +694,8 @@ export default class CreateFlowManagement extends LightningElement {
         if (this.jsonString) {
             try {
                 const parsed = JSON.parse(this.jsonString);
+
+                // 2a. Validate screen titles
                 const emptyTitleScreen = (parsed.screens || []).find(s => !s.title || !s.title.trim());
                 if (emptyTitleScreen) {
                     this.showToast(
@@ -706,15 +705,40 @@ export default class CreateFlowManagement extends LightningElement {
                     );
                     return;
                 }
+
+                // 2b. Validate options (data-source cannot have blank titles)
+                let hasBlankOptionInJson = false;
+                (parsed.screens || []).forEach(screen => {
+                    if (screen.layout && screen.layout.children) {
+                        screen.layout.children.forEach(layoutChild => {
+                            if (layoutChild.type === 'Form' && layoutChild.children) {
+                                layoutChild.children.forEach(formChild => {
+                                    if (Array.isArray(formChild['data-source'])) {
+                                        const hasBlank = formChild['data-source'].some(opt => !opt.title || opt.title.trim() === '');
+                                        if (hasBlank) {
+                                            hasBlankOptionInJson = true;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+                if (hasBlankOptionInJson) {
+                    this.showToast(
+                        'Validation Error',
+                        'Options cannot be empty. Please fill in all options (multiple choice/dropdown) or remove blank ones before saving.',
+                        'error'
+                    );
+                    return;
+                }
             } catch (parseErr) {
-                console.warn('Could not parse JSON for title validation:', parseErr);
+                console.warn('Could not parse JSON for validation:', parseErr);
             }
         }
 
         this.isLoading = true;
-        console.log('flowJson----->', this.jsonString);
-        console.log('metaFlowId----->', this.metaFlowId);
-
         try {
             // Update existing flow
             const result = await saveWhatsAppFlow({

@@ -311,74 +311,81 @@
                         </template>
                     </div>
                 </div>
-                <div class="popup-div" if:true={showPopup}>
-                    <div class="files-uploader-div" if:true={showFileUploader}>
-                        <template if:false={isAWSEnabled}>
-                            <lightning-file-upload class="file-uploader" label={uploadLabel} name="fileUploader"
-                                accept={acceptedFormats} record-id={recordId} onuploadfinished={handleUploadFinished}
-                                variant="label-hidden"></lightning-file-upload>
-                        </template>
-                        <template if:true={isAWSEnabled}>
-                            <div class="upload-container">
-                                <label class="custom-file-upload">
-                                    <lightning-icon icon-name="utility:upload" alternative-text="Upload Icon"
-                                        size="x-small"></lightning-icon>
-                                    <span class="slds-p-left--medium slds-text-color_success">Choose Files</span>
-                                    <input type="file" class="file-input" onchange={handleSelectedFiles}
-                                        accept={acceptedFormats} disabled={selectedFileName} />
-                                </label>
+                <div class="popup-container-wrapper" if:true={showPopup}>
+                    <div class="popup-close-btn" onclick={handleBackDropClick} title="Close">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="popup-div">
+                        <div class="files-uploader-div" if:true={showFileUploader}>
+                            <template if:false={isAWSEnabled}>
+                                <lightning-file-upload class="file-uploader" label={uploadLabel} name="fileUploader"
+                                    accept={acceptedFormats} record-id={recordId} onuploadfinished={handleUploadFinished}
+                                    variant="label-hidden"></lightning-file-upload>
+                            </template>
+                            <template if:true={isAWSEnabled}>
+                                <div class="upload-container">
+                                    <label class="custom-file-upload">
+                                        <lightning-icon icon-name="utility:upload" alternative-text="Upload Icon"
+                                            size="x-small"></lightning-icon>
+                                        <span class="slds-p-left--medium slds-text-color_success">Choose Files</span>
+                                        <input type="file" class="file-input" onchange={handleSelectedFiles}
+                                            accept={acceptedFormats} disabled={selectedFileName} />
+                                    </label>
 
-                                <template if:true={selectedFileName}>
-                                    <div class="file-details">
-                                        <span class="file-name">{selectedFileName}</span>
-                                        <lightning-icon icon-name="utility:delete" alternative-text="Remove File"
-                                            size="x-small" class="remove-icon" onclick={removeFile}></lightning-icon>
-                                    </div>
-                                    <button class="upload-button" onclick={handleUploadClick}>Send</button>
-                                </template>
+                                    <template if:true={selectedFileName}>
+                                        <div class="file-details">
+                                            <span class="file-name">{selectedFileName}</span>
+                                            <lightning-icon icon-name="utility:delete" alternative-text="Remove File"
+                                                size="x-small" class="remove-icon" onclick={removeFile}></lightning-icon>
+                                        </div>
+                                        <button class="upload-button" onclick={handleUploadClick}>Send</button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                        <template lwc:if={showTemplateSelection}>
+                            <div class="template-select-div">
+                                <div class="bold-text">{templateSelectionTitle}</div>
+                                <div class="search-template-div">
+                                    <input placeholder="Search Template..." type="text" class="search-template-input"
+                                        onkeyup={handleSearchTemplate} onchange={handleSearchTemplate}
+                                        value={templateSearchKey}>
+                                    <svg class="search-template-icon" xmlns="http://www.w3.org/2000/svg" width="14"
+                                        height="14" fill="darkgray" viewBox="0 0 512 512">
+                                        <path
+                                            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+                                    </svg>
+                                </div>
+                                <div class="templates-list-div" if:true={filteredTemplate}>
+                                    <template for:each={filteredTemplate} for:item="template">
+                                        <div key={template.Id} class="template-div" data-id={template.Id}
+                                            onclick={handleShowTemplatePreview}>
+                                            <div class="template-title-div">
+                                                {template.displayName}
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="no-templates-div" if:false={filteredTemplate}>
+                                    <template lwc:if={allTemplates}>
+                                        No Matching Template Found.
+                                    </template>
+                                    <template lwc:else>
+                                        No Template Available.
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <template lwc:elseif={showTemplatePreview}>
+                            <div class="show-template-preview">
+                                <c-template-send template-id={selectedTemplate} record-id={recordId}
+                                    mobile-number={recordMobileNumber} object-api-name={objectApiName} show-buttons="true"
+                                    onback={handleBackToList} onmessage={handleTemplateSent}></c-template-send>
                             </div>
                         </template>
                     </div>
-                    <template lwc:if={showTemplateSelection}>
-                        <div class="template-select-div">
-                            <div class="bold-text">{templateSelectionTitle}</div>
-                            <div class="search-template-div">
-                                <input placeholder="Search Template..." type="text" class="search-template-input"
-                                    onkeyup={handleSearchTemplate} onchange={handleSearchTemplate}
-                                    value={templateSearchKey}>
-                                <svg class="search-template-icon" xmlns="http://www.w3.org/2000/svg" width="14"
-                                    height="14" fill="darkgray" viewBox="0 0 512 512">
-                                    <path
-                                        d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
-                                </svg>
-                            </div>
-                            <div class="templates-list-div" if:true={filteredTemplate}>
-                                <template for:each={filteredTemplate} for:item="template">
-                                    <div key={template.Id} class="template-div" data-id={template.Id}
-                                        onclick={handleShowTemplatePreview}>
-                                        <div class="template-title-div">
-                                            {template.displayName}
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                            <div class="no-templates-div" if:false={filteredTemplate}>
-                                <template lwc:if={allTemplates}>
-                                    No Matching Template Found.
-                                </template>
-                                <template lwc:else>
-                                    No Template Available.
-                                </template>
-                            </div>
-                        </div>
-                    </template>
-                    <template lwc:elseif={showTemplatePreview}>
-                        <div class="show-template-preview">
-                            <c-template-send template-id={selectedTemplate} record-id={recordId}
-                                mobile-number={recordMobileNumber} object-api-name={objectApiName} show-buttons="true"
-                                onback={handleBackToList} onmessage={handleTemplateSent}></c-template-send>
-                        </div>
-                    </template>
                 </div>
                 <div class="message-draft-div">
                     <div class="reply-to-message-div" if:true={replyToMessage}>

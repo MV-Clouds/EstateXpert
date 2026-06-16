@@ -204,8 +204,7 @@
                                                             <select name={child.name} id={child.name}
                                                                 class={child.inputClass} onchange={handleDropdownChange}
                                                                 onfocus={handleInputFocus} onblur={handleInputBlur}>
-                                                                <option value="" disabled selected={isOptionSelected}>
-                                                                </option>
+                                                                <option value="" disabled selected={isOptionSelected}>Select...</option>
                                                                 <template for:each={child.dataSource} for:item="option">
                                                                     <option key={option.id} value={option.id}
                                                                         selected={option.selected}>

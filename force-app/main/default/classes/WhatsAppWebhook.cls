@@ -69,7 +69,9 @@ global without sharing class WhatsAppWebhook{
                         Map<String, Object> metadata = (Map<String, Object>)value.get('metadata');
                         System.debug('value--->' + value);
                         // Extract the phone_number_id
-                        phoneNumberId = (String) metadata.get('phone_number_id');
+                        if (metadata != null && metadata.containsKey('phone_number_id') && metadata.get('phone_number_id') != null) {
+                            phoneNumberId = (String) metadata.get('phone_number_id');
+                        }
                         System.debug('phonenumberid -- ' + phoneNumberId);
                         messages = (List<Object>)value.get('messages');
                         List<Object> senders = new List<Object>();
@@ -86,7 +88,7 @@ global without sharing class WhatsAppWebhook{
                 processSingleMessage(message, sender);
             }
         } catch (Exception e){
-            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'processWhatsAppPayload', e.getMessage());
+            ErrorHandler.insertErrordata(e, 'WhatsAppWebhook', 'processWhatsAppPayload', e.getMessage() + 'jsonstring -> ' + jsonstring);
             System.debug('Error in processWhatsAppPayload: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
     }

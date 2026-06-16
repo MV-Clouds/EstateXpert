@@ -9,11 +9,19 @@ public class CheckListItemControllerTest {
         Property__c property = new Property__c(Name = 'Dev Test');
         insert property;
 
+        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+        }
+
         Listing__c listing = new Listing__c();
         listing.Name = 'Dev Test 12';
         listing.Property__c = property.Id;
         listing.Status__c = 'Active';
         listing.Listing_Type__c = 'Rent';
+        if (listingRecordTypeMap.containsKey(listing.Listing_Type__c)) {
+            listing.RecordTypeId = listingRecordTypeMap.get(listing.Listing_Type__c);
+        }
         listing.Rent_Frequency__c = 'Monthly'; 
         listing.Property_Type__c = 'Villa';
         listing.Property_Sub_Type__c = 'Residential - Apartment';
@@ -48,6 +56,9 @@ public class CheckListItemControllerTest {
         listing1.Property__c = property.Id;
         listing1.Status__c = 'Active';
         listing1.Listing_Type__c = 'Rent';
+        if (listingRecordTypeMap.containsKey(listing1.Listing_Type__c)) {
+            listing1.RecordTypeId = listingRecordTypeMap.get(listing1.Listing_Type__c);
+        }
         listing1.Rent_Frequency__c = 'Monthly'; 
         listing1.Property_Type__c = 'Villa';
         listing1.Property_Sub_Type__c = 'Residential - Apartment';

@@ -39,6 +39,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     @track showReschedulePopup = false;
     @track rescheduleRecordId = '';
     @track selectedDateTime = '';
+    @track searchVal = '';
 
     // Group members (contacts) list properties
     @track groupMembers = [];
@@ -384,6 +385,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
     */
     handleRefresh() {
         this.isLoading = true;
+        this.searchVal = '';
         this.loadBroadcastGroups();
     }
 
@@ -404,6 +406,7 @@ export default class WbAllBroadcastPage extends NavigationMixin(LightningElement
 
     handleSearch(event) {
         try {
+            this.searchVal = event.detail.value;
             const searchKey = event.detail.value.trim().toLowerCase();
             if (searchKey !== '') {
                 this.filteredData = this.data.filter(item =>

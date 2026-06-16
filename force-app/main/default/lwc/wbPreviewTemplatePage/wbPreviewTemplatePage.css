@@ -285,7 +285,7 @@ input:focus {
 
 .urltype {
     flex: 0 0 20%;
-    min-width: 180px;
+    min-width: 15rem;
     padding-right: var(--spacing-sm);
     border-right: 1px solid var(--color-border);
 }
@@ -297,11 +297,29 @@ input:focus {
     width: 100%;
 }
 
+.phone-input-wrapper {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.phone-input-wrapper .char-count {
+    position: absolute;
+    right: 0.75rem;
+    font-size: 0.75rem;
+    color: #636363;
+    pointer-events: none;
+    user-select: none;
+}
+
 .phone-input {
     flex: 1 1 auto;
     min-width: 0;
-    width: auto;
+    width: 100%;
     padding-left: var(--spacing-sm);
+    padding-right: 3.25rem;
     appearance: textfield;
     -moz-appearance: textfield;
 }
@@ -364,6 +382,7 @@ input:focus {
 }
 
 @media (max-width: 1100px) {
+
     .send-btn,
     .close-btn {
         max-width: 8.5rem;
@@ -390,7 +409,7 @@ input:focus {
         border-right: none;
     }
 
-    .phone-input {
+    .phone-input-wrapper {
         flex: 1 1 0;
     }
 }

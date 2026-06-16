@@ -20,12 +20,20 @@ public class XMLFeedPortalTest {
             Property__c property = new Property__c(Name = 'Dev Test');
             insert property;
 
+            Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+            for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+                listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+            }
+
             Listing__c listing1 = new Listing__c();
-            listing1.Name = 'Dev Test';
+            listing1.Name = 'Dev Test 12';
             listing1.Property__c = property.Id;
             listing1.Status__c = 'Active';
             listing1.Listing_Type__c = 'Rent';
-            listing1.Rent_Frequency__c = 'Monthly';
+            if (listingRecordTypeMap.containsKey(listing1.Listing_Type__c)) {
+                listing1.RecordTypeId = listingRecordTypeMap.get(listing1.Listing_Type__c);
+            }
+            listing1.Rent_Frequency__c = 'Monthly'; 
             listing1.Property_Type__c = 'Villa';
             listing1.Property_Sub_Type__c = 'Residential - Apartment';
             listing1.Property_Category__c = 'Residential';
@@ -41,7 +49,6 @@ public class XMLFeedPortalTest {
             listing1.Size__c = 1000;
             listing1.Property_OwnerContact__c = contact.Id;
             listing1.Listed_Date__c = Date.today();
-            // listing1.Unit_Number__c = '12345';
             listing1.Furnished__c = 'Yes';
             listing1.Property_Status__c = 'Vacant';
             listing1.Year_Built__c = '2020';
@@ -50,13 +57,19 @@ public class XMLFeedPortalTest {
             listing1.Listing_Agent_Email__c = 'rkdev@gmail.com';
             listing1.Private_Amenities__c = 'Private Garden';
             listing1.Completion_Status__c = 'Completed';
+            listing1.Available_From__c = Date.today();
+            listing1.Availability_Date__c = DateTime.now();
+            listing1.Bedrooms__c = 3;
 
             Listing__c listing2 = new Listing__c();
             listing2.Name = 'Dev Test';
             listing2.Property__c = property.Id;
             listing2.Status__c = 'Active';
             listing2.Listing_Type__c = 'Sale';
-            listing2.Rent_Frequency__c = 'Monthly';
+            if (listingRecordTypeMap.containsKey(listing2.Listing_Type__c)) {
+                listing2.RecordTypeId = listingRecordTypeMap.get(listing2.Listing_Type__c);
+            }
+            listing2.Rent_Frequency__c = 'Monthly'; 
             listing2.Property_Type__c = 'Villa';
             listing2.Property_Sub_Type__c = 'Residential - Apartment';
             listing2.Property_Category__c = 'Residential';
@@ -72,7 +85,6 @@ public class XMLFeedPortalTest {
             listing2.Size__c = 1000;
             listing2.Property_OwnerContact__c = contact.Id;
             listing2.Listed_Date__c = Date.today();
-            // listing2.Unit_Number__c = '12345';
             listing2.Furnished__c = 'Yes';
             listing2.Property_Status__c = 'Vacant';
             listing2.Year_Built__c = '2020';
@@ -81,7 +93,7 @@ public class XMLFeedPortalTest {
             listing2.Listing_Agent_Email__c = 'rkdev@gmail.com';
             listing2.Private_Amenities__c = 'Private Garden';
             listing2.Completion_Status__c = 'Completed';
-
+            
             insert new List<Listing__c> { listing1, listing2 };
 
             Property_File__c propertyFile1 = new Property_File__c(

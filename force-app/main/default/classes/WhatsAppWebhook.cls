@@ -1134,7 +1134,7 @@ global without sharing class WhatsAppWebhook{
             List<SObject> records = Database.query(query);
             sObject record = records[0];
 
-            List<CustomNotificationType> cnType = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'WBConnectNotification' LIMIT 1];
+            List<CustomNotificationType> cnType = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'EXPWhatsAppChatNotification' LIMIT 1];
 
             // Id userId = Userinfo.getUserId();
             String messageContent = (String) record.get('Name') + ' has sent a new message. Tap to view.';

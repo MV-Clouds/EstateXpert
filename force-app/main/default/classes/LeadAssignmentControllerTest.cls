@@ -114,4 +114,23 @@ private class LeadAssignmentControllerTest {
         
         Test.stopTest();
     }
+
+    @isTest
+    static void testGetRecordNames() {
+        // Create a Contact
+        Contact con = new Contact(LastName = 'Test Contact');
+        insert con;
+        
+        // Prepare inputs
+        Map<String, String> recordIdToObjectMap = new Map<String, String>{
+            con.Id => 'Contact',
+            'invalidId' => 'InvalidObject'
+        };
+        
+        Test.startTest();
+        Map<String, String> result = LeadAssignmentController.getRecordNames(recordIdToObjectMap);
+        Map<String, String> emptyResult = LeadAssignmentController.getRecordNames(new Map<String, String>());
+        Map<String, String> nullResult = LeadAssignmentController.getRecordNames(null);
+        Test.stopTest();
+    }
 }

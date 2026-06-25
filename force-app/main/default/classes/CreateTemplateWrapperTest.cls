@@ -11,6 +11,30 @@ public class CreateTemplateWrapperTest {
         templateWrapper.templateBody = 'Hello {{1}}, This is an invitation for the annual event for 8 years of journey. Contact us for more details: {{2}}';
         templateWrapper.marketingOptText = 'Quick reply';
 
+        CreateTemplateWrapper.VariableWrapper headerVar = new CreateTemplateWrapper.VariableWrapper();
+        headerVar.placeholder = '{{1}}';
+        headerVar.alternateText = 'email';
+        headerVar.objectName = 'Contact';
+        headerVar.fieldName = 'Email';
+        headerVar.variableType = 'Header';
+        templateWrapper.header_variables = new List<CreateTemplateWrapper.VariableWrapper>{headerVar};
+
+        CreateTemplateWrapper.VariableWrapper bodyVar1 = new CreateTemplateWrapper.VariableWrapper();
+        bodyVar1.placeholder = '{{1}}';
+        bodyVar1.alternateText = 'name';
+        bodyVar1.objectName = 'Contact';
+        bodyVar1.fieldName = 'Name';
+        bodyVar1.variableType = 'Body';
+
+        CreateTemplateWrapper.VariableWrapper bodyVar2 = new CreateTemplateWrapper.VariableWrapper();
+        bodyVar2.placeholder = '{{2}}';
+        bodyVar2.alternateText = 'phone';
+        bodyVar2.objectName = 'Contact';
+        bodyVar2.fieldName = 'Phone';
+        bodyVar2.variableType = 'Body';
+
+        templateWrapper.variables = new List<CreateTemplateWrapper.VariableWrapper>{bodyVar1, bodyVar2};
+
         HttpResponse res = new HttpResponse();
         res.setStatusCode(200);
         res.setBody('{"success": true}');
@@ -72,6 +96,30 @@ public class CreateTemplateWrapperTest {
         templateWrapper.templateCategory = 'Authentication';
         templateWrapper.templateType = 'One-time passcode';
         templateWrapper.templateBody = 'Hello {{1}}, Please use the following OTP for verification: {{2}}';
+
+        CreateTemplateWrapper.VariableWrapper headerVar = new CreateTemplateWrapper.VariableWrapper();
+        headerVar.placeholder = '{{1}}';
+        headerVar.alternateText = 'email';
+        headerVar.objectName = 'Contact';
+        headerVar.fieldName = 'Email';
+        headerVar.variableType = 'Header';
+        templateWrapper.header_variables = new List<CreateTemplateWrapper.VariableWrapper>{headerVar};
+
+        CreateTemplateWrapper.VariableWrapper bodyVar1 = new CreateTemplateWrapper.VariableWrapper();
+        bodyVar1.placeholder = '{{1}}';
+        bodyVar1.alternateText = 'name';
+        bodyVar1.objectName = 'Contact';
+        bodyVar1.fieldName = 'Name';
+        bodyVar1.variableType = 'Body';
+
+        CreateTemplateWrapper.VariableWrapper bodyVar2 = new CreateTemplateWrapper.VariableWrapper();
+        bodyVar2.placeholder = '{{2}}';
+        bodyVar2.alternateText = 'otp';
+        bodyVar2.objectName = 'Contact';
+        bodyVar2.fieldName = 'OTP__c';
+        bodyVar2.variableType = 'Body';
+
+        templateWrapper.variables = new List<CreateTemplateWrapper.VariableWrapper>{bodyVar1, bodyVar2};
 
         HttpResponse res = new HttpResponse();
         res.setStatusCode(200);

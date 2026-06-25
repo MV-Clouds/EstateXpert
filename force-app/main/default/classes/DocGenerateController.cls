@@ -217,18 +217,6 @@ global with sharing class DocGenerateController {
         } 
     }
 
-    public static void getS3ConfigSettings(){
-        try {
-            AWS_Config__c awsData = AWS_Config__c.getOrgDefaults();
-            awsAccessKey = awsData.AWS_Access_Key__c;
-            awsSecretKey = awsData.AWS_Secret_Access_Key__c;
-            awsRegion = awsData.S3_Region_Name__c;
-            awsBucketName = awsData.S3_Bucket_Name__c;
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'getS3ConfigSettings', 'Error while getting AWS_Config__c record.');
-        }
-    }
-
     @RemoteAction
     global static string fetchSignatureBase64(String id){
         return null;

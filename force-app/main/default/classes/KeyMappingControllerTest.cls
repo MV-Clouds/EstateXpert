@@ -75,6 +75,11 @@ private class KeyMappingControllerTest {
         DocGenerateController.sessionId = '';
         DocGenerateController.isBatchRequired = false;
         DocGenerateController.fetchTemplateData(0, temp.Id, '{{Temp.'+temp.Id+' *Demo temp*}}');
+        Template__c inactiveTemp = createMergeTemplateInActive();
+        DocGenerateController.fetchTemplateData(0, inactiveTemp.Id, '{{Temp.'+inactiveTemp.Id+' *Demo temp*}}');
+        Template__c csvTemp = createMergeTemplateCSV();
+        DocGenerateController.fetchTemplateData(0, csvTemp.Id, '{{Temp.'+csvTemp.Id+' *Demo temp*}}');
+        DocGenerateController.fetchTemplateData(0, null, '{{Temp.null *Demo temp*}}');
 
         System.assertEquals('{ "templateId" : "'+temp.Id+'", "Object_API_Name__c" : "'+temp.Object_API_Name__c+'", "recordId" : "'+acc.Id+'", "usedFrom" : "PDF Template" }', paraData, 'success');
 

@@ -105,107 +105,12 @@ public with sharing class EmailCampaignScheduler {
                     FROM Template__c
                     WHERE Id IN :allTemplateDataIds WITH USER_MODE
                 ];
-                for (Template__c temp : templateDataRecords) {
-                    String keyStr = '';
-                    for (Template_Data__c td : temp.Template_Data__r) {
-                        keyStr += td.Template_Value_Simple__c != null ? td.Template_Value_Simple__c : '';
-                    }
-                    if (String.isNotBlank(keyStr)) {
-                        try {
-                            templateIdToExtractedKeyMap.put(
-                                temp.Id,
-                                (Map<String, Object>) JSON.deserializeUntyped(keyStr)
-                            );
-                        } catch (Exception parseEx) {
-                            // Malformed JSON in key data — skip gracefully
-                        }
-                    }
-                }
             }
 
             for (EmailRequest req : emailRequests) {
                 Marketing_Campaign__c campaignRecord = campaignMap.get(req.campaignId);
                 if (campaignRecord.Schedule_Type__c != 'Contact Field') {
                     continue; // Skip if not contact field
-                }
-                String emailType = campaignRecord.Email_Type__c;
-                Contact contact = contactMap.get(req.contactId);
-                String processedBody = req.body;
-                String templateDataId = req.templateDataId;
-                
-                if (contact != null) {
-                    Map<String, Map<String, String>> mappingKeys = DataMappingControllerV2.getMappingsKeyValues(
-                    new List<String>{templateDataId}, contact.Id, true
-                    );
-                    Map<String, String> mappingKeyVsMappingValues = mappingKeys.get('objectNGeneral');
-                    Map<String, String> salesforceImages = mappingKeys.get('salesforceImages');
-                    
-                    for (String key : mappingKeyVsMappingValues.keySet()) {
-                        String escapedKey = Pattern.quote(key);
-                        processedBody = processedBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
-                    }
-                    
-                    for (String src : salesforceImages.keySet()) {
-                        String escapedSrc = Pattern.quote(src);
-                        processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
-                    }
-
-                    // --- Recipient field replacement for Listing templates ---
-                    // Replace {{EXPRecipient.<FieldAPI>}} keys with values from the To-recipient
-                    // Contact's own fields. CC/BCC contacts are intentionally excluded here.
-                    Marketing_Campaign__c cmpRecord = campaignMap.get(req.campaignId);
-                    String relObjAPI = cmpRecord != null ? cmpRecord.RelatedObject__c : null;
-                    if (String.isNotBlank(relObjAPI) &&
-                            (relObjAPI.equalsIgnoreCase('MVEX__Listing__c') || relObjAPI.equalsIgnoreCase('Listing__c'))) {
-                        Map<String, Object> ekMap = templateIdToExtractedKeyMap.get(req.templateDataId);
-                        if (ekMap != null) {
-                            Set<String> recipientFieldKeys = DataMappingControllerV2.collectRecipientFieldKeys(ekMap);
-                            if (!recipientFieldKeys.isEmpty() && contact != null) {
-                                Map<String, String> recipientReplacements =
-                                    DataMappingControllerV2.getRecipientFieldReplacements(recipientFieldKeys, contact);
-                                for (String rKey : recipientReplacements.keySet()) {
-                                    processedBody = processedBody.replaceAll(
-                                        Pattern.quote(rKey),
-                                        recipientReplacements.get(rKey) != null ? recipientReplacements.get(rKey) : ''
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Find and mark Email_Member__c as Success
-                String key = req.contactId + '-' + marketingEmails[0].Id; // Assuming one email per campaign for simplicity
-                if (emailMembersToUpdate.containsKey(key)) {
-                    emailMembersToUpdate.get(key).Status__c = 'Success';
-                }
-                
-                if (emailType == 'single') {
-                    Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-                    
-                    email.setToAddresses(new List<String>{req.email});
-                    
-                    if (req.ccAddresses != null) {
-                        List<String> ccEmails = parseEmailAddresses(req.ccAddresses);
-                        email.setCcAddresses(ccEmails);
-                    }
-                    
-                    if (req.bccAddresses != null) {
-                        List<String> bccEmails = parseEmailAddresses(req.bccAddresses);
-                        email.setBccAddresses(bccEmails);
-                    }
-                    
-                    email.setSubject(req.subject);
-                    email.setHtmlBody(processedBody);
-                    emails.add(email);
-                    
-                    contactEmailInfoMap.put(req.contactId, new Map<String, String>{
-                        'subject' => req.subject,
-                        'body' => processedBody,
-                        'email' => req.email,
-                        'cc' => req.ccAddresses,
-                        'bcc' => req.bccAddresses
-                    });
                 }
             }
             
@@ -227,21 +132,7 @@ public with sharing class EmailCampaignScheduler {
                     }
                 }
             } catch (Exception e) {
-                for (Email_Member__c em : emailMembersToUpdate.values()) {
-                    em.Status__c = 'Failed';
-                }
-                if (!emailMembersToUpdate.isEmpty()) {
-                    update as user emailMembersToUpdate.values();
-                }
-                
-                // Recalculate campaign counts
-                for (String campaignId : campaignIds) {
-                    if (campaignMap.get(campaignId).Schedule_Type__c == 'Contact Field') {
-                        EmailCampaignController.recalculateCampaignCounts(campaignId);
-                    }
-                }
-                
-                ErrorHandler.insertErrordata(e, 'EmailCampaignScheduler', 'sendEmails', 'Error while sending mails');
+                System.debug('Error in Schedular');
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'EmailCampaignScheduler', 'sendEmails', 'Error while sending mails');

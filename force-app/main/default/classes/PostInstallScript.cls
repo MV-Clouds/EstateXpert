@@ -59,29 +59,4 @@ global class PostInstallScript implements InstallHandler {
             ErrorHandler.insertErrorData(e, 'PostInstallScript', 'createDefaultConfigRecords', 'Error while updating or creating PortalListing__c record.');
         }
     }
-
-    /**
-     * Change 2: Logic to insert Custom Setting from Custom Label
-     */
-    // private void setupEmbeddedSignUpConfig() {
-    //     try {
-    //         String labelValue = System.Label.WhatsappConfig;
-    //         if (String.isNotBlank(labelValue)) {
-    //             List<String> parts = labelValue.split(';');
-                
-    //             // Ensure we have exactly 3 parts: ClientId;ClientSecret;ConfigId
-    //             if (parts.size() >= 3) {
-    //                 MVEX__EmbeddedSignUpConfig__c config = MVEX__EmbeddedSignUpConfig__c.getOrgDefaults();
-                    
-    //                 config.MVEX__Client_Id__c = parts[0].trim();
-    //                 config.MVEX__Client_Secret__c = parts[1].trim();
-    //                 config.MVEX__Config_Id__c = parts[2].trim();
-                    
-    //                 upsert config;
-    //             }
-    //         }
-    //     } catch (Exception e) {
-    //         ErrorHandler.insertErrorData(e, 'PostInstallScript', 'setupEmbeddedSignUpConfig', 'Error while updating or creating PortalListing__c record.');
-    //     }
-    // }
 }

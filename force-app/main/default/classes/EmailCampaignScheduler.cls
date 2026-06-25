@@ -212,7 +212,7 @@ public with sharing class EmailCampaignScheduler {
             try {
                 if (!emails.isEmpty()) {
                     List<Messaging.SendEmailResult> sendEmailResults = Messaging.sendEmail(emails);
-                    CreateActivityFromMail2.createCaseEmailMessage(contactEmailInfoMap);
+                    CreateActivityRecordsFromMail.createCaseEmailMessage(contactEmailInfoMap);
                 }
                 
                 // Update Email_Member__c records to 'Success'

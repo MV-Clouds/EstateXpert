@@ -304,7 +304,7 @@ public with sharing class MarketingListCmpController {
 
             if (!emails.isEmpty()) {
                 Messaging.sendEmail(emails);
-                CreateActivityFromMail2.createCaseEmailMessage(contactEmailInfoMap);
+                CreateActivityRecordsFromMail.createCaseEmailMessage(contactEmailInfoMap);
             } else if(!gmails.isEmpty()){
                 GmailIntegrationControllerV1.requestNewAccessToken(gmails,null,null,false);
             }

@@ -478,9 +478,7 @@ public with sharing class PortalMappingController {
             Portal__c portalRecord = new Portal__c();
             portalRecord.Id = portalId;
     
-            if (portalName == 'Propertyfinder') {
-                portalRecord.XML_Feed_URL__c = xmlSite + 'MVEX__XMLFeedForPF?Id=' + portalId;
-            } else if (portalName == 'Bayut') {
+            if (portalName == 'Bayut') {
                 portalRecord.XML_Feed_URL__c = xmlSite + 'MVEX__XMLFeed?Id=' + portalId + '&isByt=true';
             } else if (portalName == 'Dubizzle') {
                 portalRecord.XML_Feed_URL__c = xmlSite + 'MVEX__XMLFeed?Id=' + portalId + '&isDbzl=true';

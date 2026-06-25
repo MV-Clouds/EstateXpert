@@ -35,7 +35,7 @@ public class PropertySearchControllerTest {
         listing.Listing_Price__c = 1000000;
         listing.Bedrooms__c = 3;
         listing.Bathrooms__c = 2;
-        listing.Size__c = 1000;
+        listing.Lot_Size__c = 1000;
         listing.Property_OwnerContact__c = contact.Id;
         listing.Listed_Date__c = Date.today();
         listing.Furnished__c = 'Yes';
@@ -49,7 +49,6 @@ public class PropertySearchControllerTest {
         insert listing;
 
         Inquiry__c inquiry = new Inquiry__c(
-            Name__c = 'Test Inquiry', 
             New_Construction__c = true, 
             Parking_Available__c = false, 
             Sunday_Open_House__c = false, 

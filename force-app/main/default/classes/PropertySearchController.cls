@@ -508,7 +508,7 @@ public with sharing class PropertySearchController {
                     deleteContentVersion(listingContentVersion);
                 }
                 
-                CreateActivityFromMail2.createCaseEmailMessage(contactEmailInfoMap);
+                CreateActivityRecordsFromMail.createCaseEmailMessage(contactEmailInfoMap);
             }
             // Send emails through Gmail
             else if (!gmails.isEmpty()) {

@@ -14,12 +14,9 @@ public class ListingManagerControllerTest {
     */
     @isTest
     static void testGetListingData() {
-        try {
-            Account account = new Account(Name = 'Test Account');
-            insert account;
-            
+        try {            
             // Create Property
-            Property__c property = new Property__c(Name = 'Test Property', Account__c = account.Id);
+            Property__c property = new Property__c(Name = 'Test Property');
             insert property;
 
             // Create Listings

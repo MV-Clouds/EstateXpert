@@ -35,7 +35,7 @@ public class CheckListItemControllerTest {
         listing.Listing_Price__c = 1000000;
         listing.Bedrooms__c = 3;
         listing.Bathrooms__c = 2;
-        listing.Size__c = 1000;
+        listing.Lot_Size__c = 1000;
         listing.Property_OwnerContact__c = contact.Id;
         listing.Listed_Date__c = Date.today();
         // listing.Unit_Number__c = '12345';
@@ -72,7 +72,7 @@ public class CheckListItemControllerTest {
         listing1.Listing_Price__c = 1000000;
         listing1.Bedrooms__c = 3;
         listing1.Bathrooms__c = 2;
-        listing1.Size__c = 1000;
+        listing1.Lot_Size__c = 1000;
         listing1.Property_OwnerContact__c = contact.Id;
         listing1.Listed_Date__c = Date.today();
         // listing1.Unit_Number__c = '12345';

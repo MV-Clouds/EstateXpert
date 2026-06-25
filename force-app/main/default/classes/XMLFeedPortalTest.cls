@@ -46,7 +46,7 @@ public class XMLFeedPortalTest {
             listing1.Listing_Price__c = 1000000;
             listing1.Bedrooms__c = 3;
             listing1.Bathrooms__c = 2;
-            listing1.Size__c = 1000;
+            listing1.Lot_Size__c = 1000;
             listing1.Property_OwnerContact__c = contact.Id;
             listing1.Listed_Date__c = Date.today();
             listing1.Furnished__c = 'Yes';
@@ -82,7 +82,7 @@ public class XMLFeedPortalTest {
             listing2.Listing_Price__c = 1000000;
             listing2.Bedrooms__c = 3;
             listing2.Bathrooms__c = 2;
-            listing2.Size__c = 1000;
+            listing2.Lot_Size__c = 1000;
             listing2.Property_OwnerContact__c = contact.Id;
             listing2.Listed_Date__c = Date.today();
             listing2.Furnished__c = 'Yes';

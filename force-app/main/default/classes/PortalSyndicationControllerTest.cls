@@ -79,7 +79,7 @@ public with sharing class PortalSyndicationControllerTest {
             listing.Listing_Price__c = 1000000;
             listing.Bedrooms__c = 3;
             listing.Bathrooms__c = 2;
-            listing.Size__c = 1000;
+            listing.Lot_Size__c = 1000;
             listing.Property_OwnerContact__c = contact.Id;
             listing.Listed_Date__c = Date.today();
             // listing.Unit_Number__c = '12345';

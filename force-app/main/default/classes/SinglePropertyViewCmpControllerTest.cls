@@ -26,7 +26,7 @@ public class SinglePropertyViewCmpControllerTest {
                 Property_Category__c = 'Residential',
                 Bedrooms__c = 3,
                 Bathrooms__c = 2,
-                Size__c = 2000,
+                Lot_Size__c = 2000,
                 Listing_Price__c = 500000,
                 Description__c = 'Test Description',
                 Furnished__c = 'Yes',

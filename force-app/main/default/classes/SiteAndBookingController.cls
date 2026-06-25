@@ -24,7 +24,7 @@ public with sharing class SiteAndBookingController {
             String escapedListingId = String.escapeSingleQuotes(listingId);
             Map<String, Object> result = new Map<String, Object>();
     
-            List<Listing__c> listing = [SELECT Id, Name, Address__c, Listing_Type__c, Size__c, Property_Type__c, Property_Category__c, Bedrooms__c, Bathrooms__c, Description__c,
+            List<Listing__c> listing = [SELECT Id, Name, Address__c, Listing_Type__c, Lot_Size__c, Property_Type__c, Property_Category__c, Bedrooms__c, Bathrooms__c, Description__c,
                                         Listing_Price__c, Property__c, CurrencyIsoCode, Listing_Address__c FROM Listing__c WHERE Id = :escapedListingId WITH USER_MODE LIMIT 1];
     
             List<Property_File__c> propertyFiles = new List<Property_File__c>();

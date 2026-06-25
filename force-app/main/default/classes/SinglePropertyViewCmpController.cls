@@ -19,7 +19,7 @@ public without sharing class SinglePropertyViewCmpController {
                                         Number_of_Cheques__c, Off_Market_Date__c, Off_Plan__c, On_Market_Date__c, Parking_Available__c,
                                         Parking_Spaces__c, Private_Amenities__c, Property__c, Property_Category__c, Property_Status__c, Property_Sub_Type__c,
                                         Property_Type__c, Rent_Frequency__c, Rental_Price__c, RERA_Permit_Number__c, Sale_Date__c, Sale_Price__c, Service_Charge__c,
-                                        Size__c, Sq_Ft__c, Status__c, Taxes__c, Year_Built__c FROM Listing__c WHERE Id = :recordId AND Status__c = 'Active' LIMIT 1];
+                                        Lot_Size__c, Sq_Ft__c, Status__c, Taxes__c, Year_Built__c FROM Listing__c WHERE Id = :recordId AND Status__c = 'Active' LIMIT 1];
 
             List<Property_File__c> media = [SELECT Id, Name, BaseUrl__c FROM Property_File__c WHERE Property__c = :listing[0].Property__c];
 

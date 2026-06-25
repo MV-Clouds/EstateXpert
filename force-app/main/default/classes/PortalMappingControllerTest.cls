@@ -205,7 +205,7 @@ public with sharing class PortalMappingControllerTest {
             // Prepare JSON wrapper
             PortalMappingController.PropertyPortalWrapper wrapper = new PortalMappingController.PropertyPortalWrapper();
             wrapper.name = 'New Test Portal';
-            wrapper.portalname = 'Property Finder'; // Triggers generator logic
+            wrapper.portalname = 'Bayut'; // Triggers generator logic
             wrapper.getPortalIconUrl = 'http://example.com/logo.png';
             wrapper.xml_site = 'http://site.com/';
             
@@ -213,7 +213,7 @@ public with sharing class PortalMappingControllerTest {
             
             Test.startTest();
             // Test successful save
-            String result = PortalMappingController.savePropertyPortalRecord(jsonWrapper, 'Propertyfinder');
+            String result = PortalMappingController.savePropertyPortalRecord(jsonWrapper, 'Bayut');
             
             // Test fail case
             String resultFail = PortalMappingController.savePropertyPortalRecord(jsonWrapper, '');
@@ -225,7 +225,7 @@ public with sharing class PortalMappingControllerTest {
             // Verify insertion
             List<Portal__c> createdPortals = [SELECT Id, Name, Generator__c, XML_Feed_URL__c FROM Portal__c WHERE Name = 'New Test Portal'];
             System.assertEquals(1, createdPortals.size(), 'One portal should be created');
-            System.assertEquals('Propertyfinder', createdPortals[0].Generator__c, 'Generator should be mapped correctly');
+            System.assertEquals('Bayut', createdPortals[0].Generator__c, 'Generator should be mapped correctly');
             System.assert(createdPortals[0].XML_Feed_URL__c != null, 'XML Feed URL should be generated');
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'PortalMappingControllerTest', 'testSavePropertyPortalRecord', 'Error testing save property portal.');

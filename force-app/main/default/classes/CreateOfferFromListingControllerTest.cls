@@ -218,4 +218,90 @@ public class CreateOfferFromListingControllerTest {
         System.assertEquals(false, result.isSuccess, 'Should not be successful');
         System.assertNotEquals('', result.errorMessage, 'Error message should not be empty');
     }
+    
+    /**
+     * Method Name: testUpdateOfferRecordWithOfferSource
+     * @description: Tests updateOfferRecord when sourceObjectType is 'Offer'
+     * Created Date: 2026-06-26
+     * Created By: Karan Singh
+     */
+    @isTest
+    static void testUpdateOfferRecordWithOfferSource() {
+        // Get the test offer
+        MVEX__Offer__c testOffer = [SELECT Id, MVEX__Status__c FROM MVEX__Offer__c LIMIT 1];
+        System.assertNotEquals('Countered', testOffer.MVEX__Status__c, 'Initial status should not be Countered');
+        
+        Test.startTest();
+        Boolean result = CreateOfferFromListingController.updateOfferRecord('Offer', testOffer.Id);
+        Test.stopTest();
+        
+        // Assertions
+        System.assertEquals(true, result, 'Update should be successful');
+        MVEX__Offer__c updatedOffer = [SELECT MVEX__Status__c FROM MVEX__Offer__c WHERE Id = :testOffer.Id];
+        System.assertEquals('Countered', updatedOffer.MVEX__Status__c, 'Status should be updated to Countered');
+    }
+    
+    /**
+     * Method Name: testUpdateOfferRecordWithListingSource
+     * @description: Tests updateOfferRecord when sourceObjectType is 'Listing'
+     * Created Date: 2026-06-26
+     * Created By: Karan Singh
+     */
+    @isTest
+    static void testUpdateOfferRecordWithListingSource() {
+        // Get the test offer
+        MVEX__Offer__c testOffer = [SELECT Id FROM MVEX__Offer__c LIMIT 1];
+        
+        // Check if Active RecordType exists for MVEX__Offer__c to decide the expected result
+        List<RecordType> activeRecordTypes = [SELECT Id FROM RecordType WHERE SObjectType = 'MVEX__Offer__c' AND DeveloperName = 'Active' LIMIT 1];
+        Boolean expectedResult = !activeRecordTypes.isEmpty();
+        
+        Test.startTest();
+        Boolean result = CreateOfferFromListingController.updateOfferRecord('Listing', testOffer.Id);
+        Test.stopTest();
+        
+        // Assertions
+        System.assertEquals(expectedResult, result, 'Result should match whether RecordType exists');
+        if (expectedResult) {
+            MVEX__Offer__c updatedOffer = [SELECT MVEX__First_Offer_Id__c, RecordTypeId FROM MVEX__Offer__c WHERE Id = :testOffer.Id];
+            System.assertEquals(String.valueOf(testOffer.Id), updatedOffer.MVEX__First_Offer_Id__c, 'First Offer ID should be set to the offer ID');
+            System.assertEquals(activeRecordTypes[0].Id, updatedOffer.RecordTypeId, 'Record Type ID should be updated to Active RecordType');
+        }
+    }
+    
+    /**
+     * Method Name: testUpdateOfferRecordWithInvalidSource
+     * @description: Tests updateOfferRecord when sourceObjectType is invalid
+     * Created Date: 2026-06-26
+     * Created By: Karan Singh
+     */
+    @isTest
+    static void testUpdateOfferRecordWithInvalidSource() {
+        // Get the test offer
+        MVEX__Offer__c testOffer = [SELECT Id FROM MVEX__Offer__c LIMIT 1];
+        
+        Test.startTest();
+        Boolean result = CreateOfferFromListingController.updateOfferRecord('InvalidSource', testOffer.Id);
+        Test.stopTest();
+        
+        // Assertions
+        System.assertEquals(false, result, 'Update should return false for invalid source type');
+    }
+
+    /**
+     * Method Name: testUpdateOfferRecordException
+     * @description: Tests updateOfferRecord error handling when a DML/Query exception occurs
+     * Created Date: 2026-06-26
+     * Created By: Karan Singh
+     */
+    @isTest
+    static void testUpdateOfferRecordException() {
+        Test.startTest();
+        // Pass null for offerId which will cause a DML exception on update
+        Boolean result = CreateOfferFromListingController.updateOfferRecord('Offer', null);
+        Test.stopTest();
+        
+        // Assertions
+        System.assertEquals(false, result, 'Update should return false when exception occurs');
+    }
 }

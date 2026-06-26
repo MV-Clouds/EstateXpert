@@ -6,7 +6,7 @@
 * @description : Used to test PortalSyndicationController class.
 */
 @isTest
-public with sharing class PortalSyndicationControllerTest {
+public class PortalSyndicationControllerTest {
 
     public static String rightmoveSandboxEndpoint = System.label.Rightmove_Endpoint_Sandbox;
     public static String zooplaEndpoint = System.label.Zoopla_Endpoint;
@@ -62,9 +62,15 @@ public with sharing class PortalSyndicationControllerTest {
 
             insert new List<Portal__c> { portal1, portal2, portal3, portal4, portal5 };
 
+            Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+            for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+                listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+            }
+
             Listing__c listing = new Listing__c();
             listing.Name = 'Dev Test';
             listing.Property__c = property.Id;
+            listing.RecordTypeId = listingRecordTypeMap.get('Rent');
             listing.Status__c = 'Active';
             listing.Listing_Type__c = 'Rent';
             listing.Property_Type__c = 'Villa';
@@ -322,7 +328,7 @@ public with sharing class PortalSyndicationControllerTest {
             );
             Portal_Listing_Mapping__c mapping121 = new Portal_Listing_Mapping__c(
                 Name = 'property.details.features',
-                Portal_Name__c = 'RightRightmove Overseasmove',
+                Portal_Name__c = 'Rightmove Overseas',
                 Listing_Field_API_Name__c = 'Country_Code__c',
                 Portal_Field_Description__c = 'Description 2',
                 Portal_Field_Example__c = 'Example 2',
@@ -791,6 +797,11 @@ public with sharing class PortalSyndicationControllerTest {
             // Test unpublish for PropertyFinder
             String resultPropertyFinder = PortalSyndicationController.createPortalListingRecord(
                 listing.Id, portals[1].Id, 'Unpublish', 'Propertyfinder'
+            );
+
+            // Test unpublish for Bayut
+            String resultBayutFinder = PortalSyndicationController.createPortalListingRecord(
+                listing.Id, portals[1].Id, 'Unpublish', 'Bayut'
             );
             Test.stopTest();
             

@@ -593,6 +593,71 @@ public class ChatWindowControllerTest {
         ChatWindowController.getTemplateData(testTemplateDoc.Id, testContact.Id, 'Contact');
         ChatWindowController.getTemplateData(testTemplateVid.Id, testContact.Id, 'Contact');
         ChatWindowController.getTemplateData(testTemplateImg.Id, testContact.Id, 'Contact');
+    }
+    
+    @isTest
+    static void testGetTemplatesOnly() {
+        // 1. Create a WhatsappTemplate with status 'Active-Quality Pending' and matching Contact variable
+        WhatsappTemplate__c template1 = new WhatsappTemplate__c(
+            Template_Name__c = 'Matching Template',
+            Status__c = 'Active-Quality Pending',
+            Template_Type__c = 'Custom',
+            Template_Id__c = 'tempId1'
+        );
+        insert template1;
+
+        Template_Variable__c var1 = new Template_Variable__c(
+            Name = '{{1}}',
+            Field_Name__c = 'FirstName',
+            Object_Name__c = 'Contact',
+            Type__c = 'Body',
+            WhatsappTemplate__c = template1.Id
+        );
+        insert var1;
+
+        // 2. Create a WhatsappTemplate with status 'Active-Quality Pending' and non-matching variable
+        WhatsappTemplate__c template2 = new WhatsappTemplate__c(
+            Template_Name__c = 'Non-Matching Template',
+            Status__c = 'Active-Quality Pending',
+            Template_Type__c = 'flowutility',
+            Template_Id__c = 'tempId2'
+        );
+        insert template2;
+
+        Template_Variable__c var2 = new Template_Variable__c(
+            Name = '{{1}}',
+            Field_Name__c = 'Name',
+            Object_Name__c = 'Account',
+            Type__c = 'Body',
+            WhatsappTemplate__c = template2.Id
+        );
+        insert var2;
+
+        // 3. Create a WhatsappTemplate with status 'Active-Quality Pending' but no variables
+        WhatsappTemplate__c template3 = new WhatsappTemplate__c(
+            Template_Name__c = 'No Variables Template',
+            Status__c = 'Active-Quality Pending',
+            Template_Type__c = 'CustomMarketing',
+            Template_Id__c = 'tempId3'
+        );
+        insert template3;
+
+        // 4. Create an Interactive Message template
+        WhatsappTemplate__c template4 = new WhatsappTemplate__c(
+            Template_Name__c = 'Interactive Template',
+            Template_Type__c = 'ORDER_STATUS',
+            Template_Id__c = 'tempId4'
+        );
+        insert template4;
+
+        Test.startTest();
+        List<WhatsappTemplate__c> results = ChatWindowController.getTemplatesOnly('Contact');
         Test.stopTest();
+
+        // Convert results list to Map for easier assertions
+        Map<Id, WhatsappTemplate__c> resultsMap = new Map<Id, WhatsappTemplate__c>(results);
+
+        // Assertions
+        System.assert(resultsMap.containsKey(template1.Id), 'Should return the template with matching Contact variable');
     }
 }

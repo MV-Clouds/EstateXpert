@@ -14,14 +14,9 @@ public with sharing class CreatePortalListingMappingRecords {
     * @description : Create records of Portal_Listing_Mapping__c object.
     * @return List of Portal_Listing_Mapping__c records.
     */
-    public static String createPortalRecords(String portalName, Boolean isXMLForPF) {
+    public static String createPortalRecords(String portalName) {
         try {
-            Portaldata__mdt portalMetaData = new Portaldata__mdt();
-            if (portalName == 'Propertyfinder' && isXMLForPF) {
-                portalMetaData = [SELECT MasterLabel, Portal_Record__c, Portal_Value__c FROM Portaldata__mdt WHERE Portal_Value__c = 'Propertyfinder XML' WITH USER_MODE LIMIT 1];
-            } else {
-                portalMetaData = [SELECT MasterLabel, Portal_Record__c, Portal_Value__c FROM Portaldata__mdt WHERE Portal_Value__c = :portalName WITH USER_MODE LIMIT 1];
-            }
+            Portaldata__mdt portalMetaData = [SELECT MasterLabel, Portal_Record__c, Portal_Value__c FROM Portaldata__mdt WHERE Portal_Value__c = :portalName WITH USER_MODE LIMIT 1];
 
             Object jsonObject = JSON.deserializeUntyped(portalMetaData.Portal_Record__c);
             if (jsonObject instanceof List<Object>) {
@@ -63,11 +58,7 @@ public with sharing class CreatePortalListingMappingRecords {
                         newRecord.Portal_Field_Example__c = (String) recordData.get('Portal_Field_Example__c');
                     }
                     if (recordData.containsKey('Portal_Name__c')) {
-                        if (portalName == 'Propertyfinder' && isXMLForPF) {
-                            newRecord.Portal_Name__c = 'Propertyfinder XML';
-                        } else {
-                            newRecord.Portal_Name__c = (String) recordData.get('Portal_Name__c');
-                        }
+                        newRecord.Portal_Name__c = (String) recordData.get('Portal_Name__c');
                     }
                     if (recordData.containsKey('Required__c')) {
                         newRecord.Required__c = (Boolean) recordData.get('Required__c');

@@ -20,15 +20,7 @@ public with sharing class PortalSyndicationController {
     @AuraEnabled
     public static string createPortalListingRecord(String listingId, String portalId, String actionType, String portalName){
         try {
-            List<Control_Center_Feature__mdt> controlCenterFeatureRecords = [SELECT isAvailable__c FROM Control_Center_Feature__mdt WHERE DeveloperName = 'Is_XML_For_PF' WITH USER_MODE LIMIT 1];
-            Boolean isXmlForPfEnabled = controlCenterFeatureRecords.size() > 0 ? controlCenterFeatureRecords[0].isAvailable__c : false;
-
-            List<String> portalNames = new List<String>();
-            if (isXmlForPfEnabled) {
-                portalNames = new List<String>{'Zoopla', 'Rightmove', 'Rightmove Overseas'};
-            } else {
-                portalNames = new List<String>{'Zoopla', 'Rightmove', 'Rightmove Overseas', 'Propertyfinder'};
-            }
+            List<String> portalNames = new List<String>{'Zoopla', 'Rightmove', 'Rightmove Overseas', 'Propertyfinder'};
 
             if (actionType == 'Publish' && !portalNames.contains(portalName)) {
                 PortalListing__c newPortalListing = new PortalListing__c();

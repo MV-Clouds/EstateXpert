@@ -385,7 +385,7 @@ public with sharing class PortalMappingController {
     @AuraEnabled
     public static String savePropertyPortalRecord(String portalWrapper, String portalName) {
         try {
-            List<String> portalsName = new List<String>{'Propertyfinder', 'Bayut', 'Dubizzle'};
+            List<String> portalsName = new List<String>{'Bayut', 'Dubizzle'};
             
             if(portalName == null || portalName == '') {
                 return 'Portal name is missing.';
@@ -402,7 +402,7 @@ public with sharing class PortalMappingController {
                 }
                 jsonBody = JSON.serialize(jsonBodyMap);
             } else {
-                jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName, wrapper.isXMLForPF);
+                jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
             }
 
             String portalId;
@@ -441,7 +441,7 @@ public with sharing class PortalMappingController {
     @AuraEnabled
     public static String updatePropertyPortalRecord(String portalWrapper, String portalName, String portalId) {
         try {
-            List<String> portalsName = new List<String>{'Propertyfinder', 'Bayut', 'Dubizzle'};
+            List<String> portalsName = new List<String>{'Bayut', 'Dubizzle'};
 
             if(portalName == null || portalName == '') {
                 return 'Portal name is missing.';

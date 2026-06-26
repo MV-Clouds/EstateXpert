@@ -77,4 +77,20 @@ public class ListingManagerFilterControllerTest {
 
         System.assertNotEquals(null, listings, 'Result should not be null');
     }
+
+    @isTest
+    static void testSaveStaticFields() {
+        String objectApiName = 'MVEX__Listing__c';
+        String featureName = 'ListingManagerFilters';
+        String fieldsJson = '[{"fieldAPIName":"Name","label":"Listing Name"}]';
+        
+        Test.startTest();
+        // Test insert path
+        ListingManagerFilterController.saveStaticFields(objectApiName, featureName, fieldsJson);
+        
+        // Test update path
+        String updatedFieldsJson = '[{"fieldAPIName":"Name","label":"Listing Name"},{"fieldAPIName":"MVEX__Status__c","label":"Status"}]';
+        ListingManagerFilterController.saveStaticFields(objectApiName, featureName, updatedFieldsJson);
+        Test.stopTest();
+    }
 }

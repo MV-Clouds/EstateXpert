@@ -3,7 +3,8 @@ public class SiteAndBookingControllerTest {
 
     private static Id showingRecordTypeId {
         get {
-            return Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName().get('Showing').getRecordTypeId();
+            Map<String, Schema.RecordTypeInfo> eventRtMap = Schema.SObjectType.Event.getRecordTypeInfosByDeveloperName();
+            return eventRtMap.containsKey('Showing') ? eventRtMap.get('Showing').getRecordTypeId() : null;
         }
     }
 
@@ -18,11 +19,17 @@ public class SiteAndBookingControllerTest {
         Property__c prop = new Property__c(Name='Test Property');
         insert prop;
 
+        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+        }
+
         Listing__c listing = new Listing__c(
             Name='Test Listing',
             Property__c = prop.Id,
             Address__c='Addr',
-            Listing_Type__c='Sale'
+            Listing_Type__c='Sale',
+            RecordTypeId = listingRecordTypeMap.containsKey('Sale') ? listingRecordTypeMap.get('Sale') : null
         );
         insert listing;
 
@@ -40,7 +47,6 @@ public class SiteAndBookingControllerTest {
 
         /* ---------------- SHOWING (EVENT) ---------------- */
         Event sh = new Event(
-            RecordTypeId = showingRecordTypeId,
             Buyer__c = c1.Id,
             Listing__c = listing.Id,
             Status__c = 'Scheduled',
@@ -50,6 +56,9 @@ public class SiteAndBookingControllerTest {
             DurationInMinutes = 60,
             Subject = 'Showing'
         );
+        if (showingRecordTypeId != null) {
+            sh.RecordTypeId = showingRecordTypeId;
+        }
         insert sh;
 
         /* ---------------- CHAT ---------------- */
@@ -181,5 +190,56 @@ public class SiteAndBookingControllerTest {
         Test.stopTest();
 
         System.assertEquals(true, res);
+    }
+
+    /* ---------------- sendEmailsAndCreateShowings ---------------- */
+    @IsTest
+    static void testSendEmailsAndCreateShowings() {
+        Listing__c l = [SELECT Id FROM Listing__c LIMIT 1];
+        List<Contact> cons = [SELECT Id FROM Contact];
+
+        // Insert required Email Templates dynamically for the test run
+        EmailTemplate t1 = new EmailTemplate(
+            DeveloperName = 'Showing_Confirmation',
+            FolderId = UserInfo.getUserId(),
+            Name = 'Showing Confirmation',
+            Subject = 'Showing Confirmation',
+            HtmlValue = '<html><body>Showing Confirmation for {!Event.Subject}</body></html>',
+            TemplateType = 'custom',
+            IsActive = true
+        );
+        EmailTemplate t2 = new EmailTemplate(
+            DeveloperName = 'RescheduleConfirmationEmail',
+            FolderId = UserInfo.getUserId(),
+            Name = 'Reschedule Confirmation Email',
+            Subject = 'Reschedule Confirmation',
+            HtmlValue = '<html><body>Reschedule Confirmation for {!Event.Subject}</body></html>',
+            TemplateType = 'custom',
+            IsActive = true
+        );
+        insert new List<EmailTemplate>{t1, t2};
+
+        Test.startTest();
+        SiteAndBookingController.sendEmailsAndCreateShowings(
+            new List<Id>{cons[0].Id, cons[1].Id},
+            l.Id,
+            System.now().addDays(1),
+            '1 Hour',
+            'Email',
+            false
+        );
+
+        SiteAndBookingController.sendEmailsAndCreateShowings(
+            new List<Id>{cons[0].Id, cons[1].Id},
+            l.Id,
+            System.now().addDays(2),
+            '30 Minutes',
+            'Email',
+            true
+        );
+        Test.stopTest();
+
+        List<Event> showings = [SELECT Id FROM Event WHERE Listing__c = :l.Id];
+        System.assert(showings.size() > 0);
     }
 }

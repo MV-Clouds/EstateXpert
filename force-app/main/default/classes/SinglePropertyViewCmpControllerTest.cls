@@ -16,6 +16,11 @@ public class SinglePropertyViewCmpControllerTest {
             
             Property__c property = new Property__c(Name = 'Test Property', Street__c = 'Test Street', City__c = 'Test City', State__c = 'Test State', Zip_Postal_Code__c = '12345');
             insert property;
+
+            Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
+            for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
+                listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
+            }
             
             Listing__c activeListing = new Listing__c(
                 Name = 'Active Test Listing',
@@ -30,7 +35,8 @@ public class SinglePropertyViewCmpControllerTest {
                 Listing_Price__c = 500000,
                 Description__c = 'Test Description',
                 Furnished__c = 'Yes',
-                City__c = 'Test City'
+                City__c = 'Test City',
+                RecordTypeId = listingRecordTypeMap.get('Sale')
             );
             insert activeListing;
             
@@ -49,7 +55,8 @@ public class SinglePropertyViewCmpControllerTest {
                 MVEX__Scheduled_Date__c = System.now().addDays(1),
                 Subject = 'Showing',
                 MVEX__Showing_Duration__c = 60,
-                StartDateTime = System.now().addDays(1)
+                StartDateTime = System.now().addDays(1),
+                DurationInMinutes = 30
             );
             insert showing1;
 

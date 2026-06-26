@@ -439,7 +439,7 @@ private class DataMappingControllerV2Test {
         Template__c temp = createTemplateRecord();
         Account acc = createAccountRecord();
         List<Template__c> temps = [SELECT Id, Object_API_Name__c, 
-                                    (SELECT Template_Value_Simple__c, Value_Type__c FROM Template_Data__r) 
+                                    (SELECT Template_Value_Simple__c, Value_Type__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC) 
                                     FROM Template__c WHERE Id = :temp.Id];
         
         Test.startTest();
@@ -465,5 +465,31 @@ private class DataMappingControllerV2Test {
         Test.stopTest();
         
         System.assertNotEquals(null, result);
+    }
+
+    @isTest
+    static void testCollectRecipientFieldKeys() {
+        String jsonStr = '{"recipientFields": ["{{EXPRecipient.FirstName}}", "{{EXPRecipient.Email}}"]}';
+        Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(jsonStr);
+        
+        Test.startTest();
+        Set<String> recipientKeys = DataMappingControllerV2.collectRecipientFieldKeys(extractedKeyMap);
+        Set<String> emptyKeys = DataMappingControllerV2.collectRecipientFieldKeys(null);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, recipientKeys);
+    }
+
+    @isTest
+    static void testGetRecipientFieldReplacements() {
+        Contact recipient = new Contact(FirstName = 'John', Email = 'john@example.com');
+        Set<String> recipientKeys = new Set<String>{'{{EXPRecipient.FirstName}}', '{{EXPRecipient.Email}}', '{{EXPRecipient.LastName}}', '{{InvalidFormat}}'};
+        
+        Test.startTest();
+        Map<String, String> replacements = DataMappingControllerV2.getRecipientFieldReplacements(recipientKeys, recipient);
+        Map<String, String> emptyReplacements = DataMappingControllerV2.getRecipientFieldReplacements(null, null);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, replacements);
     }
 }

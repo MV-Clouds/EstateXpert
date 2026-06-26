@@ -195,4 +195,75 @@ public class ContactTriggerHandlerTest {
         Contact conSocial = new Contact(FirstName = 'Social', LastName = 'Buyer', LeadSource = 'Facebook', MVEX__Contact_Type__c = 'Buyer');
         ContactTriggerHandler.notifyOwner(new List<Contact>{conSocial}, null);
     }
+
+    private static Boolean testEvaluateCondition(Contact con, String field, String op, String val) {
+        // Clear existing settings
+        delete [SELECT Id FROM Lead_Assignment_Setting__c];
+        
+        ContactTriggerHandler.Condition cond = new ContactTriggerHandler.Condition();
+        cond.Lead_Field = field;
+        cond.Condition = op;
+        cond.Value = val;
+        cond.Order = 1;
+
+        // Create a unique dummy user/group ID for matching
+        String testOwnerId = UserInfo.getUserId();
+        
+        Lead_Assignment_Setting__c rule = new Lead_Assignment_Setting__c(
+            Name = testOwnerId,
+            Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cond}),
+            Logic_Type__c = 'All',
+            User_Order__c = 1
+        );
+        insert rule;
+        
+        Contact testContact = con.clone(false, true, false, false);
+        testContact.OwnerId = '005000000000000AAA'; // A dummy owner ID different from UserInfo.getUserId()
+        
+        ContactTriggerHandler.handleLeadAssignment(new List<Contact>{testContact}, null);
+        
+        return testContact.OwnerId == testOwnerId;
+    }
+
+    @isTest
+    static void testAllOperators() {
+        Contact con = new Contact(
+            FirstName = 'TestCon', 
+            LastName = 'TestLastName',
+            MailingLatitude = 50.0,
+            Description = 'Apple;Orange;Banana'
+        );
+
+        // 1. Numeric Operators
+        // greaterThan
+        testEvaluateCondition(con, 'MailingLatitude', 'greaterThan', '10');
+        testEvaluateCondition(con, 'MailingLatitude', 'greaterThan', '100');
+        
+        // lessOrEqual
+        testEvaluateCondition(con, 'MailingLatitude', 'lessOrEqual', '50');
+        testEvaluateCondition(con, 'MailingLatitude', 'lessOrEqual', '100');
+        testEvaluateCondition(con, 'MailingLatitude', 'lessOrEqual', '10');
+        
+        // greaterOrEqual
+        testEvaluateCondition(con, 'MailingLatitude', 'greaterOrEqual', '50');
+        testEvaluateCondition(con, 'MailingLatitude', 'greaterOrEqual', '10');
+        testEvaluateCondition(con, 'MailingLatitude', 'greaterOrEqual', '100');
+
+        // 2. String Operators
+        // contains
+        testEvaluateCondition(con, 'Description', 'contains', 'Orange');
+        testEvaluateCondition(con, 'Description', 'contains', 'Grapes');
+        
+        // doesNotContain
+        testEvaluateCondition(con, 'Description', 'doesNotContain', 'Grapes');
+        testEvaluateCondition(con, 'Description', 'doesNotContain', 'Orange');
+        
+        // includes
+        testEvaluateCondition(con, 'Description', 'includes', 'Apple');
+        testEvaluateCondition(con, 'Description', 'includes', 'Grapes');
+        
+        // excludes
+        testEvaluateCondition(con, 'Description', 'excludes', 'Grapes');
+        testEvaluateCondition(con, 'Description', 'excludes', 'Apple');
+    }
 }

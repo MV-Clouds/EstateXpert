@@ -482,7 +482,7 @@ public with sharing class WBTemplateController {
 
         try {
             if (String.isEmpty(objectName) || fieldNames.isEmpty() || String.isEmpty(recordId)) {
-                ErrorHandler.insertErrordata(new AuraHandledException('Invalid input parameters'), 'WBTemplateController', 'fetchDynamicRecordData', 'Object name, field names or record ID cannot be empty.');
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'fetchDynamicRecordData', 'Object name, field names or record ID cannot be empty.');
                 throw new AuraHandledException('Invalid input parameters');
             }
 
@@ -713,7 +713,7 @@ public with sharing class WBTemplateController {
                 }
 
 
-                ErrorHandler.insertErrordata(new AuraHandledException('HTTP callout failed with status: ' + res.getStatusCode()), 'WBTemplateController', 'createWhatsappTemplate', 'HTTP callout failed with status: ' + res.getStatusCode());
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'createWhatsappTemplate', 'HTTP callout failed with status: ' + res.getStatusCode());
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WBTemplateController', 'createWhatsappTemplate', e.getMessage());
@@ -773,11 +773,11 @@ public with sharing class WBTemplateController {
                         fetchAllTemplatesEvent.Fetch_All_Templates__c = true;
                         EventBus.publish(fetchAllTemplatesEvent);
                     } else {
-                        ErrorHandler.insertErrordata(new AuraHandledException('Template Id not found in checkTemplateExistance for template ' + templateName), 'WBTemplateController', 'checkTemplateExistance', 'Template Id not found in checkTemplateExistance for template ' + templateName);
+                        ErrorHandler.insertErrordata(null, 'WBTemplateController', 'checkTemplateExistance', 'Template Id not found in checkTemplateExistance for template ' + templateName);
                     }
                 }
             } else {
-                ErrorHandler.insertErrordata(new AuraHandledException('API Call failed: ' + res.getStatusCode() + ' - ' + res.getBody()), 'WBTemplateController', 'checkTemplateExistance', 'API Call failed: ' + res.getStatusCode() + ' - ' + res.getBody());
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'checkTemplateExistance', 'API Call failed: ' + res.getStatusCode() + ' - ' + res.getBody());
                 System.debug('API Call failed: ' + res.getStatusCode() + ' - ' + res.getBody());
             }
         } catch (Exception e) {
@@ -823,8 +823,7 @@ public with sharing class WBTemplateController {
 
                 return sessionId; 
             } else {
-
-                ErrorHandler.insertErrordata(new AuraHandledException('HTTP callout failed with status: ' + res.getStatusCode()), 'WBTemplateController', 'startUploadSession', 'HTTP callout failed with status: ' + res.getStatusCode());
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'startUploadSession', 'HTTP callout failed with status: ' + res.getStatusCode());
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WBTemplateController', 'startUploadSession', e.getMessage());
@@ -869,7 +868,7 @@ public with sharing class WBTemplateController {
                     });
                 // return headerHandle; 
             } else {
-                ErrorHandler.insertErrordata(new AuraHandledException('HTTP callout failed with status: ' + res.getStatusCode()), 'WBTemplateController', 'uploadFileChunk', 'HTTP callout failed with status: ' + res.getStatusCode());
+                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'uploadFileChunk', 'HTTP callout failed with status: ' + res.getStatusCode() + ' - ' + res.getBody());
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WBTemplateController', 'uploadFileChunk', e.getMessage());

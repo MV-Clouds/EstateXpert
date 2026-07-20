@@ -1968,8 +1968,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 this.fileSize = file.size;
 
                 let maxSize = 4;
-                let fileSizeMB = Math.floor(file.size / (1024 * 1024));
-                let isValid = fileSizeMB <= maxSize;
+                let isValid = file.size <= maxSize * 1024 * 1024;
 
                 if (isValid) {
                     this.selectedFilesToUpload.push(file);
@@ -2288,7 +2287,8 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         uploadSessionId: this.uploadSessionId,
                         fileContent: base64Data,
                         chunkStart: chunkStart,
-                        chunkSize: base64Data.length,
+                        chunkSize: chunk.size,
+                        totalFileSize: this.fileSize,
                         fileName: this.fileName,
                         isLastChunk: isLastChunk
                     };

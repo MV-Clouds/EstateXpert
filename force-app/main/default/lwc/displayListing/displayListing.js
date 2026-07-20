@@ -18,9 +18,19 @@ import getRecordName from '@salesforce/apex/PropertySearchController.getRecordNa
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
 import FORM_FACTOR from '@salesforce/client/formFactor';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import getListingAndTemplates from '@salesforce/apex/TemplateBuilderController.getListingAndTemplates';
+import sendListingEmailWithPDF from '@salesforce/apex/TemplateBuilderController.sendListingEmailWithPDF';
+const CONTACT_ID_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__c';
+const CONTACT_NAME_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__r.Name';
+const CONTACT_EMAIL_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__r.Email';
+
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
     @api recordId;
+    @api objectApiName;
+    @wire(getRecord, { recordId: '$recordId', fields: '$inquiryFields' })
+    wiredInquiryRecord;
     @track mapMarkers = [];
     @track totalRecords = 0;
     @track properties = [];
@@ -42,16 +52,26 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track totalListing = [];
     @track conditiontype = 'related';
     @track selectedMappingId = null;
-
+    @track emailSelectedListingId = '';
+    @track isEmailModalOpen = false;
+    @track emailAvailableTemplates = [];
+    @track emailSelectedTemplateId = null;
+    @track emailSelectedTemplateName = '';
+    @track emailTemplateDropdownOpen = false;
+    @track emailTemplateSearch = '';
+    @track emailSubject = '';
+    @track emailBody = '';
+    @track emailRecipientId = '';
+    @track emailRecipientName = '';
+    @track emailRecipientEmail = '';
+    @track emailIsSending = false;
+    @track emailVfPageSrc = null;
     @track isShowModal = false;
-
     @track selectedConditionType = 'Related List';
     @track mappings = [];
-
     @track isAddConditionModalVisible = false;
     @track selectedConditionOperator = '';
     @track selectedInquiryValue = '';
-
     @track listingFieldObject = {
         'MVEX__Field_Name__c': '',
         'MVEX__Value__c': '',
@@ -61,7 +81,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         'isPicklist': false,
         'isReference': false
     };
-
     @track listingpicklistOptions = [];
     @track conditionOperatorOptions = [
         { label: 'Less Than', value: 'lessThan' },
@@ -80,16 +99,13 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track divElement;
     @track NoDataImageUrl = emptyState;
     @track hideFilterButton = false;
-
     @track listingColumns = [];
     @track isConfigOpen = false;
-    @track modalFilteredListingData = []; // New variable to store popup-filtered data
+    @track modalFilteredListingData = [];
     filterModalSnapshot = null;
-
     @track sortField = 'name';
     @track sortOrder = 'asc';
     hasUpdatedSortIcons = false;
-
     @track defaultColumns = [
         { label: '', fieldName: 'media_url', type: 'image', sortable: false },
         { label: 'Name', fieldName: 'name', type: 'text' },
@@ -99,7 +115,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         { label: 'Bathrooms', fieldName: 'mvex__bathrooms__c', type: 'number' },
         { label: 'Price', fieldName: 'mvex__listing_price__c', type: 'currency' }
     ];
-
     allConditionOptions = [
         { label: 'All Condition Are Met', value: 'all' },
         { label: 'Any Condition Is Met', value: 'any' },
@@ -108,6 +123,13 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         { label: 'Linked Listings', value: 'linked' },
         { label: 'No Filter', value: 'none' },
     ];
+
+    get inquiryFields() {
+        if (this.objectName === 'MVEX__Inquiry__c') {
+            return [CONTACT_ID_FIELD, CONTACT_NAME_FIELD, CONTACT_EMAIL_FIELD];
+        }
+        return [];
+    }
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
@@ -2142,6 +2164,9 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     */
     disconnectedCallback() {
         window?.globalThis?.removeEventListener('click', this.handleClickOutside);
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('message', this.emailVfMessageHandler);
+        }
     }
 
     openConfigureSettings() {
@@ -2301,5 +2326,272 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         }
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // SEND LISTINGS VIA EMAIL — methods
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /** Derived: filtered template list based on search text */
+    get emailFilteredTemplates() {
+        const q = (this.emailTemplateSearch || '').toLowerCase();
+        return (this.emailAvailableTemplates || []).filter(t =>
+            !q || t.label.toLowerCase().includes(q)
+        );
+    }
+
+    get emailAttachmentChips() {
+        if (!this.emailSelectedListingId) return [];
+        const listing = this.totalListing.find(l => l.id === this.emailSelectedListingId);
+        const name = listing ? (listing.name || this.emailSelectedListingId) : this.emailSelectedListingId;
+        return [{ id: this.emailSelectedListingId, label: name + '.pdf' }];
+    }
+
+    /**
+    * Method Name: handleRowEmailClick
+    * @description: Handles row email icon button click to email a single listing PDF.
+    */
+    handleRowEmailClick(event) {
+        event.stopPropagation();
+        const listingId = event.currentTarget.dataset.id;
+        if (!listingId) return;
+        this.emailSelectedListingId = listingId;
+        this.openEmailModal();
+    }
+
+    /**
+    * Method Name: openEmailModal
+    * @description: Open the email compose modal.
+    *               Fetches PDF templates + pre-fills contact from inquiry.
+    * Date: 17/07/2026
+    * Created By: Antigravity
+    */
+    openEmailModal() {
+        if (!this.emailSelectedListingId) {
+            this.showToast('Warning', 'Please select a listing.', 'warning');
+            return;
+        }
+
+        this.isEmailModalOpen = true;
+        this.emailIsSending = false;
+        this.emailSelectedTemplateId = null;
+        this.emailSelectedTemplateName = '';
+        this.emailTemplateSearch = '';
+        this.emailTemplateDropdownOpen = false;
+        this.emailRecipientId = '';
+        this.emailRecipientName = '';
+        this.emailRecipientEmail = '';
+        this.emailVfPageSrc = null;
+
+        // Use the selected listing for template fetch / subject
+        const listingId = this.emailSelectedListingId;
+        const listing = this.totalListing.find(l => l.id === listingId);
+        const listingName = listing ? listing.name : 'Listing';
+
+        this.emailSubject = `Listing Documents – ${listingName}`;
+        this.emailBody = `Hi,\n\nPlease find attached the listing document(s) for your reference.\n\nKind regards`;
+
+        // Fetch all PDF templates (listing-object scoped)
+        getListingAndTemplates({ recordId: listingId })
+            .then(result => {
+                if (result && result.templates && result.templates.length > 0) {
+                    this.emailAvailableTemplates = result.templates.map(t => ({
+                        value: t.Id,
+                        label: t.MVEX__Template_Name__c || t.Template_Name__c || t.Id
+                    })).sort((a, b) => a.label.localeCompare(b.label));
+                } else {
+                    this.emailAvailableTemplates = [];
+                }
+            })
+            .catch(err => {
+                errorDebugger('DisplayListing', 'openEmailModal/getListingAndTemplates', err, 'warn', 'Error fetching templates');
+                this.emailAvailableTemplates = [];
+            });
+
+        // Pre-fill recipient from inquiry contact lookup
+        if (this.recordId && this.objectName === 'MVEX__Inquiry__c' && this.wiredInquiryRecord && this.wiredInquiryRecord.data) {
+            const contactId = getFieldValue(this.wiredInquiryRecord.data, CONTACT_ID_FIELD);
+            const contactName = getFieldValue(this.wiredInquiryRecord.data, CONTACT_NAME_FIELD);
+            const contactEmail = getFieldValue(this.wiredInquiryRecord.data, CONTACT_EMAIL_FIELD);
+
+            if (contactEmail) {
+                this.emailRecipientId = contactId || '';
+                this.emailRecipientName = contactName || '';
+                this.emailRecipientEmail = contactEmail || '';
+                
+                // Safely handle null, undefined, or blank names
+                const nameStr = contactName ? String(contactName).trim() : '';
+                const firstName = nameStr ? nameStr.split(' ')[0] : '';
+                const greeting = firstName ? `Hi ${firstName}` : 'Hi';
+                
+                this.emailBody = `${greeting},\n\nPlease find attached the listing document(s) for your reference.\n\nKind regards`;
+            }
+        }
+
+        // Register VF message listener
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('message', this.emailVfMessageHandler);
+            window.addEventListener('message', this.emailVfMessageHandler);
+        }
+    }
+
+    /**
+    * Method Name: closeEmailModal
+    * @description: Close the email compose modal and reset all state.
+    * Date: 17/07/2026
+    * Created By: Antigravity
+    */
+    closeEmailModal() {
+        this.isEmailModalOpen = false;
+        this.emailIsSending = false;
+        this.emailVfPageSrc = null;
+        this.emailSelectedListingId = '';
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('message', this.emailVfMessageHandler);
+        }
+    }
+
+    // ── Template picker ───────────────────────────────────────────────────────
+
+    handleEmailTemplateSearchClick() {
+        this.emailTemplateDropdownOpen = true;
+    }
+
+    handleEmailTemplateSearch(event) {
+        this.emailTemplateSearch = event.target.value;
+        this.emailTemplateDropdownOpen = true;
+    }
+
+    handleEmailTemplateBlur() {
+        setTimeout(() => { this.emailTemplateDropdownOpen = false; }, 150);
+    }
+
+    handleEmailTemplateSelect(event) {
+        event.preventDefault();
+        const val = event.currentTarget.dataset.value;
+        const tpl = this.emailAvailableTemplates.find(t => t.value === val);
+        if (tpl) {
+            this.emailSelectedTemplateId = tpl.value;
+            this.emailSelectedTemplateName = tpl.label;
+            this.emailTemplateSearch = tpl.label;
+        }
+        this.emailTemplateDropdownOpen = false;
+    }
+
+    // ── Email compose fields ──────────────────────────────────────────────────
+
+    handleEmailSubjectChange(event) {
+        this.emailSubject = event.target.value;
+    }
+
+    handleEmailBodyChange(event) {
+        this.emailBody = event.target.value;
+    }
+
+    // ── Send flow (PDF generation) ───────────────────────────────────────────
+
+    /**
+    * Method Name: sendListingsEmail
+    * @description: Validates and starts the send flow.
+    *               Generates PDF via VF iframe, then calls Apex.
+    * Date: 17/07/2026
+    * Created By: Antigravity
+    */
+    sendListingsEmail() {
+        if (!this.emailSelectedTemplateId) {
+            this.showToast('Error', 'Please select a template.', 'error');
+            return;
+        }
+        if (!this.emailRecipientEmail) {
+            this.showToast('Error', 'Inquiry contact email not found.', 'error');
+            return;
+        }
+        if (!this.emailSubject?.trim()) {
+            this.showToast('Error', 'Please enter an email subject.', 'error');
+            return;
+        }
+        if (!this.emailBody?.trim()) {
+            this.showToast('Error', 'Please enter an email body.', 'error');
+            return;
+        }
+
+        this.emailIsSending = true;
+        this.emailStartPdfGeneration();
+    }
+
+    /**
+    * Method Name: emailStartPdfGeneration
+    * @description: Triggers VF page for the selected listing.
+    */
+    emailStartPdfGeneration() {
+        const listingId = this.emailSelectedListingId;
+        const listing = this.totalListing.find(l => l.id === listingId);
+        const listingName = listing ? (listing.name || listingId) : listingId;
+        const fileName = listingName + '.pdf';
+
+        const paraData = JSON.stringify({
+            templateId: this.emailSelectedTemplateId,
+            recordId: listingId,
+            selectedExtension: '.pdf',
+            selectedChannels: 'Files', // Use Files channel to automatically trigger ContentVersion upload in VF
+            fileName
+        });
+
+        this.emailVfPageSrc = null;
+        setTimeout(() => {
+            this.emailVfPageSrc = '/apex/MVEX__DocGeneratePage?paraData=' + encodeURIComponent(paraData);
+        }, 50);
+    }
+
+    /**
+    * Method Name: emailVfMessageHandler
+    * @description: Message handler bound on window — receives Files upload response containing ContentVersion ID from VF page.
+    */
+    emailVfMessageHandler = (message) => {
+        try {
+            if (!message.data || message.data.messageFrom !== 'docGenerate') return;
+            const { completedChannel, status, error, cvId } = message.data;
+
+            // Only respond to Files channel
+            if (completedChannel !== 'Files') return;
+
+            if (!status || !cvId) {
+                this.emailIsSending = false;
+                const errorMsg = error?.message || 'Failed to generate and save PDF file.';
+                this.showToast('Error', errorMsg, 'error');
+                return;
+            }
+
+            this.emailVfPageSrc = null;
+            this.emailDispatchPdf(cvId);
+
+        } catch (err) {
+            errorDebugger('DisplayListing', 'emailVfMessageHandler', err, 'warn', 'Error in VF message handler');
+            this.emailIsSending = false;
+        }
+    }
+
+    emailDispatchPdf(cvId) {
+        sendListingEmailWithPDF({
+            contactId: this.emailRecipientId || null,
+            subject: this.emailSubject,
+            body: this.emailBody,
+            contentVersionId: cvId
+        })
+            .then(result => {
+                this.emailIsSending = false;
+                if (result && result.status === 'success') {
+                    this.showToast('Success', 'Email sent successfully!', 'success');
+                    this.closeEmailModal();
+                    this.emailSelectedListingId = '';
+                } else {
+                    const msg = result?.message || 'An error occurred while sending the email.';
+                    this.showToast('Error', msg, 'error');
+                }
+            })
+            .catch(err => {
+                this.emailIsSending = false;
+                const msg = err?.body?.message || 'An error occurred while sending the email.';
+                this.showToast('Error', msg, 'error');
+            });
+    }
 
 }

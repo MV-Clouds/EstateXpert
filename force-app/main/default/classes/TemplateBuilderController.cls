@@ -541,6 +541,73 @@ public with sharing class TemplateBuilderController {
     }
 
 
+    /**
+     * Method Name: sendListingEmailWithPDF
+     * @description: Sends a single email to a recipient with a listing PDF attached.
+     * @param contactId          - Salesforce Contact Id to send to
+     * @param subject            - Email subject
+     * @param body               - Plain-text email body
+     * @param contentVersionId   - ContentVersion ID of the saved listing PDF
+     * @return Map<String, String> - Contains 'status' ('success' or 'error') and 'message'
+     */
+    @AuraEnabled
+    public static Map<String, String> sendListingEmailWithPDF(Id contactId, String subject, String body, Id contentVersionId) {
+        Map<String, String> result = new Map<String, String>{'status' => 'error', 'message' => ''};
+        Id contentDocumentId = null;
+        try {
+            if (contactId == null) {
+                result.put('message', 'Recipient contact is required.');
+                return result;
+            }
+            if (contentVersionId == null) {
+                result.put('message', 'No PDF attachment provided.');
+                return result;
+            }
+
+            List<ContentVersion> cvs = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :contentVersionId WITH USER_MODE LIMIT 1];
+            if (!cvs.isEmpty()) {
+                contentDocumentId = cvs[0].ContentDocumentId;
+            }
+
+            if (contentDocumentId == null) {
+                result.put('message', 'No valid attachment found.');
+                return result;
+            }
+
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            mail.setSubject(subject);
+            mail.setPlainTextBody(body);
+            mail.setEntityAttachments(new List<Id>{ contentVersionId });
+            mail.setTargetObjectId(contactId);
+            mail.setSaveAsActivity(true);
+
+            Messaging.SendEmailResult[] results = Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{ mail });
+            if (!results[0].isSuccess()) {
+                List<String> errors = new List<String>();
+                for (Messaging.SendEmailError err : results[0].getErrors()) {
+                    errors.add(err.getMessage());
+                }
+                result.put('message', 'Email sending failed: ' + String.join(errors, '; '));
+                return result;
+            }
+
+            result.put('status', 'success');
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'TemplateBuilderController', 'sendListingEmailWithPDF', e.getMessage());
+            result.put('message', e.getMessage());
+        } finally {
+            if (contentDocumentId != null) {
+                try {
+                    delete new ContentDocument(Id = contentDocumentId);
+                } catch (Exception deleteEx) {
+                    ErrorHandler.insertErrorData(deleteEx, 'TemplateBuilderController', 'sendListingEmailWithPDF - deleteFiles', deleteEx.getMessage());
+                }
+            }
+        }
+        return result;
+    }
+
+
     @AuraEnabled
     public static void sendEmailWithPDF(
         List<Id>     contactIds,

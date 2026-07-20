@@ -208,7 +208,7 @@ button:disabled {
 }
 
 .mapping-id {
-    font-weight: 600;
+    font-weight: 500;
     margin-right: 10px;
     background: #0176D3;
     color: white;
@@ -783,10 +783,6 @@ button:disabled {
         width: 100%;
     }
 
-    .open-mapping-div {
-        position: relative;
-    }
-
     .add-condition-icon-btn {
         width: 36px;
         height: 32px;
@@ -934,8 +930,8 @@ button:disabled {
 }
 
 .image-column {
-    width: 80px !important;
-    min-width: 80px !important;
+    width: 64px !important;
+    min-width: 64px !important;
 }
 
 .image-column .slds-truncate {
@@ -953,4 +949,367 @@ button:disabled {
 .btn-container .blue-btn-css {
     height: 34px;
     min-height: 34px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SEND LISTINGS VIA EMAIL — styles (matched to component design language)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Checkbox column ─────────────────────────────────────────────────────── */
+.checkbox-col {
+    width: 24px;
+    min-width: 24px;
+    max-width: 24px;
+    text-align: center !important;
+    padding: 0 2px !important;
+    vertical-align: middle;
+}
+
+.listing-row-checkbox {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #0176D3;
+    pointer-events: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* ── Modal backdrop ──────────────────────────────────────────────────────── */
+.email-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9000;
+    animation: emailFadeIn 0.2s ease;
+}
+
+@keyframes emailFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.blue-header {
+    background-color: #0176D3;
+    color: white;
+    border-bottom-style: unset;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    padding: 1rem 1.25rem;
+}
+
+.section_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #F3F6F9;
+    transition: all 0.2s ease;
+}
+
+.modalbody {
+    background-color: #F9FAFB !important;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    max-height: 30rem;
+    height: 100%;
+}
+
+.footerbtns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
+}
+
+.content_body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #0170d27d transparent;
+    padding: 1.5rem;
+}
+
+/* ── Field groups ────────────────────────────────────────────────────────── */
+.email-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 1rem;
+}
+
+.email-field-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.email-field-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Inputs — match SLDS/component flat input look */
+.email-text-input {
+    width: 100%;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #1c2234;
+    outline: none;
+    background: #ffffff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    height: 32px;
+}
+.email-text-input:focus {
+    border-color: #0176D3;
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15);
+}
+
+.email-body-textarea {
+    width: 100%;
+    min-height: 90px;
+    resize: vertical;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #1c2234;
+    outline: none;
+    background: #ffffff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    font-family: 'Mulish', sans-serif;
+    line-height: 1.5;
+}
+.email-body-textarea:focus {
+    border-color: #0176D3;
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15);
+}
+
+/* ── Template picker ─────────────────────────────────────────────────────── */
+.email-template-picker {
+    position: relative;
+}
+
+.email-template-dropdown {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+                rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+                rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    z-index: 9010;
+    max-height: 180px;
+    overflow-y: auto;
+    animation: slideDown 0.2s ease-out forwards;
+}
+
+.email-template-option {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #1F2937;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.email-template-option:hover {
+    background: #E1F1FE;
+    color: #0176D3;
+}
+
+.email-template-empty {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #9CA3AF;
+    font-style: italic;
+}
+
+/* ── Recipient pills & contact search ────────────────────────────────────── */
+.email-recipient-counter {
+    font-size: 11px;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.email-pills-input-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    min-height: 36px;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    padding: 5px 8px;
+    cursor: text;
+    background: #ffffff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.email-pills-input-wrapper:focus-within {
+    border-color: #0176D3;
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15);
+}
+
+/* Pill — matches .selected style */
+.email-contact-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 6px 2px 4px;
+    background: #E1F1FE;
+    border: 1px solid #0176D3;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #0176D3;
+}
+
+.email-pill-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.email-pill-name {
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.email-recipient-limit-msg {
+    font-size: 12px;
+    color: #e06c00;
+    font-style: italic;
+}
+
+
+/* ── Attachment chips ────────────────────────────────────────────────────── */
+.email-attachment-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Chip matches .mapping-item-active style */
+.email-attachment-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #1F2937;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.email-attachment-icon {
+    display: flex;
+    align-items: center;
+    color: #DC2626;
+}
+
+.email-attachment-name {
+    font-weight: 500;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #1F2937;
+}
+
+/* Badge matches .mapping-id style */
+.email-attachment-badge {
+    padding: 1px 5px;
+    background: #DC2626;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+/* ── Sending overlay ─────────────────────────────────────────────────────── */
+.email-sending-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9020;
+    gap: 12px;
+    border-radius: 8px;
+}
+
+.email-sending-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #E5E7EB;
+    border-top-color: #0176D3;
+    border-radius: 50%;
+    animation: emailSpin 0.8s linear infinite;
+}
+
+@keyframes emailSpin {
+    to { transform: rotate(360deg); }
+}
+
+.email-sending-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #0176D3;
+    margin: 0;
+}
+
+/* ── Hidden VF iframe ────────────────────────────────────────────────────── */
+.email-vf-iframe {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: none;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.action-col {
+    text-align: center !important;
+    vertical-align: middle;
+}
+
+.preview-icon-css {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+    vertical-align: middle !important;
+}
+
+/* On hover, make the inner path/border of the email icon white */
+.preview-icon-css:hover svg path:last-child {
+    stroke: #ffffff !important;
 }

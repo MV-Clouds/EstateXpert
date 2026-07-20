@@ -2419,3 +2419,8 @@ input[type="radio"]:checked+label .sizeInputLable {
   margin: 4px 0 0 0;
   line-height: 1.4;
 }
+
+.blue-btn-css .check-mark svg {
+  width: 18px !important;
+  height: 18px !important;
+}

@@ -848,8 +848,9 @@
                     try {
 
                         if (!sessionId || sessionId == '') {
-                            console.error('Error fetching session ID fro create conetentVersion');
-                            sendInfoToLWC('Files', false, { message: 'Error fetching session ID fro create conetentVersion' });
+                            console.error('Error fetching session ID for create contentVersion');
+                            sendInfoToLWC('Files', false, { message: 'Error fetching session ID for create contentVersion' });
+                            return Promise.reject(new Error('Error fetching session ID'));
                         }
 
                         const myHeaders = new Headers();
@@ -872,27 +873,22 @@
 
                         const queryURL = "/services/data/v61.0/sobjects/ContentVersion";
 
-                        fetch(encodeURI(domainURL + queryURL), requestOptions)
-                            .then(response => {
-                                response.json()
-                                    .then(result => {
-                                        if (!result.success || !result.id) {
-                                            console.log('Couldn\'t create the content version');
-                                            sendInfoToLWC('External Storage', false, result.error);
-                                        }
-                                        else {
-                                            sendInfoToLWC('External Storage', true, null, result.id);
-                                        }
-                                    })
-                            })
-                            .catch(error => {
-                                console.log('error in External Storage : ', error.json());
-                                sendInfoToLWC('External Storage', true, null, result.id);
-                            })
+                        return fetch(encodeURI(domainURL + queryURL), requestOptions)
+                            .then(response => response.json())
+                            .then(result => {
+                                if (!result.id) {
+                                    let errorMsg = 'Couldn\'t create the content version';
+                                    if (Array.isArray(result) && result[0] && result[0].message) {
+                                        errorMsg = result[0].message;
+                                    }
+                                    throw new Error(errorMsg);
+                                }
+                                return result;
+                            });
 
                     } catch (error) {
                         console.log('Error in createContentVersion ::', error.message);
-                        sendInfoToLWC('Files', false, error);
+                        return Promise.reject(error);
                     }
                 }
 

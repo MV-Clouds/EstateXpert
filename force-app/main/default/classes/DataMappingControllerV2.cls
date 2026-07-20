@@ -739,12 +739,6 @@ public without sharing class DataMappingControllerV2 {
             List<KeyMappingController.MappingFields> objectWithFields = new List<KeyMappingController.MappingFields>();
             Map<String, String> validFields = getValidFields(startingSymbol, sourceObjectAPI);
 
-            // System.debug('validFields : ' + validFields);
-            // for(String fieldAPI : validFields.keySet()){
-            //     System.debug('validFields : ' + fieldAPI);
-            // }
-
-
             for(String key : mappingKeyList){
                 String subMapping = key.substringBetween('{{','}}');
                 // Used Switch instead of if/else to avoid pmd error of congantive complexity....
@@ -848,10 +842,6 @@ public without sharing class DataMappingControllerV2 {
     public static map<String, string> fetchObjectFields(String objectAPI, String fieldType, String replationshipName){
         Map<String, String> fields = new Map<String, String>();
         try {
-            // Schema.SObjectType sobjType = Schema.getGlobalDescribe().get(objectAPI);
-
-            // System.debug('Object found: ' + sobjType);
-            // One-liner approach
             String namespace = DataMappingControllerV2.class.getName().contains('.') 
                 ? DataMappingControllerV2.class.getName().substringBefore('.') + '__' 
                 : '';

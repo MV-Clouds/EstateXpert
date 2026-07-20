@@ -12,9 +12,7 @@ import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuick
 import checkContactDateFields from '@salesforce/apex/EmailCampaignController.checkContactDateFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getCampaign from '@salesforce/apex/EmailCampaignController.getCampaign';
-// New import for Broadcast Groups
 import getBroadcastEmailGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastEmailGroups';
-
 
 export default class EmailCampaignTemplateForm extends NavigationMixin(LightningElement) {
     @track contacts = [];
@@ -322,7 +320,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Method Name: loadBroadcastGroups
     * @description: Method to load broadcast groups from the backend
     * Date: 19/11/2025
-    * Created By: Gemini
+    * Created By: Vyom Soni
     */
     loadBroadcastGroups(){
         getBroadcastEmailGroups()
@@ -517,7 +515,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Method Name: handleBroadcastGroupChange
     * @description: Method to handle broadcast group selection
     * Date: 19/11/2025
-    * Created By: Gemini
+    * Created By: Vyom Soni
     */
     handleBroadcastGroupChange(event) {
         const groupId = event.target.dataset.value;
@@ -1150,7 +1148,7 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     * Method Name: checkForChanges
     * @description: Method to enable/disable Save and Revert buttons based on changes
     * Date: 19/11/2025
-    * Created By: Gemini
+    * Created By: Vyom Soni
     */
     checkForChanges() {
         // Enable buttons if any changes have been made

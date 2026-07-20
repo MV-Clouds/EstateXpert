@@ -93,20 +93,6 @@ private class WhatsAppFlowControllerV2Test {
         Test.stopTest();
     }
 
-    // @isTest
-    // public static void testSaveWhatsAppFlowCreateFlowFail400(){
-
-    //     // Create mock response for the HTTP request inside the controller
-    //     HttpResponse mockResponse = createMockResponse('400', '{"error": {"message": "Bad Request"}}');
-    //     MockHttpResponseGenerator mock = new MockHttpResponseGenerator(mockResponse);
-    //     Test.setMock(HttpCalloutMock.class, mock);
-        
-    //     Test.startTest();
-    //     // Call the method that makes the HTTP callout
-    //     String flowId = WhatsAppFlowControllerV2.saveWhatsAppFlow('Test Flow', new List<String>{'SIGN_UP','CONTACT_US'}, '{"version": "7.2","screens": [{"id": "DEMO_SCREEN","title": "Demo","terminal": true,"layout": {"type": "SingleColumnLayout","children": [{"type": "Footer","label": "Continue","on-click-action": {"name": "complete","payload": {}}]}}]}', 'Send a survey', null, null);
-    //     Test.stopTest();
-    // }
-
 
     @isTest
     public static void testSaveWhatsAppFlowUpdateFlowSuccess(){
@@ -149,19 +135,6 @@ private class WhatsAppFlowControllerV2Test {
         Flow__c flowRecord = [SELECT Id, Flow_Id__c, Flow_JSON__c FROM Flow__c LIMIT 1];
         String result = WhatsAppFlowControllerV2.publishWhatsAppFlow('flow-1', flowRecord.Id);
         Test.stopTest();
-    }
-
-    @isTest
-    public static void testCloneWhatsAppFlowSuccess(){
-        // Create mock response for the HTTP request inside the controller
-        // HttpResponse mockResponse = createMockResponse('200', '{"Create Flow": {"value": {"id": "flow-1"}}}');
-        // MockHttpResponseGenerator mock = new MockHttpResponseGenerator(mockResponse);
-        // Test.setMock(HttpCalloutMock.class, mock);
-        
-        // Test.startTest();
-        // Flow__c flowRecord = [SELECT Id, Flow_Id__c, Flow_JSON__c FROM Flow__c LIMIT 1];
-        // String result = WhatsAppFlowControllerV2.cloneWhatsAppFlow(flowRecord.Id, 'Cloneed Flow');
-        // Test.stopTest();
     }
 
     @isTest

@@ -1,6 +1,6 @@
 public without sharing class InstagramController {
 
-      public Boolean isRecordCreated { get; set; }
+    public Boolean isRecordCreated { get; set; }
     public Boolean hasError { get; set; }
     public String errorMessage { get; set; }
     public String longLivedToken { get; set; }

@@ -119,37 +119,6 @@ public without sharing class WhatsAppChatTriggerHandler {
                 Database.SaveResult[] results = Database.update(broadcastList, false); // Capture update results
             }
 
-            // Step: Update Broadcast_Group_Member__c status based on phone number and broadcast
-            // Map<String, String> broadcastPhoneToStatus = new Map<String, String>();
-            // for (Chat__c chat : recordNewList) {
-            //     if (chat.WB_Broadcast__c != null && chat.Phone__c != null && chat.Message_Status__c != null) {
-            //         String key = chat.Phone__c;
-            //         broadcastPhoneToStatus.put(key, chat.Message_Status__c);
-            //     }
-            // }
-            // System.debug('broadcastPhoneToStatus ==> ' + broadcastPhoneToStatus);
-            // List<Broadcast_Group_Member__c> membersToUpdate = new List<Broadcast_Group_Member__c>();
-            // if (!broadcastPhoneToStatus.isEmpty()) {
-            //     List<Broadcast_Group_Member__c> matchedMembers = [
-            //         SELECT Id, Phone_Number__c, Status__c
-            //         FROM Broadcast_Group_Member__c
-            //         WHERE Phone_Number__c IN :new List<String>(broadcastPhoneToStatus.keySet()) AND Broadcast_Group_ID__c IN :groupIdList
-            //     ];
-            //     System.debug('matchedMembers ==> ' + matchedMembers);
-
-            //     for (Broadcast_Group_Member__c member : matchedMembers) {
-            //         String key = member.Phone_Number__c;
-            //         if (broadcastPhoneToStatus.containsKey(key)) {
-            //             member.Status__c = broadcastPhoneToStatus.get(key);
-            //             membersToUpdate.add(member);
-            //         }
-            //     }
-            //     System.debug('membersToUpdate ==> '+membersToUpdate);
-            //     if (!membersToUpdate.isEmpty()) {
-            //         update membersToUpdate;
-            //     }
-            // }
-
             // Publishing the event will not affect here so whether the broadcast count is updated or not it status will update for sure so for safer side using it here instead of calling multuple api calls
             BroadcastUpdateEvent__e	 broadcastEvent = new BroadcastUpdateEvent__e();
             broadcastEvent.IsChanged__c	= true;

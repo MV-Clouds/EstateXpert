@@ -2362,7 +2362,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * @description: Open the email compose modal.
     *               Fetches PDF templates + pre-fills contact from inquiry.
     * Date: 17/07/2026
-    * Created By: Antigravity
     */
     openEmailModal() {
         if (!this.emailSelectedListingId) {
@@ -2437,7 +2436,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * Method Name: closeEmailModal
     * @description: Close the email compose modal and reset all state.
     * Date: 17/07/2026
-    * Created By: Antigravity
     */
     closeEmailModal() {
         this.isEmailModalOpen = false;
@@ -2493,7 +2491,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     * @description: Validates and starts the send flow.
     *               Generates PDF via VF iframe, then calls Apex.
     * Date: 17/07/2026
-    * Created By: Antigravity
     */
     sendListingsEmail() {
         if (!this.emailSelectedTemplateId) {

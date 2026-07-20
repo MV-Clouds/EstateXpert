@@ -6,6 +6,7 @@ import deprecateWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.depre
 import publishAndDeprecateWhatsAppFlow from '@salesforce/apex/WhatsAppFlowController.publishAndDeprecateWhatsAppFlow';
 import getFlowByIdWithScreens from '@salesforce/apex/WhatsAppFlowControllerV2.getFlowByIdWithScreens';
 import cloneWhatsAppFlow from '@salesforce/apex/WhatsAppFlowControllerV2.cloneWhatsAppFlow';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo, getPicklistValues } from "lightning/uiObjectInfoApi";
 import FLOW_OBJECT from "@salesforce/schema/Flow__c";
@@ -30,6 +31,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     @track isEditMode = false;
     @track isCloneFlow = false;
     @track cloneFlowName = '';
+    @track hasBusinessAccountConfigured = false;
 
     // Clone modal state
     @track showCloneModal = false;
@@ -153,7 +155,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         }
     }
 
-    connectedCallback() {
+    async connectedCallback() {
         try {
             loadStyle(this, MulishFontCss)
                 .then(() => {
@@ -162,10 +164,33 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                 .catch(error => {
                     console.log('Error occuring during loading external css', error);
                 });
+
+            await this.checkBusinessAccountConfig();
+            if (!this.hasBusinessAccountConfigured) {
+                this.isLoading = false;
+                return;
+            }
+
             this.isFlowVisible = true;
             this.fetchWhatsAppFlows();
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
+        }
+    }
+
+    /*
+    * Method Name: checkBusinessAccountConfig
+    * @description: Method to check if WBConnect business account is configured
+    * Date: 20/07/2026
+    * Created By: Karan Singh
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
         }
     }
 

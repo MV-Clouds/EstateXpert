@@ -16,6 +16,7 @@ import getWhatsAppTemplates from '@salesforce/apex/WBTemplateController.getWhats
 import getCategoryAndStatusPicklistValues from '@salesforce/apex/WBTemplateController.getCategoryAndStatusPicklistValues';
 import deleteTemplete from '@salesforce/apex/WBTemplateController.deleteTemplete';
 import cloneWBTemplate from '@salesforce/apex/WBTemplateController.cloneWBTemplate';
+import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { NavigationMixin } from 'lightning/navigation';
@@ -29,6 +30,7 @@ const MAX_EDITS_IN_30_DAYS = 10;
 
 export default class WbAllTemplatePage extends NavigationMixin(LightningElement) {
     @track isTemplateVisible = false;
+    @track hasBusinessAccountConfigured = false;
     @track categoryValue='';
     @track timePeriodValue='';
     @track statusValues='';
@@ -186,7 +188,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
 
-    connectedCallback(){
+    async connectedCallback(){
         try {
             loadStyle(this, MulishFontCss)
             .then(() => {
@@ -195,12 +197,35 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             .catch(error => {
                 console.log('Error occuring during loading external css', error);
             });
+
+            await this.checkBusinessAccountConfig();
+            if (!this.hasBusinessAccountConfigured) {
+                this.isLoading = false;
+                return;
+            }
+
             this.isTemplateVisible = true;
             this.fetchCategoryAndStatusOptions();
             this.fetchAllTemplate(true);
             this.registerPlatformEventListener();
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
+        }
+    }
+
+    /*
+    * Method Name: checkBusinessAccountConfig
+    * @description: Method to check if WBConnect business account is configured
+    * Date: 20/07/2026
+    * Created By: Karan Singh
+    */
+    async checkBusinessAccountConfig() {
+        try {
+            const result = await hasBusinessAccountId();
+            this.hasBusinessAccountConfigured = result;
+        } catch (error) {
+            console.error('Error checking business account configuration:', error);
+            this.hasBusinessAccountConfigured = false;
         }
     }
 

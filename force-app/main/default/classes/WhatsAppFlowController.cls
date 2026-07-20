@@ -1,12 +1,13 @@
-/**WBConnect_
+/**
  * Class Name    : WhatsAppFlowController
  * Test Class    : WhatsAppFlowController
  * @description  : Handles WhatsApp Flow operations like create, update, publish, delete, deprecate and fetch preview URL.
- * Created Date  : 
- * Created By    : Kavya Trivedi
- *--------------------------------------------------------------------------------
- * Modification History :
- * Date Modified : 01/09/2025 - Kavya Trivedi - Code refactor
+ * Created By    : Harsh Gandhi
+ *
+ * MODIFICATION LOG*
+ * Last Update Date : 20/07/2026
+ * Updated By : Harsh Gandhi
+ * Change Description : Code refactor
  */
 public with sharing class WhatsAppFlowController {
     

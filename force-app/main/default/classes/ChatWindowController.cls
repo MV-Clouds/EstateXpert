@@ -1,25 +1,15 @@
 /**
-* Class Name: ChatWindowController
-* Test Class: ChatWindowControllerTest
-* @description: Used for handling various actions for the chat
-* Created Date: 22 Nov, 2024
-* Created By: Kevin Suvagiya
-*--------------------------------------------------------------------------------
-* Last Modified By: Kevin Suvagiya
-* Last Modified Date: 03 Jan 2025
-* Last Modification Description: Updated the field api name for template header, body and footer
-*--------------------------------------------------------------------------------
-* Modification History:
-* Date Modified - Developer Name - Description
-* 25 Nov, 2024  - Kevin Suvagiya - Added a method to link the chat record with the exception
-* 05 Dec, 2024  - Kevin Suvagiya - Updated the createChat to create the contentDistribution record for the files
-* 06 Dec, 2024  - Kevin Suvagiya - Added implementation for the theme preference logic
-* 09 Dec, 2024  - Kevin Suvagiya - Added method to send the message to the user with http request
-* 11 Dec, 2024  - Kevin Suvagiya - Added a method to fetch the full template data with replaced variables
-* 19 Mar, 2025  - Harsh Gandhi - Updated dynamic Name & Phone field from custom metadata and Logic for only object related templates are visible for sending Updated methods getCombinedData & getTemplateData
-* 26 Mar, 2025  - Harsh Gandhi - Updated Conditions to handle multiple media types in createChat method
-* 22 Jan, 2026  - Rachit Shah - Added method to get merge field value for related object in template preview
-**/
+ * Class Name: ChatWindowController
+ * Test Class: ChatWindowControllerTest
+ * @description: Used for handling various actions for the chat
+ * Created Date: 22 Nov, 2024
+ * Created By: Harsh Gandhi
+ *
+ * MODIFICATION LOG*
+ * Last Update Date : 20/07/2026
+ * Updated By : Harsh Gandhi
+ * Change Description : Updated field api names, exception handling, content distribution for files, theme preferences, message sending, dynamic field mapping, multiple media types in createChat, and merge field resolution for related objects.
+ */
 public with sharing class ChatWindowController {
 
     /* Variables to be used generally for the class 

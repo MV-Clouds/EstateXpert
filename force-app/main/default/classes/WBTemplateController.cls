@@ -5,15 +5,12 @@
                 picklist value from static resource and callout for creation of template.
  * Date: 25/11/2024
  * Created By: Rachit Shah
+ *
+ * MODIFICATION LOG*
+ * Last Update Date : 20/07/2026
+ * Updated By : Harsh Gandhi
+ * Change Description : Added logic to create edit history record, fetch fields with relationship support, handle polymorphic relationships, and template edit restrictions from Meta.
  */
- /***********************************************************************
- MODIFICATION LOG*
-* Last Update Date : 16/07/2025
-* Updated By : Divij Modi
-* Change Description : Added logic to create edit history record and code clean
-* 22 Jan, 2025  - Rachit Shah - Added methods to fetch fields with relationship support and handle polymorphic relationships
-* 06 Feb, 2026  - Rachit Shah  -  Updated code to handle the tenplate edit restriction which we have from meta
- ***********************************************************************/
 
 public with sharing class WBTemplateController {
     

@@ -3,13 +3,12 @@
  * @description: Used LWC components to preview the created template in meta.
  * Date: 27/11/2024
  * Created By: Kajal Tiwari
+ *
+ * MODIFICATION LOG*
+ * Last Update Date : 20/07/2026
+ * Updated By : Harsh Gandhi
+ * Change Description : Code Rework
  */
- /***********************************************************************
-MODIFICATION LOG*
- * Last Update Date : 30/04/2025
- * Updated By : Divij Modi
- * Change Description :Code Rework
- ********************************************************************** */
 
 import { LightningElement,track,api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';

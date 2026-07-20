@@ -128,7 +128,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
         maxCodetxt: 15,
         maxPackTxt: 224,
         maxHashTxt: 11,
-        chunkSize: 3145728,
+        chunkSize: 1048576,
         maxHierarchyLevel: 5
     };
 
@@ -2152,6 +2152,7 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                 .catch((error) => {
                     this.isLoading = false;
                     this.showToast('Error uploading file!', 'error');
+                    console.error('Error uploading file - ', error);
                 });
         } else {
             this.showToast('Please select a file first!', 'error');
@@ -2238,32 +2239,34 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
     uploadFileToMeta() {
         try {
             this.isLoading = true;
-            if (!this.file) {
+            if (!this.file && !this.contentVersionId && !this.filePreview) {
                 this.isLoading = false;
                 this.showToast('Please select a file to upload.', 'error');
                 return;
             }
 
-            startUploadSession({
-                fileName: this.fileName,
-                fileLength: this.fileSize,
-                fileType: this.fileType
+            getMetaHeaderHandler({
+                fileUrlOrContentVersionId: this.filePreview || '',
+                contentVersionId: this.contentVersionId || ''
             })
                 .then(result => {
-                    if (result) {
-                        this.uploadSessionId = result;
-                        this.uploadChunksToMeta();
+                    if (result && result.trim()) {
+                        this.headerHandle = result;
+                        this.isLoading = false;
+                        this.showToast('File uploaded successfully.', 'success');
                     } else {
-                        this.showToast('Failed to start upload session.', 'error');
+                        this.showToast('Failed to get header handle from Meta.', 'error');
                         this.isLoading = false;
                     }
                 })
                 .catch(error => {
-                    console.error('Failed upload session.', error.body);
+                    console.error('Failed upload session: ', error);
                     this.isLoading = false;
+                    this.showToast(error.body?.message || 'Failed to upload file to Meta.', 'error');
                 });
         } catch (error) {
             console.error('Error starting upload session: ', error);
+            this.isLoading = false;
         }
     }
 
@@ -2298,13 +2301,15 @@ export default class WbCreateTemplatePage extends NavigationMixin(LightningEleme
                         .then(result => {
                             if (result) {
                                 let serializeResult = JSON.parse(result);
-                                this.headerHandle = serializeResult.headerHandle;
+                                if (serializeResult.headerHandle) {
+                                    this.headerHandle = serializeResult.headerHandle;
+                                }
                                 // Only set contentDocumentId when NOT using AWS (local Salesforce storage)
                                 if (!this.isAWSEnabled && serializeResult.contentDocumentId) {
                                     this.contentDocumentId = serializeResult.contentDocumentId;
                                 }
 
-                                chunkStart += this.LIMITS.chunkSize;
+                                chunkStart += chunk.size;
                                 if (chunkStart < this.fileSize) {
                                     uploadNextChunk();
                                 } else {

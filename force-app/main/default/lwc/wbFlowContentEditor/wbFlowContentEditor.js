@@ -1126,7 +1126,37 @@ export default class WbFlowContentEditor extends LightningElement {
 
     handleHeightChange(event) {
         const sectionId = event.target.dataset.sectionId;
+        let rawValue = event.target.value;
+        let value = parseInt(rawValue, 10);
+
+        if (!isNaN(value) && value > 1000) {
+            value = 1000;
+            event.target.value = 1000;
+        }
+
+        this.contentSections = this.contentSections.map(section => {
+            if (section.id === sectionId) {
+                return { ...section, height: isNaN(value) ? '' : value };
+            }
+            return section;
+        });
+
+        // Force re-render
+        this.contentSections = [...this.contentSections];
+        this.dispatchContentUpdate();
+    }
+
+    handleHeightBlur(event) {
+        const sectionId = event.target.dataset.sectionId;
         let value = parseInt(event.target.value, 10);
+
+        if (isNaN(value) || value < 1) {
+            value = 200; // Default height if invalid or empty
+        } else if (value > 1000) {
+            value = 1000;
+        }
+
+        event.target.value = value;
 
         this.contentSections = this.contentSections.map(section => {
             if (section.id === sectionId) {
@@ -1135,7 +1165,6 @@ export default class WbFlowContentEditor extends LightningElement {
             return section;
         });
 
-        // Force re-render
         this.contentSections = [...this.contentSections];
         this.dispatchContentUpdate();
     }

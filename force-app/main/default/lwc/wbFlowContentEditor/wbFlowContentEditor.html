@@ -391,13 +391,14 @@
                                         <!-- Image Height -->
                                         <template if:true={section.imageUrl}>
                                             <div class="field-row">
-                                                <label class="field-label">Image height</label>
+                                                <label class="field-label">Image height (px)</label>
                                                 <div class="input-wrapper">
                                                     <input type="number" value={section.height}
-                                                        class="native-input native-input-height" min="1"
+                                                        class="native-input native-input-height" min="1" max="1000"
                                                         placeholder="200" data-section-id={section.id}
-                                                        oninput={handleHeightChange} />
+                                                        oninput={handleHeightChange} onblur={handleHeightBlur} />
                                                 </div>
+                                                <div class="image-info-text">Height range: 1px to 1000px (Default: 200px)</div>
                                             </div>
                                         </template>
                                     </template>

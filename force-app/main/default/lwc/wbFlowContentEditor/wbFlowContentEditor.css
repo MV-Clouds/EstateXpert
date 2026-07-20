@@ -192,7 +192,7 @@
 
 .char-counter-inside {
     position: absolute;
-    right: 14px;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.75rem;
@@ -380,27 +380,48 @@
     transform: translateX(20px);
 }
 
-.delete-btn {
-    background: none;
-    border: none;
-    height: 34px;
-    cursor: pointer;
-    color: var(--color-text-muted);
-    transition: all var(--transition-fast);
+.delete-btn,
+.delete-option-btn,
+.delete-icon-css {
+    padding: 6px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    border-radius: 0.375rem;
+    align-items: center;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
 }
 
-.delete-btn:hover {
-    background-color: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
+.delete-btn:hover,
+.delete-option-btn:hover:not(:disabled),
+.delete-icon-css:hover:not(:disabled) {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
-.delete-btn svg {
-    width: 20px;
-    height: 20px;
+.delete-btn:hover svg path,
+.delete-option-btn:hover:not(:disabled) svg path,
+.delete-icon-css:hover:not(:disabled) svg path {
+    stroke: #dc2626;
+}
+
+.delete-option-btn:disabled,
+.delete-btn:disabled,
+.delete-icon-css:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    box-shadow: none;
+    transform: none;
 }
 
 /* Selection Options */
@@ -422,35 +443,6 @@
 
 .option-input {
     flex: 1;
-}
-
-.delete-option-btn {
-    background: none;
-    border: none;
-    height: 34px;
-    cursor: pointer;
-    color: var(--color-text-muted);
-    transition: all var(--transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    border-radius: 0.375rem;
-}
-
-.delete-option-btn:hover:not(:disabled) {
-    background-color: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
-}
-
-.delete-option-btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.delete-option-btn svg {
-    width: 18px;
-    height: 18px;
 }
 
 .add-option-btn {

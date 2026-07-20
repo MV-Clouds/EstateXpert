@@ -38,7 +38,7 @@
 }
 
 .currentPreview{
-    width: 120px;
+    /* width: 120px; */
     min-width: 100px;
     max-width: 150px;
     flex-shrink: 0;

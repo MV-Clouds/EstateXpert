@@ -853,20 +853,34 @@ public with sharing class WBTemplateController {
             req.setEndpoint(endpoint);
             req.setMethod('POST');            
             req.setHeader('Authorization', 'OAuth ' + accessToken);
-            req.setHeader('file_offset', String.valueOf(fileWrapper.chunkStart)); 
-            req.setHeader('Content-Range', 'bytes ' + fileWrapper.chunkStart + '-' + (fileWrapper.chunkStart + fileWrapper.chunkSize - 1) + '/' + fileBlob.size());            
+            req.setHeader('file_offset', String.valueOf(fileWrapper.chunkStart));
+            req.setHeader('Content-Type', 'application/octet-stream');
             
             req.setBodyAsBlob(fileBlob);
 
             HttpResponse res = http.send(req);
 
-            if (res.getStatusCode() == 200) {
-                Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-                String headerHandle = (String) responseMap.get('h');
-                    return JSON.serialize(new Map<String, String>{
-                        'headerHandle' => headerHandle
-                    });
-                // return headerHandle; 
+            if (res.getStatusCode() == 200 || res.getStatusCode() == 206) {
+                String resBody = res.getBody();
+                Map<String, Object> responseMap = String.isNotBlank(resBody) ? (Map<String, Object>) JSON.deserializeUntyped(resBody) : null;
+                
+                Boolean isPartialRequest = false;
+                if (responseMap != null && responseMap.containsKey('debug_info')) {
+                    Map<String, Object> debugInfo = (Map<String, Object>) responseMap.get('debug_info');
+                    if (debugInfo != null && debugInfo.get('type') == 'PartialRequestError') {
+                        isPartialRequest = true;
+                    }
+                }
+
+                if (responseMap != null && (responseMap.containsKey('error') || (responseMap.containsKey('debug_info') && !isPartialRequest))) {
+                    ErrorHandler.insertErrordata(null, 'WBTemplateController', 'uploadFileChunk', 'Meta upload chunk error (' + res.getStatusCode() + '): ' + resBody);
+                    return '';
+                }
+
+                String headerHandle = (responseMap != null && responseMap.containsKey('h')) ? (String) responseMap.get('h') : '';
+                return JSON.serialize(new Map<String, String>{
+                    'headerHandle' => headerHandle
+                });
             } else {
                 ErrorHandler.insertErrordata(null, 'WBTemplateController', 'uploadFileChunk', 'HTTP callout failed with status: ' + res.getStatusCode() + ' - ' + res.getBody());
             }
@@ -1078,7 +1092,7 @@ public with sharing class WBTemplateController {
             String fileName;
             Integer fileLength;
 
-            if (fileUrlOrContentVersionId.contains('amazonaws.com')){
+            if (String.isNotBlank(fileUrlOrContentVersionId) && fileUrlOrContentVersionId.contains('amazonaws.com')){
                 // ---- S3 FILE ----
                 Http http = new Http();
                 HttpRequest s3Req = new HttpRequest();
@@ -1338,6 +1352,7 @@ public with sharing class WBTemplateController {
         @AuraEnabled public String fileContent;
         @AuraEnabled public Integer chunkStart;
         @AuraEnabled public Integer chunkSize;
+        @AuraEnabled public Long totalFileSize;
         @AuraEnabled public String fileName;
         @AuraEnabled public Boolean isLastChunk;
     }

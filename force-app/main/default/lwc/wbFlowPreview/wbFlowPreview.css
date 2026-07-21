@@ -532,6 +532,26 @@
     margin-bottom: 0.15rem;
 }
 
+.whatsapp-flow-previewer-input::placeholder {
+    color: var(--input-placeholder-color, #a5a5a5);
+    opacity: 1;
+}
+
+.whatsapp-flow-previewer-input::-webkit-input-placeholder {
+    color: var(--input-placeholder-color, #a5a5a5);
+    opacity: 1;
+}
+
+.whatsapp-flow-previewer-input::-moz-placeholder {
+    color: var(--input-placeholder-color, #a5a5a5);
+    opacity: 1;
+}
+
+.whatsapp-flow-previewer-input:-ms-input-placeholder {
+    color: var(--input-placeholder-color, #a5a5a5);
+    opacity: 1;
+}
+
 /* Error state for inputs */
 .whatsapp-flow-previewer-input.error,
 .whatsapp-flow-previewer-input.error-border {
@@ -547,7 +567,7 @@
 }
 
 .whatsapp-flow-previewer-helper-text {
-    color: #666;
+    color: #a2a2a2;
     font-size: 0.75rem;
     /* No top gap — sit right under the input border */
     margin-top: 0;
@@ -761,15 +781,16 @@ input[type="number"] {
     --header-text-color: #ddd;
     --content-bg-color: #2d2c2c;
     --border-color: #444;
-    --heading-color: #ddd;
+    --heading-color: #fafafa;
     --subheading-color: #ccc;
-    --body-text-color: #ccc;
+    --body-text-color: #fafafa;
     --footer-text-color: #999;
     --footer-bg-color: #2d2c2c;
     --continue-btn-bg: #388e3c;
-    --input-border-color: #555;
+    --input-border-color: #767778;
     --input-bg-color: #2c2c2c;
-    --input-text-color: #ddd;
+    --input-text-color: #fafafa;
+    --input-placeholder-color: #a5a5a5;
     --input-border-active-color: #66bb6a;
     --label-color: #999;
     --label-bg-color: #2c2c2c;

@@ -877,12 +877,18 @@
 
 .search-template-input {
     background-color: var(--composer-bg-color, white);
+    color: var(--composer-text-color, black);
     border: 1px solid #a9a9a970;
     border-radius: 4px;
     outline: none;
     user-select: text;
     width: 100%;
     padding: 4px 6px 4px 24px;
+}
+
+.search-template-input::placeholder {
+    color: var(--composer-text-color, black);
+    opacity: 0.6;
 }
 
 .search-template-icon {

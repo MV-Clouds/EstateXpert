@@ -1142,11 +1142,12 @@ public with sharing class WBTemplateController {
 
             // ---- UPLOAD TO META ----
             String resultJson = uploadFileChunk(serializedFileWrapper, false);
-            Map<String, Object> resultMap = (Map<String, Object>)JSON.deserializeUntyped(resultJson);
-            
-            if (resultMap.containsKey('headerHandle')){
-                headerHandleResult = (String) resultMap.get('headerHandle');
-                return headerHandleResult;
+            if (String.isNotBlank(resultJson)) {
+                Map<String, Object> resultMap = (Map<String, Object>)JSON.deserializeUntyped(resultJson);
+                if (resultMap != null && resultMap.containsKey('headerHandle')){
+                    headerHandleResult = (String) resultMap.get('headerHandle');
+                    return headerHandleResult;
+                }
             }
 
             

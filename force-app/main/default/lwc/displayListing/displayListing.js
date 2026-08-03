@@ -24,6 +24,8 @@ import sendListingEmailWithPDF from '@salesforce/apex/TemplateBuilderController.
 const CONTACT_ID_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__c';
 const CONTACT_NAME_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__r.Name';
 const CONTACT_EMAIL_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__r.Email';
+const MAX_EMAIL_SUBJECT_LEN = 3000;
+const MAX_EMAIL_BODY_LEN = 32000;
 
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
@@ -2385,7 +2387,11 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         const listing = this.totalListing.find(l => l.id === listingId);
         const listingName = listing ? listing.name : 'Listing';
 
-        this.emailSubject = `Listing Documents – ${listingName}`;
+        let defaultSubject = `Listing Documents – ${listingName}`;
+        if (defaultSubject.length > MAX_EMAIL_SUBJECT_LEN) {
+            defaultSubject = defaultSubject.slice(0, MAX_EMAIL_SUBJECT_LEN);
+        }
+        this.emailSubject = defaultSubject;
         this.emailBody = `Hi,\n\nPlease find attached the listing document(s) for your reference.\n\nKind regards`;
 
         // Fetch all PDF templates (listing-object scoped)
@@ -2449,39 +2455,85 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
     // ── Template picker ───────────────────────────────────────────────────────
 
-    handleEmailTemplateSearchClick() {
-        this.emailTemplateDropdownOpen = true;
+    toggleEmailTemplateDropdown(event) {
+        event.stopPropagation();
+        this.emailTemplateDropdownOpen = !this.emailTemplateDropdownOpen;
+        if (this.emailTemplateDropdownOpen) {
+            this.emailTemplateSearch = '';
+        }
+    }
+
+    preventTemplateDropdownClose(event) {
+        event.stopPropagation();
+    }
+
+    stopPickerPropagation(event) {
+        if (event) event.stopPropagation();
+    }
+
+    closeEmailTemplateDropdown() {
+        this.emailTemplateDropdownOpen = false;
     }
 
     handleEmailTemplateSearch(event) {
         this.emailTemplateSearch = event.target.value;
-        this.emailTemplateDropdownOpen = true;
-    }
-
-    handleEmailTemplateBlur() {
-        setTimeout(() => { this.emailTemplateDropdownOpen = false; }, 150);
     }
 
     handleEmailTemplateSelect(event) {
         event.preventDefault();
+        event.stopPropagation();
         const val = event.currentTarget.dataset.value;
         const tpl = this.emailAvailableTemplates.find(t => t.value === val);
         if (tpl) {
             this.emailSelectedTemplateId = tpl.value;
             this.emailSelectedTemplateName = tpl.label;
-            this.emailTemplateSearch = tpl.label;
+            this.emailTemplateSearch = '';
         }
         this.emailTemplateDropdownOpen = false;
     }
 
     // ── Email compose fields ──────────────────────────────────────────────────
 
+    get maxEmailSubjectLen() {
+        return MAX_EMAIL_SUBJECT_LEN;
+    }
+
+    get emailSubjectCharsLeft() {
+        return MAX_EMAIL_SUBJECT_LEN - (this.emailSubject ? this.emailSubject.length : 0);
+    }
+
+    get emailSubjectCounterClass() {
+        return this.emailSubjectCharsLeft <= 100 ? 'char-counter char-counter--warn' : 'char-counter';
+    }
+
+    get maxEmailBodyLen() {
+        return MAX_EMAIL_BODY_LEN;
+    }
+
+    get emailBodyCharsLeft() {
+        return MAX_EMAIL_BODY_LEN - (this.emailBody ? this.emailBody.length : 0);
+    }
+
+    get emailBodyCounterClass() {
+        return this.emailBodyCharsLeft <= 200 ? 'char-counter char-counter--warn' : 'char-counter';
+    }
+
     handleEmailSubjectChange(event) {
-        this.emailSubject = event.target.value;
+        let val = event.target.value || '';
+        if (val.length > MAX_EMAIL_SUBJECT_LEN) {
+            val = val.slice(0, MAX_EMAIL_SUBJECT_LEN);
+            event.target.value = val;
+        }
+        this.emailSubject = val;
     }
 
     handleEmailBodyChange(event) {
-        this.emailBody = event.target.value;
+        let val = event.target.value || '';
+        if (val.length > MAX_EMAIL_BODY_LEN) {
+            val = val.slice(0, MAX_EMAIL_BODY_LEN);
+            event.target.value = val;
+        }
+        this.emailBody = val;
     }
 
     // ── Send flow (PDF generation) ───────────────────────────────────────────
@@ -2494,19 +2546,27 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     */
     sendListingsEmail() {
         if (!this.emailSelectedTemplateId) {
-            this.showToast('Error', 'Please select a template.', 'error');
+            this.showToast('Error', 'Please select a PDF Template.', 'error');
             return;
         }
         if (!this.emailRecipientEmail) {
-            this.showToast('Error', 'Inquiry contact email not found.', 'error');
+            this.showToast('Error', 'No recipient contact email found in To field.', 'error');
             return;
         }
         if (!this.emailSubject?.trim()) {
-            this.showToast('Error', 'Please enter an email subject.', 'error');
+            this.showToast('Error', 'Please enter a Subject.', 'error');
+            return;
+        }
+        if (this.emailSubject.length > MAX_EMAIL_SUBJECT_LEN) {
+            this.showToast('Error', `Subject must not exceed ${MAX_EMAIL_SUBJECT_LEN.toLocaleString()} characters.`, 'error');
             return;
         }
         if (!this.emailBody?.trim()) {
-            this.showToast('Error', 'Please enter an email body.', 'error');
+            this.showToast('Error', 'Please enter a Message.', 'error');
+            return;
+        }
+        if (this.emailBody.length > MAX_EMAIL_BODY_LEN) {
+            this.showToast('Error', `Message must not exceed ${MAX_EMAIL_BODY_LEN.toLocaleString()} characters.`, 'error');
             return;
         }
 

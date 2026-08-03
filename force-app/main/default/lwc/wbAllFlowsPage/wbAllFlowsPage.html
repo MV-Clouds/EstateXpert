@@ -116,7 +116,7 @@
                                             scope="col">
                                             <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
                                                 role="button" tabindex="0">
-                                                <span class="slds-truncate" title="Title">Last Updated</span>
+                                                <span class="slds-truncate" title="Title">Last Modified Date</span>
                                                 <span class="slds-icon_container slds-icon-utility-arrowdown">
                                                     <svg data-index="LastModifiedDate" class="listing-manager-icon"
                                                         viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
@@ -162,7 +162,7 @@
                                             <td data-label="Status" class="truncate_css">
                                                 <div class={record.statusClass}>{record.MVEX__Status__c}</div>
                                             </td>
-                                            <td data-label="Last Updated">
+                                            <td data-label="Last Modified Date">
                                                 <div>{record.LastModifiedDate}</div>
                                             </td>
                                             <td data-label="Created Date">
@@ -392,12 +392,18 @@
                             will be duplicated as a new Draft in your account.
                         </p>
                         <div class="clone-name-field">
-                            <label class="clone-name-label" for="cloneFlowNameInput">Flow Name</label>
-                            <input id="cloneFlowNameInput" type="text" class="clone-name-input"
-                                placeholder="Enter clone name" value={cloneNameInput} maxlength={MAX_FLOW_NAME_LENGTH}
-                                oninput={handleCloneNameInput} />
+                            <label class="clone-name-label" for="cloneFlowNameInput">
+                                <span class="clone-red">*</span> New Flow Name
+                            </label>
+                            <div class="clone-input-container">
+                                <lightning-input id="cloneFlowNameInput"
+                                    placeholder="Enter name for the cloned flow" name="cloneFlowName"
+                                    value={cloneNameInput} variant="label-hidden" onchange={handleCloneNameInput}
+                                    maxlength={MAX_FLOW_NAME_LENGTH}>
+                                </lightning-input>
+                            </div>
                             <template if:true={cloneNameError}>
-                                <p class="clone-name-error">{cloneNameError}</p>
+                                <p class="clone-name-error clone-red">{cloneNameError}</p>
                             </template>
                         </div>
                     </div>

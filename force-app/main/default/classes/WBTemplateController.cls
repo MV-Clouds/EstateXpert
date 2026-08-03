@@ -900,11 +900,19 @@ public with sharing class WBTemplateController {
     @AuraEnabled
     public static string deleteTemplete(String templateId){
         try {
+            WhatsappTemplate__c wbTempRec = [SELECT Id, Name, Template_Name__c, Status__c, Template_Id__c FROM WhatsappTemplate__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
+
+            // If template is Draft or hasn't been created in Meta, delete directly from Salesforce without Meta callout
+            if (wbTempRec.Status__c == 'Draft' || wbTempRec.Status__c == 'DRAFT' || String.isBlank(wbTempRec.Template_Id__c) || wbTempRec.Template_Id__c == 'DRAFT') {
+                if (WhatsappTemplate__c.sObjectType.getDescribe().isDeletable()) {
+                    delete wbTempRec;
+                }
+                return 'Template deleted successfully';
+            }
+
             if (String.isBlank(SETTINGS.MVEX__Whatsapp_Business_Account_Id__c)) {
                 return 'Business Account ID is not configured in the system.';
             }
-
-            WhatsappTemplate__c wbTempRec = [SELECT Id, Name,Template_Name__c FROM WhatsappTemplate__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
             
             String endpoint = SETTINGS.MVEX__whatsapp_endpoint__c + '/' + SETTINGS.MVEX__APIVersion__c + '/' + SETTINGS.MVEX__Whatsapp_Business_Account_Id__c+'/message_templates?name=' + wbTempRec.Template_Name__c;
 
@@ -1410,6 +1418,7 @@ public with sharing class WBTemplateController {
             WhatsappTemplate__c cloned = new WhatsappTemplate__c(
                 Template_Name__c              = escapedNewName,
                 Template_Id__c                = 'DRAFT',
+                Status__c                     = 'Draft',
                 Template_Category__c          = source.Template_Category__c,
                 Language__c                   = source.Language__c,
                 Header_Type__c                = source.Header_Type__c,

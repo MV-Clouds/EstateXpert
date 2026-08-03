@@ -329,6 +329,8 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
                             MVEX__Template_Category__c: this.handleEmptyValue(record.MVEX__Template_Category__c),
                             LanguageLabel: this.handleEmptyValue(record.LanguageLabel),
                             MVEX__Status__c: this.handleEmptyValue(record.MVEX__Status__c),
+                            rawLastModifiedDate: record.LastModifiedDate,
+                            rawCreatedDate: record.CreatedDate,
                             LastModifiedDate: this.formatDate(record.LastModifiedDate) || '-',
                             CreatedDate: this.formatDate(record.CreatedDate) || '-',
                             isButtonDisabled,
@@ -418,19 +420,33 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
         return (value !== null && value !== undefined && value !== '' && value !== 'null') ? value : '-';
     }
   
-    formatDate(dateString) {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-            timeZone: 'UTC'
-        });
+    formatDate(dateStr) {
+        try {
+            if (!dateStr) return '-';
+
+            let formatdate = new Date(dateStr);
+
+            const day = formatdate.getDate();
+            const month = formatdate.getMonth() + 1;
+            const year = formatdate.getFullYear();
+
+            const paddedDay = day < 10 ? `0${day}` : day;
+            const paddedMonth = month < 10 ? `0${month}` : month;
+
+            let hours = formatdate.getHours();
+            const minutes = formatdate.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+            const paddedHours = hours < 10 ? `0${hours}` : hours;
+
+            return `${paddedDay}/${paddedMonth}/${year} ${paddedHours}:${paddedMinutes} ${ampm}`;
+        } catch (error) {
+            console.error('Error in formatDate:', error);
+            return '-';
+        }
     }
 
     /**
@@ -500,11 +516,16 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
     */
     getStatusClass(status) {
         switch (status) {
-            case 'Active-Quality Pending':        return 'status-approved-class';
-            case 'In-Review':       return 'status-inreview-class';
-            case 'Rejected':        return 'status-rejected-class';
-            case 'Disabled':        return 'status-disabled-class';
-            default:                return 'status-approved-class';
+            case 'Active-Quality Pending':
+            case 'APPROVED':                      return 'status-approved-class';
+            case 'In-Review':
+            case 'PENDING':                       return 'status-inreview-class';
+            case 'Rejected':
+            case 'REJECTED':                      return 'status-rejected-class';
+            case 'Disabled':                      return 'status-disabled-class';
+            case 'Draft':
+            case 'DRAFT':                         return 'status-draft-class';
+            default:                              return 'status-draft-class';
         }
     }
 
@@ -843,7 +864,7 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             if(recordId !== undefined){
                 deleteTemplete({templateId: recordId})
                 .then(data => {
-                    if(data === 'Template deleted successfully'){
+                    if (data === 'Template deleted successfully' || (data && data.includes('deleted from Salesforce successfully'))) {
                         this.showToastSuccess('Template deleted successfully');
                         this.allRecords = this.allRecords.filter(record => record.Id !== recordId); 
                         this.allRecords = this.allRecords.map((record, index) => ({
@@ -909,6 +930,14 @@ export default class WbAllTemplatePage extends NavigationMixin(LightningElement)
             this.filteredRecords = [...this.filteredRecords].sort((a, b) => {
                 let aValue = a[this.sortField];
                 let bValue = b[this.sortField];
+
+                if (this.sortField === 'LastModifiedDate') {
+                    aValue = a.rawLastModifiedDate ? new Date(a.rawLastModifiedDate) : (aValue ? new Date(aValue) : '');
+                    bValue = b.rawLastModifiedDate ? new Date(b.rawLastModifiedDate) : (bValue ? new Date(bValue) : '');
+                } else if (this.sortField === 'CreatedDate') {
+                    aValue = a.rawCreatedDate ? new Date(a.rawCreatedDate) : (aValue ? new Date(aValue) : '');
+                    bValue = b.rawCreatedDate ? new Date(b.rawCreatedDate) : (bValue ? new Date(bValue) : '');
+                }
 
                 if (aValue === undefined) aValue = '';
                 if (bValue === undefined) bValue = '';

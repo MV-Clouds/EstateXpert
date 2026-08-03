@@ -2571,7 +2571,31 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         }
 
         this.emailIsSending = true;
-        this.emailStartPdfGeneration();
+
+        // Verify that the selected template is still available before starting PDF generation
+        getListingAndTemplates({ recordId: this.emailSelectedListingId })
+            .then(result => {
+                const templates = (result && result.templates) ? result.templates : [];
+                const tplExists = templates.some(t => t.Id === this.emailSelectedTemplateId);
+
+                if (!tplExists) {
+                    this.emailIsSending = false;
+                    this.emailAvailableTemplates = templates.map(t => ({
+                        value: t.Id,
+                        label: t.MVEX__Template_Name__c || t.Template_Name__c || t.Id
+                    })).sort((a, b) => a.label.localeCompare(b.label));
+                    this.emailSelectedTemplateId = null;
+                    this.emailSelectedTemplateName = '';
+                    this.showToast('Error', 'Selected template is not available. Please select another template.', 'error');
+                    return;
+                }
+
+                this.emailStartPdfGeneration();
+            })
+            .catch(err => {
+                errorDebugger('DisplayListing', 'sendListingsEmail/getListingAndTemplates', err, 'warn', 'Error verifying template availability');
+                this.emailStartPdfGeneration();
+            });
     }
 
     /**
@@ -2612,7 +2636,13 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
             if (!status || !cvId) {
                 this.emailIsSending = false;
-                const errorMsg = error?.message || 'Failed to generate and save PDF file.';
+                let errorMsg = error?.message || 'Failed to generate and save PDF file.';
+                const errLower = errorMsg.toLowerCase();
+                if (errLower.includes('template') || errLower.includes('not found') || errLower.includes('deleted') || errLower.includes('does not exist')) {
+                    errorMsg = 'Selected template is not available. Please select another template.';
+                    this.emailSelectedTemplateId = null;
+                    this.emailSelectedTemplateName = '';
+                }
                 this.showToast('Error', errorMsg, 'error');
                 return;
             }

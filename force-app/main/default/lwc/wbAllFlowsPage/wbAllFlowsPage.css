@@ -565,8 +565,8 @@
 .clone-modal-subtitle {
     font-size: 14px;
     color: #374151;
-    margin-bottom: 1rem;
-    line-height: 1.5;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
 }
 
 .clone-name-field {
@@ -581,28 +581,22 @@
     color: #374151;
 }
 
-.clone-name-input {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #D1D5DB;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #111827;
-    background: #FFFFFF;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    box-sizing: border-box;
+.clone-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
-.clone-name-input:focus {
-    border-color: #0176D3;
-    box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.15);
+.clone-red {
+    color: #DC2626;
+    margin-right: 2px;
 }
 
 .clone-name-error {
     font-size: 12px;
     color: #DC2626;
     margin: 0;
+    display: block;
 }
 
 .refresh-icon-container {

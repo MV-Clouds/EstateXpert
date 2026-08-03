@@ -65,9 +65,9 @@ public without sharing class CreateTemplateWrapper {
             // Populate Template__c fields dynamically
             String status = metaTemplateStatus;
             whatsAppTemplate.Template_Id__c = metaTempId != null ? metaTempId : whatsAppTemplate.Template_Id__c;
-            whatsAppTemplate.Status__c = (status == null || status == '') ? 'In-Review' : (status == 'PENDING') ? 'In-Review' : 
+            whatsAppTemplate.Status__c = (status == 'APPROVED') ? 'Active-Quality Pending' : 
                                          (status == 'REJECTED') ? 'Rejected' : 
-                                         (status == 'APPROVED') ? 'Active-Quality Pending' : '';
+                                         (status == 'PENDING' || status == 'In-Review') ? 'In-Review' : 'Draft';
             whatsAppTemplate.Template_Name__c = (String) payloadMap.get('name');
             whatsAppTemplate.Template_Category__c = (String) payloadMap.get('category');
             whatsAppTemplate.Language__c = (String) payloadMap.get('language');

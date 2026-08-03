@@ -229,8 +229,10 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                             isPublishedDraft: record.MVEX__Status__c === 'Published Draft',
                             isDeprecated: record.MVEX__Status__c === 'Deprecated',
                             statusClass: this.getStatusClass(record.MVEX__Status__c),
-                            LastModifiedDate: this.formatDate(record.LastModifiedDate),
-                            CreatedDate: this.formatDate(record.CreatedDate)
+                            rawLastModifiedDate: record.LastModifiedDate,
+                            rawCreatedDate: record.CreatedDate,
+                            LastModifiedDate: this.formatDate(record.LastModifiedDate) || '-',
+                            CreatedDate: this.formatDate(record.CreatedDate) || '-'
                         };
                     });
                     this.sortData();
@@ -340,8 +342,11 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
                 if (bValue === undefined) bValue = '';
 
                 if (this.sortField === 'LastModifiedDate') {
-                    aValue = new Date(aValue);
-                    bValue = new Date(bValue);
+                    aValue = a.rawLastModifiedDate ? new Date(a.rawLastModifiedDate) : (aValue ? new Date(aValue) : '');
+                    bValue = b.rawLastModifiedDate ? new Date(b.rawLastModifiedDate) : (bValue ? new Date(bValue) : '');
+                } else if (this.sortField === 'CreatedDate') {
+                    aValue = a.rawCreatedDate ? new Date(a.rawCreatedDate) : (aValue ? new Date(aValue) : '');
+                    bValue = b.rawCreatedDate ? new Date(b.rawCreatedDate) : (bValue ? new Date(bValue) : '');
                 }
 
                 if (typeof aValue === 'string' && typeof bValue === 'string') {
@@ -450,19 +455,32 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
         }
     }
 
-    formatDate(dateString) {
-        if (dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-                timeZone: 'UTC'
-            });
+    formatDate(dateStr) {
+        try {
+            if (!dateStr) return '-';
+
+            let formatdate = new Date(dateStr);
+
+            const day = formatdate.getDate();
+            const month = formatdate.getMonth() + 1;
+            const year = formatdate.getFullYear();
+
+            const paddedDay = day < 10 ? `0${day}` : day;
+            const paddedMonth = month < 10 ? `0${month}` : month;
+
+            let hours = formatdate.getHours();
+            const minutes = formatdate.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+            const paddedHours = hours < 10 ? `0${hours}` : hours;
+
+            return `${paddedDay}/${paddedMonth}/${year} ${paddedHours}:${paddedMinutes} ${ampm}`;
+        } catch (error) {
+            console.error('Error in formatDate:', error);
+            return '-';
         }
     }
 
@@ -482,8 +500,7 @@ export default class WbAllFlowsPage extends NavigationMixin(LightningElement) {
     openCloneModal(event) {
         try {
             this.cloneSourceId = event.currentTarget.dataset.id;
-            const sourceName = event.currentTarget.dataset.name || '';
-            this.cloneNameInput = sourceName + '_copy';
+            this.cloneNameInput = '';
             this.cloneNameError = '';
             this.showCloneModal = true;
         } catch (error) {

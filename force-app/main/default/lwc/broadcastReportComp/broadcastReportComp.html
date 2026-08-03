@@ -33,7 +33,7 @@
                     </div>
                     <template if:false={isMobileOrTablet}>
                         <span class="info-badge status-badge"><strong>Status:</strong> {status}</span>
-                        <span class="info-badge template-badge"><strong>Template:</strong> {templateName}</span>
+                        <span class="info-badge template-badge" title={templateName}><strong>Template:</strong> <span class="template-name-text" title={templateName}>{templateName}</span></span>
                     </template>
                 </div>
             </div>

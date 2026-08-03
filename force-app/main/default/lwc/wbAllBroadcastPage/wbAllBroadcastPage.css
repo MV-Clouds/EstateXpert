@@ -775,6 +775,7 @@
     height: 100%;
     padding: 1rem;
     overflow: hidden;
+    min-width: 0;
 }
 
 .send-template-modal-container {
@@ -823,16 +824,41 @@
     gap: 1rem;
     padding: 0.5rem;
     padding-bottom: 0;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .template-selector-wrapper {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 0;
+    width: 100%;
 }
 
 .template-combobox {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.template-combobox .slds-combobox__input,
+.template-combobox .slds-truncate,
+.template-combobox .slds-listbox__option-text,
+.template-combobox .slds-combobox__input-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.template-combobox .slds-dropdown,
+.template-combobox .slds-combobox_container,
+.template-combobox .slds-combobox {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
 }
 
 .template-prev {

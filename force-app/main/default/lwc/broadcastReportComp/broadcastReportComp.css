@@ -505,3 +505,49 @@
     border-radius: 8px;
     margin: 4px 0;
 }
+
+.icon-button-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.refresh-icon-container {
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #0c9a58;
+    border-radius: 6px;
+    color: #0c9a58;
+    box-shadow: 0 1px 3px rgba(12, 154, 88, 0.12);
+    transition: all 0.2s ease;
+    --slds-c-icon-color-foreground-default: #0c9a58;
+}
+
+.refresh-icon-container:hover {
+    background: #f0faf5;
+    box-shadow: 0 4px 8px rgba(12, 154, 88, 0.22);
+    transform: translateY(-1px);
+}
+
+.refresh-icon-container:hover lightning-icon {
+    --slds-c-icon-color-foreground-default: #0c9a58;
+}
+
+.refresh-icon-container:active lightning-icon,
+.refresh-icon-container:active svg {
+    animation: spin 0.5s linear;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

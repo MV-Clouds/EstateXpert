@@ -31,6 +31,12 @@
                             </lightning-combobox>
                         </div>
                     </div>
+                    <div class="icon-button-container">
+                        <div class="refresh-icon-container" onclick={handleRefresh} title="Refresh">
+                            <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                size="x-small"></lightning-icon>
+                        </div>
+                    </div>
                     <template if:false={isMobileOrTablet}>
                         <span class="info-badge status-badge"><strong>Status:</strong> {status}</span>
                         <span class="info-badge template-badge" title={templateName}><strong>Template:</strong> <span class="template-name-text" title={templateName}>{templateName}</span></span>
@@ -190,7 +196,7 @@
                                                                     <th scope="col" class="nested-phone">Phone</th>
                                                                     <th scope="col" class="nested-status">Message Status
                                                                     </th>
-                                                                    <th scope="col" class="nested-replied">Replied</th>
+                                                                    <th scope="col" class="nested-replied">Replied Status</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>

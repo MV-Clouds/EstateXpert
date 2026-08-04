@@ -1116,8 +1116,9 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     setThisWeek(event) {
         event.stopPropagation();
         const today = new Date();
-        const start = new Date(today.setDate(today.getDate() - today.getDay()));
-        const end = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+        const dayOfWeek = today.getDay();
+        const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOfWeek);
+        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOfWeek + 6);
         this.dateFrom = this.formatDateInput(start);
         this.dateTo = this.formatDateInput(end);
     }
@@ -1125,8 +1126,9 @@ export default class TemplateHomePage extends NavigationMixin(LightningElement) 
     setLastWeek(event) {
         event.stopPropagation();
         const today = new Date();
-        const start = new Date(today.setDate(today.getDate() - today.getDay() - 7));
-        const end = new Date(today.setDate(today.getDate() - today.getDay() - 1));
+        const dayOfWeek = today.getDay();
+        const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOfWeek - 7);
+        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOfWeek - 1);
         this.dateFrom = this.formatDateInput(start);
         this.dateTo = this.formatDateInput(end);
     }

@@ -203,6 +203,22 @@ export default class BroadcastReportComp extends NavigationMixin(LightningElemen
         return this.totalPages > 1;
     }
 
+    /**
+    * Method Name: handleRefresh
+    * @description: Method to refresh the broadcast report data and reset all filters
+    */
+    handleRefresh() {
+        this.isLoading = true;
+        this.selectedStatusFilter = 'All';
+        this.selectedRepliedFilter = 'All';
+        this.expandedRows = {};
+        this.currentPage = 1;
+        this.sortField = 'Name';
+        this.sortOrder = 'asc';
+        this.loadBroadcastGroups();
+        this.loadBroadcastGroupsWithBroadcastId();
+    }
+
     loadBroadcastGroups() {
         this.isLoading = true;
         console.log('broadcastReportComp recordId 2', this.recordId);

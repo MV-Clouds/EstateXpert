@@ -1201,12 +1201,18 @@
     cursor: pointer;
     flex: 1;
     margin: 0;
+    min-width: 0;
 }
 
 .group-name {
     font-weight: 500;
     color: #333;
     font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
 }
 
 .group-count {
@@ -1716,17 +1722,27 @@
     cursor: pointer;
     width: 100%;
     margin: 0;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .group-info {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    margin-right: 0.75rem;
 }
 
 .group-name {
     font-weight: 500;
     color: #1e293b;
     font-size: 0.9375rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
 }
 
 .group-count {
@@ -1737,6 +1753,7 @@
 .checkbox-custom {
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
     border: 2px solid #cbd5e1;
     border-radius: 6px;
     transition: all 0.2s ease;
@@ -2024,4 +2041,10 @@
 .required-asterisk {
     color: #ef4444;
     margin-right: 2px;
+}
+
+.config-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
 }

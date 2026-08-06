@@ -310,7 +310,7 @@
                                                                 <input type="checkbox" id={group.value} data-value={group.value} onchange={handleBroadcastGroupChange} checked={group.selected} class="group-checkbox" />
                                                                 <label for={group.value} class="group-label">
                                                                     <div class="group-info">
-                                                                        <span class="group-name">{group.label}</span>
+                                                                        <span class="group-name" title={group.label}>{group.label}</span>
                                                                         <span class="group-count">{group.contactCount} contacts</span>
                                                                     </div>
                                                                     <div class="checkbox-custom"></div>

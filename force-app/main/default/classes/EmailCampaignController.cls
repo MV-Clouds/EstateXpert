@@ -1227,8 +1227,8 @@ public with sharing class EmailCampaignController {
                     
     @AuraEnabled
     public static List<CampaignMemberEmailInfo> getCampaignMemberEmails(String campaignId) {
+        List<CampaignMemberEmailInfo> results = new List<CampaignMemberEmailInfo>();
         try {
-            List<CampaignMemberEmailInfo> results = new List<CampaignMemberEmailInfo>();
             
             // Query Marketing_Campaign__c to get RelatedObject__c
             Marketing_Campaign__c campaign = [
@@ -1254,16 +1254,14 @@ public with sharing class EmailCampaignController {
 
             // Query Contacts based on RelatedObject__c
             Map<Id, SObject> recipients = new Map<Id, SObject>();
-            if (relatedObject == 'Contact') {
-                List<Contact> contacts = [
-                    SELECT Id, Name, Email
-                    FROM Contact
-                    WHERE Id IN :recipientIds
-                    WITH USER_MODE
-                ];
-                for (Contact con : contacts) {
-                    recipients.put(con.Id, con);
-                }
+            List<Contact> contacts = [
+                SELECT Id, Name, Email
+                FROM Contact
+                WHERE Id IN :recipientIds
+                WITH USER_MODE
+            ];
+            for (Contact con : contacts) {
+                recipients.put(con.Id, con);
             }
 
             // Query Marketing_Email__c IDs separately to avoid semi-join sub-select
@@ -1328,7 +1326,7 @@ public with sharing class EmailCampaignController {
             return results;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getCampaignMemberEmails', 'Error while fetching campaign member emails for campaignId: ' + campaignId);
-            return null;
+            return results;
         }
     }
                     

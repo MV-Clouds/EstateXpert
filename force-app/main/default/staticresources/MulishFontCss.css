@@ -1,3 +1,7 @@
+* {
+  --slds-s-label-font-weight: 500;
+}
+
 .blue-btn-css {
   display: inline-flex;
   justify-content: center;

@@ -19,7 +19,7 @@
                 <div class="header">
                     <div class="search-input header-search-bar-css">
                         <lightning-input type="search" value={searchInput} onchange={handleSearch}
-                            placeholder="Search Members" class="input-members" variant="label-hidden"></lightning-input>
+                            placeholder="Search Members..." class="input-members" variant="label-hidden"></lightning-input>
                     </div>
                     <div class="icon-button-container">
                         <div class="filter-icon-container" onclick={handleFilterClick}>
@@ -58,14 +58,14 @@
                             </div>
                             <div class="filter-row">
                                 <div class="filter-item">
-                                    <label class="filter-label">Send Time Start</label>
+                                    <label class="filter-label">Send Date Start</label>
                                     <lightning-input type="date" onchange={handleFilterChange} value={sendTimeStart}
-                                        data-id="sendTimeStart" variant="label-hidden"></lightning-input>
+                                        data-id="sendTimeStart" variant="label-hidden" placeholder="Select Start Date"></lightning-input>
                                 </div>
                                 <div class="filter-item">
-                                    <label class="filter-label">Send Time End</label>
+                                    <label class="filter-label">Send Date End</label>
                                     <lightning-input type="date" onchange={handleFilterChange} value={sendTimeEnd}
-                                        data-id="sendTimeEnd" variant="label-hidden"></lightning-input>
+                                        data-id="sendTimeEnd" variant="label-hidden" placeholder="Select End Date"></lightning-input>
                                 </div>
                             </div>
                             <div class="filter-actions">
@@ -106,7 +106,7 @@
                                     scope="col">
                                     <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
                                         tabindex="0">
-                                        <span class="slds-truncate" title="Contact Name">Contact Name</span>
+                                        <span class="slds-truncate" title="Member Name">Member Name</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
                                             <svg data-index="contactName" class="listing-manager-icon"
                                                 viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
@@ -121,7 +121,7 @@
                                     scope="col">
                                     <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
                                         tabindex="0">
-                                        <span class="slds-truncate" title="Contact Email">Contact Email</span>
+                                        <span class="slds-truncate" title="Member Email">Member Email</span>
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
                                             <svg data-index="contactEmail" class="listing-manager-icon"
                                                 viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
@@ -183,16 +183,16 @@
                                     <td data-label="S.No.">
                                         <div>{member.rowIndex}</div>
                                     </td>
-                                    <td data-label="Contact Name" class="truncate_css">
+                                    <td data-label="Member Name" class="truncate_css">
                                         <div>{member.contactName}</div>
                                     </td>
-                                    <td data-label="Contact Email">
+                                    <td data-label="Member Email">
                                         <div>{member.contactEmail}</div>
                                     </td>
                                     <td data-label="Email Name">
                                         <div>{member.emailName}</div>
                                     </td>
-                                    <td data-label="Send Time">
+                                    <td data-label="Send Date">
                                         <div>{member.sendTimeFormatted}</div>
                                     </td>
                                     <td data-label="Status">

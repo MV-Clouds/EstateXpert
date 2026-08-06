@@ -161,7 +161,7 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     }
 
     getStatusClass(status) {
-        status = status.split(' ')[0];
+        status = status ? status?.split(' ')[0] : '';
         switch (status) {
             case 'Pending':
                 return 'pending-class';
@@ -175,14 +175,32 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     }
 
     formatDate(dateStr) {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        return `${day}/${month}/${year} ${hours}:${minutes}`;
+        try {
+            if (!dateStr) return '-';
+
+            let formatdate = new Date(dateStr);
+
+            const day = formatdate.getDate();
+            const month = formatdate.getMonth() + 1;
+            const year = formatdate.getFullYear();
+
+            const paddedDay = day < 10 ? `0${day}` : day;
+            const paddedMonth = month < 10 ? `0${month}` : month;
+
+            let hours = formatdate.getHours();
+            const minutes = formatdate.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+            const paddedHours = hours < 10 ? `0${hours}` : hours;
+
+            return `${paddedDay}/${paddedMonth}/${year} ${paddedHours}:${paddedMinutes} ${ampm}`;
+        } catch (error) {
+            console.log('Error in formatDate ==> ', error);
+            return '-';
+        }
     }
 
     updateShownData() {
@@ -223,20 +241,9 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
     }
 
     handleSearch(event) {
-        const searchKey = (event.target.value || '').toLowerCase();
+        const searchKey = (event?.target?.value || '').toLowerCase();
         this.searchInput = searchKey;
-        this.filteredMembers = this.memberEmails.filter(member => 
-            (member.contactName && member.contactName.toLowerCase().includes(searchKey)) ||
-            (member.contactEmail && member.contactEmail.toLowerCase().includes(searchKey)) ||
-            (member.emailName && member.emailName.toLowerCase().includes(searchKey))
-        );
-        this.currentPage = 1;
-        this.statusFilterList = [];
-        this.statusFilter = '';
-        this.sendTimeStart = '';
-        this.sendTimeEnd = '';
-        this.sortData();
-        this.updateShownData();
+        this.applyAllFilters();
     }
 
     handleFilterClick() {
@@ -252,8 +259,8 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         this.statusFilter = '';
         this.sendTimeStart = '';
         this.sendTimeEnd = '';
-        this.filteredMembers = this.memberEmails;
-        this.currentPage = 1;
+        this.applyAllFilters();
+        this.isFilterModalOpen = false;
     }
 
     closeFilterModal() {
@@ -264,9 +271,12 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         try {
             const filterId = event.target.dataset.id;
             if (filterId === 'statusFilter') {
-                this.statusFilter = event.target.value;
-                if (!this.statusFilterList.includes(this.statusFilter) && this.statusFilter !== '') {
-                    this.statusFilterList.push(this.statusFilter);
+                const val = event.target.value;
+                this.statusFilter = val;
+                if (val) {
+                    this.statusFilterList = [val];
+                } else {
+                    this.statusFilterList = [];
                 }
             } else if (filterId === 'sendTimeStart') {
                 this.sendTimeStart = event.target.value;
@@ -287,6 +297,7 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
         if (index > -1) {
             this.statusFilterList.splice(index, 1);
         }
+        this.applyAllFilters();
     }
 
     applyFilter() {
@@ -298,25 +309,48 @@ export default class CampaignMembersTable extends NavigationMixin(LightningEleme
                 return;
             }
         }
+        this.applyAllFilters();
+        this.isFilterModalOpen = false;
+    }
+
+    applyAllFilters() {
+        const searchKey = (this.searchInput || '').toLowerCase();
+        const startDate = this.sendTimeStart ? new Date(this.sendTimeStart) : null;
+        const endDate = this.sendTimeEnd ? new Date(this.sendTimeEnd) : null;
+
+        if (startDate) startDate.setHours(0, 0, 0, 0);
+        if (endDate) endDate.setHours(23, 59, 59, 999);
 
         this.filteredMembers = this.memberEmails.filter(member => {
-            const sendTime = member.sendTime ? new Date(member.sendTime) : null;
-            const startDate = this.sendTimeStart ? new Date(this.sendTimeStart) : null;
-            const endDate = this.sendTimeEnd ? new Date(this.sendTimeEnd) : null;
+            const isSearchMatch = !searchKey ||
+                (member?.contactName && member.contactName.toLowerCase().includes(searchKey)) ||
+                (member?.contactEmail && member.contactEmail.toLowerCase().includes(searchKey)) ||
+                (member?.emailName && member.emailName.toLowerCase().includes(searchKey));
 
-            if (startDate) startDate.setHours(0, 0, 0, 0);
-            if (endDate) endDate.setHours(23, 59, 59, 999);
+            const isStatusMatch = this.statusFilterList.length === 0 || this.statusFilterList.some(filterVal => {
+                if (!filterVal) return true;
+                if (!member?.status) return false;
+                if (filterVal === 'Failed') {
+                    return member.status?.toLowerCase()?.includes('failed');
+                }
+                if (filterVal === 'Pending') {
+                    return member.status?.toLowerCase()?.includes('pending');
+                }
+                if (filterVal === 'Success') {
+                    return member.status?.toLowerCase()?.includes('success');
+                }
+                return member.status?.toLowerCase() === filterVal?.toLowerCase();
+            });
 
-            const isStatusMatch = this.statusFilterList.length === 0 || this.statusFilterList.includes(member.status);
+            const sendTime = member?.sendTime ? new Date(member.sendTime) : null;
             const isDateMatch = (!startDate || !sendTime || sendTime >= startDate) && (!endDate || !sendTime || sendTime <= endDate);
 
-            return isStatusMatch && isDateMatch;
+            return isSearchMatch && isStatusMatch && isDateMatch;
         });
+
         this.currentPage = 1;
-        this.isFilterModalOpen = false;
         this.sortData();
         this.updateShownData();
-        this.clearSearchInput();
     }
 
     showToast(title, message, variant) {

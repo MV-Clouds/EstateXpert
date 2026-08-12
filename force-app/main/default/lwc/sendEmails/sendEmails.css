@@ -980,16 +980,20 @@
 .template-selector-inner {
     display: flex;
     width: 100%;
+    max-width: 100%;
     gap: 1rem;
 }
 
 .template-combobox {
     flex: 1;
+    min-width: 0;
     border: none;
 }
 
 .template-combobox lightning-combobox {
     --slds-c-combobox-radius-border: 0;
+    width: 100%;
+    min-width: 0;
 }
 
 .preview-template-btn {
@@ -1592,10 +1596,18 @@
     display: flex;
     gap: 1rem;
     align-items: flex-end;
+    width: 100%;
+    max-width: 100%;
 }
 
 .template-input-group .custom-combobox {
     flex: 1;
+    min-width: 0;
+}
+
+.template-input-group .blue-btn-css {
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .preview-template-btn {
@@ -2009,10 +2021,23 @@
     display: flex;
     gap: 0.75rem;
     align-items: flex-end;
+    width: 100%;
+    max-width: 100%;
 }
 
 .template-combobox {
     flex: 1;
+    min-width: 0;
+}
+
+.template-combobox lightning-combobox {
+    width: 100%;
+    min-width: 0;
+}
+
+.template-selector-inner .blue-btn-css {
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .delete-email-btn {

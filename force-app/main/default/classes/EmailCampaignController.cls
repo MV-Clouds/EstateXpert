@@ -450,6 +450,8 @@ public with sharing class EmailCampaignController {
             // Group Marketing_Email__c by schedule to avoid duplicates for Specific Date
             Map<String, Marketing_Email__c> scheduleToEmailMap = new Map<String, Marketing_Email__c>();
             List<Marketing_Email__c> emailRecordsToInsert = new List<Marketing_Email__c>();
+            Integer lastDays = -1;
+            String lastTimeString = null;
             for (Object emailDataObj : emails) {
                 Map<String, Object> emailData = (Map<String, Object>) emailDataObj;
                 String subject = String.valueOf(emailData.get('subject'));
@@ -457,7 +459,22 @@ public with sharing class EmailCampaignController {
                 String template = String.valueOf(emailData.get('template'));
                 String templateType = String.valueOf(emailData.get('templateType'));
                 Integer daysAfterStartDate = Integer.valueOf(emailData.get('daysAfterStartDate'));
+                if (daysAfterStartDate != null && (daysAfterStartDate < 0 || daysAfterStartDate > 365)) {
+                    throw new AuraHandledException('Days after start date cannot exceed 365 days (1 year).');
+                }
+                if (daysAfterStartDate != null && daysAfterStartDate < lastDays) {
+                    throw new AuraHandledException('Drip campaign emails must be scheduled in increasing chronological order.');
+                }
                 String timeString = (String) emailData.get('timeToSend');
+                if (daysAfterStartDate != null && daysAfterStartDate == lastDays && lastTimeString != null && timeString != null) {
+                    if (timeString <= lastTimeString) {
+                        throw new AuraHandledException('Emails scheduled on the same day must have progressive send times.');
+                    }
+                }
+                if (daysAfterStartDate != null) {
+                    lastDays = daysAfterStartDate;
+                    lastTimeString = timeString;
+                }
                 String selectedListingId = (String) emailData.get('selectedListingId');
                 
                 String scheduleKey = daysAfterStartDate + '-' + timeString;
@@ -856,6 +873,8 @@ public with sharing class EmailCampaignController {
             
             List<Marketing_Email__c> emailRecordsToInsert = new List<Marketing_Email__c>();
             List<Marketing_Email__c> emailRecordsToUpdate = new List<Marketing_Email__c>();
+            Integer lastUpdateDays = -1;
+            String lastUpdateTimeString = null;
             for (Object emailDataObj : emails) {
                 Map<String, Object> emailData = (Map<String, Object>) emailDataObj;
                 String emailId = String.valueOf(emailData.get('id'));
@@ -864,7 +883,22 @@ public with sharing class EmailCampaignController {
                 String template = String.valueOf(emailData.get('template'));
                 String templateType = String.valueOf(emailData.get('templateType'));
                 Integer daysAfterStartDate = Integer.valueOf(emailData.get('daysAfterStartDate'));
+                if (daysAfterStartDate != null && (daysAfterStartDate < 0 || daysAfterStartDate > 365)) {
+                    throw new AuraHandledException('Days after start date cannot exceed 365 days (1 year).');
+                }
+                if (daysAfterStartDate != null && daysAfterStartDate < lastUpdateDays) {
+                    throw new AuraHandledException('Drip campaign emails must be scheduled in increasing chronological order.');
+                }
                 String timeString = (String) emailData.get('timeToSend');
+                if (daysAfterStartDate != null && daysAfterStartDate == lastUpdateDays && lastUpdateTimeString != null && timeString != null) {
+                    if (timeString <= lastUpdateTimeString) {
+                        throw new AuraHandledException('Emails scheduled on the same day must have progressive send times.');
+                    }
+                }
+                if (daysAfterStartDate != null) {
+                    lastUpdateDays = daysAfterStartDate;
+                    lastUpdateTimeString = timeString;
+                }
                 String selectedListingId = (String) emailData.get('selectedListingId');
                 
                 

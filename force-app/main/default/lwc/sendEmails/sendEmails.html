@@ -183,7 +183,7 @@
                                                     <div class="delay-section">
                                                         <div class="delay-field">
                                                             <label class="form-label"><span style="color: red;">*</span> Days After Start Date</label>
-                                                            <lightning-input type="number" value={selectedDrip.daysAfterStartDate} min="0" step="1" data-id={selectedDrip.id} onchange={handleDaysAfterStartDateChange} class={computeDelayInputClass} variant="label-hidden"></lightning-input>
+                                                            <lightning-input type="number" value={selectedDrip.daysAfterStartDate} min={minDaysForSelectedDrip} max="365" step="1" message-when-range-overflow="Days after start date cannot exceed 365 days (1 year)" data-id={selectedDrip.id} onchange={handleDaysAfterStartDateChange} onblur={handleDaysAfterStartDateBlur} class={computeDelayInputClass} variant="label-hidden"></lightning-input>
                                                         </div>
                                                         <div class="delay-field">
                                                             <label class="form-label"><span style="color: red;">*</span> Time to Send</label>

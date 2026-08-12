@@ -354,10 +354,11 @@
                                             </td>
                                             <td data-label="Days after start date">
                                                 <div class="days-after-input">
-                                                    <lightning-input type="number" value={email.daysAfterStartDate}
-                                                        min="0" message-when-range-underflow="Enter a positive number"
-                                                        onchange={handleDaysAfterStartDateChange} data-id={email.id}
-                                                        max-length="5" disabled={email.disabled}
+                                                     <lightning-input type="number" value={email.daysAfterStartDate}
+                                                        min="0" max="365" message-when-range-underflow="Enter a positive number"
+                                                        message-when-range-overflow="Days cannot exceed 365 days (1 year)"
+                                                        onchange={handleDaysAfterStartDateChange} onblur={handleDaysAfterStartDateBlur} data-id={email.id}
+                                                        disabled={email.disabled}
                                                         variant="label-hidden"></lightning-input>
                                                 </div>
                                             </td>

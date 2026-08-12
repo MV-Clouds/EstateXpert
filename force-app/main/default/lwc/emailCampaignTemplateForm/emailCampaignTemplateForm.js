@@ -1389,7 +1389,24 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
     */
     handleDaysAfterStartDateChange(event) {
         const emailId = event.target.dataset.id;
-        this.newDaysAfterStartDate = event.target.value;
+        const rawVal = event.target.value;
+
+        if (rawVal === '' || rawVal === null || rawVal === undefined) {
+            this.emails = this.emails.map(email => {
+                if (email.id == emailId) email.daysAfterStartDate = '';
+                return email;
+            });
+            this.emailsWithTemplate = this.emailsWithTemplate.map(email => {
+                if (email.id == emailId) email.daysAfterStartDate = '';
+                return email;
+            });
+            return;
+        }
+
+        let val = parseInt(rawVal, 10);
+        if (isNaN(val)) return;
+
+        this.newDaysAfterStartDate = val;
     
         this.emails = this.emails.map(email => {
             if (email.id == emailId) {
@@ -1401,6 +1418,70 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
         this.emailsWithTemplate = this.emailsWithTemplate.map(email => {
             if (email.id == emailId) {
                 email.daysAfterStartDate = this.newDaysAfterStartDate;
+            }
+            return email;
+        });
+
+        this.updateExactDates();
+        this.checkForChanges();
+    }
+
+    handleDaysAfterStartDateBlur(event) {
+        const emailId = event.target.dataset.id;
+        const emailIndex = this.emails.findIndex(e => e.id == emailId);
+        if (emailIndex < 0) return;
+
+        const rawVal = event.target.value;
+        let val = parseInt(rawVal, 10);
+
+        const prevDays = emailIndex > 0 ? (parseInt(this.emails[emailIndex - 1].daysAfterStartDate, 10) || 0) : 0;
+        const nextDays = emailIndex < this.emails.length - 1 ? (parseInt(this.emails[emailIndex + 1].daysAfterStartDate, 10) || 365) : 365;
+
+        let resetVal = val;
+        let showToast = false;
+        let toastMsg = '';
+
+        if (isNaN(val) || rawVal === '' || rawVal === null) {
+            resetVal = prevDays;
+        } else if (val > 365) {
+            resetVal = 365;
+            showToast = true;
+            toastMsg = 'Days after start date cannot exceed 365 days (1 year).';
+        } else if (val < prevDays) {
+            resetVal = prevDays;
+            showToast = true;
+            toastMsg = `Row ${emailIndex + 1} (Day ${val}) cannot be scheduled earlier than Row ${emailIndex} (Day ${prevDays}).`;
+        } else if (val > nextDays) {
+            resetVal = nextDays;
+            showToast = true;
+            toastMsg = `Row ${emailIndex + 1} (Day ${val}) cannot be scheduled later than Row ${emailIndex + 2} (Day ${nextDays}). Please adjust subsequent row days first.`;
+        }
+
+        if (showToast) {
+            this.showToast('Error', toastMsg, 'error');
+        }
+
+        if (emailIndex > 0 && resetVal === prevDays) {
+            const prevEmail = this.emails[emailIndex - 1];
+            const currentEmail = this.emails[emailIndex];
+            if (prevEmail.timeToSend && currentEmail.timeToSend && currentEmail.timeToSend <= prevEmail.timeToSend) {
+                this.showToast('Error', `Row ${emailIndex + 1} is on the same day (Day ${resetVal}) as Row ${emailIndex}. Send time must be later than Row ${emailIndex} (${prevEmail.timeToSend}).`, 'error');
+            }
+        }
+
+        event.target.value = resetVal;
+        this.newDaysAfterStartDate = resetVal;
+
+        this.emails = this.emails.map(email => {
+            if (email.id == emailId) {
+                email.daysAfterStartDate = resetVal;
+            }
+            return email;
+        });
+            
+        this.emailsWithTemplate = this.emailsWithTemplate.map(email => {
+            if (email.id == emailId) {
+                email.daysAfterStartDate = resetVal;
             }
             return email;
         });
@@ -1500,7 +1581,26 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             }
             
             const email = this.emails.find(email => email.id == emailId);
-    
+            const emailIndex = this.emails.findIndex(e => e.id == emailId);
+
+            if (emailIndex > 0) {
+                const prevEmail = this.emails[emailIndex - 1];
+                if (prevEmail && parseInt(prevEmail.daysAfterStartDate, 10) === parseInt(email.daysAfterStartDate, 10)) {
+                    if (newTimeToSend <= prevEmail.timeToSend) {
+                        this.showToast('Error', `Row ${emailIndex + 1} is scheduled on the same day (Day ${email.daysAfterStartDate}) as Row ${emailIndex}. Send time must be later than Row ${emailIndex} (${prevEmail.timeToSend}).`, 'error');
+                    }
+                }
+            }
+
+            if (emailIndex >= 0 && emailIndex < this.emails.length - 1) {
+                const nextEmail = this.emails[emailIndex + 1];
+                if (nextEmail && parseInt(nextEmail.daysAfterStartDate, 10) === parseInt(email.daysAfterStartDate, 10)) {
+                    if (newTimeToSend >= nextEmail.timeToSend) {
+                        this.showToast('Error', `Row ${emailIndex + 1} is scheduled on the same day (Day ${email.daysAfterStartDate}) as Row ${emailIndex + 2}. Send time must be earlier than Row ${emailIndex + 2} (${nextEmail.timeToSend}).`, 'error');
+                    }
+                }
+            }
+
             const selectedDate = new Date(email.exactDate);
             const currentTime = new Date();
             console.log('currentTime ==> ' , currentTime);
@@ -1954,7 +2054,26 @@ export default class EmailCampaignTemplateForm extends NavigationMixin(Lightning
             return email.name && email.template && email.daysAfterStartDate != null && email.timeToSend && 
                    (!isListingRequired || email.selectedListingId);
         });
-        const isValid = hasRecipients && isDateSelected && areEmailsValid;
+
+        let areSequenceDaysValid = true;
+        for (let i = 1; i < emails.length; i++) {
+            const prevDays = parseInt(emails[i - 1].daysAfterStartDate, 10) || 0;
+            const currDays = parseInt(emails[i].daysAfterStartDate, 10) || 0;
+            if (currDays < prevDays) {
+                areSequenceDaysValid = false;
+                this.showToast('Error', `Row ${i + 1} (Day ${currDays}) cannot be scheduled earlier than Row ${i} (Day ${prevDays}).`, 'error');
+                break;
+            }
+            if (currDays === prevDays && emails[i - 1].timeToSend && emails[i].timeToSend) {
+                if (emails[i].timeToSend <= emails[i - 1].timeToSend) {
+                    areSequenceDaysValid = false;
+                    this.showToast('Error', `Row ${i + 1} on Day ${currDays} must have a later send time than Row ${i}.`, 'error');
+                    break;
+                }
+            }
+        }
+
+        const isValid = hasRecipients && isDateSelected && areEmailsValid && areSequenceDaysValid;
         console.log('validateInputs result:', isValid);
         return isValid;
     }

@@ -285,6 +285,16 @@ export default class SendEmails extends LightningElement {
         return this.dripSequence.find(drip => drip.id === this.selectedDripId);
     }
 
+    // Get minimum allowed days for selected drip based on sequence position
+    get minDaysForSelectedDrip() {
+        if (!this.dripSequence || this.dripSequence.length === 0) return 0;
+        const index = this.dripSequence.findIndex(d => d.id === this.selectedDripId);
+        if (index > 0) {
+            return parseInt(this.dripSequence[index - 1].daysAfterStartDate) || 0;
+        }
+        return 0;
+    }
+
     // Get the selected drip index (1-based for display)
     get selectedDripIndex() {
         const index = this.dripSequence.findIndex(drip => drip.id === this.selectedDripId);
@@ -813,7 +823,7 @@ export default class SendEmails extends LightningElement {
                 template: '',
                 subject: '',
                 daysAfterStartDate: this.dripSequence.length > 0 ?
-                    Math.max(...this.dripSequence.map(d => parseInt(d.daysAfterStartDate) || 0)) + 1 : 1,
+                    Math.min(365, Math.max(...this.dripSequence.map(d => parseInt(d.daysAfterStartDate) || 0)) + 1) : 1,
                 timeToSend: defaultTime,
                 formattedTime: this.formatTimeForDisplay(defaultTime),
                 displayIndex: this.dripSequence.length + 1,
@@ -978,20 +988,28 @@ export default class SendEmails extends LightningElement {
         }
     }
 
-    // Handle days after start date change
+    // Handle days after start date change - allow smooth typing & clearing without premature resets
     handleDaysAfterStartDateChange(event) {
         const dripId = parseInt(event.target.dataset.id);
-        const newDays = parseInt(event.target.value) || 0;
+        const rawVal = event.target.value;
+
+        // If the user clears the field to type a new number, store empty string temporarily so input can be edited
+        if (rawVal === '' || rawVal === null || rawVal === undefined) {
+            this.dripSequence = this.dripSequence.map(drip => {
+                if (drip.id === dripId) {
+                    return { ...drip, daysAfterStartDate: '' };
+                }
+                return drip;
+            });
+            return;
+        }
+
+        const newDays = parseInt(rawVal, 10);
+        if (isNaN(newDays)) return;
 
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
-                // Validate the new date/time combination
                 const isValid = this.isDateTimeInFuture(this.dripStartDate, newDays, drip.timeToSend);
-
-                if (!isValid && this.dripStartDate) {
-                    this.showToast('Error', 'This date and time combination is in the past. Please select a future time.', 'error');
-                }
-
                 return {
                     ...drip,
                     daysAfterStartDate: newDays,
@@ -1002,10 +1020,88 @@ export default class SendEmails extends LightningElement {
         });
     }
 
+    // Handle days after start date blur - validate sequence bounds when focus leaves the input field
+    handleDaysAfterStartDateBlur(event) {
+        const dripId = parseInt(event.target.dataset.id);
+        const dripIndex = this.dripSequence.findIndex(d => d.id === dripId);
+        if (dripIndex < 0) return;
+
+        const rawVal = event.target.value;
+        let newDays = parseInt(rawVal, 10);
+
+        const prevDays = dripIndex > 0 ? (parseInt(this.dripSequence[dripIndex - 1].daysAfterStartDate, 10) || 0) : 0;
+        const nextDays = dripIndex < this.dripSequence.length - 1 ? (parseInt(this.dripSequence[dripIndex + 1].daysAfterStartDate, 10) || 365) : 365;
+
+        let resetVal = newDays;
+        let showToast = false;
+        let toastMsg = '';
+
+        if (isNaN(newDays) || rawVal === '' || rawVal === null) {
+            resetVal = prevDays;
+        } else if (newDays > 365) {
+            resetVal = 365;
+            showToast = true;
+            toastMsg = 'Days after start date cannot exceed 365 days (1 year).';
+        } else if (newDays < prevDays) {
+            resetVal = prevDays;
+            showToast = true;
+            toastMsg = `Email ${dripIndex + 1} (Day ${newDays}) cannot be scheduled earlier than Email ${dripIndex} (Day ${prevDays}).`;
+        } else if (newDays > nextDays) {
+            resetVal = nextDays;
+            showToast = true;
+            toastMsg = `Email ${dripIndex + 1} (Day ${newDays}) cannot be scheduled later than Email ${dripIndex + 2} (Day ${nextDays}). Please adjust subsequent email days first.`;
+        }
+
+        if (showToast) {
+            this.showToast('Error', toastMsg, 'error');
+        }
+
+        if (dripIndex > 0 && resetVal === prevDays) {
+            const prevDrip = this.dripSequence[dripIndex - 1];
+            if (prevDrip.timeToSend && drip.timeToSend && drip.timeToSend <= prevDrip.timeToSend) {
+                this.showToast('Error', `Email ${dripIndex + 1} is on the same day (Day ${resetVal}) as Email ${dripIndex}. Send time must be later than Email ${dripIndex} (${this.formatTimeForDisplay(prevDrip.timeToSend)}).`, 'error');
+            }
+        }
+
+        event.target.value = resetVal;
+        this.dripSequence = this.dripSequence.map(d => {
+            if (d.id === dripId) {
+                const isValid = this.isDateTimeInFuture(this.dripStartDate, resetVal, d.timeToSend);
+                return {
+                    ...d,
+                    daysAfterStartDate: resetVal,
+                    hasInvalidTime: !isValid
+                };
+            }
+            return d;
+        });
+    }
+
     // Handle time to send change
     handleTimeToSendChange(event) {
         const dripId = parseInt(event.target.dataset.id);
         const newTime = event.target.value;
+        const dripIndex = this.dripSequence.findIndex(d => d.id === dripId);
+
+        if (dripIndex > 0) {
+            const prevDrip = this.dripSequence[dripIndex - 1];
+            const currentDrip = this.dripSequence[dripIndex];
+            if (prevDrip && parseInt(prevDrip.daysAfterStartDate) === parseInt(currentDrip.daysAfterStartDate)) {
+                if (newTime <= prevDrip.timeToSend) {
+                    this.showToast('Error', `Email ${dripIndex + 1} is on the same day (Day ${currentDrip.daysAfterStartDate}) as Email ${dripIndex}. Send time must be later than Email ${dripIndex} (${this.formatTimeForDisplay(prevDrip.timeToSend)}).`, 'error');
+                }
+            }
+        }
+
+        if (dripIndex >= 0 && dripIndex < this.dripSequence.length - 1) {
+            const nextDrip = this.dripSequence[dripIndex + 1];
+            const currentDrip = this.dripSequence[dripIndex];
+            if (nextDrip && parseInt(nextDrip.daysAfterStartDate) === parseInt(currentDrip.daysAfterStartDate)) {
+                if (newTime >= nextDrip.timeToSend) {
+                    this.showToast('Error', `Email ${dripIndex + 1} is on the same day (Day ${currentDrip.daysAfterStartDate}) as Email ${dripIndex + 2}. Send time must be earlier than Email ${dripIndex + 2} (${this.formatTimeForDisplay(nextDrip.timeToSend)}).`, 'error');
+                }
+            }
+        }
 
         this.dripSequence = this.dripSequence.map(drip => {
             if (drip.id === dripId) {
@@ -1130,11 +1226,33 @@ export default class SendEmails extends LightningElement {
             return false;
         }
 
-        // Check if all required fields are filled
-        for (let drip of this.dripSequence) {
-            // Check basic fields
+        for (let i = 0; i < this.dripSequence.length; i++) {
+            const drip = this.dripSequence[i];
             if (!drip.name || !drip.template || !drip.timeToSend || drip.daysAfterStartDate == null || !drip.relatedObject) {
                 return false;
+            }
+
+            if (drip.daysAfterStartDate > 365 || drip.daysAfterStartDate < 0) {
+                return false;
+            }
+
+            // Sequence order validation
+            if (i > 0) {
+                const prevDrip = this.dripSequence[i - 1];
+                const prevDays = parseInt(prevDrip.daysAfterStartDate) || 0;
+                const currDays = parseInt(drip.daysAfterStartDate) || 0;
+
+                if (currDays < prevDays) {
+                    this.showToast('Error', `Email ${i + 1} (Day ${currDays}) cannot be scheduled earlier than Email ${i} (Day ${prevDays}).`, 'error');
+                    return false;
+                }
+
+                if (currDays === prevDays && prevDrip.timeToSend && drip.timeToSend) {
+                    if (drip.timeToSend <= prevDrip.timeToSend) {
+                        this.showToast('Error', `Email ${i + 1} on Day ${currDays} must have a later send time than Email ${i}.`, 'error');
+                        return false;
+                    }
+                }
             }
 
             // Mandatory listing for Listing-type drips

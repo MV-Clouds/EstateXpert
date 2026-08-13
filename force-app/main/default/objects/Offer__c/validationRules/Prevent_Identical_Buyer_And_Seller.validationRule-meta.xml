@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prevent_Identical_Buyer_And_Seller</fullName>
+    <active>true</active>
+    <description>Prevents users from saving a record where the Buyer Contact and Seller Contact are identical.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Seller_Contact__c)),
+    NOT(ISBLANK(Buyer_Contact__c)),
+    Seller_Contact__c = Buyer_Contact__c
+)</errorConditionFormula>
+    <errorMessage>The Buyer Contact and Seller Contact cannot be the same person.</errorMessage>
+</ValidationRule>

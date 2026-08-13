@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Listing_Type_Must_Match_Record_Type</fullName>
+    <active>true</active>
+    <errorConditionFormula>OR(
+    AND(
+        RecordType.DeveloperName = &apos;Rent&apos;,
+        NOT(ISPICKVAL(Listing_Type__c, &apos;Rent&apos;))
+    ),
+    AND(
+        RecordType.DeveloperName = &apos;Sale&apos;,
+        NOT(ISPICKVAL(Listing_Type__c, &apos;Sale&apos;))
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Listing_Type__c</errorDisplayField>
+    <errorMessage>The Listing Type must match the selected Record Type (e.g., a Sale record must have a Listing Type of Sale).</errorMessage>
+</ValidationRule>

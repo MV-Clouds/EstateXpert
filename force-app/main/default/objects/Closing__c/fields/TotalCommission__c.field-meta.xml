@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TotalCommission__c</fullName>
+    <deprecated>false</deprecated>
+    <formula>IF( RecordType.DeveloperName = &apos;Rent&apos;, ( ( Total_Commission_Amount__c / Rental_Price__c)), ( (Total_Commission_Amount__c / Sale_Price__c )))</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Total Commission %</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Percent</type>
+</CustomField>

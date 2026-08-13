@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sale</fullName>
+    <active>true</active>
+    <compactLayoutAssignment>Closing_Compact_Layout</compactLayoutAssignment>
+    <label>Sale</label>
+    <picklistValues>
+        <picklist>Client_Representing__c</picklist>
+        <values>
+            <fullName>Both</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Buyer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Landlord</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Seller</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Tenant</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Closing_Status__c</picklist>
+        <values>
+            <fullName>Canceled</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Closed</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Open</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Closing_Type__c</picklist>
+        <values>
+            <fullName>Rent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sale</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Contract_Type__c</picklist>
+        <values>
+            <fullName>New</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Renewal</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>External_Representing__c</picklist>
+        <values>
+            <fullName>Buyer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Landlord</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Seller</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Tenant</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Lease_Terms__c</picklist>
+        <values>
+            <fullName>12 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>13 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>15 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>18 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>24 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>36 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>48 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>6 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>60 Month</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>9 Month</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Listing_Type__c</picklist>
+        <values>
+            <fullName>Rent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sale</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Property_Category__c</picklist>
+        <values>
+            <fullName>Commercial</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Property_Sub_Type__c</picklist>
+        <values>
+            <fullName>Commercial - Bulk Units</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Factory</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Full floor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Half floor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Hotel Apartment</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Labor Camp</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Office Space</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Plot</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Restaurant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Retail</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Shop</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Show Room</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Staff Accommodation</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Store</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Villa</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Warehouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commercial - Whole Building</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Apartment</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Bulk Units</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Bungalow</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Compound</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Duplex</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Full floor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Half floor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Labor Camp</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Land</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Penthouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Townhouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Villa</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Residential - Whole Building</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Representing__c</picklist>
+        <values>
+            <fullName>Both</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Buyer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Seller</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Sale_Type__c</picklist>
+        <values>
+            <fullName>Cash</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Mortgage</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

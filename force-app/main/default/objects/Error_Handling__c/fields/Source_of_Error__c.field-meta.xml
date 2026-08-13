@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_of_Error__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Source of Error</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Apex</fullName>
+                <default>true</default>
+                <label>Apex</label>
+            </value>
+            <value>
+                <fullName>JavaScript</fullName>
+                <default>false</default>
+                <label>JavaScript</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

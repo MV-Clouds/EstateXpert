@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Installment_Type__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Installment Type</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Full Payment</fullName>
+                <default>false</default>
+                <label>Full Payment</label>
+            </value>
+            <value>
+                <fullName>Off-Plan Tranche 1</fullName>
+                <default>false</default>
+                <label>Off-Plan Tranche 1</label>
+            </value>
+            <value>
+                <fullName>Off-Plan Tranche 2</fullName>
+                <default>false</default>
+                <label>Off-Plan Tranche 2</label>
+            </value>
+            <value>
+                <fullName>Off-Plan Tranche 3</fullName>
+                <default>false</default>
+                <label>Off-Plan Tranche 3</label>
+            </value>
+            <value>
+                <fullName>Construction</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Construction</label>
+            </value>
+            <value>
+                <fullName>Down Payment</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Down Payment</label>
+            </value>
+            <value>
+                <fullName>Handover</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Handover</label>
+            </value>
+            <value>
+                <fullName>Monthly</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Monthly</label>
+            </value>
+            <value>
+                <fullName>Post-Handover</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Post-Handover</label>
+            </value>
+            <value>
+                <fullName>Rent</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Rent</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

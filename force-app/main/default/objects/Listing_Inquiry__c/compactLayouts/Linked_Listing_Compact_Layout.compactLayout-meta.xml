@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Linked_Listing_Compact_Layout</fullName>
+    <fields>Name</fields>
+    <fields>Contact__c</fields>
+    <fields>Listing__c</fields>
+    <fields>Inquiry__c</fields>
+    <fields>Client_Rating__c</fields>
+    <fields>Has_Been_Sent__c</fields>
+    <fields>Price__c</fields>
+    <label>Linked Listing Compact Layout</label>
+</CompactLayout>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All</fullName>
+    <columns>NAME</columns>
+    <columns>Address__c</columns>
+    <columns>Bedrooms__c</columns>
+    <columns>Bathrooms__c</columns>
+    <columns>City__c</columns>
+    <columns>Year_Built__c</columns>
+    <columns>OWNER.FIRST_NAME</columns>
+    <columns>OWNER.LAST_NAME</columns>
+    <filterScope>Everything</filterScope>
+    <label>All</label>
+</ListView>

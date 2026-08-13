@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Offer_Field</fullName>
+    <active>true</active>
+    <errorConditionFormula>OR(
+   ISCHANGED( Counter_Offer_for__c ),
+   ISCHANGED( Listing__c )
+)</errorConditionFormula>
+    <errorMessage>One or more restricted fields have been modified. These fields are locked and cannot be changed.</errorMessage>
+</ValidationRule>

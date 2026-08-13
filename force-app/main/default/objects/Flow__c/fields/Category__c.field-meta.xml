@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Category__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Category</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>SIGN_UP</fullName>
+                <default>false</default>
+                <label>Sign up</label>
+            </value>
+            <value>
+                <fullName>SIGN_IN</fullName>
+                <default>false</default>
+                <label>Sign in</label>
+            </value>
+            <value>
+                <fullName>APPOINTMENT_BOOKING</fullName>
+                <default>false</default>
+                <label>Appointment booking</label>
+            </value>
+            <value>
+                <fullName>LEAD_GENERATION</fullName>
+                <default>false</default>
+                <label>Lead generation</label>
+            </value>
+            <value>
+                <fullName>SHOPPING</fullName>
+                <default>false</default>
+                <label>Shopping</label>
+            </value>
+            <value>
+                <fullName>CONTACT_US</fullName>
+                <default>false</default>
+                <label>Contact us</label>
+            </value>
+            <value>
+                <fullName>CUSTOMER_SUPPORT</fullName>
+                <default>false</default>
+                <label>Customer support</label>
+            </value>
+            <value>
+                <fullName>SURVEY</fullName>
+                <default>false</default>
+                <label>Survey</label>
+            </value>
+            <value>
+                <fullName>OTHER</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prevent_Listed_Rent_Price_Modification</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    TEXT(Listing_Type__c) = &apos;Rent&apos;,
+    ISCHANGED(Listed_Rent_Price__c),
+    NOT(ISBLANK(PRIORVALUE(Listed_Rent_Price__c)))
+)</errorConditionFormula>
+    <errorDisplayField>Listed_Rent_Price__c</errorDisplayField>
+    <errorMessage>The Listing Price cannot be changed once it has been set.</errorMessage>
+</ValidationRule>

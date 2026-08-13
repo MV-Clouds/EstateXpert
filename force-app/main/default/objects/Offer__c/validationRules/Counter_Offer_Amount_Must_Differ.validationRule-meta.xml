@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Counter_Offer_Amount_Must_Differ</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    RecordType.DeveloperName = &apos;Counter_Offer&apos;,
+    TEXT(Listing_Type__c) = &apos;Sale&apos;,
+    NOT(ISBLANK(Counter_Offer_for__c)),
+    NOT(ISBLANK(Offer_Amount__c)),
+    Offer_Amount__c = Counter_Offer_for__r.Offer_Amount__c
+)</errorConditionFormula>
+    <errorDisplayField>Offer_Amount__c</errorDisplayField>
+    <errorMessage>A counter-offer must have a different amount than the original offer. Please enter a higher or lower value.</errorMessage>
+</ValidationRule>

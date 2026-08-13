@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ShortformOfPrivateAmenities__c</fullName>
+    <deprecated>false</deprecated>
+    <externalId>false</externalId>
+    <formula>IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Maids Room&quot;), &quot;MR &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Study&quot;), &quot;ST &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Central A/C &amp; Heating&quot;), &quot;AC &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Balcony&quot;), &quot;BA &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Private Garden&quot;), &quot;PG &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Private Pool&quot;), &quot;PP &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Private Gym&quot;), &quot;PY &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Private Jacuzzi&quot;), &quot;PJ &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Shared Pool&quot;), &quot;SP &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Shared Spa&quot;), &quot;SS &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Shared Gym&quot;), &quot;SY &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Security&quot;), &quot;SE &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Concierge Service&quot;), &quot;CS &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Maid Service&quot;), &quot;MS &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Covered Parking&quot;), &quot;CP &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Built in Wardrobes&quot;), &quot;BW &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Walk in Closet&quot;), &quot;WC &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Built in Kitchen Appliances&quot;), &quot;BK &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;View of Water&quot;), &quot;VW &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;View of Landmark&quot;), &quot;BL &quot;, &quot;&quot;) &amp;
+IF(CONTAINS(TEXT(Private_Amenities__c), &quot;Pets Allowed&quot;), &quot;PA &quot;, &quot;&quot;)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>ShortformOfPrivateAmenities</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

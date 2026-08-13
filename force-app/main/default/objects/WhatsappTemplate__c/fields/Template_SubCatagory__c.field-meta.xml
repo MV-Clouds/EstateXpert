@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Template_SubCatagory__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Template SubCatagory</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Template_Category__c</controllingField>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Custom</fullName>
+                <default>false</default>
+                <label>Custom</label>
+            </value>
+            <value>
+                <fullName>Confirmation</fullName>
+                <default>false</default>
+                <label>Confirmation</label>
+            </value>
+            <value>
+                <fullName>Cancellation</fullName>
+                <default>false</default>
+                <label>Cancellation</label>
+            </value>
+            <value>
+                <fullName>Sitevisit</fullName>
+                <default>false</default>
+                <label>Sitevisit</label>
+            </value>
+            <value>
+                <fullName>Reminder</fullName>
+                <default>false</default>
+                <label>Reminder</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Marketing</controllingFieldValue>
+            <valueName>Custom</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

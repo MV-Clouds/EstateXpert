@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Invalid_Offer_Expiration_Date</fullName>
+    <active>true</active>
+    <description>Prevents users from saving an offer where the Offer Expiration Date is earlier than the Offer Date.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Offer_Expiration_Date__c)),
+    NOT(ISBLANK(Offer_Date__c)),
+    Offer_Expiration_Date__c &lt; Offer_Date__c
+)</errorConditionFormula>
+    <errorDisplayField>Offer_Expiration_Date__c</errorDisplayField>
+    <errorMessage>The Offer Expiration Date cannot be earlier than the Offer Date.</errorMessage>
+</ValidationRule>

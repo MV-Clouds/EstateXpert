@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Email_Agent_Regarding_No_Response</name>
+        <label>Email Agent Regarding No Response</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>emailSimple</actionName>
+        <actionType>emailSimple</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>recipientAddresses</name>
+            <value/>
+        </inputParameters>
+        <inputParameters>
+            <name>composeEmailContent</name>
+            <value>
+                <stringValue>True</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailSubject</name>
+            <value>
+                <stringValue>Action Required: Contact did not respond to hours approval</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailBody</name>
+            <value>
+                <elementReference>tt_NoResponseEmailBody</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>sendRichBody</name>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputParameters>
+        <nameSegment>emailSimple</nameSegment>
+        <offset>0</offset>
+        <versionString>2.0.1</versionString>
+    </actionCalls>
+    <apiVersion>66.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>If the user does not respond or confirm the site visit, the event status will be updated to &quot;No Response.&quot;</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>fx_ContactRecordURL</name>
+        <dataType>String</dataType>
+        <expression>LEFT({!$Api.Partner_Server_URL_600}, FIND(&apos;/services&apos;, {!$Api.Partner_Server_URL_600})) &amp; &quot;lightning/r/&quot; &amp; {!$Record.MVEX__Buyer__c} &amp; &quot;/view&quot;</expression>
+    </formulas>
+    <interviewLabel>Event - Update Expired Approval Status {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Event - Update Expired Approval Status</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Update_Status_to_No_Response</name>
+        <label>Update Status to No Response</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Email_Agent_Regarding_No_Response</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>Status__c</field>
+            <value>
+                <stringValue>No Response</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <doesRequireRecordChangedToMeetCriteria>true</doesRequireRecordChangedToMeetCriteria>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Status__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Waiting For Confirmation</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>Scheduled_Date__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>Event</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <scheduledPaths>
+            <name>Timeout_Follow_Up</name>
+            <connector>
+                <targetReference>Update_Status_to_No_Response</targetReference>
+            </connector>
+            <label>Timeout Follow-Up</label>
+            <offsetNumber>0</offsetNumber>
+            <offsetUnit>Minutes</offsetUnit>
+            <recordField>Scheduled_Date__c</recordField>
+            <timeSource>RecordField</timeSource>
+        </scheduledPaths>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <textTemplates>
+        <name>tt_NoResponseEmailBody</name>
+        <isViewedAsPlainText>true</isViewedAsPlainText>
+        <text>Hi {!$Record.Owner:User.FirstName},&lt;br&gt;&lt;br&gt;
+The hours submitted for approval on {!$Record.Scheduled_Date__c} have not been responded to by &lt;a href=&quot;{!fx_ContactRecordURL}&quot;&gt;{!$Record.Buyer__r.FirstName}&lt;/a&gt;.&lt;br&gt;&lt;br&gt;
+The status has automatically been updated to No Response. Please follow up with them directly.&lt;br&gt;&lt;br&gt;
+Regards,&lt;br&gt;
+Salesforce Support</text>
+    </textTemplates>
+</Flow>

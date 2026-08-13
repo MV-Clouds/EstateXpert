@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Buying_Time_Frame__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Buying Time Frame</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>ASAP</fullName>
+                <default>false</default>
+                <label>ASAP</label>
+            </value>
+            <value>
+                <fullName>1-3 Months</fullName>
+                <default>false</default>
+                <label>1-3 Months</label>
+            </value>
+            <value>
+                <fullName>3-6 Months</fullName>
+                <default>false</default>
+                <label>3-6 Months</label>
+            </value>
+            <value>
+                <fullName>6-12 Months</fullName>
+                <default>false</default>
+                <label>6-12 Months</label>
+            </value>
+            <value>
+                <fullName>Not Sure</fullName>
+                <default>false</default>
+                <label>Not Sure</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

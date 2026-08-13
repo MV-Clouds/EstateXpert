@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lease_Terms__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Lease Terms</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>3 Month</fullName>
+                <default>false</default>
+                <label>3 Month</label>
+            </value>
+            <value>
+                <fullName>6 Month</fullName>
+                <default>false</default>
+                <label>6 Month</label>
+            </value>
+            <value>
+                <fullName>9 Month</fullName>
+                <default>false</default>
+                <label>9 Month</label>
+            </value>
+            <value>
+                <fullName>12 Month</fullName>
+                <default>false</default>
+                <label>12 Month</label>
+            </value>
+            <value>
+                <fullName>13 Month</fullName>
+                <default>false</default>
+                <label>13 Month</label>
+            </value>
+            <value>
+                <fullName>15 Month</fullName>
+                <default>false</default>
+                <label>15 Month</label>
+            </value>
+            <value>
+                <fullName>18 Month</fullName>
+                <default>false</default>
+                <label>18 Month</label>
+            </value>
+            <value>
+                <fullName>24 Month</fullName>
+                <default>false</default>
+                <label>24 Month</label>
+            </value>
+            <value>
+                <fullName>36 Month</fullName>
+                <default>false</default>
+                <label>36 Month</label>
+            </value>
+            <value>
+                <fullName>48 Month</fullName>
+                <default>false</default>
+                <label>48 Month</label>
+            </value>
+            <value>
+                <fullName>60 Month</fullName>
+                <default>false</default>
+                <label>60 Month</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

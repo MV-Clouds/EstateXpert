@@ -134,8 +134,8 @@
         <fullName>Whatsapp_Endpoint</fullName>
         <language>en_US</language>
         <protected>true</protected>
-        <shortDescription>Whatsapp Endpoint</shortDescription>
-        <value>https://graph.facebook.com/</value>
+        <shortDescription>Whatsapp Endpoint &amp; Version</shortDescription>
+        <value>https://graph.facebook.com/;v24.0</value>
     </labels>
     <labels>
         <fullName>Whatsapp_Webhook_Gmail_API</fullName>
@@ -164,5 +164,19 @@
         <protected>true</protected>
         <shortDescription>supportEmail</shortDescription>
         <value>supportemailservice@1fwdbemcdjzputwkkm4hslcbvqdmpnmmcagkgnff0cwx6zr5ns.f9-enofmam.ap43.apex.salesforce.com,support-estatexpert@mvclouds.com</value>
+    </labels>
+    <labels>
+        <fullName>ErrorNotificationEmail</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>ErrorNotificationEmail</shortDescription>
+        <value>karan.s@mvclouds.com</value>
+    </labels>
+    <labels>
+        <fullName>thumbnail</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>thumbnail</shortDescription>
+        <value>https://estatexpertlistingimages.s3.us-east-1.amazonaws.com/videothumbnail.jpeg</value>
     </labels>
 </CustomLabels>

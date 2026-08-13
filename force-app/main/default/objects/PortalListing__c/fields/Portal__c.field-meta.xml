@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Portal__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Portal</label>
+    <referenceTo>Portal__c</referenceTo>
+    <relationshipLabel>Portals Listing</relationshipLabel>
+    <relationshipName>Portals_Listing</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

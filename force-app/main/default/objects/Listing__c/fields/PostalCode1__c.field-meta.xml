@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>PostalCode1__c</fullName>
+    <deprecated>false</deprecated>
+    <externalId>false</externalId>
+    <formula>IF(
+    CONTAINS(Zip_Postal_Code__c, &quot; &quot;), 
+    LEFT(Zip_Postal_Code__c, FIND(&quot; &quot;, Zip_Postal_Code__c) - 1), 
+    LEFT(
+        Zip_Postal_Code__c, 
+        IF(
+            LEN(Zip_Postal_Code__c) = 6, 
+            3, 
+            IF(
+                LEN(Zip_Postal_Code__c) = 7, 
+                4, 
+                FLOOR(LEN(Zip_Postal_Code__c) / 2)
+            )
+        )
+    )
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>PostalCode1</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

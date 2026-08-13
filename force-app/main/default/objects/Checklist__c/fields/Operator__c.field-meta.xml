@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Operator__c</fullName>
+    <deprecated>false</deprecated>
+    <label>Operator</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Equals</fullName>
+                <default>false</default>
+                <label>Equals</label>
+            </value>
+            <value>
+                <fullName>Is Null</fullName>
+                <default>false</default>
+                <label>Is Null</label>
+            </value>
+            <value>
+                <fullName>Contains</fullName>
+                <default>false</default>
+                <label>Contains</label>
+            </value>
+            <value>
+                <fullName>Not Contains</fullName>
+                <default>false</default>
+                <label>Not Contains</label>
+            </value>
+            <value>
+                <fullName>Not Equals to</fullName>
+                <default>false</default>
+                <label>Not Equals to</label>
+            </value>
+            <value>
+                <fullName>Greater Than</fullName>
+                <default>false</default>
+                <label>Greater Than</label>
+            </value>
+            <value>
+                <fullName>Greater Than Equal To</fullName>
+                <default>false</default>
+                <label>Greater Than Equal To</label>
+            </value>
+            <value>
+                <fullName>Less Than</fullName>
+                <default>false</default>
+                <label>Less Than</label>
+            </value>
+            <value>
+                <fullName>Less Than Equal To</fullName>
+                <default>false</default>
+                <label>Less Than Equal To</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

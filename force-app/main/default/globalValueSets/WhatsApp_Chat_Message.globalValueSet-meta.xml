@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Inbound-Message</fullName>
+        <default>false</default>
+        <label>Inbound-Message</label>
+    </customValue>
+    <customValue>
+        <fullName>Outbound-Message</fullName>
+        <default>false</default>
+        <label>Outbound-Message</label>
+    </customValue>
+    <masterLabel>WhatsApp Chat Message</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rent_Closing</fullName>
+    <columns>NAME</columns>
+    <columns>Renter__c</columns>
+    <columns>Listing__c</columns>
+    <columns>Closing_Status__c</columns>
+    <columns>Rental_Agreement_Start_Date__c</columns>
+    <columns>OWNER.ALIAS</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Closing__c.Rent</value>
+    </filters>
+    <filters>
+        <field>Rental_Agreement_End_Date__c</field>
+        <operation>greaterThan</operation>
+        <value>TODAY</value>
+    </filters>
+    <label>Rent Closing</label>
+</ListView>

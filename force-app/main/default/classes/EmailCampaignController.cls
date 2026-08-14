@@ -1193,16 +1193,12 @@ public with sharing class EmailCampaignController {
             for (Email_Member__c em : emailMembers) {
                 totalEmails++;
                 if (em.Status__c == 'Pending') {
-                    if (em.Schedule_Date_and_Time__c != null && em.Schedule_Date_and_Time__c > System.now()) {
-                        remainingEmails++;
-                    } else {
-                        // Pending but past time - considered failed
-                        failedEmails++;
-                    }
-                } else if (em.Status__c != null && em.Status__c.contains('Failed')) {
-                    failedEmails++;
+                    remainingEmails++;
                 } else if (em.Status__c == 'Success') {
                     sentEmails++;
+                } else {
+                    // Any other status (Failed, Failed (No Email), Failed (Invalid Date), etc.) is counted as failed
+                    failedEmails++;
                 }
             }
 
@@ -1476,6 +1472,12 @@ public with sharing class EmailCampaignController {
      * Created By : Rachit Shah
      * @description : Used for sending email from flow
      */
+    public static Boolean isValidId(String idStr) {
+        if (String.isBlank(idStr)) return false;
+        if (idStr.equalsIgnoreCase('null') || idStr.equalsIgnoreCase('undefined')) return false;
+        return (idStr.length() == 15 || idStr.length() == 18) && Pattern.matches('^[a-zA-Z0-9]{15,18}$', idStr);
+    }
+
     @InvocableMethod(label='Send Emails (Specific Date)' description='Send emails to primary, cc, and bcc recipients for specific date campaigns')
     public static void sendEmails(List<EmailRequests> emailRequests) {
         try {
@@ -1492,9 +1494,15 @@ public with sharing class EmailCampaignController {
             // Track processed Email_Member__c IDs to avoid duplicates
             Set<String> processedKeys = new Set<String>();
 
-            for (EmailRequests req : emailRequests) {
-                if (req.toAddresses != null) {
-                    recipientIds.addAll(req.toAddresses);
+            if (emailRequests != null) {
+                for (EmailRequests req : emailRequests) {
+                    if (req.toAddresses != null) {
+                        for (String addr : req.toAddresses) {
+                            if (isValidId(addr)) {
+                                recipientIds.add(addr);
+                            }
+                        }
+                    }
                 }
             }
             Map<String, Integer> remainingEmailsMap = new Map<String, Integer>();
@@ -1514,33 +1522,45 @@ public with sharing class EmailCampaignController {
             }
 
             // Now, replace req.toAddresses (ids) with actual emails for downstream logic
-            for (EmailRequests req : emailRequests) {
-                List<String> emailAddresses = new List<String>();
-                for (String recipientId : req.toAddresses) {
-
-                    SObject rec = idToRecipientMap.get(recipientId);
-                    if (rec != null) {
-                        String email = (String)rec.get('Email');
-                        if (email != null) {
-                            emailAddresses.add(email);
-                            emailToRecipientIdMap.put(email, recipientId);
+            if (emailRequests != null) {
+                for (EmailRequests req : emailRequests) {
+                    List<String> emailAddresses = new List<String>();
+                    if (req.toAddresses != null) {
+                        for (String recipientId : req.toAddresses) {
+                            if (isValidId(recipientId)) {
+                                SObject rec = idToRecipientMap.get((Id)recipientId);
+                                if (rec != null) {
+                                    String email = (String)rec.get('Email');
+                                    if (email != null) {
+                                        emailAddresses.add(email);
+                                        emailToRecipientIdMap.put(email, (Id)recipientId);
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-                req.toAddresses = emailAddresses;
-            }
-
-            // Collect campaign IDs and template IDs, and map email addresses to recipient IDs
-            for (EmailRequests req : emailRequests) {
-                campaignIds.add(req.campaignId);
-                templateIds.add(req.templateDataId);
-                if (req.listingId != null && req.RelatedObjectName == 'MVEX__Listing__c') {
-                    listingIds.add(req.listingId);
+                    req.toAddresses = emailAddresses;
                 }
 
-                for (String toAddress : req.toAddresses) {
-                    if (toAddress != null) {
-                        emailToRecipientIdMap.put(toAddress, null);
+                // Collect campaign IDs and template IDs, and map email addresses to recipient IDs
+                for (EmailRequests req : emailRequests) {
+                    if (isValidId(req.campaignId)) {
+                        campaignIds.add(req.campaignId);
+                    }
+                    if (isValidId(req.templateDataId)) {
+                        templateIds.add((Id)req.templateDataId);
+                    }
+                    if (isValidId(req.listingId) && String.isNotBlank(req.RelatedObjectName) && 
+                        (req.RelatedObjectName.equalsIgnoreCase('MVEX__Listing__c') || req.RelatedObjectName.equalsIgnoreCase('Listing__c'))) {
+                        listingIds.add((Id)req.listingId);
+                    }
+
+                    if (req.toAddresses != null) {
+                        for (String toAddress : req.toAddresses) {
+                            if (toAddress != null) {
+                                emailToRecipientIdMap.put(toAddress, null);
+                            }
+                        }
                     }
                 }
             }
@@ -1566,11 +1586,13 @@ public with sharing class EmailCampaignController {
                     campaignMap.put(campaign.Id, campaign);
                     remainingEmailsMap.put(campaign.Id, Integer.valueOf(campaign.Remaining_Emails__c));
             
-                    // Process campaign members
+                    // Process campaign members - safely add to List<Id>
                     List<Id> recipientListPerCampaign = new List<Id>();
                     for (Marketing_Campaign_Member__c member : campaign.Marketing_Campaign_Members__r) {
-                        recipientListPerCampaign.add(member.RecipientId__c);
-                        recipientIds.add(member.RecipientId__c);
+                        if (isValidId(member.RecipientId__c)) {
+                            recipientListPerCampaign.add((Id)member.RecipientId__c);
+                            recipientIds.add(member.RecipientId__c);
+                        }
                     }
                     campaignToRecipientMap.put(campaign.Id, recipientListPerCampaign);
             
@@ -1588,12 +1610,9 @@ public with sharing class EmailCampaignController {
                 'Contact' => new Set<Id>()
             };
             for (String campaignId : campaignMap.keySet()) {
-                String relatedObject = campaignMap.get(campaignId).RelatedObject__c;
                 List<Id> recipientIdsForCampaign = campaignToRecipientMap.get(campaignId);
                 if (recipientIdsForCampaign != null) {
-                    if (relatedObject == 'Contact') {
-                        objectToIdsMap.get('Contact').addAll(recipientIdsForCampaign);
-                    }
+                    objectToIdsMap.get('Contact').addAll(recipientIdsForCampaign);
                 }
             }
             
@@ -1635,10 +1654,12 @@ public with sharing class EmailCampaignController {
             
             Set<Id> recipientObjectIds = new Set<Id>();
             for (EmailRequests request : emailRequests) {
-                for (String toAddress : request.toAddresses) {
-                    SObject recipient = emailToRecipientMap.get(toAddress);
-                    if (recipient != null) {
-                        recipientObjectIds.add(recipient.Id);
+                if (request.toAddresses != null) {
+                    for (String toAddress : request.toAddresses) {
+                        SObject recipient = emailToRecipientMap.get(toAddress);
+                        if (recipient != null && recipient.Id != null) {
+                            recipientObjectIds.add(recipient.Id);
+                        }
                     }
                 }
             }
@@ -1690,7 +1711,7 @@ public with sharing class EmailCampaignController {
             for (EmailRequests request : emailRequests) {
 
                 Marketing_Campaign__c campaignRecord = campaignMap.get(request.campaignId);
-                if (campaignRecord.Schedule_Type__c != 'Specific Date') {
+                if (campaignRecord == null || campaignRecord.Schedule_Type__c != 'Specific Date') {
                     continue; // Skip if not specific date
                 }
 
@@ -1710,64 +1731,69 @@ public with sharing class EmailCampaignController {
                     }
                 }
                 extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
-                String sourceObjectAPI = temps[0].Object_API_Name__c;
-                Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);            
+                String sourceObjectAPI = !temps.isEmpty() ? temps[0].Object_API_Name__c : null;
+                Map<String, Object> extractedKeyMap = extractedKeyString != 'null' ? (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString) : new Map<String, Object>();            
                 
-                for (String toAddress : request.toAddresses) {
-                    // Reset body per-recipient so substitutions from one recipient
-                    // don't carry over into the next recipient's email.
-                    processedBody = request.body;
-                    SObject recipient = emailToRecipientMap.get(toAddress);
-                    if (recipient == null) {
-                        continue;
-                    }
-                    
-                    String recipientId = recipient.Id;
-                    Set<Id> emailIds = campaignToEmailIdsMap.get(request.campaignId);
-                    if (emailIds == null) {
-                        continue;
-                    }
-                    
-                    String matchedKey;
-                    for (Id emailId : emailIds) {
-                        String key = recipientId + '-' + emailId;
-                        if (emailMembersToUpdate.containsKey(key) && !processedKeys.contains(key)) {
-                            matchedKey = key;
-                            break;
+                if (request.toAddresses != null) {
+                    for (String toAddress : request.toAddresses) {
+                        // Reset body per-recipient so substitutions from one recipient
+                        // don't carry over into the next recipient's email.
+                        processedBody = request.body;
+                        SObject recipient = emailToRecipientMap.get(toAddress);
+                        if (recipient == null) {
+                            continue;
                         }
-                    }
-                    
-                    if (matchedKey == null) {
-                        continue;
-                    }
+                        
+                        String recipientId = recipient.Id;
+                        Set<Id> emailIds = campaignToEmailIdsMap.get(request.campaignId);
+                        if (emailIds == null) {
+                            continue;
+                        }
+                        
+                        String matchedKey;
+                        for (Id emailId : emailIds) {
+                            String key = recipientId + '-' + emailId;
+                            if (emailMembersToUpdate.containsKey(key) && !processedKeys.contains(key)) {
+                                matchedKey = key;
+                                break;
+                            }
+                        }
+                        
+                        if (matchedKey == null) {
+                            continue;
+                        }
 
-                    Map<String, Map<String, String>> mappingKeys;
-                    String relObj = request.RelatedObjectName;
-                    
-                    if (String.isNotBlank(relObj)) {
-                        if (relObj.equalsIgnoreCase('MVEX__Listing__c') || relObj.equalsIgnoreCase('Listing__c')) {
-                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, listingIds, true);
-                        } else if (relObj.equalsIgnoreCase('Contact')) {
-                            Set<Id> idsToMap = new Set<Id>{recipient.Id};
-                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
-                        } else {
-                            // Default fallback for other objects, assuming recipient.Id is the relevant ID
-                            Set<Id> idsToMap = new Set<Id>{recipient.Id};
-                            mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
+                        Map<String, Map<String, String>> mappingKeys;
+                        String relObj = request.RelatedObjectName;
+                        
+                        if (String.isNotBlank(relObj)) {
+                            if (relObj.equalsIgnoreCase('MVEX__Listing__c') || relObj.equalsIgnoreCase('Listing__c')) {
+                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, listingIds, true);
+                            } else if (relObj.equalsIgnoreCase('Contact') && recipient != null && recipient.Id != null) {
+                                Set<Id> idsToMap = new Set<Id>{recipient.Id};
+                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
+                            } else if (recipient != null && recipient.Id != null) {
+                                // Default fallback for other objects, assuming recipient.Id is the relevant ID
+                                Set<Id> idsToMap = new Set<Id>{recipient.Id};
+                                mappingKeys = DataMappingControllerV2.getMappingsKeyValues2(extractedKeyMap, relObj, idsToMap, true);
+                            }
                         }
-                    }
 
                     processedKeys.add(matchedKey);
-                    if (recipient != null) {
+                    if (recipient != null && mappingKeys != null) {
                         Map<String, String> mappingKeyVsMappingValues = mappingKeys.get('objectNGeneral');
                         Map<String, String> salesforceImages = mappingKeys.get('salesforceImages');
-                        for (String key : mappingKeyVsMappingValues.keySet()) {
-                            String escapedKey = Pattern.quote(key);
-                            processedBody = processedBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
+                        if (mappingKeyVsMappingValues != null) {
+                            for (String key : mappingKeyVsMappingValues.keySet()) {
+                                String escapedKey = Pattern.quote(key);
+                                processedBody = processedBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
+                            }
                         }
-                        for (String src : salesforceImages.keySet()) {
-                            String escapedSrc = Pattern.quote(src);
-                            processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
+                        if (salesforceImages != null) {
+                            for (String src : salesforceImages.keySet()) {
+                                String escapedSrc = Pattern.quote(src);
+                                processedBody = processedBody.replaceAll(escapedSrc, salesforceImages.get(src));
+                            }
                         }
 
                         // --- Recipient field replacement for Listing templates ---
@@ -1883,6 +1909,7 @@ public with sharing class EmailCampaignController {
                     }
                 }      
             }
+        }
 
 
             try {

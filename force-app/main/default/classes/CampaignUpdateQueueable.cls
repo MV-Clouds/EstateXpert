@@ -23,25 +23,9 @@ public with sharing class CampaignUpdateQueueable implements Queueable, Database
                     if (this.status == 'Failed') {
                         campaignToUpdate.Status__c = 'Failed';
                         campaignToUpdate.Failed_Reason__c = this.errorMessage;
-
                         campaignsToUpdate.add(campaignToUpdate);
                     } else {
-                        Integer remainingEmails = this.remainingEmailsMap.get(campaignId);
-                        campaignToUpdate.Remaining_Emails__c = remainingEmails;
-                        if(campaignToUpdate.Total_Sent_Mails__c != null){
-                            campaignToUpdate.Total_Sent_Mails__c += this.emailSize;
-                        }
-                        else {
-                            campaignToUpdate.Total_Sent_Mails__c = this.emailSize;
-                        }
-            
-                        if (remainingEmails == 0) {
-                            campaignToUpdate.Status__c = 'Completed';
-                        } else if (campaignToUpdate.Status__c != 'In Progress') {
-                            campaignToUpdate.Status__c = 'In Progress';
-                        }
-            
-                        campaignsToUpdate.add(campaignToUpdate);
+                        EmailCampaignController.recalculateCampaignCounts((Id)campaignId);
                     }
                 }
             }

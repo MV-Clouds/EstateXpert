@@ -1,7 +1,6 @@
 import { LightningElement, track, api } from 'lwc';
 import saveSettings from '@salesforce/apex/IntegrationPopupController.saveSettings';
 import getSettings from '@salesforce/apex/IntegrationPopupController.getSettings';
-import saveCustomTempData from '@salesforce/apex/IntegrationPopupController.saveCustomTempData';
 import siteData from '@salesforce/apex/IntegrationPopupController.siteData';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
@@ -712,8 +711,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
             }
         }
 
-        this.saveTempData(this.fieldsData.MVEX__ClientId__c, this.fieldsData.MVEX__ClientSecret__c, this.fieldsData.MVEX__Redirect_URI__c);
-
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -742,10 +739,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
                 }
             }
 
-            console.log('Client ID:', this.fieldsData.MVEX__Client_ID__c, 'Client Secret:', this.fieldsData.MVEX__Client_Secret__c, 'Redirect URI:', this.fieldsData.MVEX__Redirect_URI__c);
-            
-
-            this.saveTempData(this.fieldsData.MVEX__Client_ID__c, this.fieldsData.MVEX__Client_Secret__c, this.fieldsData.MVEX__Redirect_URI__c);
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
                 attributes: {
@@ -754,29 +747,6 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
             });
         } catch (error) {
             console.log('error in redirectToGmailLoginPage ->', error.stack);
-        }
-    }
-
-    /**
-    * Method Name : saveTempData
-    * @description : save temp data
-    * @param {String} clientId
-    * @param {String} clientSecret
-    * @param {String} redirectURI
-    * Created Date: 27/12/2024
-    * Created By: Karan Singh
-    */
-    saveTempData(clientId, clientSecret, redirectURI) {
-        try {
-            saveCustomTempData({ clientId, clientSecret, redirectURI })
-                .then(() => {
-                    console.log('Data Saved Successfully.');
-                })
-                .catch(error => {
-                    console.log('Failed to save data : ', error);
-                });
-        } catch (error) {
-            console.log('error in saveTempData ->', error.stack);
         }
     }
 

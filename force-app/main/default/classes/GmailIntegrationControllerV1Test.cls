@@ -32,13 +32,6 @@ private class GmailIntegrationControllerV1Test {
 
     @TestSetup
     static void setupTestData() {
-        TempData__c tempData = new TempData__c(
-            Client_ID__c = 'testClientId',
-            Client_Secret__c = 'testClientSecret',
-            Redirect_URI__c = 'https://test.redirect.uri'
-        );
-        insert tempData;
-
         GmailConfig__c config = new GmailConfig__c(
             Client_ID__c = 'testClientId',
             Client_Secret__c = 'testClientSecret',

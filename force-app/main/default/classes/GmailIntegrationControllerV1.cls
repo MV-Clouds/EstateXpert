@@ -20,8 +20,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 errorMessage = 'Authorization code not found.';
                 return;
             }
-            
-            // Replaced TempData__c with Custom Metadata retrieval
+
             String clientId = '';
             String clientSecret = '';
             String redirectUrl = '';

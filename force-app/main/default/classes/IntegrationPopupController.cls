@@ -214,32 +214,6 @@ public with sharing class IntegrationPopupController {
     }
 
     /**
-    * Method Name : saveCustomTempData
-    * @param clientId : String to stored the client id.
-    * @param clientSecret : String to stored the client secret.
-    * @param redirectURI : String to stored the redirect URI.
-    * @description : Method to save custom temp data.
-    */
-    @AuraEnabled
-    public static void saveCustomTempData(String clientId, String clientSecret, String redirectURI){
-        try {
-            TempData__c tempDataSettings = TempData__c.getOrgDefaults();
-            if (tempDataSettings == null) {
-                tempDataSettings = new TempData__c();
-                tempDataSettings.SetupOwnerId = UserInfo.getOrganizationId();
-            }
-            tempDataSettings.Client_ID__c = clientId;
-            tempDataSettings.Client_Secret__c = clientSecret;
-            tempDataSettings.Redirect_URI__c = redirectURI;
-
-            upsert as user tempDataSettings;
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'saveCustomTempData', 'Error while saving custom temp data.');
-        }
-    }
-
-    /**
     * Class Name : SocialMediaDataWrapper
     * @description : Wrapper class to store social media data.
     */

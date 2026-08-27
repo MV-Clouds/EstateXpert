@@ -450,3 +450,17 @@
 .svg_back_icon {
     display: none;
 }
+
+/* ── Deactivate button variant ───────────────────────────────────────────── */
+
+.action_btn.deactivate_btn {
+    color: #C23934;
+    border-color: #C23934;
+    background: #fff;
+}
+
+.action_btn.deactivate_btn:hover {
+    background: #FFF0F0;
+    border-color: #A61C17;
+    color: #A61C17;
+}

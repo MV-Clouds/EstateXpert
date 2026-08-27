@@ -43,5 +43,22 @@ public class CampaignUpdateQueueableTest {
         Test.startTest();
         System.enqueueJob(queueable);
         Test.stopTest();
+
+        // Validate the results
+        List<Marketing_Campaign__c> updatedCampaigns = [SELECT Id, Remaining_Emails__c, Total_Sent_Mails__c, Status__c FROM Marketing_Campaign__c];
+
+        for (Marketing_Campaign__c campaign : updatedCampaigns) {
+            Integer expectedRemainingEmails = remainingEmailsMap.get(String.valueOf(campaign.Id));  // Use Integer for expected value
+            Decimal expectedTotalSentMails = campaignMap.get(String.valueOf(campaign.Id)).Total_Sent_Mails__c + emailSize;
+
+            System.assertEquals(expectedRemainingEmails, campaign.Remaining_Emails__c.intValue(), 'Remaining Emails should be updated correctly'); // Use intValue() for comparison
+            System.assertEquals(expectedTotalSentMails, campaign.Total_Sent_Mails__c, 'Total Sent Mails should be updated correctly');
+
+            if (expectedRemainingEmails == 0) {
+                System.assertEquals('Completed', campaign.Status__c, 'Campaign status should be set to Completed');
+            } else {
+                System.assertEquals('In Progress', campaign.Status__c, 'Campaign status should be In Progress');
+            }
+        }
     }
 }

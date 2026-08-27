@@ -177,6 +177,21 @@ public class IntegrationPopupControllerTest {
     }
 
     @isTest
+    static void testSaveCustomTempDataAndGetSiteUrl() {
+        Test.startTest();
+        IntegrationPopupController.saveCustomTempData('test_client_id', 'test_secret', 'https://test.com');
+        String gmailUrl = IntegrationPopupController.getSiteUrl(null, 'Gmail');
+        String instaUrl = IntegrationPopupController.getSiteUrl(null, 'Instagram');
+        String existingUrl = IntegrationPopupController.getSiteUrl('https://existing.com', 'Gmail');
+        Test.stopTest();
+        
+        TempData__c tempData = TempData__c.getOrgDefaults();
+        System.assertEquals('test_client_id', tempData.Client_ID__c, 'Client ID should match');
+        System.assertEquals('test_secret', tempData.Client_Secret__c, 'Client secret should match');
+        System.assertEquals('https://existing.com', existingUrl, 'Should return existing URL');
+    }
+
+    @isTest
     static void testSiteData() {
         Test.startTest();
         List<IntegrationPopupController.FieldList> sites = IntegrationPopupController.siteData();

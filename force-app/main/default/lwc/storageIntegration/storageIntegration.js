@@ -5,6 +5,7 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import saveSettings from '@salesforce/apex/IntegrationPopupController.saveSettings';
 import getSettings from '@salesforce/apex/IntegrationPopupController.getSettings';
+import saveCustomTempData from '@salesforce/apex/IntegrationPopupController.saveCustomTempData';
 import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeAWSAccess';
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
@@ -408,6 +409,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     }
                     // Show the inline input section so the user can also paste manually
                     this.showGmailInput = true;
+                    // Save temp data for the OAuth callback
+                    this.saveTempData(fieldsData.MVEX__Client_ID__c, fieldsData.MVEX__Client_Secret__c, fieldsData.MVEX__Redirect_URI__c);
                     // Redirect to Google OAuth — identical URL to integrationPopUp
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
@@ -523,6 +526,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     }
                     // Show the inline input section so user can also enter manually
                     this.showInstagramInput = true;
+                    // Save temp data for the OAuth callback
+                    this.saveTempData(clientId, clientSecret, redirectUri);
                     // Redirect to Instagram OAuth — identical URL to integrationPopUp.redirectToInstagramLoginPage
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
@@ -614,6 +619,25 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         } catch (error) {
             errorDebugger('StorageIntegration', 'saveInstagramToken', error, 'warn', 'Error saving Instagram token');
             this.isSpinner = false;
+        }
+    }
+
+    // ══ Shared OAuth helper ═══════════════════════════════════════════════════
+
+    /**
+    * Method Name: saveTempData
+    * @description: Saves OAuth credentials to TempData__c custom setting before redirecting.
+    *               Mirrors the same method in integrationPopUp.
+    * Created Date: 16/03/2026
+    * Created By: Karan Singh
+    */
+    saveTempData(clientId, clientSecret, redirectURI) {
+        try {
+            saveCustomTempData({ clientId, clientSecret, redirectURI })
+                .then(() => { console.log('Temp data saved successfully.'); })
+                .catch(error => { console.log('Failed to save temp data:', error); });
+        } catch (error) {
+            console.log('Error in saveTempData:', error);
         }
     }
 

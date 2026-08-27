@@ -5,7 +5,6 @@ public without sharing class InstagramController {
     public String errorMessage { get; set; }
     public String longLivedToken { get; set; }
     public String instagramUserId { get; set; }
-    @TestVisible public static List<MVEX__recordManagerConfig__mdt> mockMetadata = null;
     
     public InstagramController() {
         isRecordCreated = false;
@@ -25,28 +24,13 @@ public without sharing class InstagramController {
                 ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, errorMessage));
                 return null;
             }
-
-            String clientId = '';
-            String clientSecret = '';
-            String redirectUrl = '';
-
-            List<MVEX__recordManagerConfig__mdt> mdtList = mockMetadata != null ? mockMetadata : [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'Instagram_Integration'  LIMIT 1];
-            if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
-                String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-                if(parts.size() >= 3) {
-                    clientId = parts[0];
-                    clientSecret = parts[1];
-                    redirectUrl = parts[2];
-                }
-            }
-
-            if(String.isBlank(clientId) || String.isBlank(clientSecret) || String.isBlank(redirectUrl)){
-                hasError = true;
-                errorMessage = 'Instagram Credentials configuration missing in Custom Metadata.';
-                return null;
-            }
     
-          String tokenUrl = 'https://api.instagram.com/oauth/access_token';
+            TempData__c settings = TempData__c.getOrgDefaults();
+            String clientId = settings.Client_ID__c;
+            String clientSecret = settings.Client_Secret__c;
+            String redirectUrl = settings.Redirect_URI__c;
+            
+            String tokenUrl = 'https://api.instagram.com/oauth/access_token';
             String body = 'client_id=' + EncodingUtil.urlEncode(clientId, 'UTF-8') +
                           '&client_secret=' + EncodingUtil.urlEncode(clientSecret, 'UTF-8') +
                           '&grant_type=authorization_code' +

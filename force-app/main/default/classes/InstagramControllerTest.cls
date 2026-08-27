@@ -1,5 +1,15 @@
 @isTest
 private class InstagramControllerTest {
+
+    @testSetup
+    static void setupTestData() {
+        insert new TempData__c(
+            Client_ID__c = '123456',
+            Client_Secret__c = 'secret',
+            Redirect_URI__c = 'https://example.com/redirect'
+        );
+    }
+
     @isTest
     static void testGetRefreshTokenWithValidCode() {
         Test.setCurrentPage(new PageReference('/apex/Dummy'));

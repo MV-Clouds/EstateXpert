@@ -6,20 +6,18 @@
  */
 public without sharing class MetaAdsTokenController {
 
-    // ─── Tech Provider App Credentials (WBConnect / EstateXpert) ──────
-    private static final String META_APP_ID     = '514916280628381';
-    private static final String META_APP_SECRET = '6e1719dde4e730a3a55e0eab8899f62b';
-    private static final String META_CONFIG_ID  = '1251520462667703';
-    // ──────────────────────────────────────────────────────────────────
+    // ─── Configuration from Custom Metadata ──────
+    public static Integration_App_Config__mdt getConfig() {
+        return Integration_App_Config__mdt.getInstance('Meta_Ads');
+    }
 
-    private static final String GRAPH_API_VERSION = 'v21.0';
-    private static final String GRAPH_BASE_URL    = 'https://graph.facebook.com';
+    public Boolean hasConfig { get { return getConfig() != null; } }
 
     // Properties exposed to Visualforce Page
-    public String metaAppId    { get { return META_APP_ID; } }
-    public String metaConfigId { get { return META_CONFIG_ID; } }
-    public String apiVersion   { get { return GRAPH_API_VERSION; } }
-    public String apiEndpoint  { get { return GRAPH_BASE_URL; } }
+    public String metaAppId    { get { return getConfig()?.App_ID__c; } }
+    public String metaConfigId { get { return getConfig()?.Config_Id__c; } }
+    public String apiVersion   { get { return getConfig()?.API_Version__c; } }
+    public String apiEndpoint  { get { return getConfig()?.Base_Url__c; } }
 
     /**
      * @description Exchanges the authCode from the SDK for a System User Token,
@@ -37,6 +35,18 @@ public without sharing class MetaAdsTokenController {
             }
 
             Http http = new Http();
+
+            Integration_App_Config__mdt config = getConfig();
+            if (config == null) {
+                resultMap.put('success', false);
+                resultMap.put('message', 'Integration configuration for Meta Ads is missing.');
+                return resultMap;
+            }
+
+            String META_APP_ID = config.App_ID__c;
+            String META_APP_SECRET = config.App_Secret__c;
+            String GRAPH_API_VERSION = config.API_Version__c;
+            String GRAPH_BASE_URL = config.Base_Url__c;
 
             // ── Step 1: Exchange Auth Code for Permanent System User Token ──
             String tokenUrl = GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/oauth/access_token'
@@ -160,6 +170,38 @@ public without sharing class MetaAdsTokenController {
                     resultMap.put('forms', formMap.get('data'));
                 }
             }
+
+            // ── Step 6: Save Tokens to Custom Setting ──
+            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
+            if (tokenConfig == null) {
+                tokenConfig = new Meta_Token_Config__c();
+                tokenConfig.SetupOwnerId = UserInfo.getOrganizationId();
+            }
+            
+            tokenConfig.Client_App_Id__c = clientAppId;
+            tokenConfig.Page_Id__c = foundPageId;
+            
+            if (String.isNotBlank(systemUserToken)) {
+                if (systemUserToken.length() <= 255) {
+                    tokenConfig.System_User_Token_1__c = systemUserToken;
+                    tokenConfig.System_User_Token_2__c = null;
+                } else {
+                    tokenConfig.System_User_Token_1__c = systemUserToken.substring(0, 255);
+                    tokenConfig.System_User_Token_2__c = systemUserToken.substring(255);
+                }
+            }
+            
+            if (String.isNotBlank(pageAccessToken)) {
+                if (pageAccessToken.length() <= 255) {
+                    tokenConfig.Page_Access_Token_1__c = pageAccessToken;
+                    tokenConfig.Page_Access_Token_2__c = null;
+                } else {
+                    tokenConfig.Page_Access_Token_1__c = pageAccessToken.substring(0, 255);
+                    tokenConfig.Page_Access_Token_2__c = pageAccessToken.substring(255);
+                }
+            }
+            
+            upsert tokenConfig;
 
             resultMap.put('success', true);
             return resultMap;

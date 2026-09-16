@@ -11,14 +11,19 @@
         <script>
             // Initialize Meta JavaScript SDK with Tech Provider App ID
             window.fbAsyncInit = function () {
-                console.log('[Meta Ads] Initializing FB SDK with Tech Provider App ID:', '{!metaAppId}');
-                FB.init({
-                    appId: '{!metaAppId}',
-                    autoLogAppEvents: true,
-                    xfbml: true,
-                    version: '{!apiVersion}'
-                });
-                console.log('[Meta Ads] FB SDK Initialized successfully.');
+                var appId = '{!metaAppId}';
+                console.log('[Meta Ads] Initializing FB SDK with Tech Provider App ID:', appId);
+                if (appId) {
+                    FB.init({
+                        appId: appId,
+                        autoLogAppEvents: true,
+                        xfbml: true,
+                        version: '{!apiVersion}'
+                    });
+                    console.log('[Meta Ads] FB SDK Initialized successfully.');
+                } else {
+                    console.error('[Meta Ads] Missing App ID. Cannot initialize SDK.');
+                }
             };
         </script>
         <script crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" async="true"
@@ -491,6 +496,19 @@
                         </div>
                     </div>
 
+                    <apex:outputPanel rendered="{!NOT(hasConfig)}">
+                        <div class="info-box" style="background: #FEF2F2; border-color: #F87171;">
+                            <svg class="info-icon" style="color: #EF4444;" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="info-content">
+                                <p class="info-title" style="color: #991B1B;">Configuration Missing</p>
+                                <p class="info-text" style="color: #991B1B;">The Meta Ads integration configuration is missing. Please ask your administrator to configure the Tech Provider App credentials in Custom Metadata (Integration_App_Config__mdt) first.</p>
+                            </div>
+                        </div>
+                    </apex:outputPanel>
+
+                    <apex:outputPanel rendered="{!hasConfig}">
                     <div id="setup-form-div">
                         <div class="input-group">
                             <label class="input-label" for="app-id-input">Meta Application ID</label>
@@ -548,6 +566,7 @@
                         <div class="section-header">📋 Active Lead Forms &amp; Dynamic Fields</div>
                         <div id="forms-display"></div>
                     </div>
+                    </apex:outputPanel>
 
                 </div>
 

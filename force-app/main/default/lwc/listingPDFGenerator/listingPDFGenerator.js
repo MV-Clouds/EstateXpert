@@ -1,5 +1,5 @@
 import { LightningElement, track, wire } from "lwc";
-import { CurrentPageReference } from 'lightning/navigation';
+import { CurrentPageReference, NavigationMixin } from 'lightning/navigation';
 import getListingAndTemplates from '@salesforce/apex/TemplateBuilderController.getListingAndTemplates';
 import searchContactsWithEmail from '@salesforce/apex/TemplateBuilderController.searchContactsWithEmail';
 import sendEmailWithPDF from '@salesforce/apex/TemplateBuilderController.sendEmailWithPDF';
@@ -12,7 +12,7 @@ const MAX_RECIPIENTS  = 10;
 const MAX_SUBJECT_LEN = 255;
 const MAX_BODY_LEN    = 32000;
 
-export default class ListingPDFGenerator extends LightningElement {
+export default class ListingPDFGenerator extends NavigationMixin(LightningElement) {
 
     @track templateid;
     @track recordId;
@@ -28,7 +28,7 @@ export default class ListingPDFGenerator extends LightningElement {
     @track isStep2 = false;
     @track selectedValue = null;
     @track vfGeneratePageSRC;
-    @track isDataAvailable = true;
+    @track isDataAvailable = false;
     @track vfEmailPageSRC;
     @track isStep3 = false;
     @track previousStep = 1;
@@ -138,6 +138,7 @@ export default class ListingPDFGenerator extends LightningElement {
                     if (a.label > b.label) return 1;
                     return 0;
                 });
+                this.isDataAvailable = true;
             } else {
                 this.isDataAvailable = false;
             }
@@ -255,6 +256,29 @@ export default class ListingPDFGenerator extends LightningElement {
 
     closeActionScreen() {
         this.dispatchEvent(new CloseActionScreenEvent());
+    }
+
+    navigateToTemplateBuilder(event) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        this[NavigationMixin.GenerateUrl]({
+            type: 'standard__navItemPage',
+            attributes: {
+                apiName: 'MVEX__Control_Center'
+            },
+            state: {
+                c__openComponent: 'templateHomePage'
+            }
+        }).then((url) => {
+            window.open(url, '_blank');
+        }).catch((error) => {
+            console.error('Error generating tab URL:', error);
+            window.open('/lightning/n/MVEX__Control_Center?c__openComponent=templateHomePage', '_blank');
+        }).finally(() => {
+            this.closeActionScreen();
+        });
     }
 
     showPicklistOptions() {

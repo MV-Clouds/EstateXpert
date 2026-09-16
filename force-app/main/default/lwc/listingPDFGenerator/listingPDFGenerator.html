@@ -2,14 +2,14 @@
     <!-- Step 1: Select Template -->
     <template if:true={isStep1}>
         <div class="slds-modal__header blue-header">
-            <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Select Template</h1>
+            <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Select PDF Template</h1>
         </div>
         <div class="body_container">
             <template if:true={isDataAvailable}>
                 <div class="slds-form-element__control main_body">
-                    <label>Select Listing Template</label>
-                    <lightning-input label="Select Listing Template" type="search" onclick={showPicklistOptions}
-                        placeholder="Search Template..." onkeyup={search} variant="label-hidden" value={selectedValue}
+                    <label>Select Listing PDF Template</label>
+                    <lightning-input label="Select Listing PDF Template" type="search" onclick={showPicklistOptions}
+                        placeholder="Search PDF Template..." onkeyup={search} variant="label-hidden" value={selectedValue}
                         onblur={hidePicklistOptions} class="input_class" oncommit={handleClear} readonly={readonly}>
                     </lightning-input>
                     <div if:true={dropDown}
@@ -77,7 +77,10 @@
                 <div class="emptyStateContainer">
                     <img class="emptyStateImage" src="/resource/MVEX__emptyState" draggable="false" />
                     <div class="emptyStateMessage">
-                        No templates found. Please create a template first.
+                        No active Listing PDF templates found
+                    </div>
+                    <div class="emptyStateSubMessage">
+                        Please create an active PDF Template for the Listing object.
                     </div>
                 </div>
                 <div class="edit_modal_footerbtns">

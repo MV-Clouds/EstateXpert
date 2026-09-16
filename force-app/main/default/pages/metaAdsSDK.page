@@ -1,0 +1,715 @@
+<!--
+  @description       : Meta Ads SDK Page - Complete 2-App Architecture with Webhook Subscription
+  @author            : EstateXpert
+  @last modified on  : 08-31-2026
+-->
+<apex:page html-style="height: 100%;" showHeader="false" sidebar="false" controller="MetaAdsTokenController">
+    <apex:styleSheet value="{!URLFOR($Resource.MulishFontCss)}" />
+    <html>
+
+    <head>
+        <script>
+            // Initialize Meta JavaScript SDK with Tech Provider App ID
+            window.fbAsyncInit = function () {
+                console.log('[Meta Ads] Initializing FB SDK with Tech Provider App ID:', '{!metaAppId}');
+                FB.init({
+                    appId: '{!metaAppId}',
+                    autoLogAppEvents: true,
+                    xfbml: true,
+                    version: '{!apiVersion}'
+                });
+                console.log('[Meta Ads] FB SDK Initialized successfully.');
+            };
+        </script>
+        <script crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" async="true"
+            defer="true"></script>
+    </head>
+
+    <body>
+        <style>
+            * {
+                font-family: 'Mulish';
+                user-select: none;
+            }
+
+            html,
+            body {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                padding: unset !important;
+                overflow: hidden;
+            }
+
+            .smi_container {
+                background: #f5f7fa;
+                height: calc(100% - 2rem);
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .sub_main_header_css {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .main_header_cls {
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                border-left: 4px solid #1877F2;
+                border-radius: 12px;
+                padding: 1rem;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+                position: relative;
+            }
+
+            .header_block_css {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                flex-direction: row;
+                font-size: 26px;
+                font-weight: 500;
+                text-align: left;
+                gap: 15px;
+                color: #0f1419;
+                letter-spacing: 0.3px;
+            }
+
+            .svg_back_icon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+            }
+
+            .main_container {
+                padding: 1rem;
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: space-between;
+                height: 100%;
+                background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+                border-radius: 12px;
+                position: relative;
+                box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+                border: 1px solid rgba(24, 119, 242, 0.1);
+                overflow: hidden;
+            }
+
+            .config-card {
+                background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+                border-radius: 12px;
+                padding: 2.5rem;
+                width: 55%;
+                height: 100%;
+                max-height: 100%;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(24, 119, 242, 0.1);
+                z-index: 1;
+                border: 1px solid rgba(24, 119, 242, 0.08);
+                overflow-y: auto;
+                box-sizing: border-box;
+            }
+
+            .background-image {
+                position: fixed;
+                bottom: 16px;
+                right: 24px;
+                height: auto;
+                object-fit: contain;
+                pointer-events: none;
+            }
+
+            .page-title {
+                font-size: 28px;
+                font-weight: 500;
+                color: #0f1419;
+                margin: 0;
+                letter-spacing: 0.3px;
+            }
+
+            .page-subtitle {
+                font-size: 14px;
+                color: #636363;
+                margin: 4px 0 0 0;
+            }
+
+            .page-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .page-header-content {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .input-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .input-label {
+                display: block;
+                font-size: 14px;
+                font-weight: 500;
+                color: #131314;
+                margin-bottom: 10px;
+            }
+
+            .input-field {
+                width: 100%;
+                padding: 14px 16px;
+                font-size: 16px;
+                border: 1px solid #d0d4d8;
+                border-radius: 8px;
+                box-sizing: border-box;
+                font-family: 'Mulish';
+                background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+                transition: all 0.3s ease;
+                user-select: text;
+            }
+
+            .input-field:focus {
+                outline: none;
+                border-color: #1877F2;
+                box-shadow: 0 3px 12px rgba(24, 119, 242, 0.2);
+                background: #ffffff;
+            }
+
+            .info-box {
+                display: flex;
+                gap: 12px;
+                padding: 16px;
+                background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 6px rgba(24, 119, 242, 0.1);
+                border: 1px solid rgba(24, 119, 242, 0.1);
+            }
+
+            .info-icon {
+                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
+                color: #1877F2;
+            }
+
+            .info-content {
+                flex: 1;
+            }
+
+            .info-title {
+                font-size: 14px;
+                font-weight: 500;
+                color: #131314;
+                margin: 0 0 4px 0;
+            }
+
+            .info-text {
+                font-size: 14px;
+                color: #636363;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            .connect-btn {
+                width: 100%;
+                padding: 14px 24px;
+                font-size: 16px;
+                font-weight: 500;
+                background: #1877F2;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                box-shadow: 0 2px 8px rgba(24, 119, 242, 0.3);
+            }
+
+            .connect-btn:hover {
+                background: #0d65d9;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4);
+            }
+
+            .connect-btn:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            .error-message-text {
+                color: #DC2626;
+                font-size: 14px;
+                margin-top: 8px;
+                display: block;
+            }
+
+            .meta-icon {
+                width: 36px;
+                height: 36px;
+                flex-shrink: 0;
+                object-fit: contain;
+            }
+
+            /* Results Section Styles */
+            .results-container {
+                display: none;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .badges-row {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-bottom: 1rem;
+            }
+
+            .status-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #1877F2;
+                box-shadow: 0 1px 3px rgba(24, 119, 242, 0.1);
+            }
+
+            .status-badge.success {
+                background: #dcfce7;
+                color: #166534;
+                box-shadow: 0 1px 3px rgba(22, 101, 52, 0.1);
+            }
+
+            .webhook-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                background: #e0f2fe;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #0369a1;
+                box-shadow: 0 1px 3px rgba(3, 105, 161, 0.1);
+            }
+
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                background: #1877F2;
+                border-radius: 50%;
+            }
+
+            .status-dot.success {
+                background: #16a34a;
+            }
+
+            .section-header {
+                font-size: 12px;
+                font-weight: 500;
+                color: #1f2937;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin: 1.5rem 0 0.5rem 0;
+            }
+
+            .token-box {
+                font-size: 13px;
+                color: #1e293b;
+                word-break: break-all;
+                background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #E5E7EB;
+                user-select: text;
+                max-height: 80px;
+                overflow-y: auto;
+                margin-bottom: 12px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .card {
+                background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+                padding: 16px;
+                border-radius: 8px;
+                border: 1px solid #E5E7EB;
+                margin-top: 8px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .field-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 12px;
+                background: white;
+                border-radius: 6px;
+                margin-top: 6px;
+                font-size: 13px;
+                border: 1px solid #edf2f7;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            }
+
+            /* Loading Spinner Overlay from FacebookSDK */
+            .spinner-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.92);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                z-index: 2000;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .spinner-overlay.show {
+                display: flex;
+            }
+
+            .spinner-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .spinner-big {
+                width: 48px;
+                height: 48px;
+                border: 4px solid #E5E7EB;
+                border-top: 4px solid #1877F2;
+                border-radius: 50%;
+                animation: spin-big 1s linear infinite;
+            }
+
+            @keyframes spin-big {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .spinner-text {
+                font-size: 14px;
+                font-weight: 500;
+                color: #636363;
+            }
+
+            /* Button spinner from MetaAdsSDK */
+            .spinner {
+                display: none;
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(255, 255, 255, 0.4);
+                border-top: 3px solid white;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @media (max-width: 1024px) {
+                .background-image {
+                    display: none;
+                }
+
+                .config-card {
+                    width: 100%;
+                    max-width: 100%;
+                }
+            }
+        </style>
+
+        <div id="main-containerdiv" class="smi_container">
+
+            <!-- header -->
+            <div class="main_header_cls">
+                <div class="sub_main_header_css">
+                    <div slot="title" class="header_block_css">
+                        <div class="svg_back_icon" onclick="backToControlCenter()">
+                            <svg width="26" height="22" viewBox="0 0 30 26" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M28.3334 24.224C25.0711 20.2418 22.1742 17.9822 19.6427 17.4454C17.1111 16.9085 14.7009 16.8274 12.412 17.202V24.3334L1.66669 12.6967L12.412 1.66669V8.44469C16.6445 8.47802 20.2427 9.99646 23.2067 13C26.1702 16.0036 27.8791 19.7449 28.3334 24.224Z"
+                                    fill="#131314" stroke="#131314" stroke-width="2" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div class="portal_mapping">
+                            Meta Ads Configuration
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Container -->
+            <div class="main_container">
+                <div class="config-card">
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <img src="/resource/MVEX__controlcenterimg/meta.png" class="meta-icon" alt="Meta"
+                            draggable="false" />
+                        <div class="page-header-content">
+                            <h1 class="page-title">Connect Meta Lead Ads</h1>
+                            <p class="page-subtitle">Integrate your Facebook Pages, permanent tokens, and real-time
+                                Webhook subscriptions</p>
+                        </div>
+                    </div>
+
+                    <div id="setup-form-div">
+                        <div class="input-group">
+                            <label class="input-label" for="app-id-input">Meta Application ID</label>
+                            <input type="text" id="app-id-input" class="input-field"
+                                placeholder="Enter your Meta Application ID (e.g. 514916280628381)" />
+                        </div>
+
+                        <div class="info-box">
+                            <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <div class="info-content">
+                                <p class="info-title">Automatic Setup on Click:</p>
+                                <p class="info-text">1. <strong>Subscribes the Page to Real-Time Webhooks</strong>
+                                    (<code>leadgen</code>).<br />2. Discovers all active <strong>Lead Forms &amp;
+                                        Dynamic Fields</strong>!</p>
+                            </div>
+                        </div>
+
+                        <button class="connect-btn" id="connect-btn" onclick="launchMetaAdsSignup()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                            <span id="btn-text">Connect with Meta</span>
+                            <div class="spinner" id="btn-spinner"></div>
+                        </button>
+
+                        <span class="error-message-text" id="error-message"></span>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div class="results-container" id="results-container">
+                        <div class="badges-row">
+                            <div class="status-badge success">
+                                <span class="status-dot success"></span>
+                                Connected Successfully
+                            </div>
+                            <div class="webhook-badge" id="webhook-badge-display">
+                                ⚡ Webhook: Active (leadgen)
+                            </div>
+                        </div>
+
+                        <!-- Connected Page -->
+                        <div class="section-header">📄 Connected Page</div>
+                        <div class="card" id="page-display"></div>
+
+                        <!-- Tokens -->
+                        <div class="section-header">🔑 Permanent Page Access Token (Never Expires)</div>
+                        <div class="token-box" id="page-token-display"></div>
+
+                        <!-- Discovered Lead Forms -->
+                        <div class="section-header">📋 Active Lead Forms &amp; Dynamic Fields</div>
+                        <div id="forms-display"></div>
+                    </div>
+
+                </div>
+
+                <!-- Background Image -->
+                <img src="/resource/MVEX__featurepropertybg" class="background-image" alt="" />
+            </div>
+        </div>
+
+        <!-- Loading Spinner Full Page -->
+        <div id="loading-spinner" class="spinner-overlay">
+            <div class="spinner-container">
+                <div class="spinner-big"></div>
+                <div class="spinner-text">Loading...</div>
+            </div>
+        </div>
+
+        <script>
+            function backToControlCenter() {
+                window.top.location.href = '/lightning/n/MVEX__Control_Center';
+            }
+
+            function launchMetaAdsSignup() {
+                var errorEl = document.getElementById('error-message');
+                errorEl.textContent = '';
+
+                var appIdInput = document.getElementById('app-id-input').value.trim();
+                if (!appIdInput) {
+                    errorEl.textContent = 'Please enter your Meta Application ID to proceed.';
+                    return;
+                }
+
+                if (typeof FB === 'undefined') {
+                    errorEl.textContent = 'Meta SDK is still loading... please wait a few seconds and try again.';
+                    return;
+                }
+
+                setLoading(true);
+
+                try {
+                    FB.login(function (response) {
+                        console.log('[Meta Ads] FB.login response:', response);
+
+                        if (response.status === 'connected' && response.authResponse) {
+                            var code = response.authResponse.code;
+
+                            if (!code) {
+                                errorEl.textContent = 'Authorization code not received.';
+                                resetButton();
+                                return;
+                            }
+
+                            // ── Call Apex to exchange code, subscribe webhook & discover forms ──
+                            Visualforce.remoting.Manager.invokeAction(
+                                '{!$RemoteAction.MetaAdsTokenController.exchangeCodeForToken}',
+                                code,
+                                appIdInput,
+                                function (result, event) {
+                                    resetButton();
+                                    if (event.status && result) {
+                                        if (result.success) {
+                                            console.log('[Meta Ads] Complete Success:', result);
+                                            renderResults(result);
+                                        } else {
+                                            errorEl.textContent = 'Meta API Error: ' + result.message;
+                                        }
+                                    } else {
+                                        errorEl.textContent = 'Remoting Error: ' + (event.message || 'Unknown error');
+                                    }
+                                },
+                                { escape: true }
+                            );
+
+                        } else {
+                            errorEl.textContent = 'Login was cancelled or window closed.';
+                            resetButton();
+                        }
+                    }, {
+                        config_id: '{!metaConfigId}',
+                        response_type: 'code',
+                        override_default_response_type: true
+                    });
+                } catch (e) {
+                    errorEl.textContent = 'Exception: ' + e.message;
+                    resetButton();
+                }
+            }
+
+            function setLoading(loading) {
+                var btn = document.getElementById('connect-btn');
+                var btnText = document.getElementById('btn-text');
+                var spinner = document.getElementById('btn-spinner');
+                btn.disabled = loading;
+                btnText.textContent = loading ? 'Subscribing Webhooks & Discovering Forms...' : 'Connect with Meta';
+                spinner.style.display = loading ? 'block' : 'none';
+            }
+
+            function resetButton() {
+                setLoading(false);
+            }
+
+            function renderResults(data) {
+                var container = document.getElementById('results-container');
+
+                // Webhook Status Badge
+                var webhookBadge = document.getElementById('webhook-badge-display');
+                if (data.webhook_subscribed) {
+                    webhookBadge.innerHTML = '⚡ Real-Time Webhook: Active (leadgen)';
+                    webhookBadge.style.background = '#dcfce7';
+                    webhookBadge.style.color = '#166534';
+                } else {
+                    webhookBadge.innerHTML = '⚠️ Webhook: ' + (data.webhook_message || 'Pending');
+                    webhookBadge.style.background = '#fef3c7';
+                    webhookBadge.style.color = '#92400e';
+                }
+
+                // 1. Page Info
+                var pageDisplay = document.getElementById('page-display');
+                pageDisplay.innerHTML = '<div style="font-weight:600;font-size:15px;color:#0f172a;">' + (data.page_name || 'EstateXpert Demo Page') + '</div>'
+                    + '<div style="font-size:12px;color:#64748b;margin-top:2px;">Page ID: ' + (data.page_id || '1224679970734324') + ' | Client App ID: ' + (data.client_app_id || 'N/A') + '</div>';
+
+                // 2. Page Access Token
+                document.getElementById('page-token-display').textContent = data.page_access_token;
+
+                // 3. Forms & Dynamic Fields
+                var formsDisplay = document.getElementById('forms-display');
+                formsDisplay.innerHTML = '';
+
+                if (data.forms && data.forms.length > 0) {
+                    data.forms.forEach(function (form) {
+                        var formCard = document.createElement('div');
+                        formCard.className = 'card';
+
+                        var questionsHtml = '';
+                        if (form.questions && form.questions.length > 0) {
+                            form.questions.forEach(function (q) {
+                                questionsHtml += '<div class="field-item">'
+                                    + '<span style="font-weight:500;color:#334155;">' + (q.label || q.key) + '</span>'
+                                    + '<span style="font-size:11px;font-weight:600;color:#1877F2;background:#e0f2fe;padding:2px 6px;border-radius:4px;">' + (q.type || 'TEXT') + '</span>'
+                                    + '</div>';
+                            });
+                        } else {
+                            questionsHtml = '<p style="font-size:12px;color:#94a3b8;margin:4px 0 0 0;">No fields in this form.</p>';
+                        }
+
+                        formCard.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                            + '<p style="font-size:15px;font-weight:600;color:#0f172a;margin:0;">📝 ' + form.name + '</p>'
+                            + '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">' + (form.status || 'ACTIVE') + '</span>'
+                            + '</div>'
+                            + '<p style="font-size:11px;color:#64748b;margin:2px 0 8px 0;">Form ID: ' + form.id + '</p>'
+                            + '<p style="font-size:12px;font-weight:600;color:#334155;margin:8px 0 4px 0;">Form Fields:</p>'
+                            + questionsHtml;
+
+                        formsDisplay.appendChild(formCard);
+                    });
+                } else {
+                    formsDisplay.innerHTML = '<div class="card" style="color:#64748b;font-size:13px;">No Lead Forms found on this page yet. (Create a form in Meta Business Suite → Instant Forms to see it appear here).</div>';
+                }
+
+                container.style.display = 'block';
+            }
+        </script>
+    </body>
+
+    </html>
+</apex:page>

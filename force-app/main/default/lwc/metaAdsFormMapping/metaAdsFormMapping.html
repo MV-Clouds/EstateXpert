@@ -1,0 +1,101 @@
+<template>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="title">Meta Ads Form Mappings</div>
+            <button class="btn-new" onclick={openNewMappingModal}>New Mapping</button>
+        </div>
+
+        <!-- Mappings Table -->
+        <div class="table-container">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+            <template if:false={isLoading}>
+                <template if:true={hasMappings}>
+                    <lightning-datatable
+                        key-field="id"
+                        data={tableData}
+                        columns={columns}
+                        hide-checkbox-column
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </template>
+                <template if:false={hasMappings}>
+                    <div class="slds-text-align_center slds-p-around_medium" style="color: #6b7280;">
+                        No form mappings found. Click "New Mapping" to get started.
+                    </div>
+                </template>
+            </template>
+        </div>
+
+        <!-- Mapping Wizard Modal -->
+        <template if:true={isModalOpen}>
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Form Mapping Wizard</h2>
+                        <button class="btn-close" onclick={closeModal}>&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <template if:true={isModalLoading}>
+                            <lightning-spinner alternative-text="Loading forms" size="small"></lightning-spinner>
+                        </template>
+
+                        <!-- Step 1: Select Form -->
+                        <div class="form-group">
+                            <label class="form-label">Select Meta Lead Form</label>
+                            <select onchange={handleFormSelection} disabled={isModalLoading}>
+                                <option value="">-- Choose a Form --</option>
+                                <template for:each={availableForms} for:item="form">
+                                    <option key={form.id} value={form.id}>{form.name} ({form.id})</option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Step 2: Map Fields -->
+                        <template if:true={selectedFormId}>
+                            <div style="margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #111827;">
+                                Field Mappings
+                            </div>
+                            
+                            <template for:each={currentFormFields} for:item="field">
+                                <div key={field.key} class="mapping-row">
+                                    <div class="mapping-col">
+                                        <div class="form-label">Meta Form Field</div>
+                                        <div style="padding: 8px 12px; background: #e5e7eb; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                                            {field.label}
+                                        </div>
+                                    </div>
+                                    <div class="mapping-icon">➜</div>
+                                    <div class="mapping-col">
+                                        <div class="form-label">Salesforce Lead Field</div>
+                                        <select data-key={field.key} onchange={handleMappingChange}>
+                                            <option value="">-- Do Not Map --</option>
+                                            <template for:each={salesforceLeadFields} for:item="sfField">
+                                                <!-- We rely on JS to set the selected value dynamically -->
+                                                <option key={sfField.value} value={sfField.value}>
+                                                    {sfField.label}
+                                                </option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <template if:false={currentFormFields.length}>
+                                <div style="color: #6b7280; font-size: 14px;">No fields found in this form.</div>
+                            </template>
+                        </template>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-cancel" onclick={closeModal}>Cancel</button>
+                        <button class="btn-save" onclick={saveMapping} disabled={isSaveDisabled}>Save Mapping</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

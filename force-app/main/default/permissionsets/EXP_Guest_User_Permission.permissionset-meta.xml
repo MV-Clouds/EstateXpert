@@ -1954,7 +1954,7 @@
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
+        <allowEdit>false</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Contact</object>
@@ -1964,7 +1964,7 @@
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
+        <allowEdit>false</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>MVEX__Chat__c</object>
@@ -1984,7 +1984,7 @@
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
+        <allowEdit>false</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>MVEX__Flow_Submission__c</object>
@@ -2004,7 +2004,7 @@
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
+        <allowEdit>false</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>MVEX__Inquiry__c</object>
@@ -2014,7 +2014,7 @@
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
+        <allowEdit>false</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>MVEX__Listing_Inquiry__c</object>
@@ -2034,7 +2034,7 @@
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
+        <allowEdit>false</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>MVEX__PortalListing__c</object>

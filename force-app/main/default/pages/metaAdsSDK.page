@@ -258,6 +258,31 @@
                 box-shadow: none;
             }
 
+            .deactivate-btn {
+                width: 100%;
+                padding: 12px 24px;
+                font-size: 16px;
+                font-weight: 500;
+                background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+                color: #DC2626;
+                border: 1px solid #DC2626;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 1.5rem;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            }
+
+            .deactivate-btn:hover {
+                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+            }
+
             .error-message-text {
                 color: #DC2626;
                 font-size: 14px;
@@ -547,10 +572,7 @@
                         <div class="badges-row">
                             <div class="status-badge success">
                                 <span class="status-dot success"></span>
-                                Connected Successfully
-                            </div>
-                            <div class="webhook-badge" id="webhook-badge-display">
-                                ⚡ Webhook: Active (leadgen)
+                                Connected
                             </div>
                         </div>
 
@@ -558,13 +580,12 @@
                         <div class="section-header">📄 Connected Page</div>
                         <div class="card" id="page-display"></div>
 
-                        <!-- Tokens -->
-                        <div class="section-header">🔑 Permanent Page Access Token (Never Expires)</div>
-                        <div class="token-box" id="page-token-display"></div>
-
-                        <!-- Discovered Lead Forms -->
-                        <div class="section-header">📋 Active Lead Forms &amp; Dynamic Fields</div>
-                        <div id="forms-display"></div>
+                        <button class="deactivate-btn" onclick="deactivateMetaAds()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                            Deactivate Integration
+                        </button>
                     </div>
                     </apex:outputPanel>
 
@@ -584,6 +605,51 @@
         </div>
 
         <script>
+            var isConnected = {!isConnected};
+
+            document.addEventListener("DOMContentLoaded", function() {
+                if (isConnected && '{!hasConfig}' === 'true') {
+                    document.getElementById('setup-form-div').style.display = 'none';
+                    checkStatusOnLoad();
+                }
+            });
+
+            function checkStatusOnLoad() {
+                var errorEl = document.getElementById('error-message');
+                setLoading(true, 'Checking connection status...');
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.MetaAdsTokenController.checkConnectionStatus}',
+                    function (result, event) {
+                        resetButton();
+                        if (event.status && result && result.success) {
+                            renderResults(result);
+                        } else {
+                            document.getElementById('setup-form-div').style.display = 'block';
+                            if (errorEl) errorEl.textContent = 'Connection check failed: ' + (result ? result.message : event.message);
+                        }
+                    },
+                    { escape: true }
+                );
+            }
+
+            function deactivateMetaAds() {
+                if (confirm('Are you sure you want to deactivate the Meta Ads integration? This will disconnect your account.')) {
+                    setLoading(true, 'Deactivating...');
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.MetaAdsTokenController.deactivateConnection}',
+                        function (result, event) {
+                            if (event.status && result && result.success) {
+                                window.location.reload();
+                            } else {
+                                resetButton();
+                                alert('Failed to deactivate: ' + (result ? result.message : event.message));
+                            }
+                        },
+                        { escape: true }
+                    );
+                }
+            }
+
             function backToControlCenter() {
                 window.top.location.href = '/lightning/n/MVEX__Control_Center';
             }
@@ -654,13 +720,28 @@
                 }
             }
 
-            function setLoading(loading) {
+            function setLoading(loading, msg) {
                 var btn = document.getElementById('connect-btn');
                 var btnText = document.getElementById('btn-text');
                 var spinner = document.getElementById('btn-spinner');
-                btn.disabled = loading;
-                btnText.textContent = loading ? 'Subscribing Webhooks & Discovering Forms...' : 'Connect with Meta';
-                spinner.style.display = loading ? 'block' : 'none';
+                
+                var overlay = document.getElementById('loading-spinner');
+                
+                if (loading) {
+                    if (msg) {
+                        overlay.classList.add('show');
+                        overlay.querySelector('.spinner-text').textContent = msg;
+                    } else {
+                        if(btn) btn.disabled = true;
+                        if(btnText) btnText.textContent = 'Subscribing Webhooks...';
+                        if(spinner) spinner.style.display = 'block';
+                    }
+                } else {
+                    overlay.classList.remove('show');
+                    if(btn) btn.disabled = false;
+                    if(btnText) btnText.textContent = 'Connect with Meta';
+                    if(spinner) spinner.style.display = 'none';
+                }
             }
 
             function resetButton() {
@@ -668,62 +749,15 @@
             }
 
             function renderResults(data) {
+                var setupForm = document.getElementById('setup-form-div');
+                if (setupForm) setupForm.style.display = 'none';
+                
                 var container = document.getElementById('results-container');
-
-                // Webhook Status Badge
-                var webhookBadge = document.getElementById('webhook-badge-display');
-                if (data.webhook_subscribed) {
-                    webhookBadge.innerHTML = '⚡ Real-Time Webhook: Active (leadgen)';
-                    webhookBadge.style.background = '#dcfce7';
-                    webhookBadge.style.color = '#166534';
-                } else {
-                    webhookBadge.innerHTML = '⚠️ Webhook: ' + (data.webhook_message || 'Pending');
-                    webhookBadge.style.background = '#fef3c7';
-                    webhookBadge.style.color = '#92400e';
-                }
 
                 // 1. Page Info
                 var pageDisplay = document.getElementById('page-display');
                 pageDisplay.innerHTML = '<div style="font-weight:600;font-size:15px;color:#0f172a;">' + (data.page_name || 'EstateXpert Demo Page') + '</div>'
                     + '<div style="font-size:12px;color:#64748b;margin-top:2px;">Page ID: ' + (data.page_id || '1224679970734324') + ' | Client App ID: ' + (data.client_app_id || 'N/A') + '</div>';
-
-                // 2. Page Access Token
-                document.getElementById('page-token-display').textContent = data.page_access_token;
-
-                // 3. Forms & Dynamic Fields
-                var formsDisplay = document.getElementById('forms-display');
-                formsDisplay.innerHTML = '';
-
-                if (data.forms && data.forms.length > 0) {
-                    data.forms.forEach(function (form) {
-                        var formCard = document.createElement('div');
-                        formCard.className = 'card';
-
-                        var questionsHtml = '';
-                        if (form.questions && form.questions.length > 0) {
-                            form.questions.forEach(function (q) {
-                                questionsHtml += '<div class="field-item">'
-                                    + '<span style="font-weight:500;color:#334155;">' + (q.label || q.key) + '</span>'
-                                    + '<span style="font-size:11px;font-weight:600;color:#1877F2;background:#e0f2fe;padding:2px 6px;border-radius:4px;">' + (q.type || 'TEXT') + '</span>'
-                                    + '</div>';
-                            });
-                        } else {
-                            questionsHtml = '<p style="font-size:12px;color:#94a3b8;margin:4px 0 0 0;">No fields in this form.</p>';
-                        }
-
-                        formCard.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">'
-                            + '<p style="font-size:15px;font-weight:600;color:#0f172a;margin:0;">📝 ' + form.name + '</p>'
-                            + '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">' + (form.status || 'ACTIVE') + '</span>'
-                            + '</div>'
-                            + '<p style="font-size:11px;color:#64748b;margin:2px 0 8px 0;">Form ID: ' + form.id + '</p>'
-                            + '<p style="font-size:12px;font-weight:600;color:#334155;margin:8px 0 4px 0;">Form Fields:</p>'
-                            + questionsHtml;
-
-                        formsDisplay.appendChild(formCard);
-                    });
-                } else {
-                    formsDisplay.innerHTML = '<div class="card" style="color:#64748b;font-size:13px;">No Lead Forms found on this page yet. (Create a form in Meta Business Suite → Instant Forms to see it appear here).</div>';
-                }
 
                 container.style.display = 'block';
             }

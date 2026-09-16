@@ -13,6 +13,13 @@ public without sharing class MetaAdsTokenController {
 
     public Boolean hasConfig { get { return getConfig() != null; } }
 
+    public Boolean isConnected { 
+        get { 
+            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
+            return tokenConfig != null && String.isNotBlank(tokenConfig.Page_Access_Token_1__c); 
+        } 
+    }
+
     // Properties exposed to Visualforce Page
     public String metaAppId    { get { return getConfig()?.App_ID__c; } }
     public String metaConfigId { get { return getConfig()?.Config_Id__c; } }
@@ -211,5 +218,90 @@ public without sharing class MetaAdsTokenController {
             resultMap.put('message', 'Exception: ' + e.getMessage() + ' (Line ' + e.getLineNumber() + ')');
             return resultMap;
         }
+    }
+
+    @RemoteAction
+    public static Map<String, Object> checkConnectionStatus() {
+        Map<String, Object> resultMap = new Map<String, Object>();
+        try {
+            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
+            if (tokenConfig == null || String.isBlank(tokenConfig.Page_Access_Token_1__c)) {
+                resultMap.put('success', false);
+                resultMap.put('message', 'Not connected.');
+                return resultMap;
+            }
+
+            String pageAccessToken = tokenConfig.Page_Access_Token_1__c + (String.isNotBlank(tokenConfig.Page_Access_Token_2__c) ? tokenConfig.Page_Access_Token_2__c : '');
+            String pageId = tokenConfig.Page_Id__c;
+            String clientAppId = tokenConfig.Client_App_Id__c;
+
+            Integration_App_Config__mdt config = getConfig();
+            if (config == null) {
+                resultMap.put('success', false);
+                return resultMap;
+            }
+
+            String GRAPH_API_VERSION = config.API_Version__c;
+            String GRAPH_BASE_URL = config.Base_Url__c;
+
+            Http http = new Http();
+            
+            // Fetch Page Name
+            HttpRequest pageReq = new HttpRequest();
+            pageReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '?fields=name&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
+            pageReq.setMethod('GET');
+            pageReq.setTimeout(20000);
+            HttpResponse pageRes = http.send(pageReq);
+            
+            String foundPageName = pageId;
+            if (pageRes.getStatusCode() == 200) {
+                Map<String, Object> pMap = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
+                if (pMap.containsKey('name')) {
+                    foundPageName = (String) pMap.get('name');
+                }
+            }
+
+            // Fetch Forms
+            HttpRequest formReq = new HttpRequest();
+            formReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '/leadgen_forms?fields=id,name,status,created_time,questions&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
+            formReq.setMethod('GET');
+            formReq.setTimeout(20000);
+            HttpResponse formRes = http.send(formReq);
+
+            if (formRes.getStatusCode() == 200) {
+                Map<String, Object> formMap = (Map<String, Object>) JSON.deserializeUntyped(formRes.getBody());
+                if (formMap.containsKey('data')) {
+                    resultMap.put('forms', formMap.get('data'));
+                }
+            }
+
+            resultMap.put('page_access_token', pageAccessToken);
+            resultMap.put('page_id', pageId);
+            resultMap.put('page_name', foundPageName);
+            resultMap.put('client_app_id', clientAppId);
+            resultMap.put('webhook_subscribed', true);
+            resultMap.put('success', true);
+            
+        } catch (Exception e) {
+            resultMap.put('success', false);
+            resultMap.put('message', e.getMessage());
+        }
+        return resultMap;
+    }
+
+    @RemoteAction
+    public static Map<String, Object> deactivateConnection() {
+        Map<String, Object> resultMap = new Map<String, Object>();
+        try {
+            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
+            if (tokenConfig != null && tokenConfig.Id != null) {
+                delete tokenConfig;
+            }
+            resultMap.put('success', true);
+        } catch (Exception e) {
+            resultMap.put('success', false);
+            resultMap.put('message', e.getMessage());
+        }
+        return resultMap;
     }
 }

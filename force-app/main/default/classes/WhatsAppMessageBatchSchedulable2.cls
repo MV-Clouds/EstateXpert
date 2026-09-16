@@ -10,12 +10,12 @@
 global with sharing class WhatsAppMessageBatchSchedulable2 implements Schedulable {
 
     global String templateId;
-    global List<Chat__c> chatRecs;
+    global List<MVEX__Chat__c> chatRecs;
     global String broadcastId;
     global String objectApiName;
     global String phoneField;
     
-    global WhatsAppMessageBatchSchedulable2(String tempId, List<Chat__c> chats, String broadcastRecId, String objName, String phoneFieldName) {
+    global WhatsAppMessageBatchSchedulable2(String tempId, List<MVEX__Chat__c> chats, String broadcastRecId, String objName, String phoneFieldName) {
         this.templateId = tempId;
         this.chatRecs = chats;
         this.broadcastId = broadcastRecId;

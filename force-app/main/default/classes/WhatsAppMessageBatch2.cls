@@ -10,18 +10,18 @@
 global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SObject>, Database.AllowsCallouts, Database.Stateful {
     
     global String templateId;
-    global List<Chat__c> chatsToProcess;
+    global List<MVEX__Chat__c> chatsToProcess;
     global String broadcastId;
     global String objectApiName;
-    global List<Chat__c> chatsToUpdate = new List<Chat__c>();
-    global static List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
+    global List<MVEX__Chat__c> chatsToUpdate = new List<MVEX__Chat__c>();
+    global static List<MVEX__WBConnect_Configuration__mdt> wbConfig = MVEX__WBConnect_Configuration__mdt.getAll().values(); 
     global static MVEX__WhatsAppConfig__c wbConfig2 = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
     global String phoneField;
     global MVEX__WhatsappTemplate__c template;
     global List<MVEX__Template_Variable__c> templateVariables;
 
-    // Constructor to pass Chat__c list and template data
-    global WhatsAppMessageBatch2(String tempId, List<Chat__c> chats, String brId, String objName, String phoneFieldName) {
+    // Constructor to pass MVEX__Chat__c list and template data
+    global WhatsAppMessageBatch2(String tempId, List<MVEX__Chat__c> chats, String brId, String objName, String phoneFieldName) {
         this.chatsToProcess = chats;
         this.templateId = tempId;
         this.broadcastId = brId;
@@ -62,12 +62,12 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
     global Database.QueryLocator start(Database.BatchableContext bc) {
         try {
             List<Id> chatIds = new List<Id>();
-            for (Chat__c chat : this.chatsToProcess) {
+            for (MVEX__Chat__c chat : this.chatsToProcess) {
                 chatIds.add(chat.Id);
             } 
-            return Database.getQueryLocator([SELECT Id, Phone__c, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id IN :chatIds WITH USER_MODE]);
+            return Database.getQueryLocator([SELECT Id, MVEX__Phone__c, MVEX__WhatsAppMessageId__c, MVEX__Message_Status__c FROM MVEX__Chat__c WHERE Id IN :chatIds WITH USER_MODE LIMIT 50000]);
         } catch (Exception e) {
-            return Database.getQueryLocator([SELECT Id FROM Chat__c WHERE Id = null]);
+            return Database.getQueryLocator([SELECT Id FROM MVEX__Chat__c WHERE Id = null]);
         }
     }
 
@@ -78,13 +78,13 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
     @param           : scope - Scope of the batch process
     ********************************************************
     */
-    global void execute(Database.BatchableContext bc, List<Chat__c> chatList) {
+    global void execute(Database.BatchableContext bc, List<MVEX__Chat__c> chatList) {
         try {
-            Chat__c chat = new Chat__c();
+            MVEX__Chat__c chat = new MVEX__Chat__c();
             if(chatList.size() > 0){
                 chat = chatList[0];
             }
-            String phone = chat.Phone__c;
+            String phone = chat.MVEX__Phone__c;
             String requestBody;
             
             String query = 'SELECT Id, ' + this.phoneField + ' FROM ' + this.objectApiName + ' WHERE ' + this.phoneField + ' =: phone ORDER BY CreatedDate DESC LIMIT 1';
@@ -105,7 +105,7 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
                 requestBody = buildWhatsAppRequestBody(
                     this.template, this.templateVariables, fieldValues, phoneNumber
                 );
-                List<Chat__c> cht = sendWhatsAppMessage(chat.Id, requestBody);
+                List<MVEX__Chat__c> cht = sendWhatsAppMessage(chat.Id, requestBody);
                 if(cht.size() > 0){
                     this.chatsToUpdate.add(cht[0]);
                 }
@@ -130,8 +130,8 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
             }
     
             if(broadcastId != null){
-                Broadcast__c br = new Broadcast__c(Id = this.broadcastId);
-                br.Status__c = 'Completed';
+                MVEX__Broadcast__c br = new MVEX__Broadcast__c(Id = this.broadcastId);
+                br.MVEX__Status__c = 'Completed';
                 Database.update(br, false, AccessLevel.USER_MODE);
             }
         } catch (Exception e) {
@@ -601,12 +601,12 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
     @description     : This method is used to send the WhatsApp message using the WhatsApp Business API.
     @param           : chatId - Id of the chat record
     @param           : jsonBody - JSON body to be sent
-    @return          : List<Chat__c> - List of chat records
+    @return          : List<MVEX__Chat__c> - List of chat records
     ********************************************************
     */
-    global static List<Chat__c> sendWhatsAppMessage(String chatId, String jsonBody) {
+    global static List<MVEX__Chat__c> sendWhatsAppMessage(String chatId, String jsonBody) {
         try {
-            List<Chat__c> chat = [SELECT Id, Phone__c, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id = :chatId WITH USER_MODE LIMIT 1];
+            List<MVEX__Chat__c> chat = [SELECT Id, MVEX__Phone__c, MVEX__WhatsAppMessageId__c, MVEX__Message_Status__c FROM MVEX__Chat__c WHERE Id = :chatId WITH USER_MODE LIMIT 1];
     
             HttpRequest httpReq = new HttpRequest();
             String accessToken = (wbConfig2.MVEX__Access_Token_1__c != null ? wbConfig2.MVEX__Access_Token_1__c : '') + (wbConfig2.MVEX__Access_Token_2__c != null ? wbConfig2.MVEX__Access_Token_2__c : '');
@@ -625,10 +625,10 @@ global with sharing class WhatsAppMessageBatch2 implements Database.Batchable<SO
                 List<Object> messages = (List<Object>)jsonMap.get('messages');
                 Map<String, Object> firstMessage = (Map<String, Object>)messages[0];
                 String whatsAppMessageID = (String) firstMessage.get('id');
-                chat[0].WhatsAppMessageId__c = whatsAppMessageID;
-                chat[0].Message_Status__c = 'Sent';
+                chat[0].MVEX__WhatsAppMessageId__c = whatsAppMessageID;
+                chat[0].MVEX__Message_Status__c = 'Sent';
             }else{
-                chat[0].Message_Status__c = 'Failed';
+                chat[0].MVEX__Message_Status__c = 'Failed';
             }
             return chat;
         } catch (Exception e) {

@@ -18,15 +18,30 @@ public with sharing class PlatformEventController {
     */
     public static void publishEvent(String status, String jsonBody, String portalName, String listingId) {
         try {
-            ResponseEvent__e event = new ResponseEvent__e();
-            event.PortalName__c = portalName;
-            event.JSONBody__c = jsonBody;
-            event.Status__c = status;
-            event.Listing_Id__c = listingId;
+            MVEX__ResponseEvent__e event = new MVEX__ResponseEvent__e();
+            event.MVEX__PortalName__c = portalName;
+            event.MVEX__JSONBody__c = jsonBody;
+            event.MVEX__Status__c = status;
+            event.MVEX__Listing_Id__c = listingId;
             EventBus.publish(event);
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'PlatformEventController', 'publishEvent', 'Error while publishing event.');
         }
 
+    }
+
+    /**
+    * Method Name : publishRefreshEvent
+    * @param {string} featureName - The feature name (e.g., Marketing_List)
+    * @description : Used to publish MVEX__RefreshEvent__e platform event to notify clients to refresh.
+    */
+    public static void publishRefreshEvent(String featureName) {
+        try {
+            MVEX__RefreshEvent__e event = new MVEX__RefreshEvent__e();
+            event.Feature_Name__c = featureName;
+            EventBus.publish(event);
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PlatformEventController', 'publishRefreshEvent', 'Error while publishing refresh event.');
+        }
     }
 }

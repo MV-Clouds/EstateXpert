@@ -1,5 +1,18 @@
+/**
+* Class Name : SendEmailsController
+* Test Class : SendEmailsControllerTest
+* Created By : Karan Singh
+* Last Modified Date : 17/09/2026
+* Last Modified By : Karan Singh
+* @description : Controller for handling email templates, messaging service options, listings, and contacts for SendEmails component.
+*/
 public with sharing class SendEmailsController {
 
+    /**
+    * Method Name : getMessagingServiceOptions
+    * @return List<Map<String, String>> List of available messaging service options with label and value.
+    * @description : Retrieves available messaging service options such as Single Messaging Service and Gmail if configured.
+    */
     @AuraEnabled
     public static List<Map<String, String>> getMessagingServiceOptions() {
         List<Map<String, String>> optionsList = new List<Map<String, String>>();
@@ -7,8 +20,8 @@ public with sharing class SendEmailsController {
             Map<String, String> optionsMap = new Map<String, String>();
             optionsMap.put('Single Messaging Service', 'single');
             
-            GmailConfig__c gmailConfig = GmailConfig__c.getOrgDefaults();
-            if (gmailConfig != null && !String.isBlank(gmailConfig.Refresh_Token__c)) {
+            MVEX__GmailConfig__c gmailConfig = MVEX__GmailConfig__c.getOrgDefaults();
+            if (gmailConfig != null && !String.isBlank(gmailConfig.MVEX__Refresh_Token__c)) {
                 optionsMap.put('Gmail', 'gmail');
             }
             
@@ -21,18 +34,18 @@ public with sharing class SendEmailsController {
         return optionsList;
     }
     
+    /**
+    * Method Name : getTemplatesByObject
+    * @return Map<String, Object> Map containing email templates and EstateXpert custom marketing templates.
+    * @description : Fetches active standard EmailTemplate records and custom MVEX__Template__c records with body data and merge fields.
+    */
     @AuraEnabled
     public static Map<String, Object> getTemplatesByObject() {
         Map<String, Object> result = new Map<String, Object>();
         try {
             List<Map<String, Object>> emailTemplateOptions = new List<Map<String, Object>>();
-            List<EmailTemplate> emailTemplates = [
-                SELECT Id, Name, Subject, Body, HtmlValue, TemplateType, Folder.Name
-                FROM EmailTemplate 
-                WHERE IsActive = true
-                WITH USER_MODE
-                ORDER BY Name ASC
-            ];
+            List<EmailTemplate> emailTemplates = [SELECT Id, Name, Subject, Body, HtmlValue, TemplateType, Folder.Name FROM EmailTemplate WHERE IsActive = true
+                                                    WITH USER_MODE ORDER BY Name ASC LIMIT 50000];
             
             for (EmailTemplate template : emailTemplates) {
                 emailTemplateOptions.add(new Map<String, Object>{
@@ -46,45 +59,38 @@ public with sharing class SendEmailsController {
             }
             
             List<Map<String, Object>> customTemplateOptions = new List<Map<String, Object>>();
-            List<Template__c> customTemplates = [
-                SELECT Id, Template_Name__c, Subject__c, Object_API_Name__c,
-                       (SELECT Id, Template_Value_Simple__c, Value_Type__c 
-                        FROM Template_Data__r 
-                        WHERE Value_Type__c = 'Body Value' 
-                        ORDER BY Order_No_Simple__c ASC)
-                FROM Template__c 
-                WHERE Template_Status__c = true AND Template_pattern__c = 'Marketing Template'
-                WITH USER_MODE
-                ORDER BY Template_Name__c ASC
-            ];
+            List<MVEX__Template__c> customTemplates = [SELECT Id, MVEX__Template_Name__c, MVEX__Subject__c, MVEX__Object_API_Name__c,
+                                                       (SELECT Id, MVEX__Template_Value_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__r 
+                                                        WHERE MVEX__Value_Type__c = 'Body Value' ORDER BY MVEX__Order_No_Simple__c ASC)
+                                                        FROM MVEX__Template__c WHERE MVEX__Template_Status__c = true AND MVEX__Template_pattern__c = 'Marketing Template'
+                                                        WITH USER_MODE ORDER BY MVEX__Template_Name__c ASC];
             
-            for (Template__c template : customTemplates) {
+            for (MVEX__Template__c template : customTemplates) {
                 String templateBody = '';
-                for (Template_Data__c data : template.Template_Data__r) {
-                    if (data.Value_Type__c == 'Body Value' && data.Template_Value_Simple__c != null) {
-                        templateBody += data.Template_Value_Simple__c;
+                for (MVEX__Template_Data__c data : template.MVEX__Template_Data__r) {
+                    if (data.MVEX__Value_Type__c == 'Body Value' && data.MVEX__Template_Value_Simple__c != null) {
+                        templateBody += data.MVEX__Template_Value_Simple__c;
                     }
                 }
             
                 // Check for merge fields using regex
                 Pattern mergeFieldPattern = Pattern.compile('\\{\\{[#/]?[a-zA-Z0-9_.]+}}');
                 Matcher m = mergeFieldPattern.matcher(templateBody);
-                String objectName = template.Object_API_Name__c;
+                String objectName = template.MVEX__Object_API_Name__c;
                 
                 if (!m.find()) {
                     objectName = 'Generic'; // No merge fields found
                 }
             
                 customTemplateOptions.add(new Map<String, Object>{
-                    'label' => template.Template_Name__c,
+                    'label' => template.MVEX__Template_Name__c,
                     'value' => template.Id,
                     'type' => 'EstateXpert Template',
-                    'subject' => template.Subject__c,
+                    'subject' => template.MVEX__Subject__c,
                     'body' => templateBody,
                     'objectName' => objectName
                 });
             }
-            
             
             result.put('emailTemplates', emailTemplateOptions);
             result.put('customTemplates', customTemplateOptions);
@@ -95,26 +101,32 @@ public with sharing class SendEmailsController {
         return result;
     }
 
+    /**
+    * Method Name : getListings
+    * @return List<MVEX__Listing__c> List of listing records with address, type, price, and status.
+    * @description : Retrieves listing records for template merge preview and campaign selection.
+    */
     @AuraEnabled
-    public static List<Listing__c> getListings() {
-        List<Listing__c> listings = new List<Listing__c>();
+    public static List<MVEX__Listing__c> getListings() {
+        List<MVEX__Listing__c> listings = new List<MVEX__Listing__c>();
         try {
-            listings = [SELECT Id, Name, Address__c, Listing_Type__c, Listing_Price__c, Status__c FROM Listing__c WITH USER_MODE];
+            listings = [SELECT Id, Name, MVEX__Address__c, MVEX__Listing_Type__c, MVEX__Listing_Price__c, MVEX__Status__c FROM MVEX__Listing__c WITH USER_MODE];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SendEmailsController', 'getListings', e.getStackTraceString());
         }
         return listings;
     }
 
+    /**
+    * Method Name : getAllContacts
+    * @return List<Contact> List of contact records that have an email address.
+    * @description : Retrieves all active contacts with email addresses ordered by Name.
+    */
     @AuraEnabled
     public static List<Contact> getAllContacts() {
         List<Contact> contacts = new List<Contact>();
         try {
-            contacts = [SELECT Id, Name, Email, Phone 
-                        FROM Contact 
-                        WHERE Email != null 
-                        WITH USER_MODE 
-                        ORDER BY Name ASC LIMIT 50000];
+            contacts = [SELECT Id, Name, Email, Phone FROM Contact WHERE Email != null WITH USER_MODE ORDER BY Name ASC LIMIT 50000];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SendEmailsController', 'getAllContacts', e.getStackTraceString());
         }

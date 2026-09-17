@@ -1,6 +1,7 @@
 import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getFormsAndFields from '@salesforce/apex/MetaAdsFormMappingController.getFormsAndFields';
+import getConnectedPages from '@salesforce/apex/MetaAdsFormMappingController.getConnectedPages';
+import getLeadForms from '@salesforce/apex/MetaAdsFormMappingController.getLeadForms';
 import getSalesforceLeadFields from '@salesforce/apex/MetaAdsFormMappingController.getSalesforceLeadFields';
 import getExistingMappings from '@salesforce/apex/MetaAdsFormMappingController.getExistingMappings';
 import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveMapping';
@@ -16,9 +17,11 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track isModalOpen = false;
     @track isModalLoading = false;
     
-    @track availableForms = []; // Forms from Meta API
+    @track availablePages = []; // Pages from Meta API
+    @track availableForms = []; // Forms from Meta API for selected page
     @track salesforceLeadFields = []; // Fields from SF
     
+    @track selectedPageId = '';
     @track selectedFormId = '';
     @track currentFormFields = []; // [{key, label, value}]
     
@@ -30,7 +33,6 @@ export default class MetaAdsFormMapping extends LightningElement {
     
     // Meta Config State
     currentClientAppId = '';
-    currentPageId = '';
 
     connectedCallback() {
         loadStyle(this, MulishFontCss).catch(error => {
@@ -53,17 +55,19 @@ export default class MetaAdsFormMapping extends LightningElement {
                 this.fullMappingJson = {};
             }
             
-            // 3. Pre-fetch forms to build the table with names
-            const formsRes = await getFormsAndFields();
-            if (formsRes && formsRes.success) {
-                this.currentClientAppId = formsRes.client_app_id;
-                this.currentPageId = formsRes.page_id;
-                if (formsRes.forms) {
-                    this.availableForms = formsRes.forms;
+            // 3. Pre-fetch pages
+            const pagesRes = await getConnectedPages();
+            if (pagesRes && pagesRes.success) {
+                if (pagesRes.pages) {
+                    this.availablePages = pagesRes.pages;
                 }
-            } else if (formsRes && !formsRes.success) {
-                this.showToast('Warning', 'Could not fetch forms from Meta API. ' + (formsRes.message || ''), 'warning');
+            } else if (pagesRes && !pagesRes.success) {
+                this.showToast('Warning', 'Could not fetch pages from Meta API. ' + (pagesRes.message || ''), 'warning');
             }
+
+            // Client App ID logic isn't tied to a specific page anymore, but we can extract it if needed
+            // For now we assume a single client app id environment
+            this.currentClientAppId = 'default_app_id'; // We can adapt this if multi-app is needed
 
             this.buildTableData();
             
@@ -85,12 +89,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 let forms = pages[pId];
                 for (let fId in forms) {
                     let mappings = forms[fId];
-                    let formName = 'Unknown Form';
-                    // Try to find name in availableForms
-                    let found = this.availableForms.find(f => String(f.id) === String(fId));
-                    if (found) {
-                        formName = found.name;
-                    }
+                    let formName = 'Form ID: ' + fId;
                     
                     data.push({
                         index: idx++,
@@ -112,16 +111,29 @@ export default class MetaAdsFormMapping extends LightningElement {
         return this.tableData.length > 0;
     }
 
-    get isStep1() {
-        return this.currentStep === '1';
+    get isStep1() { return this.currentStep === '1'; }
+    get isStep2() { return this.currentStep === '2'; }
+    get isStep3() { return this.currentStep === '3'; }
+
+    get isNextDisabledStep1() {
+        return !this.selectedPageId;
     }
 
-    get isStep2() {
-        return this.currentStep === '2';
-    }
-
-    get isNextDisabled() {
+    get isNextDisabledStep2() {
         return !this.selectedFormId;
+    }
+
+    get isSaveDisabled() {
+        return !this.selectedFormId;
+    }
+
+    get pageOptions() {
+        return this.availablePages.map(p => {
+            return {
+                label: `${p.name} (${p.id})`,
+                value: String(p.id)
+            };
+        });
     }
 
     get formOptions() {
@@ -133,24 +145,17 @@ export default class MetaAdsFormMapping extends LightningElement {
         }).filter(opt => {
             // allow if it's the currently selected form (we are editing)
             if (opt.value === this.selectedFormId) return true;
-            // filter out if it already exists in tableData
-            return !this.tableData.some(row => String(row.formId) === opt.value);
+            // filter out if it already exists in tableData for the selected page
+            return !this.tableData.some(row => String(row.formId) === opt.value && String(row.pageId) === String(this.selectedPageId));
         });
-    }
-
-    get isSaveDisabled() {
-        return !this.selectedFormId;
     }
 
     // --- Modal Logic ---
 
     openNewMappingModal() {
-        if (!this.currentClientAppId || !this.currentPageId) {
-            this.showToast('Error', 'Meta Ads connection missing. Connect Meta Ads first.', 'error');
-            return;
-        }
-        
+        this.selectedPageId = '';
         this.selectedFormId = '';
+        this.availableForms = [];
         this.currentFormFields = [];
         this.currentStep = '1';
         this.isModalOpen = true;
@@ -162,13 +167,46 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     goNext() {
-        if (this.selectedFormId) {
+        if (this.currentStep === '1' && this.selectedPageId) {
             this.currentStep = '2';
+        } else if (this.currentStep === '2' && this.selectedFormId) {
+            this.currentStep = '3';
         }
     }
 
     goBack() {
-        this.currentStep = '1';
+        if (this.currentStep === '2') {
+            this.currentStep = '1';
+        } else if (this.currentStep === '3') {
+            this.currentStep = '2';
+        }
+    }
+
+    async handlePageSelection(event) {
+        this.selectedPageId = event.detail.value;
+        this.selectedFormId = '';
+        this.availableForms = [];
+        
+        if (!this.selectedPageId) {
+            return;
+        }
+
+        this.isModalLoading = true;
+        try {
+            const formsRes = await getLeadForms({ pageId: this.selectedPageId });
+            if (formsRes && formsRes.success) {
+                if (formsRes.forms) {
+                    this.availableForms = formsRes.forms;
+                }
+                this.currentClientAppId = formsRes.client_app_id || 'default_app_id';
+            } else {
+                this.showToast('Error', 'Failed to fetch forms: ' + (formsRes.message || ''), 'error');
+            }
+        } catch (error) {
+            this.showToast('Error', 'Error fetching forms.', 'error');
+        } finally {
+            this.isModalLoading = false;
+        }
     }
 
     handleFormSelection(event) {
@@ -184,9 +222,9 @@ export default class MetaAdsFormMapping extends LightningElement {
             // Check if we have existing mappings for this form
             let existingMappings = {};
             if (this.fullMappingJson[this.currentClientAppId] && 
-                this.fullMappingJson[this.currentClientAppId][this.currentPageId] &&
-                this.fullMappingJson[this.currentClientAppId][this.currentPageId][this.selectedFormId]) {
-                existingMappings = this.fullMappingJson[this.currentClientAppId][this.currentPageId][this.selectedFormId];
+                this.fullMappingJson[this.currentClientAppId][this.selectedPageId] &&
+                this.fullMappingJson[this.currentClientAppId][this.selectedPageId][this.selectedFormId]) {
+                existingMappings = this.fullMappingJson[this.currentClientAppId][this.selectedPageId][this.selectedFormId];
             }
 
             this.currentFormFields = form.questions.map(q => {
@@ -225,17 +263,20 @@ export default class MetaAdsFormMapping extends LightningElement {
 
         // Ensure JSON structure
         if (!this.fullMappingJson[this.currentClientAppId]) this.fullMappingJson[this.currentClientAppId] = {};
-        if (!this.fullMappingJson[this.currentClientAppId][this.currentPageId]) this.fullMappingJson[this.currentClientAppId][this.currentPageId] = {};
+        if (!this.fullMappingJson[this.currentClientAppId][this.selectedPageId]) this.fullMappingJson[this.currentClientAppId][this.selectedPageId] = {};
         
-        this.fullMappingJson[this.currentClientAppId][this.currentPageId][this.selectedFormId] = formMapping;
+        this.fullMappingJson[this.currentClientAppId][this.selectedPageId][this.selectedFormId] = formMapping;
 
         this.isModalLoading = true;
         try {
             const jsonStr = JSON.stringify(this.fullMappingJson);
-            const result = await saveMappingApex({ mappingJson: jsonStr });
+            const result = await saveMappingApex({ mappingJson: jsonStr, pageId: this.selectedPageId });
             
             if (result && result.success) {
-                this.showToast('Success', 'Form mapping saved successfully.', 'success');
+                this.showToast('Success', 'Form mapping saved and webhook subscribed successfully.', 'success');
+                // Optional: we don't have form names natively in tableData since we aren't fetching ALL forms anymore.
+                // We could fetch forms for table building, or just use the Form ID in the table. 
+                // For now, it will use "Form ID: xxx" since we didn't fetch all forms globally.
                 this.buildTableData();
                 this.closeModal();
             } else {
@@ -266,17 +307,33 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
-    editRow(row) {
-        // Only allow edit if the connection matches, or we could support multi-page edit 
-        // but for now we set the context.
+    async editRow(row) {
         this.currentClientAppId = row.clientAppId;
-        this.currentPageId = row.pageId;
-        
+        this.selectedPageId = row.pageId;
         this.selectedFormId = row.formId;
-        this.currentStep = '1';
-        this.isModalOpen = true;
         
-        this.handleFormSelection({detail: {value: this.selectedFormId}});
+        this.isModalOpen = true;
+        this.isModalLoading = true;
+        this.currentStep = '3'; // Jump straight to mapping
+
+        try {
+            // Fetch forms for this page so we have the questions
+            const formsRes = await getLeadForms({ pageId: this.selectedPageId });
+            if (formsRes && formsRes.success) {
+                if (formsRes.forms) {
+                    this.availableForms = formsRes.forms;
+                }
+            }
+            
+            // Build fields for mapping step
+            this.handleFormSelection({ detail: { value: this.selectedFormId } });
+            
+        } catch (error) {
+            this.showToast('Error', 'Failed to load form details for editing.', 'error');
+            this.closeModal();
+        } finally {
+            this.isModalLoading = false;
+        }
     }
 
     async deleteRow(row) {
@@ -301,7 +358,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 }
 
                 const jsonStr = JSON.stringify(this.fullMappingJson);
-                const result = await saveMappingApex({ mappingJson: jsonStr });
+                const result = await saveMappingApex({ mappingJson: jsonStr, pageId: '' }); // Don't subscribe on delete
                 
                 if (result && result.success) {
                     this.showToast('Success', 'Mapping deleted.', 'success');
@@ -326,3 +383,4 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.dispatchEvent(evt);
     }
 }
+

@@ -16,7 +16,7 @@ public without sharing class MetaAdsTokenController {
     public Boolean isConnected { 
         get { 
             Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-            return tokenConfig != null && String.isNotBlank(tokenConfig.Page_Access_Token_1__c); 
+            return tokenConfig != null && String.isNotBlank(tokenConfig.System_User_Token_1__c); 
         } 
     }
 
@@ -85,100 +85,7 @@ public without sharing class MetaAdsTokenController {
             resultMap.put('system_user_token', systemUserToken);
             resultMap.put('client_app_id', clientAppId);
 
-            // ── Step 2: Fetch Connected Pages & Page Tokens via /me/accounts ──
-            HttpRequest pageReq = new HttpRequest();
-            pageReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/me/accounts?fields=id,name,access_token,tasks&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8'));
-            pageReq.setMethod('GET');
-            pageReq.setTimeout(20000);
-
-            HttpResponse pageRes = http.send(pageReq);
-            Map<String, Object> pagesMap = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
-            List<Object> pagesList = pagesMap.containsKey('data') ? (List<Object>) pagesMap.get('data') : new List<Object>();
-
-            // ── Step 3: Extract Page Token & Page ID ──
-            String pageAccessToken = systemUserToken;
-            String foundPageId = null;
-            String foundPageName = null;
-
-            if (!pagesList.isEmpty()) {
-                Map<String, Object> firstPage = (Map<String, Object>) pagesList[0];
-                foundPageId = (String) firstPage.get('id');
-                foundPageName = (String) firstPage.get('name');
-                if (firstPage.containsKey('access_token')) {
-                    pageAccessToken = (String) firstPage.get('access_token');
-                }
-            } else {
-                // Fallback direct check for demo page
-                HttpRequest directPageReq = new HttpRequest();
-                directPageReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/1224679970734324?fields=id,name,access_token&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8'));
-                directPageReq.setMethod('GET');
-                HttpResponse directRes = http.send(directPageReq);
-                if (directRes.getStatusCode() == 200) {
-                    Map<String, Object> dpMap = (Map<String, Object>) JSON.deserializeUntyped(directRes.getBody());
-                    foundPageId = (String) dpMap.get('id');
-                    foundPageName = (String) dpMap.get('name');
-                    if (dpMap.containsKey('access_token')) {
-                        pageAccessToken = (String) dpMap.get('access_token');
-                    }
-                    pagesList.add(dpMap);
-                }
-            }
-
-            resultMap.put('pages', pagesList);
-            resultMap.put('page_access_token', pageAccessToken);
-            resultMap.put('page_id', foundPageId);
-            resultMap.put('page_name', foundPageName);
-
-            // ── Step 4: Subscribe the Page to Webhooks (subscribed_apps) for Real-Time Leads ──
-            Boolean webhookSubscribed = false;
-            String webhookSubscribedMsg = '';
-
-            if (String.isNotBlank(foundPageId)) {
-                try {
-                    String subUrl = GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + foundPageId + '/subscribed_apps'
-                        + '?subscribed_fields=leadgen'
-                        + '&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8');
-
-                    HttpRequest subReq = new HttpRequest();
-                    subReq.setEndpoint(subUrl);
-                    subReq.setMethod('POST');
-                    subReq.setHeader('Content-Type', 'application/json');
-                    subReq.setTimeout(20000);
-
-                    HttpResponse subRes = http.send(subReq);
-                    System.debug('[MetaAdsTokenController] subscribed_apps Status: ' + subRes.getStatusCode());
-                    System.debug('[MetaAdsTokenController] subscribed_apps Body: ' + subRes.getBody());
-
-                    Map<String, Object> subMap = (Map<String, Object>) JSON.deserializeUntyped(subRes.getBody());
-                    if (subRes.getStatusCode() == 200 && subMap.containsKey('success') && (Boolean) subMap.get('success') == true) {
-                        webhookSubscribed = true;
-                        webhookSubscribedMsg = 'Successfully subscribed to real-time leads (leadgen).';
-                    } else {
-                        webhookSubscribedMsg = subRes.getBody();
-                    }
-                } catch (Exception subEx) {
-                    webhookSubscribedMsg = 'Subscription call error: ' + subEx.getMessage();
-                }
-            }
-
-            resultMap.put('webhook_subscribed', webhookSubscribed);
-            resultMap.put('webhook_message', webhookSubscribedMsg);
-
-            // ── Step 5: Automatically Fetch Lead Forms & Dynamic Fields ──
-            if (String.isNotBlank(foundPageId)) {
-                HttpRequest formReq = new HttpRequest();
-                formReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + foundPageId + '/leadgen_forms?fields=id,name,status,created_time,questions&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
-                formReq.setMethod('GET');
-                formReq.setTimeout(20000);
-
-                HttpResponse formRes = http.send(formReq);
-                Map<String, Object> formMap = (Map<String, Object>) JSON.deserializeUntyped(formRes.getBody());
-                if (formMap.containsKey('data')) {
-                    resultMap.put('forms', formMap.get('data'));
-                }
-            }
-
-            // ── Step 6: Save Tokens to Custom Setting ──
+            // ── Step 2: Save Token to Custom Setting ──
             Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
             if (tokenConfig == null) {
                 tokenConfig = new Meta_Token_Config__c();
@@ -186,7 +93,6 @@ public without sharing class MetaAdsTokenController {
             }
             
             tokenConfig.Client_App_Id__c = clientAppId;
-            tokenConfig.Page_Id__c = foundPageId;
             
             if (String.isNotBlank(systemUserToken)) {
                 if (systemUserToken.length() <= 255) {
@@ -198,19 +104,10 @@ public without sharing class MetaAdsTokenController {
                 }
             }
             
-            if (String.isNotBlank(pageAccessToken)) {
-                if (pageAccessToken.length() <= 255) {
-                    tokenConfig.Page_Access_Token_1__c = pageAccessToken;
-                    tokenConfig.Page_Access_Token_2__c = null;
-                } else {
-                    tokenConfig.Page_Access_Token_1__c = pageAccessToken.substring(0, 255);
-                    tokenConfig.Page_Access_Token_2__c = pageAccessToken.substring(255);
-                }
-            }
-            
             upsert tokenConfig;
 
             resultMap.put('success', true);
+            resultMap.put('account_name', 'System User Account'); // For VF page display
             return resultMap;
 
         } catch (Exception e) {
@@ -225,61 +122,16 @@ public without sharing class MetaAdsTokenController {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
             Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-            if (tokenConfig == null || String.isBlank(tokenConfig.Page_Access_Token_1__c)) {
+            if (tokenConfig == null || String.isBlank(tokenConfig.System_User_Token_1__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Not connected.');
                 return resultMap;
             }
 
-            String pageAccessToken = tokenConfig.Page_Access_Token_1__c + (String.isNotBlank(tokenConfig.Page_Access_Token_2__c) ? tokenConfig.Page_Access_Token_2__c : '');
-            String pageId = tokenConfig.Page_Id__c;
             String clientAppId = tokenConfig.Client_App_Id__c;
 
-            Integration_App_Config__mdt config = getConfig();
-            if (config == null) {
-                resultMap.put('success', false);
-                return resultMap;
-            }
-
-            String GRAPH_API_VERSION = config.API_Version__c;
-            String GRAPH_BASE_URL = config.Base_Url__c;
-
-            Http http = new Http();
-            
-            // Fetch Page Name
-            HttpRequest pageReq = new HttpRequest();
-            pageReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '?fields=name&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
-            pageReq.setMethod('GET');
-            pageReq.setTimeout(20000);
-            HttpResponse pageRes = http.send(pageReq);
-            
-            String foundPageName = pageId;
-            if (pageRes.getStatusCode() == 200) {
-                Map<String, Object> pMap = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
-                if (pMap.containsKey('name')) {
-                    foundPageName = (String) pMap.get('name');
-                }
-            }
-
-            // Fetch Forms
-            HttpRequest formReq = new HttpRequest();
-            formReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '/leadgen_forms?fields=id,name,status,created_time,questions&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
-            formReq.setMethod('GET');
-            formReq.setTimeout(20000);
-            HttpResponse formRes = http.send(formReq);
-
-            if (formRes.getStatusCode() == 200) {
-                Map<String, Object> formMap = (Map<String, Object>) JSON.deserializeUntyped(formRes.getBody());
-                if (formMap.containsKey('data')) {
-                    resultMap.put('forms', formMap.get('data'));
-                }
-            }
-
-            resultMap.put('page_access_token', pageAccessToken);
-            resultMap.put('page_id', pageId);
-            resultMap.put('page_name', foundPageName);
+            resultMap.put('account_name', 'System User Account');
             resultMap.put('client_app_id', clientAppId);
-            resultMap.put('webhook_subscribed', true);
             resultMap.put('success', true);
             
         } catch (Exception e) {

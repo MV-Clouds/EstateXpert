@@ -11,14 +11,14 @@
         <script>
             // Initialize Meta JavaScript SDK with Tech Provider App ID
             window.fbAsyncInit = function () {
-                var appId = '{!metaAppId}';
+                var appId = '{!JSENCODE(metaAppId)}';
                 console.log('[Meta Ads] Initializing FB SDK with Tech Provider App ID:', appId);
                 if (appId) {
                     FB.init({
                         appId: appId,
                         autoLogAppEvents: true,
                         xfbml: true,
-                        version: '{!apiVersion}'
+                        version: '{!JSENCODE(apiVersion)}'
                     });
                     console.log('[Meta Ads] FB SDK Initialized successfully.');
                 } else {
@@ -79,7 +79,7 @@
                 justify-content: flex-start;
                 align-items: center;
                 flex-direction: row;
-                font-size: 26px;
+                font-size: 18px;
                 font-weight: 500;
                 text-align: left;
                 gap: 15px;
@@ -112,7 +112,7 @@
             .config-card {
                 background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
                 border-radius: 12px;
-                padding: 2.5rem;
+                padding: 2rem;
                 width: 55%;
                 height: 100%;
                 max-height: 100%;
@@ -133,7 +133,7 @@
             }
 
             .page-title {
-                font-size: 28px;
+                font-size: 18px;
                 font-weight: 500;
                 color: #0f1419;
                 margin: 0;
@@ -141,7 +141,7 @@
             }
 
             .page-subtitle {
-                font-size: 14px;
+                font-size: 16px;
                 color: #636363;
                 margin: 4px 0 0 0;
             }
@@ -172,8 +172,8 @@
 
             .input-field {
                 width: 100%;
-                padding: 14px 16px;
-                font-size: 16px;
+                padding: 8px 16px;
+                font-size: 14px;
                 border: 1px solid #d0d4d8;
                 border-radius: 8px;
                 box-sizing: border-box;
@@ -229,8 +229,9 @@
 
             .connect-btn {
                 width: 100%;
-                padding: 14px 24px;
-                font-size: 16px;
+                height: 30px;
+                padding: 0 24px;
+                font-size: 14px;
                 font-weight: 500;
                 background: #1877F2;
                 color: white;
@@ -260,8 +261,9 @@
 
             .deactivate-btn {
                 width: 100%;
-                padding: 12px 24px;
-                font-size: 16px;
+                height: 30px;
+                padding: 0 24px;
+                font-size: 14px;
                 font-weight: 500;
                 background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
                 color: #DC2626;
@@ -356,11 +358,9 @@
             }
 
             .section-header {
-                font-size: 12px;
+                font-size: 16px;
                 font-weight: 500;
                 color: #1f2937;
-                text-transform: uppercase;
-                letter-spacing: 1px;
                 margin: 1.5rem 0 0.5rem 0;
             }
 
@@ -524,69 +524,77 @@
                     <apex:outputPanel rendered="{!NOT(hasConfig)}">
                         <div class="info-box" style="background: #FEF2F2; border-color: #F87171;">
                             <svg class="info-icon" style="color: #EF4444;" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
                             </svg>
                             <div class="info-content">
                                 <p class="info-title" style="color: #991B1B;">Configuration Missing</p>
-                                <p class="info-text" style="color: #991B1B;">The Meta Ads integration configuration is missing. Please ask your administrator to configure the Tech Provider App credentials in Custom Metadata (Integration_App_Config__mdt) first.</p>
+                                <p class="info-text" style="color: #991B1B;">The Meta Ads integration configuration is
+                                    missing. Please ask your administrator to configure the Tech Provider App
+                                    credentials in Custom Metadata (Integration_App_Config__mdt) first.</p>
                             </div>
                         </div>
                     </apex:outputPanel>
 
                     <apex:outputPanel rendered="{!hasConfig}">
-                    <div id="setup-form-div">
-                        <div class="input-group">
-                            <label class="input-label" for="app-id-input">Meta Application ID</label>
-                            <input type="text" id="app-id-input" class="input-field"
-                                placeholder="Enter your Meta Application ID (e.g. 514916280628381)" />
-                        </div>
-
-                        <div class="info-box">
-                            <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <div class="info-content">
-                                <p class="info-title">Automatic Setup on Click:</p>
-                                <p class="info-text">1. <strong>Subscribes the Page to Real-Time Webhooks</strong>
-                                    (<code>leadgen</code>).<br />2. Discovers all active <strong>Lead Forms &amp;
-                                        Dynamic Fields</strong>!</p>
+                        <div id="setup-form-div">
+                            <div class="input-group">
+                                <label class="input-label" for="app-id-input">Meta Application ID</label>
+                                <input type="text" id="app-id-input" class="input-field"
+                                    placeholder="Enter your Meta Application ID (e.g. 514916280628381)" />
                             </div>
-                        </div>
 
-                        <button class="connect-btn" id="connect-btn" onclick="launchMetaAdsSignup()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                            </svg>
-                            <span id="btn-text">Connect with Meta</span>
-                            <div class="spinner" id="btn-spinner"></div>
-                        </button>
-
-                        <span class="error-message-text" id="error-message"></span>
-                    </div>
-
-                    <!-- Results Section -->
-                    <div class="results-container" id="results-container">
-                        <div class="badges-row">
-                            <div class="status-badge success">
-                                <span class="status-dot success"></span>
-                                Connected
+                            <div class="info-box">
+                                <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <div class="info-content">
+                                    <p class="info-title">Automatic Setup on Click:</p>
+                                    <p class="info-text">1. <strong>Subscribes the Page to Real-Time Webhooks</strong>
+                                        (<code>leadgen</code>).<br />2. Discovers all active <strong>Lead Forms &amp;
+                                            Dynamic Fields</strong>!</p>
+                                </div>
                             </div>
+
+                            <button class="connect-btn" id="connect-btn" onclick="launchMetaAdsSignup()">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                    </path>
+                                </svg>
+                                <span id="btn-text">Connect with Meta</span>
+                                <div class="spinner" id="btn-spinner"></div>
+                            </button>
+
+                            <span class="error-message-text" id="error-message"></span>
                         </div>
 
-                        <!-- Connected Page -->
-                        <div class="section-header">📄 Connected Account</div>
-                        <div class="card" id="page-display"></div>
+                        <!-- Results Section -->
+                        <div class="results-container" id="results-container">
+                            <div class="badges-row">
+                                <div class="status-badge success">
+                                    <span class="status-dot success"></span>
+                                    Connected
+                                </div>
+                            </div>
 
-                        <button class="deactivate-btn" onclick="deactivateMetaAds()">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                            Deactivate Integration
-                        </button>
-                    </div>
+                            <!-- Connected Page -->
+                            <div class="section-header">📄 Connected Account</div>
+                            <div class="card" id="page-display"></div>
+
+                            <button class="deactivate-btn" onclick="deactivateMetaAds()">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Deactivate Integration
+                            </button>
+                        </div>
                     </apex:outputPanel>
 
                 </div>
@@ -607,7 +615,7 @@
         <script>
             var isConnected = {!isConnected};
 
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 if (isConnected && '{!hasConfig}' === 'true') {
                     document.getElementById('setup-form-div').style.display = 'none';
                     checkStatusOnLoad();
@@ -710,7 +718,7 @@
                             resetButton();
                         }
                     }, {
-                        config_id: '{!metaConfigId}',
+                        config_id: '{!JSENCODE(metaConfigId)}',
                         response_type: 'code',
                         override_default_response_type: true
                     });
@@ -724,23 +732,23 @@
                 var btn = document.getElementById('connect-btn');
                 var btnText = document.getElementById('btn-text');
                 var spinner = document.getElementById('btn-spinner');
-                
+
                 var overlay = document.getElementById('loading-spinner');
-                
+
                 if (loading) {
                     if (msg) {
                         overlay.classList.add('show');
                         overlay.querySelector('.spinner-text').textContent = msg;
                     } else {
-                        if(btn) btn.disabled = true;
-                        if(btnText) btnText.textContent = 'Subscribing Webhooks...';
-                        if(spinner) spinner.style.display = 'block';
+                        if (btn) btn.disabled = true;
+                        if (btnText) btnText.textContent = 'Subscribing Webhooks...';
+                        if (spinner) spinner.style.display = 'block';
                     }
                 } else {
                     overlay.classList.remove('show');
-                    if(btn) btn.disabled = false;
-                    if(btnText) btnText.textContent = 'Connect with Meta';
-                    if(spinner) spinner.style.display = 'none';
+                    if (btn) btn.disabled = false;
+                    if (btnText) btnText.textContent = 'Connect with Meta';
+                    if (spinner) spinner.style.display = 'none';
                 }
             }
 
@@ -751,13 +759,13 @@
             function renderResults(data) {
                 var setupForm = document.getElementById('setup-form-div');
                 if (setupForm) setupForm.style.display = 'none';
-                
+
                 var container = document.getElementById('results-container');
 
                 // 1. Account Info
                 var pageDisplay = document.getElementById('page-display');
-                pageDisplay.innerHTML = '<div style="font-weight:600;font-size:15px;color:#0f172a;">' + (data.account_name || 'System User Account') + '</div>'
-                    + '<div style="font-size:12px;color:#64748b;margin-top:2px;">Client App ID: ' + (data.client_app_id || 'N/A') + '</div>';
+                pageDisplay.innerHTML = '<div style="font-weight:600;font-size:16px;color:#0f172a;">' + (data.account_name || 'System User Account') + '</div>'
+                    + '<div style="font-size:14px;color:#64748b;margin-top:2px;">Client App ID: ' + (data.client_app_id || 'N/A') + '</div>';
 
                 container.style.display = 'block';
             }

@@ -23,61 +23,103 @@
                     <table class="slds-table">
                         <thead>
                             <tr class="table_tr_cls">
+                                <th scope="col" class="expand-col">
+                                    <div></div>
+                                </th>
                                 <th scope="col" class="sno">
                                     <div>No.</div>
                                 </th>
                                 <th class="groupname" scope="col">
-                                    <div class="slds-truncate" title="Form Name">Form Name</div>
-                                </th>
-                                <th class="groupname" scope="col">
-                                    <div class="slds-truncate" title="Form ID">Form ID</div>
+                                    <div class="slds-truncate" title="Page Name">Page Name</div>
                                 </th>
                                 <th class="groupname" scope="col">
                                     <div class="slds-truncate" title="Page ID">Page ID</div>
                                 </th>
                                 <th class="groupname" scope="col">
-                                    <div class="slds-truncate" title="Mapped Fields">Mapped Fields</div>
-                                </th>
-                                <th class="expand-col" scope="col">
-                                    <div class="slds-truncate" title="Actions">Actions</div>
+                                    <div class="slds-truncate" title="Mapped Forms">Mapped Forms</div>
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             <template for:each={tableData} for:item="row" for:index="index">
+                                <!-- Parent Row (Page) -->
                                 <tr key={row.id} class="parent-row">
+                                    <td data-label="" class="expand-cell">
+                                        <div class="action-icon-container" data-id={row.id} onclick={handleToggleRow}>
+                                            <svg class="action-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <template if:true={row.isExpanded}>
+                                                    <path d="M7 10l5 5 5-5z" fill="currentColor" />
+                                                </template>
+                                                <template if:false={row.isExpanded}>
+                                                    <path d="M10 17l5-5-5-5z" fill="currentColor" />
+                                                </template>
+                                            </svg>
+                                        </div>
+                                    </td>
                                     <td data-label="No.">
                                         <div>{row.index}</div>
                                     </td>
-                                    <td data-label="Form Name" class="truncate_css">
-                                        <div>{row.formName}</div>
-                                    </td>
-                                    <td data-label="Form ID">
-                                        <div>{row.formId}</div>
+                                    <td data-label="Page Name" class="truncate_css">
+                                        <div>{row.pageName}</div>
                                     </td>
                                     <td data-label="Page ID">
                                         <div>{row.pageId}</div>
                                     </td>
-                                    <td data-label="Mapped Fields">
-                                        <div>{row.mappedCount}</div>
-                                    </td>
-                                    <td data-label="Actions" class="expand-cell">
-                                        <div style="display: flex; gap: 8px; justify-content: center;">
-                                            <div class="action-icon-container" data-id={row.id} onclick={handleEditRow} title="Edit Mapping">
-                                                <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                </svg>
-                                            </div>
-                                            <div class="action-icon-container" data-id={row.id} onclick={handleDeleteRow} title="Delete Mapping">
-                                                <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
+                                    <td data-label="Mapped Forms">
+                                        <div>{row.forms.length}</div>
                                     </td>
                                 </tr>
+
+                                <!-- Accordion Content Row (Forms) -->
+                                <template if:true={row.isExpanded}>
+                                    <tr key={row.id} class="accordion-row">
+                                        <td colspan="5">
+                                            <div class="accordion-content" style="padding: 10px 20px 10px 40px; background: #fafafa;">
+                                                <template if:true={row.forms.length}>
+                                                    <div class="table-content">
+                                                        <table class="slds-table" style="border: none;">
+                                                            <thead>
+                                                                <tr class="table_tr_cls">
+                                                                    <th scope="col" style="width: 50px;">No.</th>
+                                                                    <th scope="col">Form Name</th>
+                                                                    <th scope="col">Form ID</th>
+                                                                    <th scope="col">Mapped Fields</th>
+                                                                    <th scope="col" style="width: 100px; text-align: center;">Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <template for:each={row.forms} for:item="form">
+                                                                    <tr key={form.id}>
+                                                                        <td class="truncate_css">{form.index}</td>
+                                                                        <td class="truncate_css">{form.formName}</td>
+                                                                        <td class="truncate_css">{form.formId}</td>
+                                                                        <td class="truncate_css">{form.mappedCount}</td>
+                                                                        <td class="truncate_css" style="text-align: center;">
+                                                                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                                                                <div class="action-icon-container" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
+                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <div class="action-icon-container" data-id={form.id} onclick={handleDeleteRow} title="Delete Mapping">
+                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </template>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
                             </template>
                         </tbody>
                     </table>

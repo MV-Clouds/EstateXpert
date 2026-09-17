@@ -154,7 +154,7 @@ public with sharing class MetaAdsFormMappingController {
     @AuraEnabled
     public static String getExistingMappings() {
         try {
-            MVEX__Configuration_Settings__c setting = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
+            MVEX__Configuration_Settings__c setting = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' WITH USER_MODE LIMIT 1];
             return setting.MVEX__Fields_Data__c;
         } catch (Exception e) {
             return null;
@@ -168,51 +168,19 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> saveMapping(String mappingJson, String pageId) {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            // Subscribe webhook for the page on the fly FIRST (to avoid Uncommitted Work Pending error)
             if (String.isNotBlank(pageId)) {
-                Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-                if (tokenConfig != null && String.isNotBlank(tokenConfig.System_User_Token_1__c)) {
-                    String systemUserToken = tokenConfig.System_User_Token_1__c + (String.isNotBlank(tokenConfig.System_User_Token_2__c) ? tokenConfig.System_User_Token_2__c : '');
-                    
-                    Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
-                    String GRAPH_API_VERSION = config.API_Version__c;
-                    String GRAPH_BASE_URL = config.Base_Url__c;
-                    
-                    Http http = new Http();
-                    
-                    // Fetch Page Access Token on the fly
-                    HttpRequest pageReq = new HttpRequest();
-                    pageReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '?fields=access_token&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8'));
-                    pageReq.setMethod('GET');
-                    pageReq.setTimeout(20000);
-                    HttpResponse pageRes = http.send(pageReq);
-                    
-                    if (pageRes.getStatusCode() == 200) {
-                        Map<String, Object> pMap = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
-                        if (pMap.containsKey('access_token')) {
-                            String pageAccessToken = (String) pMap.get('access_token');
-                            
-                            // Call subscribed_apps
-                            HttpRequest subReq = new HttpRequest();
-                            subReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '/subscribed_apps?subscribed_fields=leadgen&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
-                            subReq.setMethod('POST');
-                            subReq.setTimeout(20000);
-                            HttpResponse subRes = http.send(subReq);
-                            
-                            if (subRes.getStatusCode() != 200) {
-                                resultMap.put('success', false);
-                                resultMap.put('message', 'Failed to subscribe webhook: ' + subRes.getBody());
-                                return resultMap;
-                            }
-                        }
-                    }
+                String errorMsg = subscribeWebhookOnTheFly(pageId);
+                if (errorMsg != null) {
+                    resultMap.put('success', false);
+                    resultMap.put('message', errorMsg);
+                    return resultMap;
                 }
             }
 
             // NOW perform DML
             MVEX__Configuration_Settings__c setting;
             try {
-                setting = [SELECT Id, MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
+                setting = [SELECT Id, MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' WITH USER_MODE LIMIT 1];
             } catch (Exception e) {
                 setting = new MVEX__Configuration_Settings__c(Name = 'Meta Ads Mappings');
             }
@@ -220,7 +188,7 @@ public with sharing class MetaAdsFormMappingController {
             setting.MVEX__Fields_Data__c = mappingJson;
             setting.MVEX__Feature_Name__c = 'Meta Ads Mappings';
             
-            upsert setting;
+            upsert as user setting;
             
             resultMap.put('success', true);
         } catch (Exception e) {
@@ -228,5 +196,47 @@ public with sharing class MetaAdsFormMappingController {
             resultMap.put('message', e.getMessage());
         }
         return resultMap;
+    }
+
+    private static String subscribeWebhookOnTheFly(String pageId) {
+        Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
+        if (tokenConfig == null || String.isBlank(tokenConfig.System_User_Token_1__c)) {
+            return null;
+        }
+        String systemUserToken = tokenConfig.System_User_Token_1__c + (String.isNotBlank(tokenConfig.System_User_Token_2__c) ? tokenConfig.System_User_Token_2__c : '');
+        
+        Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
+        String graphApiVersion = config.API_Version__c;
+        String graphBaseUrl = config.Base_Url__c;
+        
+        Http http = new Http();
+        
+        HttpRequest pageReq = new HttpRequest();
+        pageReq.setEndpoint(graphBaseUrl + '/' + graphApiVersion + '/' + pageId + '?fields=access_token&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8'));
+        pageReq.setMethod('GET');
+        pageReq.setTimeout(20000);
+        HttpResponse pageRes = http.send(pageReq);
+        
+        if (pageRes.getStatusCode() != 200) {
+            return null; // Silent skip if page token fetch fails, could be intentional
+        }
+        
+        Map<String, Object> pMap = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
+        if (!pMap.containsKey('access_token')) {
+            return null;
+        }
+        String pageAccessToken = (String) pMap.get('access_token');
+        
+        HttpRequest subReq = new HttpRequest();
+        subReq.setEndpoint(graphBaseUrl + '/' + graphApiVersion + '/' + pageId + '/subscribed_apps?subscribed_fields=leadgen&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
+        subReq.setMethod('POST');
+        subReq.setTimeout(20000);
+        HttpResponse subRes = http.send(subReq);
+        
+        if (subRes.getStatusCode() != 200) {
+            return 'Failed to subscribe webhook: ' + subRes.getBody();
+        }
+        
+        return null; // Success
     }
 }

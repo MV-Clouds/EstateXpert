@@ -43,7 +43,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 500;
     text-align: left;
     gap: 15px;
@@ -53,7 +53,7 @@
 }
 
 .broadcast-title {
-    font-size: 26px;
+    font-size: 18px;
     font-weight: 500;
     color: #0f1419;
     letter-spacing: 0.3px;
@@ -158,7 +158,7 @@
 
 .empty-state__content .empty-state__message {
     color: #0176D3;
-    font-size: 22px;
+    font-size: 16px;
     font-weight: 500;
     margin-top: 1.5rem;
     text-align: center;
@@ -177,8 +177,13 @@
     text-overflow: ellipsis;
 }
 
-.table-content .slds-table:not(.slds-no-row-hover) tbody tr:hover>th {
-    background-color: #0476d3;
+.table-content .slds-table:not(.slds-no-row-hover) tbody tr.parent-row:hover>th,
+.table-content .slds-table:not(.slds-no-row-hover) tbody tr.parent-row:hover>td {
+    background-color: #f3f4f6;
+}
+
+.accordion-row:hover > td {
+    background-color: transparent !important;
 }
 
 .filter_label_css {
@@ -189,6 +194,19 @@
 }
 
 /* Modal CSS styling matching newPopUp */
+.accordion-content .table-content {
+    border-radius: 8px;
+    max-height: 300px;
+    overflow: auto;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    border: none;
+}
+
+.accordion-content .table-content table.slds-table td,
+.accordion-content .table-content table.slds-table th {
+    border: none !important;
+}
+
 .section_css {
     display: flex;
     justify-content: center;
@@ -248,7 +266,7 @@
     font-size: 14px;
     font-weight: 500;
     padding: 0 1.5rem;
-    height: 36px;
+    height: 30px;
     background: #FFFFFF;
     border: 1.5px solid #0176D3;
     color: #0176D3;
@@ -271,7 +289,7 @@
     font-weight: 500;
     border: none;
     padding: 0 1.5rem;
-    height: 36px;
+    height: 30px;
     background: #0176D3;
     color: white;
     border-radius: 5px;
@@ -322,7 +340,7 @@
     justify-content: center;
     gap: 8px;
     transition: all 0.2s;
-    height: 36px;
+    height: 30px;
 }
 
 .blue-btn-css:hover {
@@ -348,7 +366,7 @@
     justify-content: center;
     gap: 8px;
     transition: all 0.2s;
-    height: 36px;
+    height: 30px;
 }
 
 .white-btn-css:hover {

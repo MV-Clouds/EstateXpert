@@ -50,7 +50,22 @@ export default class MetaAdsFormMapping extends LightningElement {
             // 2. Get Existing Mappings
             const existing = await getExistingMappings();
             if (existing) {
-                this.fullMappingJson = JSON.parse(existing);
+                let parsedJson = JSON.parse(existing);
+                // Migrate if root is clientAppId (e.g. 'default_app_id' or similar non-numeric)
+                // A Meta page ID is numeric. If the root key isn't numeric, it's likely a clientAppId.
+                let newRootJson = {};
+                for (let key in parsedJson) {
+                    if (isNaN(key)) {
+                        // It's a clientAppId, extract the pages inside it
+                        let pagesObj = parsedJson[key];
+                        for (let pKey in pagesObj) {
+                            newRootJson[pKey] = pagesObj[pKey];
+                        }
+                    } else {
+                        newRootJson[key] = parsedJson[key];
+                    }
+                }
+                this.fullMappingJson = newRootJson;
             } else {
                 this.fullMappingJson = {};
             }
@@ -81,28 +96,58 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     buildTableData() {
         let data = [];
-        let idx = 1;
+        let pageIndex = 1;
         // traverse fullMappingJson
-        for (let appId in this.fullMappingJson) {
-            let pages = this.fullMappingJson[appId];
-            for (let pId in pages) {
-                let forms = pages[pId];
-                for (let fId in forms) {
-                    let mappings = forms[fId];
-                    let formName = 'Form ID: ' + fId;
-                    
-                    data.push({
-                        index: idx++,
-                        id: fId + '_' + pId,
-                        formId: fId,
-                        pageId: pId,
-                        clientAppId: appId,
-                        formName: formName,
-                        mappedCount: Object.keys(mappings).length,
-                        mappings: mappings // keep reference
-                    });
-                }
+        for (let pId in this.fullMappingJson) {
+            let pageObj = this.fullMappingJson[pId];
+            
+            let isNewFormat = pageObj.forms !== undefined;
+            let pageName = isNewFormat ? pageObj.pageName : 'Page ID: ' + pId;
+            let formsObj = isNewFormat ? pageObj.forms : pageObj;
+            
+            if (!isNewFormat || pageName === 'Page ID: ' + pId) {
+                let pageNameObj = this.availablePages.find(p => String(p.id) === String(pId));
+                if (pageNameObj) pageName = pageNameObj.name;
             }
+            
+            let pageRow = {
+                index: pageIndex++,
+                id: pId,
+                pageId: pId,
+                pageName: pageName,
+                isExpanded: false,
+                forms: []
+            };
+            
+            let formIndex = 1;
+            for (let fId in formsObj) {
+                let formVal = formsObj[fId];
+                // Check if old format (formVal is a string/object mapping instead of having 'mappings')
+                // Wait, if it's the old format but nested under clientAppId, pId would be the clientAppId!
+                // Let's migrate clientAppId logic in loadInitialData, or handle it gracefully.
+                // If the root key is NOT a numeric Page ID but rather 'default_app_id', this might break.
+                // I will add a migration step in loadInitialData to flatten it if it has a clientAppId.
+                
+                let isFormNewFormat = formVal.mappings !== undefined;
+                let formName = isFormNewFormat ? formVal.formName : 'Form ID: ' + fId;
+                let mappings = isFormNewFormat ? formVal.mappings : formVal;
+                
+                if (!isFormNewFormat || formName === 'Form ID: ' + fId) {
+                    let fData = this.availableForms.find(f => String(f.id) === String(fId));
+                    if (fData) formName = fData.name;
+                }
+                
+                pageRow.forms.push({
+                    index: formIndex++,
+                    id: fId + '_' + pId,
+                    formId: fId,
+                    pageId: pId,
+                    formName: formName,
+                    mappedCount: Object.keys(mappings).length,
+                    mappings: mappings
+                });
+            }
+            data.push(pageRow);
         }
         this.tableData = data;
     }
@@ -146,7 +191,11 @@ export default class MetaAdsFormMapping extends LightningElement {
             // allow if it's the currently selected form (we are editing)
             if (opt.value === this.selectedFormId) return true;
             // filter out if it already exists in tableData for the selected page
-            return !this.tableData.some(row => String(row.formId) === opt.value && String(row.pageId) === String(this.selectedPageId));
+            let pageRow = this.tableData.find(row => String(row.pageId) === String(this.selectedPageId));
+            if (pageRow) {
+                return !pageRow.forms.some(f => String(f.formId) === opt.value);
+            }
+            return true;
         });
     }
 
@@ -221,10 +270,13 @@ export default class MetaAdsFormMapping extends LightningElement {
         if (form && form.questions) {
             // Check if we have existing mappings for this form
             let existingMappings = {};
-            if (this.fullMappingJson[this.currentClientAppId] && 
-                this.fullMappingJson[this.currentClientAppId][this.selectedPageId] &&
-                this.fullMappingJson[this.currentClientAppId][this.selectedPageId][this.selectedFormId]) {
-                existingMappings = this.fullMappingJson[this.currentClientAppId][this.selectedPageId][this.selectedFormId];
+            if (this.fullMappingJson[this.selectedPageId]) {
+                let pageObj = this.fullMappingJson[this.selectedPageId];
+                let formsObj = pageObj.forms !== undefined ? pageObj.forms : pageObj;
+                
+                if (formsObj[this.selectedFormId]) {
+                    existingMappings = formsObj[this.selectedFormId].mappings !== undefined ? formsObj[this.selectedFormId].mappings : formsObj[this.selectedFormId];
+                }
             }
 
             this.currentFormFields = form.questions.map(q => {
@@ -288,11 +340,36 @@ export default class MetaAdsFormMapping extends LightningElement {
             }
         });
 
-        // Ensure JSON structure
-        if (!this.fullMappingJson[this.currentClientAppId]) this.fullMappingJson[this.currentClientAppId] = {};
-        if (!this.fullMappingJson[this.currentClientAppId][this.selectedPageId]) this.fullMappingJson[this.currentClientAppId][this.selectedPageId] = {};
+        // Ensure JSON structure and format migration
+        let pageName = this.availablePages.find(p => String(p.id) === String(this.selectedPageId))?.name || 'Page ID: ' + this.selectedPageId;
+        let formName = this.availableForms.find(f => String(f.id) === String(this.selectedFormId))?.name || 'Form ID: ' + this.selectedFormId;
+
+        // Migrate old format to new format
+        if (this.fullMappingJson[this.selectedPageId] && this.fullMappingJson[this.selectedPageId].forms === undefined) {
+             let oldForms = this.fullMappingJson[this.selectedPageId];
+             let migratedForms = {};
+             for (let oldFId in oldForms) {
+                 migratedForms[oldFId] = {
+                     formName: 'Form ID: ' + oldFId,
+                     mappings: oldForms[oldFId]
+                 };
+             }
+             this.fullMappingJson[this.selectedPageId] = {
+                 pageName: pageName,
+                 forms: migratedForms
+             };
+        } else if (!this.fullMappingJson[this.selectedPageId]) {
+            this.fullMappingJson[this.selectedPageId] = {
+                pageName: pageName,
+                forms: {}
+            };
+        }
         
-        this.fullMappingJson[this.currentClientAppId][this.selectedPageId][this.selectedFormId] = formMapping;
+        // Save mapping
+        this.fullMappingJson[this.selectedPageId].forms[this.selectedFormId] = {
+            formName: formName,
+            mappings: formMapping
+        };
 
         this.isModalLoading = true;
         try {
@@ -318,24 +395,45 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     // --- Table Actions ---
 
-    handleEditRow(event) {
+    handleToggleRow(event) {
         const rowId = event.currentTarget.dataset.id;
         const row = this.tableData.find(r => r.id === rowId);
         if (row) {
-            this.editRow(row);
+            row.isExpanded = !row.isExpanded;
+        }
+    }
+
+    handleEditRow(event) {
+        const rowId = event.currentTarget.dataset.id;
+        let targetRow = null;
+        for (let page of this.tableData) {
+            let found = page.forms.find(f => f.id === rowId);
+            if (found) {
+                targetRow = found;
+                break;
+            }
+        }
+        if (targetRow) {
+            this.editRow(targetRow);
         }
     }
 
     handleDeleteRow(event) {
         const rowId = event.currentTarget.dataset.id;
-        const row = this.tableData.find(r => r.id === rowId);
-        if (row) {
-            this.deleteRow(row);
+        let targetRow = null;
+        for (let page of this.tableData) {
+            let found = page.forms.find(f => f.id === rowId);
+            if (found) {
+                targetRow = found;
+                break;
+            }
+        }
+        if (targetRow) {
+            this.deleteRow(targetRow);
         }
     }
 
     async editRow(row) {
-        this.currentClientAppId = row.clientAppId;
         this.selectedPageId = row.pageId;
         this.selectedFormId = row.formId;
         
@@ -370,18 +468,17 @@ export default class MetaAdsFormMapping extends LightningElement {
 
         try {
             this.isLoading = true;
-            if (this.fullMappingJson[row.clientAppId] && 
-                this.fullMappingJson[row.clientAppId][row.pageId] &&
-                this.fullMappingJson[row.clientAppId][row.pageId][row.formId]) {
+            if (this.fullMappingJson[row.pageId]) {
+                let pageObj = this.fullMappingJson[row.pageId];
+                let isNewFormat = pageObj.forms !== undefined;
+                let formsObj = isNewFormat ? pageObj.forms : pageObj;
                 
-                delete this.fullMappingJson[row.clientAppId][row.pageId][row.formId];
-                
-                // Cleanup empty objects
-                if (Object.keys(this.fullMappingJson[row.clientAppId][row.pageId]).length === 0) {
-                    delete this.fullMappingJson[row.clientAppId][row.pageId];
-                }
-                if (Object.keys(this.fullMappingJson[row.clientAppId]).length === 0) {
-                    delete this.fullMappingJson[row.clientAppId];
+                if (formsObj[row.formId]) {
+                    delete formsObj[row.formId];
+                    
+                    if (Object.keys(formsObj).length === 0) {
+                        delete this.fullMappingJson[row.pageId];
+                    }
                 }
 
                 const jsonStr = JSON.stringify(this.fullMappingJson);

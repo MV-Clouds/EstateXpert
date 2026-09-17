@@ -182,6 +182,11 @@
     background-color: #f3f4f6;
 }
 
+.table-content .slds-table thead tr:hover > th,
+.table-content .slds-table thead th:hover {
+    background-color: inherit !important;
+}
+
 .accordion-row:hover > td {
     background-color: transparent !important;
 }

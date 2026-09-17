@@ -22,7 +22,7 @@ global without sharing class MetaLeadWebhook {
                 response.responseBody = Blob.valueOf(request.params.get('hub.challenge'));
             }
         } catch(Exception e){
-            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'doGet', e.getMessage());
+            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'doGet', e.getMessage());
         }
     }
     
@@ -58,7 +58,7 @@ global without sharing class MetaLeadWebhook {
             res.responseBody = Blob.valueOf('Webhook received successfully.');
         } catch (Exception e) {
             System.debug('Error: ' + e.getMessage());
-            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'handlePost', e.getMessage());
+            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'handlePost', e.getMessage());
             res.statusCode = 500;
             res.responseBody = Blob.valueOf('Error processing webhook: ' + e.getMessage());
         }
@@ -85,7 +85,7 @@ global without sharing class MetaLeadWebhook {
             return '';
         }catch(Exception e){
             System.debug('Error fetching form name: ' + e.getMessage());
-            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'fetchFormName', e.getMessage());
+            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'fetchFormName', e.getMessage());
             return '';
         }
     }
@@ -101,7 +101,7 @@ global without sharing class MetaLeadWebhook {
             return (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
         } catch (Exception e) {
             System.debug('API Error: ' + e.getMessage());
-            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'makeGetRequest', e.getMessage());
+            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'makeGetRequest', e.getMessage());
             return new Map<String, Object>();
         }
     }
@@ -141,7 +141,7 @@ global without sharing class MetaLeadWebhook {
             }
 
             // --- 4. Process Field Mappings ---
-            List<MetaLeadFieldMapping__mdt> mappingRecords = [SELECT MVEX__New_Field_Mapping__c FROM MetaLeadFieldMapping__mdt LIMIT 1];
+            List<MVEX__MetaLeadFieldMapping__mdt> mappingRecords = [SELECT MVEX__New_Field_Mapping__c FROM MVEX__MetaLeadFieldMapping__mdt LIMIT 1];
             // Deserialize the JSON string into a list of mappings
             List<FieldMapping> fieldMappings = new List<FieldMapping>();
             if (!mappingRecords.isEmpty() && String.isNotBlank(mappingRecords[0].MVEX__New_Field_Mapping__c)) {
@@ -178,7 +178,7 @@ global without sharing class MetaLeadWebhook {
             try {
                 insert newContact;
             } catch (Exception e) {
-                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceLead', e.getMessage());
+                // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceLead', e.getMessage());
             }
         }
     }

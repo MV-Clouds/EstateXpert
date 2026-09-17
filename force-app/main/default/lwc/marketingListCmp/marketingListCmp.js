@@ -716,7 +716,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     loadAllTemplates() {
         getTemplatesByObject()
             .then(result => {
-                this.templateMap = new Map(Object.entries(result));
+                this.templateMap = new Map(Object.entries(result || {}));
                 this.updateTemplateOptions();
             })
             .catch(error => {
@@ -1889,8 +1889,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
 
     updateTemplateOptions() {
-        if (!this.selectedObject || this.templateMap.size === 0) {
+        if (!this.selectedObject || !this.templateMap || this.templateMap.size === 0) {
             this.templateOptions = [];
+            this.selectedTemplate = '';
             return;
         }
 
@@ -1911,7 +1912,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             label: template.MVEX__Template_Name__c,
             value: template.Id
         }));
-        this.selectedTemplate = this.templateOptions[0].value;
+        this.selectedTemplate = this.templateOptions.length > 0 ? this.templateOptions[0].value : '';
     }
 
     handleInputChange(event) {
@@ -1936,7 +1937,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
 
     // Handle send message button click
-    handleSendMessage() {
+    async handleSendMessage() {
         if (this.isSendMessageDisabled) {
             if (!this.selectedContactList || this.selectedContactList.length === 0) {
                 this.showToast('Warning', 'Please select at least one contact to send messages.', 'warning');
@@ -1946,15 +1947,25 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             }
             return;
         }
+
+        if (!this.templateMap || this.templateMap.size === 0) {
+            await this.loadAllTemplates();
+        } else {
+            this.updateTemplateOptions();
+        }
+
+        if (!this.templateOptions || this.templateOptions.length === 0) {
+            this.showToast('Warning', 'There is no active WhatsApp template to send to contacts.', 'warning');
+            return;
+        }
+
         this.showTemplate = true;
         this.popUpLastPage = false;
         this.popUpConfirmPage = false;
         this.popupHeader = 'Choose Template';
         this.broadcastGroupName = '';
         this.messageText = '';
-        this.selectedTemplate = '';
         this.selectedDateTime = '';
-        this.updateTemplateOptions();
     }
 
     // Handle closing the template modal

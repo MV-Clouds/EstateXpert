@@ -1,7 +1,7 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import designcss from '@salesforce/resourceUrl/listingManagerCss';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+// import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
 import { NavigationMixin } from 'lightning/navigation';
@@ -10,12 +10,10 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import summerNote_Editor from '@salesforce/resourceUrl/summerNoteEditor';
 import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuickTemplates';
 import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmpController.processBroadcastMessageWithObject';
-// import objectAndTempData from '@salesforce/apex/CreateTemplateController.objectAndTempData';
-// import sendTemplateMessage from '@salesforce/apex/BroadcastMessageController.sendTemplateMessage';
-// import scheduleTemplateMessage from '@salesforce/apex/BroadcastMessageController.scheduleTemplateMessage';
 import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController.getMessagingServiceOptions';
 import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
 import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
+import getUserConfig from '@salesforce/apex/ObjectConfigController.getUserConfig';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
@@ -24,6 +22,7 @@ import FORM_FACTOR from '@salesforce/client/formFactor';
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
     @api recordId;
+    @track configuredPhoneField = 'Phone';
     @track data;
     @track addModal = false;
     @track spinnerShow = true;
@@ -34,6 +33,16 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track unchangedProcessContact = [];
     @track filteredSelectedContacts = [];
     @track pendingFilterEvent = null; // Store filter event if received before data loads
+    @track lastFilterEvent = null; // Store last applied filter event to persist across data reloads
+    @track appliedFilters = [
+        {
+            id: 'MVEX__Contact_Type__c',
+            label: 'Contact Type',
+            value: 'Buyer',
+            displayText: 'Contact Type: Buyer'
+        }
+    ];
+    @track showAllFilters = false;
     allSelectedContacts = [];
     @track sortField = 'Name';
     @track sortOrder = 'asc';
@@ -278,6 +287,42 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return this.shownProcessedContactData.length === 0;
     }
 
+    get hasAppliedFilters() {
+        return Array.isArray(this.appliedFilters) && this.appliedFilters.length > 0;
+    }
+
+    get displayedAppliedFilters() {
+        if (!this.appliedFilters || !Array.isArray(this.appliedFilters)) {
+            return [];
+        }
+        if (this.showAllFilters || this.appliedFilters.length <= 3) {
+            return this.appliedFilters;
+        }
+        return this.appliedFilters.slice(0, 3);
+    }
+
+    get hasMoreFilters() {
+        return Array.isArray(this.appliedFilters) && this.appliedFilters.length > 3 && !this.showAllFilters;
+    }
+
+    get remainingFilterCount() {
+        if (!Array.isArray(this.appliedFilters) || this.appliedFilters.length <= 3) {
+            return 0;
+        }
+        return this.appliedFilters.length - 3;
+    }
+
+    get canCollapseFilters() {
+        return this.showAllFilters && Array.isArray(this.appliedFilters) && this.appliedFilters.length > 3;
+    }
+
+    toggleShowAllFilters(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.showAllFilters = !this.showAllFilters;
+    }
+
     get listingSpinnerLoading() {
         return !this.spinnerShow && this.listingLoading;
     }
@@ -341,6 +386,64 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return null;
     }
 
+    get selectedContactsWithoutEmail() {
+        if (!this.selectedContactList || this.selectedContactList.length === 0) {
+            return [];
+        }
+        return this.selectedContactList.filter(contact => !this.getContactEmail(contact));
+    }
+
+    get selectedContactsWithoutPhone() {
+        if (!this.selectedContactList || this.selectedContactList.length === 0) {
+            return [];
+        }
+        return this.selectedContactList.filter(contact => !this.getContactPhone(contact));
+    }
+
+    get isSendEmailDisabled() {
+        if (!this.selectedContactList || this.selectedContactList.length === 0) {
+            return false;
+        }
+        return this.selectedContactsWithoutEmail.length > 0;
+    }
+
+    get isSendMessageDisabled() {
+        if (!this.selectedContactList || this.selectedContactList.length === 0) {
+            return true;
+        }
+        return this.selectedContactsWithoutPhone.length > 0;
+    }
+
+    get sendEmailButtonTitle() {
+        if (!this.selectedContactList || this.selectedContactList.length === 0) {
+            return 'Send Emails';
+        }
+        const noEmail = this.selectedContactsWithoutEmail;
+        if (noEmail.length === 1) {
+            return `Contact "${noEmail[0].Name || 'Selected contact'}" has no email address. Unselect this contact to enable Send Emails.`;
+        } else if (noEmail.length > 1) {
+            const names = noEmail.slice(0, 3).map(c => c.Name || 'Contact').join(', ');
+            const suffix = noEmail.length > 3 ? '...' : '';
+            return `${noEmail.length} selected contacts (${names}${suffix}) have no email address. Unselect them to enable Send Emails.`;
+        }
+        return 'Send Emails';
+    }
+
+    get sendMessageButtonTitle() {
+        if (!this.selectedContactList || this.selectedContactList.length === 0) {
+            return 'Select at least one contact to send messages';
+        }
+        const noPhone = this.selectedContactsWithoutPhone;
+        if (noPhone.length === 1) {
+            return `Contact "${noPhone[0].Name || 'Selected contact'}" has no phone number. Unselect this contact to enable Send Message.`;
+        } else if (noPhone.length > 1) {
+            const names = noPhone.slice(0, 3).map(c => c.Name || 'Contact').join(', ');
+            const suffix = noPhone.length > 3 ? '...' : '';
+            return `${noPhone.length} selected contacts (${names}${suffix}) have no phone number. Unselect them to enable Send Message.`;
+        }
+        return 'Send Message';
+    }
+
     /**
      * Method Name : connectedCallback
      * @description : retrieve fields name from the field-set and retrieve Contact records.
@@ -358,6 +461,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 console.error('Error loading styles', error);
             });
         this.checkBusinessAccountConfig();
+        this.loadPhoneFieldConfiguration();
         this.getAccessible();
     }
 
@@ -379,6 +483,80 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             console.error('Error checking business account configuration:', error);
             this.hasBusinessAccountConfigured = false;
         }
+    }
+
+    /**
+    * Method Name : loadPhoneFieldConfiguration
+    * @description : Loads user-configured phone field from metadata for messaging
+    */
+    loadPhoneFieldConfiguration() {
+        getUserConfig()
+            .then(data => {
+                if (!data) return;
+                let phoneField = '';
+                if (data.ChatWindowConfigInfo && data.ChatWindowConfigInfo !== '{}') {
+                    try {
+                        const chatConfig = JSON.parse(data.ChatWindowConfigInfo);
+                        if (chatConfig) {
+                            const objKey = this.objectName || this.selectedObject || 'Contact';
+                            if (chatConfig[objKey] && chatConfig[objKey].phoneField) {
+                                phoneField = chatConfig[objKey].phoneField;
+                            } else if (chatConfig.Contact && chatConfig.Contact.phoneField) {
+                                phoneField = chatConfig.Contact.phoneField;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error parsing ChatWindowConfigInfo in marketingListCmp:', e);
+                    }
+                }
+
+                if (!phoneField && data.ObjectConfigInfo && data.ObjectConfigInfo !== '{}') {
+                    try {
+                        const objConfig = JSON.parse(data.ObjectConfigInfo);
+                        if (objConfig && objConfig.phoneField) {
+                            phoneField = objConfig.phoneField;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing ObjectConfigInfo in marketingListCmp:', e);
+                    }
+                }
+
+                if (phoneField) {
+                    this.configuredPhoneField = phoneField;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading phone field configuration:', error);
+            });
+    }
+
+    getContactEmail(contact) {
+        if (!contact) return '';
+        if (contact.Email !== undefined && contact.Email !== null && String(contact.Email).trim() !== '') {
+            return String(contact.Email).trim();
+        }
+        const matchingKey = Object.keys(contact).find(k => k.toLowerCase() === 'email');
+        if (matchingKey && contact[matchingKey] !== undefined && contact[matchingKey] !== null && String(contact[matchingKey]).trim() !== '') {
+            return String(contact[matchingKey]).trim();
+        }
+        return '';
+    }
+
+    getContactPhone(contact) {
+        if (!contact) return '';
+        const targetField = this.configuredPhoneField || 'Phone';
+        if (contact[targetField] !== undefined && contact[targetField] !== null && String(contact[targetField]).trim() !== '') {
+            return String(contact[targetField]).trim();
+        }
+        const lowerTarget = targetField.toLowerCase();
+        const matchingKey = Object.keys(contact).find(k => k.toLowerCase() === lowerTarget);
+        if (matchingKey && contact[matchingKey] !== undefined && contact[matchingKey] !== null && String(contact[matchingKey]).trim() !== '') {
+            return String(contact[matchingKey]).trim();
+        }
+        if (lowerTarget !== 'phone' && contact.Phone !== undefined && contact.Phone !== null && String(contact.Phone).trim() !== '') {
+            return String(contact.Phone).trim();
+        }
+        return '';
     }
 
     getAccessible() {
@@ -639,8 +817,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.updateShownData();
             this.spinnerShow = false;
 
-            // Apply pending filter if it was received before data loaded
-            if (this.pendingFilterEvent) {
+            // Apply existing filter if one was already active, or pending filter if received before load
+            if (this.lastFilterEvent) {
+                this.handleFilteredContacts(this.lastFilterEvent);
+            } else if (this.pendingFilterEvent) {
                 const filterEvent = this.pendingFilterEvent;
                 this.pendingFilterEvent = null; // Clear the pending event
                 this.handleFilteredContacts(filterEvent);
@@ -782,6 +962,14 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     handleFilteredContacts(event) {
         try {
+            this.showAllFilters = false;
+            if (event.detail && Array.isArray(event.detail.appliedFilters)) {
+                this.appliedFilters = event.detail.appliedFilters;
+            }
+
+            // Save last filter event to reapply whenever table data reloads
+            this.lastFilterEvent = event;
+
             // If contact data hasn't loaded yet, store the filter event for later
             if (!this.unchangedProcessContact || this.unchangedProcessContact.length === 0) {
                 this.pendingFilterEvent = event;
@@ -821,6 +1009,21 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     handleReset(event) {
         try {
             if (event.detail.filtercontacts == true) {
+                this.showAllFilters = false;
+                if (event.detail && Array.isArray(event.detail.appliedFilters)) {
+                    this.appliedFilters = event.detail.appliedFilters;
+                    this.lastFilterEvent = event;
+                } else {
+                    this.appliedFilters = [
+                        {
+                            id: 'MVEX__Contact_Type__c',
+                            label: 'Contact Type',
+                            value: 'Buyer',
+                            displayText: 'Contact Type: Buyer'
+                        }
+                    ];
+                    this.lastFilterEvent = null;
+                }
                 this.sortField = 'Name';
                 this.sortOrder = 'asc';
 
@@ -912,7 +1115,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     checkBoxValueChange(event) {
         try {
             const checkboxId = Number(event.target.dataset.id);
-            this.shownProcessedContactData[checkboxId].isChecked = event.target.checked;
+            const isChecked = event.target.checked;
+            this.shownProcessedContactData[checkboxId].isChecked = isChecked;
             this.processedContactData.forEach(item1 => {
                 this.shownProcessedContactData.forEach(item2 => {
                     if (item1.Id == item2.Id) {
@@ -933,6 +1137,33 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 })
             })
             this.updateSelectedProperties();
+
+            if (isChecked) {
+                const changedContact = this.shownProcessedContactData[checkboxId];
+                const contactName = changedContact?.Name || 'Selected contact';
+                const hasEmail = Boolean(this.getContactEmail(changedContact));
+                const hasPhone = Boolean(this.getContactPhone(changedContact));
+
+                if (!hasEmail && !hasPhone) {
+                    this.showToast(
+                        'Missing Email and Phone',
+                        `You have selected "${contactName}" who has neither an email address nor a valid phone number, disabling both "Send Emails" and "Send Message" buttons. Please unselect this contact to enable them.`,
+                        'warning'
+                    );
+                } else if (!hasEmail) {
+                    this.showToast(
+                        'Missing Email Address',
+                        `You have selected "${contactName}" who has no email address, disabling the "Send Emails" button. Please unselect this contact to enable the Send Emails button.`,
+                        'warning'
+                    );
+                } else if (!hasPhone) {
+                    this.showToast(
+                        'Missing Phone Number',
+                        `You have selected "${contactName}" who has no valid phone number, disabling the "Send Message" button. Please unselect this contact to enable the Send Message button.`,
+                        'warning'
+                    );
+                }
+            }
         } catch (e) {
             console.log('Error checkCoxValueChange ->' + e);
         }
@@ -971,6 +1202,40 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             });
             this.updateShownData();
             this.updateSelectedProperties();
+
+            if (isChecked) {
+                const noEmailContacts = this.processedContactData.filter(c => !this.getContactEmail(c));
+                const noPhoneContacts = this.processedContactData.filter(c => !this.getContactPhone(c));
+
+                const hasEmailIssues = noEmailContacts.length > 0;
+                const hasPhoneIssues = noPhoneContacts.length > 0;
+
+                if (hasEmailIssues && hasPhoneIssues) {
+                    this.showToast(
+                        'Missing Contact Information',
+                        `Some selected contacts are missing required details (${noEmailContacts.length} missing email, ${noPhoneContacts.length} missing phone number), disabling "Send Emails" and "Send Message" buttons. Please unselect contacts without email or phone to enable them.`,
+                        'warning'
+                    );
+                } else if (hasEmailIssues) {
+                    const namesStr = noEmailContacts.length === 1
+                        ? `"${noEmailContacts[0].Name || 'Selected contact'}"`
+                        : `${noEmailContacts.length} contacts (${noEmailContacts.slice(0, 3).map(c => c.Name || 'Contact').join(', ')}${noEmailContacts.length > 3 ? '...' : ''})`;
+                    this.showToast(
+                        'Missing Email Address',
+                        `You have selected ${namesStr} with no email address, disabling the "Send Emails" button. Please unselect these contacts to enable the Send Emails button.`,
+                        'warning'
+                    );
+                } else if (hasPhoneIssues) {
+                    const namesStr = noPhoneContacts.length === 1
+                        ? `"${noPhoneContacts[0].Name || 'Selected contact'}"`
+                        : `${noPhoneContacts.length} contacts (${noPhoneContacts.slice(0, 3).map(c => c.Name || 'Contact').join(', ')}${noPhoneContacts.length > 3 ? '...' : ''})`;
+                    this.showToast(
+                        'Missing Phone Number',
+                        `You have selected ${namesStr} with no phone number, disabling the "Send Message" button. Please unselect these contacts to enable the Send Message button.`,
+                        'warning'
+                    );
+                }
+            }
         } catch (error) {
             console.log('Error selectAllCheckbox->' + error);
         }
@@ -1199,6 +1464,11 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     handleAdd() {
+        if (this.isSendEmailDisabled) {
+            const names = this.selectedContactsWithoutEmail.map(c => c.Name || 'Contact').join(', ');
+            this.showToast('Warning', `Cannot send emails: The following selected contact(s) do not have an email address: ${names}. Please unselect them to proceed.`, 'warning');
+            return;
+        }
         this.isModalOpen = true;
     }
 
@@ -1464,6 +1734,24 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
+    openFilterPanel() {
+        try {
+            if (this.wrapOn) {
+                this.wrapFilter();
+            } else {
+                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                if (filterDiv) {
+                    filterDiv.classList.add('highlight-filter-panel');
+                    setTimeout(() => {
+                        filterDiv.classList.remove('highlight-filter-panel');
+                    }, 1200);
+                }
+            }
+        } catch (error) {
+            console.error('Error in openFilterPanel:', error);
+        }
+    }
+
     backToControlCenter(event) {
         try {
             event.preventDefault();
@@ -1484,6 +1772,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     handleCloseModal() {
         this.isConfigOpen = false;
         this.getContactDataMethod();
+        const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
+        if (filterCmp && typeof filterCmp.reapplyFilters === 'function') {
+            filterCmp.reapplyFilters();
+        }
     }
 
     /**
@@ -1617,6 +1909,15 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     // Handle send message button click
     handleSendMessage() {
+        if (this.isSendMessageDisabled) {
+            if (!this.selectedContactList || this.selectedContactList.length === 0) {
+                this.showToast('Warning', 'Please select at least one contact to send messages.', 'warning');
+            } else {
+                const names = this.selectedContactsWithoutPhone.map(c => c.Name || 'Contact').join(', ');
+                this.showToast('Warning', `Cannot send messages: The following selected contact(s) do not have a valid phone number: ${names}. Please unselect them to proceed.`, 'warning');
+            }
+            return;
+        }
         this.showTemplate = true;
         this.popUpLastPage = false;
         this.popUpConfirmPage = false;
@@ -1650,8 +1951,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         const autoGroupName = 'Marketing List - ' + timestamp;
         const autoDesc = 'Broadcast initiated from Marketing List at ' + timestamp;
 
+        const phoneField = this.configuredPhoneField || 'Phone';
         const phoneNumbers = this.selectedContactList
-            .map(contact => contact.Phone)
+            .map(contact => this.getContactPhone(contact))
             .filter(phone => phone);
 
         const messageData = {
@@ -1662,7 +1964,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             name: autoGroupName,
             isUpdate: false,
             broadcastGroupId: null,
-            phoneField: 'Phone',
+            phoneField: phoneField,
             communicationType: 'WhatsApp'
         };
 
@@ -1688,8 +1990,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             return;
         }
 
+        const phoneField = this.configuredPhoneField || 'Phone';
         const phoneNumbers = this.selectedContactList
-            .map(contact => contact.Phone)
+            .map(contact => this.getContactPhone(contact))
             .filter(phone => phone);
 
         const messageData = {
@@ -1700,7 +2003,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             name: this.broadcastGroupName,
             isUpdate: false,
             broadcastGroupId: null,
-            phoneField: 'Phone'
+            phoneField: phoneField
         };
 
         this.spinnerShow = true;

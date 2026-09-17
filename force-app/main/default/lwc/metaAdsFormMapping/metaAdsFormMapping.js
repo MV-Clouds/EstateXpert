@@ -5,24 +5,10 @@ import getSalesforceLeadFields from '@salesforce/apex/MetaAdsFormMappingControll
 import getExistingMappings from '@salesforce/apex/MetaAdsFormMappingController.getExistingMappings';
 import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveMapping';
 
-const ACTIONS = [
-    { label: 'Edit', name: 'edit' },
-    { label: 'Delete', name: 'delete' }
-];
-
-const COLUMNS = [
-    { label: 'Form Name', fieldName: 'formName', type: 'text' },
-    { label: 'Form ID', fieldName: 'formId', type: 'text' },
-    { label: 'Page ID', fieldName: 'pageId', type: 'text' },
-    { label: 'Mapped Fields', fieldName: 'mappedCount', type: 'number' },
-    {
-        type: 'action',
-        typeAttributes: { rowActions: ACTIONS },
-    },
-];
+import { loadStyle } from 'lightning/platformResourceLoader';
+import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
 export default class MetaAdsFormMapping extends LightningElement {
-    columns = COLUMNS;
     
     @track isLoading = true;
     @track tableData = [];
@@ -36,6 +22,8 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track selectedFormId = '';
     @track currentFormFields = []; // [{key, label, value}]
     
+    @track currentStep = '1';
+    
     // Overall JSON state
     // Format: { clientAppId: { pageId: { formId: { metaKey: sfField } } } }
     fullMappingJson = {};
@@ -45,6 +33,9 @@ export default class MetaAdsFormMapping extends LightningElement {
     currentPageId = '';
 
     connectedCallback() {
+        loadStyle(this, MulishFontCss).catch(error => {
+            console.error('Error loading MulishFontCss', error);
+        });
         this.loadInitialData();
     }
 
@@ -86,6 +77,7 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     buildTableData() {
         let data = [];
+        let idx = 1;
         // traverse fullMappingJson
         for (let appId in this.fullMappingJson) {
             let pages = this.fullMappingJson[appId];
@@ -101,6 +93,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                     }
                     
                     data.push({
+                        index: idx++,
                         id: fId + '_' + pId,
                         formId: fId,
                         pageId: pId,
@@ -119,6 +112,32 @@ export default class MetaAdsFormMapping extends LightningElement {
         return this.tableData.length > 0;
     }
 
+    get isStep1() {
+        return this.currentStep === '1';
+    }
+
+    get isStep2() {
+        return this.currentStep === '2';
+    }
+
+    get isNextDisabled() {
+        return !this.selectedFormId;
+    }
+
+    get formOptions() {
+        return this.availableForms.map(f => {
+            return {
+                label: `${f.name} (${f.id})`,
+                value: String(f.id)
+            };
+        }).filter(opt => {
+            // allow if it's the currently selected form (we are editing)
+            if (opt.value === this.selectedFormId) return true;
+            // filter out if it already exists in tableData
+            return !this.tableData.some(row => String(row.formId) === opt.value);
+        });
+    }
+
     get isSaveDisabled() {
         return !this.selectedFormId;
     }
@@ -133,15 +152,27 @@ export default class MetaAdsFormMapping extends LightningElement {
         
         this.selectedFormId = '';
         this.currentFormFields = [];
+        this.currentStep = '1';
         this.isModalOpen = true;
     }
 
     closeModal() {
         this.isModalOpen = false;
+        this.currentStep = '1';
+    }
+
+    goNext() {
+        if (this.selectedFormId) {
+            this.currentStep = '2';
+        }
+    }
+
+    goBack() {
+        this.currentStep = '1';
     }
 
     handleFormSelection(event) {
-        this.selectedFormId = event.target.value;
+        this.selectedFormId = event.detail.value;
         if (!this.selectedFormId) {
             this.currentFormFields = [];
             return;
@@ -168,16 +199,6 @@ export default class MetaAdsFormMapping extends LightningElement {
                 };
             });
             
-            // Wait for DOM update then set selects
-            setTimeout(() => {
-                this.currentFormFields.forEach(f => {
-                    let sel = this.template.querySelector(`select[data-key="${f.key}"]`);
-                    if (sel) {
-                        sel.value = f.value;
-                    }
-                });
-            }, 0);
-            
         } else {
             this.currentFormFields = [];
         }
@@ -185,7 +206,7 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     handleMappingChange(event) {
         const metaKey = event.target.dataset.key;
-        const sfField = event.target.value;
+        const sfField = event.detail.value;
         
         let field = this.currentFormFields.find(f => f.key === metaKey);
         if (field) {
@@ -229,13 +250,18 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     // --- Table Actions ---
 
-    handleRowAction(event) {
-        const actionName = event.detail.action.name;
-        const row = event.detail.row;
-
-        if (actionName === 'edit') {
+    handleEditRow(event) {
+        const rowId = event.currentTarget.dataset.id;
+        const row = this.tableData.find(r => r.id === rowId);
+        if (row) {
             this.editRow(row);
-        } else if (actionName === 'delete') {
+        }
+    }
+
+    handleDeleteRow(event) {
+        const rowId = event.currentTarget.dataset.id;
+        const row = this.tableData.find(r => r.id === rowId);
+        if (row) {
             this.deleteRow(row);
         }
     }
@@ -247,17 +273,10 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.currentPageId = row.pageId;
         
         this.selectedFormId = row.formId;
+        this.currentStep = '1';
         this.isModalOpen = true;
         
-        // Wait for select element to render
-        setTimeout(() => {
-            let formSelect = this.template.querySelector('select:not([data-key])');
-            if (formSelect) {
-                formSelect.value = this.selectedFormId;
-                // mock event
-                this.handleFormSelection({target: {value: this.selectedFormId}});
-            }
-        }, 0);
+        this.handleFormSelection({detail: {value: this.selectedFormId}});
     }
 
     async deleteRow(row) {

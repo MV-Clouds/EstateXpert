@@ -1,101 +1,219 @@
 <template>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="title">Meta Ads Form Mappings</div>
-            <button class="btn-new" onclick={openNewMappingModal}>New Mapping</button>
+    <div class="wrapper">
+        <div class="main_header_cls">
+            <div class="sub_main_header_css">
+                <div class="header_block_css">
+                    <div class="broadcast-title">Meta Ads Form Mappings</div>
+                </div>
+                <div class="header-right-info">
+                    <button class="blue-btn-css" onclick={openNewMappingModal}>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        New Mapping
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Mappings Table -->
-        <div class="table-container">
-            <template if:true={isLoading}>
-                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        <div class="main_content_cls">
+            <!-- Custom Table -->
+            <template if:true={hasMappings}>
+                <div class="table-content">
+                    <table class="slds-table">
+                        <thead>
+                            <tr class="table_tr_cls">
+                                <th scope="col" class="sno">
+                                    <div>No.</div>
+                                </th>
+                                <th class="groupname" scope="col">
+                                    <div class="slds-truncate" title="Form Name">Form Name</div>
+                                </th>
+                                <th class="groupname" scope="col">
+                                    <div class="slds-truncate" title="Form ID">Form ID</div>
+                                </th>
+                                <th class="groupname" scope="col">
+                                    <div class="slds-truncate" title="Page ID">Page ID</div>
+                                </th>
+                                <th class="groupname" scope="col">
+                                    <div class="slds-truncate" title="Mapped Fields">Mapped Fields</div>
+                                </th>
+                                <th class="expand-col" scope="col">
+                                    <div class="slds-truncate" title="Actions">Actions</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={tableData} for:item="row" for:index="index">
+                                <tr key={row.id} class="parent-row">
+                                    <td data-label="No.">
+                                        <div>{row.index}</div>
+                                    </td>
+                                    <td data-label="Form Name" class="truncate_css">
+                                        <div>{row.formName}</div>
+                                    </td>
+                                    <td data-label="Form ID">
+                                        <div>{row.formId}</div>
+                                    </td>
+                                    <td data-label="Page ID">
+                                        <div>{row.pageId}</div>
+                                    </td>
+                                    <td data-label="Mapped Fields">
+                                        <div>{row.mappedCount}</div>
+                                    </td>
+                                    <td data-label="Actions" class="expand-cell">
+                                        <div style="display: flex; gap: 8px; justify-content: center;">
+                                            <div class="action-icon-container" data-id={row.id} onclick={handleEditRow} title="Edit Mapping">
+                                                <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="action-icon-container" data-id={row.id} onclick={handleDeleteRow} title="Delete Mapping">
+                                                <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
             </template>
-            <template if:false={isLoading}>
-                <template if:true={hasMappings}>
-                    <lightning-datatable
-                        key-field="id"
-                        data={tableData}
-                        columns={columns}
-                        hide-checkbox-column
-                        onrowaction={handleRowAction}>
-                    </lightning-datatable>
-                </template>
-                <template if:false={hasMappings}>
-                    <div class="slds-text-align_center slds-p-around_medium" style="color: #6b7280;">
-                        No form mappings found. Click "New Mapping" to get started.
+
+            <!-- No Records Message -->
+            <template if:false={hasMappings}>
+                <div class="no-records-message">
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-state__message">No Data Available to Show.</div>
+                        </div>
                     </div>
-                </template>
+                </div>
             </template>
         </div>
 
         <!-- Mapping Wizard Modal -->
         <template if:true={isModalOpen}>
-            <div class="modal-overlay">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Form Mapping Wizard</h2>
-                        <button class="btn-close" onclick={closeModal}>&times;</button>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close close-icon-css" onclick={closeModal}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
+                        </svg>
                     </div>
-                    
-                    <div class="modal-body">
-                        <template if:true={isModalLoading}>
-                            <lightning-spinner alternative-text="Loading forms" size="small"></lightning-spinner>
-                        </template>
 
-                        <!-- Step 1: Select Form -->
-                        <div class="form-group">
-                            <label class="form-label">Select Meta Lead Form</label>
-                            <select onchange={handleFormSelection} disabled={isModalLoading}>
-                                <option value="">-- Choose a Form --</option>
-                                <template for:each={availableForms} for:item="form">
-                                    <option key={form.id} value={form.id}>{form.name} ({form.id})</option>
-                                </template>
-                            </select>
-                        </div>
+                    <div class="slds-modal__header blue-header">
+                        <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Form Mapping Wizard</h1>
+                    </div>
 
-                        <!-- Step 2: Map Fields -->
-                        <template if:true={selectedFormId}>
-                            <div style="margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #111827;">
-                                Field Mappings
+                    <div class="slds-modal__content modalbody" id="modal-content-id-1">
+                        <div class="content_body">
+                            <template if:true={isModalLoading}>
+                                <lightning-spinner alternative-text="Loading forms" size="small"></lightning-spinner>
+                            </template>
+
+                            <div class="slds-m-bottom_large slds-p-horizontal_small" style="margin-top: 1rem;">
+                                <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
+                                    <lightning-progress-step label="Select Form" value="1"></lightning-progress-step>
+                                    <lightning-progress-step label="Map Fields" value="2"></lightning-progress-step>
+                                </lightning-progress-indicator>
                             </div>
-                            
-                            <template for:each={currentFormFields} for:item="field">
-                                <div key={field.key} class="mapping-row">
-                                    <div class="mapping-col">
-                                        <div class="form-label">Meta Form Field</div>
-                                        <div style="padding: 8px 12px; background: #e5e7eb; border-radius: 6px; font-size: 14px; font-weight: 500;">
-                                            {field.label}
-                                        </div>
-                                    </div>
-                                    <div class="mapping-icon">➜</div>
-                                    <div class="mapping-col">
-                                        <div class="form-label">Salesforce Lead Field</div>
-                                        <select data-key={field.key} onchange={handleMappingChange}>
-                                            <option value="">-- Do Not Map --</option>
-                                            <template for:each={salesforceLeadFields} for:item="sfField">
-                                                <!-- We rely on JS to set the selected value dynamically -->
-                                                <option key={sfField.value} value={sfField.value}>
-                                                    {sfField.label}
-                                                </option>
-                                            </template>
-                                        </select>
-                                    </div>
+
+                            <!-- Step 1: Select Form -->
+                            <template if:true={isStep1}>
+                                <div class="form-group slds-p-around_small">
+                                    <lightning-combobox
+                                        name="formSelect"
+                                        label="Select Meta Lead Form"
+                                        value={selectedFormId}
+                                        placeholder="-- Choose a Form --"
+                                        options={formOptions}
+                                        onchange={handleFormSelection}
+                                        disabled={isModalLoading}
+                                        class="custom-combobox">
+                                    </lightning-combobox>
+                                    <template if:false={formOptions.length}>
+                                        <div class="slds-m-top_small slds-text-color_error">No available forms to map. All forms may already be mapped.</div>
+                                    </template>
                                 </div>
                             </template>
-                            
-                            <template if:false={currentFormFields.length}>
-                                <div style="color: #6b7280; font-size: 14px;">No fields found in this form.</div>
-                            </template>
-                        </template>
-                    </div>
 
-                    <div class="modal-footer">
-                        <button class="btn-cancel" onclick={closeModal}>Cancel</button>
-                        <button class="btn-save" onclick={saveMapping} disabled={isSaveDisabled}>Save Mapping</button>
+                            <!-- Step 2: Map Fields -->
+                            <template if:true={isStep2}>
+                                <div style="margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #111827;">
+                                    Field Mappings
+                                </div>
+                                
+                                <template for:each={currentFormFields} for:item="field">
+                                    <div key={field.key} class="mapping-row">
+                                        <div class="mapping-col">
+                                            <div class="filter_label_css" style="margin-bottom: 4px;">Meta Form Field</div>
+                                            <div style="padding: 8px 12px; background: #e5e7eb; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                                                {field.label}
+                                            </div>
+                                        </div>
+                                        <div class="mapping-icon">➜</div>
+                                        <div class="mapping-col">
+                                            <div class="filter_label_css" style="margin-bottom: 4px;">Salesforce Lead Field</div>
+                                            <lightning-combobox
+                                                data-key={field.key}
+                                                value={field.value}
+                                                options={salesforceLeadFields}
+                                                onchange={handleMappingChange}
+                                                placeholder="-- Do Not Map --"
+                                                variant="label-hidden"
+                                                class="custom-combobox">
+                                            </lightning-combobox>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <template if:false={currentFormFields.length}>
+                                    <div style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 12px;">No fields found in this form.</div>
+                                </template>
+                            </template>
+                        </div>
+                        
+                        <div class="footerbtns">
+                            <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeModal}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                </svg>
+                                Cancel
+                            </button>
+                            
+                            <template if:true={isStep1}>
+                                <button class="save_btn_css" disabled={isNextDisabled} onclick={goNext}>
+                                    Next
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 4px;">
+                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </template>
+                            
+                            <template if:true={isStep2}>
+                                <button class="cancel_btn_css" onclick={goBack}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 4px;">
+                                        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Back
+                                </button>
+                                <button class="save_btn_css" disabled={isSaveDisabled} onclick={saveMapping}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                    </svg>
+                                    Save Mapping
+                                </button>
+                            </template>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
         </template>
     </div>
 </template>

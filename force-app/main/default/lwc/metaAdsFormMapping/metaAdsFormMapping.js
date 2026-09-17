@@ -230,16 +230,43 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.currentFormFields = form.questions.map(q => {
                 let key = q.key;
                 let currentValue = existingMappings[key] || '';
+                let metaType = q.type || '';
+                
                 return {
                     key: key,
                     label: q.label || key,
-                    value: currentValue
+                    metaType: metaType,
+                    value: currentValue,
+                    options: this.getFilteredFieldOptions(metaType)
                 };
             });
             
         } else {
             this.currentFormFields = [];
         }
+    }
+
+    getFilteredFieldOptions(metaType) {
+        if (!metaType) return this.salesforceLeadFields;
+
+        metaType = metaType.toUpperCase();
+        // Default allowed Salesforce field types for strings/text
+        let allowedSfTypes = ['STRING', 'TEXTAREA', 'PICKLIST', 'MULTIPICKLIST']; 
+
+        if (metaType === 'EMAIL' || metaType === 'WORK_EMAIL') {
+            allowedSfTypes = ['EMAIL', 'STRING'];
+        } else if (metaType === 'PHONE' || metaType === 'WORK_PHONE_NUMBER') {
+            allowedSfTypes = ['PHONE', 'STRING'];
+        } else if (metaType === 'DOB' || metaType === 'DATE_OF_BIRTH') {
+            allowedSfTypes = ['DATE', 'DATETIME', 'STRING'];
+        } else if (metaType === 'GENDER' || metaType === 'MARITAL_STATUS' || metaType === 'RELATIONSHIP_STATUS' || metaType === 'MILITARY_STATUS') {
+            allowedSfTypes = ['PICKLIST', 'STRING'];
+        }
+
+        return this.salesforceLeadFields.filter(f => {
+            let sfType = f.type ? f.type.toUpperCase() : 'STRING';
+            return allowedSfTypes.includes(sfType);
+        });
     }
 
     handleMappingChange(event) {

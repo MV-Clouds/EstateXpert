@@ -140,6 +140,7 @@ public with sharing class MetaAdsFormMappingController {
                 Map<String, String> f = new Map<String, String>();
                 f.put('label', dfr.getLabel() + ' (' + dfr.getName() + ')');
                 f.put('value', dfr.getName());
+                f.put('type', String.valueOf(dfr.getType()));
                 fields.add(f);
             }
         }

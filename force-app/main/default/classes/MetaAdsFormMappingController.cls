@@ -200,7 +200,9 @@ public with sharing class MetaAdsFormMappingController {
                             HttpResponse subRes = http.send(subReq);
                             
                             if (subRes.getStatusCode() != 200) {
-                                System.debug('Failed to subscribe webhook: ' + subRes.getBody());
+                                resultMap.put('success', false);
+                                resultMap.put('message', 'Failed to subscribe webhook: ' + subRes.getBody());
+                                return resultMap;
                             }
                         }
                     }

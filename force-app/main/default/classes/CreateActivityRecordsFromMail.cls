@@ -49,7 +49,7 @@ public with sharing class CreateActivityRecordsFromMail {
         caseEmailMessage.HtmlBody = emailInfo.get('body');
         caseEmailMessage.Incoming = false;
         caseEmailMessage.MessageDate = System.now();
-        caseEmailMessage.Contact_ID__c = contactId;
+        caseEmailMessage.MVEX__Contact_ID__c = contactId;
         caseEmailMessage.Status = '3';
         return caseEmailMessage;
     }
@@ -75,7 +75,7 @@ public with sharing class CreateActivityRecordsFromMail {
     private static EmailMessageRelation buildEmailMessageRelation(EmailMessage caseEmailMessage) {
         EmailMessageRelation emr = new EmailMessageRelation();
         emr.EmailMessageId = caseEmailMessage.Id;
-        emr.RelationId = caseEmailMessage.Contact_ID__c;
+        emr.RelationId = caseEmailMessage.MVEX__Contact_ID__c;
         emr.RelationType = 'FromAddress';
         emr.RelationAddress = caseEmailMessage.FromAddress;
         return emr;

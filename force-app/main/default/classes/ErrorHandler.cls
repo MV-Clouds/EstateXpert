@@ -16,25 +16,25 @@ public with sharing class ErrorHandler{
      @return Error_Handling__c - reocrd of Error_Handling__c object
      @description insert error data into the obeject as record
      */
-    public static Error_Handling__c insertErrorData(Exception e, String classname, String methodname, String ErrorBody){
+    public static MVEX__Error_Handling__c insertErrorData(Exception e, String classname, String methodname, String ErrorBody){
         try{
 
             String class_name = classname;
             String method_name = methodname;
             String Error_Body = ErrorBody;
 
-            Error_Handling__c error = new Error_Handling__c();
+            MVEX__Error_Handling__c error = new MVEX__Error_Handling__c();
 
             if (e != null) {
-                error.Error_Message__c = e.getMessage();
-                error.Error_Type__c = e.getTypeName();
-                error.Line_Number__c = String.valueOf(e.getLineNumber());
-                error.Label__c = e.getTypeName() + ' In ' + class_name + ' Of ' + method_name;
+                error.MVEX__Error_Message__c = e.getMessage();
+                error.MVEX__Error_Type__c = e.getTypeName();
+                error.MVEX__Line_Number__c = String.valueOf(e.getLineNumber());
+                error.MVEX__Label__c = e.getTypeName() + ' In ' + class_name + ' Of ' + method_name;
             }
-            error.Class_Name__c = class_name;
-            error.Method_Name__c = method_name;
-            error.Error_Body__c = Error_Body;
-            error.Source_of_Error__c = 'Apex';
+            error.MVEX__Class_Name__c = class_name;
+            error.MVEX__Method_Name__c = method_name;
+            error.MVEX__Error_Body__c = Error_Body;
+            error.MVEX__Source_of_Error__c = 'Apex';
 
             insert as user error;
             return error;

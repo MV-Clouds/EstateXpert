@@ -20,11 +20,11 @@ public with sharing class ListingManagerFilterController {
         try{
             List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
     
-            ListingManagerFilterConfig__mdt filterConfig = [SELECT BlockedFields__c FROM ListingManagerFilterConfig__mdt WITH USER_MODE LIMIT 1];
+            MVEX__ListingManagerFilterConfig__mdt filterConfig = [SELECT MVEX__BlockedFields__c FROM MVEX__ListingManagerFilterConfig__mdt WITH USER_MODE LIMIT 1];
 
             Set<String> blockedFields = new Set<String>();
-            if (filterConfig != null && filterConfig.BlockedFields__c != null) {
-                blockedFields.addAll(filterConfig.BlockedFields__c.split(';'));
+            if (filterConfig != null && filterConfig.MVEX__BlockedFields__c != null) {
+                blockedFields.addAll(filterConfig.MVEX__BlockedFields__c.split(';'));
             }
 
             Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectApiName).getDescribe();
@@ -133,12 +133,12 @@ public with sharing class ListingManagerFilterController {
      * Method Name : getFilteredListings
      * @description : get the filtered listings.
      * @param filterConditions String of combined filter conditions.
-     * @return List of Listing__c records.
+     * @return List of MVEX__Listing__c records.
      */
     @AuraEnabled
-    public static List<Listing__c> getFilteredListings(String filterConditions) {
+    public static List<MVEX__Listing__c> getFilteredListings(String filterConditions) {
         try {
-            String baseQuery = 'SELECT Id FROM Listing__c';
+            String baseQuery = 'SELECT Id FROM MVEX__Listing__c';
             if (String.isNotBlank(filterConditions) && filterConditions != 'TRUE') {
                 // Avoid double-escaping by ensuring the input is clean
                 baseQuery += ' WHERE ' + filterConditions;
@@ -146,13 +146,13 @@ public with sharing class ListingManagerFilterController {
             baseQuery += ' ORDER BY CreatedDate DESC';
             System.debug('baseQuery: ' + baseQuery);
             
-            List<Listing__c> listings = Database.query(baseQuery, AccessLevel.USER_MODE);
+            List<MVEX__Listing__c> listings = Database.query(baseQuery, AccessLevel.USER_MODE);
             System.debug('Listings retrieved: ' + listings.size());
             return listings;
         } catch (Exception e) {
             System.debug('Error in getFilteredListings: ' + e.getMessage() + ' at line ' + e.getLineNumber());
             ErrorHandler.insertErrorData(e, 'ListingManagerFilterController', 'getFilteredListings', e.getMessage());
-            return new List<Listing__c>();
+            return new List<MVEX__Listing__c>();
         }
     }
 

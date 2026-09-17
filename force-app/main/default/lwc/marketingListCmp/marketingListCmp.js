@@ -1,7 +1,8 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import designcss from '@salesforce/resourceUrl/listingManagerCss';
-// import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
 import { NavigationMixin } from 'lightning/navigation';
@@ -23,6 +24,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @api objectName = 'Contact';
     @api recordId;
     @track configuredPhoneField = 'Phone';
+    refreshSubscription = {};
+    refreshChannelName = '/event/MVEX__RefreshEvent__e';
+    isManualRefreshing = false;
     @track data;
     @track addModal = false;
     @track spinnerShow = true;
@@ -462,6 +466,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             });
         this.checkBusinessAccountConfig();
         this.loadPhoneFieldConfiguration();
+        this.handleSubscribeRefresh();
         this.getAccessible();
     }
 
@@ -527,6 +532,92 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             })
             .catch(error => {
                 console.error('Error loading phone field configuration:', error);
+            });
+    }
+
+    /**
+    * Method Name: handleSubscribeRefresh
+    * @description: Subscribes to MVEX__RefreshEvent__e platform event to detect contact changes
+    */
+    handleSubscribeRefresh() {
+        const messageCallback = (response) => {
+            console.log('RefreshEvent received in marketingListCmp:', response);
+            const payload = response?.data?.payload;
+            const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
+            
+            // Verify feature name before doing any operation
+            if (featureName && (featureName.toLowerCase() === 'marketing_list' || featureName.toLowerCase() === 'marketing_list_fields')) {
+                this.handleRefreshEventReceived();
+            }
+        };
+
+        subscribe(this.refreshChannelName, -1, messageCallback)
+            .then(response => {
+                this.refreshSubscription = response;
+            })
+            .catch(error => {
+                console.warn('Subscription error for ' + this.refreshChannelName + ':', error);
+                if (this.refreshChannelName.includes('MVEX__')) {
+                    this.refreshChannelName = '/event/RefreshEvent__e';
+                    subscribe(this.refreshChannelName, -1, messageCallback)
+                        .then(resp => {
+                            this.refreshSubscription = resp;
+                        })
+                        .catch(err => console.error('Fallback subscription error:', err));
+                }
+            });
+
+        onError(error => {
+            console.warn('empApi error:', error);
+        });
+    }
+
+    /**
+    * Method Name: handleUnsubscribeRefresh
+    * @description: Unsubscribes from refresh platform event channel
+    */
+    handleUnsubscribeRefresh() {
+        if (this.refreshSubscription && this.refreshSubscription.id) {
+            unsubscribe(this.refreshSubscription, response => {
+                console.log('Unsubscribed from refresh event channel:', response);
+            });
+        }
+    }
+
+    /**
+    * Method Name: handleRefreshEventReceived
+    * @description: Displays info toast when contact change platform event is received
+    */
+    handleRefreshEventReceived() {
+        this.showToast(
+            'Contact Updates Available',
+            'A contact has been created, updated, or deleted. Please click the Refresh button to refresh the marketing list with your current filters.',
+            'info'
+        );
+    }
+
+    /**
+    * Method Name: handleRefreshMarketingList
+    * @description: Manually refreshes the contact data while preserving currently applied filters
+    */
+    handleRefreshMarketingList() {
+        this.isManualRefreshing = true;
+        this.spinnerShow = true;
+        this.getContactDataMethod()
+            .then(() => {
+                const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
+                if (filterCmp && typeof filterCmp.reapplyFilters === 'function') {
+                    filterCmp.reapplyFilters();
+                } else {
+                    this.isManualRefreshing = false;
+                    this.spinnerShow = false;
+                    this.showToast('Success', 'Marketing list refreshed successfully.', 'success');
+                }
+            })
+            .catch(error => {
+                this.isManualRefreshing = false;
+                this.spinnerShow = false;
+                this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
             });
     }
 
@@ -619,6 +710,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     disconnectedCallback() {
         window?.globalThis?.removeEventListener('resize', this.handleResize);
+        this.handleUnsubscribeRefresh();
     }
 
     loadAllTemplates() {
@@ -668,7 +760,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
      */
     getContactDataMethod() {
         this.spinnerShow = true;
-        getContactData()
+        return getContactData()
             .then(result => {
                 this.contactData = result.contacts;
                 this.pageSize = result.pageSize;
@@ -684,13 +776,16 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
                 this.contactData.forEach((con) => {
                     con.isChecked = false;
-                })
+                });
                 this.processContacts();
+                return result;
             })
             .catch(error => {
+                this.isManualRefreshing = false;
                 this.spinnerShow = false;
-                this.showToast('Error', error.body.message || 'An unknown error occurred', 'error');
+                this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
                 console.log('error in getContactData -> ' + JSON.stringify(error, null, 2));
+                throw error;
             });
     }
 
@@ -813,17 +908,21 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 };
             });
             this.unchangedProcessContact = this.processedContactData;
-            this.sortData();
-            this.updateShownData();
-            this.spinnerShow = false;
 
             // Apply existing filter if one was already active, or pending filter if received before load
-            if (this.lastFilterEvent) {
+            if (!this.isManualRefreshing && this.lastFilterEvent) {
                 this.handleFilteredContacts(this.lastFilterEvent);
             } else if (this.pendingFilterEvent) {
                 const filterEvent = this.pendingFilterEvent;
                 this.pendingFilterEvent = null; // Clear the pending event
                 this.handleFilteredContacts(filterEvent);
+            } else {
+                this.sortData();
+                this.updateShownData();
+            }
+
+            if (!this.isManualRefreshing) {
+                this.spinnerShow = false;
             }
         } catch (error) {
             console.log('Error processContacts->' + error);
@@ -1001,6 +1100,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
+
+            if (this.isManualRefreshing) {
+                this.isManualRefreshing = false;
+                this.spinnerShow = false;
+                this.showToast('Success', 'Marketing list refreshed successfully.', 'success');
+            }
         } catch (e) {
             console.error('handleFilteredContacts' + e);
         }
@@ -1771,94 +1876,17 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
     handleCloseModal() {
         this.isConfigOpen = false;
-        this.getContactDataMethod();
-        const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
-        if (filterCmp && typeof filterCmp.reapplyFilters === 'function') {
-            filterCmp.reapplyFilters();
-        }
+        this.getContactDataMethod()
+            .then(() => {
+                const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
+                if (filterCmp && typeof filterCmp.reapplyFilters === 'function') {
+                    filterCmp.reapplyFilters();
+                }
+            })
+            .catch(error => {
+                console.error('Error reloading after close modal:', error);
+            });
     }
-
-    /**
-     * Method Name : broadcastCheckboxChange
-     * @description : Handle individual checkbox changes in the broadcast group table
-     * Date: 13/06/2025
-     * Created By: [Your Name]
-     */
-    // broadcastCheckboxChange(event) {
-    //     try {
-    //         const checkboxId = Number(event.target.dataset.id);
-    //         this.selectedContactList[checkboxId].isChecked = event.target.checked;
-    //         this.updateSelectedProperties();
-    //     } catch (error) {
-    //         console.log('Error broadcastCheckboxChange->' + error);
-    //     }
-    // }
-
-    // handleSave(){
-    //     try{
-
-    //         if(this.messageText.trim() === '' || this.broadcastGroupName.trim() === ''){            
-    //             this.showToast('Error', 'Please fill in all required fields', 'error');
-    //             return;
-    //         }
-
-    //         console.log('selectedContactList', JSON.stringify(this.selectedContactList));
-
-    //         const phoneNumbers = Array.from(this.selectedContactList)
-    //         .map(recordId => {
-    //             return recordId ? recordId.Phone : null;
-    //         })
-    //         .filter(Phone => Phone !== null && Phone !== '');
-
-
-    //         const isUpdate = false;
-
-    //         const phoneField = 'Phone';
-    //         // const listViewName = '00BdM00000XfLjwUAF';
-
-    //         const messageData = {
-    //             objectApiName: this.selectedObject,
-    //             listViewName: this.listViewId,
-    //             phoneNumbers: phoneNumbers,
-    //             description: this.messageText,
-    //             name: this.broadcastGroupName,
-    //             isUpdate: isUpdate,
-    //             broadcastGroupId: null,
-    //             phoneField: phoneField
-    //         };
-
-    //         this.spinnerShow = true;
-
-    //         console.log('messageData', JSON.stringify(messageData));
-
-    //         // Call the Apex method
-    //         processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) })
-    //         .then(() => {
-    //             this.showToast('Success', 'Broadcast group created successfully', 'success');
-    //             this.updateShownData();
-    //         })
-    //         .catch(error => {
-    //             this.showToast('Error', error.body?.message || 'Failed to process broadcast', 'error');
-    //         })
-    //         .finally(() => {
-    //             this.spinnerShow = false;
-    //         });;
-    //     }catch(error){
-    //         console.log('Error handleSave-->' + error.stack);
-    //     }
-    // }
-
-    //  handlePageChange(event) {
-    //     try{
-    //         const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
-    //         if (selectedPage !== this.currentPage) {
-    //             this.currentPage = selectedPage;
-    //             this.updateShownData();
-    //         }
-    //     }catch(error){
-    //         this.showToast('Error', 'Error navigating pages', 'error');
-    //     }
-    // } 
 
     updateTemplateOptions() {
         if (!this.selectedObject || this.templateMap.size === 0) {

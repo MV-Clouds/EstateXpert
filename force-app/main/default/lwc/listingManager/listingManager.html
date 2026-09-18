@@ -74,8 +74,59 @@
                             <template if:true={listingSpinnerLoading}>
                                 <c-spinner-component is-absolute="true"></c-spinner-component>
                             </template>
-                            <template if:true={showList}>
-                                <template if:false={showSection}>
+                            <template if:true={showSection}>
+                                <div class="noresult">
+                                    <div class="no-data-container">
+                                        <img src="/resource/MVEX__emptyState" alt="No listings found" draggable="false" class="no-data-image" />
+                                        <div class="no-data-message">No Listings Found</div>
+
+                                        <template if:true={hasAppliedFilters}>
+                                            <p class="no-data-hint">
+                                                No listings match the applied filters. Try adjusting your criteria:
+                                            </p>
+                                            <div class="applied-filter-badges">
+                                                <template for:each={displayedAppliedFilters} for:item="filter">
+                                                    <span key={filter.id} class="applied-filter-pill" title={filter.displayText}>
+                                                        <strong class="pill-label">{filter.label}:</strong>
+                                                        <span class="pill-value">{filter.value}</span>
+                                                    </span>
+                                                </template>
+                                                <template if:true={hasMoreFilters}>
+                                                    <button class="more-filters-pill" onclick={toggleShowAllFilters} title="View all applied filters">
+                                                        +{remainingFilterCount} more
+                                                    </button>
+                                                </template>
+                                                <template if:true={canCollapseFilters}>
+                                                    <button class="collapse-filters-btn" onclick={toggleShowAllFilters} title="Show fewer filters">
+                                                        Show less
+                                                    </button>
+                                                </template>
+                                            </div>
+                                            <div class="no-data-action-wrapper">
+                                                <button class="blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
+                                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
+                                                        <path d="M2 7H14V5H2V7Z" fill="currentColor"></path>
+                                                        <path d="M4 11H12V9H4V11Z" fill="currentColor"></path>
+                                                        <path d="M10 15H6V13H10V15Z" fill="currentColor"></path>
+                                                    </svg>
+                                                    Modify Filters
+                                                </button>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={hasAppliedFilters}>
+                                            <p class="no-data-hint">
+                                                We did not find any listings in the system.
+                                            </p>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:false={showSection}>
+                                <!-- LIST VIEW -->
+                                <template if:true={showList}>
                                     <div class="table-content" id="table-content">
                                         <table aria-multiselectable="true"
                                             class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
@@ -173,15 +224,18 @@
                                         </table>
                                     </div>
                                 </template>
-                                <template if:true={showSection}>
-                                    <div class="noresult">
-                                        <div class="noresult-class">
-                                            <p class="tag1">No Result found yet...</p>
-                                            <p class="tag2">We did not find any result for your search</p>
+
+                                <!-- MAP VIEW -->
+                                <template if:true={showMap}>
+                                    <div class="map-view-container">
+                                        <div class="mapCmp">
+                                            <lightning-map class="map-class" map-markers={mapMarkers} list-view="hide">
+                                            </lightning-map>
                                         </div>
                                     </div>
                                 </template>
 
+                                <!-- UNIFIED PAGINATION -->
                                 <template if:true={showPagination}>
                                     <div class="paginationDiv">
                                         <div class="btnCover">
@@ -221,11 +275,6 @@
                                         </div>
                                     </div>
                                 </template>
-                            </template>
-
-                            <template if:true={showMap}>
-                                <c-listing-manager-mapview-cmp
-                                    listingsdata={listingData}></c-listing-manager-mapview-cmp>
                             </template>
                         </div>
                     </template>

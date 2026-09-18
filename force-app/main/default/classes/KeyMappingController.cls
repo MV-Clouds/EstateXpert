@@ -7,7 +7,6 @@ public with sharing class KeyMappingController {
     public static string generalFieldkeys = '{{Doc.mappingKey}}';
     public static string mergeTemplatekeys = '{{Temp.tempId}}';
     public static string formattingKeys = '*formatKey*';
-    public static string signatureKey = '{{Sign.EXP *Signature Key*}}';
     public static List<string> imgTyes = new List<string>{'png','jpg','jpeg','avif','webp','heic','ico','jfif','jps','jpe'};
     public static integer maxImageSize = 20*1000*1000;  // 20MB
     public static list<string> polymorphismObjAllowdFields = new list<string>
@@ -30,8 +29,8 @@ public with sharing class KeyMappingController {
         RetrunWrapper retrunWrapper = new RetrunWrapper();
         try {
             if (templateId != null) {
-                List<Template__c> tem = [SELECT Id, ListingMediaCount__c FROM Template__c WHERE Id =: templateId WITH USER_MODE];
-                retrunWrapper.listingMediaCount = tem[0].ListingMediaCount__c != null ? tem[0].ListingMediaCount__c.round().intValue() : 1;
+                List<MVEX__Template__c> tem = [SELECT Id, MVEX__ListingMediaCount__c FROM MVEX__Template__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
+                retrunWrapper.listingMediaCount = tem[0].MVEX__ListingMediaCount__c != null ? tem[0].MVEX__ListingMediaCount__c.round().intValue() : 1;
             }
             
             list<MappingObjects> objWithFields = new list<MappingObjects>();
@@ -370,18 +369,18 @@ public with sharing class KeyMappingController {
     public static RetrunWrapper getMerginTemplateKeys(string sourceObjectAPI, String templateId){
         RetrunWrapper retrunWrapper = new RetrunWrapper();
         try {
-            List<Template__c> activeTemps = [SELECT Id, Name, Template_Name__c FROM Template__c WHERE Template_Status__c = true AND Id != :templateId AND Template_pattern__c IN ('PDF Template') AND Object_API_Name__c =: sourceObjectAPI WITH USER_MODE];
+            List<MVEX__Template__c> activeTemps = [SELECT Id, Name, MVEX__Template_Name__c FROM MVEX__Template__c WHERE MVEX__Template_Status__c = true AND Id != :templateId AND MVEX__Template_pattern__c IN ('PDF Template') AND MVEX__Object_API_Name__c =: sourceObjectAPI WITH USER_MODE LIMIT 50000];
             if(activeTemps != null){
                 list<MappingObjects> fieldMappingsWithObj = new list<MappingObjects>();
                 MappingObjects mergeTemps = new MappingObjects();
                 list<MappingFields> fieldMappings = new list<MappingFields>();
                 mergeTemps.name = 'Merge Tempaltes';
                 mergeTemps.name = 'megreTempaltes';
-                for(Template__c temp : activeTemps){
+                for(MVEX__Template__c temp : activeTemps){
                     MappingFields tempKeys = new MappingFields();
-                    tempKeys.label = temp.Template_Name__c;
+                    tempKeys.label = temp.MVEX__Template_Name__c;
                     tempKeys.name = temp.Id;
-                    tempKeys.key = mergeTemplatekeys.replace('tempId', temp.Id +' '+ formattingKeys.replace('formatKey', temp.Template_Name__c));
+                    tempKeys.key = mergeTemplatekeys.replace('tempId', temp.Id +' '+ formattingKeys.replace('formatKey', temp.MVEX__Template_Name__c));
                     fieldMappings.add(tempKeys);
                 }
                 mergeTemps.fieldMappings = fieldMappings;
@@ -416,7 +415,7 @@ public with sharing class KeyMappingController {
 
             List<ContentVersion>  allImgCV = new List<ContentVersion>();
             if (maxImageSize != null) {
-                allImgCV = [SELECT Id, Title, FileExtension, FileType, VersionDataUrl, ContentSize, IsLatest, ContentDocumentId FROM ContentVersion WHERE FileExtension IN: imgTyes AND IsLatest = true AND ContentSize < :maxImageSize WITH USER_MODE];
+                allImgCV = [SELECT Id, Title, FileExtension, FileType, VersionDataUrl, ContentSize, IsLatest, ContentDocumentId FROM ContentVersion WHERE FileExtension IN: imgTyes AND IsLatest = true AND ContentSize < :maxImageSize WITH USER_MODE LIMIT 50000];
             }
 
             /**
@@ -436,7 +435,7 @@ public with sharing class KeyMappingController {
                 // System.debug('total images : ' + cDocIds.size());
 
                 // ...Get All ContentDistribution for existing ContentVersion...
-                List<ContentDistribution> allICDs = [SELECT Id, ContentVersionId, ContentDocumentId FROM ContentDistribution WHERE ContentDocumentId IN :cDocIds WITH USER_MODE];
+                List<ContentDistribution> allICDs = [SELECT Id, ContentVersionId, ContentDocumentId FROM ContentDistribution WHERE ContentDocumentId IN :cDocIds WITH USER_MODE LIMIT 50000];
 
                 // ...Collect all ContentVersion Id which have ContentDistribution created...
                 Set<Id> cdAvilabeFor = new Set<Id>();
@@ -490,7 +489,7 @@ public with sharing class KeyMappingController {
                 // At this time we have ContentDistribution for all ContentVersion that have public sharing....
                 List<ContentDistribution> allICDs2 = new List<ContentDistribution>(); 
                 if (maxImageSize != null) {
-                    allICDs2 = [SELECT Id, ContentVersionId, ContentVersion.Title, ContentVersion.FileExtension, ContentVersion.FileType, ContentVersion.ContentSize, ContentDownloadUrl FROM ContentDistribution WHERE ContentDocumentId IN :cDocIds AND ContentVersion.IsLatest =true AND ContentVersion.ContentSize < :maxImageSize WITH USER_MODE];
+                    allICDs2 = [SELECT Id, ContentVersionId, ContentVersion.Title, ContentVersion.FileExtension, ContentVersion.FileType, ContentVersion.ContentSize, ContentDownloadUrl FROM ContentDistribution WHERE ContentDocumentId IN :cDocIds AND ContentVersion.IsLatest =true AND ContentVersion.ContentSize < :maxImageSize WITH USER_MODE LIMIT 50000];
                 }
 
                 // Collect ContentVersion and ContentDownloadUrl into map...
@@ -512,44 +511,6 @@ public with sharing class KeyMappingController {
             retrunWrapper.isSuccess = false;
             retrunWrapper.returnMessage = e.getMessage();
             return retrunWrapper;
-        }
-    }
-    
-    /**
-     * Method Name : getSignatureInfo
-     * @return Decimal
-     * @description : Method to collect signature size.
-    */
-    @AuraEnabled 
-    public static Decimal getSignatureInfo(String templateId){
-        Decimal signatureSize = 50;
-        
-        List<Template__c> temp = new List<Template__c>();
-        if (templateId != null) {
-            temp = [SELECT Id, Signature_Size__c FROM Template__c WHERE Id =: templateId WITH USER_MODE];
-        }
-
-        if(temp.size() > 0){
-            signatureSize = temp[0].Signature_Size__c != null ? temp[0].Signature_Size__c : 50;
-        }
-        
-        return signatureSize;
-    }
-
-    /**
-     * Method Name : updateSignatureInfo
-     * @return boolean
-     * @description : Method to update signature size.
-    */
-    @AuraEnabled 
-    public static boolean updateSignatureInfo(String templateId, Decimal signatureSize){
-        try {
-            Template__c temp = new Template__c(Id = templateId, Signature_Size__c = signatureSize);
-            update as user temp;
-            return true;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'KeyMappingController', 'updateSignatureInfo', e.getMessage());
-            return false;
         }
     }
 
@@ -695,7 +656,6 @@ public with sharing class KeyMappingController {
     
             retrunWrapper.isSuccess = true;
             retrunWrapper.fieldFormatting = listOFformattingField;
-            retrunWrapper.signatureKey = signatureKey;
             return retrunWrapper;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'KeyMappingController', 'formattingFieldKeys', 'Error while formatting field keys.');
@@ -713,10 +673,9 @@ public with sharing class KeyMappingController {
         @AuraEnabled public String returnMessage;
         @AuraEnabled public Obj_Label_API objectLabelAPI;
         @AuraEnabled public list<MappingObjects> fieldMappingsWithObj;
-        @auraEnabled public Template__c template;
+        @auraEnabled public MVEX__Template__c template;
         @auraEnabled public List<ContentDistribution> cdImages;
         @auraEnabled public list<FormattingField> fieldFormatting;
-        @AuraEnabled public String signatureKey;
         @AuraEnabled public Integer listingMediaCount;
      }
 

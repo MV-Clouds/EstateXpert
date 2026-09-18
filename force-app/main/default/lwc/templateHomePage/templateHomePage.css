@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .wrapper {
@@ -242,7 +241,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 500;
     text-align: left;
     gap: 15px;
@@ -286,8 +285,8 @@
 
 .filter-icon-container {
     cursor: pointer;
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     justify-content: center;
     align-items: center;

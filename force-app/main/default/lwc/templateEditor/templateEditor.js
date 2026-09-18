@@ -9,6 +9,7 @@ import getTemplateData from '@salesforce/apex/TemplateBuilderController.getTempl
 import getTemplates from '@salesforce/apex/TemplateBuilderController.getTemplates';
 import saveTemplateApex from '@salesforce/apex/TemplateBuilderController.saveTemplateApex';
 import saveTempDataRecordsInBatch from '@salesforce/apex/TemplateBuilderController.saveTempDataRecordsInBatch';
+import deleteTemplate from '@salesforce/apex/TemplateBuilderController.deleteTemplate';
 import { initializeSummerNote } from './editorConf.js';
 import { navigationComps, nameSpace, pageFormats, unitMultiplier, unitConverter, errorDebugger } from 'c/globalProperties';
 
@@ -47,6 +48,8 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
     searchFieldValue = '';
 
     isCloseConfirmation = false                     // To define user click on close button and confirmation popup open
+    isEmptyCloseConfirmation = false;               // To define user click on close button when template is empty
+    isContentEmptyError = false;                    // To track error popup when template content is empty
     noTemplateFound = false;                        // To check weather template available for not
 
     editorDataChanges = false;                      // To identify any editor data change or not
@@ -403,6 +406,11 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
                     `A template named "${name}" already exists. Please enter a unique name before saving.`);
                 return;
             }
+            if (this.isEditorEmpty(this.contentEditor)) {
+                this.isContentEmptyError = true;
+                this.showMessagePopup('error', 'Template Content Empty!', 'Template content cannot be empty. Please add content before saving.');
+                return;
+            }
             this.isSpinner = true;
             this.saveTemplateValue('save');
         }
@@ -688,8 +696,13 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
 
     handleCloseEdit() {
         try {
-            this.isCloseConfirmation = true;
-            this.showMessagePopup('Warning', 'Do You Want to Leave?', `Your unsaved changes will be discarded once you leave the this page.`);
+            if (this.isTemplateEmpty()) {
+                this.isEmptyCloseConfirmation = true;
+                this.showMessagePopup('Warning', 'Delete Empty Template?', 'This template is empty. The empty template will get deleted on closing. Do you want to proceed?');
+            } else {
+                this.isCloseConfirmation = true;
+                this.showMessagePopup('Warning', 'Do You Want to Leave?', `Your unsaved changes will be discarded once you leave the this page.`);
+            }
 
         } catch (error) {
             errorDebugger('TemplateEditor', 'handleCloseEdit', error, 'warn');
@@ -726,6 +739,11 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
             if (this.checkDuplicateName(name)) {
                 this.showMessagePopup('error', 'Duplicate Template Name!',
                     `A template named "${name}" already exists. Please enter a unique name before saving.`);
+                return;
+            }
+            if (this.isEditorEmpty(this.contentEditor)) {
+                this.isContentEmptyError = true;
+                this.showMessagePopup('error', 'Template Content Empty!', 'Template content cannot be empty. Please add content before saving.');
                 return;
             }
             this.isSpinner = true;
@@ -1394,6 +1412,27 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
                 this.currentTab = 'basicTab';
                 this.setActiveTab();
             }
+            else if (this.isContentEmptyError) {
+                this.currentTab = 'contentTab';
+                this.setActiveTab();
+                this.isContentEmptyError = false;
+            }
+            else if (this.isEmptyCloseConfirmation) {
+                if (event.detail) {
+                    this.isSpinner = true;
+                    deleteTemplate({ templateId: this.templateId })
+                        .then(() => {
+                            this.isSpinner = false;
+                            this.closeEditTemplate();
+                        })
+                        .catch(error => {
+                            this.isSpinner = false;
+                            errorDebugger('TemplateEditor', 'handleMsgPopConfirmation deleteTemplate', error, 'warn');
+                            this.closeEditTemplate();
+                        });
+                }
+                this.isEmptyCloseConfirmation = false;
+            }
             else if(this.isCloseConfirmation){
                 //... Popup message show WHEN User click on close button select YES...
                 if(event.detail){
@@ -1569,5 +1608,60 @@ export default class TemplateEditor extends NavigationMixin(LightningElement) {
             unscopedCss = unscopedCss.replace(/\.note-editable(?=[\s{,])/g, 'body');
             return `<style${attrs}>\n${unscopedCss}\n</style>`;
         });
+    }
+
+    /**
+     * Checks if an editor element's content is empty or contains only spaces / blank tags.
+     * @param {HTMLElement} editorElement
+     * @return {Boolean}
+     */
+    isEditorEmpty(editorElement) {
+        try {
+            if (!editorElement) return true;
+            let htmlContent = '';
+            if (typeof window !== 'undefined' && typeof $ !== 'undefined' && $(editorElement).summernote) {
+                htmlContent = $(editorElement).summernote('code');
+            } else {
+                htmlContent = editorElement.innerHTML || '';
+            }
+            return this.isHtmlEmpty(htmlContent);
+        } catch (error) {
+            return true;
+        }
+    }
+
+    /**
+     * Checks if HTML string has no printable text or media elements.
+     * @param {String} htmlContent
+     * @return {Boolean}
+     */
+    isHtmlEmpty(htmlContent) {
+        if (!htmlContent) return true;
+        let tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+
+        // Remove style and script tags so styles are not counted as content
+        tempDiv.querySelectorAll('style, script').forEach(node => node.remove());
+
+        // Check if there are media or interactive elements (images, tables, hr, svg, etc.)
+        const hasMediaOrElements = tempDiv.querySelector('img, table, iframe, hr, svg, canvas, audio, video, input, select, textarea');
+        if (hasMediaOrElements) {
+            return false;
+        }
+
+        // Check text content without whitespace and non-breaking spaces (\u00a0, \u200b, \ufeff)
+        const text = (tempDiv.textContent || tempDiv.innerText || '').replace(/[\s\u00a0\u200b\ufeff]+/g, '');
+        return text.length === 0;
+    }
+
+    /**
+     * Checks if all template editors (body, header, footer) are empty.
+     * @return {Boolean}
+     */
+    isTemplateEmpty() {
+        const isBodyEmpty = this.isEditorEmpty(this.contentEditor);
+        const isHeaderEmpty = this.isEditorEmpty(this.headerEditor);
+        const isFooterEmpty = this.isEditorEmpty(this.footerEditor);
+        return isBodyEmpty && isHeaderEmpty && isFooterEmpty;
     }
 }

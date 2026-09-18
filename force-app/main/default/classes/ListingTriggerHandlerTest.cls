@@ -113,4 +113,29 @@ public class ListingTriggerHandlerTest {
         
         System.assertEquals(2, [SELECT count() FROM Listing__c WHERE Name LIKE 'Match Me%' OR Name = 'Sync Off New']);
     }
+
+    @isTest
+    static void testAfterUpdateDeleteUndelete() {
+        ListingTriggerHandler.mockMetadata = new Mapping_Metadata__mdt(
+            Automatic_Sync__c = false,
+            BlockedFields__c = 'CreatedDate',
+            Mapping_String__c = 'Name:Name'
+        );
+
+        Listing__c listing = new Listing__c(
+            Name = 'Test Event Listing'
+        );
+        insert listing;
+
+        Test.startTest();
+        listing.Name = 'Test Event Listing Updated';
+        update listing;
+
+        delete listing;
+
+        undelete listing;
+        Test.stopTest();
+
+        System.assertNotEquals(null, listing.Id);
+    }
 }

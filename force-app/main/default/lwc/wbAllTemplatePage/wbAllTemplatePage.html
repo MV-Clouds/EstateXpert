@@ -343,15 +343,9 @@
                     </template>
                 </template>
                 <template if:false={filteredRecords.length}>
-                    <div class="no-records-message">
-                        <div class="empty-state">
-                            <div class="empty-state__content">
-                                <div class="empty-state__icon">
-                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                </div>
-                                <div class="empty-state__message">No data available to show</div>
-                            </div>
-                        </div>
+                    <div class="exp-no-data-container">
+                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                        <div class="exp-no-data-message">No data available to show</div>
                     </div>
                 </template>
             </div>

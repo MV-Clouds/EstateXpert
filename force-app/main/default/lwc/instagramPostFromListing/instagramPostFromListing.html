@@ -31,17 +31,10 @@
 
         <div class="content-body">
             <template if:false={hasAllCredentials}>
-                <div class="credentials-missing-container">
-                    <div class="credentials-missing-content">
-                        <img src="/resource/MVEX__emptyState" alt="Credentials Required" class="credentials-empty-icon"
-                            draggable="false" />
-                        <div class="credentials-missing-message">
-                            {missingCredentialsMessage}
-                        </div>
-                        <div class="credentials-missing-submessage">
-                            Please configure your credentials in the integration settings.
-                        </div>
-                    </div>
+                <div class="exp-no-data-container">
+                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                    <div class="exp-no-data-message">{missingCredentialsMessage}</div>
+                    <div class="exp-no-sub-data-message">Please configure your credentials in the integration settings.</div>
                 </div>
             </template>
 

@@ -27,7 +27,7 @@ public with sharing class CheckListItemController {
     public class ObjectFieldsWrapper {
         @AuraEnabled public String label;
         @AuraEnabled public List<FieldWrapper> fields;
-        @AuraEnabled public List<Checklist__c> checklist;
+        @AuraEnabled public List<MVEX__Checklist__c> checklist;
     }
 
     /**
@@ -40,9 +40,9 @@ public with sharing class CheckListItemController {
     public static ObjectFieldsWrapper getObjectFields(String objectName){
         ObjectFieldsWrapper result = new ObjectFieldsWrapper();
         result.fields = new List<FieldWrapper>();
-        result.checklist = new List<Checklist__c>();
+        result.checklist = new List<MVEX__Checklist__c>();
         try {
-            result.checklist = [SELECT Id, Name, Field_Name__c, Object_Name__c, Operator__c, Sequence__c, Value__c, Description__c, Data_Type__c FROM Checklist__c WHERE Object_Name__c = :objectName WITH USER_MODE ORDER BY Sequence__c NULLS LAST, Name];
+            result.checklist = [SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Operator__c, MVEX__Sequence__c, MVEX__Value__c, MVEX__Description__c, MVEX__Data_Type__c FROM MVEX__Checklist__c WHERE MVEX__Object_Name__c = :objectName WITH USER_MODE ORDER BY MVEX__Sequence__c NULLS LAST, Name];
             
             // Get the object's label
             Schema.DescribeSObjectResult describeSObjectResult = Schema.getGlobalDescribe().get(objectName).getDescribe();
@@ -142,15 +142,15 @@ public with sharing class CheckListItemController {
             checklistDataToShow.isEditable = false;
             checklistDataToShow.checklistData = new List<ChecklistWrapper>();
 
-            if (Schema.sObjectType.Checklist__c.isCreateable() && Schema.sObjectType.Checklist__c.isUpdateable()) {
+            if (Schema.sObjectType.MVEX__Checklist__c.isCreateable() && Schema.sObjectType.MVEX__Checklist__c.isUpdateable()) {
                 checklistDataToShow.isEditable = true;
             }
 
-            List<Checklist__c> checkList = [SELECT Id, Name, Field_Name__c, Object_Name__c, Operator__c, Sequence__c, Value__c, Description__c, Data_Type__c
-                                            FROM Checklist__c WHERE Object_Name__c = :objectName WITH USER_MODE ORDER BY Sequence__c NULLS LAST, Name];
+            List<MVEX__Checklist__c> checkList = [SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Operator__c, MVEX__Sequence__c, MVEX__Value__c, MVEX__Description__c, MVEX__Data_Type__c
+                                            FROM MVEX__Checklist__c WHERE MVEX__Object_Name__c = :objectName WITH USER_MODE ORDER BY MVEX__Sequence__c NULLS LAST, Name];
 
-            List<Checklist_Item__c> checklistItem = [SELECT Id, Checklist__c, Is_Checked__c, Record_Id__c FROM Checklist_Item__c 
-                                                        WHERE Record_Id__c = :recordId WITH USER_MODE];
+            List<MVEX__Checklist_Item__c> checklistItem = [SELECT Id, MVEX__Checklist__c, MVEX__Is_Checked__c, MVEX__Record_Id__c FROM MVEX__Checklist_Item__c 
+                                                        WHERE MVEX__Record_Id__c = :recordId WITH USER_MODE];
 
             Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
             if (sObjectType == null) {
@@ -168,31 +168,31 @@ public with sharing class CheckListItemController {
             String query = 'SELECT ' + queryFields + ' FROM ' + sobjectName + ' WHERE Id = :recordId LIMIT 1';
             SObject sObjectRecord = Database.query(query, AccessLevel.USER_MODE);
 
-            for (Checklist__c item : checkList) {
+            for (MVEX__Checklist__c item : checkList) {
                 ChecklistWrapper wrapper = new ChecklistWrapper();
                 wrapper.id = item.Id;
                 wrapper.name = item.Name;
-                wrapper.description = item.Description__c;
-                wrapper.fieldName = item.Field_Name__c;
-                wrapper.objectName = item.Object_Name__c;
-                wrapper.operator = item.Operator__c;
-                wrapper.value = item.Value__c;
-                 wrapper.type = item.Data_Type__c;
+                wrapper.description = item.MVEX__Description__c;
+                wrapper.fieldName = item.MVEX__Field_Name__c;
+                wrapper.objectName = item.MVEX__Object_Name__c;
+                wrapper.operator = item.MVEX__Operator__c;
+                wrapper.value = item.MVEX__Value__c;
+                 wrapper.type = item.MVEX__Data_Type__c;
                 wrapper.completed = false;
                 wrapper.showDropdown = false;
-                wrapper.isDescription = item.Description__c != null && item.Description__c != '' ? true : false;
+                wrapper.isDescription = item.MVEX__Description__c != null && item.MVEX__Description__c != '' ? true : false;
 
                 // Set the field label
-                if (item.Field_Name__c != null && fieldMap.containsKey(item.Field_Name__c)) {
-                    wrapper.fieldLabel = fieldMap.get(item.Field_Name__c).getDescribe().getLabel();
+                if (item.MVEX__Field_Name__c != null && fieldMap.containsKey(item.MVEX__Field_Name__c)) {
+                    wrapper.fieldLabel = fieldMap.get(item.MVEX__Field_Name__c).getDescribe().getLabel();
                 }
 
-                // Check if Field_Name__c matches any field in the specified object and Value__c matches the value of that field
+                // Check if MVEX__Field_Name__c matches any field in the specified object and MVEX__Value__c matches the value of that field
                 setCompletedBasedOnField(wrapper, item, sObjectRecord, fieldMap);
 
-                // Check if Checklist__c and checkList.id is same and Is_Checked__c is true
-                for (Checklist_Item__c checklistItemRecord : checklistItem) {
-                    if (checklistItemRecord.Checklist__c == item.Id && checklistItemRecord.Is_Checked__c == true && item.Field_Name__c == null) {
+                // Check if MVEX__Checklist__c and checkList.id is same and MVEX__Is_Checked__c is true
+                for (MVEX__Checklist_Item__c checklistItemRecord : checklistItem) {
+                    if (checklistItemRecord.MVEX__Checklist__c == item.Id && checklistItemRecord.MVEX__Is_Checked__c == true && item.MVEX__Field_Name__c == null) {
                         wrapper.completed = true;
                         break;
                     }
@@ -266,33 +266,33 @@ public with sharing class CheckListItemController {
     /**
     * Method Name : setCompletedBasedOnField
     * @param wrapper - ChecklistWrapper
-    * @param item - Checklist__c
+    * @param item - MVEX__Checklist__c
     * @param sObjectRecord - SObject
     * @param fieldMap - Map<String, Schema.SObjectField>
     * @description : Used to return boolean value as per the cheklist conditions.
     * @return Boolean value.
     */
-    public static void setCompletedBasedOnField(ChecklistWrapper wrapper, Checklist__c item, SObject sObjectRecord, Map<String, Schema.SObjectField> fieldMap) {
+    public static void setCompletedBasedOnField(ChecklistWrapper wrapper, MVEX__Checklist__c item, SObject sObjectRecord, Map<String, Schema.SObjectField> fieldMap) {
         try {
-            if (sObjectRecord != null && item.Field_Name__c != null && item.Value__c != null) {
-                Object fieldValue = sObjectRecord.get(item.Field_Name__c);
+            if (sObjectRecord != null && item.MVEX__Field_Name__c != null && item.MVEX__Value__c != null) {
+                Object fieldValue = sObjectRecord.get(item.MVEX__Field_Name__c);
                 if (fieldValue != null) {
-                    if (item.Data_Type__c == 'NUMBER' && fieldValue instanceof Decimal) {
+                    if (item.MVEX__Data_Type__c == 'NUMBER' && fieldValue instanceof Decimal) {
                         Decimal decimalValue = (Decimal) fieldValue;
                         fieldValue = decimalValue.setScale(0, RoundingMode.HALF_UP).intValue();
                     }
 
                     String fieldValueString = String.valueOf(fieldValue);
-                    String itemValueString = item.Value__c;
+                    String itemValueString = item.MVEX__Value__c;
     
-                    if (item.Data_Type__c == 'DATE') {
+                    if (item.MVEX__Data_Type__c == 'DATE') {
                         Boolean status1 = changeDateFormat(item, fieldValue);
                         wrapper.completed = status1;
-                    } else if (item.Data_Type__c == 'DATETIME') {
+                    } else if (item.MVEX__Data_Type__c == 'DATETIME') {
                         Boolean status2 = changeDateTimeFormat(item, fieldValue);
                         wrapper.completed = status2;
                     } else {
-                        switch on item.Operator__c {
+                        switch on item.MVEX__Operator__c {
                             when 'Equals' {
                                 wrapper.completed = fieldValueString.equalsIgnoreCase(itemValueString);
                             }
@@ -326,9 +326,9 @@ public with sharing class CheckListItemController {
                         }
                     }
                 } else {
-                    String itemValueString = item.Value__c;
+                    String itemValueString = item.MVEX__Value__c;
 
-                    switch on item.Operator__c {
+                    switch on item.MVEX__Operator__c {
                         when 'Equals' {
                             wrapper.completed = false;
                         }
@@ -355,13 +355,13 @@ public with sharing class CheckListItemController {
         }
     }
 
-    public static boolean changeDateFormat(Checklist__c item, Object fieldValue) {
+    public static boolean changeDateFormat(MVEX__Checklist__c item, Object fieldValue) {
         try {
-            Date parsedDate = Date.valueOf(item.Value__c);
+            Date parsedDate = Date.valueOf(item.MVEX__Value__c);
             if (fieldValue instanceof Date) {
-                if (item.Operator__c == 'Equals' && ((Date) fieldValue).equals(parsedDate)) {
+                if (item.MVEX__Operator__c == 'Equals' && ((Date) fieldValue).equals(parsedDate)) {
                     return true;
-                } else if (item.Operator__c == 'Not Equals to' && !((Date) fieldValue).equals(parsedDate)) {
+                } else if (item.MVEX__Operator__c == 'Not Equals to' && !((Date) fieldValue).equals(parsedDate)) {
                     return true;
                 } else {
                     return false;
@@ -375,15 +375,15 @@ public with sharing class CheckListItemController {
         }
     }
 
-    public static boolean changeDateTimeFormat(Checklist__c item, Object fieldValue) {
+    public static boolean changeDateTimeFormat(MVEX__Checklist__c item, Object fieldValue) {
         try {
             // Strip the 'Z' from the datetime string if present
-            String dateTimeString = item.Value__c.replace('Z', '');
+            String dateTimeString = item.MVEX__Value__c.replace('Z', '');
             Datetime parsedDatetime = Datetime.valueOfGmt(dateTimeString.replace('T', ' '));
             if (fieldValue instanceof Datetime) {
-                if (item.Operator__c == 'Equals' && ((Datetime) fieldValue).equals(parsedDatetime)) {
+                if (item.MVEX__Operator__c == 'Equals' && ((Datetime) fieldValue).equals(parsedDatetime)) {
                     return true;
-                } else if (item.Operator__c == 'Not Equals to' && !((Datetime) fieldValue).equals(parsedDatetime)) {
+                } else if (item.MVEX__Operator__c == 'Not Equals to' && !((Datetime) fieldValue).equals(parsedDatetime)) {
                     return true;
                 } else {
                     return false;
@@ -408,18 +408,18 @@ public with sharing class CheckListItemController {
     @AuraEnabled
     public static string createCheckListItem(String recordId, String checklistId, Boolean completed){
         try {
-            List<Checklist_Item__c> checklistItem = [SELECT Id, Is_Checked__c FROM Checklist_Item__c WHERE Checklist__c = :checklistId AND Record_Id__c = :recordId WITH USER_MODE LIMIT 1];
+            List<MVEX__Checklist_Item__c> checklistItem = [SELECT Id, MVEX__Is_Checked__c FROM MVEX__Checklist_Item__c WHERE MVEX__Checklist__c = :checklistId AND MVEX__Record_Id__c = :recordId WITH USER_MODE LIMIT 1];
             if(checklistItem.size() > 0){
-                for (Checklist_Item__c item : checklistItem) {
-                    item.Is_Checked__c = completed;
+                for (MVEX__Checklist_Item__c item : checklistItem) {
+                    item.MVEX__Is_Checked__c = completed;
                 }
                 
                 update as user checklistItem;  
             } else {
-                Checklist_Item__c newChecklistItem = new Checklist_Item__c();
-                newChecklistItem.Checklist__c = checklistId;
-                newChecklistItem.Is_Checked__c = completed;
-                newChecklistItem.Record_Id__c = recordId;
+                MVEX__Checklist_Item__c newChecklistItem = new MVEX__Checklist_Item__c();
+                newChecklistItem.MVEX__Checklist__c = checklistId;
+                newChecklistItem.MVEX__Is_Checked__c = completed;
+                newChecklistItem.MVEX__Record_Id__c = recordId;
                 
                 insert as user newChecklistItem;   
 
@@ -441,13 +441,13 @@ public with sharing class CheckListItemController {
     */
     @AuraEnabled
     public static String manageChecklistRecords(List<Map<String, Object>> itemsToCreate, List<Map<String, Object>> itemsToUpdate, List<String> itemsToDelete) {
-        List<Checklist__c> recordsToCreate = new List<Checklist__c>();
-        List<Checklist__c> recordsToUpdate = new List<Checklist__c>();
-        List<Checklist__c> recordsToDelete = new List<Checklist__c>();
+        List<MVEX__Checklist__c> recordsToCreate = new List<MVEX__Checklist__c>();
+        List<MVEX__Checklist__c> recordsToUpdate = new List<MVEX__Checklist__c>();
+        List<MVEX__Checklist__c> recordsToDelete = new List<MVEX__Checklist__c>();
 
         try {
             for (Map<String, Object> fields : itemsToCreate) {
-                Checklist__c newRecord = new Checklist__c();
+                MVEX__Checklist__c newRecord = new MVEX__Checklist__c();
                 for (String fieldName : fields.keySet()) {
                     newRecord.put(fieldName, fields.get(fieldName));
                 }
@@ -455,7 +455,7 @@ public with sharing class CheckListItemController {
             }
 
             for (Map<String, Object> fields : itemsToUpdate) {
-                Checklist__c existingRecord = new Checklist__c(Id = (String) fields.get('Id'));
+                MVEX__Checklist__c existingRecord = new MVEX__Checklist__c(Id = (String) fields.get('Id'));
                 for (String fieldName : fields.keySet()) {
                     if (fieldName != 'Id') {
                         existingRecord.put(fieldName, fields.get(fieldName));
@@ -465,7 +465,7 @@ public with sharing class CheckListItemController {
             }
 
             for (String id : itemsToDelete) {
-                recordsToDelete.add(new Checklist__c(Id = id));
+                recordsToDelete.add(new MVEX__Checklist__c(Id = id));
             }
 
             if (!recordsToCreate.isEmpty()) {

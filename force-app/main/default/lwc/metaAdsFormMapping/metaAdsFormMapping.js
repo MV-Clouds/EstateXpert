@@ -13,25 +13,23 @@ export default class MetaAdsFormMapping extends LightningElement {
     
     @track isLoading = true;
     @track tableData = [];
-    
+
     @track isModalOpen = false;
     @track isModalLoading = false;
-    
-    @track availablePages = []; // Pages from Meta API
-    @track availableForms = []; // Forms from Meta API for selected page
-    @track salesforceLeadFields = []; // Fields from SF
-    
+    @track spinnerLabel = 'Loading forms...';
+
+    @track availablePages = [];      // Pages from Meta API
+    @track availableForms = [];      // Forms for selected page
+    @track salesforceLeadFields = []; // SF Contact fields
+
     @track selectedPageId = '';
     @track selectedFormId = '';
-    @track currentFormFields = []; // [{key, label, value}]
-    
-    @track currentStep = '1';
-    
-    // Overall JSON state
-    // Format: { clientAppId: { pageId: { formId: { metaKey: sfField } } } }
+    @track currentFormFields = [];   // [{ key, label, value, options }]
+    @track formsLoaded = false;      // true once forms have been fetched for selected page
+
+    // Overall JSON state — { pageId: { pageName, forms: { formId: { formName, mappings: {} } } } }
     fullMappingJson = {};
-    
-    // Meta Config State
+
     currentClientAppId = '';
 
     connectedCallback() {
@@ -156,20 +154,31 @@ export default class MetaAdsFormMapping extends LightningElement {
         return this.tableData.length > 0;
     }
 
-    get isStep1() { return this.currentStep === '1'; }
-    get isStep2() { return this.currentStep === '2'; }
-    get isStep3() { return this.currentStep === '3'; }
+    // ─── Single-page wizard computed properties ───────────────────────────────
 
-    get isNextDisabledStep1() {
+    /** Form section is locked until a page is chosen */
+    get isFormSectionDisabled() {
         return !this.selectedPageId;
     }
 
-    get isNextDisabledStep2() {
-        return !this.selectedFormId;
+    /** Form dropdown is disabled while loading OR no page selected */
+    get isFormDropdownDisabled() {
+        return this.isModalLoading || !this.selectedPageId;
     }
 
+    /** Show "no forms" message only after forms have been fetched and list is empty */
+    get showNoFormsMsg() {
+        return this.formsLoaded && this.selectedPageId && this.formOptions.length === 0;
+    }
+
+    /** Show field-mapping section only when a form is selected AND fields exist */
+    get hasFormFields() {
+        return !!this.selectedFormId;
+    }
+
+    /** Save is enabled only when a form is selected */
     get isSaveDisabled() {
-        return !this.selectedFormId;
+        return !this.selectedFormId || this.isModalLoading;
     }
 
     get pageOptions() {
@@ -202,33 +211,16 @@ export default class MetaAdsFormMapping extends LightningElement {
     // --- Modal Logic ---
 
     openNewMappingModal() {
-        this.selectedPageId = '';
-        this.selectedFormId = '';
-        this.availableForms = [];
+        this.selectedPageId    = '';
+        this.selectedFormId    = '';
+        this.availableForms    = [];
         this.currentFormFields = [];
-        this.currentStep = '1';
-        this.isModalOpen = true;
+        this.formsLoaded       = false;
+        this.isModalOpen       = true;
     }
 
     closeModal() {
         this.isModalOpen = false;
-        this.currentStep = '1';
-    }
-
-    goNext() {
-        if (this.currentStep === '1' && this.selectedPageId) {
-            this.currentStep = '2';
-        } else if (this.currentStep === '2' && this.selectedFormId) {
-            this.currentStep = '3';
-        }
-    }
-
-    goBack() {
-        if (this.currentStep === '2') {
-            this.currentStep = '1';
-        } else if (this.currentStep === '3') {
-            this.currentStep = '2';
-        }
     }
 
     async handlePageSelection(event) {
@@ -241,18 +233,21 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
 
         this.isModalLoading = true;
+        this.spinnerLabel   = 'Loading forms...';
+        this.formsLoaded    = false;
         try {
             const formsRes = await getLeadForms({ pageId: this.selectedPageId });
             if (formsRes && formsRes.success) {
-                if (formsRes.forms) {
-                    this.availableForms = formsRes.forms;
-                }
+                this.availableForms     = formsRes.forms || [];
                 this.currentClientAppId = formsRes.client_app_id || 'default_app_id';
+                this.formsLoaded        = true;
             } else {
-                this.showToast('Error', 'Failed to fetch forms: ' + (formsRes.message || ''), 'error');
+                this.showToast('Warning', 'Failed to fetch forms: ' + (formsRes.message || ''), 'warning');
+                this.formsLoaded = true; // still mark loaded so error msg shows
             }
         } catch (error) {
             this.showToast('Error', 'Error fetching forms.', 'error');
+            this.formsLoaded = true;
         } finally {
             this.isModalLoading = false;
         }
@@ -434,25 +429,23 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     async editRow(row) {
-        this.selectedPageId = row.pageId;
-        this.selectedFormId = row.formId;
-        
-        this.isModalOpen = true;
-        this.isModalLoading = true;
-        this.currentStep = '3'; // Jump straight to mapping
+        this.selectedPageId    = row.pageId;
+        this.selectedFormId    = row.formId;
+        this.availableForms    = [];
+        this.currentFormFields = [];
+        this.formsLoaded       = false;
+        this.isModalOpen       = true;
+        this.isModalLoading    = true;
+        this.spinnerLabel      = 'Loading form fields...';
 
         try {
-            // Fetch forms for this page so we have the questions
             const formsRes = await getLeadForms({ pageId: this.selectedPageId });
-            if (formsRes && formsRes.success) {
-                if (formsRes.forms) {
-                    this.availableForms = formsRes.forms;
-                }
+            if (formsRes && formsRes.success && formsRes.forms) {
+                this.availableForms = formsRes.forms;
+                this.formsLoaded    = true;
             }
-            
-            // Build fields for mapping step
+            // Populate field mappings for the pre-selected form
             this.handleFormSelection({ detail: { value: this.selectedFormId } });
-            
         } catch (error) {
             this.showToast('Error', 'Failed to load form details for editing.', 'error');
             this.closeModal();

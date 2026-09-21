@@ -23,26 +23,16 @@
                     <table class="slds-table">
                         <thead>
                             <tr class="table_tr_cls">
-                                <th scope="col" class="expand-col">
-                                    <div></div>
-                                </th>
-                                <th scope="col" class="sno">
-                                    <div>No.</div>
-                                </th>
-                                <th class="groupname" scope="col">
-                                    <div class="slds-truncate" title="Page Name">Page Name</div>
-                                </th>
-                                <th class="groupname" scope="col">
-                                    <div class="slds-truncate" title="Page ID">Page ID</div>
-                                </th>
-                                <th class="groupname" scope="col">
-                                    <div class="slds-truncate" title="Mapped Forms">Mapped Forms</div>
-                                </th>
+                                <th scope="col" class="expand-col"><div></div></th>
+                                <th scope="col" class="sno"><div>No.</div></th>
+                                <th class="groupname" scope="col"><div class="slds-truncate" title="Page Name">Page Name</div></th>
+                                <th class="groupname" scope="col"><div class="slds-truncate" title="Page ID">Page ID</div></th>
+                                <th class="groupname" scope="col"><div class="slds-truncate" title="Mapped Forms">Mapped Forms</div></th>
                             </tr>
                         </thead>
                         <tbody>
                             <template for:each={tableData} for:item="row" for:index="index">
-                                <!-- Parent Row (Page) -->
+                                <!-- Parent Row -->
                                 <tr key={row.id} class="parent-row">
                                     <td data-label="" class="expand-cell">
                                         <div class="action-icon-container" data-id={row.id} onclick={handleToggleRow}>
@@ -56,21 +46,13 @@
                                             </svg>
                                         </div>
                                     </td>
-                                    <td data-label="No.">
-                                        <div>{row.index}</div>
-                                    </td>
-                                    <td data-label="Page Name" class="truncate_css">
-                                        <div>{row.pageName}</div>
-                                    </td>
-                                    <td data-label="Page ID">
-                                        <div>{row.pageId}</div>
-                                    </td>
-                                    <td data-label="Mapped Forms">
-                                        <div>{row.forms.length}</div>
-                                    </td>
+                                    <td data-label="No."><div>{row.index}</div></td>
+                                    <td data-label="Page Name"><div>{row.pageName}</div></td>
+                                    <td data-label="Page ID"><div>{row.pageId}</div></td>
+                                    <td data-label="Mapped Forms"><div>{row.forms.length}</div></td>
                                 </tr>
 
-                                <!-- Accordion Content Row (Forms) -->
+                                <!-- Accordion Row -->
                                 <template if:true={row.isExpanded}>
                                     <tr key={row.id} class="accordion-row">
                                         <td colspan="5">
@@ -90,11 +72,11 @@
                                                             <tbody>
                                                                 <template for:each={row.forms} for:item="form">
                                                                     <tr key={form.id}>
-                                                                        <td class="truncate_css">{form.index}</td>
-                                                                        <td class="truncate_css">{form.formName}</td>
-                                                                        <td class="truncate_css">{form.formId}</td>
-                                                                        <td class="truncate_css">{form.mappedCount}</td>
-                                                                        <td class="truncate_css" style="text-align: center;">
+                                                                        <td>{form.index}</td>
+                                                                        <td>{form.formName}</td>
+                                                                        <td>{form.formId}</td>
+                                                                        <td>{form.mappedCount}</td>
+                                                                        <td style="text-align: center;">
                                                                             <div style="display: flex; gap: 8px; justify-content: center;">
                                                                                 <div class="action-icon-container" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
                                                                                     <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -126,7 +108,7 @@
                 </div>
             </template>
 
-            <!-- No Records Message -->
+            <!-- No Records -->
             <template if:false={hasMappings}>
                 <div class="no-records-message">
                     <div class="empty-state">
@@ -138,10 +120,12 @@
             </template>
         </div>
 
-        <!-- Mapping Wizard Modal -->
+        <!-- ─── Single-Page Mapping Wizard Modal ──────────────────────────────── -->
         <template if:true={isModalOpen}>
-            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+                class="slds-modal slds-fade-in-open slds-modal_small section_css">
                 <div class="slds-modal__container">
+
                     <div class="slds-modal__close close-icon-css" onclick={closeModal}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
@@ -153,93 +137,105 @@
                     </div>
 
                     <div class="slds-modal__content modalbody" id="modal-content-id-1">
-                        <div class="content_body">
+                        <div class="content_body" style="position: relative;">
+
+                            <!-- Spinner Overlay (covers entire body while loading) -->
                             <template if:true={isModalLoading}>
-                                <c-spinner-component is-absolute="true"></c-spinner-component>
+                                <div class="wizard-spinner-overlay">
+                                    <div class="wizard-spinner-wrap">
+                                        <div class="wizard-spinner"></div>
+                                        <span class="wizard-spinner-text">{spinnerLabel}</span>
+                                    </div>
+                                </div>
                             </template>
 
-                            <div class="slds-m-bottom_large slds-p-horizontal_small" style="margin-top: 1rem;">
-                                <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
-                                    <lightning-progress-step label="Select Page" value="1"></lightning-progress-step>
-                                    <lightning-progress-step label="Select Form" value="2"></lightning-progress-step>
-                                    <lightning-progress-step label="Map Fields" value="3"></lightning-progress-step>
-                                </lightning-progress-indicator>
+                            <!-- Section 1: Select Page (always visible) -->
+                            <div class="wizard-section">
+                                <div class="wizard-step-label">
+                                    <span class="wizard-step-badge">1</span>
+                                    Select Meta Page
+                                </div>
+                                <lightning-combobox
+                                    name="pageSelect"
+                                    label=""
+                                    value={selectedPageId}
+                                    placeholder="-- Choose a Page --"
+                                    options={pageOptions}
+                                    onchange={handlePageSelection}
+                                    disabled={isModalLoading}
+                                    variant="label-hidden"
+                                    class="custom-combobox">
+                                </lightning-combobox>
+                                <template if:false={pageOptions.length}>
+                                    <div class="wizard-hint-error">No pages found. Please connect a Meta Ads account first.</div>
+                                </template>
                             </div>
 
-                            <!-- Step 1: Select Page -->
-                            <template if:true={isStep1}>
-                                <div class="form-group slds-p-around_small">
-                                    <lightning-combobox
-                                        name="pageSelect"
-                                        label="Select Meta Page"
-                                        value={selectedPageId}
-                                        placeholder="-- Choose a Page --"
-                                        options={pageOptions}
-                                        onchange={handlePageSelection}
-                                        disabled={isModalLoading}
-                                        class="custom-combobox">
-                                    </lightning-combobox>
-                                    <template if:false={pageOptions.length}>
-                                        <div class="slds-m-top_small slds-text-color_error">No available pages found. Please ensure you have connected a Meta Ads account.</div>
+                            <div class="wizard-divider"></div>
+
+                            <!-- Section 2: Select Form (disabled until page selected) -->
+                            <div class="wizard-section">
+                                <div class="wizard-step-label">
+                                    <span class="wizard-step-badge" class:wizard-step-badge-disabled={isFormSectionDisabled}>2</span>
+                                    Select Lead Form
+                                    <template if:true={isFormSectionDisabled}>
+                                        <span class="wizard-hint-muted">&nbsp;— Select a page first</span>
                                     </template>
                                 </div>
-                            </template>
+                                <lightning-combobox
+                                    name="formSelect"
+                                    label=""
+                                    value={selectedFormId}
+                                    placeholder="-- Choose a Form --"
+                                    options={formOptions}
+                                    onchange={handleFormSelection}
+                                    disabled={isFormDropdownDisabled}
+                                    variant="label-hidden"
+                                    class="custom-combobox">
+                                </lightning-combobox>
+                                <template if:true={showNoFormsMsg}>
+                                    <div class="wizard-hint-error">No available forms. All forms may already be mapped.</div>
+                                </template>
+                            </div>
 
-                            <!-- Step 2: Select Form -->
-                            <template if:true={isStep2}>
-                                <div class="form-group slds-p-around_small">
-                                    <lightning-combobox
-                                        name="formSelect"
-                                        label="Select Meta Lead Form"
-                                        value={selectedFormId}
-                                        placeholder="-- Choose a Form --"
-                                        options={formOptions}
-                                        onchange={handleFormSelection}
-                                        disabled={isModalLoading}
-                                        class="custom-combobox">
-                                    </lightning-combobox>
-                                    <template if:false={formOptions.length}>
-                                        <div class="slds-m-top_small slds-text-color_error">No available forms to map. All forms may already be mapped.</div>
-                                    </template>
-                                </div>
-                            </template>
-
-                            <!-- Step 3: Map Fields -->
-                            <template if:true={isStep3}>
-                                <div style="margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #111827;">
-                                    Field Mappings
-                                </div>
-                                
-                                <template for:each={currentFormFields} for:item="field">
-                                    <div key={field.key} class="mapping-row">
-                                        <div class="mapping-col">
-                                            <div class="filter_label_css" style="margin-bottom: 4px;">Meta Form Field</div>
-                                            <div style="padding: 8px 12px; background: #e5e7eb; border-radius: 6px; font-size: 14px; font-weight: 500;">
-                                                {field.label}
+                            <!-- Section 3: Field Mappings (only visible after form selected) -->
+                            <template if:true={hasFormFields}>
+                                <div class="wizard-divider"></div>
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <span class="wizard-step-badge">3</span>
+                                        Map Fields
+                                    </div>
+                                    <template for:each={currentFormFields} for:item="field">
+                                        <div key={field.key} class="mapping-row">
+                                            <div class="mapping-col">
+                                                <div class="filter_label_css" style="margin-bottom: 4px;">Meta Form Field</div>
+                                                <div class="meta-field-pill">{field.label}</div>
+                                            </div>
+                                            <div class="mapping-icon">&#10145;</div>
+                                            <div class="mapping-col">
+                                                <div class="filter_label_css" style="margin-bottom: 4px;">Salesforce Contact Field</div>
+                                                <lightning-combobox
+                                                    data-key={field.key}
+                                                    value={field.value}
+                                                    options={field.options}
+                                                    onchange={handleMappingChange}
+                                                    placeholder="-- Do Not Map --"
+                                                    variant="label-hidden"
+                                                    class="custom-combobox">
+                                                </lightning-combobox>
                                             </div>
                                         </div>
-                                        <div class="mapping-icon">➜</div>
-                                        <div class="mapping-col">
-                                            <div class="filter_label_css" style="margin-bottom: 4px;">Salesforce Lead Field</div>
-                                            <lightning-combobox
-                                                data-key={field.key}
-                                                value={field.value}
-                                                options={field.options}
-                                                onchange={handleMappingChange}
-                                                placeholder="-- Do Not Map --"
-                                                variant="label-hidden"
-                                                class="custom-combobox">
-                                            </lightning-combobox>
-                                        </div>
-                                    </div>
-                                </template>
-                                
-                                <template if:false={currentFormFields.length}>
-                                    <div style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 12px;">No fields found in this form.</div>
-                                </template>
+                                    </template>
+                                    <template if:false={currentFormFields.length}>
+                                        <div class="wizard-hint-muted" style="text-align:center; margin-top:12px;">No fields found in this form.</div>
+                                    </template>
+                                </div>
                             </template>
+
                         </div>
-                        
+
+                        <!-- Footer -->
                         <div class="footerbtns">
                             <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeModal}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -247,47 +243,15 @@
                                 </svg>
                                 Cancel
                             </button>
-                            
-                            <template if:true={isStep1}>
-                                <button class="save_btn_css" disabled={isNextDisabledStep1} onclick={goNext}>
-                                    Next
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 4px;">
-                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </template>
-                            
-                            <template if:true={isStep2}>
-                                <button class="cancel_btn_css" onclick={goBack}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 4px;">
-                                        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    Back
-                                </button>
-                                <button class="save_btn_css" disabled={isNextDisabledStep2} onclick={goNext}>
-                                    Next
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 4px;">
-                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </template>
-                            
-                            <template if:true={isStep3}>
-                                <button class="cancel_btn_css" onclick={goBack}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 4px;">
-                                        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    Back
-                                </button>
-                                <button class="save_btn_css" disabled={isSaveDisabled} onclick={saveMapping}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
-                                    </svg>
-                                    Save Mapping
-                                </button>
-                            </template>
+                            <button class="save_btn_css" disabled={isSaveDisabled} onclick={saveMapping}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                </svg>
+                                Save Mapping
+                            </button>
                         </div>
                     </div>
+
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>

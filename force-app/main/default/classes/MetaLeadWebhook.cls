@@ -1,91 +1,132 @@
 @RestResource(urlMapping='/PAGE/webhooks/*')
 global without sharing class MetaLeadWebhook {
-    
-    // --- Configuration Getters ---
-    private static MVEX__MetaLeadConfig__c getConfig() { return MVEX__MetaLeadConfig__c.getInstance(); }
-    private static String accessToken { get { return getConfig().MVEX__ACCESS_TOKEN__c; } set; }
-    private static String verifyToken { get { return getConfig().MVEX__VERIFY_TOKEN__c; } set; }
-    private static String fbApiVersion { get { return getConfig().MVEX__FB_API_VERSION__c; } set; }
-    private static String appId { get { return getConfig().MVEX__APP_ID__c; } set; }
-    private static String appSecret { get { return getConfig().MVEX__APP_SECRET__c; } set; }
 
-    private static String pageId = '';
-    private static String formId = '';
-    private static String leadId = '';
-    
+    // ─── IDs parsed from the webhook payload ─────────────────────────────────────
+    private static String pageId  = '';
+    private static String formId  = '';
+    private static String leadId  = '';
+
+    // ─── Token helpers ────────────────────────────────────────────────────────────
+    /**
+     * Returns the System User Token stored by the SDK (Meta_Token_Config__c).
+     * This is the CORRECT token source — the old MVEX__MetaLeadConfig__c is legacy.
+     */
+    private static String getSystemUserToken() {
+        Meta_Token_Config__c cfg = Meta_Token_Config__c.getOrgDefaults();
+        if (cfg == null || String.isBlank(cfg.System_User_Token_1__c)) {
+            return null;
+        }
+        return cfg.System_User_Token_1__c + (String.isNotBlank(cfg.System_User_Token_2__c) ? cfg.System_User_Token_2__c : '');
+    }
+
+    /**
+     * Returns the verify token from the legacy config (still used for GET verification).
+     */
+    private static String getVerifyToken() {
+        MVEX__MetaLeadConfig__c cfg = MVEX__MetaLeadConfig__c.getInstance();
+        return cfg != null ? cfg.MVEX__VERIFY_TOKEN__c : '';
+    }
+
+    /**
+     * Fetches a Page Access Token on-the-fly using the System User Token.
+     * This is the SAME approach used in MetaAdsFormMappingController which works correctly.
+     */
+    private static String getPageAccessToken(String pId, String systemUserToken, String apiVersion, String baseUrl) {
+        try {
+            String url = baseUrl + '/' + apiVersion + '/' + pId + '?fields=access_token&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8');
+            Map<String, Object> resp = makeGetRequest(url);
+            if (resp.containsKey('access_token')) {
+                return (String) resp.get('access_token');
+            }
+        } catch (Exception e) {
+            System.debug('Failed to get Page Access Token: ' + e.getMessage());
+        }
+        // Fallback: use System User Token directly
+        return systemUserToken;
+    }
+
+    // ─── Webhook GET (verification handshake) ─────────────────────────────────────
     @HttpGet
     global static void doGet() {
-        try{
-            RestRequest request = RestContext.request;
+        try {
+            RestRequest  request  = RestContext.request;
             RestResponse response = RestContext.response;
-            if (request.params.get('hub.verify_token') == verifyToken) {
+            if (request.params.get('hub.verify_token') == getVerifyToken()) {
                 response.responseBody = Blob.valueOf(request.params.get('hub.challenge'));
             }
-        } catch(Exception e){
+        } catch (Exception e) {
             // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'doGet', e.getMessage());
         }
     }
-    
+
+    // ─── Webhook POST (lead received) ─────────────────────────────────────────────
     @HttpPost
     global static void handlePost() {
         RestResponse res = RestContext.response;
-        String rawPostData = RestContext.request.requestBody.toString();
-        
+        // Always respond 200 immediately so Meta doesn't retry
+        res.statusCode = 200;
+        res.responseBody = Blob.valueOf('EVENT_RECEIVED');
+
         try {
+            String rawPostData = RestContext.request.requestBody.toString();
             Map<String, Object> jsonData = (Map<String, Object>) JSON.deserializeUntyped(rawPostData);
             List<Object> entries = (List<Object>) jsonData.get('entry');
-            
-            if (entries != null && !entries.isEmpty()) {
-                Map<String, Object> entry = (Map<String, Object>) entries[0];
-                List<Object> changes = (List<Object>) entry.get('changes');
-                
-                if (changes != null && !changes.isEmpty()) {
-                    Map<String, Object> change = (Map<String, Object>) changes[0];
-                    Map<String, Object> value = (Map<String, Object>) change.get('value');
-                    
-                    leadId = String.valueOf(value.get('leadgen_id'));
-                    formId = String.valueOf(value.get('form_id'));
-                    pageId = String.valueOf(value.get('page_id'));
-                    
-                    if (String.isNotBlank(accessToken)) {
-                        Map<String, Object> leadData = fetchLeadData(leadId);
-                        String formName = fetchFormName(formId);
-                        createSalesforceContact(leadData, formName);
-                    }
-                }
+
+            if (entries == null || entries.isEmpty()) return;
+
+            Map<String, Object> entry   = (Map<String, Object>) entries[0];
+            List<Object>        changes = (List<Object>) entry.get('changes');
+            if (changes == null || changes.isEmpty()) return;
+
+            Map<String, Object> change = (Map<String, Object>) changes[0];
+            Map<String, Object> value  = (Map<String, Object>) change.get('value');
+
+            leadId = String.valueOf(value.get('leadgen_id'));
+            formId = String.valueOf(value.get('form_id'));
+            pageId = String.valueOf(value.get('page_id'));
+
+            // Resolve the correct token chain
+            String systemUserToken = getSystemUserToken();
+            if (String.isBlank(systemUserToken)) {
+                System.debug('MetaLeadWebhook: No System User Token found in Meta_Token_Config__c. Cannot fetch lead.');
+                return;
             }
-            res.statusCode = 200;
-            res.responseBody = Blob.valueOf('Webhook received successfully.');
+
+            Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
+            String apiVersion = config != null ? config.API_Version__c : 'v19.0';
+            String baseUrl    = config != null ? config.Base_Url__c    : 'https://graph.facebook.com';
+
+            // Derive Page Access Token (same method used in MetaAdsFormMappingController)
+            String pageAccessToken = getPageAccessToken(pageId, systemUserToken, apiVersion, baseUrl);
+
+            Map<String, Object> leadData = fetchLeadData(leadId, pageAccessToken, apiVersion, baseUrl);
+            String formName              = fetchFormName(formId, pageAccessToken, apiVersion, baseUrl);
+            createSalesforceContact(leadData, formName);
+
         } catch (Exception e) {
-            System.debug('Error: ' + e.getMessage());
+            System.debug('MetaLeadWebhook.handlePost Error: ' + e.getMessage() + ' | Line: ' + e.getLineNumber());
             // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'handlePost', e.getMessage());
-            res.statusCode = 500;
-            res.responseBody = Blob.valueOf('Error processing webhook: ' + e.getMessage());
         }
     }
-    
-    // API Call to get Lead Field Data
-    public static Map<String, Object> fetchLeadData(String leadgenId) {
-        String url = 'https://graph.facebook.com/' + fbApiVersion + '/' + leadgenId + 
-                     '?fields=field_data,platform,created_time,campaign_id,campaign_name&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8');
+
+    // ─── Graph API: fetch lead field data ─────────────────────────────────────────
+    public static Map<String, Object> fetchLeadData(String leadgenId, String token, String apiVersion, String baseUrl) {
+        String url = baseUrl + '/' + apiVersion + '/' + leadgenId
+                   + '?fields=field_data,platform,created_time,campaign_id,campaign_name'
+                   + '&access_token=' + EncodingUtil.urlEncode(token, 'UTF-8');
         return makeGetRequest(url);
     }
 
-    // API Call to get Form Name
-    public static String fetchFormName(String formId) {
-        try{
-            if(String.isBlank(formId)) return '';
-            String url = 'https://graph.facebook.com/' + fbApiVersion + '/' + formId + 
-                         '?fields=name&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8');
-            
+    // ─── Graph API: fetch form name ───────────────────────────────────────────────
+    public static String fetchFormName(String fId, String token, String apiVersion, String baseUrl) {
+        try {
+            if (String.isBlank(fId)) return '';
+            String url = baseUrl + '/' + apiVersion + '/' + fId
+                       + '?fields=name&access_token=' + EncodingUtil.urlEncode(token, 'UTF-8');
             Map<String, Object> response = makeGetRequest(url);
-            if(response.containsKey('name')){
-                return (String)response.get('name');
-            }
-            return '';
-        }catch(Exception e){
+            return response.containsKey('name') ? (String) response.get('name') : '';
+        } catch (Exception e) {
             System.debug('Error fetching form name: ' + e.getMessage());
-            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'fetchFormName', e.getMessage());
             return '';
         }
     }
@@ -106,11 +147,7 @@ global without sharing class MetaLeadWebhook {
         }
     }
     
-    public class FieldMapping {
-        public String metaField { get; set; }
-        public String salesforceField { get; set; }
-    }
-    
+
     private static void createSalesforceContact(Map<String, Object> leadData, String formName) {
         if (leadData.containsKey('id') || String.isNotBlank(leadId)) {
             Contact newContact = new Contact();
@@ -141,20 +178,35 @@ global without sharing class MetaLeadWebhook {
             }
 
             // --- 4. Process Field Mappings ---
-            List<MVEX__MetaLeadFieldMapping__mdt> mappingRecords = [SELECT MVEX__New_Field_Mapping__c FROM MVEX__MetaLeadFieldMapping__mdt LIMIT 1];
-            // Deserialize the JSON string into a list of mappings
-            List<FieldMapping> fieldMappings = new List<FieldMapping>();
-            if (!mappingRecords.isEmpty() && String.isNotBlank(mappingRecords[0].MVEX__New_Field_Mapping__c)) {
-                fieldMappings = (List<FieldMapping>) JSON.deserialize(mappingRecords[0].MVEX__New_Field_Mapping__c, List<FieldMapping>.class);
-            }
-            
-            // Create a map for easier lookup
-            Map<String, FieldMapping> fieldMappingMap = new Map<String, FieldMapping>();
-            for (FieldMapping mapping : fieldMappings) {
-                fieldMappingMap.put(mapping.metaField, mapping);
+            Map<String, String> currentFormMapping = new Map<String, String>();
+            try {
+                List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
+                if (!settings.isEmpty() && String.isNotBlank(settings[0].MVEX__Fields_Data__c)) {
+                    Map<String, Object> rootJson = (Map<String, Object>) JSON.deserializeUntyped(settings[0].MVEX__Fields_Data__c);
+                    
+                    if (rootJson.containsKey(pageId)) {
+                        Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(pageId);
+                        if (pageObj.containsKey('forms')) {
+                            Map<String, Object> formsObj = (Map<String, Object>) pageObj.get('forms');
+                            if (formsObj.containsKey(formId)) {
+                                Map<String, Object> formObj = (Map<String, Object>) formsObj.get(formId);
+                                if (formObj.containsKey('mappings')) {
+                                    Map<String, Object> mappingsObj = (Map<String, Object>) formObj.get('mappings');
+                                    for (String metaField : mappingsObj.keySet()) {
+                                        currentFormMapping.put(metaField, String.valueOf(mappingsObj.get(metaField)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.debug('Error fetching/parsing mappings JSON: ' + e.getMessage());
             }
             
             // Process field data
+            String unmappedData = '';
+            
             if (leadData.containsKey('field_data')) {
                 List<Object> fieldData = (List<Object>) leadData.get('field_data');
                 for (Object field : fieldData) {
@@ -163,15 +215,86 @@ global without sharing class MetaLeadWebhook {
                     List<Object> values = (List<Object>) fieldMap.get('values');
                     String fieldValue = values != null && !values.isEmpty() ? String.valueOf(values[0]) : '';
                     
-                    if (fieldMappingMap.containsKey(fieldName)) {
-                        newContact.put(fieldMappingMap.get(fieldName).salesforceField, fieldValue);
+                    if (String.isBlank(fieldValue)) continue;
+                    
+                    if (currentFormMapping.containsKey(fieldName)) {
+                        String sfField = currentFormMapping.get(fieldName);
+                        try {
+                            newContact.put(sfField, fieldValue);
+                        } catch (Exception e) {
+                            System.debug('Failed to map ' + fieldName + ' to ' + sfField);
+                            unmappedData += fieldName + ': ' + fieldValue + '\n';
+                        }
+                    } else {
+                        // Smart Fallback for unmapped fields
+                        String lowerName = fieldName.toLowerCase();
+                        if (lowerName.contains('email') && String.isBlank(newContact.Email)) {
+                            newContact.Email = fieldValue;
+                        } else if (lowerName.contains('phone') && String.isBlank(newContact.Phone)) {
+                            newContact.Phone = fieldValue;
+                        } else if (lowerName == 'first_name' && String.isBlank(newContact.FirstName)) {
+                            newContact.FirstName = fieldValue;
+                        } else if (lowerName == 'last_name' && String.isBlank(newContact.LastName)) {
+                            newContact.LastName = fieldValue;
+                        } else if (lowerName == 'full_name' && String.isBlank(newContact.LastName)) {
+                            List<String> nameParts = fieldValue.split(' ', 2);
+                            if (nameParts.size() > 1) {
+                                newContact.FirstName = nameParts[0];
+                                newContact.LastName = nameParts[1];
+                            } else {
+                                newContact.LastName = fieldValue;
+                            }
+                        } else {
+                            // Append unmapped fields to a string
+                            unmappedData += fieldName + ': ' + fieldValue + '\n';
+                        }
                     }
                 }
             }
 
-            // --- 5. Required Field Fallback ---
+            // Append unmapped data to Description if any
+            if (String.isNotBlank(unmappedData)) {
+                String existingDesc = String.isNotBlank(newContact.Description) ? newContact.Description + '\n\n' : '';
+                newContact.Description = existingDesc + '--- Unmapped Meta Lead Data ---\n' + unmappedData;
+            }
+
+            // --- 5. Required Field Fallback (Dynamic) ---
             if (String.isBlank(newContact.LastName)) {
-                newContact.LastName = 'Meta Lead ' + leadId;
+                newContact.LastName = 'Unknown Meta Lead';
+            }
+            
+            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Contact.fields.getMap();
+            for (String fieldName : fieldMap.keySet()) {
+                Schema.DescribeFieldResult dfr = fieldMap.get(fieldName).getDescribe();
+                
+                // A field is strictly required if it is createable, not nillable, and not defaulted on create.
+                if (dfr.isCreateable() && !dfr.isNillable() && !dfr.isDefaultedOnCreate()) {
+                    // Check if value is already populated
+                    Object currentVal = newContact.get(fieldName);
+                    if (currentVal == null || (currentVal instanceof String && String.isBlank((String)currentVal))) {
+                        Schema.DisplayType fType = dfr.getType();
+                        try {
+                            if (fType == Schema.DisplayType.String || fType == Schema.DisplayType.TextArea || fType == Schema.DisplayType.Phone || fType == Schema.DisplayType.Email || fType == Schema.DisplayType.URL) {
+                                newContact.put(fieldName, 'Empty');
+                            } else if (fType == Schema.DisplayType.Double || fType == Schema.DisplayType.Integer || fType == Schema.DisplayType.Currency || fType == Schema.DisplayType.Percent) {
+                                newContact.put(fieldName, 0);
+                            } else if (fType == Schema.DisplayType.Date) {
+                                newContact.put(fieldName, Date.today());
+                            } else if (fType == Schema.DisplayType.DateTime) {
+                                newContact.put(fieldName, DateTime.now());
+                            } else if (fType == Schema.DisplayType.Boolean) {
+                                newContact.put(fieldName, false);
+                            } else if (fType == Schema.DisplayType.Picklist || fType == Schema.DisplayType.MultiPicklist) {
+                                List<Schema.PicklistEntry> ple = dfr.getPicklistValues();
+                                if (!ple.isEmpty()) {
+                                    newContact.put(fieldName, ple[0].getValue());
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.debug('Could not assign fallback for required field: ' + fieldName);
+                        }
+                    }
+                }
             }
             
             // --- 6. Insert ---

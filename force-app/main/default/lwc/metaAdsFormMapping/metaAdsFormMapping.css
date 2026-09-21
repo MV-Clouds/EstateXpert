@@ -84,7 +84,7 @@
 }
 
 .expand-col {
-    width: 15%;
+    width: 0%;
     text-align: center;
 }
 
@@ -114,7 +114,6 @@
 .action-icon-container:hover {
     border-color: #0176D3;
     box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
-    transform: translateY(-1px);
 }
 
 .action-arrow {
@@ -164,27 +163,9 @@
     text-align: center;
 }
 
-.truncate_css {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 1px;
-}
-
-.truncate_css div {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .table-content .slds-table:not(.slds-no-row-hover) tbody tr.parent-row:hover>th,
 .table-content .slds-table:not(.slds-no-row-hover) tbody tr.parent-row:hover>td {
     background-color: #f3f4f6;
-}
-
-.table-content .slds-table thead tr:hover > th,
-.table-content .slds-table thead th:hover {
-    background-color: inherit !important;
 }
 
 .accordion-row:hover > td {
@@ -205,11 +186,6 @@
     overflow: auto;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border: none;
-}
-
-.accordion-content .table-content table.slds-table td,
-.accordion-content .table-content table.slds-table th {
-    border: none !important;
 }
 
 .section_css {
@@ -410,6 +386,10 @@
 
 .form-group{
     padding-top: 0px;
+}
+
+.table-content .slds-table:not(.slds-no-row-hover) tbody tr:hover > th{
+    background-color: #0176D3;
 }
 
 @media only screen and (max-width: 900px) {

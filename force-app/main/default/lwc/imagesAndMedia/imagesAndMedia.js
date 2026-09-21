@@ -352,12 +352,8 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
             fetchListingAndImages({ recordId: this.recordId })
                 .then(result => {
                     if (result != null) {
-                        console.log('result ',result);
-                        
                         this.data = result.listingImages;
                         this.propertyId = result.propertyId;
-                        console.log('result property ',this.propertyId);
-                        
                         this.exposeData = this.data.filter(media => media.MVEX__Sort_on_Expose__c !== null && media.MVEX__IsOnExpose__c !== false).sort((a, b) => a.MVEX__Sort_on_Expose__c - b.MVEX__Sort_on_Expose__c);
                         this.websiteData = this.data.filter(media => media.MVEX__Sort_on_Website__c !== null && media.MVEX__IsOnWebsite__c !== false).sort((a, b) => a.MVEX__Sort_on_Website__c - b.MVEX__Sort_on_Website__c);
                         this.portalData = this.data.filter(media => media.MVEX__Sort_on_Portal_Feed__c !== null && media.MVEX__IsOnPortalFeed__c !== false).sort((a, b) => a.MVEX__Sort_on_Portal_Feed__c - b.MVEX__Sort_on_Portal_Feed__c);

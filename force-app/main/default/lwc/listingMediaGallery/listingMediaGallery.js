@@ -112,7 +112,6 @@ export default class ListingMediaGallery extends LightningElement {
             this.subscription = subscribe(this.messageContext, Refresh_cmp, (message) => {
                 if (message.refresh === true) {
                     this.fetchingdata();
-                    message.refresh = false;
                 }
             });
             this.data = this.fetchingdata();

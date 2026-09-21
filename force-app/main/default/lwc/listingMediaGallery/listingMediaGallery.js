@@ -5,9 +5,11 @@ import Refresh_cmp from '@salesforce/messageChannel/refreshImagesChannel__c';
 import { refreshApex } from '@salesforce/apex';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import placeholderImage from '@salesforce/resourceUrl/placeholderImage';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class ListingMediaGallery extends LightningElement {
+    placeholderImage = placeholderImage;
     @api recordId;
     @track data = [];
     @track taglist = [];
@@ -271,7 +273,12 @@ export default class ListingMediaGallery extends LightningElement {
     openImageModel() {
         try {
             this.imageLoading = true;
-            this.modalImageUrl = this.currentImageUrl;
+            const mainImg = this.template.querySelector('.image-wrapper img');
+            if (mainImg && mainImg.src && mainImg.src.includes('placeholderImage')) {
+                this.modalImageUrl = placeholderImage;
+            } else {
+                this.modalImageUrl = this.currentImageUrl;
+            }
             this.isModalOpen = true;
         } catch (error) {
             errorDebugger('ListingMediaGallery', 'openImageModel', error, 'warn', 'Error in openImageModel');
@@ -286,5 +293,26 @@ export default class ListingMediaGallery extends LightningElement {
     */
     handleImageLoad() {
         this.imageLoading = false;
+    }
+
+    /**
+    * Method Name: handleImageError
+    * @description: Used to handle image loading errors and display placeholder image.
+    * Created Date: 21/09/2026
+    * Created By: Karan Singh
+    */
+    handleImageError(event) {
+        try {
+            const img = event ? (event.target || event.currentTarget) : null;
+            if (img && (!img.src || !img.src.includes('placeholderImage'))) {
+                img.src = placeholderImage;
+            }
+            if (this.isModalOpen) {
+                this.imageLoading = false;
+                this.modalImageUrl = placeholderImage;
+            }
+        } catch (error) {
+            errorDebugger('ListingMediaGallery', 'handleImageError', error, 'warn', 'Error in handleImageError');
+        }
     }
 }

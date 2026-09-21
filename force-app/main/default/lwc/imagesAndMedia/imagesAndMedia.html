@@ -91,7 +91,7 @@
                       </svg>
                     </div>
                     <img src={imageUrl.MVEX__BaseUrl__c} alt="Image" draggable="true" ondragstart={handleDragStart}
-                      data-index={index}></img>
+                      data-index={index} onerror={handleImageError}></img>
                   </div>
                 </template>
               </div>
@@ -136,7 +136,7 @@
                       </svg>
                     </div>
                     <img key={imageUrl.Id} src={imageUrl.MVEX__BaseUrl__c} alt="Image" draggable="true"
-                      ondragstart={handleDragStart} data-index={index}></img>
+                      ondragstart={handleDragStart} data-index={index} onerror={handleImageError}></img>
                   </div>
                 </template>
               </div>
@@ -181,7 +181,7 @@
                       </svg>
                     </div>
                     <img key={imageUrl.Id} src={imageUrl.MVEX__BaseUrl__c} alt="Image" draggable="true"
-                      ondragstart={handleDragStart} data-index={index}></img>
+                      ondragstart={handleDragStart} data-index={index} onerror={handleImageError}></img>
                   </div>
                 </template>
               </div>
@@ -237,7 +237,7 @@
                         <div class="slds-truncate font_style_css">
                           <img src={item.MVEX__BaseUrl__c}
                             class="slds-avatar slds-avatar_rectangle slds-avatar_large customimg" alt="Thumbnail"
-                            draggable="false" />
+                            draggable="false" onerror={handleImageError} />
                         </div>
                       </td>
                       <td data-label="Title" class="truncate_css">
@@ -341,7 +341,8 @@
                 <div class="image_info_cls">
                   <div class="img-section">
                     <img src={item.MVEX__BaseUrl__c}
-                      class="slds-avatar slds-avatar_rectangle slds-avatar_large customimg" alt="Thumbnail" />
+                      class="slds-avatar slds-avatar_rectangle slds-avatar_large customimg" alt="Thumbnail"
+                      onerror={handleImageError} />
                   </div>
                   <div class="detail-section">
                     <div class="name-section">
@@ -605,7 +606,7 @@
       </div>
       <div class="img_preview_container">
         <template if:true={isImageHavePreview}>
-          <img src={previewImageSrc} onload={handleImageLoaded} onerror={handleImageNotLoaded}
+          <img src={previewImageSrc} onload={handleImageLoaded} onerror={handleImageError}
             onclick={stopEventPropogation} />
         </template>
         <template if:false={isImageHavePreview}>

@@ -10,10 +10,12 @@ import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import placeholderImage from '@salesforce/resourceUrl/placeholderImage';
 import { errorDebugger } from "c/globalProperties";
 import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
+    placeholderImage = placeholderImage;
     @api recordId;
     @track showSpinner = true;
     @track data = [];
@@ -1480,15 +1482,37 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     }
 
     /**
-    * Method Name: handleImageNotLoaded
-    * @description: Used to handle image not loaded.
-    * Created Date: 27/06/2024
-    * Last Updated: 23/12/2024
+    * Method Name: handleImageError
+    * @description: Used to handle image loading errors and display placeholder image.
+    * Created Date: 21/09/2026
     * Created By: Karan Singh
     */
-    handleImageNotLoaded() {
-        this.isImageHavePreview = false;
-        this.previewImgSpinner = false;
+    handleImageError(event) {
+        try {
+            const img = event ? (event.target || event.currentTarget) : null;
+            if (img && !img.dataset.fallbackApplied) {
+                img.dataset.fallbackApplied = 'true';
+                img.src = placeholderImage;
+            }
+            if (this.showImagePreview) {
+                this.previewImageSrc = placeholderImage;
+                this.isImageHavePreview = true;
+                this.previewImgSpinner = false;
+            }
+        } catch (error) {
+            errorDebugger('ImagesAndMedia', 'handleImageError', error, 'warn', 'Error while handling image error');
+        }
+    }
+
+    /**
+    * Method Name: handleImageNotLoaded
+    * @description: Used to handle image not loaded in preview modal.
+    * Created Date: 27/06/2024
+    * Last Updated: 21/09/2026
+    * Created By: Karan Singh
+    */
+    handleImageNotLoaded(event) {
+        this.handleImageError(event);
     }
 
     /**
@@ -1507,14 +1531,9 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
             var imageId = event.currentTarget.dataset.recid;
             var imageTitle = event.currentTarget.dataset.description;
             this.viewAllImageList = this.data;
-            if (imageSize == 'External' || mimeType == 'video/mp4') {
-                const config = {
-                    type: 'standard__webPage',
-                    attributes: {
-                        url: imageExSrc
-                    }
-                };
-                this[NavigationMixin.Navigate](config);
+            const isVideo = mimeType === 'video/mp4' || mimeType === 'video/quicktime' || (mimeType && mimeType.startsWith('video/'));
+            if (imageSize == 'External' || isVideo) {
+                window.open(imageExSrc, '_blank');
             } else {
                 this.changeImage(imageId, null);
                 this.openCustomPreview(imageSrc, imageTitle, imageId);

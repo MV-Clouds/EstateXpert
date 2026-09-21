@@ -41,7 +41,7 @@
                     <template if:true={showSpinner}>
                         <lightning-spinner size="medium"></lightning-spinner>
                     </template>
-                    <img src={currentImageUrl} alt="Current Image" draggable="false" />
+                    <img src={currentImageUrl} alt="Current Image" draggable="false" onerror={handleImageError} />
                 </div>
                 
                 <template if:true={hasMultipleImages}>
@@ -108,7 +108,7 @@
                         <p class="fullscreen-loading-text">Loading image...</p>
                     </div>
                 </template>
-                <img src={modalImageUrl} alt="Image Preview" class="fullscreen-image" draggable="false" onload={handleImageLoad} />
+                <img src={modalImageUrl} alt="Image Preview" class="fullscreen-image" draggable="false" onload={handleImageLoad} onerror={handleImageError} />
             </div>
         </div>
     </template>

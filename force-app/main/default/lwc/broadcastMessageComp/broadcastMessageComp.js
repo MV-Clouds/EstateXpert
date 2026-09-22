@@ -792,7 +792,7 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
         const name        = (this.broadcastGroupName || '').trim();
         const description = (this.messageText       || '').trim();
 
-        if (!name || !description) {
+        if (!name) {
             this.showToast('Error', 'Please fill in all required fields', 'error');
             return;
         }
@@ -840,14 +840,13 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 this.closePopUp();
                 this.selectedRecords.clear();
                 this.updateShownData();
+                this.navigateToAllGroup();
             })
             .catch(error => {
-                this.isLoading = false;
                 this.showToast('Error', error.body?.message || 'Failed to save group', 'error');
             })
             .finally(() => {
                 this.isLoading = false;
-                this.navigateToAllGroup();
             });
     }
 
@@ -867,6 +866,9 @@ export default class BroadcastMessageComp extends NavigationMixin(LightningEleme
                 attributes: {
                     apiName: "MVEX__Multi_Channel_Group",
                 },
+                state: {
+                    c__refresh: true
+                }
             });
         } catch (error) {
             errorDebugger('broadcastMessageComp', 'navigateToAllGroup', error, 'warn', 'Error in navigateToAllGroup');

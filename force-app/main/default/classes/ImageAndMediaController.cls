@@ -35,11 +35,7 @@ public with sharing class ImageAndMediaController {
         try {
             List<MVEX__Listing__c> listingRecord = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c WHERE Id =: recordId WITH USER_MODE LIMIT 1];
             if (!listingRecord.isEmpty()) {
-                List<MVEX__Property_File__c> listingImages = [SELECT Id, MVEX__BaseUrl__c, MVEX__Tags__c, Name, MVEX__ExternalLink__c, MVEX__Size__c, MVEX__Property__c, 
-                                                                MVEX__IsOnPortalFeed__c, MVEX__IsOnWebsite__c, MVEX__IsOnExpose__c, MVEX__Sort_on_Expose__c, 
-                                                                MVEX__Sort_on_Portal_Feed__c, MVEX__Sort_on_Website__c, MVEX__Filename__c, MVEX__MimeType__c FROM 
-                                                                MVEX__Property_File__c WHERE MVEX__Property__c =: listingRecord[0].MVEX__Property__c 
-                                                                WITH USER_MODE ORDER BY Name];
+                List<MVEX__Property_File__c> listingImages = [SELECT Id, MVEX__BaseUrl__c, MVEX__Tags__c, Name, MVEX__ExternalLink__c, MVEX__Size__c, MVEX__Property__c, MVEX__IsOnPortalFeed__c, MVEX__IsOnWebsite__c, MVEX__IsOnExpose__c, MVEX__Sort_on_Expose__c, MVEX__Sort_on_Portal_Feed__c, MVEX__Sort_on_Website__c, MVEX__Filename__c, MVEX__MimeType__c FROM MVEX__Property_File__c WHERE MVEX__Property__c =: listingRecord[0].MVEX__Property__c WITH USER_MODE ORDER BY Name];
                 listingImages.sort();
 
                 newWrap.propertyId = listingRecord[0].MVEX__Property__c;

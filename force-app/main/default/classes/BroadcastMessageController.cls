@@ -4,14 +4,9 @@ public with sharing class BroadcastMessageController {
     public static Map<String, Object> getObjectConfigs() {
         try {
             Map<String, Object> result = new Map<String, Object>();
-            List<Object_Config__mdt> objectConfigList = [
-                SELECT ChatWindowConfigInfo__c 
-                FROM Object_Config__mdt 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+            List<MVEX__Object_Config__mdt> objectConfigList = [SELECT MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
     
-            Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].ChatWindowConfigInfo__c);
+            Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
             
             List<Map<String, String>> objectOptions = new List<Map<String, String>>();
             Map<String, Map<String, String>> configMap = new Map<String, Map<String, String>>();
@@ -52,10 +47,10 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static List<Broadcast_Group__c> getBroadcastGroups() {
-        List<Broadcast_Group__c> broadcastGroups = new List<Broadcast_Group__c>();
+    public static List<MVEX__Broadcast_Group__c> getBroadcastGroups() {
+        List<MVEX__Broadcast_Group__c> broadcastGroups = new List<MVEX__Broadcast_Group__c>();
         try {
-            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WHERE Communication_Type__c IN ('Both', 'WhatsApp') WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            broadcastGroups = [SELECT Id, Name, MVEX__Count_of_Members__c, MVEX__Description__c, MVEX__Object_Name__c, MVEX__Phone_Field__c, MVEX__Communication_Type__c FROM MVEX__Broadcast_Group__c WHERE MVEX__Communication_Type__c IN ('Both', 'WhatsApp') WITH USER_MODE ORDER BY LastModifiedDate DESC];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastGroups', e.getMessage());
         }
@@ -63,10 +58,10 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static List<Broadcast_Group__c> getAllBroadcastGroups() {
-        List<Broadcast_Group__c> broadcastGroups = new List<Broadcast_Group__c>();
+    public static List<MVEX__Broadcast_Group__c> getAllBroadcastGroups() {
+        List<MVEX__Broadcast_Group__c> broadcastGroups = new List<MVEX__Broadcast_Group__c>();
         try {
-            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c, CreatedDate FROM Broadcast_Group__c WHERE Communication_Type__c IN ('Both', 'WhatsApp', 'Email') WITH USER_MODE ORDER BY CreatedDate DESC];
+            broadcastGroups = [SELECT Id, Name, MVEX__Count_of_Members__c, MVEX__Description__c, MVEX__Object_Name__c, MVEX__Phone_Field__c, MVEX__Communication_Type__c, CreatedDate FROM MVEX__Broadcast_Group__c WHERE MVEX__Communication_Type__c IN ('Both', 'WhatsApp', 'Email') WITH USER_MODE ORDER BY CreatedDate DESC];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getAllBroadcastGroups', e.getMessage());
         }
@@ -74,10 +69,10 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static List<Broadcast_Group__c> getBroadcastEmailGroups() {
-        List<Broadcast_Group__c> broadcastGroups = new List<Broadcast_Group__c>();
+    public static List<MVEX__Broadcast_Group__c> getBroadcastEmailGroups() {
+        List<MVEX__Broadcast_Group__c> broadcastGroups = new List<MVEX__Broadcast_Group__c>();
         try {
-            broadcastGroups = [SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Communication_Type__c FROM Broadcast_Group__c WHERE Communication_Type__c IN ('Both', 'Email') WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            broadcastGroups = [SELECT Id, Name, MVEX__Count_of_Members__c, MVEX__Description__c, MVEX__Object_Name__c, MVEX__Phone_Field__c, MVEX__Communication_Type__c FROM MVEX__Broadcast_Group__c WHERE MVEX__Communication_Type__c IN ('Both', 'Email') WITH USER_MODE ORDER BY LastModifiedDate DESC];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastEmailGroups', e.getMessage());
         }
@@ -90,16 +85,11 @@ public with sharing class BroadcastMessageController {
         try {
             String groupIdStr = String.valueOf(groupId);
 
-            // Check WhatsApp Broadcasts (Broadcast_Group_IDs__c is comma-separated)
-            List<Broadcast__c> broadcasts = [
-                SELECT Id, Name, Status__c, Broadcast_Group_IDs__c
-                FROM Broadcast__c
-                WHERE Status__c != 'Completed'
-                WITH USER_MODE
-            ];
-            for (Broadcast__c b : broadcasts) {
-                if (String.isBlank(b.Broadcast_Group_IDs__c)) continue;
-                List<String> groupIds = b.Broadcast_Group_IDs__c.split(',');
+            // Check WhatsApp Broadcasts (MVEX__Broadcast_Group_IDs__c is comma-separated)
+            List<MVEX__Broadcast__c> broadcasts = [SELECT Id, Name, MVEX__Status__c, MVEX__Broadcast_Group_IDs__c FROM MVEX__Broadcast__c WHERE MVEX__Status__c != 'Completed' WITH USER_MODE LIMIT 50000];
+            for (MVEX__Broadcast__c b : broadcasts) {
+                if (String.isBlank(b.MVEX__Broadcast_Group_IDs__c)) continue;
+                List<String> groupIds = b.MVEX__Broadcast_Group_IDs__c.split(',');
                 for (String gId : groupIds) {
                     if (gId.trim() == groupIdStr) {
                         activeCampaignNames.add('Broadcast: ' + b.Name);
@@ -108,19 +98,14 @@ public with sharing class BroadcastMessageController {
                 }
             }
 
-            // Check Email Marketing Campaigns (Selected_Broadcast_Groups__c is @@@ separated)
-            List<Marketing_Campaign__c> campaigns = [
-                SELECT Id, Label__c, Status__c, Selected_Broadcast_Groups__c
-                FROM Marketing_Campaign__c
-                WHERE Status__c != 'Completed'
-                WITH USER_MODE
-            ];
-            for (Marketing_Campaign__c c : campaigns) {
-                if (String.isBlank(c.Selected_Broadcast_Groups__c)) continue;
-                List<String> groupIds = c.Selected_Broadcast_Groups__c.split('@@@');
+            // Check Email Marketing Campaigns (MVEX__Selected_Broadcast_Groups__c is @@@ separated)
+            List<MVEX__Marketing_Campaign__c> campaigns = [SELECT Id, MVEX__Label__c, MVEX__Status__c, MVEX__Selected_Broadcast_Groups__c FROM MVEX__Marketing_Campaign__c WHERE MVEX__Status__c != 'Completed' WITH USER_MODE LIMIT 50000];
+            for (MVEX__Marketing_Campaign__c c : campaigns) {
+                if (String.isBlank(c.MVEX__Selected_Broadcast_Groups__c)) continue;
+                List<String> groupIds = c.MVEX__Selected_Broadcast_Groups__c.split('@@@');
                 for (String gId : groupIds) {
                     if (gId.trim() == groupIdStr) {
-                        activeCampaignNames.add('Campaign: ' + c.Label__c);
+                        activeCampaignNames.add('Campaign: ' + c.MVEX__Label__c);
                         break;
                     }
                 }
@@ -134,11 +119,7 @@ public with sharing class BroadcastMessageController {
     @AuraEnabled
     public static void deleteBroadcastGroup(Id groupId) {
         try {
-            Broadcast_Group__c groupToDelete = [
-                SELECT Id FROM Broadcast_Group__c 
-                WHERE Id = :groupId 
-                WITH USER_MODE 
-                LIMIT 1
+            MVEX__Broadcast_Group__c groupToDelete = [SELECT Id FROM MVEX__Broadcast_Group__c WHERE Id = :groupId WITH USER_MODE LIMIT 1
             ];
             delete as user groupToDelete;
         } catch (Exception e) {
@@ -147,10 +128,10 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static List<Broadcast__c> getBroadcastRecs() {
-        List<Broadcast__c> broadcastRecs = new List<Broadcast__c>();
+    public static List<MVEX__Broadcast__c> getBroadcastRecs() {
+        List<MVEX__Broadcast__c> broadcastRecs = new List<MVEX__Broadcast__c>();
         try {
-            broadcastRecs = [SELECT Id, Name, Recipient_Count__c, WhatsappTemplate__c, WhatsappTemplate__r.Template_Name__c, Status__c, Total_Sent__c, Total_Delivered__c, Total_Read__c, Total_Failed__c FROM Broadcast__c WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            broadcastRecs = [SELECT Id, Name, MVEX__Recipient_Count__c, MVEX__WhatsappTemplate__c, MVEX__WhatsappTemplate__r.MVEX__Template_Name__c, MVEX__Status__c, MVEX__Total_Sent__c, MVEX__Total_Delivered__c, MVEX__Total_Read__c, MVEX__Total_Failed__c FROM MVEX__Broadcast__c WITH USER_MODE ORDER BY LastModifiedDate DESC];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastRecs', e.getMessage());
         }
@@ -161,25 +142,22 @@ public with sharing class BroadcastMessageController {
     public static List<Map<String, Object>> getBroadcastRecsWithReplies() {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
         try {
-            List<Broadcast__c> broadcasts = [
-                SELECT Id, Name,Status__c, CreatedDate, Recipient_Count__c, MVEX__Schedule_DateTime__c,
-                    Total_Sent__c, Total_Delivered__c, Total_Read__c,MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
-                FROM Broadcast__c 
-                ORDER BY CreatedDate DESC
-            ];
+            List<MVEX__Broadcast__c> broadcasts = [SELECT Id, Name,MVEX__Status__c, CreatedDate, MVEX__Recipient_Count__c, MVEX__Schedule_DateTime__c,
+                                                    MVEX__Total_Sent__c, MVEX__Total_Delivered__c, MVEX__Total_Read__c,MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
+                                                    FROM MVEX__Broadcast__c WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 50000];
 
             Map<Id, Map<String, Integer>> broadcastStats = new Map<Id, Map<String, Integer>>();
-            for (Broadcast__c b : broadcasts) {
+            for (MVEX__Broadcast__c b : broadcasts) {
                 broadcastStats.put(b.Id, new Map<String, Integer>{
                     'Sent' => 0, 'Delivered' => 0, 'Seen' => 0, 'Failed' => 0
                 });
             }
 
             for (AggregateResult ar : [
-                SELECT WB_Broadcast__c broadcastId, Message_Status__c status, COUNT(Id) cnt
-                FROM Chat__c
-                WHERE WB_Broadcast__c IN :broadcasts AND Type_of_Message__c IN ('Outbound Messages', 'OutBound Messages')
-                GROUP BY WB_Broadcast__c, Message_Status__c
+                SELECT MVEX__WB_Broadcast__c broadcastId, MVEX__Message_Status__c status, COUNT(Id) cnt
+                FROM MVEX__Chat__c
+                WHERE MVEX__WB_Broadcast__c IN :broadcasts AND MVEX__Type_of_Message__c IN ('Outbound Messages', 'OutBound Messages')
+                GROUP BY MVEX__WB_Broadcast__c, MVEX__Message_Status__c
             ]) {
                 Id bId = (Id) ar.get('broadcastId');
                 String status = (String) ar.get('status');
@@ -191,7 +169,7 @@ public with sharing class BroadcastMessageController {
                 else if (status == 'Failed' || status == 'failed') broadcastStats.get(bId).put('Failed', broadcastStats.get(bId).get('Failed') + cnt);
             }
 
-            for (Broadcast__c b : broadcasts) {
+            for (MVEX__Broadcast__c b : broadcasts) {
                 Integer sent = broadcastStats.get(b.Id).get('Sent');
                 Integer delivered = broadcastStats.get(b.Id).get('Delivered');
                 Integer read = broadcastStats.get(b.Id).get('Seen');
@@ -200,13 +178,13 @@ public with sharing class BroadcastMessageController {
                 result.add(new Map<String, Object>{
                     'Id' => b.Id,
                     'Name' => b.Name,
-                    'MVEX__Status__c' => b.Status__c,
+                    'MVEX__MVEX__Status__c' => b.MVEX__Status__c,
                     'CreatedDate' => b.CreatedDate,
-                    'MVEX__Recipient_Count__c' => b.Recipient_Count__c,
+                    'MVEX__MVEX__Recipient_Count__c' => b.MVEX__Recipient_Count__c,
                     'MVEX__Total_Sent__c' => sent + delivered + read,
-                    'MVEX__Total_Delivered__c' => delivered + read,
+                    'MVEX__MVEX__Total_Delivered__c' => delivered + read,
                     'MVEX__Total_Failed__c' => failed,
-                    'MVEX__Total_Read__c' => read,
+                    'MVEX__MVEX__Total_Read__c' => read,
                     'MVEX__Template_Name__c' => b.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c,
                     'MVEX__Schedule_DateTime__c' => b.MVEX__Schedule_DateTime__c
                 });
@@ -222,11 +200,11 @@ public with sharing class BroadcastMessageController {
         Map<String, Object> result = new Map<String, Object>();
         try {
             // Query single broadcast
-            Broadcast__c broadcast = [
-                SELECT Id, Name, Status__c, CreatedDate, Recipient_Count__c, Schedule_DateTime__c,
-                    Total_Sent__c, Total_Delivered__c, Total_Read__c,
+            MVEX__Broadcast__c broadcast = [
+                SELECT Id, Name, MVEX__Status__c, CreatedDate, MVEX__Recipient_Count__c, MVEX__Schedule_DateTime__c,
+                    MVEX__Total_Sent__c, MVEX__Total_Delivered__c, MVEX__Total_Read__c,
                     MVEX__WhatsappTemplate__r.MVEX__Template_Name__c
-                FROM Broadcast__c 
+                FROM MVEX__Broadcast__c 
                 WHERE Id = :broadcastId
                 LIMIT 1
             ];
@@ -234,10 +212,10 @@ public with sharing class BroadcastMessageController {
             Integer sent = 0, delivered = 0, read = 0, failed = 0;
 
             for (AggregateResult ar : [
-                SELECT Message_Status__c status, COUNT(Id) cnt
-                FROM Chat__c
-                WHERE WB_Broadcast__c = :broadcastId AND Type_of_Message__c IN ('Outbound Messages', 'OutBound Messages')
-                GROUP BY Message_Status__c
+                SELECT MVEX__Message_Status__c status, COUNT(Id) cnt
+                FROM MVEX__Chat__c
+                WHERE MVEX__WB_Broadcast__c = :broadcastId AND MVEX__Type_of_Message__c IN ('Outbound Messages', 'OutBound Messages')
+                GROUP BY MVEX__Message_Status__c
             ]) {
                 String status = (String) ar.get('status');
                 Integer cnt = (Integer) ar.get('cnt');
@@ -250,12 +228,12 @@ public with sharing class BroadcastMessageController {
 
             result.put('Id', broadcast.Id);
             result.put('Name', broadcast.Name);
-            result.put('MVEX__Status__c', broadcast.Status__c);
-            result.put('MVEX__Recipient_Count__c', broadcast.Recipient_Count__c);
+            result.put('MVEX__MVEX__Status__c', broadcast.MVEX__Status__c);
+            result.put('MVEX__MVEX__Recipient_Count__c', broadcast.MVEX__Recipient_Count__c);
             result.put('MVEX__Total_Sent__c', sent + delivered + read);
-            result.put('MVEX__Total_Delivered__c', delivered + read);
+            result.put('MVEX__MVEX__Total_Delivered__c', delivered + read);
             result.put('MVEX__Total_Failed__c', failed);
-            result.put('MVEX__Total_Read__c', read);
+            result.put('MVEX__MVEX__Total_Read__c', read);
             result.put('MVEX__Template_Name__c', broadcast.MVEX__WhatsappTemplate__r.MVEX__Template_Name__c);
             result.put('MVEX__Schedule_DateTime__c', broadcast.MVEX__Schedule_DateTime__c);
         } catch (Exception e) {
@@ -265,21 +243,21 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static Map<String, List<WhatsappTemplate__c>> getTemplatesByObject() {
-        Map<String, List<WhatsappTemplate__c>> objectTemplateMap = new Map<String, List<WhatsappTemplate__c>>();
+    public static Map<String, List<MVEX__WhatsappTemplate__c>> getTemplatesByObject() {
+        Map<String, List<MVEX__WhatsappTemplate__c>> objectTemplateMap = new Map<String, List<MVEX__WhatsappTemplate__c>>();
         try {
-            List<WhatsappTemplate__c> templates = [
-                SELECT Id, Template_Name__c, (SELECT Object_Name__c FROM WB_Template_Variables__r) 
-                FROM WhatsappTemplate__c 
-                WHERE Status__c = 'Active-Quality Pending'
+            List<MVEX__WhatsappTemplate__c> templates = [
+                SELECT Id, MVEX__Template_Name__c, (SELECT MVEX__Object_Name__c FROM MVEX__WB_Template_Variables__r) 
+                FROM MVEX__WhatsappTemplate__c 
+                WHERE MVEX__Status__c = 'Active-Quality Pending'
                 WITH USER_MODE 
                 ORDER BY LastModifiedDate DESC
             ];
     
-            for (WhatsappTemplate__c template : templates) {
-                String objectName = template.WB_Template_Variables__r.isEmpty() ? 'Generic' : template.WB_Template_Variables__r[0].Object_Name__c;
+            for (MVEX__WhatsappTemplate__c template : templates) {
+                String objectName = template.MVEX__WB_Template_Variables__r.isEmpty() ? 'Generic' : template.MVEX__WB_Template_Variables__r[0].MVEX__Object_Name__c;
                 if (!objectTemplateMap.containsKey(objectName)) {
-                    objectTemplateMap.put(objectName, new List<WhatsappTemplate__c>());
+                    objectTemplateMap.put(objectName, new List<MVEX__WhatsappTemplate__c>());
                 }
                 objectTemplateMap.get(objectName).add(template);
             }
@@ -305,55 +283,51 @@ public with sharing class BroadcastMessageController {
             String emailField = (String) request.get('emailField');
             String communicationType = (String) request.get('communicationType');
 
-            Broadcast_Group__c broadcastGroup;
+            MVEX__Broadcast_Group__c broadcastGroup;
 
             if (isUpdate && String.isNotBlank(broadcastGroupId)) {
                 broadcastGroup = [
-                    SELECT Id, Name, Description__c, Object_Name__c, List_View__c, Phone_Field__c, Communication_Type__c, Email_Field__c
-                    FROM Broadcast_Group__c
+                    SELECT Id, Name, MVEX__Description__c, MVEX__Object_Name__c, MVEX__List_View__c, MVEX__Phone_Field__c, MVEX__Communication_Type__c, MVEX__Email_Field__c
+                    FROM MVEX__Broadcast_Group__c
                     WHERE Id = :broadcastGroupId
                     WITH USER_MODE
                     LIMIT 1
                 ];
 
                 broadcastGroup.Name = name;
-                broadcastGroup.Description__c = description;
-                broadcastGroup.Object_Name__c = objectApiName;
-                broadcastGroup.List_View__c = listViewName;
-                broadcastGroup.Phone_Field__c = phoneField;
-                broadcastGroup.Communication_Type__c = communicationType;
-                broadcastGroup.Email_Field__c = emailField;
+                broadcastGroup.MVEX__Description__c = description;
+                broadcastGroup.MVEX__Object_Name__c = objectApiName;
+                broadcastGroup.MVEX__List_View__c = listViewName;
+                broadcastGroup.MVEX__Phone_Field__c = phoneField;
+                broadcastGroup.MVEX__Communication_Type__c = communicationType;
+                broadcastGroup.MVEX__Email_Field__c = emailField;
 
                 Database.SaveResult updateResult = Database.update(broadcastGroup, false, AccessLevel.USER_MODE);
             } else {
-                broadcastGroup = new Broadcast_Group__c(
+                broadcastGroup = new MVEX__Broadcast_Group__c(
                     Name = name,
-                    Description__c = description,
-                    Object_Name__c = objectApiName,
-                    List_View__c = listViewName,
-                    Phone_Field__c = phoneField,
-                    Email_Field__c = emailField,
-                    Communication_Type__c = communicationType
+                    MVEX__Description__c = description,
+                    MVEX__Object_Name__c = objectApiName,
+                    MVEX__List_View__c = listViewName,
+                    MVEX__Phone_Field__c = phoneField,
+                    MVEX__Email_Field__c = emailField,
+                    MVEX__Communication_Type__c = communicationType
                 );
                 Database.SaveResult insertResult = Database.insert(broadcastGroup, false, AccessLevel.USER_MODE);
             }
 
-            // Use Member_Record_Id__c as unique key for update
-            Map<String, Broadcast_Group_Member__c> existingMembersMap = new Map<String, Broadcast_Group_Member__c>();
+            // Use MVEX__Member_Record_Id__c as unique key for update
+            Map<String, MVEX__Broadcast_Group_Member__c> existingMembersMap = new Map<String, MVEX__Broadcast_Group_Member__c>();
             if (isUpdate) {
-                for (Broadcast_Group_Member__c member : [
-                    SELECT Id, Member_Record_Id__c 
-                    FROM Broadcast_Group_Member__c 
-                    WHERE Broadcast_Group_ID__c = :broadcastGroup.Id
-                    WITH USER_MODE
-                ]) {
-                    if (!String.isBlank(member.Member_Record_Id__c)) {
-                        existingMembersMap.put(member.Member_Record_Id__c, member);
+                for (MVEX__Broadcast_Group_Member__c member : [SELECT Id, MVEX__Member_Record_Id__c FROM MVEX__Broadcast_Group_Member__c 
+                                                                WHERE MVEX__Broadcast_Group_ID__c = :broadcastGroup.Id WITH USER_MODE]) {
+                    if (!String.isBlank(member.MVEX__Member_Record_Id__c)) {
+                        existingMembersMap.put(member.MVEX__Member_Record_Id__c, member);
                     }
                 }
             }
 
-            List<Broadcast_Group_Member__c> newMembersToInsert = new List<Broadcast_Group_Member__c>();
+            List<MVEX__Broadcast_Group_Member__c> newMembersToInsert = new List<MVEX__Broadcast_Group_Member__c>();
             Set<String> receivedRecordIds = new Set<String>();
 
             for (Object recObj : recipientsRaw) {
@@ -368,23 +342,23 @@ public with sharing class BroadcastMessageController {
                 receivedRecordIds.add(recId);
 
                 if (!existingMembersMap.containsKey(recId)) {
-                    Broadcast_Group_Member__c member = new Broadcast_Group_Member__c(
-                        Broadcast_Group_ID__c = broadcastGroup.Id,
-                        Member_Record_Id__c = recId
+                    MVEX__Broadcast_Group_Member__c member = new MVEX__Broadcast_Group_Member__c(
+                        MVEX__Broadcast_Group_ID__c = broadcastGroup.Id,
+                        MVEX__Member_Record_Id__c = recId
                     );
                     if (communicationType == 'Both') {
-                        member.Phone_Number__c = recPhone;
-                        member.Email__c = recEmail;
+                        member.MVEX__Phone_Number__c = recPhone;
+                        member.MVEX__Email__c = recEmail;
                     } else if (communicationType == 'Email') {
-                        member.Email__c = recEmail;
+                        member.MVEX__Email__c = recEmail;
                     } else {
-                        member.Phone_Number__c = recPhone;
+                        member.MVEX__Phone_Number__c = recPhone;
                     }
                     newMembersToInsert.add(member);
                 }
             }
 
-            List<Broadcast_Group_Member__c> membersToDelete = new List<Broadcast_Group_Member__c>();
+            List<MVEX__Broadcast_Group_Member__c> membersToDelete = new List<MVEX__Broadcast_Group_Member__c>();
             for (String existingId : existingMembersMap.keySet()) {
                 if (!receivedRecordIds.contains(existingId)) {
                     membersToDelete.add(existingMembersMap.get(existingId));
@@ -407,18 +381,18 @@ public with sharing class BroadcastMessageController {
     @AuraEnabled
     public static Map<String, Object> getBroadcastGroupDetails(String groupId) {
         try {
-            Broadcast_Group__c groupRecord = [
-                SELECT Id, Name, Description__c, Object_Name__c, List_View__c, Phone_Field__c, Email_Field__c, Communication_Type__c
-                FROM Broadcast_Group__c
+            MVEX__Broadcast_Group__c groupRecord = [
+                SELECT Id, Name, MVEX__Description__c, MVEX__Object_Name__c, MVEX__List_View__c, MVEX__Phone_Field__c, MVEX__Email_Field__c, MVEX__Communication_Type__c
+                FROM MVEX__Broadcast_Group__c
                 WHERE Id = :groupId
                 WITH USER_MODE 
                 LIMIT 1
             ];
 
-            List<Broadcast_Group_Member__c> groupMembers = [
-                SELECT Id, Phone_Number__c, Email__c, Name, Member_Record_Id__c 
-                FROM Broadcast_Group_Member__c
-                WHERE Broadcast_Group_ID__c = :groupId
+            List<MVEX__Broadcast_Group_Member__c> groupMembers = [
+                SELECT Id, MVEX__Phone_Number__c, MVEX__Email__c, Name, MVEX__Member_Record_Id__c 
+                FROM MVEX__Broadcast_Group_Member__c
+                WHERE MVEX__Broadcast_Group_ID__c = :groupId
                 WITH USER_MODE 
             ];
 
@@ -435,41 +409,41 @@ public with sharing class BroadcastMessageController {
     @AuraEnabled
     public static String createChatRecods(String templateId, List<String> groupIds, Boolean isScheduled, String timeOfMessage) {
         try {
-            Broadcast__c broadcast = new Broadcast__c();
-            broadcast.WhatsappTemplate__c = templateId;
-            broadcast.Status__c = 'Pending';
-            broadcast.Schedule_DateTime__c = DateTime.now();
-            broadcast.Broadcast_Group_IDs__c = String.join(groupIds, ','); // Save all group IDs as a comma-separated string
+            MVEX__Broadcast__c broadcast = new MVEX__Broadcast__c();
+            broadcast.MVEX__WhatsappTemplate__c = templateId;
+            broadcast.MVEX__Status__c = 'Pending';
+            broadcast.MVEX__Schedule_DateTime__c = DateTime.now();
+            broadcast.MVEX__Broadcast_Group_IDs__c = String.join(groupIds, ','); // Save all group IDs as a comma-separated string
 
             String objectApiName = '';
             String phoneField = '';
-            List<Chat__c> chatRecs = new List<Chat__c>();
+            List<MVEX__Chat__c> chatRecs = new List<MVEX__Chat__c>();
 
             if (groupIds.size() > 0) {
-                List<Broadcast_Group__c> brGroupRecs = [SELECT Id, Name, Object_Name__c, Phone_Field__c FROM Broadcast_Group__c WHERE Id IN :groupIds 
+                List<MVEX__Broadcast_Group__c> brGroupRecs = [SELECT Id, Name, MVEX__Object_Name__c, MVEX__Phone_Field__c FROM MVEX__Broadcast_Group__c WHERE Id IN :groupIds 
                                                         WITH USER_MODE];
                 if (brGroupRecs.size() > 0) {
-                    objectApiName = brGroupRecs[0].Object_Name__c;
-                    phoneField = brGroupRecs[0].Phone_Field__c;
+                    objectApiName = brGroupRecs[0].MVEX__Object_Name__c;
+                    phoneField = brGroupRecs[0].MVEX__Phone_Field__c;
                 }
 
-                List<Broadcast_Group_Member__c> groupMembers = new List<Broadcast_Group_Member__c>();
-                groupMembers = [SELECT Id, Name, Phone_Number__c, Broadcast_Group_ID__c FROM Broadcast_Group_Member__c WHERE Broadcast_Group_ID__c IN :groupIds WITH USER_MODE];
-                broadcast.Recipient_Count__c = groupMembers.size();
+                List<MVEX__Broadcast_Group_Member__c> groupMembers = new List<MVEX__Broadcast_Group_Member__c>();
+                groupMembers = [SELECT Id, Name, MVEX__Phone_Number__c, MVEX__Broadcast_Group_ID__c FROM MVEX__Broadcast_Group_Member__c WHERE MVEX__Broadcast_Group_ID__c IN :groupIds WITH USER_MODE];
+                broadcast.MVEX__Recipient_Count__c = groupMembers.size();
                 Database.insert(broadcast, false, AccessLevel.USER_MODE);
 
                 List<String> phoneList = new List<String>();
                 if (groupMembers.size() > 0) {
-                    for (Broadcast_Group_Member__c member : groupMembers) {
-                        if (member.Phone_Number__c != null || member.Phone_Number__c != '') {
-                            phoneList.add(member.Phone_Number__c);
-                            Chat__c newChat = new Chat__c();
-                            newChat.WhatsappTemplate__c = templateId;
-                            newChat.Phone__c = member.Phone_Number__c;
-                            newChat.Type_of_Message__c = 'OutBound Messages';
-                            newChat.Message_Status__c = null;
-                            newChat.Message_Type__c = 'Template';
-                            newChat.WB_Broadcast__c = broadcast.Id;
+                    for (MVEX__Broadcast_Group_Member__c member : groupMembers) {
+                        if (member.MVEX__Phone_Number__c != null || member.MVEX__Phone_Number__c != '') {
+                            phoneList.add(member.MVEX__Phone_Number__c);
+                            MVEX__Chat__c newChat = new MVEX__Chat__c();
+                            newChat.MVEX__WhatsappTemplate__c = templateId;
+                            newChat.MVEX__Phone__c = member.MVEX__Phone_Number__c;
+                            newChat.MVEX__Type_of_Message__c = 'OutBound Messages';
+                            newChat.MVEX__Message_Status__c = null;
+                            newChat.MVEX__Message_Type__c = 'Template';
+                            newChat.MVEX__WB_Broadcast__c = broadcast.Id;
                             chatRecs.add(newChat);
                         }
                     }
@@ -503,8 +477,8 @@ public with sharing class BroadcastMessageController {
 
                 WhatsAppMessageBatchSchedulable2 batchSchedular = new WhatsAppMessageBatchSchedulable2(templateId, chatRecs, broadcast.Id, objectApiName, phoneField);
 
-                Broadcast__c br = new Broadcast__c(Id = broadcast.Id);
-                br.Schedule_DateTime__c = userDateTime;
+                MVEX__Broadcast__c br = new MVEX__Broadcast__c(Id = broadcast.Id);
+                br.MVEX__Schedule_DateTime__c = userDateTime;
                 Database.SaveResult updateResult = Database.update(br, false, AccessLevel.USER_MODE);
 
                 String jobName = 'BroadcastSchedule_' + broadcast.Id;
@@ -536,9 +510,9 @@ public with sharing class BroadcastMessageController {
 
             System.debug('Aborted scheduled job for broadcast: ' + broadcastId);
 
-            List<Chat__c> chatRecs = [SELECT Id, Phone__c FROM Chat__c WHERE WB_Broadcast__c = :broadcastId WITH USER_MODE];
-            List<Broadcast__c> broadcastRecs = new List<Broadcast__c>();
-            broadcastRecs =  [SELECT Id, Name, WhatsappTemplate__c, WhatsappTemplate__r.Template_Name__c, Broadcast_Group_IDs__c, Status__c, MVEX__Schedule_DateTime__c FROM Broadcast__c WHERE Id = :broadcastId WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            List<MVEX__Chat__c> chatRecs = [SELECT Id, MVEX__Phone__c FROM MVEX__Chat__c WHERE MVEX__WB_Broadcast__c = :broadcastId WITH USER_MODE];
+            List<MVEX__Broadcast__c> broadcastRecs = new List<MVEX__Broadcast__c>();
+            broadcastRecs =  [SELECT Id, Name, MVEX__WhatsappTemplate__c, MVEX__WhatsappTemplate__r.MVEX__Template_Name__c, MVEX__Broadcast_Group_IDs__c, MVEX__Status__c, MVEX__Schedule_DateTime__c FROM MVEX__Broadcast__c WHERE Id = :broadcastId WITH USER_MODE ORDER BY LastModifiedDate DESC];
 
             if (action == 'Reschedule') {
                 // Validate the new schedule time
@@ -547,16 +521,16 @@ public with sharing class BroadcastMessageController {
                     return new List<String>{'Error', 'Something went wrong while rescheduling the broadcast. Please try again.'};
                 }
 
-                String templateId = broadcastRecs[0].WhatsappTemplate__c;
+                String templateId = broadcastRecs[0].MVEX__WhatsappTemplate__c;
                 String objectApiName = '';
                 String phoneField = '';
                 List<String> groupIds = new List<String>();
-                if (broadcastRecs[0].Broadcast_Group_IDs__c != null) {
-                    groupIds = broadcastRecs[0].Broadcast_Group_IDs__c.split(',');
-                    List<Broadcast_Group__c> brGroupRecs = [SELECT Id, Name, Object_Name__c, Phone_Field__c FROM Broadcast_Group__c WHERE Id IN :groupIds];
+                if (broadcastRecs[0].MVEX__Broadcast_Group_IDs__c != null) {
+                    groupIds = broadcastRecs[0].MVEX__Broadcast_Group_IDs__c.split(',');
+                    List<MVEX__Broadcast_Group__c> brGroupRecs = [SELECT Id, Name, MVEX__Object_Name__c, MVEX__Phone_Field__c FROM MVEX__Broadcast_Group__c WHERE Id IN :groupIds];
                     if (brGroupRecs.size() > 0) {
-                        objectApiName = brGroupRecs[0].Object_Name__c;
-                        phoneField = brGroupRecs[0].Phone_Field__c;
+                        objectApiName = brGroupRecs[0].MVEX__Object_Name__c;
+                        phoneField = brGroupRecs[0].MVEX__Phone_Field__c;
                     }
                     System.debug('brGroupRecs: ' + brGroupRecs);
                 }
@@ -587,8 +561,8 @@ public with sharing class BroadcastMessageController {
 
                 System.debug('batchSchedular: ' + batchSchedular);
 
-                Broadcast__c br = new Broadcast__c(Id = broadcastId);
-                br.Schedule_DateTime__c = userDateTime;
+                MVEX__Broadcast__c br = new MVEX__Broadcast__c(Id = broadcastId);
+                br.MVEX__Schedule_DateTime__c = userDateTime;
                 Database.SaveResult updateResult = Database.update(br, false, AccessLevel.USER_MODE);
 
                 System.debug('updateResult: ' + updateResult);
@@ -614,30 +588,30 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static List<Broadcast_Group__c> getBroadcastGroupsByBroadcastId(String broadcastId) {
+    public static List<MVEX__Broadcast_Group__c> getBroadcastGroupsByBroadcastId(String broadcastId) {
         try {
-            Broadcast__c broadcast = [
-                SELECT Broadcast_Group_IDs__c 
-                FROM Broadcast__c 
+            MVEX__Broadcast__c broadcast = [
+                SELECT MVEX__Broadcast_Group_IDs__c 
+                FROM MVEX__Broadcast__c 
                 WHERE Id = :broadcastId 
                 WITH USER_MODE 
                 LIMIT 1
             ];
 
-            if (broadcast.Broadcast_Group_IDs__c == null) {
-                return new List<Broadcast_Group__c>();
+            if (broadcast.MVEX__Broadcast_Group_IDs__c == null) {
+                return new List<MVEX__Broadcast_Group__c>();
             }
 
-            List<String> groupIds = broadcast.Broadcast_Group_IDs__c.split(',');
+            List<String> groupIds = broadcast.MVEX__Broadcast_Group_IDs__c.split(',');
             return [
-                SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Email_Field__c, Communication_Type__c
-                FROM Broadcast_Group__c 
+                SELECT Id, Name, MVEX__Count_of_Members__c, MVEX__Description__c, MVEX__Object_Name__c, MVEX__Phone_Field__c, MVEX__Email_Field__c, MVEX__Communication_Type__c
+                FROM MVEX__Broadcast_Group__c 
                 WHERE Id IN :groupIds 
                 WITH USER_MODE
             ];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastGroupsByBroadcastId', e.getMessage());
-            return new List<Broadcast_Group__c>();
+            return new List<MVEX__Broadcast_Group__c>();
         }
     }
 
@@ -646,78 +620,78 @@ public with sharing class BroadcastMessageController {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
         
         try {
-            Broadcast__c broadcast = [
-                SELECT Broadcast_Group_IDs__c, CreatedDate
-                FROM Broadcast__c 
+            MVEX__Broadcast__c broadcast = [
+                SELECT MVEX__Broadcast_Group_IDs__c, CreatedDate
+                FROM MVEX__Broadcast__c 
                 WHERE Id = :broadcastId 
                 WITH USER_MODE 
                 LIMIT 1
             ];
 
-            if (String.isBlank(broadcast.Broadcast_Group_IDs__c)) return result;
+            if (String.isBlank(broadcast.MVEX__Broadcast_Group_IDs__c)) return result;
 
-            List<String> groupIds = broadcast.Broadcast_Group_IDs__c.split(',');
+            List<String> groupIds = broadcast.MVEX__Broadcast_Group_IDs__c.split(',');
             
             // Get groups
-            List<Broadcast_Group__c> groups = [
-                SELECT Id, Name, Count_of_Members__c, Description__c, Object_Name__c, Phone_Field__c, Email_Field__c, Communication_Type__c
-                FROM Broadcast_Group__c 
+            List<MVEX__Broadcast_Group__c> groups = [
+                SELECT Id, Name, MVEX__Count_of_Members__c, MVEX__Description__c, MVEX__Object_Name__c, MVEX__Phone_Field__c, MVEX__Email_Field__c, MVEX__Communication_Type__c
+                FROM MVEX__Broadcast_Group__c 
                 WHERE Id IN :groupIds 
                 WITH USER_MODE
             ];
 
             // Get phones per group
             Map<Id, Set<String>> groupToPhones = new Map<Id, Set<String>>();
-            for (Broadcast_Group_Member__c m : [
-                SELECT Broadcast_Group_ID__c, Phone_Number__c 
-                FROM Broadcast_Group_Member__c 
-                WHERE Broadcast_Group_ID__c IN :groupIds AND Phone_Number__c != null
+            for (MVEX__Broadcast_Group_Member__c m : [
+                SELECT MVEX__Broadcast_Group_ID__c, MVEX__Phone_Number__c 
+                FROM MVEX__Broadcast_Group_Member__c 
+                WHERE MVEX__Broadcast_Group_ID__c IN :groupIds AND MVEX__Phone_Number__c != null
                 WITH USER_MODE
             ]) {
-                if (!groupToPhones.containsKey(m.Broadcast_Group_ID__c)) {
-                    groupToPhones.put(m.Broadcast_Group_ID__c, new Set<String>());
+                if (!groupToPhones.containsKey(m.MVEX__Broadcast_Group_ID__c)) {
+                    groupToPhones.put(m.MVEX__Broadcast_Group_ID__c, new Set<String>());
                 }
-                groupToPhones.get(m.Broadcast_Group_ID__c).add(m.Phone_Number__c);
+                groupToPhones.get(m.MVEX__Broadcast_Group_ID__c).add(m.MVEX__Phone_Number__c);
             }
 
             Set<String> allPhones = new Set<String>();
             for (Set<String> phones : groupToPhones.values()) allPhones.addAll(phones);
 
             // Get ONLY outbound messages for this broadcast
-            List<Chat__c> outboundMessages = [
-                SELECT Phone__c, Message_Status__c
-                FROM Chat__c 
-                WHERE Phone__c IN :allPhones
-                AND WB_Broadcast__c = :broadcastId
-                AND Type_of_Message__c = 'Outbound Messages'
+            List<MVEX__Chat__c> outboundMessages = [
+                SELECT MVEX__Phone__c, MVEX__Message_Status__c
+                FROM MVEX__Chat__c 
+                WHERE MVEX__Phone__c IN :allPhones
+                AND MVEX__WB_Broadcast__c = :broadcastId
+                AND MVEX__Type_of_Message__c = 'Outbound Messages'
                 WITH USER_MODE
             ];
 
             // Count latest status per phone
             Map<String, String> phoneToStatus = new Map<String, String>();
-            for (Chat__c msg : outboundMessages) {
-                String status = msg.Message_Status__c;
+            for (MVEX__Chat__c msg : outboundMessages) {
+                String status = msg.MVEX__Message_Status__c;
                 if (status == 'Seen' || status == 'Delivered' || status == 'Sent' || status == 'Failed') {
-                    phoneToStatus.put(msg.Phone__c, status);
+                    phoneToStatus.put(msg.MVEX__Phone__c, status);
                 }
             }
 
             // Count replies
             Map<String, Integer> phoneToReplies = new Map<String, Integer>();
             for (AggregateResult ar : [
-                SELECT Phone__c phone, COUNT(Id) cnt
-                FROM Chat__c 
-                WHERE Phone__c IN :allPhones
-                AND Type_of_Message__c = 'Inbound Messages'
+                SELECT MVEX__Phone__c phone, COUNT(Id) cnt
+                FROM MVEX__Chat__c 
+                WHERE MVEX__Phone__c IN :allPhones
+                AND MVEX__Type_of_Message__c = 'Inbound Messages'
                 AND CreatedDate >= :broadcast.CreatedDate
-                GROUP BY Phone__c
+                GROUP BY MVEX__Phone__c
             ]) {
                 phoneToReplies.put((String) ar.get('phone'), (Integer) ar.get('cnt'));
             }
 
             // Build result
             Integer index = 1;
-            for (Broadcast_Group__c grp : groups) {
+            for (MVEX__Broadcast_Group__c grp : groups) {
                 Integer sent = 0, delivered = 0, seen = 0, replied = 0, failed = 0;
                 Set<String> phones = groupToPhones.get(grp.Id);
                 if (phones != null) {
@@ -734,16 +708,16 @@ public with sharing class BroadcastMessageController {
                 Map<String, Object> stat = new Map<String, Object>{
                     'Id' => grp.Id,
                     'Name' => grp.Name,
-                    'MVEX__Count_of_Members__c' => grp.Count_of_Members__c,
-                    'MVEX__Description__c' => grp.Description__c,
-                    'MVEX__Object_Name__c' => grp.Object_Name__c,
-                    'MVEX__Phone_Field__c' => grp.Phone_Field__c,
-                    'MVEX__Email_Field__c' => grp.Email_Field__c,
+                    'MVEX__MVEX__Count_of_Members__c' => grp.MVEX__Count_of_Members__c,
+                    'MVEX__MVEX__Description__c' => grp.MVEX__Description__c,
+                    'MVEX__MVEX__Object_Name__c' => grp.MVEX__Object_Name__c,
+                    'MVEX__MVEX__Phone_Field__c' => grp.MVEX__Phone_Field__c,
+                    'MVEX__MVEX__Email_Field__c' => grp.MVEX__Email_Field__c,
                     'index' => index++,
                     'MVEX__Total_Sent__c' => sent + delivered + seen,
-                    'MVEX__Total_Delivered__c' => delivered + seen,
+                    'MVEX__MVEX__Total_Delivered__c' => delivered + seen,
                     'MVEX__Total_Failed__c' => failed,
-                    'MVEX__Total_Read__c' => seen,
+                    'MVEX__MVEX__Total_Read__c' => seen,
                     'MVEX__Total_Replied__c' => replied
                 };
                 result.add(stat);
@@ -772,24 +746,24 @@ public with sharing class BroadcastMessageController {
             String emailField = objectConfig.get('emailField');
             String nameField = objectConfig.get('nameField');
 
-            List<Broadcast_Group__c> groups = [SELECT Communication_Type__c FROM Broadcast_Group__c WHERE Id = :groupId WITH USER_MODE LIMIT 1];
-            String communicationType = groups.isEmpty() ? 'Phone' : groups[0].Communication_Type__c;
+            List<MVEX__Broadcast_Group__c> groups = [SELECT MVEX__Communication_Type__c FROM MVEX__Broadcast_Group__c WHERE Id = :groupId WITH USER_MODE LIMIT 1];
+            String communicationType = groups.isEmpty() ? 'Phone' : groups[0].MVEX__Communication_Type__c;
 
-            List<Broadcast_Group_Member__c> members = [
-                SELECT Phone_Number__c, Email__c, Status__c 
-                FROM Broadcast_Group_Member__c 
-                WHERE Broadcast_Group_ID__c = :groupId 
-                AND (Phone_Number__c != null OR Email__c != null) 
+            List<MVEX__Broadcast_Group_Member__c> members = [
+                SELECT MVEX__Phone_Number__c, MVEX__Email__c, MVEX__Status__c 
+                FROM MVEX__Broadcast_Group_Member__c 
+                WHERE MVEX__Broadcast_Group_ID__c = :groupId 
+                AND (MVEX__Phone_Number__c != null OR MVEX__Email__c != null) 
                 WITH USER_MODE
             ];
 
             Map<String, String> valueToStatus = new Map<String, String>();
             Set<String> values = new Set<String>();
 
-            for (Broadcast_Group_Member__c member : members) {
-                String value = communicationType == 'Email' ? member.Email__c : member.Phone_Number__c;
+            for (MVEX__Broadcast_Group_Member__c member : members) {
+                String value = communicationType == 'Email' ? member.MVEX__Email__c : member.MVEX__Phone_Number__c;
                 if (String.isNotBlank(value)) {
-                    valueToStatus.put(value, member.Status__c);
+                    valueToStatus.put(value, member.MVEX__Status__c);
                     values.add(value);
                 }
             }
@@ -812,37 +786,37 @@ public with sharing class BroadcastMessageController {
             Map<String, String> phoneToChatStatus = new Map<String, String>();
 
             if (String.isNotBlank(broadcastId)) {
-                Broadcast__c broadcast = [SELECT CreatedDate FROM Broadcast__c WHERE Id = :broadcastId WITH USER_MODE LIMIT 1];
+                MVEX__Broadcast__c broadcast = [SELECT CreatedDate FROM MVEX__Broadcast__c WHERE Id = :broadcastId WITH USER_MODE LIMIT 1];
                 
                 // Get reply counts for each phone number
                 if (!values.isEmpty()) {
-                    List<Chat__c> replyMessages = [
-                        SELECT Phone__c
-                        FROM Chat__c 
-                        WHERE Phone__c IN :values
-                        AND Type_of_Message__c = 'Inbound Messages'
+                    List<MVEX__Chat__c> replyMessages = [
+                        SELECT MVEX__Phone__c
+                        FROM MVEX__Chat__c 
+                        WHERE MVEX__Phone__c IN :values
+                        AND MVEX__Type_of_Message__c = 'Inbound Messages'
                         AND CreatedDate >= :broadcast.CreatedDate
                         WITH USER_MODE
                     ];
 
-                    for (Chat__c reply : replyMessages) {
-                        phoneToHasReply.put(reply.Phone__c, true);
+                    for (MVEX__Chat__c reply : replyMessages) {
+                        phoneToHasReply.put(reply.MVEX__Phone__c, true);
                     }
                 }
 
                 // Step 2: Get phone numbers and statuses
                 Set<String> phoneNumbers = new Set<String>();
-                for (Broadcast_Group_Member__c member : members) {
-                    phoneNumbers.add(member.Phone_Number__c);
+                for (MVEX__Broadcast_Group_Member__c member : members) {
+                    phoneNumbers.add(member.MVEX__Phone_Number__c);
                 }
 
                 if (!phoneNumbers.isEmpty()) {
                     // Step 3: Fetch chat statuses using phone numbers
-                    List<Chat__c> broadcastRelatedChats = [SELECT Phone__c, Message_Status__c FROM Chat__c WHERE WB_Broadcast__c = :broadcastId AND Phone__c IN :phoneNumbers WITH SECURITY_ENFORCED];
+                    List<MVEX__Chat__c> broadcastRelatedChats = [SELECT MVEX__Phone__c, MVEX__Message_Status__c FROM MVEX__Chat__c WHERE MVEX__WB_Broadcast__c = :broadcastId AND MVEX__Phone__c IN :phoneNumbers WITH SECURITY_ENFORCED];
 
-                    for (Chat__c chat : broadcastRelatedChats) {
-                        if (!phoneToChatStatus.containsKey(chat.Phone__c)) {
-                            phoneToChatStatus.put(chat.Phone__c, chat.Message_Status__c);
+                    for (MVEX__Chat__c chat : broadcastRelatedChats) {
+                        if (!phoneToChatStatus.containsKey(chat.MVEX__Phone__c)) {
+                            phoneToChatStatus.put(chat.MVEX__Phone__c, chat.MVEX__Message_Status__c);
                         }
                     }
                 }
@@ -887,87 +861,87 @@ public with sharing class BroadcastMessageController {
         
         try {
             // Get broadcast and group IDs
-            Broadcast__c broadcast = [
-                SELECT Broadcast_Group_IDs__c, CreatedDate
-                FROM Broadcast__c 
+            MVEX__Broadcast__c broadcast = [
+                SELECT MVEX__Broadcast_Group_IDs__c, CreatedDate
+                FROM MVEX__Broadcast__c 
                 WHERE Id = :broadcastId 
                 WITH USER_MODE 
                 LIMIT 1
             ];
 
-            if (String.isBlank(broadcast.Broadcast_Group_IDs__c)) {
+            if (String.isBlank(broadcast.MVEX__Broadcast_Group_IDs__c)) {
                 return groupMembersMap;
             }
 
-            List<String> groupIds = broadcast.Broadcast_Group_IDs__c.split(',');
+            List<String> groupIds = broadcast.MVEX__Broadcast_Group_IDs__c.split(',');
             
             // Get all groups
-            Map<Id, Broadcast_Group__c> groupsMap = new Map<Id, Broadcast_Group__c>([
-                SELECT Id, Object_Name__c, Communication_Type__c
-                FROM Broadcast_Group__c 
+            Map<Id, MVEX__Broadcast_Group__c> groupsMap = new Map<Id, MVEX__Broadcast_Group__c>([
+                SELECT Id, MVEX__Object_Name__c, MVEX__Communication_Type__c
+                FROM MVEX__Broadcast_Group__c 
                 WHERE Id IN :groupIds 
                 WITH USER_MODE
             ]);
 
             // Get all group members for these groups
-            List<Broadcast_Group_Member__c> allMembers = [
-                SELECT Broadcast_Group_ID__c, Phone_Number__c, Email__c, Status__c 
-                FROM Broadcast_Group_Member__c 
-                WHERE Broadcast_Group_ID__c IN :groupIds 
-                AND (Phone_Number__c != null OR Email__c != null) 
+            List<MVEX__Broadcast_Group_Member__c> allMembers = [
+                SELECT MVEX__Broadcast_Group_ID__c, MVEX__Phone_Number__c, MVEX__Email__c, MVEX__Status__c 
+                FROM MVEX__Broadcast_Group_Member__c 
+                WHERE MVEX__Broadcast_Group_ID__c IN :groupIds 
+                AND (MVEX__Phone_Number__c != null OR MVEX__Email__c != null) 
                 WITH USER_MODE
             ];
 
             // Organize members by group
-            Map<Id, List<Broadcast_Group_Member__c>> groupToMembersMap = new Map<Id, List<Broadcast_Group_Member__c>>();
+            Map<Id, List<MVEX__Broadcast_Group_Member__c>> groupToMembersMap = new Map<Id, List<MVEX__Broadcast_Group_Member__c>>();
             Set<String> allPhones = new Set<String>();
             Set<String> allEmails = new Set<String>();
             
-            for (Broadcast_Group_Member__c member : allMembers) {
-                if (!groupToMembersMap.containsKey(member.Broadcast_Group_ID__c)) {
-                    groupToMembersMap.put(member.Broadcast_Group_ID__c, new List<Broadcast_Group_Member__c>());
+            for (MVEX__Broadcast_Group_Member__c member : allMembers) {
+                if (!groupToMembersMap.containsKey(member.MVEX__Broadcast_Group_ID__c)) {
+                    groupToMembersMap.put(member.MVEX__Broadcast_Group_ID__c, new List<MVEX__Broadcast_Group_Member__c>());
                 }
-                groupToMembersMap.get(member.Broadcast_Group_ID__c).add(member);
+                groupToMembersMap.get(member.MVEX__Broadcast_Group_ID__c).add(member);
                 
-                if (String.isNotBlank(member.Phone_Number__c)) {
-                    allPhones.add(member.Phone_Number__c);
+                if (String.isNotBlank(member.MVEX__Phone_Number__c)) {
+                    allPhones.add(member.MVEX__Phone_Number__c);
                 }
-                if (String.isNotBlank(member.Email__c)) {
-                    allEmails.add(member.Email__c);
+                if (String.isNotBlank(member.MVEX__Email__c)) {
+                    allEmails.add(member.MVEX__Email__c);
                 }
             }
 
             // Get reply status for all phones
             Map<String, Boolean> phoneToHasReply = new Map<String, Boolean>();
             if (!allPhones.isEmpty()) {
-                List<Chat__c> replyMessages = [
-                    SELECT Phone__c
-                    FROM Chat__c 
-                    WHERE Phone__c IN :allPhones
-                    AND Type_of_Message__c = 'Inbound Messages'
+                List<MVEX__Chat__c> replyMessages = [
+                    SELECT MVEX__Phone__c
+                    FROM MVEX__Chat__c 
+                    WHERE MVEX__Phone__c IN :allPhones
+                    AND MVEX__Type_of_Message__c = 'Inbound Messages'
                     AND CreatedDate >= :broadcast.CreatedDate
                     WITH USER_MODE
                 ];
 
-                for (Chat__c reply : replyMessages) {
-                    phoneToHasReply.put(reply.Phone__c, true);
+                for (MVEX__Chat__c reply : replyMessages) {
+                    phoneToHasReply.put(reply.MVEX__Phone__c, true);
                 }
             }
 
             // Get chat status for all phones
             Map<String, String> phoneToChatStatus = new Map<String, String>();
             if (!allPhones.isEmpty()) {
-                List<Chat__c> broadcastChats = [
-                    SELECT Phone__c, Message_Status__c 
-                    FROM Chat__c 
-                    WHERE WB_Broadcast__c = :broadcastId 
-                    AND Phone__c IN :allPhones 
+                List<MVEX__Chat__c> broadcastChats = [
+                    SELECT MVEX__Phone__c, MVEX__Message_Status__c 
+                    FROM MVEX__Chat__c 
+                    WHERE MVEX__WB_Broadcast__c = :broadcastId 
+                    AND MVEX__Phone__c IN :allPhones 
                     WITH SECURITY_ENFORCED
                 ];
 
-                for (Chat__c chat : broadcastChats) {
-                    if (!phoneToChatStatus.containsKey(chat.Phone__c)) {
-                        phoneToChatStatus.put(chat.Phone__c, chat.Message_Status__c);
+                for (MVEX__Chat__c chat : broadcastChats) {
+                    if (!phoneToChatStatus.containsKey(chat.MVEX__Phone__c)) {
+                        phoneToChatStatus.put(chat.MVEX__Phone__c, chat.MVEX__Message_Status__c);
                     }
                 }
             }
@@ -979,16 +953,16 @@ public with sharing class BroadcastMessageController {
             // Process each group
             for (Id groupId : groupsMap.keySet()) {
                 List<BroadcastMemberWrapper> memberWrappers = new List<BroadcastMemberWrapper>();
-                Broadcast_Group__c brodcastGroup = groupsMap.get(groupId);
-                List<Broadcast_Group_Member__c> groupMembers = groupToMembersMap.get(groupId);
+                MVEX__Broadcast_Group__c brodcastGroup = groupsMap.get(groupId);
+                List<MVEX__Broadcast_Group_Member__c> groupMembers = groupToMembersMap.get(groupId);
                 
                 if (groupMembers == null || groupMembers.isEmpty()) {
                     groupMembersMap.put(groupId, memberWrappers);
                     continue;
                 }
 
-                String objectName = brodcastGroup.Object_Name__c;
-                String communicationType = brodcastGroup.Communication_Type__c != null ? brodcastGroup.Communication_Type__c : 'Phone';
+                String objectName = brodcastGroup.MVEX__Object_Name__c;
+                String communicationType = brodcastGroup.MVEX__Communication_Type__c != null ? brodcastGroup.MVEX__Communication_Type__c : 'Phone';
                 
                 Map<String, String> objectConfig = (Map<String, String>) configMap.get(objectName);
                 String phoneField = objectConfig.get('phoneField');
@@ -996,8 +970,8 @@ public with sharing class BroadcastMessageController {
 
                 // Collect values for this group
                 Set<String> values = new Set<String>();
-                for (Broadcast_Group_Member__c member : groupMembers) {
-                    String value = communicationType == 'Email' ? member.Email__c : member.Phone_Number__c;
+                for (MVEX__Broadcast_Group_Member__c member : groupMembers) {
+                    String value = communicationType == 'Email' ? member.MVEX__Email__c : member.MVEX__Phone_Number__c;
                     if (String.isNotBlank(value)) {
                         values.add(value);
                     }

@@ -513,6 +513,44 @@ public with sharing class KeyMappingController {
             return retrunWrapper;
         }
     }
+    
+    /**
+     * Method Name : getSignatureInfo
+     * @return Decimal
+     * @description : Method to collect signature size.
+    */
+    @AuraEnabled 
+    public static Decimal getSignatureInfo(String templateId){
+        Decimal signatureSize = 50;
+        
+        List<MVEX__Template__c> temp = new List<MVEX__Template__c>();
+        if (templateId != null) {
+            temp = [SELECT Id, MVEX__Signature_Size__c FROM MVEX__Template__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
+        }
+
+        if(temp.size() > 0){
+            signatureSize = temp[0].MVEX__Signature_Size__c != null ? temp[0].MVEX__Signature_Size__c : 50;
+        }
+        
+        return signatureSize;
+    }
+
+    /**
+     * Method Name : updateSignatureInfo
+     * @return boolean
+     * @description : Method to update signature size.
+    */
+    @AuraEnabled 
+    public static boolean updateSignatureInfo(String templateId, Decimal signatureSize){
+        try {
+            MVEX__Template__c temp = new MVEX__Template__c(Id = templateId, MVEX__Signature_Size__c = signatureSize);
+            update as user temp;
+            return true;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'KeyMappingController', 'updateSignatureInfo', e.getMessage());
+            return false;
+        }
+    }
 
     /**
      * Method Name : createMappingFieldInstance

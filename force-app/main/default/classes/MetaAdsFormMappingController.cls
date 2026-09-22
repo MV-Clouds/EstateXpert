@@ -125,26 +125,52 @@ public with sharing class MetaAdsFormMappingController {
     }
 
     /**
-     * @description Fetches all updateable and accessible fields on the Lead object
+     * @description Fetches all updateable and accessible fields on the Contact object,
+     *              including whether each field is required (nillable=false + createable).
+     *              Excludes system/audit fields that Salesforce auto-populates (OwnerId, RecordTypeId, etc.)
      */
     @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> getSalesforceLeadFields() {
         List<Map<String, String>> fields = new List<Map<String, String>>();
-        
-        Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Lead.fields.getMap();
+
+        // System-managed fields: Salesforce auto-populates these — never require mapping
+        Set<String> SYSTEM_FIELDS = new Set<String>{
+            'ownerid', 'recordtypeid', 'currencyisocode',
+            'createdbyid', 'lastmodifiedbyid', 'masterrecordid'
+        };
+
+        Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Contact.fields.getMap();
         for (String fieldName : fieldMap.keySet()) {
             Schema.DescribeFieldResult dfr = fieldMap.get(fieldName).getDescribe();
-            
-            // Allow updateable fields that aren't deprecated
+
+            // Skip system-managed fields entirely (not useful for user mapping)
+            if (SYSTEM_FIELDS.contains(fieldName.toLowerCase())) {
+                continue;
+            }
+
+            // Allow updateable, accessible, non-deprecated fields
             if (dfr.isAccessible() && dfr.isUpdateable() && !dfr.isDeprecatedAndHidden()) {
+                // A field is truly required if:
+                //   - It must be supplied on create (isCreateable)
+                //   - It cannot be null (isNillable = false)
+                //   - It has no static default value (getDefaultValue = null)
+                //   - Salesforce does NOT auto-default it on insert (isDefaultedOnCreate = false)
+                //     e.g. OwnerId is defaulted to the running user, so it is NOT user-required
+                Boolean isRequired = dfr.isCreateable()
+                    && !dfr.isNillable()
+                    && dfr.getDefaultValue() == null
+                    && !dfr.isDefaultedOnCreate();
+
                 Map<String, String> f = new Map<String, String>();
-                f.put('label', dfr.getLabel() + ' (' + dfr.getName() + ')');
-                f.put('value', dfr.getName());
-                f.put('type', String.valueOf(dfr.getType()));
+                f.put('label',    dfr.getLabel() + ' (' + dfr.getName() + ')');
+                f.put('value',    dfr.getName());
+                f.put('apiName',  dfr.getName());
+                f.put('type',     String.valueOf(dfr.getType()));
+                f.put('required', String.valueOf(isRequired));
                 fields.add(f);
             }
         }
-        
+
         return fields;
     }
 

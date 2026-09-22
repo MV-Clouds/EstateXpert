@@ -263,34 +263,131 @@ export default class MetaAdsFormMapping extends LightningElement {
         // Find form questions
         const form = this.availableForms.find(f => String(f.id) === String(this.selectedFormId));
         if (form && form.questions) {
-            // Check if we have existing mappings for this form
+            // Load existing mappings for this form (if any)
             let existingMappings = {};
             if (this.fullMappingJson[this.selectedPageId]) {
                 let pageObj = this.fullMappingJson[this.selectedPageId];
                 let formsObj = pageObj.forms !== undefined ? pageObj.forms : pageObj;
-                
                 if (formsObj[this.selectedFormId]) {
-                    existingMappings = formsObj[this.selectedFormId].mappings !== undefined ? formsObj[this.selectedFormId].mappings : formsObj[this.selectedFormId];
+                    existingMappings = formsObj[this.selectedFormId].mappings !== undefined
+                        ? formsObj[this.selectedFormId].mappings
+                        : formsObj[this.selectedFormId];
                 }
             }
 
             this.currentFormFields = form.questions.map(q => {
-                let key = q.key;
-                let currentValue = existingMappings[key] || '';
+                let key      = q.key;
                 let metaType = q.type || '';
-                
+                let options  = this.getFilteredFieldOptions(metaType);
+
+                // 1. Use existing saved mapping if available
+                let currentValue = existingMappings[key] || '';
+
+                // 2. Auto-populate: smart match by field name if no saved mapping
+                if (!currentValue) {
+                    currentValue = this.autoMatchSalesforceField(key, metaType, options);
+                }
+
                 return {
-                    key: key,
-                    label: q.label || key,
-                    metaType: metaType,
-                    value: currentValue,
-                    options: this.getFilteredFieldOptions(metaType)
+                    key:               key,
+                    label:             q.label || key,
+                    metaType:          metaType,
+                    value:             currentValue,
+                    options:           options,
+                    required:          false,
+                    showRequiredError:  false,
+                    rowClass:          'mapping-row'
                 };
             });
-            
+
+            // 3. Inject unmapped required SF Contact fields as rows so user must map them
+            this.injectRequiredSalesforceFields(existingMappings);
+
         } else {
             this.currentFormFields = [];
         }
+    }
+
+    /**
+     * Smart name-matching: given a Meta field key (e.g. "email", "phone_number", "full_name"),
+     * find the best-fit Salesforce Contact field API name from the filtered option list.
+     */
+    autoMatchSalesforceField(metaKey, metaType, options) {
+        if (!options || options.length === 0) return '';
+
+        // Normalise the meta key: strip underscores, lowercase
+        const norm = metaKey.toLowerCase().replace(/_/g, '');
+
+        // Priority map: exact API name matches (lowercase, no underscores)
+        const priorityMap = {
+            'email':          'Email',
+            'workemail':      'Email',
+            'phonenumber':    'Phone',
+            'workphonenumber':'Phone',
+            'phone':          'Phone',
+            'firstname':      'FirstName',
+            'lastname':       'LastName',
+            'fullname':       'LastName',   // best Contact equivalent
+            'city':           'MailingCity',
+            'state':          'MailingState',
+            'country':        'MailingCountry',
+            'zip':            'MailingPostalCode',
+            'postalcode':     'MailingPostalCode',
+            'streetaddress':  'MailingStreet',
+            'address':        'MailingStreet',
+            'company':        'AccountId',
+            'jobtitle':       'Title',
+            'dateofbirth':    'Birthdate',
+            'dob':            'Birthdate',
+        };
+
+        const priorityMatch = priorityMap[norm];
+        if (priorityMatch) {
+            const found = options.find(o => o.value === priorityMatch);
+            if (found) return found.value;
+        }
+
+        // Fuzzy fallback: find option whose API name contains the meta key
+        const fuzzy = options.find(o =>
+            o.value.toLowerCase().includes(norm) ||
+            norm.includes(o.value.toLowerCase().replace(/__c$/i, ''))
+        );
+        return fuzzy ? fuzzy.value : '';
+    }
+
+    /**
+     * Find required Contact fields that are NOT yet covered by any form field mapping,
+     * and append them as extra mapping rows so the user is forced to map them.
+     */
+    injectRequiredSalesforceFields(existingMappings) {
+        // Collect all SF fields currently mapped by form fields
+        const alreadyMapped = new Set(this.currentFormFields.map(f => f.value).filter(Boolean));
+        // Also include existing saved mappings
+        Object.values(existingMappings).forEach(v => alreadyMapped.add(v));
+
+        // Find required SF fields not yet mapped
+        const requiredUnmapped = this.salesforceLeadFields.filter(sf =>
+            sf.required === 'true' && !alreadyMapped.has(sf.value)
+        );
+
+        // Add a required-injection row for each
+        requiredUnmapped.forEach(sf => {
+            // Check if we already have a row for this SF field
+            const alreadyHasRow = this.currentFormFields.some(f => f.sfRequired === sf.value);
+            if (!alreadyHasRow) {
+                this.currentFormFields = [...this.currentFormFields, {
+                    key:               '__required__' + sf.value,
+                    label:             sf.label.split(' (')[0],
+                    metaType:          sf.type,
+                    value:             existingMappings[sf.value] || '',
+                    options:           this.salesforceLeadFields,
+                    required:          true,
+                    showRequiredError:  false,
+                    sfRequired:        sf.value,
+                    rowClass:          'mapping-row mapping-row--required'
+                }];
+            }
+        });
     }
 
     getFilteredFieldOptions(metaType) {
@@ -319,19 +416,40 @@ export default class MetaAdsFormMapping extends LightningElement {
     handleMappingChange(event) {
         const metaKey = event.target.dataset.key;
         const sfField = event.detail.value;
-        
-        let field = this.currentFormFields.find(f => f.key === metaKey);
-        if (field) {
-            field.value = sfField;
-        }
+
+        // Must reassign array to trigger reactivity
+        this.currentFormFields = this.currentFormFields.map(f => {
+            if (f.key === metaKey) {
+                return Object.assign({}, f, {
+                    value: sfField,
+                    showRequiredError: f.required && !sfField,
+                    rowClass: (f.required && !sfField)
+                        ? 'mapping-row mapping-row--required mapping-row--error'
+                        : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                });
+            }
+            return f;
+        });
     }
 
     async saveMapping() {
-        // Build mapping object for current form
+        // ── Validate: all required SF fields must be mapped ──────────────────
+        const unmappedRequired = this.currentFormFields.filter(f => f.required && !f.value);
+        if (unmappedRequired.length > 0) {
+            const names = unmappedRequired.map(f => f.label).join(', ');
+            this.showToast('Validation Error',
+                `The following required Salesforce fields must be mapped before saving: ${names}`,
+                'error');
+            return;
+        }
+
+        // Build mapping object: { metaFieldKey: sfFieldApiName }
         let formMapping = {};
         this.currentFormFields.forEach(f => {
-            if (f.value) { // only save if mapped
-                formMapping[f.key] = f.value;
+            // Skip injected required-field rows that weren't given a meta key
+            const key = f.sfRequired ? f.sfRequired : f.key;
+            if (f.value) {
+                formMapping[key] = f.value;
             }
         });
 

@@ -16,7 +16,13 @@
             </div>
         </div>
 
-        <div class="main_content_cls">
+        <div class="main_content_cls" style="position: relative;">
+
+            <!-- Full-area loading spinner while fetching mappings and pages on init -->
+            <template if:true={isLoading}>
+                <c-spinner-component is-absolute="true"></c-spinner-component>
+            </template>
+
             <!-- Custom Table -->
             <template if:true={hasMappings}>
                 <div class="table-content">
@@ -207,9 +213,14 @@
                                         Map Fields
                                     </div>
                                     <template for:each={currentFormFields} for:item="field">
-                                        <div key={field.key} class="mapping-row">
+                                        <div key={field.key} class={field.rowClass}>
                                             <div class="mapping-col">
-                                                <div class="filter_label_css" style="margin-bottom: 4px;">Meta Form Field</div>
+                                                <div class="filter_label_css" style="margin-bottom: 4px;">
+                                                    Meta Form Field
+                                                    <template if:true={field.required}>
+                                                        <span class="required-badge">Required in Salesforce</span>
+                                                    </template>
+                                                </div>
                                                 <div class="meta-field-pill">{field.label}</div>
                                             </div>
                                             <div class="mapping-icon">&#10145;</div>
@@ -224,6 +235,9 @@
                                                     variant="label-hidden"
                                                     class="custom-combobox">
                                                 </lightning-combobox>
+                                                <template if:true={field.showRequiredError}>
+                                                    <div class="wizard-hint-error">This field is required — please map it.</div>
+                                                </template>
                                             </div>
                                         </div>
                                     </template>

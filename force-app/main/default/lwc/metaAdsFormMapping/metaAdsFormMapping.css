@@ -22,7 +22,7 @@
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     border-left: 4px solid #0176D3;
     border-radius: 12px;
-    padding: 1rem;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -502,4 +502,34 @@
     font-weight: 500;
     color: #374151;
     border: 1px solid #d1d5db;
+}
+
+/* Required field row highlight */
+.mapping-row--required {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 4px;
+}
+
+.mapping-row--error {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #f87171;
+}
+
+/* Required badge pill next to label */
+.required-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 2px 8px;
+    background: #dc2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    vertical-align: middle;
 }

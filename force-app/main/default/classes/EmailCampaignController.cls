@@ -14,9 +14,12 @@ public with sharing class EmailCampaignController {
      * @description : Used for getting campaign data
      */
     @AuraEnabled(cacheable=true)
-    public static List<Marketing_Campaign__c> getEmailCampaignTemplates() {
+    public static List<MVEX__Marketing_Campaign__c> getEmailCampaignTemplates() {
         try {
-            List<Marketing_Campaign__c> templates = [SELECT Id, Label__c, From_Name__c, From_Address__c, Sender_Mode__c,Is_Marketing_Campaign_Template__c,Marketing_Campaign_Template__c,Campaign_Start_Date__c,Total_Sent_Mails__c	 FROM Marketing_Campaign__c WHERE Is_Marketing_Campaign_Template__c = true WITH USER_MODE ];
+            List<MVEX__Marketing_Campaign__c> templates = [SELECT Id, MVEX__Label__c, MVEX__From_Name__c, MVEX__From_Address__c, MVEX__Sender_Mode__c,
+                                                            MVEX__Is_Marketing_Campaign_Template__c, MVEX__Marketing_Campaign_Template__c,
+                                                            MVEX__Campaign_Start_Date__c, MVEX__Total_Sent_Mails__c FROM MVEX__Marketing_Campaign__c 
+                                                            WHERE MVEX__Is_Marketing_Campaign_Template__c = true WITH USER_MODE LIMIT 5000];
             
             return templates;
         } catch (Exception e) {
@@ -50,9 +53,9 @@ public with sharing class EmailCampaignController {
      * @description : Used for getting Campaign data
      */
     @AuraEnabled(cacheable=true)
-    public static Marketing_Campaign__c getCampaign(String campaignId) {
+    public static MVEX__Marketing_Campaign__c getCampaign(String campaignId) {
         try {
-            return [SELECT Id,RelatedObject__c FROM Marketing_Campaign__c WHERE Id = :campaignId WITH USER_MODE];
+            return [SELECT Id, MVEX__RelatedObject__c FROM MVEX__Marketing_Campaign__c WHERE Id = :campaignId WITH USER_MODE LIMIT 1];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getCampaign', 'Error while getting data from campaign');
             return null;
@@ -142,35 +145,35 @@ public with sharing class EmailCampaignController {
             templateWrappers.listingTemplates = new List<TemplateWrapper>();
             templateWrappers.emailTemplates = emailTemplate;
             
-            List<Template__c> templates = [SELECT Id, Template_Name__c, Subject__c, Object_API_Name__c ,
-                                        (SELECT Template_Value_Simple__c, Value_Type__c FROM Template_Data__r WHERE Value_Type__c = 'Body Value' ORDER BY Order_No_Simple__c ASC)
-                                        FROM Template__c WHERE Template_pattern__c = 'Marketing Template' AND Template_Status__c = true WITH USER_MODE];
-            for (Template__c template : templates) {
+            List<MVEX__Template__c> templates = [SELECT Id, MVEX__Template_Name__c, MVEX__Subject__c, MVEX__Object_API_Name__c ,
+                                        (SELECT MVEX__Template_Value_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c = 'Body Value' ORDER BY MVEX__Order_No_Simple__c ASC)
+                                        FROM MVEX__Template__c WHERE MVEX__Template_pattern__c = 'Marketing Template' AND MVEX__Template_Status__c = true WITH USER_MODE];
+            for (MVEX__Template__c template : templates) {
                 String templateBody = '';
                 
-                for (Template_Data__c fieldData : template.Template_Data__r) {
-                    String value = fieldData.Template_Value_Simple__c != null ? fieldData.Template_Value_Simple__c : '';
-                    if (fieldData.Value_Type__c == 'Body Value') {
+                for (MVEX__Template_Data__c fieldData : template.MVEX__Template_Data__r) {
+                    String value = fieldData.MVEX__Template_Value_Simple__c != null ? fieldData.MVEX__Template_Value_Simple__c : '';
+                    if (fieldData.MVEX__Value_Type__c == 'Body Value') {
                         templateBody += value;
                     }
                 }
                 
                 TemplateWrapper wrapper = new TemplateWrapper();
                 wrapper.templateId = template.Id;
-                wrapper.templateName = template.Template_Name__c;
-                wrapper.subject = template.Subject__c;
+                wrapper.templateName = template.MVEX__Template_Name__c;
+                wrapper.subject = template.MVEX__Subject__c;
                 wrapper.body = templateBody;
-                wrapper.objectApiName = template.Object_API_Name__c;
+                wrapper.objectApiName = template.MVEX__Object_API_Name__c;
                 
                 templateWrappers.marketingTemplates.add(wrapper);
             }
             
-            List<Template__c> templatedatas = [SELECT Id, Template_Name__c FROM Template__c WHERE Object_API_Name__c = 'MVEX__Listing__c' AND Template_Status__c = true WITH USER_MODE ORDER BY Template_Name__c ASC];
+            List<MVEX__Template__c> templatedatas = [SELECT Id, MVEX__Template_Name__c FROM MVEX__Template__c WHERE MVEX__Object_API_Name__c = 'MVEX__Listing__c' AND MVEX__Template_Status__c = true WITH USER_MODE ORDER BY MVEX__Template_Name__c ASC];
             
-            for (Template__c template : templatedatas) {
+            for (MVEX__Template__c template : templatedatas) {
                 TemplateWrapper wrapper = new TemplateWrapper();
                 wrapper.templateId = template.Id;
-                wrapper.templateName = template.Template_Name__c;
+                wrapper.templateName = template.MVEX__Template_Name__c;
                 
                 templateWrappers.listingTemplates.add(wrapper);
             }
@@ -189,11 +192,10 @@ public with sharing class EmailCampaignController {
      * @description : Used for getting marketing email data
      */
     @AuraEnabled(cacheable=true)
-    public static List<Marketing_Email__c> getMarketingEmails(String templateId) {
+    public static List<MVEX__Marketing_Email__c> getMarketingEmails(String templateId) {
         try {
-            return [SELECT Id, Name, Marketing_Campaign__c ,Subject__c,Send_Date_Time__c,Days_After_Start_Date__c,TimeToSend__c,Listing__c, Template_Id__c,Template_Type__c	
-                    FROM Marketing_Email__c 
-                    WHERE Marketing_Campaign__c = :templateId WITH USER_MODE];
+            return [SELECT Id, Name, MVEX__Marketing_Campaign__c, MVEX__Subject__c, MVEX__Send_Date_Time__c, MVEX__Days_After_Start_Date__c, MVEX__TimeToSend__c,
+                    MVEX__Listing__c, MVEX__Template_Id__c,MVEX__Template_Type__c FROM MVEX__Marketing_Email__c WHERE MVEX__Marketing_Campaign__c = :templateId WITH USER_MODE];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getMarketingEmails', 'Error while retriving data in apex.');
             return null;
@@ -215,9 +217,9 @@ public with sharing class EmailCampaignController {
             
             optionsMap.put('Single Messaging Service', 'single');
             
-            // Retrieve custom setting: GmailConfig__c
-            GmailConfig__c gmailConfig = GmailConfig__c.getOrgDefaults();
-            if (gmailConfig != null && !String.isBlank(gmailConfig.Refresh_Token__c)) {
+            // Retrieve custom setting: MVEX__GmailConfig__c
+            MVEX__GmailConfig__c gmailConfig = MVEX__GmailConfig__c.getOrgDefaults();
+            if (gmailConfig != null && !String.isBlank(gmailConfig.MVEX__Refresh_Token__c)) {
                 optionsMap.put('Gmail', 'gmail');
             }
             
@@ -406,50 +408,50 @@ public with sharing class EmailCampaignController {
             }
             
             // Create campaign - store both individual and broadcast group info
-            Marketing_Campaign__c campaign = new Marketing_Campaign__c(
-                Label__c = campaignName,
-                Is_Marketing_Campaign_Template__c = saveForFuture,
-                Primary_Recipient__c = String.join(selectedPrimaryRecipients, '@@@'),
-                BCC_Contacts__c = bccRecipients,
-                CC_Contacts__c = ccRecipients,
-                Total_Emails__c = 0,
-                Email_Type__c = emailType,
-                Failed_Emails__c = failedEmails,
-                Status__c = isImmediateSend ? 'In Progress' : 'Pending', // Set status based on immediate send
-                Schedule_Type__c = specificDate != null ? 'Specific Date' : 'Contact Field',
-                RelatedObject__c = relatedObject,
+            MVEX__Marketing_Campaign__c campaign = new MVEX__Marketing_Campaign__c(
+                MVEX__Label__c = campaignName,
+                MVEX__Is_Marketing_Campaign_Template__c = saveForFuture,
+                MVEX__Primary_Recipient__c = String.join(selectedPrimaryRecipients, '@@@'),
+                MVEX__BCC_Contacts__c = bccRecipients,
+                MVEX__CC_Contacts__c = ccRecipients,
+                MVEX__Total_Emails__c = 0,
+                MVEX__Email_Type__c = emailType,
+                MVEX__Failed_Emails__c = failedEmails,
+                MVEX__Status__c = isImmediateSend ? 'In Progress' : 'Pending', // Set status based on immediate send
+                MVEX__Schedule_Type__c = specificDate != null ? 'Specific Date' : 'Contact Field',
+                MVEX__RelatedObject__c = relatedObject,
                 // ✨ ADDED: Store selected broadcast group IDs
-                Selected_Broadcast_Groups__c = !selectedBroadcastGroups.isEmpty() ? String.join(selectedBroadcastGroups, '@@@') : null
+                MVEX__Selected_Broadcast_Groups__c = !selectedBroadcastGroups.isEmpty() ? String.join(selectedBroadcastGroups, '@@@') : null
             );
             
             if (specificDate != null) {
-                campaign.Start_Date__c = specificDate;
-                campaign.Campaign_Start_Date__c = specificDate;
+                campaign.MVEX__Start_Date__c = specificDate;
+                campaign.MVEX__Campaign_Start_Date__c = specificDate;
             } else if (!String.isEmpty(selectedContactDateField)) {
-                campaign.SelectedContactDateField__c = selectedContactDateField;
-                campaign.Campaign_Start_Date__c = null;
+                campaign.MVEX__SelectedContactDateField__c = selectedContactDateField;
+                campaign.MVEX__Campaign_Start_Date__c = null;
             }
             if (!String.isEmpty(templateId)) {
-                campaign.Marketing_Campaign_Template__c = templateId;
+                campaign.MVEX__Marketing_Campaign_Template__c = templateId;
             }
             
             insert as user campaign;
         
             // Create campaign members for all unique recipients
-            List<Marketing_Campaign_Member__c> marketingCampaignMembers = new List<Marketing_Campaign_Member__c>();
+            List<MVEX__Marketing_Campaign_Member__c> marketingCampaignMembers = new List<MVEX__Marketing_Campaign_Member__c>();
             for (String contactId : selectedPrimaryRecipients) {
-                marketingCampaignMembers.add(new Marketing_Campaign_Member__c(
-                    Marketing_Campaign__c = campaign.Id,
-                    RecipientId__c = contactId,
-                    Contact_Type__c = 'Primary'
+                marketingCampaignMembers.add(new MVEX__Marketing_Campaign_Member__c(
+                    MVEX__Marketing_Campaign__c = campaign.Id,
+                    MVEX__RecipientId__c = contactId,
+                    MVEX__Contact_Type__c = 'Primary'
                 ));
             }
             
             insert as user marketingCampaignMembers;
             
-            // Group Marketing_Email__c by schedule to avoid duplicates for Specific Date
-            Map<String, Marketing_Email__c> scheduleToEmailMap = new Map<String, Marketing_Email__c>();
-            List<Marketing_Email__c> emailRecordsToInsert = new List<Marketing_Email__c>();
+            // Group MVEX__Marketing_Email__c by schedule to avoid duplicates for Specific Date
+            Map<String, MVEX__Marketing_Email__c> scheduleToEmailMap = new Map<String, MVEX__Marketing_Email__c>();
+            List<MVEX__Marketing_Email__c> emailRecordsToInsert = new List<MVEX__Marketing_Email__c>();
             Integer lastDays = -1;
             String lastTimeString = null;
             for (Object emailDataObj : emails) {
@@ -482,16 +484,16 @@ public with sharing class EmailCampaignController {
                     continue; // Skip duplicate schedules
                 }
                 
-                Marketing_Email__c emailCampaign = new Marketing_Email__c(Marketing_Campaign__c = campaign.Id);
-                emailCampaign.Subject__c = subject;
+                MVEX__Marketing_Email__c emailCampaign = new MVEX__Marketing_Email__c(MVEX__Marketing_Campaign__c = campaign.Id);
+                emailCampaign.MVEX__Subject__c = subject;
                 emailCampaign.Name = name;
-                emailCampaign.Template_Id__c = template;
-                emailCampaign.Template_Type__c = templateType;
-                emailCampaign.Days_After_Start_Date__c = daysAfterStartDate;
+                emailCampaign.MVEX__Template_Id__c = template;
+                emailCampaign.MVEX__Template_Type__c = templateType;
+                emailCampaign.MVEX__Days_After_Start_Date__c = daysAfterStartDate;
                 if (selectedListingId != null && selectedListingId != '' && (selectedListingId.length() == 15 || selectedListingId.length() == 18)) {
-                    emailCampaign.Listing__c = selectedListingId;
+                    emailCampaign.MVEX__Listing__c = selectedListingId;
                 } else {
-                    emailCampaign.Listing__c = null;
+                    emailCampaign.MVEX__Listing__c = null;
                 }
                 
                 if (!String.isEmpty(timeString)) {
@@ -501,15 +503,15 @@ public with sharing class EmailCampaignController {
                         timeString.split(':').size() > 2 ? Integer.valueOf(timeString.split(':')[2]) : 0, 
                         0
                     );
-                    emailCampaign.TimeToSend__c = sendTime;
+                    emailCampaign.MVEX__TimeToSend__c = sendTime;
                     
                     // For immediate send, set the send date time to current time
                     if (isImmediateSend && daysAfterStartDate == 0) {
                         DateTime now = DateTime.now();
-                        emailCampaign.Send_Date_Time__c = now;
+                        emailCampaign.MVEX__Send_Date_Time__c = now;
                     } else if (specificDate != null) {
                         DateTime sendDateTime = DateTime.newInstanceGmt(specificDate.addDays(daysAfterStartDate), sendTime);
-                        emailCampaign.Send_Date_Time__c = sendDateTime;
+                        emailCampaign.MVEX__Send_Date_Time__c = sendDateTime;
                     }
                 }
                 emailRecordsToInsert.add(emailCampaign);
@@ -519,19 +521,16 @@ public with sharing class EmailCampaignController {
             }
             insert as user emailRecordsToInsert;
             
-            // Create Email_Member__c records with distinct schedules based on Schedule_Type__c
-            List<Email_Member__c> emailMembersToInsert = new List<Email_Member__c>();
+            // Create MVEX__Email_Member__c records with distinct schedules based on MVEX__Schedule_Type__c
+            List<MVEX__Email_Member__c> emailMembersToInsert = new List<MVEX__Email_Member__c>();
             Set<String> emailMemberKeys = new Set<String>();
             Set<Id> campaignIds = new Set<Id>{campaign.Id};
-            List<Email_Member__c> existingEmailMembers = [
-                SELECT RecipientId__c, Marketing_Email__c, Schedule_Date_and_Time__c
-                FROM Email_Member__c
-                WHERE Marketing_Email__c IN (SELECT Id FROM Marketing_Email__c WHERE Marketing_Campaign__c IN :campaignIds)
-                WITH USER_MODE
-            ];
+            List<MVEX__Email_Member__c> existingEmailMembers = [SELECT MVEX__RecipientId__c, MVEX__Marketing_Email__c, MVEX__Schedule_Date_and_Time__c
+                                                                FROM MVEX__Email_Member__c WHERE MVEX__Marketing_Email__c IN (SELECT Id FROM MVEX__Marketing_Email__c 
+                                                                WHERE MVEX__Marketing_Campaign__c IN :campaignIds) WITH USER_MODE];
             Set<String> existingKeys = new Set<String>();
-            for (Email_Member__c em : existingEmailMembers) {
-                existingKeys.add(em.RecipientId__c + '-' + em.Marketing_Email__c + '-' + String.valueOf(em.Schedule_Date_and_Time__c));
+            for (MVEX__Email_Member__c em : existingEmailMembers) {
+                existingKeys.add(em.MVEX__RecipientId__c + '-' + em.MVEX__Marketing_Email__c + '-' + String.valueOf(em.MVEX__Schedule_Date_and_Time__c));
             }
             
             String scheduleType = specificDate != null ? 'Specific Date' : 'Contact Field';
@@ -539,12 +538,12 @@ public with sharing class EmailCampaignController {
             for (String contactId : selectedPrimaryRecipients) {
                 if (!conMap.containsKey(contactId) || conMap.get(contactId) == null) {
                     failedEmails += marketingEmailCount;
-                    for (Marketing_Email__c email : emailRecordsToInsert) {
-                        Email_Member__c emailMember = new Email_Member__c(
-                            RecipientId__c = contactId,
-                            Marketing_Email__c = email.Id,
-                            Schedule_Date_and_Time__c = null,
-                            Status__c = 'Failed (No Email)'
+                    for (MVEX__Marketing_Email__c email : emailRecordsToInsert) {
+                        MVEX__Email_Member__c emailMember = new MVEX__Email_Member__c(
+                            MVEX__RecipientId__c = contactId,
+                            MVEX__Marketing_Email__c = email.Id,
+                            MVEX__Schedule_Date_and_Time__c = null,
+                            MVEX__Status__c = 'Failed (No Email)'
                         );
                         emailMembersToInsert.add(emailMember);
                     }
@@ -558,36 +557,36 @@ public with sharing class EmailCampaignController {
                 }
                 if (scheduleBaseDate == null) {
                     failedEmails += marketingEmailCount;
-                    for (Marketing_Email__c email : emailRecordsToInsert) {
-                        Email_Member__c emailMember = new Email_Member__c(
-                            RecipientId__c = contactId,
-                            Marketing_Email__c = email.Id,
-                            Schedule_Date_and_Time__c = null,
-                            Status__c = 'Failed (Invalid Date)'
+                    for (MVEX__Marketing_Email__c email : emailRecordsToInsert) {
+                        MVEX__Email_Member__c emailMember = new MVEX__Email_Member__c(
+                            MVEX__RecipientId__c = contactId,
+                            MVEX__Marketing_Email__c = email.Id,
+                            MVEX__Schedule_Date_and_Time__c = null,
+                            MVEX__Status__c = 'Failed (Invalid Date)'
                         );
                         emailMembersToInsert.add(emailMember);
                     }
                     continue;
                 }
-                for (Marketing_Email__c email : emailRecordsToInsert) {
+                for (MVEX__Marketing_Email__c email : emailRecordsToInsert) {
                     DateTime scheduledDateTime;
                     
                     // For immediate send, schedule for right now
-                    if (isImmediateSend && email.Days_After_Start_Date__c == 0) {
+                    if (isImmediateSend && email.MVEX__Days_After_Start_Date__c == 0) {
                         scheduledDateTime = DateTime.now();
                     } else {
-                        Date emailDate = scheduleBaseDate.addDays(Integer.valueOf(email.Days_After_Start_Date__c));
-                        scheduledDateTime = DateTime.newInstanceGmt(emailDate, email.TimeToSend__c);
+                        Date emailDate = scheduleBaseDate.addDays(Integer.valueOf(email.MVEX__Days_After_Start_Date__c));
+                        scheduledDateTime = DateTime.newInstanceGmt(emailDate, email.MVEX__TimeToSend__c);
                     }
             
                     String memberKey = contactId + '-' + email.Id + '-' + String.valueOf(scheduledDateTime);
                     
                     if (!emailMemberKeys.contains(memberKey) && !existingKeys.contains(memberKey)) {
-                        emailMembersToInsert.add(new Email_Member__c(
-                            RecipientId__c = contactId,
-                            Marketing_Email__c = email.Id,
-                            Schedule_Date_and_Time__c = scheduledDateTime,
-                            Status__c = 'Pending'
+                        emailMembersToInsert.add(new MVEX__Email_Member__c(
+                            MVEX__RecipientId__c = contactId,
+                            MVEX__Marketing_Email__c = email.Id,
+                            MVEX__Schedule_Date_and_Time__c = scheduledDateTime,
+                            MVEX__Status__c = 'Pending'
                         ));
                         emailMemberKeys.add(memberKey);
                     }
@@ -782,97 +781,97 @@ public with sharing class EmailCampaignController {
             }
                         
             // Fetch existing campaign
-            Marketing_Campaign__c campaign = [
-                SELECT Id, Label__c, Is_Marketing_Campaign_Template__c, BCC_Contacts__c, CC_Contacts__c, 
-                    Status__c, Start_Date__c, SelectedContactDateField__c, Marketing_Campaign_Template__c, 
-                    Campaign_Start_Date__c, Total_Emails__c, Remaining_Emails__c, Failed_Emails__c, Schedule_Type__c,RelatedObject__c,
-                    Selected_Broadcast_Groups__c 
-                FROM Marketing_Campaign__c 
+            MVEX__Marketing_Campaign__c campaign = [
+                SELECT Id, MVEX__Label__c, MVEX__Is_Marketing_Campaign_Template__c, MVEX__BCC_Contacts__c, MVEX__CC_Contacts__c, 
+                    MVEX__Status__c, MVEX__Start_Date__c, MVEX__SelectedContactDateField__c, MVEX__Marketing_Campaign_Template__c, 
+                    MVEX__Campaign_Start_Date__c, MVEX__Total_Emails__c, MVEX__Remaining_Emails__c, MVEX__Failed_Emails__c, MVEX__Schedule_Type__c,MVEX__RelatedObject__c,
+                    MVEX__Selected_Broadcast_Groups__c 
+                FROM MVEX__Marketing_Campaign__c 
                 WHERE Id = :campaignId WITH USER_MODE LIMIT 1
             ];
             
             // Update campaign fields
-            campaign.Label__c = campaignName;
-            campaign.Is_Marketing_Campaign_Template__c = saveForFuture;
-            campaign.BCC_Contacts__c = bccRecipients;
-            campaign.CC_Contacts__c = ccRecipients;
-            campaign.Email_Type__c = emailType;
-            campaign.Status__c = 'Pending';
-            campaign.Schedule_Type__c = specificDate != null ? 'Specific Date' : 'Contact Field';
-            campaign.RelatedObject__c = relatedObject;
-            // ✨ FIX 1: Update the Primary_Recipient__c field with the merged list of contacts/group members
-            campaign.Primary_Recipient__c = String.join(selectedPrimaryRecipients, '@@@');
+            campaign.MVEX__Label__c = campaignName;
+            campaign.MVEX__Is_Marketing_Campaign_Template__c = saveForFuture;
+            campaign.MVEX__BCC_Contacts__c = bccRecipients;
+            campaign.MVEX__CC_Contacts__c = ccRecipients;
+            campaign.MVEX__Email_Type__c = emailType;
+            campaign.MVEX__Status__c = 'Pending';
+            campaign.MVEX__Schedule_Type__c = specificDate != null ? 'Specific Date' : 'Contact Field';
+            campaign.MVEX__RelatedObject__c = relatedObject;
+            // ✨ FIX 1: Update the MVEX__Primary_Recipient__c field with the merged list of contacts/group members
+            campaign.MVEX__Primary_Recipient__c = String.join(selectedPrimaryRecipients, '@@@');
             // FIX 2: Save the selected broadcast group IDs for UI reload
-            campaign.Selected_Broadcast_Groups__c = !selectedBroadcastGroups.isEmpty() ? String.join(selectedBroadcastGroups, '@@@') : null;
+            campaign.MVEX__Selected_Broadcast_Groups__c = !selectedBroadcastGroups.isEmpty() ? String.join(selectedBroadcastGroups, '@@@') : null;
             
             if (specificDate != null) {
-                campaign.Start_Date__c = specificDate;
-                campaign.Campaign_Start_Date__c = specificDate;
+                campaign.MVEX__Start_Date__c = specificDate;
+                campaign.MVEX__Campaign_Start_Date__c = specificDate;
             } else if (!String.isEmpty(selectedContactDateField)) {
-                campaign.SelectedContactDateField__c = selectedContactDateField;
-                campaign.Campaign_Start_Date__c = null;
+                campaign.MVEX__SelectedContactDateField__c = selectedContactDateField;
+                campaign.MVEX__Campaign_Start_Date__c = null;
             }
             if (!String.isEmpty(templateId)) {
-                campaign.Marketing_Campaign_Template__c = templateId;
+                campaign.MVEX__Marketing_Campaign_Template__c = templateId;
             }
                             
             update as user campaign;
             
-            // Handle Marketing_Campaign_Member__c
-            List<Marketing_Campaign_Member__c> existingMembers = [
-                SELECT Id, RecipientId__c , Contact_Type__c, Marketing_Campaign__c
-                FROM Marketing_Campaign_Member__c
-                WHERE Marketing_Campaign__c = :campaignId WITH USER_MODE
+            // Handle MVEX__Marketing_Campaign_Member__c
+            List<MVEX__Marketing_Campaign_Member__c> existingMembers = [
+                SELECT Id, MVEX__RecipientId__c , MVEX__Contact_Type__c, MVEX__Marketing_Campaign__c
+                FROM MVEX__Marketing_Campaign_Member__c
+                WHERE MVEX__Marketing_Campaign__c = :campaignId WITH USER_MODE
             ];
             Set<Id> existingContactIds = new Set<Id>();
-            for (Marketing_Campaign_Member__c member : existingMembers) {
-                existingContactIds.add(member.RecipientId__c);
+            for (MVEX__Marketing_Campaign_Member__c member : existingMembers) {
+                existingContactIds.add(member.MVEX__RecipientId__c);
             }
 
-            List<Marketing_Campaign_Member__c> membersToDelete = new List<Marketing_Campaign_Member__c>();
-            for (Marketing_Campaign_Member__c member : existingMembers) {
+            List<MVEX__Marketing_Campaign_Member__c> membersToDelete = new List<MVEX__Marketing_Campaign_Member__c>();
+            for (MVEX__Marketing_Campaign_Member__c member : existingMembers) {
                 // Only keep primary recipients in the member table for reporting
-                if (!selectedPrimaryRecipients.contains(member.RecipientId__c)) {
+                if (!selectedPrimaryRecipients.contains(member.MVEX__RecipientId__c)) {
                     membersToDelete.add(member);
                 }
             }
             
             delete as user membersToDelete;
             
-            List<Marketing_Campaign_Member__c> newMembers = new List<Marketing_Campaign_Member__c>();
+            List<MVEX__Marketing_Campaign_Member__c> newMembers = new List<MVEX__Marketing_Campaign_Member__c>();
             for (String contactId : selectedPrimaryRecipients) {
                 if (!existingContactIds.contains(contactId)) {
-                    newMembers.add(new Marketing_Campaign_Member__c(
-                    RecipientId__c = contactId,
-                    Contact_Type__c = 'Primary',
-                    Marketing_Campaign__c = campaign.Id
+                    newMembers.add(new MVEX__Marketing_Campaign_Member__c(
+                    MVEX__RecipientId__c = contactId,
+                    MVEX__Contact_Type__c = 'Primary',
+                    MVEX__Marketing_Campaign__c = campaign.Id
                     ));
                 }
             }
             insert as user newMembers;
             
-            // Handle Marketing_Email__c
-            List<Marketing_Email__c> existingEmails = [
-                SELECT Id, Name, Marketing_Campaign__c, Subject__c, Template_Id__c, Listing__c, Template_Type__c,
-                Days_After_Start_Date__c, TimeToSend__c, Send_Date_Time__c
-                FROM Marketing_Email__c
-                WHERE Marketing_Campaign__c = :campaignId WITH USER_MODE
+            // Handle MVEX__Marketing_Email__c
+            List<MVEX__Marketing_Email__c> existingEmails = [
+                SELECT Id, Name, MVEX__Marketing_Campaign__c, MVEX__Subject__c, MVEX__Template_Id__c, MVEX__Listing__c, MVEX__Template_Type__c,
+                MVEX__Days_After_Start_Date__c, MVEX__TimeToSend__c, MVEX__Send_Date_Time__c
+                FROM MVEX__Marketing_Email__c
+                WHERE MVEX__Marketing_Campaign__c = :campaignId WITH USER_MODE
             ];
-            Map<String, Marketing_Email__c> scheduleToEmailMap = new Map<String, Marketing_Email__c>();
+            Map<String, MVEX__Marketing_Email__c> scheduleToEmailMap = new Map<String, MVEX__Marketing_Email__c>();
             if (specificDate != null) {
-                for (Marketing_Email__c email : existingEmails) {
-                    String scheduleKey = email.Days_After_Start_Date__c + '-' + (email.TimeToSend__c != null ? String.valueOf(email.TimeToSend__c) : '');
+                for (MVEX__Marketing_Email__c email : existingEmails) {
+                    String scheduleKey = email.MVEX__Days_After_Start_Date__c + '-' + (email.MVEX__TimeToSend__c != null ? String.valueOf(email.MVEX__TimeToSend__c) : '');
                     scheduleToEmailMap.put(scheduleKey, email);
                 }
             }
             
-            Map<String, Marketing_Email__c> existingEmailMap = new Map<String, Marketing_Email__c>();
-            for (Marketing_Email__c email : existingEmails) {
+            Map<String, MVEX__Marketing_Email__c> existingEmailMap = new Map<String, MVEX__Marketing_Email__c>();
+            for (MVEX__Marketing_Email__c email : existingEmails) {
                 existingEmailMap.put(email.Id, email);
             }
             
-            List<Marketing_Email__c> emailRecordsToInsert = new List<Marketing_Email__c>();
-            List<Marketing_Email__c> emailRecordsToUpdate = new List<Marketing_Email__c>();
+            List<MVEX__Marketing_Email__c> emailRecordsToInsert = new List<MVEX__Marketing_Email__c>();
+            List<MVEX__Marketing_Email__c> emailRecordsToUpdate = new List<MVEX__Marketing_Email__c>();
             Integer lastUpdateDays = -1;
             String lastUpdateTimeString = null;
             for (Object emailDataObj : emails) {
@@ -903,25 +902,25 @@ public with sharing class EmailCampaignController {
                 
                 
                 String scheduleKey = daysAfterStartDate + '-' + timeString;
-                Marketing_Email__c emailCampaign;
+                MVEX__Marketing_Email__c emailCampaign;
                 if (specificDate != null && scheduleToEmailMap.containsKey(scheduleKey)) {
                     emailCampaign = scheduleToEmailMap.get(scheduleKey);
                 } else if (emailId != null && existingEmailMap.containsKey(emailId)) {
-                    emailCampaign = new Marketing_Email__c(Id = emailId);
+                    emailCampaign = new MVEX__Marketing_Email__c(Id = emailId);
                 } else {
-                    emailCampaign = new Marketing_Email__c(Marketing_Campaign__c = campaign.Id);
+                    emailCampaign = new MVEX__Marketing_Email__c(MVEX__Marketing_Campaign__c = campaign.Id);
                 }
                 
-                emailCampaign.Subject__c = subject;
+                emailCampaign.MVEX__Subject__c = subject;
                 emailCampaign.Name = name;
-                emailCampaign.Template_Id__c = template;
-                emailCampaign.Template_Type__c = String.valueOf(emailData.get('templateType'));
-                emailCampaign.Days_After_Start_Date__c = daysAfterStartDate;
+                emailCampaign.MVEX__Template_Id__c = template;
+                emailCampaign.MVEX__Template_Type__c = String.valueOf(emailData.get('templateType'));
+                emailCampaign.MVEX__Days_After_Start_Date__c = daysAfterStartDate;
                                                 
                 if (selectedListingId != null && selectedListingId != '' && (selectedListingId.length() == 15 || selectedListingId.length() == 18)) {
-                    emailCampaign.Listing__c = selectedListingId;
+                    emailCampaign.MVEX__Listing__c = selectedListingId;
                 } else {
-                    emailCampaign.Listing__c = null;
+                    emailCampaign.MVEX__Listing__c = null;
                 }
 
                 if (!String.isEmpty(timeString)) {
@@ -930,10 +929,10 @@ public with sharing class EmailCampaignController {
                         Integer hours = Integer.valueOf(timeParts[0]);
                         Integer minutes = Integer.valueOf(timeParts[1]);
                         Integer seconds = Integer.valueOf(timeParts[2]);
-                        emailCampaign.TimeToSend__c = Time.newInstance(hours, minutes, seconds, 0);
+                        emailCampaign.MVEX__TimeToSend__c = Time.newInstance(hours, minutes, seconds, 0);
                         if (specificDate != null) {
                             Date sendDate = specificDate.addDays(daysAfterStartDate);
-                            emailCampaign.Send_Date_Time__c = DateTime.newInstanceGmt(sendDate, emailCampaign.TimeToSend__c);
+                            emailCampaign.MVEX__Send_Date_Time__c = DateTime.newInstanceGmt(sendDate, emailCampaign.MVEX__TimeToSend__c);
                         }
                     }
                 }
@@ -969,45 +968,45 @@ public with sharing class EmailCampaignController {
                 }
             }
             if (!emailIdsToDelete.isEmpty()) {
-                List<Marketing_Email__c> emailsToDelete = [
-                    SELECT Id FROM Marketing_Email__c 
+                List<MVEX__Marketing_Email__c> emailsToDelete = [
+                    SELECT Id FROM MVEX__Marketing_Email__c 
                     WHERE Id IN :emailIdsToDelete WITH USER_MODE
                 ];
-                if (!emailsToDelete.isEmpty() && Schema.sObjectType.Marketing_Email__c.isDeletable()) {
+                if (!emailsToDelete.isEmpty() && Schema.sObjectType.MVEX__Marketing_Email__c.isDeletable()) {
                     delete as user emailsToDelete;
                 }
             }
                         
-            // Handle Email_Member__c with distinct schedules
-            List<Email_Member__c> existingEmailMembers = [
-                SELECT Id, RecipientId__c, Marketing_Email__c, Schedule_Date_and_Time__c, Status__c
-                FROM Email_Member__c
-                WHERE Marketing_Email__c IN (SELECT Id FROM Marketing_Email__c WHERE Marketing_Campaign__c = :campaignId) 
+            // Handle MVEX__Email_Member__c with distinct schedules
+            List<MVEX__Email_Member__c> existingEmailMembers = [
+                SELECT Id, MVEX__RecipientId__c, MVEX__Marketing_Email__c, MVEX__Schedule_Date_and_Time__c, MVEX__Status__c
+                FROM MVEX__Email_Member__c
+                WHERE MVEX__Marketing_Email__c IN (SELECT Id FROM MVEX__Marketing_Email__c WHERE MVEX__Marketing_Campaign__c = :campaignId) 
                 AND IsDeleted = false
                 WITH USER_MODE
             ];
 
-            // Create a map to track existing Email_Member__c records by a composite key
-            Map<String, Email_Member__c> existingEmailMemberMap = new Map<String, Email_Member__c>();
-            for (Email_Member__c em : existingEmailMembers) {
-                String key = em.Marketing_Email__c + '-' + em.RecipientId__c;
+            // Create a map to track existing MVEX__Email_Member__c records by a composite key
+            Map<String, MVEX__Email_Member__c> existingEmailMemberMap = new Map<String, MVEX__Email_Member__c>();
+            for (MVEX__Email_Member__c em : existingEmailMembers) {
+                String key = em.MVEX__Marketing_Email__c + '-' + em.MVEX__RecipientId__c;
                 existingEmailMemberMap.put(key, em);
             }
 
-            List<Email_Member__c> emailMembersToInsert = new List<Email_Member__c>();
-            List<Email_Member__c> emailMembersToUpdate = new List<Email_Member__c>();
-            List<Email_Member__c> emailMembersToDelete = new List<Email_Member__c>();
+            List<MVEX__Email_Member__c> emailMembersToInsert = new List<MVEX__Email_Member__c>();
+            List<MVEX__Email_Member__c> emailMembersToUpdate = new List<MVEX__Email_Member__c>();
+            List<MVEX__Email_Member__c> emailMembersToDelete = new List<MVEX__Email_Member__c>();
 
-            // Identify Email_Member__c records to delete
-            for (Email_Member__c em : existingEmailMembers) {
-                if (!selectedPrimaryRecipients.contains(em.RecipientId__c)) {
+            // Identify MVEX__Email_Member__c records to delete
+            for (MVEX__Email_Member__c em : existingEmailMembers) {
+                if (!selectedPrimaryRecipients.contains(em.MVEX__RecipientId__c)) {
                     emailMembersToDelete.add(em);
                 }
             }
 
-            // Deduplicate allEmails to avoid processing the same Marketing_Email__c multiple times
+            // Deduplicate allEmails to avoid processing the same MVEX__Marketing_Email__c multiple times
             Set<Id> uniqueEmailIds = new Set<Id>();
-            List<Marketing_Email__c> allEmails = new List<Marketing_Email__c>();
+            List<MVEX__Marketing_Email__c> allEmails = new List<MVEX__Marketing_Email__c>();
             // Exclude deleted email IDs
             Set<String> deletedEmailIds = new Set<String>();
             for (Object emailId : deletedEmails) {
@@ -1015,19 +1014,19 @@ public with sharing class EmailCampaignController {
                     deletedEmailIds.add(String.valueOf(emailId));
                 }
             }
-            for (Marketing_Email__c email : existingEmails) {
+            for (MVEX__Marketing_Email__c email : existingEmails) {
                 if (!deletedEmailIds.contains(email.Id)) {
                     uniqueEmailIds.add(email.Id);
                     allEmails.add(email);
                 }
             }
-            for (Marketing_Email__c email : emailRecordsToInsert) {
+            for (MVEX__Marketing_Email__c email : emailRecordsToInsert) {
                 if (!uniqueEmailIds.contains(email.Id) && !deletedEmailIds.contains(email.Id)) {
                     uniqueEmailIds.add(email.Id);
                     allEmails.add(email);
                 }
             }
-            for (Marketing_Email__c email : scheduleToEmailMap.values()) {
+            for (MVEX__Marketing_Email__c email : scheduleToEmailMap.values()) {
                 if (!uniqueEmailIds.contains(email.Id) && !deletedEmailIds.contains(email.Id)) {
                     uniqueEmailIds.add(email.Id);
                     allEmails.add(email);
@@ -1036,20 +1035,20 @@ public with sharing class EmailCampaignController {
 
             String scheduleType = specificDate != null ? 'Specific Date' : 'Contact Field';
 
-            // Track processed Email_Member__c records to avoid duplicates
+            // Track processed MVEX__Email_Member__c records to avoid duplicates
             Set<String> processedEmailMemberKeys = new Set<String>();
 
             for (String contactId : selectedPrimaryRecipients) {
                 if (!conMap.containsKey(contactId) || conMap.get(contactId) == null) {
                     failedEmails += allEmails.size();
-                    for (Marketing_Email__c email : allEmails) {
+                    for (MVEX__Marketing_Email__c email : allEmails) {
                         String compositeKey = email.Id + '-' + contactId;
                         if (!processedEmailMemberKeys.contains(compositeKey) && !existingEmailMemberMap.containsKey(compositeKey)) {
-                            Email_Member__c emailMember = new Email_Member__c(
-                                RecipientId__c = contactId,
-                                Marketing_Email__c = email.Id,
-                                Schedule_Date_and_Time__c = null,
-                                Status__c = 'Failed'
+                            MVEX__Email_Member__c emailMember = new MVEX__Email_Member__c(
+                                MVEX__RecipientId__c = contactId,
+                                MVEX__Marketing_Email__c = email.Id,
+                                MVEX__Schedule_Date_and_Time__c = null,
+                                MVEX__Status__c = 'Failed'
                             );
                             emailMembersToInsert.add(emailMember);
                             processedEmailMemberKeys.add(compositeKey);
@@ -1066,14 +1065,14 @@ public with sharing class EmailCampaignController {
                 }
                 if (scheduleBaseDate == null) {
                     failedEmails += allEmails.size();
-                    for (Marketing_Email__c email : allEmails) {
+                    for (MVEX__Marketing_Email__c email : allEmails) {
                         String compositeKey = email.Id + '-' + contactId;
                         if (!processedEmailMemberKeys.contains(compositeKey) && !existingEmailMemberMap.containsKey(compositeKey)) {
-                            Email_Member__c emailMember = new Email_Member__c(
-                                RecipientId__c = contactId,
-                                Marketing_Email__c = email.Id,
-                                Schedule_Date_and_Time__c = null,
-                                Status__c = 'Failed'
+                            MVEX__Email_Member__c emailMember = new MVEX__Email_Member__c(
+                                MVEX__RecipientId__c = contactId,
+                                MVEX__Marketing_Email__c = email.Id,
+                                MVEX__Schedule_Date_and_Time__c = null,
+                                MVEX__Status__c = 'Failed'
                             );
                             emailMembersToInsert.add(emailMember);
                             processedEmailMemberKeys.add(compositeKey);
@@ -1082,16 +1081,16 @@ public with sharing class EmailCampaignController {
                     continue;
                 }
 
-                for (Marketing_Email__c email : allEmails) {
-                    if (email.TimeToSend__c == null) {
+                for (MVEX__Marketing_Email__c email : allEmails) {
+                    if (email.MVEX__TimeToSend__c == null) {
                         failedEmails++;
                         String compositeKey = email.Id + '-' + contactId;
                         if (!processedEmailMemberKeys.contains(compositeKey) && !existingEmailMemberMap.containsKey(compositeKey)) {
-                            Email_Member__c emailMember = new Email_Member__c(
-                                RecipientId__c = contactId,
-                                Marketing_Email__c = email.Id,
-                                Schedule_Date_and_Time__c = null,
-                                Status__c = 'Failed'
+                            MVEX__Email_Member__c emailMember = new MVEX__Email_Member__c(
+                                MVEX__RecipientId__c = contactId,
+                                MVEX__Marketing_Email__c = email.Id,
+                                MVEX__Schedule_Date_and_Time__c = null,
+                                MVEX__Status__c = 'Failed'
                             );
                             emailMembersToInsert.add(emailMember);
                             processedEmailMemberKeys.add(compositeKey);
@@ -1099,19 +1098,19 @@ public with sharing class EmailCampaignController {
                         continue;
                     }
 
-                    Date sendDate = scheduleBaseDate.addDays(email.Days_After_Start_Date__c != null ? email.Days_After_Start_Date__c.intValue() : 0);
-                    DateTime scheduleDateTime = DateTime.newInstanceGmt(sendDate, email.TimeToSend__c);
+                    Date sendDate = scheduleBaseDate.addDays(email.MVEX__Days_After_Start_Date__c != null ? email.MVEX__Days_After_Start_Date__c.intValue() : 0);
+                    DateTime scheduleDateTime = DateTime.newInstanceGmt(sendDate, email.MVEX__TimeToSend__c);
                     String compositeKey = email.Id + '-' + contactId;
-                    Email_Member__c existingMember = existingEmailMemberMap.get(compositeKey);
+                    MVEX__Email_Member__c existingMember = existingEmailMemberMap.get(compositeKey);
                     if (scheduleDateTime <= System.now()) {
-                        if (existingMember == null || (existingMember.Status__c != 'Success' && existingMember.Status__c != 'Pending')) {
+                        if (existingMember == null || (existingMember.MVEX__Status__c != 'Success' && existingMember.MVEX__Status__c != 'Pending')) {
                             failedEmails++;
                             if (!processedEmailMemberKeys.contains(compositeKey) && !existingEmailMemberMap.containsKey(compositeKey)) {
-                                Email_Member__c emailMember = new Email_Member__c(
-                                    RecipientId__c = contactId,
-                                    Marketing_Email__c = email.Id,
-                                    Schedule_Date_and_Time__c = null,
-                                    Status__c = 'Failed'
+                                MVEX__Email_Member__c emailMember = new MVEX__Email_Member__c(
+                                    MVEX__RecipientId__c = contactId,
+                                    MVEX__Marketing_Email__c = email.Id,
+                                    MVEX__Schedule_Date_and_Time__c = null,
+                                    MVEX__Status__c = 'Failed'
                                 );
                                 emailMembersToInsert.add(emailMember);
                                 processedEmailMemberKeys.add(compositeKey);
@@ -1121,18 +1120,18 @@ public with sharing class EmailCampaignController {
                     }
 
                     if (existingMember != null) {
-                        if (existingMember.Schedule_Date_and_Time__c != scheduleDateTime || existingMember.Status__c != 'Pending') {
-                            existingMember.Schedule_Date_and_Time__c = scheduleDateTime;
-                            existingMember.Status__c = 'Pending';
+                        if (existingMember.MVEX__Schedule_Date_and_Time__c != scheduleDateTime || existingMember.MVEX__Status__c != 'Pending') {
+                            existingMember.MVEX__Schedule_Date_and_Time__c = scheduleDateTime;
+                            existingMember.MVEX__Status__c = 'Pending';
                             emailMembersToUpdate.add(existingMember);
                         }
                     } else {
                         if (!processedEmailMemberKeys.contains(compositeKey)) {
-                            Email_Member__c emailMember = new Email_Member__c(
-                                RecipientId__c = contactId,
-                                Marketing_Email__c = email.Id,
-                                Schedule_Date_and_Time__c = scheduleDateTime,
-                                Status__c = 'Pending'
+                            MVEX__Email_Member__c emailMember = new MVEX__Email_Member__c(
+                                MVEX__RecipientId__c = contactId,
+                                MVEX__Marketing_Email__c = email.Id,
+                                MVEX__Schedule_Date_and_Time__c = scheduleDateTime,
+                                MVEX__Status__c = 'Pending'
                             );
                             emailMembersToInsert.add(emailMember);
                             processedEmailMemberKeys.add(compositeKey);
@@ -1167,20 +1166,20 @@ public with sharing class EmailCampaignController {
      * modified By : Yash Parekh
      * modified Date : 25/05/2025
      * Date : 06/05/2025
-     * @description : Recalculates campaign counts based on Email_Member__c records
+     * @description : Recalculates campaign counts based on MVEX__Email_Member__c records
      */
     public static void recalculateCampaignCounts(Id campaignId) {
         try {
-            Marketing_Campaign__c campaign = [
-                SELECT Id, Total_Emails__c, Remaining_Emails__c, Failed_Emails__c, Total_Sent_Mails__c, Status__c
-                FROM Marketing_Campaign__c
+            MVEX__Marketing_Campaign__c campaign = [
+                SELECT Id, MVEX__Total_Emails__c, MVEX__Remaining_Emails__c, MVEX__Failed_Emails__c, MVEX__Total_Sent_Mails__c, MVEX__Status__c
+                FROM MVEX__Marketing_Campaign__c
                 WHERE Id = :campaignId WITH USER_MODE
                 LIMIT 1
             ];
-            List<Email_Member__c> emailMembers = [
-                SELECT Id, Status__c, Schedule_Date_and_Time__c, Marketing_Email__r.Marketing_Campaign__c
-                FROM Email_Member__c
-                WHERE Marketing_Email__r.Marketing_Campaign__c = :campaignId
+            List<MVEX__Email_Member__c> emailMembers = [
+                SELECT Id, MVEX__Status__c, MVEX__Schedule_Date_and_Time__c, MVEX__Marketing_Email__r.MVEX__Marketing_Campaign__c
+                FROM MVEX__Email_Member__c
+                WHERE MVEX__Marketing_Email__r.MVEX__Marketing_Campaign__c = :campaignId
                 WITH USER_MODE
             ];
 
@@ -1190,11 +1189,11 @@ public with sharing class EmailCampaignController {
             Integer failedEmails = 0;
             Integer sentEmails = 0;
 
-            for (Email_Member__c em : emailMembers) {
+            for (MVEX__Email_Member__c em : emailMembers) {
                 totalEmails++;
-                if (em.Status__c == 'Pending') {
+                if (em.MVEX__Status__c == 'Pending') {
                     remainingEmails++;
-                } else if (em.Status__c == 'Success') {
+                } else if (em.MVEX__Status__c == 'Success') {
                     sentEmails++;
                 } else {
                     // Any other status (Failed, Failed (No Email), Failed (Invalid Date), etc.) is counted as failed
@@ -1202,11 +1201,11 @@ public with sharing class EmailCampaignController {
                 }
             }
 
-            campaign.Total_Emails__c = totalEmails;
-            campaign.Remaining_Emails__c = remainingEmails;
-            campaign.Failed_Emails__c = failedEmails;
-            campaign.Total_Sent_Mails__c = sentEmails;
-            campaign.Status__c = totalEmails == 0 ? 'Pending' : 
+            campaign.MVEX__Total_Emails__c = totalEmails;
+            campaign.MVEX__Remaining_Emails__c = remainingEmails;
+            campaign.MVEX__Failed_Emails__c = failedEmails;
+            campaign.MVEX__Total_Sent_Mails__c = sentEmails;
+            campaign.MVEX__Status__c = totalEmails == 0 ? 'Pending' : 
                                 (remainingEmails == 0 ? 'Completed' : 
                                 (sentEmails > 0 || failedEmails > 0 ? 'In Progress' : 'Pending'));
 
@@ -1260,29 +1259,29 @@ public with sharing class EmailCampaignController {
         List<CampaignMemberEmailInfo> results = new List<CampaignMemberEmailInfo>();
         try {
             
-            // Query Marketing_Campaign__c to get RelatedObject__c
-            Marketing_Campaign__c campaign = [
-                SELECT Id, RelatedObject__c
-                FROM Marketing_Campaign__c
+            // Query MVEX__Marketing_Campaign__c to get MVEX__RelatedObject__c
+            MVEX__Marketing_Campaign__c campaign = [
+                SELECT Id, MVEX__RelatedObject__c
+                FROM MVEX__Marketing_Campaign__c
                 WHERE Id = :campaignId
                 WITH USER_MODE
                 LIMIT 1
             ];
-            String relatedObject = campaign.RelatedObject__c;
+            String relatedObject = campaign.MVEX__RelatedObject__c;
 
-            // Determine which objects to query based on RelatedObject__c
+            // Determine which objects to query based on MVEX__RelatedObject__c
             Set<String> recipientIds = new Set<String>();
-            List<Marketing_Campaign_Member__c> campaignMembers = [
-                SELECT RecipientId__c
-                FROM Marketing_Campaign_Member__c
-                WHERE Marketing_Campaign__c = :campaignId
+            List<MVEX__Marketing_Campaign_Member__c> campaignMembers = [
+                SELECT MVEX__RecipientId__c
+                FROM MVEX__Marketing_Campaign_Member__c
+                WHERE MVEX__Marketing_Campaign__c = :campaignId
                 WITH USER_MODE
             ];
-            for (Marketing_Campaign_Member__c member : campaignMembers) {
-                recipientIds.add(member.RecipientId__c);
+            for (MVEX__Marketing_Campaign_Member__c member : campaignMembers) {
+                recipientIds.add(member.MVEX__RecipientId__c);
             }
 
-            // Query Contacts based on RelatedObject__c
+            // Query Contacts based on MVEX__RelatedObject__c
             Map<Id, SObject> recipients = new Map<Id, SObject>();
             List<Contact> contacts = [
                 SELECT Id, Name, Email
@@ -1294,30 +1293,30 @@ public with sharing class EmailCampaignController {
                 recipients.put(con.Id, con);
             }
 
-            // Query Marketing_Email__c IDs separately to avoid semi-join sub-select
+            // Query MVEX__Marketing_Email__c IDs separately to avoid semi-join sub-select
             Set<Id> marketingEmailIds = new Set<Id>();
-            List<Marketing_Email__c> campaignEmails = [
+            List<MVEX__Marketing_Email__c> campaignEmails = [
                 SELECT Id, Name
-                FROM Marketing_Email__c
-                WHERE Marketing_Campaign__c = :campaignId
+                FROM MVEX__Marketing_Email__c
+                WHERE MVEX__Marketing_Campaign__c = :campaignId
                 WITH USER_MODE
             ];
-            for (Marketing_Email__c email : campaignEmails) {
+            for (MVEX__Marketing_Email__c email : campaignEmails) {
                 marketingEmailIds.add(email.Id);
             }
 
-            // Query Email_Member__c records
-            List<Email_Member__c> emailMembers = [
-                SELECT RecipientId__c, Schedule_Date_and_Time__c, Marketing_Email__r.Name, Status__c
-                FROM Email_Member__c
-                WHERE RecipientId__c IN :recipientIds
-                AND Marketing_Email__c IN :marketingEmailIds
+            // Query MVEX__Email_Member__c records
+            List<MVEX__Email_Member__c> emailMembers = [
+                SELECT MVEX__RecipientId__c, MVEX__Schedule_Date_and_Time__c, MVEX__Marketing_Email__r.Name, MVEX__Status__c
+                FROM MVEX__Email_Member__c
+                WHERE MVEX__RecipientId__c IN :recipientIds
+                AND MVEX__Marketing_Email__c IN :marketingEmailIds
                 WITH USER_MODE
-                ORDER BY RecipientId__c, Schedule_Date_and_Time__c
+                ORDER BY MVEX__RecipientId__c, MVEX__Schedule_Date_and_Time__c
             ];
-            Map<String, Email_Member__c> emailMemberMap = new Map<String, Email_Member__c>();
-            for (Email_Member__c em : emailMembers) {
-                String key = em.RecipientId__c + '-' + em.Marketing_Email__r.Name;
+            Map<String, MVEX__Email_Member__c> emailMemberMap = new Map<String, MVEX__Email_Member__c>();
+            for (MVEX__Email_Member__c em : emailMembers) {
+                String key = em.MVEX__RecipientId__c + '-' + em.MVEX__Marketing_Email__r.Name;
                 emailMemberMap.put(key, em);
             }
 
@@ -1327,19 +1326,19 @@ public with sharing class EmailCampaignController {
                 String recipientName = (String)recipient.get('Name');
                 String recipientEmail = (String)recipient.get('Email');
                 
-                for (Marketing_Email__c email : campaignEmails) {
+                for (MVEX__Marketing_Email__c email : campaignEmails) {
                     String key = recipientId + '-' + email.Name;
-                    Email_Member__c em = emailMemberMap.get(key);
+                    MVEX__Email_Member__c em = emailMemberMap.get(key);
                     String status;
                     if (recipientEmail == null) {
                         status = 'Failed (No Email)';
                     }else if (em == null) {
                         status = 'Failed (No Schedule)';
-                    }else if (em.Schedule_Date_and_Time__c == null) {
+                    }else if (em.MVEX__Schedule_Date_and_Time__c == null) {
                         status = 'Failed (Invalid Schedule)';
-                    }else if (em.Status__c == 'Success'){
+                    }else if (em.MVEX__Status__c == 'Success'){
                         status = 'Success';
-                    }else if (em.Schedule_Date_and_Time__c > System.now().addMinutes(-5)) {
+                    }else if (em.MVEX__Schedule_Date_and_Time__c > System.now().addMinutes(-5)) {
                         status = 'Pending';
                     } else {
                         status = 'Failed (Not Sent)';
@@ -1348,7 +1347,7 @@ public with sharing class EmailCampaignController {
                         recipientName,
                         recipientEmail,
                         email.Name,
-                        em != null ? em.Schedule_Date_and_Time__c : null,
+                        em != null ? em.MVEX__Schedule_Date_and_Time__c : null,
                         status
                     ));
                 }
@@ -1385,38 +1384,38 @@ public with sharing class EmailCampaignController {
     @AuraEnabled
     public static String getCamapaignAndRelatedData(String campaignId) {
         try {
-            Marketing_Campaign__c campaign = [
-            SELECT Id, Label__c, Sender_Mode__c, From_Address__c, From_Name__c, 
-            Is_Marketing_Campaign_Template__c, BCC_Contacts__c, CC_Contacts__c, RelatedObject__c,
-            Status__c, Start_Date__c, SelectedContactDateField__c,Marketing_Campaign_Template__c , Total_Sent_Mails__c,Campaign_Start_Date__c,Email_Type__c,
-            Selected_Broadcast_Groups__c
-            FROM Marketing_Campaign__c 
+            MVEX__Marketing_Campaign__c campaign = [
+            SELECT Id, MVEX__Label__c, MVEX__Sender_Mode__c, MVEX__From_Address__c, MVEX__From_Name__c, 
+            MVEX__Is_Marketing_Campaign_Template__c, MVEX__BCC_Contacts__c, MVEX__CC_Contacts__c, MVEX__RelatedObject__c,
+            MVEX__Status__c, MVEX__Start_Date__c, MVEX__SelectedContactDateField__c,MVEX__Marketing_Campaign_Template__c , MVEX__Total_Sent_Mails__c,MVEX__Campaign_Start_Date__c,MVEX__Email_Type__c,
+            MVEX__Selected_Broadcast_Groups__c
+            FROM MVEX__Marketing_Campaign__c 
             WHERE Id = :campaignId WITH USER_MODE LIMIT 50000
             ];
             
-            List<Marketing_Campaign_Member__c> marketingCampaignMembers = [SELECT Id,RecipientId__c,Contact_Type__c,Marketing_Campaign__c FROM Marketing_Campaign_Member__c WHERE Marketing_Campaign__c = :campaignId WITH USER_MODE];
+            List<MVEX__Marketing_Campaign_Member__c> marketingCampaignMembers = [SELECT Id,MVEX__RecipientId__c,MVEX__Contact_Type__c,MVEX__Marketing_Campaign__c FROM MVEX__Marketing_Campaign_Member__c WHERE MVEX__Marketing_Campaign__c = :campaignId WITH USER_MODE];
             
-            List<Marketing_Email__c> emailRecords = [SELECT Id,Name,Marketing_Campaign__c,Subject__c,Template_Id__c,Days_After_Start_Date__c,TimeToSend__c,Send_Date_Time__c,Listing__c, Template_Type__c FROM Marketing_Email__c WHERE Marketing_Campaign__c = :campaignId WITH USER_MODE];
+            List<MVEX__Marketing_Email__c> emailRecords = [SELECT Id,Name,MVEX__Marketing_Campaign__c,MVEX__Subject__c,MVEX__Template_Id__c,MVEX__Days_After_Start_Date__c,MVEX__TimeToSend__c,MVEX__Send_Date_Time__c,MVEX__Listing__c, MVEX__Template_Type__c FROM MVEX__Marketing_Email__c WHERE MVEX__Marketing_Campaign__c = :campaignId WITH USER_MODE];
             
             CampaignData campaignData = new CampaignData();
             campaignData.id = campaign.Id;
-            campaignData.label = campaign.Label__c;
-            campaignData.senderMode = campaign.Sender_Mode__c;
-            campaignData.fromAddress = campaign.From_Address__c;
-            campaignData.fromName = campaign.From_Name__c;
-            campaignData.isMarketingCampaignTemplate = campaign.Is_Marketing_Campaign_Template__c;
-            campaignData.bCCContacts = campaign.BCC_Contacts__c;
-            campaignData.cCContacts = campaign.CC_Contacts__c;
-            campaignData.status = campaign.Status__c;
-            campaignData.startDate = campaign.Start_Date__c;
-            campaignData.selectedContactDateField = campaign.SelectedContactDateField__c;
+            campaignData.label = campaign.MVEX__Label__c;
+            campaignData.senderMode = campaign.MVEX__Sender_Mode__c;
+            campaignData.fromAddress = campaign.MVEX__From_Address__c;
+            campaignData.fromName = campaign.MVEX__From_Name__c;
+            campaignData.isMarketingCampaignTemplate = campaign.MVEX__Is_Marketing_Campaign_Template__c;
+            campaignData.bCCContacts = campaign.MVEX__BCC_Contacts__c;
+            campaignData.cCContacts = campaign.MVEX__CC_Contacts__c;
+            campaignData.status = campaign.MVEX__Status__c;
+            campaignData.startDate = campaign.MVEX__Start_Date__c;
+            campaignData.selectedContactDateField = campaign.MVEX__SelectedContactDateField__c;
             campaignData.marketingCampaignMembers = marketingCampaignMembers;
             campaignData.emailRecords = emailRecords;
-            campaignData.templateId = campaign.Marketing_Campaign_Template__c;
-            campaignData.emailType = campaign.Email_Type__c;
-            campaignData.relatedObject = campaign.RelatedObject__c;
+            campaignData.templateId = campaign.MVEX__Marketing_Campaign_Template__c;
+            campaignData.emailType = campaign.MVEX__Email_Type__c;
+            campaignData.relatedObject = campaign.MVEX__RelatedObject__c;
             // ✨ ADDED: Assign the new field's value
-            campaignData.selectedBroadcastGroups = campaign.Selected_Broadcast_Groups__c;
+            campaignData.selectedBroadcastGroups = campaign.MVEX__Selected_Broadcast_Groups__c;
             
             String campaignJson = JSON.serialize(campaignData);
             
@@ -1434,12 +1433,12 @@ public with sharing class EmailCampaignController {
      * @description : Used for getting campaign data
      */
     @AuraEnabled
-    public static List<Marketing_Campaign__c> getCampaigns(){
+    public static List<MVEX__Marketing_Campaign__c> getCampaigns(){
         
-        List<Marketing_Campaign__c> campaigns = new List<Marketing_Campaign__c>();
+        List<MVEX__Marketing_Campaign__c> campaigns = new List<MVEX__Marketing_Campaign__c>();
         
         try {
-            campaigns = [SELECT Id, Name, Label__c, Start_Date__c , CreatedDate ,Failed_Emails__c, Status__c,Marketing_Campaign_Template__c,Is_Marketing_Campaign_Template__c,Remaining_Emails__c,Total_Emails__c,Campaign_Start_Date__c,Total_Sent_Mails__c,Schedule_Type__c	 FROM Marketing_Campaign__c WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 50000];
+            campaigns = [SELECT Id, Name, MVEX__Label__c, MVEX__Start_Date__c , CreatedDate ,MVEX__Failed_Emails__c, MVEX__Status__c,MVEX__Marketing_Campaign_Template__c,MVEX__Is_Marketing_Campaign_Template__c,MVEX__Remaining_Emails__c,MVEX__Total_Emails__c,MVEX__Campaign_Start_Date__c,MVEX__Total_Sent_Mails__c,MVEX__Schedule_Type__c	 FROM MVEX__Marketing_Campaign__c WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 50000];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'EmailCampaignController', 'getCampaigns', 'Error while getting campaigns.');
         }
@@ -1456,7 +1455,7 @@ public with sharing class EmailCampaignController {
     @AuraEnabled
     public static void deleteCampaign(Id campaignId) {
         try {
-            Marketing_Campaign__c campaignToDelete = [SELECT Id FROM Marketing_Campaign__c WHERE Id = :campaignId WITH USER_MODE LIMIT 1];
+            MVEX__Marketing_Campaign__c campaignToDelete = [SELECT Id FROM MVEX__Marketing_Campaign__c WHERE Id = :campaignId WITH USER_MODE LIMIT 1];
             
             if(campaignToDelete != null) {
                 delete as user campaignToDelete;
@@ -1491,7 +1490,7 @@ public with sharing class EmailCampaignController {
 
             String processedBody = ''; 
 
-            // Track processed Email_Member__c IDs to avoid duplicates
+            // Track processed MVEX__Email_Member__c IDs to avoid duplicates
             Set<String> processedKeys = new Set<String>();
 
             if (emailRequests != null) {
@@ -1551,7 +1550,7 @@ public with sharing class EmailCampaignController {
                         templateIds.add((Id)req.templateDataId);
                     }
                     if (isValidId(req.listingId) && String.isNotBlank(req.RelatedObjectName) && 
-                        (req.RelatedObjectName.equalsIgnoreCase('MVEX__Listing__c') || req.RelatedObjectName.equalsIgnoreCase('Listing__c'))) {
+                        (req.RelatedObjectName.equalsIgnoreCase('MVEX__Listing__c') || req.RelatedObjectName.equalsIgnoreCase('MVEX__Listing__c'))) {
                         listingIds.add((Id)req.listingId);
                     }
 
@@ -1565,47 +1564,47 @@ public with sharing class EmailCampaignController {
                 }
             }
             
-            Map<String, Marketing_Campaign__c> campaignMap = new Map<String, Marketing_Campaign__c>();
+            Map<String, MVEX__Marketing_Campaign__c> campaignMap = new Map<String, MVEX__Marketing_Campaign__c>();
             Map<String, List<Id>> campaignToRecipientMap = new Map<String, List<Id>>();
             Map<String, Set<Id>> campaignToEmailIdsMap = new Map<String, Set<Id>>();
 
 
             if (!campaignIds.isEmpty()) {
-                List<Marketing_Campaign__c> campaigns = [
+                List<MVEX__Marketing_Campaign__c> campaigns = [
                     SELECT 
-                        Id, Name, Status__c, Remaining_Emails__c, Total_Sent_Mails__c, 
-                        Email_Type__c, Schedule_Type__c, RelatedObject__c,
-                        (SELECT Id, RecipientId__c FROM Marketing_Campaign_Members__r),
-                        (SELECT Id, Listing__c FROM Marketing_Emails__r)
-                    FROM Marketing_Campaign__c 
+                        Id, Name, MVEX__Status__c, MVEX__Remaining_Emails__c, MVEX__Total_Sent_Mails__c, 
+                        MVEX__Email_Type__c, MVEX__Schedule_Type__c, MVEX__RelatedObject__c,
+                        (SELECT Id, MVEX__RecipientId__c FROM MVEX__Marketing_Campaign_Members__r),
+                        (SELECT Id, MVEX__Listing__c FROM MVEX__Marketing_Emails__r)
+                    FROM MVEX__Marketing_Campaign__c 
                     WHERE Id IN :campaignIds
                     WITH USER_MODE
                 ];
             
-                for (Marketing_Campaign__c campaign : campaigns) {
+                for (MVEX__Marketing_Campaign__c campaign : campaigns) {
                     campaignMap.put(campaign.Id, campaign);
-                    remainingEmailsMap.put(campaign.Id, Integer.valueOf(campaign.Remaining_Emails__c));
+                    remainingEmailsMap.put(campaign.Id, Integer.valueOf(campaign.MVEX__Remaining_Emails__c));
             
                     // Process campaign members - safely add to List<Id>
                     List<Id> recipientListPerCampaign = new List<Id>();
-                    for (Marketing_Campaign_Member__c member : campaign.Marketing_Campaign_Members__r) {
-                        if (isValidId(member.RecipientId__c)) {
-                            recipientListPerCampaign.add((Id)member.RecipientId__c);
-                            recipientIds.add(member.RecipientId__c);
+                    for (MVEX__Marketing_Campaign_Member__c member : campaign.MVEX__Marketing_Campaign_Members__r) {
+                        if (isValidId(member.MVEX__RecipientId__c)) {
+                            recipientListPerCampaign.add((Id)member.MVEX__RecipientId__c);
+                            recipientIds.add(member.MVEX__RecipientId__c);
                         }
                     }
                     campaignToRecipientMap.put(campaign.Id, recipientListPerCampaign);
             
                     // Process emails
                     Set<Id> emailIdsPerCampaign = new Set<Id>();
-                    for (Marketing_Email__c email : campaign.Marketing_Emails__r) {
+                    for (MVEX__Marketing_Email__c email : campaign.MVEX__Marketing_Emails__r) {
                         emailIdsPerCampaign.add(email.Id);
                     }
                     campaignToEmailIdsMap.put(campaign.Id, emailIdsPerCampaign);
                 }
             }
             
-            // Determine which objects to query based on RelatedObject__c
+            // Determine which objects to query based on MVEX__RelatedObject__c
             Map<String, Set<Id>> objectToIdsMap = new Map<String, Set<Id>>{
                 'Contact' => new Set<Id>()
             };
@@ -1628,27 +1627,27 @@ public with sharing class EmailCampaignController {
                 }
             }
             
-            // Query Email_Member__c records to update status later
-            Map<String, Email_Member__c> emailMembersToUpdate = new Map<String, Email_Member__c>();
+            // Query MVEX__Email_Member__c records to update status later
+            Map<String, MVEX__Email_Member__c> emailMembersToUpdate = new Map<String, MVEX__Email_Member__c>();
             if (!campaignIds.isEmpty() && !recipientIds.isEmpty()) {
-                List<Email_Member__c> emailMembers = [
-                    SELECT Id, RecipientId__c, Marketing_Email__c, Status__c 
-                    FROM Email_Member__c
-                    WHERE RecipientId__c IN :recipientIds 
-                    AND Marketing_Email__c IN (SELECT Id FROM Marketing_Email__c WHERE Marketing_Campaign__c IN :campaignIds)
-                    AND Status__c = 'Pending'
+                List<MVEX__Email_Member__c> emailMembers = [
+                    SELECT Id, MVEX__RecipientId__c, MVEX__Marketing_Email__c, MVEX__Status__c 
+                    FROM MVEX__Email_Member__c
+                    WHERE MVEX__RecipientId__c IN :recipientIds 
+                    AND MVEX__Marketing_Email__c IN (SELECT Id FROM MVEX__Marketing_Email__c WHERE MVEX__Marketing_Campaign__c IN :campaignIds)
+                    AND MVEX__Status__c = 'Pending'
                     WITH USER_MODE
                 ];
-                for (Email_Member__c em : emailMembers) {
-                    String key = em.RecipientId__c + '-' + em.Marketing_Email__c;
+                for (MVEX__Email_Member__c em : emailMembers) {
+                    String key = em.MVEX__RecipientId__c + '-' + em.MVEX__Marketing_Email__c;
                     emailMembersToUpdate.put(key, em);
                 }
             }
                 
-            List<Template__c> temps = [
-                SELECT Id, Name, Object_API_Name__c, Template_Name__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate,
-                    (SELECT Id, Name, Template_Value_Simple__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC)
-                FROM Template__c 
+            List<MVEX__Template__c> temps = [
+                SELECT Id, Name, MVEX__Object_API_Name__c, MVEX__Template_Name__c, MVEX__Template_pattern__c, MVEX__Template_Status__c, MVEX__Description__c, CreatedDate, LastModifiedDate,
+                    (SELECT Id, Name, MVEX__Template_Value_Simple__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c = 'Extracted Mapping Keys' ORDER BY MVEX__Order_No_Simple__c ASC)
+                FROM MVEX__Template__c 
                 WHERE Id IN :templateIds WITH USER_MODE
             ];                    
             
@@ -1667,30 +1666,18 @@ public with sharing class EmailCampaignController {
             Map<Id, Id> listingIdToPropertyId = new Map<Id, Id>();
             Map<String, Map<String, String>> listingImages = new Map<String, Map<String, String>>();
 
-            for (Listing__c listing : [
-                SELECT Id, Property__c 
-                FROM Listing__c 
-                WHERE Id IN :listingIds
-                WITH USER_MODE
-            ]) {
-                listingIdToPropertyId.put(listing.Id, listing.Property__c);
+            for (MVEX__Listing__c listing : [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c WHERE Id IN :listingIds WITH USER_MODE LIMIT 5000]) {
+                listingIdToPropertyId.put(listing.Id, listing.MVEX__Property__c);
             }
     
-            // Step 2: Get all Property_File__c records in a single query
-            Map<Id, List<Property_File__c>> propertyIdToFiles = new Map<Id, List<Property_File__c>>();
-            for (Property_File__c file : [
-                SELECT Id, BaseUrl__c, Property__c 
-                FROM Property_File__c 
-                WHERE Property__c IN :listingIdToPropertyId.values() 
-                AND IsOnExpose__c = true 
-                AND Size__c != null 
-                WITH USER_MODE
-                ORDER BY Sort_on_Expose__c ASC NULLS LAST, Name ASC
-            ]) {
-                if (!propertyIdToFiles.containsKey(file.Property__c)) {
-                    propertyIdToFiles.put(file.Property__c, new List<Property_File__c>());
+            // Step 2: Get all MVEX__Property_File__c records in a single query
+            Map<Id, List<MVEX__Property_File__c>> propertyIdToFiles = new Map<Id, List<MVEX__Property_File__c>>();
+            for (MVEX__Property_File__c file : [SELECT Id, MVEX__BaseUrl__c, MVEX__Property__c FROM MVEX__Property_File__c WHERE MVEX__Property__c IN :listingIdToPropertyId.values() 
+                                                AND MVEX__IsOnExpose__c = true AND MVEX__Size__c != null WITH USER_MODE ORDER BY MVEX__Sort_on_Expose__c ASC NULLS LAST, Name ASC LIMIT 50000]) {
+                if (!propertyIdToFiles.containsKey(file.MVEX__Property__c)) {
+                    propertyIdToFiles.put(file.MVEX__Property__c, new List<MVEX__Property_File__c>());
                 }
-                propertyIdToFiles.get(file.Property__c).add(file);
+                propertyIdToFiles.get(file.MVEX__Property__c).add(file);
             }
     
             // Step 3: Build the result map
@@ -1699,9 +1686,9 @@ public with sharing class EmailCampaignController {
                 Id propertyId = listingIdToPropertyId.get(listingId);
     
                 if (propertyId != null && propertyIdToFiles.containsKey(propertyId)) {
-                    List<Property_File__c> mediaList = propertyIdToFiles.get(propertyId);
+                    List<MVEX__Property_File__c> mediaList = propertyIdToFiles.get(propertyId);
                     for (Integer i = 0; i < mediaList.size(); i++) {
-                        imageMap.put('listingMedia[' + (i + 1) + ']', mediaList[i].BaseUrl__c);
+                        imageMap.put('listingMedia[' + (i + 1) + ']', mediaList[i].MVEX__BaseUrl__c);
                     }
                 }
     
@@ -1710,28 +1697,28 @@ public with sharing class EmailCampaignController {
             
             for (EmailRequests request : emailRequests) {
 
-                Marketing_Campaign__c campaignRecord = campaignMap.get(request.campaignId);
-                if (campaignRecord == null || campaignRecord.Schedule_Type__c != 'Specific Date') {
+                MVEX__Marketing_Campaign__c campaignRecord = campaignMap.get(request.campaignId);
+                if (campaignRecord == null || campaignRecord.MVEX__Schedule_Type__c != 'Specific Date') {
                     continue; // Skip if not specific date
                 }
 
-                String emailType = campaignRecord.Email_Type__c;
-                String relatedObject = campaignRecord.RelatedObject__c;
+                String emailType = campaignRecord.MVEX__Email_Type__c;
+                String relatedObject = campaignRecord.MVEX__RelatedObject__c;
     
                 String extractedKeyString = '';
-                List<Template__c> fieldData = new List<Template__c>();
+                List<MVEX__Template__c> fieldData = new List<MVEX__Template__c>();
                 if (!temps.isEmpty() && request.templateDataId != null) {
-                    for (Template__c tempData : temps) {
+                    for (MVEX__Template__c tempData : temps) {
                         if (tempData.Id == request.templateDataId) {
                             fieldData.add(tempData);
                         }
                     }
                     if (!fieldData.isEmpty()) {
-                        extractedKeyString += fieldData[0].Template_Data__r.size() > 0 ? fieldData[0].Template_Data__r[0].Template_Value_Simple__c : '';
+                        extractedKeyString += fieldData[0].MVEX__Template_Data__r.size() > 0 ? fieldData[0].MVEX__Template_Data__r[0].MVEX__Template_Value_Simple__c : '';
                     }
                 }
                 extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
-                String sourceObjectAPI = !temps.isEmpty() ? temps[0].Object_API_Name__c : null;
+                String sourceObjectAPI = !temps.isEmpty() ? temps[0].MVEX__Object_API_Name__c : null;
                 Map<String, Object> extractedKeyMap = extractedKeyString != 'null' ? (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString) : new Map<String, Object>();            
                 
                 if (request.toAddresses != null) {
@@ -1913,11 +1900,11 @@ public with sharing class EmailCampaignController {
 
 
             try {
-                List<Email_Member__c> emailMembersToUpdateList = new List<Email_Member__c>();
+                List<MVEX__Email_Member__c> emailMembersToUpdateList = new List<MVEX__Email_Member__c>();
                 for (String key : processedKeys) {
                     if (emailMembersToUpdate.containsKey(key)) {
-                        Email_Member__c em = emailMembersToUpdate.get(key);
-                        em.Status__c = 'Success';
+                        MVEX__Email_Member__c em = emailMembersToUpdate.get(key);
+                        em.MVEX__Status__c = 'Success';
                         emailMembersToUpdateList.add(em);
                     }
                 }
@@ -1935,19 +1922,19 @@ public with sharing class EmailCampaignController {
                 
                 // Recalculate campaign counts for all affected campaigns
                 for (String campaignId : campaignIds) {
-                    if (campaignMap.get(campaignId).Schedule_Type__c == 'Specific Date') {
+                    if (campaignMap.get(campaignId).MVEX__Schedule_Type__c == 'Specific Date') {
                         recalculateCampaignCounts(campaignId);
                     }
                 }
             } catch (Exception e) {
                 System.enqueueJob(new CampaignUpdateQueueable(remainingEmailsMap, campaignMap, emails.size(), 'Failed', e.getMessage()));
                 
-                // Update Email_Member__c status to 'Failed' for processed records
-                List<Email_Member__c> emailMembersToUpdateList = new List<Email_Member__c>();
+                // Update MVEX__Email_Member__c status to 'Failed' for processed records
+                List<MVEX__Email_Member__c> emailMembersToUpdateList = new List<MVEX__Email_Member__c>();
                 for (String key : processedKeys) {
                     if (emailMembersToUpdate.containsKey(key)) {
-                        Email_Member__c em = emailMembersToUpdate.get(key);
-                        em.Status__c = 'Failed';
+                        MVEX__Email_Member__c em = emailMembersToUpdate.get(key);
+                        em.MVEX__Status__c = 'Failed';
                         emailMembersToUpdateList.add(em);
                     }
                 }
@@ -1957,7 +1944,7 @@ public with sharing class EmailCampaignController {
                 
                 // Recalculate campaign counts
                 for (String campaignId : campaignIds) {
-                    if (campaignMap.get(campaignId).Schedule_Type__c == 'Specific Date') {
+                    if (campaignMap.get(campaignId).MVEX__Schedule_Type__c == 'Specific Date') {
                         recalculateCampaignCounts(campaignId);
                     }
                 }
@@ -2142,8 +2129,8 @@ public with sharing class EmailCampaignController {
         public String templateName;
         public String selectedContactDateField;
         public String templateId;
-        public List<Marketing_Campaign_Member__c> marketingCampaignMembers;
-        public List<Marketing_Email__c> emailRecords;
+        public List<MVEX__Marketing_Campaign_Member__c> marketingCampaignMembers;
+        public List<MVEX__Marketing_Email__c> emailRecords;
         public String emailType;
         public String relatedObject;
         // ✨ ADDED: Field to store the selected broadcast groups (IDs separated by '@@@')

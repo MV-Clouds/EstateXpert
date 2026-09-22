@@ -128,14 +128,10 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
                 const filteredListingFields = listingFields.filter(
                     field => !blockfieldsSet.has(field.apiName)
                 );
-    
-                const filteredFields = filteredListingFields.filter(
-                    field => !portalMetadataRecords.some(record => record.MVEX__Listing_Field_API_Name__c === field.apiName)
-                );
         
                 portalMetadataRecords.forEach(record => {
     
-                    const finalFilteredFields = filteredFields.filter(field => {
+                    const finalFilteredFields = filteredListingFields.filter(field => {
                         switch (record.MVEX__Allowed_Field_Datatype__c) {
                             case 'String':
                                 return ['REFERENCE', 'TEXTAREA', 'STRING', 'URL', 'MULTIPICKLIST', 'PICKLIST'].includes(field.dataType);
@@ -160,6 +156,11 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
                         label: field.label,
                         value: field.apiName
                     }));
+
+                    const hasSelectedOption = additionalOptions.some(opt => opt.value === record.MVEX__Listing_Field_API_Name__c);
+                    const selectedOption = (!hasSelectedOption && record.MVEX__Listing_Field_API_Name__c)
+                        ? [{ label: this.getListingLabel(record.MVEX__Listing_Field_API_Name__c), value: record.MVEX__Listing_Field_API_Name__c }]
+                        : [];
         
                     const finalList = {
                         id: record.Id,
@@ -171,7 +172,7 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
                         dataType: record.MVEX__Allowed_Field_Datatype__c,
                         listingFields: [
                             { label: 'None', value: '' },
-                            ...(record.MVEX__Listing_Field_API_Name__c ? [{ label: this.getListingLabel(record.MVEX__Listing_Field_API_Name__c), value: record.MVEX__Listing_Field_API_Name__c }] : []),
+                            ...selectedOption,
                             ...additionalOptions
                         ]
                     };
@@ -327,57 +328,26 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
 
     /**
     * Method Name: handleComboboxChange
-    * @description: Used to update the combobox list of each mapping.
+    * @description: Used to update the selected listing field of the mapping.
     * Created Date: 04/06/2024
+    * Updated Date: 22/09/2026
     * Created By: Karan Singh
+    * Updated By: Karan Singh
     */
     handleComboboxChange(event) {
         try {
-            const selectedIndex = event.currentTarget.dataset.index;
+            const selectedIndex = parseInt(event.currentTarget.dataset.index, 10);
             const selectedValue = event.detail.value;
-            const dataType = event.currentTarget.dataset.datatype;
             this.isDataChanged = true;
 
-            if (selectedValue == '') {
-                let previousValue;
-                this.finalList = this.finalList.map((pair, index) => {
-                    if (index === parseInt(selectedIndex, 10)) {
-                        previousValue = pair.listingFieldAPIName;
-                        return { ...pair, listingFieldAPIName: selectedValue };
-                    }
-                    return pair;
-                });
-
-                if (previousValue != '') {
-                    this.finalList.forEach((pair, index) => {
-                        if (index !== parseInt(selectedIndex, 10)) {
-                            const customOptions = [...pair.listingFields, { label: this.getListingLabel(previousValue), value: previousValue }];
-                            pair.listingFields = customOptions;
-                        }
-                    });
+            this.finalList = this.finalList.map((pair, index) => {
+                if (index === selectedIndex) {
+                    return { ...pair, listingFieldAPIName: selectedValue };
                 }
-
-            } else {
-                let previousValue;
-                this.finalList = this.finalList.map((pair, index) => {
-                    if (index === parseInt(selectedIndex, 10)) {
-                        previousValue = pair.listingFieldAPIName;
-                        return { ...pair, listingFieldAPIName: selectedValue };
-                    }
-                    return pair;
-                });
-                this.finalList.forEach((pair, index) => {
-                    if (index !== parseInt(selectedIndex, 10) && pair.dataType === dataType) {
-                        var customOptions = pair.listingFields.filter(option => option.value !== selectedValue);
-                        if (previousValue != '') {
-                            customOptions = customOptions.concat({ label: this.getListingLabel(previousValue), value: previousValue });
-                        }
-                        pair.listingFields = customOptions;
-                    }
-                });
-            }
+                return pair;
+            });
         } catch (error) {
-            errorDebugger('PortalMappingLandingPage', 'handleComboboxChange', error, 'warn', 'Error occurred while updating the combobox list of each mapping');
+            errorDebugger('PortalMappingLandingPage', 'handleComboboxChange', error, 'warn', 'Error occurred while updating the combobox selection');
         }
         this.saveBtnDisable = false;
     }

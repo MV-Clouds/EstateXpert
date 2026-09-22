@@ -10,8 +10,8 @@
   color: white;
   gap: 8px;
   padding: 0 16px;
-  height: 36px;
-  min-height: 36px;
+  height: 30px;
+  min-height: 30px;
   font-size: 14px;
   border: none;
   border-radius: 6px;
@@ -42,8 +42,8 @@
   color: #0176D3;
   gap: 8px;
   padding: 0 16px;
-  height: 36px;
-  min-height: 36px;
+  height: 30px;
+  min-height: 30px;
   font-size: 14px;
   border: 1px solid #0176d3;
   border-radius: 6px;
@@ -76,8 +76,8 @@
   color: white;
   gap: 8px;
   padding: 0 16px;
-  height: 36px;
-  min-height: 36px;
+  height: 30px;
+  min-height: 30px;
   font-size: 14px;
   border: none;
   border-radius: 6px;
@@ -105,9 +105,9 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
   border-radius: 6px;
   background: #ffffff;
   transition: all 0.2s ease;
@@ -247,7 +247,7 @@
 }
 
 .header-search-bar-css .slds-input {
-  min-height: 36px;
+  min-height: 30px;
 }
 
 .header-combobox .slds-form-element__help {
@@ -255,7 +255,7 @@
 }
 
 .header-combobox .slds-combobox__input {
-  min-height: 36px;
+  min-height: 30px;
   align-items: center;
 }
 

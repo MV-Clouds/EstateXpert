@@ -1,11 +1,11 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import getAllBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getAllBroadcastGroups';
 import deleteBroadcastGroup from '@salesforce/apex/BroadcastMessageController.deleteBroadcastGroup';
 import getActiveCampaignsForGroup from '@salesforce/apex/BroadcastMessageController.getActiveCampaignsForGroup';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import FORM_FACTOR from '@salesforce/client/formFactor';
@@ -132,7 +132,18 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
     }
-    
+
+    @wire(CurrentPageReference)
+    handlePageReference(pageRef) {
+        if (pageRef && pageRef.state) {
+            const shouldRefresh = pageRef.state.c__refresh === true || pageRef.state.c__refresh === 'true';
+            if (shouldRefresh) {
+                this.currentPage = 1;
+                this.loadBroadcastGroups();
+            }
+        }
+    }
+
     async connectedCallback() {
         try {
             loadStyle(this, MulishFontCss)
@@ -178,11 +189,16 @@ export default class WbAllBroadcastGroupPage extends NavigationMixin(LightningEl
                     ...item,
                     index: index + 1,
                 }));
-                this.filteredData = [...this.data];
-                this.sortData();
-                this.updateShownData();
+                if (this.searchTerm || this.selectedCommunicationTypeFilter) {
+                    this.applyFilters();
+                } else {
+                    this.filteredData = [...this.data];
+                    this.sortData();
+                    this.updateShownData();
+                }
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error('Error loading broadcast groups:', error);
                 this.showToast('Error', 'Error loading records', 'error');
             })
             .finally(() => {

@@ -1,6 +1,6 @@
 import { LightningElement, track, wire } from "lwc";
 import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
-import { NavigationMixin } from "lightning/navigation";
+import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import FORM_FACTOR from "@salesforce/client/formFactor";
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
@@ -24,6 +24,23 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     
     // Lead capture state
     @track integrationType = null; // 'Google' or 'Meta'
+
+    _hasNavigatedToTemplate = false;
+
+    @wire(CurrentPageReference)
+    getStateParameters(currentPageReference) {
+        if (currentPageReference && currentPageReference.state) {
+            const target = currentPageReference.state.c__openComponent || currentPageReference.state.c__target;
+            if ((target === 'templateHomePage' || target === 'templateBuilder') && !this._hasNavigatedToTemplate) {
+                this._hasNavigatedToTemplate = true;
+                setTimeout(() => {
+                    this.templateBuilderMethod();
+                }, 0);
+            } else if (!target) {
+                this._hasNavigatedToTemplate = false;
+            }
+        }
+    }
 
     connectedCallback() {
         // Load Mulish font
@@ -337,7 +354,9 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     templateBuilderMethod(event) {
-        event.preventDefault();
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
         let componentDef = {
             componentDef: "MVEX:templateHomePage"
         };

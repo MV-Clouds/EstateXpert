@@ -160,7 +160,7 @@ public without sharing class DataMappingControllerV2 {
         }
     }
 
-    public static map<String, Map<String, String>> getMappingsKeyValues1(List<Template__c> temps, String recordId, Boolean includeMergTemKeys){
+    public static map<String, Map<String, String>> getMappingsKeyValues1(List<MVEX__Template__c> temps, String recordId, Boolean includeMergTemKeys){
         Map<String, Map<String, String>> mapingKeyVsValuesGroup = new Map<String, Map<String, String>>{
             'objectNGeneral' => new map<string, string>(),
             'margeTemplate' => new map<string, string>(),
@@ -172,13 +172,13 @@ public without sharing class DataMappingControllerV2 {
                 String sourceObjectAPI = '';
 
                 if(!temps.isEmpty()){
-                    for(Template_Data__c fieldData : temps[0].Template_Data__r){
-                        extractedKeyString +=  fieldData.Template_Value_Simple__c;
+                    for(MVEX__Template_Data__c fieldData : temps[0].MVEX__Template_Data__r){
+                        extractedKeyString +=  fieldData.MVEX__Template_Value_Simple__c;
                     }
 
                     extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
 
-                    sourceObjectAPI = temps[0].Object_API_Name__c;
+                    sourceObjectAPI = temps[0].MVEX__Object_API_Name__c;
                 }
 
                 Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);
@@ -233,21 +233,21 @@ public without sharing class DataMappingControllerV2 {
             'listingMediaImages' => new map<string, string>()
         };
         try {
-            List<Template__c> temps = [SELECT Id, Name, Object_API_Name__c, Template_Name__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate,
-                                      (SELECT Id, Name, Template_Value_Simple__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC)
-                                       FROM Template__c  WHERE Id In :templateIDs];
+            List<MVEX__Template__c> temps = [SELECT Id, Name, MVEX__Object_API_Name__c, MVEX__Template_Name__c, MVEX__Template_pattern__c, MVEX__Template_Status__c, MVEX__Description__c, CreatedDate, LastModifiedDate,
+                                      (SELECT Id, Name, MVEX__Template_Value_Simple__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c = 'Extracted Mapping Keys' ORDER BY MVEX__Order_No_Simple__c ASC)
+                                       FROM MVEX__Template__c WHERE Id In :templateIDs WITH USER_MODE LIMIT 50000];
 
-            for(Template__c temp : temps){
+            for(MVEX__Template__c temp : temps){
                 String extractedKeyString = '';
 
                 // get extracted Keys stored in field...
-                for(Template_Data__c fieldData : temp.Template_Data__r){
-                    extractedKeyString +=  fieldData.Template_Value_Simple__c;
+                for(MVEX__Template_Data__c fieldData : temp.MVEX__Template_Data__r){
+                    extractedKeyString +=  fieldData.MVEX__Template_Value_Simple__c;
                 }
 
                 extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
 
-                String sourceObjectAPI = temp.Object_API_Name__c;
+                String sourceObjectAPI = temp.MVEX__Object_API_Name__c;
 
                 // Type cast extracted key field value to key mappign keys, child object info and merge tempalte keys....
                 Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);
@@ -598,12 +598,12 @@ public without sharing class DataMappingControllerV2 {
             Map<String, String> templateIds = extractMergeTemplateIds(margeTempKeyList);
 
             // --- --- Collect mapping keys from merge template records --- ---
-            List<Template__c> mergeTemps = [SELECT Id,Object_API_Name__c,
-                                            (SELECT Id, Name, Template_Value_Simple__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC)
-                                            FROM Template__c WHERE Id IN :templateIds.values() AND Template_pattern__c = 'PDF Template' AND Object_API_Name__c =:sourceObjectAPI AND Template_Status__c = true WITH USER_MODE ];
+            List<MVEX__Template__c> mergeTemps = [SELECT Id,MVEX__Object_API_Name__c,
+                                            (SELECT Id, Name, MVEX__Template_Value_Simple__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c = 'Extracted Mapping Keys' ORDER BY MVEX__Order_No_Simple__c ASC)
+                                            FROM MVEX__Template__c WHERE Id IN :templateIds.values() AND MVEX__Template_pattern__c = 'PDF Template' AND MVEX__Object_API_Name__c =:sourceObjectAPI AND MVEX__Template_Status__c = true WITH USER_MODE LIMIT 50000];
             
             List<String> validTemplateListIds = new List<String>();
-            for(Template__c temp : mergeTemps){
+            for(MVEX__Template__c temp : mergeTemps){
                 validTemplateListIds.add(temp.Id);
             }
 
@@ -1013,16 +1013,16 @@ public without sharing class DataMappingControllerV2 {
     public static Map<String, String> getListingMediaImages(String listingId){
         Map<String, String> images = new Map<String, String>();
         try {
-            List<Listing__c> listingRecord = [SELECT Id, Property__c FROM Listing__c WHERE Id =: listingId WITH USER_MODE LIMIT 1];
+            List<MVEX__Listing__c> listingRecord = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c WHERE Id =: listingId WITH USER_MODE LIMIT 1];
             if (!listingRecord.isEmpty()) {
                 
-                String propertyId = listingRecord[0].Property__c;
+                String propertyId = listingRecord[0].MVEX__Property__c;
 
-                List<Property_File__c> media = [SELECT Id, BaseUrl__c FROM Property_File__c WHERE Property__c =: propertyId AND IsOnExpose__c = true AND Size__c != null WITH USER_MODE Order BY Sort_on_Expose__c ASC NULLS LAST, Name ASC];
+                List<MVEX__Property_File__c> media = [SELECT Id, MVEX__BaseUrl__c FROM MVEX__Property_File__c WHERE MVEX__Property__c =: propertyId AND MVEX__IsOnExpose__c = true AND MVEX__Size__c != null WITH USER_MODE ORDER BY MVEX__Sort_on_Expose__c ASC NULLS LAST, Name ASC LIMIT 50000];
                 if (!media.isEmpty()) {
                     for (Integer i = 0; i < media.size(); i++) {
-                        Property_File__c mediaItem = media[i];
-                        images.put('listingMedia[' + (i + 1) + ']', mediaItem.BaseUrl__c);
+                        MVEX__Property_File__c mediaItem = media[i];
+                        images.put('listingMedia[' + (i + 1) + ']', mediaItem.MVEX__BaseUrl__c);
                     }     
                 }
             }
@@ -1041,32 +1041,20 @@ public without sharing class DataMappingControllerV2 {
         }
     
         try {
-            // Step 1: Get all listings with their Property__c
+            // Step 1: Get all listings with their MVEX__Property__c
             Map<Id, Id> listingIdToPropertyId = new Map<Id, Id>();
-            for (Listing__c listing : [
-                SELECT Id, Property__c 
-                FROM Listing__c 
-                WHERE Id IN :listingIds
-                WITH USER_MODE
-            ]) {
-                listingIdToPropertyId.put(listing.Id, listing.Property__c);
+            for (MVEX__Listing__c listing : [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c WHERE Id IN :listingIds WITH USER_MODE LIMIT 50000]) {
+                listingIdToPropertyId.put(listing.Id, listing.MVEX__Property__c);
             }
     
-            // Step 2: Get all Property_File__c records in a single query
-            Map<Id, List<Property_File__c>> propertyIdToFiles = new Map<Id, List<Property_File__c>>();
-            for (Property_File__c file : [
-                SELECT Id, BaseUrl__c, Property__c 
-                FROM Property_File__c 
-                WHERE Property__c IN :listingIdToPropertyId.values() 
-                AND IsOnExpose__c = true 
-                AND Size__c != null 
-                WITH USER_MODE
-                ORDER BY Sort_on_Expose__c ASC NULLS LAST, Name ASC
-            ]) {
-                if (!propertyIdToFiles.containsKey(file.Property__c)) {
-                    propertyIdToFiles.put(file.Property__c, new List<Property_File__c>());
+            // Step 2: Get all MVEX__Property_File__c records in a single query
+            Map<Id, List<MVEX__Property_File__c>> propertyIdToFiles = new Map<Id, List<MVEX__Property_File__c>>();
+            for (MVEX__Property_File__c file : [SELECT Id, MVEX__BaseUrl__c, MVEX__Property__c FROM MVEX__Property_File__c WHERE MVEX__Property__c IN :listingIdToPropertyId.values() 
+                                                AND MVEX__IsOnExpose__c = true AND MVEX__Size__c != null WITH USER_MODE ORDER BY MVEX__Sort_on_Expose__c ASC NULLS LAST, Name ASC LIMIT 50000]) {
+                if (!propertyIdToFiles.containsKey(file.MVEX__Property__c)) {
+                    propertyIdToFiles.put(file.MVEX__Property__c, new List<MVEX__Property_File__c>());
                 }
-                propertyIdToFiles.get(file.Property__c).add(file);
+                propertyIdToFiles.get(file.MVEX__Property__c).add(file);
             }
     
             // Step 3: Build the result map
@@ -1075,9 +1063,9 @@ public without sharing class DataMappingControllerV2 {
                 Id propertyId = listingIdToPropertyId.get(listingId);
     
                 if (propertyId != null && propertyIdToFiles.containsKey(propertyId)) {
-                    List<Property_File__c> mediaList = propertyIdToFiles.get(propertyId);
+                    List<MVEX__Property_File__c> mediaList = propertyIdToFiles.get(propertyId);
                     for (Integer i = 0; i < mediaList.size(); i++) {
-                        imageMap.put('listingMedia[' + (i + 1) + ']', mediaList[i].BaseUrl__c);
+                        imageMap.put('listingMedia[' + (i + 1) + ']', mediaList[i].MVEX__BaseUrl__c);
                     }
                 }
     

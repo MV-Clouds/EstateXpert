@@ -4,11 +4,11 @@ public class ListingTriggerHandlerTest {
     @testSetup
     static void setupData() {
         // Create an existing property to test the "Matching Key" logic
-        Property__c prop = new Property__c(
+        MVEX__Property__c prop = new MVEX__Property__c(
             Name = 'Match Me',
-            Address__c = '123 Salesforce Lane',
-            Bedrooms__c = 3,
-            Bathrooms__c = 2
+            MVEX__Address__c = '123 Salesforce Lane',
+            MVEX__Bedrooms__c = 3,
+            MVEX__Bathrooms__c = 2
         );
         insert prop;
     }
@@ -16,10 +16,10 @@ public class ListingTriggerHandlerTest {
     @isTest
     static void testAfterInsert_AutomaticSyncOn() {
         // Mocking Metadata: Sync ON
-        ListingTriggerHandler.mockMetadata = new Mapping_Metadata__mdt(
-            Automatic_Sync__c = true,
-            BlockedFields__c = 'CreatedDate;LastModifiedDate',
-            Mapping_String__c = 'Name:Name;Address__c:Address__c'
+        ListingTriggerHandler.mockMetadata = new MVEX__Mapping_Metadata__mdt(
+            MVEX__Automatic_Sync__c = true,
+            MVEX__BlockedFields__c = 'CreatedDate;LastModifiedDate',
+            MVEX__Mapping_String__c = 'Name:Name;MVEX__Address__c:MVEX__Address__c'
         );
 
         Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
@@ -27,35 +27,35 @@ public class ListingTriggerHandlerTest {
             listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
         }
 
-        List<Listing__c> newListings = new List<Listing__c>();
+        List<MVEX__Listing__c> newListings = new List<MVEX__Listing__c>();
         
         // 1. Coverage for matchingPropertiesMap.containsKey(propertyKey) == true
-        newListings.add(new Listing__c(
+        newListings.add(new MVEX__Listing__c(
             Name = 'Match Me',
-            Address__c = '123 Salesforce Lane',
-            Bedrooms__c = 3,
-            Bathrooms__c = 2,
-            Listing_Type__c = 'Rent',
+            MVEX__Address__c = '123 Salesforce Lane',
+            MVEX__Bedrooms__c = 3,
+            MVEX__Bathrooms__c = 2,
+            MVEX__Listing_Type__c = 'Rent',
             RecordTypeId = listingRecordTypeMap.get('Rent')
         ));
 
         // 2. Coverage for else branch (Create a new property)
-        newListings.add(new Listing__c(
+        newListings.add(new MVEX__Listing__c(
             Name = 'Unique Listing',
-            Address__c = '789 Discovery Way',
-            Bedrooms__c = 5,
-            Bathrooms__c = 4,
-            Listing_Type__c = 'Rent',
+            MVEX__Address__c = '789 Discovery Way',
+            MVEX__Bedrooms__c = 5,
+            MVEX__Bathrooms__c = 4,
+            MVEX__Listing_Type__c = 'Rent',
             RecordTypeId = listingRecordTypeMap.get('Rent')
         ));
 
         // 3. Coverage for existingPropertiesMap branch (Property__c != null)
-        Property__c existingProp = [SELECT Id FROM Property__c LIMIT 1];
-        newListings.add(new Listing__c(
+        MVEX__Property__c existingProp = [SELECT Id FROM MVEX__Property__c LIMIT 1];
+        newListings.add(new MVEX__Listing__c(
             Name = 'Manual Link',
-            Property__c = existingProp.Id,
-            Address__c = '123 Salesforce Lane',
-            Listing_Type__c = 'Rent',
+            MVEX__Property__c = existingProp.Id,
+            MVEX__Address__c = '123 Salesforce Lane',
+            MVEX__Listing_Type__c = 'Rent',
             RecordTypeId = listingRecordTypeMap.get('Rent')
         ));
 
@@ -67,10 +67,10 @@ public class ListingTriggerHandlerTest {
     @isTest
     static void testAfterInsert_AutomaticSyncOff() {
         // Mocking Metadata: Sync OFF
-        ListingTriggerHandler.mockMetadata = new Mapping_Metadata__mdt(
-            Automatic_Sync__c = false,
-            BlockedFields__c = 'CreatedDate',
-            Mapping_String__c = 'Name:Name;Address__c:Address__c;Bedrooms__c:Bedrooms__c'
+        ListingTriggerHandler.mockMetadata = new MVEX__Mapping_Metadata__mdt(
+            MVEX__Automatic_Sync__c = false,
+            MVEX__BlockedFields__c = 'CreatedDate',
+            MVEX__Mapping_String__c = 'Name:Name;MVEX__Address__c:MVEX__Address__c;MVEX__Bedrooms__c:MVEX__Bedrooms__c'
         );
 
         Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
@@ -78,32 +78,32 @@ public class ListingTriggerHandlerTest {
             listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
         }
 
-        List<Listing__c> newListings = new List<Listing__c>();
+        List<MVEX__Listing__c> newListings = new List<MVEX__Listing__c>();
         
         // Match existing
-        newListings.add(new Listing__c(
+        newListings.add(new MVEX__Listing__c(
             Name = 'Match Me',
-            Address__c = '123 Salesforce Lane',
-            Bedrooms__c = 3,
-            Listing_Type__c = 'Sale',
+            MVEX__Address__c = '123 Salesforce Lane',
+            MVEX__Bedrooms__c = 3,
+            MVEX__Listing_Type__c = 'Sale',
             RecordTypeId = listingRecordTypeMap.get('Sale')
         ));
 
         // Create new
-        newListings.add(new Listing__c(
+        newListings.add(new MVEX__Listing__c(
             Name = 'Sync Off New',
-            Address__c = '456 Off St',
-            Listing_Type__c = 'Sale',
+            MVEX__Address__c = '456 Off St',
+            MVEX__Listing_Type__c = 'Sale',
             RecordTypeId = listingRecordTypeMap.get('Sale')
         ));
 
         // Create with existing property
-        Property__c existingProp = [SELECT Id FROM Property__c LIMIT 1];
-        newListings.add(new Listing__c(
+        MVEX__Property__c existingProp = [SELECT Id FROM MVEX__Property__c LIMIT 1];
+        newListings.add(new MVEX__Listing__c(
             Name = 'Sync Off Existing Prop',
-            Property__c = existingProp.Id,
-            Address__c = '123 Salesforce Lane',
-            Listing_Type__c = 'Sale',
+            MVEX__Property__c = existingProp.Id,
+            MVEX__Address__c = '123 Salesforce Lane',
+            MVEX__Listing_Type__c = 'Sale',
             RecordTypeId = listingRecordTypeMap.get('Sale')
         ));
 
@@ -111,18 +111,18 @@ public class ListingTriggerHandlerTest {
         insert newListings;
         Test.stopTest();
         
-        System.assertEquals(2, [SELECT count() FROM Listing__c WHERE Name LIKE 'Match Me%' OR Name = 'Sync Off New']);
+        System.assertEquals(2, [SELECT count() FROM MVEX__Listing__c WHERE Name LIKE 'Match Me%' OR Name = 'Sync Off New']);
     }
 
     @isTest
     static void testAfterUpdateDeleteUndelete() {
-        ListingTriggerHandler.mockMetadata = new Mapping_Metadata__mdt(
-            Automatic_Sync__c = false,
-            BlockedFields__c = 'CreatedDate',
-            Mapping_String__c = 'Name:Name'
+        ListingTriggerHandler.mockMetadata = new MVEX__Mapping_Metadata__mdt(
+            MVEX__Automatic_Sync__c = false,
+            MVEX__BlockedFields__c = 'CreatedDate',
+            MVEX__Mapping_String__c = 'Name:Name'
         );
 
-        Listing__c listing = new Listing__c(
+        MVEX__Listing__c listing = new MVEX__Listing__c(
             Name = 'Test Event Listing'
         );
         insert listing;

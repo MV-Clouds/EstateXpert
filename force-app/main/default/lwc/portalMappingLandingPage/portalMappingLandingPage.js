@@ -87,7 +87,7 @@ export default class PortalMappingLandingPage extends NavigationMixin(LightningE
         this.fieldWrapperList = [];
         this.MainListingOptions = [];
         try {
-            getObjectFields({ portalName: this.portalGen, isXMLForPF: this.isXMLForPF })
+            getObjectFields({ portalName: this.portalGen })
                 .then(data => {
                     if (data[0].portalMetadataRecords.length > 0) {
                         this.MainListingOptions = data[0].listingFields;

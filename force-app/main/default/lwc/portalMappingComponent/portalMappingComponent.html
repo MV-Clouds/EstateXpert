@@ -117,13 +117,9 @@
                     </div>
                 </template>
                 <template if:false={isPortalData}>
-                    <div class="empty-state">
-                        <div class="empty-state__content">
-                            <div class="empty-state__icon">
-                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                            </div>
-                            <div class="empty-state__message">No Portals are available to show.</div>
-                        </div>
+                    <div class="exp-no-data-container">
+                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                        <div class="exp-no-data-message">No Portals are available to show.</div>
                     </div>
                 </template>
             </div>
@@ -132,7 +128,7 @@
 
     <template if:true={showModal}>
         <c-new-pop-up onhidepopup={handleHidePopup} get-portal-name={clickedPortalName}
-            get-portal-icon-url={clickedPortalIconURL} onrefreshpageonhide={handleHideAndRefreshPage} is-x-m-l-for-p-f={isXMLForPF}></c-new-pop-up>
+            get-portal-icon-url={clickedPortalIconURL} onrefreshpageonhide={handleHideAndRefreshPage}></c-new-pop-up>
     </template>
 
     <template if:true={isSpinner}>
@@ -148,7 +144,7 @@
 
     <template if:true={propertyEditModal}>
         <c-setting-pop-up onhidepopup={handleHidePopup} get-portal-name={portalGen} get-portal-icon-url={portalIconUrl}
-            get-portal-id={selectedPortalId} onrefreshpageonhide={handleHideAndRefreshPage} is-x-m-l-for-p-f={isXMLForPF}></c-setting-pop-up>
+            get-portal-id={selectedPortalId} onrefreshpageonhide={handleHideAndRefreshPage}></c-setting-pop-up>
     </template>
 
     <c-message-popup onconfirmation={handleConfirmation}>

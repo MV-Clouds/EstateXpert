@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import fetchPortals from "@salesforce/apex/PortalSyndicationController.fetchPortals";
 import createPortalListingRecord from "@salesforce/apex/PortalSyndicationController.createPortalListingRecord";
+import getZooplaFieldMappings from "@salesforce/apex/PortalSyndicationController.getZooplaFieldMappings";
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
@@ -23,6 +24,7 @@ export default class PortalSyndication extends LightningElement {
     @track isDataAvailable = false;
     @track errorType = 'publish';
     @track isXMLForPF = false;
+    @track zooplaFieldMappings = null;
 
     /**
     * Method Name: connectedCallback
@@ -52,6 +54,9 @@ export default class PortalSyndication extends LightningElement {
             fetchPortals({ listingId: this.recordId })
             .then(data => {
                 if (data) {
+                    if (data.zooplaFieldMappings) {
+                        this.zooplaFieldMappings = data.zooplaFieldMappings;
+                    }
                     this.portals = data.portalData.map(portal => ({
                         ...portal,
                         buttonLabel: portal.flag ? 'Unpublish' : 'Publish',
@@ -59,7 +64,6 @@ export default class PortalSyndication extends LightningElement {
                         badgeColor: portal.flag ? 'active_cls' : 'inactive_cls',
                         isPublished: portal.flag
                     }));
-                    this.isXMLForPF = data.isXMLForPF;
                 }
 
                 this.isDataAvailable = this.portals.length > 0 ? true : false;
@@ -90,7 +94,7 @@ export default class PortalSyndication extends LightningElement {
     */
     checkPortals() {
         try {
-            return this.portals.some(record => (record.pname === 'Rightmove' || record.pname === 'Rightmove Overseas' || record.pname === 'Zoopla' || (record.pname === 'Propertyfinder' && !this.isXMLForPF)));
+            return this.portals.some(record => (record.pname === 'Rightmove' || record.pname === 'Rightmove Overseas' || record.pname === 'Zoopla' || (record.pname === 'Propertyfinder')));
         } catch (error) {
             errorDebugger('PortalSyndication', 'checkPortals', error, 'warn', 'Error occurred while checking the portals');
             return false;
@@ -116,6 +120,84 @@ export default class PortalSyndication extends LightningElement {
     }
 
     /**
+    * Method Name: ensureZooplaMappings
+    * @description: Ensures Zoopla field mappings are loaded.
+    */
+    async ensureZooplaMappings() {
+        if (!this.zooplaFieldMappings) {
+            try {
+                this.zooplaFieldMappings = await getZooplaFieldMappings();
+            } catch (error) {
+                errorDebugger('PortalSyndication', 'ensureZooplaMappings', error, 'warn', 'Error fetching Zoopla field mappings');
+            }
+        }
+    }
+
+    /**
+    * Method Name: getZooplaFieldLabel
+    * @description: Returns the Salesforce Listing field label for a given Zoopla error path.
+    * @param {String|Array} path - Zoopla error path
+    * @return {String} - Salesforce Listing field label or original path
+    */
+    getZooplaFieldLabel(path) {
+        try {
+            if (!path) {
+                return '';
+            }
+            if (Array.isArray(path)) {
+                path = path.join('.');
+            }
+            if (typeof path !== 'string') {
+                path = String(path);
+            }
+
+            // Normalize path: strip leading # or #/, remove slashes, convert to dots, remove array indices [0]
+            let cleanPath = path.trim()
+                .replace(/^#\/?/, '')
+                .replace(/^\/+|\/+$/g, '')
+                .replace(/\//g, '.')
+                .replace(/\[\d+\]/g, '')
+                .replace(/\.\d+\./g, '.')
+                .replace(/\.\d+$/g, '')
+                .trim()
+                .toLowerCase();
+
+            // Handle content / media paths
+            if (cleanPath === 'content' || cleanPath.startsWith('content.') || cleanPath.startsWith('content[')) {
+                if (cleanPath.includes('url')) {
+                    return 'Listing Media (URL)';
+                } else if (cleanPath.includes('type')) {
+                    return 'Listing Media (Type)';
+                }
+                return 'Listing Media';
+            }
+
+            if (this.zooplaFieldMappings) {
+                // 1. Direct match with normalized clean path
+                if (this.zooplaFieldMappings[cleanPath]) {
+                    return this.zooplaFieldMappings[cleanPath];
+                }
+                // 2. Direct match with raw lowercase path without # or /
+                let rawLower = path.replace(/^#\/?/, '').trim().toLowerCase();
+                if (this.zooplaFieldMappings[rawLower]) {
+                    return this.zooplaFieldMappings[rawLower];
+                }
+                // 3. Match child or parent prefix (e.g. "detailed_description" matches "detailed_description.text", or vice versa)
+                for (let key in this.zooplaFieldMappings) {
+                    if (key === cleanPath || key.startsWith(cleanPath + '.') || cleanPath.startsWith(key + '.') || key.endsWith('.' + cleanPath) || cleanPath.endsWith('.' + key)) {
+                        return this.zooplaFieldMappings[key];
+                    }
+                }
+            }
+
+            return cleanPath || path;
+        } catch (error) {
+            errorDebugger('PortalSyndication', 'getZooplaFieldLabel', error, 'warn', 'Error while mapping Zoopla field label');
+            return path;
+        }
+    }
+
+    /**
     * Method Name: handleSubscribe
     * @description: Used to subscribe to the platform event channel.
     * Created Date: 09/07/2024
@@ -124,7 +206,7 @@ export default class PortalSyndication extends LightningElement {
     handleSubscribe() {
         try {
             const self = this;
-            const messageCallback = function (response) {
+            const messageCallback = async function (response) {
                 let obj = JSON.parse(JSON.stringify(response));
                 let objData = obj.data.payload;
                 self.status = objData.MVEX__Status__c;
@@ -135,11 +217,19 @@ export default class PortalSyndication extends LightningElement {
                     if (self.status === 'Failed') {
                         let errorDetails = [];
                         let responseBodyParsed = JSON.parse(self.responseBody);
-                        if (self.portalName === 'Zoopla' && responseBodyParsed.errors) {
-                            errorDetails.push(...responseBodyParsed.errors.map(error => ({
-                                message: error.message,
-                                path: error.path
-                            })));
+                        if (self.portalName === 'Zoopla') {
+                            await self.ensureZooplaMappings();
+                            if (responseBodyParsed.errors && Array.isArray(responseBodyParsed.errors) && responseBodyParsed.errors.length > 0) {
+                                errorDetails.push(...responseBodyParsed.errors.map(error => ({
+                                    message: error.message,
+                                    path: self.getZooplaFieldLabel(error.path)
+                                })));
+                            } else if (responseBodyParsed.error_advice || responseBodyParsed.error_name || responseBodyParsed.message) {
+                                errorDetails.push({
+                                    message: responseBodyParsed.error_advice || responseBodyParsed.message || responseBodyParsed.error_name,
+                                    path: responseBodyParsed.error_name || ''
+                                });
+                            }
                             errorDetails = JSON.stringify(errorDetails);
                         } else if (self.portalName === 'Rightmove' || self.portalName === 'Rightmove Overseas') {
                             if (responseBodyParsed.errors) {
@@ -162,7 +252,7 @@ export default class PortalSyndication extends LightningElement {
                             }
 
                             errorDetails = JSON.stringify(errorDetails);
-                        } else if (self.portalName === 'Property Finder' && !this.isXMLForPF) {
+                        } else if (self.portalName === 'Property Finder') {
                             // Handle Property Finder error structure
                             if (responseBodyParsed.errors && Array.isArray(responseBodyParsed.errors)) {
                                 errorDetails.push(...responseBodyParsed.errors.map(error => ({
@@ -318,9 +408,9 @@ export default class PortalSyndication extends LightningElement {
     */
     checkForPortal(portalName, actionType) {
         try {
-            if ((portalName === 'Zoopla' || portalName === 'Rightmove' || portalName === 'Rightmove Overseas' || (portalName === 'Propertyfinder' && !this.isXMLForPF)) && actionType === 'Publish') {
+            if ((portalName === 'Zoopla' || portalName === 'Rightmove' || portalName === 'Rightmove Overseas' || portalName === 'Propertyfinder') && actionType === 'Publish') {
                 return true;
-            } else if (portalName === 'Propertyfinder' && actionType === 'Unpublish' && !this.isXMLForPF) {
+            } else if (portalName === 'Propertyfinder' && actionType === 'Unpublish') {
                 return true;
             }
     

@@ -1,5 +1,18 @@
+/**
+* Class Name : SendEmailsController
+* Test Class : SendEmailsControllerTest
+* Created By : Karan Singh
+* Last Modified Date : 17/09/2026
+* Last Modified By : Karan Singh
+* @description : Controller for handling email templates, messaging service options, listings, and contacts for SendEmails component.
+*/
 public with sharing class SendEmailsController {
 
+    /**
+    * Method Name : getMessagingServiceOptions
+    * @return List<Map<String, String>> List of available messaging service options with label and value.
+    * @description : Retrieves available messaging service options such as Single Messaging Service and Gmail if configured.
+    */
     @AuraEnabled
     public static List<Map<String, String>> getMessagingServiceOptions() {
         List<Map<String, String>> optionsList = new List<Map<String, String>>();
@@ -21,6 +34,11 @@ public with sharing class SendEmailsController {
         return optionsList;
     }
     
+    /**
+    * Method Name : getTemplatesByObject
+    * @return Map<String, Object> Map containing email templates and EstateXpert custom marketing templates.
+    * @description : Fetches active standard EmailTemplate records and custom MVEX__Template__c records with body data and merge fields.
+    */
     @AuraEnabled
     public static Map<String, Object> getTemplatesByObject() {
         Map<String, Object> result = new Map<String, Object>();
@@ -74,7 +92,6 @@ public with sharing class SendEmailsController {
                 });
             }
             
-            
             result.put('emailTemplates', emailTemplateOptions);
             result.put('customTemplates', customTemplateOptions);
             
@@ -84,6 +101,11 @@ public with sharing class SendEmailsController {
         return result;
     }
 
+    /**
+    * Method Name : getListings
+    * @return List<MVEX__Listing__c> List of listing records with address, type, price, and status.
+    * @description : Retrieves listing records for template merge preview and campaign selection.
+    */
     @AuraEnabled
     public static List<MVEX__Listing__c> getListings() {
         List<MVEX__Listing__c> listings = new List<MVEX__Listing__c>();
@@ -95,15 +117,16 @@ public with sharing class SendEmailsController {
         return listings;
     }
 
+    /**
+    * Method Name : getAllContacts
+    * @return List<Contact> List of contact records that have an email address.
+    * @description : Retrieves all active contacts with email addresses ordered by Name.
+    */
     @AuraEnabled
     public static List<Contact> getAllContacts() {
         List<Contact> contacts = new List<Contact>();
         try {
-            contacts = [SELECT Id, Name, Email, Phone 
-                        FROM Contact 
-                        WHERE Email != null 
-                        WITH USER_MODE 
-                        ORDER BY Name ASC LIMIT 50000];
+            contacts = [SELECT Id, Name, Email, Phone FROM Contact WHERE Email != null WITH USER_MODE ORDER BY Name ASC LIMIT 50000];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SendEmailsController', 'getAllContacts', e.getStackTraceString());
         }

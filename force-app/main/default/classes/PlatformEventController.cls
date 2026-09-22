@@ -29,4 +29,19 @@ public with sharing class PlatformEventController {
         }
 
     }
+
+    /**
+    * Method Name : publishRefreshEvent
+    * @param {string} featureName - The feature name (e.g., Marketing_List)
+    * @description : Used to publish MVEX__RefreshEvent__e platform event to notify clients to refresh.
+    */
+    public static void publishRefreshEvent(String featureName) {
+        try {
+            MVEX__RefreshEvent__e event = new MVEX__RefreshEvent__e();
+            event.Feature_Name__c = featureName;
+            EventBus.publish(event);
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PlatformEventController', 'publishRefreshEvent', 'Error while publishing refresh event.');
+        }
+    }
 }

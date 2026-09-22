@@ -1,4 +1,18 @@
+/**
+* Class Name : CreateActivityRecordsFromMail
+* Test Class : CreateActivityRecordsFromMailTest
+* Created By : Karan Singh
+* Last Modified Date : 17/09/2026
+* Last Modified By : Karan Singh
+* @description : Handles the creation of EmailMessage, Attachment, and EmailMessageRelation activity records when emails are sent.
+*/
 public with sharing class CreateActivityRecordsFromMail {
+
+    /**
+    * Method Name : createCaseEmailMessage
+    * @param contactEmailInfoMap Map of Contact Id to email detail map (subject, body, email, cc, bcc, attachment, etc.).
+    * @description : Creates and inserts EmailMessage, Attachment, and EmailMessageRelation activity records for sent emails.
+    */
     public static void createCaseEmailMessage(Map<String, Map<String, String>> contactEmailInfoMap) {
         try {
             List<EmailMessage> emailMessagesToInsert = new List<EmailMessage>();
@@ -37,7 +51,13 @@ public with sharing class CreateActivityRecordsFromMail {
         }
     }
 
-    // Helper methods to improve readability and maintainability
+    /**
+    * Method Name : buildEmailMessage
+    * @param contactId The Contact record ID associated with the email.
+    * @param emailInfo Map containing email attributes such as to address, subject, body, cc, and bcc.
+    * @return EmailMessage Constructed EmailMessage record populated with sender, recipient, body, and contact details.
+    * @description : Constructs an EmailMessage record from provided contact and email information.
+    */
     private static EmailMessage buildEmailMessage(String contactId, Map<String, String> emailInfo) {
         EmailMessage caseEmailMessage = new EmailMessage();
         caseEmailMessage.FromAddress = UserInfo.getUserEmail();
@@ -54,6 +74,13 @@ public with sharing class CreateActivityRecordsFromMail {
         return caseEmailMessage;
     }
 
+    /**
+    * Method Name : buildAttachment
+    * @param contactId The Contact record ID to associate the attachment with.
+    * @param emailInfo Map containing attachment content (base64) and attachment name.
+    * @return Attachment Constructed Attachment record or null if no attachment data is present.
+    * @description : Builds an Attachment record from base64 encoded content associated with the email.
+    */
     private static Attachment buildAttachment(String contactId, Map<String, String> emailInfo) {
         String attachmentName = emailInfo.containsKey('attachmentName') ? emailInfo.get('attachmentName') : '';
         String attachmentContent = emailInfo.containsKey('attachmentContent') ? emailInfo.get('attachmentContent') : null;
@@ -72,6 +99,12 @@ public with sharing class CreateActivityRecordsFromMail {
         return null;
     }
 
+    /**
+    * Method Name : buildEmailMessageRelation
+    * @param caseEmailMessage The inserted EmailMessage record.
+    * @return EmailMessageRelation Constructed EmailMessageRelation linking the EmailMessage to the contact.
+    * @description : Creates an EmailMessageRelation record to link the EmailMessage with the related Contact.
+    */
     private static EmailMessageRelation buildEmailMessageRelation(EmailMessage caseEmailMessage) {
         EmailMessageRelation emr = new EmailMessageRelation();
         emr.EmailMessageId = caseEmailMessage.Id;

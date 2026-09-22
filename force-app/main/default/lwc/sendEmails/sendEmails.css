@@ -729,12 +729,6 @@
     --slds-c-icon-color-foreground-default: white;
 }
 
-/* Contact Pills Styles */
-.combobox-container {
-    margin-bottom: 1rem;
-    flex: 1;
-}
-
 .contact-combobox {
     width: 100%;
     --inputAreaHeight: 2.5rem;
@@ -1131,13 +1125,6 @@
 .configure-email-form .custom-combobox {
     --slds-c-input-radius-border: 6px;
     --slds-c-input-color-border: #e5e5e5;
-}
-
-
-.section-divider {
-    position: relative;
-    text-align: center;
-    margin: 1rem 0;
 }
 
 .divider-text {
@@ -1561,11 +1548,13 @@
     transition: all 0.3s ease;
 }
 
-.primary-recipients {
-    max-height: 24rem;
-    overflow: auto;
+.recipient-list-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
     scrollbar-width: thin;
-    margin-bottom: 1rem;
 }
 
 .section-card:hover {
@@ -1646,14 +1635,20 @@
 }
 
 .recipient-selection-container {
-    margin-top: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-bottom: 1rem;
 }
 
 .recipient-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
-    align-items: start;
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
 }
 
 .recipient-header {
@@ -1799,6 +1794,7 @@
     border: 1px dashed #e2e8f0;
     border-radius: 8px;
     margin-top: 1rem;
+    flex: 1;
 }
 
 .recipient-empty-state p {
@@ -1815,7 +1811,8 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin: 1.5rem 0 1rem;
+    margin-bottom: 0.5rem;
+    position: relative;
 }
 
 .blue-btn-css {
@@ -2072,4 +2069,11 @@
     display: flex;
     flex-direction: column;
     justify-content: end;
+}
+
+.step-recipients-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }

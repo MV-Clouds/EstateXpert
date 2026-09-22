@@ -7,7 +7,6 @@ public with sharing class KeyMappingController {
     public static string generalFieldkeys = '{{Doc.mappingKey}}';
     public static string mergeTemplatekeys = '{{Temp.tempId}}';
     public static string formattingKeys = '*formatKey*';
-    public static string signatureKey = '{{Sign.EXP *Signature Key*}}';
     public static List<string> imgTyes = new List<string>{'png','jpg','jpeg','avif','webp','heic','ico','jfif','jps','jpe'};
     public static integer maxImageSize = 20*1000*1000;  // 20MB
     public static list<string> polymorphismObjAllowdFields = new list<string>
@@ -695,7 +694,6 @@ public with sharing class KeyMappingController {
     
             retrunWrapper.isSuccess = true;
             retrunWrapper.fieldFormatting = listOFformattingField;
-            retrunWrapper.signatureKey = signatureKey;
             return retrunWrapper;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'KeyMappingController', 'formattingFieldKeys', 'Error while formatting field keys.');
@@ -716,7 +714,6 @@ public with sharing class KeyMappingController {
         @auraEnabled public MVEX__Template__c template;
         @auraEnabled public List<ContentDistribution> cdImages;
         @auraEnabled public list<FormattingField> fieldFormatting;
-        @AuraEnabled public String signatureKey;
         @AuraEnabled public Integer listingMediaCount;
      }
 

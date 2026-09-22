@@ -59,7 +59,7 @@ public with sharing class ImageAndMediaController {
     * @param recordId to stored the Listing record Id
     * @param mediaList to stored the images data
     * @return Boolean value
-    * @description : Used to create new Property_File__c records.
+    * @description : Used to create new MVEX__Property_File__c records.
     */
     @AuraEnabled
     public static String createmediaforlisting(Id recordId, List<MediaData> mediaList){
@@ -97,7 +97,7 @@ public with sharing class ImageAndMediaController {
             }
             
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'createmediaforlisting', 'Error while creating Property_File__c record.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'createmediaforlisting', 'Error while creating MVEX__Property_File__c record.');
             return e.getMessage();
         }
     }
@@ -127,10 +127,10 @@ public with sharing class ImageAndMediaController {
 
     /**
     * Method Name : deletelistingmedia
-    * @param id to stored the Property_File__c record Id
+    * @param id to stored the MVEX__Property_File__c record Id
     * @param propertyId to stored the property Id
     * @return Boolean value
-    * @description : Used to delete Property_File__c records.
+    * @description : Used to delete MVEX__Property_File__c records.
     */
     @AuraEnabled
     public static Boolean deletelistingmedia(String id,String propertyId){
@@ -151,7 +151,7 @@ public with sharing class ImageAndMediaController {
             }   
             return true;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'deletelistingmedia', 'Error while deleting Property_File__c record.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'deletelistingmedia', 'Error while deleting MVEX__Property_File__c record.');
             return false;
         }
     }
@@ -173,8 +173,8 @@ public with sharing class ImageAndMediaController {
 
     /**
     * Method Name : getS3ConfigSettings
-    * @return AWS_Config__c details
-    * @description : Used to return the AWS_Config__c custom setting record.
+    * @return MVEX__AWS_Config__c details
+    * @description : Used to return the MVEX__AWS_Config__c custom setting record.
     */
     @AuraEnabled
     public static AWSWrapper getS3ConfigSettings(){
@@ -192,7 +192,7 @@ public with sharing class ImageAndMediaController {
 
             return newWrap;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'getS3ConfigSettings', 'Error while getting AWS_Config__c record.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'getS3ConfigSettings', 'Error while getting MVEX__AWS_Config__c record.');
             newWrap.contentVersionData = e.getMessage();
             newWrap.status = false;
             return newWrap;
@@ -202,9 +202,9 @@ public with sharing class ImageAndMediaController {
 
     /**
     * Method Name : updatePropertyFileRecords
-    * @param itemsToUpdate to stored the Property_File__c records
+    * @param itemsToUpdate to stored the MVEX__Property_File__c records
     * @return String value
-    * @description : Used to update the Property_File__c records.
+    * @description : Used to update the MVEX__Property_File__c records.
     */
     @AuraEnabled
     public static String updatePropertyFileRecords(List<Map<String, Object>> itemsToUpdate) {
@@ -229,7 +229,7 @@ public with sharing class ImageAndMediaController {
 
             return 'success';
         }catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'updatePropertyFileRecords', 'Error while updating Property_File__c records.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'updatePropertyFileRecords', 'Error while updating MVEX__Property_File__c records.');
             return 'error' + e.getMessage() + e.getLineNumber();
         }
     }

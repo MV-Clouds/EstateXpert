@@ -14,9 +14,10 @@ import emojiData from '@salesforce/resourceUrl/emojis_data';
 import NoPreviewAvailable from '@salesforce/resourceUrl/NoPreviewAvailable';
 import whatsappAudioIcon from '@salesforce/resourceUrl/whatsAppAudioIcon';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
+import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { NavigationMixin } from 'lightning/navigation';
-import { loadScript } from 'lightning/platformResourceLoader';
+import { loadScrip, loadStyle } from 'lightning/platformResourceLoader';
 import { subscribe } from 'lightning/empApi';
 
 export default class ChatWindow extends NavigationMixin(LightningElement) {
@@ -156,6 +157,13 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
 
     async connectedCallback() {
         try {
+            loadStyle(this, MulishFontCss)
+            .then(() => {
+                console.log("Css loaded successfully");
+            })
+            .catch((error) => {
+                console.log("Error loading style:", error);
+            });
             this.checkBusinessAccountConfig();
         } catch (e) {
             console.error('Error in connectedCallback:::', e.message);
@@ -1006,6 +1014,15 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
             },
             state: {
                 selectedRecordId: contentDocumentId
+            }
+        });
+    }
+
+    navigateToWhatsAppSetup() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/apex/MVEX__facebookSDK'
             }
         });
     }

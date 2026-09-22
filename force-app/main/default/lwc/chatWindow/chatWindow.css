@@ -1268,6 +1268,6 @@
 .configuration-error-submessage {
     font-size: 0.9rem;
     color: #777;
-    margin-top: 1.5rem;
+    margin: 1rem 0;
     font-style: italic;
 }

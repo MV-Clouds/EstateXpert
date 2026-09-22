@@ -16,7 +16,7 @@ public with sharing class ImageAndMediaController {
         @AuraEnabled
         public String propertyId { get; set; }
         @AuraEnabled
-        public List<Property_File__c> listingImages { get; set; }
+        public List<MVEX__Property_File__c> listingImages { get; set; }
         @AuraEnabled
         public String status { get; set; }
     }
@@ -33,12 +33,12 @@ public with sharing class ImageAndMediaController {
         ListingWrapper newWrap = new ListingWrapper();
 
         try {
-            List<Listing__c> listingRecord = [SELECT Id, Property__c FROM Listing__c WHERE Id =: recordId WITH USER_MODE LIMIT 1];
+            List<MVEX__Listing__c> listingRecord = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c WHERE Id =: recordId WITH USER_MODE LIMIT 1];
             if (!listingRecord.isEmpty()) {
-                List<Property_File__c> listingImages = [SELECT Id, BaseUrl__c, Tags__c, Name, ExternalLink__c, Size__c, Property__c, IsOnPortalFeed__c, IsOnWebsite__c, IsOnExpose__c, Sort_on_Expose__c, Sort_on_Portal_Feed__c, Sort_on_Website__c, Filename__c, MimeType__c FROM Property_File__c WHERE Property__c =: listingRecord[0].Property__c WITH USER_MODE ORDER BY Name];
+                List<MVEX__Property_File__c> listingImages = [SELECT Id, MVEX__BaseUrl__c, MVEX__Tags__c, Name, MVEX__ExternalLink__c, MVEX__Size__c, MVEX__Property__c, MVEX__IsOnPortalFeed__c, MVEX__IsOnWebsite__c, MVEX__IsOnExpose__c, MVEX__Sort_on_Expose__c, MVEX__Sort_on_Portal_Feed__c, MVEX__Sort_on_Website__c, MVEX__Filename__c, MVEX__MimeType__c FROM MVEX__Property_File__c WHERE MVEX__Property__c =: listingRecord[0].MVEX__Property__c WITH USER_MODE ORDER BY Name];
                 listingImages.sort();
 
-                newWrap.propertyId = listingRecord[0].Property__c;
+                newWrap.propertyId = listingRecord[0].MVEX__Property__c;
                 newWrap.listingImages = listingImages;
                 newWrap.status = 'success';
 
@@ -64,28 +64,28 @@ public with sharing class ImageAndMediaController {
     @AuraEnabled
     public static String createmediaforlisting(Id recordId, List<MediaData> mediaList){
         try {
-            List<Property_File__c> mediaToInsert = new List<Property_File__c>();
+            List<MVEX__Property_File__c> mediaToInsert = new List<MVEX__Property_File__c>();
 
             for (MediaData media : mediaList) {
-                Property_File__c mediaRecord = new Property_File__c();
-                mediaRecord.BaseUrl__c = media.externalUrl;
+                MVEX__Property_File__c mediaRecord = new MVEX__Property_File__c();
+                mediaRecord.MVEX__BaseUrl__c = media.externalUrl;
                 if(media.name != '' && media.name != null){
                     if (media.name.length() > 80) { 
                         String truncatedName = media.name.substring(0, 80);
                         mediaRecord.Name = truncatedName; 
-                        mediaRecord.Filename__c = media.name;
+                        mediaRecord.MVEX__Filename__c = media.name;
                     } else {
                         mediaRecord.Name = media.name;
-                        mediaRecord.Filename__c = media.name;
+                        mediaRecord.MVEX__Filename__c = media.name;
                     }
                 }
-                mediaRecord.Size__c = media.size;
-                mediaRecord.Property__c = recordId;
-                mediaRecord.ExternalLink__c = media.externalVideoUrl;
-                mediaRecord.IsOnExpose__c = media.IsOnExpose;
-                mediaRecord.IsOnPortalFeed__c = media.IsOnPortalFeed;
-                mediaRecord.IsOnWebsite__c = media.IsOnWebsite;
-                mediaRecord.MimeType__c = media.type;
+                mediaRecord.MVEX__Size__c = media.size;
+                mediaRecord.MVEX__Property__c = recordId;
+                mediaRecord.MVEX__ExternalLink__c = media.externalVideoUrl;
+                mediaRecord.MVEX__IsOnExpose__c = media.IsOnExpose;
+                mediaRecord.MVEX__IsOnPortalFeed__c = media.IsOnPortalFeed;
+                mediaRecord.MVEX__IsOnWebsite__c = media.IsOnWebsite;
+                mediaRecord.MVEX__MimeType__c = media.type;
                 mediaToInsert.add(mediaRecord);
             }
             
@@ -136,14 +136,14 @@ public with sharing class ImageAndMediaController {
     public static Boolean deletelistingmedia(String id,String propertyId){
         try {
             if (id != null) {
-                List<Property_File__c> record = [SELECT Id FROM Property_File__c WHERE Id = :id WITH USER_MODE LIMIT 1];
-                if (Schema.sObjectType.Property_File__c.isDeletable()) {
+                List<MVEX__Property_File__c> record = [SELECT Id FROM MVEX__Property_File__c WHERE Id = :id WITH USER_MODE LIMIT 1];
+                if (Schema.sObjectType.MVEX__Property_File__c.isDeletable()) {
                     delete as user record;
                 }
             } else if (propertyId != null) {
-                List<Listing__c> listing = [SELECT Id, Property__c FROM Listing__c WHERE Id= :propertyId WITH USER_MODE LIMIT 1];
+                List<MVEX__Listing__c> listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c WHERE Id= :propertyId WITH USER_MODE LIMIT 1];
                 if (!listing.isEmpty()) {
-                    List<Property_File__c> allMedia = [SELECT Id, Property__c FROM Property_File__c WHERE Property__c = :listing[0].Property__c];
+                    List<MVEX__Property_File__c> allMedia = [SELECT Id, MVEX__Property__c FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing[0].MVEX__Property__c];
                     if (allMedia != null) {
                         delete as user allMedia;
                     }
@@ -166,7 +166,7 @@ public with sharing class ImageAndMediaController {
         @AuraEnabled
         public String contentVersionData { get; set; }
         @AuraEnabled
-        public AWS_Config__c awsConfigData  { get; set; }
+        public MVEX__AWS_Config__c awsConfigData  { get; set; }
         @AuraEnabled
         public Boolean isIntegrated  { get; set; }
     }
@@ -183,10 +183,10 @@ public with sharing class ImageAndMediaController {
             List<ContentVersion>  cvList = [SELECT Id, ContentSize, Title, FileType, VersionDataUrl, VersionData FROM ContentVersion WHERE ExternalDocumentInfo1 = 'watermark3112' AND isLatest = true WITH USER_MODE];
             newWrap.contentVersionData = cvList.size() > 0 ? EncodingUtil.base64Encode(cvList[0].VersionData) : '';
 
-            AWS_Config__c awsCredential = AWS_Config__c.getOrgDefaults();
+            MVEX__AWS_Config__c awsCredential = MVEX__AWS_Config__c.getOrgDefaults();
             newWrap.awsConfigData = awsCredential;
 
-            newWrap.isIntegrated = awsCredential.AWS_Access_Key__c != null && awsCredential.AWS_Secret_Access_Key__c != null && awsCredential.S3_Bucket_Name__c != null && awsCredential.S3_Region_Name__c != null;
+            newWrap.isIntegrated = awsCredential.MVEX__AWS_Access_Key__c != null && awsCredential.MVEX__AWS_Secret_Access_Key__c != null && awsCredential.MVEX__S3_Bucket_Name__c != null && awsCredential.MVEX__S3_Region_Name__c != null;
 
             newWrap.status = true;
 
@@ -209,10 +209,10 @@ public with sharing class ImageAndMediaController {
     @AuraEnabled
     public static String updatePropertyFileRecords(List<Map<String, Object>> itemsToUpdate) {
         try {
-            List<Property_File__c> recordsToUpdate = new List<Property_File__c>();
+            List<MVEX__Property_File__c> recordsToUpdate = new List<MVEX__Property_File__c>();
 
             for (Map<String, Object> fields : itemsToUpdate) {
-                Property_File__c existingRecord = new Property_File__c(Id = (String) fields.get('Id'));
+                MVEX__Property_File__c existingRecord = new MVEX__Property_File__c(Id = (String) fields.get('Id'));
                 for (String fieldName : fields.keySet()) {
                     if (fieldName != 'Id') {
                         existingRecord.put(fieldName, fields.get(fieldName));

@@ -236,10 +236,10 @@ public with sharing class ObjectConfigController {
     public static Map<String, String> getUserConfig() {
         Map<String, String> configMap = new Map<String, String>();
         try {
-            List<Object_Config__mdt> config = [SELECT ObjectConfigInfo__c, ChatWindowConfigInfo__c FROM Object_Config__mdt WITH USER_MODE LIMIT 1];
+            List<MVEX__Object_Config__mdt> config = [SELECT MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
             if(config.size() > 0) {
-                configMap.put('ObjectConfigInfo', config[0].ObjectConfigInfo__c);
-                configMap.put('ChatWindowConfigInfo', config[0].ChatWindowConfigInfo__c);
+                configMap.put('ObjectConfigInfo', config[0].MVEX__ObjectConfigInfo__c);
+                configMap.put('ChatWindowConfigInfo', config[0].MVEX__ChatWindowConfigInfo__c);
             } else {
                 configMap.put('ObjectConfigInfo', '{}');
                 configMap.put('ChatWindowConfigInfo', '{}');
@@ -265,8 +265,8 @@ public with sharing class ObjectConfigController {
             String devName = 'objectConfigInfo';
             String masterLabel = 'objectConfigInfo';
 
-            List<Object_Config__mdt> configList = [SELECT MasterLabel, DeveloperName, ObjectConfigInfo__c, ChatWindowConfigInfo__c FROM Object_Config__mdt WITH USER_MODE LIMIT 1];
-            Object_Config__mdt config = new Object_Config__mdt();
+            List<MVEX__Object_Config__mdt> configList = [SELECT MasterLabel, DeveloperName, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
+            MVEX__Object_Config__mdt config = new MVEX__Object_Config__mdt();
 
             if (!configList.isEmpty()) {
                 config = configList[0];

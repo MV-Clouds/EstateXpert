@@ -20,7 +20,7 @@ public with sharing class ChatWindowController {
     */
     /* ---------------- Start ---------------- */
     public static MVEX__WhatsAppConfig__c wbConfig = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
-    public static List<MVEX__User_Theme_Preference__c> userPreferences = [SELECT MVEX__Theme__c FROM MVEX__User_Theme_Preference__c WHERE SetupOwnerId =: UserInfo.getUserId() WITH USER_MODE LIMIT 1];
+    public static List<User_Theme_Preference__c> userPreferences = [SELECT Theme__c FROM User_Theme_Preference__c WHERE SetupOwnerId =: UserInfo.getUserId() WITH USER_MODE LIMIT 1];
     /* ----------------  End  ---------------- */
     
     @AuraEnabled
@@ -158,8 +158,8 @@ public with sharing class ChatWindowController {
             List<MVEX__Chat__c> chats = new List<MVEX__Chat__c>();
             List<MVEX__WhatsappTemplate__c> templates = new List<MVEX__WhatsappTemplate__c>();
             // Contact recordData = new Contact();
-            MVEX__User_Theme_Preference__c userPreference = !userPreferences.isEmpty() ? userPreferences[0] : null;
-            String theme = userPreference != null && userPreference.MVEX__Theme__c != null ? userPreference.MVEX__Theme__c : 'light'; // Default to Light
+            User_Theme_Preference__c userPreference = !userPreferences.isEmpty() ? userPreferences[0] : null;
+            String theme = userPreference != null && userPreference.Theme__c != null ? userPreference.Theme__c : 'light'; // Default to Light
 
             // Fetch metadata record from Object_Config__mdt
             List<MVEX__Object_Config__mdt> objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
@@ -355,13 +355,13 @@ public with sharing class ChatWindowController {
     public static Boolean updateThemePreference(String theme) {
         Boolean isSuccess = false;
         try {
-            MVEX__User_Theme_Preference__c userPreference = new MVEX__User_Theme_Preference__c();
+            User_Theme_Preference__c userPreference = new User_Theme_Preference__c();
             if (userPreferences.isEmpty()) {
                 userPreference.SetupOwnerId = UserInfo.getUserId();
             }else{
                 userPreference = userPreferences[0];
             }
-            userPreference.MVEX__Theme__c = theme;
+            userPreference.Theme__c = theme;
             upsert as User userPreference;
             isSuccess = true;
         } catch (Exception e) {

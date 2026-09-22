@@ -1842,7 +1842,7 @@ public with sharing class EmailCampaignController {
                     
                     if (emailType == 'single') {
                             Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-                            String replyToEmail = Label.EmailMessageEmailService;
+                            String replyToEmail = System.Label.EmailMessageEmailService;
                             if (replyToEmail != null) {
                                 email.setReplyTo(replyToEmail);
                             }

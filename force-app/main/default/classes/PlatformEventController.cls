@@ -18,11 +18,11 @@ public with sharing class PlatformEventController {
     */
     public static void publishEvent(String status, String jsonBody, String portalName, String listingId) {
         try {
-            ResponseEvent__e event = new ResponseEvent__e();
-            event.PortalName__c = portalName;
-            event.JSONBody__c = jsonBody;
-            event.Status__c = status;
-            event.Listing_Id__c = listingId;
+            MVEX__ResponseEvent__e event = new MVEX__ResponseEvent__e();
+            event.MVEX__PortalName__c = portalName;
+            event.MVEX__JSONBody__c = jsonBody;
+            event.MVEX__Status__c = status;
+            event.MVEX__Listing_Id__c = listingId;
             EventBus.publish(event);
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'PlatformEventController', 'publishEvent', 'Error while publishing event.');

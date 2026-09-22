@@ -70,8 +70,12 @@ public with sharing class ImageAndMediaController {
                 MVEX__Property_File__c mediaRecord = new MVEX__Property_File__c();
                 mediaRecord.MVEX__BaseUrl__c = media.externalUrl;
                 if(media.name != '' && media.name != null){
-                    if (media.name.length() > 80) { 
-                        String truncatedName = media.name.substring(0, 80);
+                    String displayName = media.name;
+                    if (displayName.contains('/')) {
+                        displayName = displayName.substringAfterLast('/');
+                    }
+                    if (displayName.length() > 80) { 
+                        String truncatedName = displayName.substring(0, 80);
                         mediaRecord.Name = truncatedName; 
                         mediaRecord.MVEX__Filename__c = media.name;
                     } else {
@@ -169,6 +173,8 @@ public with sharing class ImageAndMediaController {
         public MVEX__AWS_Config__c awsConfigData  { get; set; }
         @AuraEnabled
         public Boolean isIntegrated  { get; set; }
+        @AuraEnabled
+        public String orgFolder { get; set; }
     }
 
     /**
@@ -187,6 +193,18 @@ public with sharing class ImageAndMediaController {
             newWrap.awsConfigData = awsCredential;
 
             newWrap.isIntegrated = awsCredential.MVEX__AWS_Access_Key__c != null && awsCredential.MVEX__AWS_Secret_Access_Key__c != null && awsCredential.MVEX__S3_Bucket_Name__c != null && awsCredential.MVEX__S3_Region_Name__c != null;
+
+            String orgId = UserInfo.getOrganizationId();
+            String orgName = '';
+            try {
+                Organization org = [SELECT Id, Name FROM Organization LIMIT 1];
+                if (org != null && String.isNotBlank(org.Name)) {
+                    orgName = org.Name.replaceAll('[^a-zA-Z0-9]', '_').replaceAll('_+', '_').replaceAll('^_|_$', '');
+                }
+            } catch (Exception orgEx) {
+                // fallback if organization query fails
+            }
+            newWrap.orgFolder = (String.isNotBlank(orgName) ? orgName + '_' : '') + orgId;
 
             newWrap.status = true;
 

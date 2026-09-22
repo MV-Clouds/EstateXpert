@@ -38,6 +38,7 @@ export default class AwsFileUploader extends LightningElement {
     @track isImageData = false;
     @track isScrolling = false;
     @track isIntegrated = false;
+    @track orgFolder = '';
 
     /**
     * Method Name: options
@@ -168,6 +169,10 @@ export default class AwsFileUploader extends LightningElement {
                 } else {
                     this.showToast('Error', 'Please integrate the AWS first to use this feature.', 'error');
                     this.showSpinner = false;
+                    this.uploadStatus = false;
+                    if (this.imageToShowFiles.length > 0) {
+                        this.isImageData = true;
+                    }
                 }
             } else {
                 this.uploadImage();
@@ -175,6 +180,10 @@ export default class AwsFileUploader extends LightningElement {
         } catch (error) {
             errorDebugger('AwsFileUploader', 'handleOnSave', error, 'warn', 'Error while handling on save');
             this.showSpinner = false;
+            this.uploadStatus = false;
+            if (this.imageToShowFiles.length > 0) {
+                this.isImageData = true;
+            }
         }
     }
 
@@ -240,6 +249,7 @@ export default class AwsFileUploader extends LightningElement {
                     this.showSpinner = false;
                     if (result.status) {
                         this.confData = result.awsConfigData;
+                        this.orgFolder = result.orgFolder || '';
                         this.isContentVersionDataIsAvailable = result.contentVersionData !== '' ? true : false;
                         this.isWatermark = this.isContentVersionDataIsAvailable;
                         this.logo = result.contentVersionData;
@@ -314,12 +324,14 @@ export default class AwsFileUploader extends LightningElement {
                     } else {
                         let fileContent = [];
                         fileContent.push({
+                            recordId: this.propertyId,
                             externalUrl: this.imageUrlToUpload,
-                            name: this.imageTitleToUpload + this.currentDateTimeWithSeconds,
+                            name: this.imageTitleToUpload + '_' + this.currentDateTimeWithSeconds,
                             isOnExpose: true,
                             isOnPortalFeed: true,
-                            isOnWebsite: true
-                        })
+                            isOnWebsite: true,
+                            externalVideoUrl: this.imageUrlToUpload
+                        });
                         createmediaforlisting({ recordId: this.propertyId, mediaList: fileContent })
                             .then(result => {
                                 if (result == 'success') {
@@ -346,7 +358,7 @@ export default class AwsFileUploader extends LightningElement {
                         fileContent.push({
                             recordId: this.propertyId,
                             externalUrl: videoId != null ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : this.thumbnail,
-                            name: this.imageTitleToUpload + this.currentDateTimeWithSeconds,
+                            name: this.imageTitleToUpload + '_' + this.currentDateTimeWithSeconds,
                             isOnExpose: true,
                             isOnPortalFeed: true,
                             isOnWebsite: true,
@@ -543,9 +555,7 @@ export default class AwsFileUploader extends LightningElement {
                             this.fileSize.push(fileSizeInMB);
                             totalSize += fileSizeInMB; // Update total size
 
-                            const mimeType = (file.type || '').toLowerCase();
-                            const ext = file.name.split('.').pop().toLowerCase();
-                            const isVideo = mimeType.startsWith('video/') || ext === 'mov' || ext === 'mp4';
+                            const isVideo = this.isVideoFile(file);
 
                             const fileData = {
                                 name: file.name,
@@ -576,6 +586,37 @@ export default class AwsFileUploader extends LightningElement {
     }
 
     /**
+    * Method Name: isVideoFile
+    * @description: Checks whether a file is a video (MP4, QuickTime/MOV, etc.)
+    * @param {File} file
+    * @returns {boolean}
+    */
+    isVideoFile(file) {
+        if (!file) return false;
+        const mimeType = (file.type || '').toLowerCase();
+        const ext = (file.name || '').split('.').pop().toLowerCase();
+        return mimeType.startsWith('video/') || ext === 'mp4' || ext === 'mov';
+    }
+
+    /**
+    * Method Name: getFileMimeType
+    * @description: Gets normalized MIME type for a file.
+    * @param {File} file
+    * @returns {string}
+    */
+    getFileMimeType(file) {
+        if (file && file.type) return file.type;
+        const ext = (file?.name || '').split('.').pop().toLowerCase();
+        if (ext === 'mov') return 'video/quicktime';
+        if (ext === 'mp4') return 'video/mp4';
+        if (ext === 'png') return 'image/png';
+        if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+        if (ext === 'heic') return 'image/heic';
+        if (ext === 'heif') return 'image/heif';
+        return 'application/octet-stream';
+    }
+
+    /**
     * Method Name: createThumbnail
     * @description: Used to create thumbnail for video file.
     * @param: file: The file to create thumbnail.
@@ -583,20 +624,28 @@ export default class AwsFileUploader extends LightningElement {
     * Created By: Karan Singh
     * */
     createThumbnail(file) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             try {
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
 
+                video.preload = 'metadata';
+                video.muted = true;
+                video.playsInline = true;
                 video.src = URL.createObjectURL(file);
+
+                const timer = setTimeout(() => {
+                    resolve(this.thumbnail);
+                }, 3000);
 
                 video.addEventListener('loadeddata', () => {
                     video.currentTime = 1;
 
                     video.addEventListener('seeked', () => {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
+                        clearTimeout(timer);
+                        canvas.width = video.videoWidth || 300;
+                        canvas.height = video.videoHeight || 150;
 
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
@@ -607,11 +656,12 @@ export default class AwsFileUploader extends LightningElement {
                 });
 
                 video.onerror = () => {
-                    reject('Error loading video file');
+                    clearTimeout(timer);
+                    resolve(this.thumbnail);
                 };
 
             } catch (error) {
-                reject(`Error in createThumbnail -> ${error.stack}`);
+                resolve(this.thumbnail);
             }
         });
     }
@@ -642,6 +692,7 @@ export default class AwsFileUploader extends LightningElement {
             if (this.propertyId != undefined) {
                 // Step 1: Attempt the AWS S3 upload first.
                 let uploadSucceeded = false;
+                this.fileURL = [];
                 try {
                     await this.uploadToAWS(this.selectedFilesToUpload);
                     uploadSucceeded = true;
@@ -649,6 +700,11 @@ export default class AwsFileUploader extends LightningElement {
                     console.log('uploadError->' + uploadError);
                     this.showSpinner = false;
                     this.uploadStatus = false;
+                    this.isFileUploading = false;
+                    this.uploadProgress = 0;
+                    if (this.imageToShowFiles.length > 0) {
+                        this.isImageData = true;
+                    }
                     // Detect CORS-related errors and surface a specific, actionable message.
                     const isCorsError = this.isCorsError(uploadError);
                     console.log('isCorsError->' + isCorsError);
@@ -659,7 +715,8 @@ export default class AwsFileUploader extends LightningElement {
                             'error'
                         );
                     } else {
-                        this.showToast('Error', 'AWS upload failed. No Salesforce record has been created. Please check your AWS configuration.', 'error');
+                        const errorMsg = (uploadError && uploadError.message) ? uploadError.message : 'AWS upload failed. No Salesforce record has been created. Please check your AWS configuration.';
+                        this.showToast('Error', errorMsg, 'error');
                     }
                     errorDebugger('AwsFileUploader', 'handleclick:uploadToAWS', uploadError, 'warn', 'AWS S3 upload failed — Salesforce record creation skipped');
                     return; // Abort: do NOT create the Salesforce record.
@@ -669,13 +726,16 @@ export default class AwsFileUploader extends LightningElement {
                 if (uploadSucceeded && this.fileURL.length === this.selectedFilesToUpload.length) {
                     let contents = [];
                     for (let file = 0; file < this.selectedFilesToUpload.length; file++) {
+                        const currentFile = this.selectedFilesToUpload[file];
+                        const isVideo = this.isVideoFile(currentFile);
+                        const fileType = this.getFileMimeType(currentFile);
                         contents.push({
                             recordId: this.propertyId,
-                            externalUrl: this.selectedFilesToUpload[file].type != 'video/mp4' ? this.fileURL[file] : this.thumbnail,
+                            externalUrl: !isVideo ? this.fileURL[file] : this.thumbnail,
                             externalVideoUrl: this.fileURL[file],
                             name: this.renameFileName(this.fileName[file]),
                             size: this.fileSize[file],
-                            type: this.selectedFilesToUpload[file].type,
+                            type: fileType,
                             isOnExpose: true,
                             isOnPortalFeed: true,
                             isOnWebsite: true
@@ -687,11 +747,18 @@ export default class AwsFileUploader extends LightningElement {
                             if (result == 'success') {
                                 this.handleDialogueCloseAndRefresh();
                             } else {
+                                this.uploadStatus = false;
+                                if (this.imageToShowFiles.length > 0) {
+                                    this.isImageData = true;
+                                }
                                 this.showToast('Error', result, 'error');
                             }
                         }).catch(error => {
                             this.showSpinner = false;
                             this.uploadStatus = false;
+                            if (this.imageToShowFiles.length > 0) {
+                                this.isImageData = true;
+                            }
                             this.showToast('Error', error, 'error');
                             errorDebugger('AwsFileUploader', 'handleclick:createmediaforlisting', error, 'warn', 'Error while uploading image');
                         });
@@ -699,16 +766,29 @@ export default class AwsFileUploader extends LightningElement {
                     // Upload appeared to succeed but URLs are missing — treat as failure.
                     this.showSpinner = false;
                     this.uploadStatus = false;
+                    this.isFileUploading = false;
+                    this.uploadProgress = 0;
+                    if (this.imageToShowFiles.length > 0) {
+                        this.isImageData = true;
+                    }
                     this.showToast('Error', 'The image upload was rejected by AWS S3. Please configure the CORS policy on your S3 bucket to allow uploads from Salesforce.', 'error');
                 }
             } else {
                 this.showSpinner = false;
                 this.uploadStatus = false;
+                if (this.imageToShowFiles.length > 0) {
+                    this.isImageData = true;
+                }
                 this.showToast('Error', 'Property not added.', 'error');
             }
         } catch (error) {
             this.showSpinner = false;
             this.uploadStatus = false;
+            this.isFileUploading = false;
+            this.uploadProgress = 0;
+            if (this.imageToShowFiles.length > 0) {
+                this.isImageData = true;
+            }
             this.showToast('Error', JSON.stringify(error.stack), 'error');
             errorDebugger('AwsFileUploader', 'handleclick', error, 'warn', 'Error while handling click');
         }
@@ -751,14 +831,17 @@ export default class AwsFileUploader extends LightningElement {
     async uploadToAWS() {
         try {
             this.initializeAwsSdk(this.confData);
+            this.fileURL = [];
             const uploadPromises = this.selectedFilesToUpload.map(async (file, index) => {
                 this.showSpinner = true;
                 let objKey = this.renameFileName(this.fileName[index]);
+                const isVideo = this.isVideoFile(file);
+                const fileMimeType = this.getFileMimeType(file);
 
                 let params = {
                     Key: objKey,
-                    ContentType: this.isWatermark && file.type !== 'video/mp4' ? 'image/jpeg' : file.type,
-                    Body: this.isWatermark && file.type !== 'video/mp4' ? await this.compressAndWatermarkImage(file) : file,
+                    ContentType: this.isWatermark && !isVideo ? 'image/jpeg' : fileMimeType,
+                    Body: this.isWatermark && !isVideo ? await this.compressAndWatermarkImage(file) : file,
                     ACL: "public-read"
                 };
 
@@ -790,7 +873,11 @@ export default class AwsFileUploader extends LightningElement {
             this.uploadProgress = 0;
             this.showSpinner = false;
             this.uploadStatus = false;
+            if (this.imageToShowFiles.length > 0) {
+                this.isImageData = true;
+            }
             errorDebugger('AwsFileUploader', 'uploadToAWS', error, 'warn', 'Error while uploading to AWS');
+            throw error;
         }
     }
 
@@ -954,9 +1041,24 @@ export default class AwsFileUploader extends LightningElement {
             let invalidFileTypes = [];
             let totalSize = 0;
 
+            const ALLOWED_TYPES = new Set([
+                'image/png',
+                'image/jpeg',
+                'image/jpg',
+                'image/heic',
+                'image/heif',
+                'video/mp4',
+                'video/quicktime'
+            ]);
+
             for (let i = 0; i < files.length; i++) {
                 let file = files[i];
-                if (file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/jpeg' || file.type === 'video/mp4') {
+                const mimeType = (file.type || '').toLowerCase();
+                const ext = file.name.split('.').pop().toLowerCase();
+                const isValidMime = ALLOWED_TYPES.has(mimeType);
+                const isValidExt = ['png', 'jpg', 'jpeg', 'heic', 'heif', 'mp4', 'mov'].includes(ext);
+
+                if (isValidMime || isValidExt) {
                     const fileSize = Math.floor(file.size / 1024);
                     // Check if the individual file size is within 10 MB
                     if (fileSize <= 10240) {
@@ -967,12 +1069,13 @@ export default class AwsFileUploader extends LightningElement {
                             this.fileSize.push(fileSize);
                             totalSize += fileSize;
 
+                            const isVideo = this.isVideoFile(file);
                             const fileData = {
-                                Id: Date.now() + '-' + file,
+                                Id: Date.now() + '-' + file.name,
                                 name: file.name,
                                 size: file.size,
                                 formattedSize: this.getFormattedSize(file.size),
-                                preview: file.type != 'video/mp4' ? URL.createObjectURL(file) : await this.createThumbnail(file)
+                                preview: isVideo ? await this.createThumbnail(file) : URL.createObjectURL(file)
                             };
                             this.imageToShowFiles.push(fileData);
                         } else {
@@ -1066,16 +1169,26 @@ export default class AwsFileUploader extends LightningElement {
     renameFileName(filename) {
         try {
             let originalFileName = filename;
+            if (originalFileName.includes('/')) {
+                originalFileName = originalFileName.substring(originalFileName.lastIndexOf('/') + 1);
+            }
             let extensionIndex = originalFileName.lastIndexOf('.');
             let baseFileName = originalFileName.substring(0, extensionIndex);
             let extension = originalFileName.substring(extensionIndex + 1);
 
             const time = this.currentDateTimeWithSeconds;
             let watermarkPart = this.isWatermark ? '_watermark' : '';
-            let objKey = `${baseFileName}_${time}${watermarkPart}.${extension}`
+            let fileKey = `${baseFileName}_${time}${watermarkPart}.${extension}`
                 .replace(/\s+/g, "_")
                 .toLowerCase();
-            return objKey;
+
+            const folderPrefix = (this.orgFolder || '')
+                .replace(/[^a-zA-Z0-9_]/g, "_")
+                .replace(/_+/g, "_")
+                .replace(/^_+|_+$/g, "")
+                .toLowerCase();
+
+            return folderPrefix ? `${folderPrefix}/${fileKey}` : fileKey;
         } catch (error) {
             errorDebugger('AwsFileUploader', 'renameFileName', error, 'warn', 'Error while renaming file name');
         }

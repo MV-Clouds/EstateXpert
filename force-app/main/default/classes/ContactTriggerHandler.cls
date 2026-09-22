@@ -14,14 +14,25 @@ public without sharing class ContactTriggerHandler {
 
     public static void handleLeadAssignment(List<Contact> newLeads, Map<Id, Contact> oldLeadMap) {
         try {
+            // Fetch only conditional rules (records where Default_User__c is not true)
             List<Lead_Assignment_Setting__c> allRules = [
                 SELECT Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c
                 FROM Lead_Assignment_Setting__c
+                WHERE Object_Name__c = 'Contact'
+                AND (Default_User__c = false OR Default_User__c = null)
                 ORDER BY User_Order__c ASC
             ];
 
-            if (allRules.isEmpty()) {
-                return;
+            // Fetch the default assignee record 
+            String defaultAssigneeUserId = null;
+            List<Lead_Assignment_Setting__c> defaultRules = [
+                SELECT Name
+                FROM Lead_Assignment_Setting__c
+                WHERE Object_Name__c = 'Contact' AND Default_User__c = true
+                LIMIT 1
+            ];
+            if (!defaultRules.isEmpty()) {
+                defaultAssigneeUserId = defaultRules[0].Name;
             }
 
             Boolean isInsert = (oldLeadMap == null);
@@ -39,9 +50,11 @@ public without sharing class ContactTriggerHandler {
             }
 
             User sysAdmin = null;
-            List<User> sysAdmins = [SELECT Id FROM User WHERE Profile.Name = 'System Administrator' AND IsActive = TRUE LIMIT 1];
-            if (!sysAdmins.isEmpty()) {
-                sysAdmin = sysAdmins[0];
+            if (String.isBlank(defaultAssigneeUserId)) {
+                List<User> sysAdmins = [SELECT Id FROM User WHERE Profile.Name = 'System Administrator' AND IsActive = TRUE LIMIT 1];
+                if (!sysAdmins.isEmpty()) {
+                    sysAdmin = sysAdmins[0];
+                }
             }
 
             for (Contact lead : leadsToProcess) {
@@ -54,8 +67,13 @@ public without sharing class ContactTriggerHandler {
                         break;
                     }
                 }
-                if (!isAssigned && sysAdmin != null) {
-                    lead.OwnerId = sysAdmin.Id;
+                if (!isAssigned) {
+                    if (String.isNotBlank(defaultAssigneeUserId)) {
+                        // Assign to the configured Default Assignee
+                        lead.OwnerId = defaultAssigneeUserId;
+                    } else if (sysAdmin != null) {
+                        lead.OwnerId = sysAdmin.Id;
+                    }
                 }
             }
         } catch (Exception e) {

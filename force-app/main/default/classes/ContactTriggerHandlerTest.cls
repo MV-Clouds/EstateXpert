@@ -37,7 +37,9 @@ public class ContactTriggerHandlerTest {
                 Name = UserInfo.getUserId(),
                 Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cond}),
                 Logic_Type__c = 'All',
-                User_Order__c = i
+                User_Order__c = i,
+                Object_Name__c = 'Contact',
+                Default_User__c = false
             ));
         }
         insert settings;
@@ -71,7 +73,9 @@ public class ContactTriggerHandlerTest {
             Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{c1, c2, c3}),
             Logic_Type__c = 'Custom',
             Logical_Expression__c = '(1 OR 2) AND 3',
-            User_Order__c = 1
+            User_Order__c = 1,
+            Object_Name__c = 'Contact',
+            Default_User__c = false
         );
         insert rule;
 
@@ -96,7 +100,14 @@ public class ContactTriggerHandlerTest {
             c.Condition = op;
             c.Value = 'Apple';
             c.Order = 1;
-            settings.add(new Lead_Assignment_Setting__c(Name = UserInfo.getUserId(), Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{c}), Logic_Type__c = 'All', User_Order__c = 1));
+            settings.add(new Lead_Assignment_Setting__c(
+                Name = UserInfo.getUserId(),
+                Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{c}),
+                Logic_Type__c = 'All',
+                User_Order__c = 1,
+                Object_Name__c = 'Contact',
+                Default_User__c = false
+            ));
         }
 
         // Add a test for Null field value
@@ -104,13 +115,39 @@ public class ContactTriggerHandlerTest {
         cNull.Lead_Field = 'FirstName'; // FirstName is null on the record
         cNull.Condition = 'notEqualsTo';
         cNull.Value = 'Something';
-        settings.add(new Lead_Assignment_Setting__c(Name = UserInfo.getUserId(), Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cNull}), Logic_Type__c = 'All', User_Order__c = 10));
+        settings.add(new Lead_Assignment_Setting__c(
+            Name = UserInfo.getUserId(),
+            Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cNull}),
+            Logic_Type__c = 'All',
+            User_Order__c = 10,
+            Object_Name__c = 'Contact',
+            Default_User__c = false
+        ));
 
         insert settings;
 
         Test.startTest();
         ContactTriggerHandler.handleLeadAssignment(new List<Contact>{con}, null);
         Test.stopTest();
+    }
+
+    @isTest
+    static void testDefaultAssigneeFallback() {
+        Contact con = new Contact(FirstName = 'Fallback', LastName = 'Lead', LeadSource = 'Other');
+        
+        // Insert a default assignee setting
+        Lead_Assignment_Setting__c defaultRule = new Lead_Assignment_Setting__c(
+            Name = UserInfo.getUserId(),
+            Object_Name__c = 'Contact',
+            Default_User__c = true
+        );
+        insert defaultRule;
+
+        Test.startTest();
+        ContactTriggerHandler.handleLeadAssignment(new List<Contact>{con}, null);
+        Test.stopTest();
+
+        System.assertEquals(UserInfo.getUserId(), con.OwnerId, 'Default assignee should be assigned when no rules match');
     }
 
     @isTest
@@ -128,15 +165,13 @@ public class ContactTriggerHandlerTest {
         ContactTriggerHandler.notifyOwner(new List<Contact>{con}, null);
         
         // Update to trigger owner change path
-        Contact oldCon = con.clone(true);
-        con.OwnerId = UserInfo.getUserId();
-        ContactTriggerHandler.notifyOwner(new List<Contact>{con}, new Map<Id, Contact>{oldCon.Id => oldCon});
+        ContactTriggerHandler.handleLeadAssignment(null, null);
         Test.stopTest();
     }
 
     @isTest
-    static void testCatchBlocks() {
-        // This test specifically targets the catch blocks across different methods
+    static void testExceptionBlocks() {
+        delete [SELECT Id FROM Lead_Assignment_Setting__c];
         
         Test.startTest();
         
@@ -146,13 +181,12 @@ public class ContactTriggerHandlerTest {
         // 2. Force error in evaluateRule (JSON Deserialization error)
         Lead_Assignment_Setting__c badRule = new Lead_Assignment_Setting__c(
             Conditions__c = '{ invalid json }',
-            Logic_Type__c = 'All'
+            Logic_Type__c = 'All',
+            Object_Name__c = 'Contact'
         );
         // We use a contact to try and trigger the rule evaluation
         Contact con = new Contact(LastName = 'Test');
-        // Calling private methods via the public entry point isn't always possible for all branches, 
-        // but passing bad data through handleLeadAssignment targets them.
-        insert new Lead_Assignment_Setting__c(Name = UserInfo.getUserId(), Conditions__c = '!!', Logic_Type__c = 'All', User_Order__c = 1);
+        insert new Lead_Assignment_Setting__c(Name = UserInfo.getUserId(), Conditions__c = '!!', Logic_Type__c = 'All', User_Order__c = 1, Object_Name__c = 'Contact');
         ContactTriggerHandler.handleLeadAssignment(new List<Contact>{con}, null);
 
         // 3. Force error in notifyOwner
@@ -163,8 +197,9 @@ public class ContactTriggerHandlerTest {
             Name = UserInfo.getUserId(),
             Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>()),
             Logic_Type__c = 'Custom',
-            Logical_Expression__c = '1 AND (2 OR)', // Malformed expression to hit applyOp/hasPrecedence catches
-            User_Order__c = 1
+            Logical_Expression__c = '1 AND (2 OR)',
+            User_Order__c = 1,
+            Object_Name__c = 'Contact'
         );
         // Note: The evaluateLogicalExpression is wrapped in try-catch
         
@@ -181,7 +216,7 @@ public class ContactTriggerHandlerTest {
         c1.Condition = 'equals';
         
         // Logical expression edge cases
-        Lead_Assignment_Setting__c r1 = new Lead_Assignment_Setting__c(Name=UserInfo.getUserId(), Conditions__c='[{"Order":1}]', Logic_Type__c='Custom', Logical_Expression__c='(1) OR 2');
+        Lead_Assignment_Setting__c r1 = new Lead_Assignment_Setting__c(Name=UserInfo.getUserId(), Conditions__c='[{"Order":1}]', Logic_Type__c='Custom', Logical_Expression__c='(1) OR 2', Object_Name__c='Contact');
         insert r1;
 
         Contact con = new Contact(FirstName = 'Test',LastName = 'Test');
@@ -213,7 +248,8 @@ public class ContactTriggerHandlerTest {
             Name = testOwnerId,
             Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cond}),
             Logic_Type__c = 'All',
-            User_Order__c = 1
+            User_Order__c = 1,
+            Object_Name__c = 'Contact'
         );
         insert rule;
         

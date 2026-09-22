@@ -10,7 +10,8 @@ private class LeadAssignmentControllerTest {
             Object_Name__c = 'Contact',
             Logic_Type__c = 'AND',
             Logical_Expression__c = '1',
-            User_Order__c = 1
+            User_Order__c = 1,
+            Default_User__c = false
         );
         Lead_Assignment_Setting__c rule2 = new Lead_Assignment_Setting__c(
             Name = 'Test Rule 2',
@@ -18,7 +19,8 @@ private class LeadAssignmentControllerTest {
             Object_Name__c = 'Contact',
             Logic_Type__c = 'OR',
             Logical_Expression__c = '1 OR 2',
-            User_Order__c = 2
+            User_Order__c = 2,
+            Default_User__c = false
         );
         insert new List<Lead_Assignment_Setting__c>{ rule1, rule2 };
     }
@@ -66,7 +68,7 @@ private class LeadAssignmentControllerTest {
         
         // Test Save (bulk update user orders)
         List<Lead_Assignment_Setting__c> existingRules = [
-            SELECT Id FROM Lead_Assignment_Setting__c WHERE Object_Name__c = 'Contact' LIMIT 2
+            SELECT Id FROM Lead_Assignment_Setting__c WHERE Object_Name__c = 'Contact' AND (Default_User__c = false OR Default_User__c = null) LIMIT 2
         ];
         List<Map<String, Object>> saveRules = new List<Map<String, Object>>{
             new Map<String, Object>{ 'Id' => existingRules[0].Id, 'User_Order' => 10 },
@@ -75,6 +77,28 @@ private class LeadAssignmentControllerTest {
         String saveResult = LeadAssignmentController.manageRule('save', saveRules);
         System.assertEquals('Success', saveResult, 'Save should return Success');
         
+        // Test Save Default Assignee
+        Map<String, Object> saveDefaultPayload = new Map<String, Object>{
+            'Default_User_Id' => UserInfo.getUserId()
+        };
+        String defaultRuleId = LeadAssignmentController.manageRule('savedefault', saveDefaultPayload);
+        System.assert(String.isNotBlank(defaultRuleId), 'Default rule ID should not be blank');
+
+        // Test Update Default Assignee
+        Map<String, Object> updateDefaultPayload = new Map<String, Object>{
+            'Id' => defaultRuleId,
+            'Default_User_Id' => UserInfo.getUserId()
+        };
+        String updatedDefaultRuleId = LeadAssignmentController.manageRule('savedefault', updateDefaultPayload);
+        System.assertEquals(defaultRuleId, updatedDefaultRuleId, 'Updated default rule ID should match');
+
+        // Test Delete Default Assignee
+        Map<String, Object> deleteDefaultPayload = new Map<String, Object>{
+            'Id' => defaultRuleId
+        };
+        String deleteDefaultResult = LeadAssignmentController.manageRule('deletedefault', deleteDefaultPayload);
+        System.assertEquals('Success', deleteDefaultResult, 'Delete default should return Success');
+
         // Test Delete
         Map<String, Object> deleteRule = new Map<String, Object>{ 'Id' => insertResult };
         String deleteResult = LeadAssignmentController.manageRule('delete', deleteRule);

@@ -574,6 +574,14 @@
   position: relative;
 }
 
+.main_content_cls .section-control {
+  background: #0176d3;
+  color: white;
+  margin: auto;
+  --slds-c-icon-color-foreground-default: #ffffff !important;
+  --slds-g-shadow-outline-focus-1: none !important;
+}
+
 /* cyrillic-ext */
 @font-face {
   font-family: 'Mulish';

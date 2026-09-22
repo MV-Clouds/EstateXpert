@@ -58,8 +58,22 @@ public with sharing class LeadAssignmentController {
 
             // Get rules
             result.rules = [SELECT Id, Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c, Object_Name__c
-                            FROM Lead_Assignment_Setting__c WHERE Object_Name__c = 'Contact' WITH USER_MODE ORDER BY User_Order__c];
+                            FROM Lead_Assignment_Setting__c
+                            WHERE Object_Name__c = 'Contact'
+                            AND (Default_User__c = false OR Default_User__c = null)
+                            WITH USER_MODE
+                            ORDER BY User_Order__c];
 
+            // Get the default assignee record (Default_User__c = true; Name stores the userId)
+            List<Lead_Assignment_Setting__c> defaultRules = [
+                SELECT Id, Name, Default_User__c
+                FROM Lead_Assignment_Setting__c
+                WHERE Object_Name__c = 'Contact' AND Default_User__c = true
+                WITH USER_MODE LIMIT 1
+            ];
+            if (!defaultRules.isEmpty()) {
+                result.defaultRule = defaultRules[0];
+            }
             return result;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'LeadAssignmentController', 'getLeadAssignmentInitData', 'Error while fetching init data.');
@@ -90,6 +104,7 @@ public with sharing class LeadAssignmentController {
                 newRule.Logic_Type__c = (String)rule.get('Logic_Type');
                 newRule.Logical_Expression__c = (String)rule.get('Logical_Expression');
                 newRule.User_Order__c = Integer.valueOf(rule.get('User_Order'));
+                newRule.Default_User__c = false;
 
                 insert as user newRule;
                 return newRule.Id;
@@ -138,12 +153,69 @@ public with sharing class LeadAssignmentController {
                 List<Lead_Assignment_Setting__c> rulesToDelete = [
                     SELECT Id FROM Lead_Assignment_Setting__c 
                     WHERE Id = :ruleId AND Object_Name__c = 'Contact' 
+                    AND (Default_User__c = false OR Default_User__c = null)
                     WITH USER_MODE LIMIT 1
                 ];
                 if (!rulesToDelete.isEmpty()) {
                     delete as user rulesToDelete;
                 } else {
                     return 'Rule not found for Rule ID: ' + ruleId;
+                }
+                return 'Success';
+            } else if (operationLower == 'savedefault') {
+                // upsert the default assignee record.
+                Map<String, Object> rule = (Map<String, Object>)JSON.deserializeUntyped(jsonString);
+                String defaultUserId = (String)rule.get('Default_User_Id');
+                String existingId    = (String)rule.get('Id');
+
+                if (String.isBlank(defaultUserId)) {
+                    return 'Default User ID is required.';
+                }
+
+                Lead_Assignment_Setting__c defaultRule = new Lead_Assignment_Setting__c();
+                if (String.isNotBlank(existingId)) {
+                    defaultRule.Id = existingId;
+                } else {
+                    // Check if a default assignee record already exists in database
+                    List<Lead_Assignment_Setting__c> existingDefaults = [
+                        SELECT Id FROM Lead_Assignment_Setting__c
+                        WHERE Object_Name__c = 'Contact' AND Default_User__c = true
+                        WITH USER_MODE LIMIT 1
+                    ];
+                    if (!existingDefaults.isEmpty()) {
+                        defaultRule.Id = existingDefaults[0].Id;
+                    }
+                }
+                defaultRule.Name                        = defaultUserId;  // userId stored in Name
+                defaultRule.Default_User__c             = true;           // boolean flag
+                defaultRule.Object_Name__c        = 'Contact';
+                defaultRule.Conditions__c         = null;
+                defaultRule.Logic_Type__c         = null;
+                defaultRule.Logical_Expression__c = null;
+                defaultRule.User_Order__c         = null;
+
+                upsert as user defaultRule;
+                return defaultRule.Id;
+            } else if (operationLower == 'deletedefault') {
+                // Remove the default assignee record (identified by Default_User__c = true)
+                Map<String, Object> rule = (Map<String, Object>)JSON.deserializeUntyped(jsonString);
+                String defaultId = (String)rule.get('Id');
+                List<Lead_Assignment_Setting__c> toDelete;
+                if (String.isNotBlank(defaultId)) {
+                    toDelete = [
+                        SELECT Id FROM Lead_Assignment_Setting__c
+                        WHERE Id = :defaultId AND Default_User__c = true
+                        WITH USER_MODE LIMIT 1
+                    ];
+                } else {
+                    toDelete = [
+                        SELECT Id FROM Lead_Assignment_Setting__c
+                        WHERE Object_Name__c = 'Contact' AND Default_User__c = true
+                        WITH USER_MODE LIMIT 1
+                    ];
+                }
+                if (!toDelete.isEmpty()) {
+                    delete as user toDelete;
                 }
                 return 'Success';
             } else {
@@ -212,6 +284,7 @@ public with sharing class LeadAssignmentController {
         @AuraEnabled public List<FieldWrapper> objectFields = new List<FieldWrapper>();
         @AuraEnabled public List<User> users = new List<User>();
         @AuraEnabled public List<Lead_Assignment_Setting__c> rules = new List<Lead_Assignment_Setting__c>();
+        @AuraEnabled public Lead_Assignment_Setting__c defaultRule;
     }
 
     public class FieldWrapper {

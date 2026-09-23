@@ -11,7 +11,7 @@ private class LeadAssignmentControllerTest {
             MVEX__Logic_Type__c = 'AND',
             MVEX__Logical_Expression__c = '1',
             MVEX__User_Order__c = 1,
-            MVEX__Default_User__c = false
+            Default_User__c = false
         );
         MVEX__Lead_Assignment_Setting__c rule2 = new MVEX__Lead_Assignment_Setting__c(
             Name = 'Test Rule 2',
@@ -20,7 +20,7 @@ private class LeadAssignmentControllerTest {
             MVEX__Logic_Type__c = 'OR',
             MVEX__Logical_Expression__c = '1 OR 2',
             MVEX__User_Order__c = 2,
-            MVEX__Default_User__c = false
+            Default_User__c = false
         );
         insert new List<MVEX__Lead_Assignment_Setting__c>{ rule1, rule2 };
     }
@@ -68,7 +68,7 @@ private class LeadAssignmentControllerTest {
         
         // Test Save (bulk update user orders)
         List<MVEX__Lead_Assignment_Setting__c> existingRules = [
-            SELECT Id FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact' AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null) LIMIT 2
+            SELECT Id FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact' AND (Default_User__c = false OR Default_User__c = null) LIMIT 2
         ];
         List<Map<String, Object>> saveRules = new List<Map<String, Object>>{
             new Map<String, Object>{ 'Id' => existingRules[0].Id, 'User_Order' => 10 },

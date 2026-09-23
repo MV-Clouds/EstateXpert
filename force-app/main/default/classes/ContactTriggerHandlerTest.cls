@@ -39,7 +39,7 @@ public class ContactTriggerHandlerTest {
                 MVEX__Logic_Type__c = 'All',
                 MVEX__User_Order__c = i,
                 MVEX__Object_Name__c = 'Contact',
-                MVEX__Default_User__c = false
+                Default_User__c = false
             ));
         }
         insert settings;
@@ -75,7 +75,7 @@ public class ContactTriggerHandlerTest {
             MVEX__Logical_Expression__c = '(1 OR 2) AND 3',
             MVEX__User_Order__c = 1,
             MVEX__Object_Name__c = 'Contact',
-            MVEX__Default_User__c = false
+            Default_User__c = false
         );
         insert rule;
 
@@ -106,7 +106,7 @@ public class ContactTriggerHandlerTest {
                 MVEX__Logic_Type__c = 'All',
                 MVEX__User_Order__c = 1,
                 MVEX__Object_Name__c = 'Contact',
-                MVEX__Default_User__c = false
+                Default_User__c = false
             ));
         }
 
@@ -121,7 +121,7 @@ public class ContactTriggerHandlerTest {
             MVEX__Logic_Type__c = 'All',
             MVEX__User_Order__c = 10,
             MVEX__Object_Name__c = 'Contact',
-            MVEX__Default_User__c = false
+            Default_User__c = false
         ));
 
         insert settings;
@@ -139,7 +139,7 @@ public class ContactTriggerHandlerTest {
         MVEX__Lead_Assignment_Setting__c defaultRule = new MVEX__Lead_Assignment_Setting__c(
             Name = UserInfo.getUserId(),
             MVEX__Object_Name__c = 'Contact',
-            MVEX__Default_User__c = true
+            Default_User__c = true
         );
         insert defaultRule;
 

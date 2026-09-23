@@ -24,8 +24,8 @@ public with sharing class ZooplaIntegrationController {
         ListingResponse response = new ListingResponse();
         try {
             String escapedPortalId = String.escapeSingleQuotes(portalId);
-            List<MVEX__Portal__c> portalZoopla = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
-                                            WHERE Id = :escapedPortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
+            List<Portal__c> portalZoopla = [SELECT Id, Field_Mapping__c, Portal_Configuration__c, Is_Active__c FROM Portal__c 
+                                            WHERE Id = :escapedPortalId AND Is_Active__c = true WITH USER_MODE LIMIT 1];
             
             if (portalZoopla.isEmpty()) {
                 response.status = 'Failed';
@@ -33,8 +33,8 @@ public with sharing class ZooplaIntegrationController {
                 return response;
             }
             
-            MVEX__Portal__c zooplaPortal = portalZoopla[0];
-            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(zooplaPortal.MVEX__Portal_Configuration__c);
+            Portal__c zooplaPortal = portalZoopla[0];
+            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(zooplaPortal.Portal_Configuration__c);
             
             String branchId = (String) configMap.get('branch_reference');
             Boolean isSandbox = configMap.containsKey('is_test_portal') ? Boolean.valueOf((String) configMap.get('is_test_portal')) : true;
@@ -84,18 +84,18 @@ public with sharing class ZooplaIntegrationController {
             }
             
             // SOQL query to fetch matching records based on listing_reference
-            List<MVEX__Listing__c> properties = [SELECT Id, Name, MVEX__Broker_s_Listing_ID__c FROM MVEX__Listing__c WHERE MVEX__Broker_s_Listing_ID__c IN :listingReferences 
+            List<Listing__c> properties = [SELECT Id, Name, Broker_s_Listing_ID__c FROM Listing__c WHERE Broker_s_Listing_ID__c IN :listingReferences 
                                             WITH USER_MODE ORDER BY Name ASC LIMIT 50000];
             
             // Prepare response
             List<Map<String, Object>> resultData = new List<Map<String, Object>>();
             
-            for (MVEX__Listing__c property : properties) {
+            for (Listing__c property : properties) {
                 Map<String, Object> resultItem = new Map<String, Object>();
                 resultItem.put('id', property.Id);
                 resultItem.put('name', property.Name);
-                resultItem.put('listing_reference', property.MVEX__Broker_s_Listing_ID__c);
-                resultItem.put('url', listingUrls.get(property.MVEX__Broker_s_Listing_ID__c));
+                resultItem.put('listing_reference', property.Broker_s_Listing_ID__c);
+                resultItem.put('url', listingUrls.get(property.Broker_s_Listing_ID__c));
                 resultData.add(resultItem);
             }
             
@@ -119,18 +119,18 @@ public with sharing class ZooplaIntegrationController {
         try {
             String escapedListingId = String.escapeSingleQuotes(listingId);
             String escapedPortalId = String.escapeSingleQuotes(portalId);
-            List<MVEX__Portal__c> portalZoopla = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
-                                            WHERE Id =: escapedPortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
+            List<Portal__c> portalZoopla = [SELECT Id, Field_Mapping__c, Portal_Configuration__c, Is_Active__c FROM Portal__c 
+                                            WHERE Id =: escapedPortalId AND Is_Active__c = true WITH USER_MODE LIMIT 1];
 
             if (portalZoopla.isEmpty()) {
                 updatePortalListingRecord(listingId, portalId, 'Portal configuration is missing.', 'Exception');
                 return;
             }
 
-            MVEX__Portal__c zooplaPortal = portalZoopla[0];
+            Portal__c zooplaPortal = portalZoopla[0];
 
-            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(zooplaPortal.MVEX__Field_Mapping__c);
-            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(zooplaPortal.MVEX__Portal_Configuration__c);
+            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(zooplaPortal.Field_Mapping__c);
+            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(zooplaPortal.Portal_Configuration__c);
             Map<String, Object> finalMapping = new Map<String, Object>();
 
             finalMapping.put('branch_reference', configMap.get('branch_reference'));
@@ -155,7 +155,7 @@ public with sharing class ZooplaIntegrationController {
                 String propertyId = (String) listingRecord.get('MVEX__Property__c');
                 String escapedPropertyId = String.escapeSingleQuotes(propertyId);
                 if (propertyId != null) {
-                    List<MVEX__Property_File__c> media = [SELECT Id, MVEX__BaseUrl__c, MVEX__ExternalLink__c, MVEX__Tags__c FROM MVEX__Property_File__c WHERE MVEX__Property__c = :escapedPropertyId AND MVEX__IsOnPortalFeed__c = true WITH USER_MODE ORDER BY MVEX__Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC LIMIT 50000];
+                    List<Property_File__c> media = [SELECT Id, BaseUrl__c, ExternalLink__c, Tags__c FROM Property_File__c WHERE Property__c = :escapedPropertyId AND IsOnPortalFeed__c = true WITH USER_MODE ORDER BY Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC LIMIT 50000];
 
                     for (String key : jsonMap.keySet()) {
                         String label = (String) jsonMap.get(key);
@@ -228,26 +228,26 @@ public with sharing class ZooplaIntegrationController {
                 portalIds.add(listing.get('portalId'));
             }
 
-            List<MVEX__Portal__c> portalZoopla = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id IN :portalIds 
-                                                AND MVEX__Is_Active__c = true WITH USER_MODE];
+            List<Portal__c> portalZoopla = [SELECT Id, Field_Mapping__c, Portal_Configuration__c, Is_Active__c FROM Portal__c WHERE Id IN :portalIds 
+                                                AND Is_Active__c = true WITH USER_MODE];
 
             if (portalZoopla.isEmpty()) {
                 return;
             }
 
-            Map<Id, MVEX__Portal__c> portalMap = new Map<Id, MVEX__Portal__c>(portalZoopla);
+            Map<Id, Portal__c> portalMap = new Map<Id, Portal__c>(portalZoopla);
             
             Set<String> listingIds = listingsMap.keySet();
             String query = 'SELECT Id, MVEX__Status__c, MVEX__Broker_s_Listing_ID__c FROM MVEX__Listing__c WHERE Id IN :listingIds';
-            List<MVEX__Listing__c> listings = Database.query(query, AccessLevel.USER_MODE);
+            List<Listing__c> listings = Database.query(query, AccessLevel.USER_MODE);
 
             Http h3 = new Http();
-            for (MVEX__Listing__c listing : listings) {
+            for (Listing__c listing : listings) {
                 Map<String, String> listingMap = listingsMap.get(listing.Id);
-                MVEX__Portal__c portal = portalMap.get(listingMap.get('portalId'));
+                Portal__c portal = portalMap.get(listingMap.get('portalId'));
                 
                 if (portal != null) {
-                    Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(portal.MVEX__Portal_Configuration__c);
+                    Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(portal.Portal_Configuration__c);
                     Boolean isSandbox = configMap.containsKey('is_test_portal') ? Boolean.valueOf((String) configMap.get('is_test_portal')) : true;
                     String certificateName = (String) configMap.get('certificate');
                     
@@ -258,7 +258,7 @@ public with sharing class ZooplaIntegrationController {
                     HttpRequest req3 = new HttpRequest();
                     req3.setClientCertificateName(certificateName);
                     req3.setHeader('Content-Type', 'application/json; profile=' + zooplaDocEndpoint + 'listing/delete.json');
-                    req3.setBody('{ "listing_reference": "' + listing.MVEX__Broker_s_Listing_ID__c + '" }');
+                    req3.setBody('{ "listing_reference": "' + listing.Broker_s_Listing_ID__c + '" }');
                     req3.setMethod('POST');
                     req3.setEndpoint(endpoint);
                     
@@ -293,7 +293,6 @@ public with sharing class ZooplaIntegrationController {
         public String email;
         public String website;
         public String is_test_portal;
-        public Object sync_branch_with_zoopla;
     }
 
     /**
@@ -348,7 +347,7 @@ public with sharing class ZooplaIntegrationController {
             
             String responseBody = res3.getBody();
 
-            List<MVEX__Portal__c> portalList = [SELECT Id, MVEX__Is_Active__c, MVEX__Response__c FROM MVEX__Portal__c WHERE MVEX__Is_Active__c = true AND Id =: escapedPortalId WITH USER_MODE LIMIT 1];
+            List<Portal__c> portalList = [SELECT Id, Is_Active__c, Response__c FROM Portal__c WHERE Is_Active__c = true AND Id =: escapedPortalId WITH USER_MODE LIMIT 1];
 
             if (res3.getStatusCode() != 200) {
                 PlatformEventController.publishEvent('Failed', responseBody, 'Zoopla Branch', !portalList.isEmpty() ? portalList[0].Id : null);
@@ -358,7 +357,7 @@ public with sharing class ZooplaIntegrationController {
 
             } else {
                 if (!portalList.isEmpty()) {
-                    portalList[0].MVEX__Response__c = responseBody;
+                    portalList[0].Response__c = responseBody;
                     update as user portalList;   
                 }
             }
@@ -371,12 +370,12 @@ public with sharing class ZooplaIntegrationController {
     public static void updatePortalListingRecord(String listingId, String portalId, String apiResponse, String status) {
         try {
             if (status == 'Success') {
-                MVEX__PortalListing__c newPortalListing = new MVEX__PortalListing__c();
-                newPortalListing.MVEX__Listing__c = listingId;
-                newPortalListing.MVEX__Portal__c = portalId;
-                newPortalListing.MVEX__SystemIsActive__c = true;
-                newPortalListing.MVEX__Listed_Date__c = System.today();
-                newPortalListing.MVEX__API_Response__c = apiResponse;
+                PortalListing__c newPortalListing = new PortalListing__c();
+                newPortalListing.Listing__c = listingId;
+                newPortalListing.Portal__c = portalId;
+                newPortalListing.SystemIsActive__c = true;
+                newPortalListing.Listed_Date__c = System.today();
+                newPortalListing.API_Response__c = apiResponse;
                 insert as user newPortalListing;  
             }
             PlatformEventController.publishEvent(status, apiResponse, 'Zoopla', listingId);

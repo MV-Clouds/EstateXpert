@@ -27,8 +27,8 @@
                             </div>
                         </template>
                         <template if:false={field.isFirst}>
-                            <template if:true={field.isCheckbox}>
-                                <div class="input-container" key={field.id}>
+                            <template if:false={field.isPicklist}>
+                                <div class="input-container" key={field.Id}>
                                     <div class="slds-form-element flex_css">
                                         <label class="label_css">
                                             <abbr if:true={field.isRequired} class="slds-required"
@@ -36,46 +36,28 @@
                                             <lightning-helptext content={field.helpText}></lightning-helptext>
                                         </label>
                                         <div class="slds-form-element__control width_css">
-                                            <lightning-input type="checkbox" variant="label-hidden"
-                                                data-field={field.fieldName} checked={field.value}
-                                                onchange={handleCheckboxChange}></lightning-input>
+                                            <input type={field.datatype} class="slds-input"
+                                                placeholder={field.placeHolder} data-field={field.fieldName}
+                                                onkeyup={getTheFieldValue} value={field.value}>
                                         </div>
                                     </div>
                                 </div>
                             </template>
-                            <template if:false={field.isCheckbox}>
-                                <template if:false={field.isPicklist}>
-                                    <div class="input-container" key={field.id}>
-                                        <div class="slds-form-element flex_css">
-                                            <label class="label_css">
-                                                <abbr if:true={field.isRequired} class="slds-required"
-                                                    title="required">*</abbr>{field.fieldName}
-                                                <lightning-helptext content={field.helpText}></lightning-helptext>
-                                            </label>
-                                            <div class="slds-form-element__control width_css">
-                                                <input type={field.datatype} class="slds-input"
-                                                    placeholder={field.placeHolder} data-field={field.fieldName}
-                                                    onkeyup={getTheFieldValue} value={field.value}>
-                                            </div>
+                            <template if:true={field.isPicklist}>
+                                <div class="input-container" key={field.Id}>
+                                    <div class="slds-form-element flex_css">
+                                        <label class="label_css">
+                                            <abbr if:true={field.isRequired} class="slds-required"
+                                                title="required">*</abbr>{field.fieldName}
+                                            <lightning-helptext content={field.helpText}></lightning-helptext>
+                                        </label>
+                                        <div class="slds-form-element__control width_css">
+                                            <lightning-combobox data-index={index} value={field.value}
+                                                placeholder={field.placeHolder} options={field.picklistOptions}
+                                                variant="label-hidden" onchange={handleChange}></lightning-combobox>
                                         </div>
                                     </div>
-                                </template>
-                                <template if:true={field.isPicklist}>
-                                    <div class="input-container" key={field.id}>
-                                        <div class="slds-form-element flex_css">
-                                            <label class="label_css">
-                                                <abbr if:true={field.isRequired} class="slds-required"
-                                                    title="required">*</abbr>{field.fieldName}
-                                                <lightning-helptext content={field.helpText}></lightning-helptext>
-                                            </label>
-                                            <div class="slds-form-element__control width_css">
-                                                <lightning-combobox data-index={index} value={field.value}
-                                                    placeholder={field.placeHolder} options={field.picklistOptions}
-                                                    variant="label-hidden" onchange={handleChange}></lightning-combobox>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
+                                </div>
                             </template>
                         </template>
                     </template>

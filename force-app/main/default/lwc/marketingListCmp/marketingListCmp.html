@@ -73,11 +73,6 @@
                                     New Contact
                                 </button>
 
-                                <button class="refresh-btn" onclick={handleRefreshMarketingList} title="Refresh">
-                                    <lightning-icon icon-name="utility:refresh" alternative-text="Refresh"
-                                        size="x-small"></lightning-icon>
-                                </button>
-
                                 <div class="filter-tab-wrapper">
                                     <div class="filter-toggle-btn" onclick={wrapFilter}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
@@ -92,6 +87,9 @@
                                                 <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
                                             </g>
                                         </svg>
+                                        <template if:true={hasAppliedFilters}>
+                                            <span class="filter-applied-dot" title="Filter Applied"></span>
+                                        </template>
                                     </div>
                                 </div>
                             </div>

@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .content-body {
@@ -430,7 +429,7 @@
 }
 
 .credentials-empty-icon {
-    width: 15rem;
+    width: 200px;
     height: auto;
     margin-bottom: 2rem;
     filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.1));
@@ -447,6 +446,21 @@
     font-size: 14px;
     color: #706e6b;
     font-weight: 400;
+}
+
+.credentials-missing-link {
+    margin-top: 0.75rem;
+    font-size: 14px;
+    color: #0176D3;
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+}
+
+.credentials-missing-link:hover {
+    color: #014486;
+    text-decoration: underline;
 }
 
 /* ===== EMPTY STATE STYLES ===== */

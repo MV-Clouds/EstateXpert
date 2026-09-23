@@ -1,8 +1,7 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import designcss from '@salesforce/resourceUrl/listingManagerCss';
 import getListingData from '@salesforce/apex/ListingManagerController.getListingData';
-// import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { NavigationMixin } from 'lightning/navigation';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import LISTING_OBJECT from '@salesforce/schema/MVEX__Listing__c';
@@ -413,7 +412,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             if (!import.meta.env.SSR) {
                 window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
             }
-            loadStyle(this, designcss);
             this.getAccessible();
             this.registerPlatformEventListener();
 
@@ -459,25 +457,23 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     }
 
     getAccessible() {
-        // getMetadataRecords()
-        //     .then(data => {
-        //         const listingManagerFeature = data.find(
-        //             item => item.DeveloperName === 'Listing_Manager'
-        //         );
-        //         this.isAccessible = listingManagerFeature ? Boolean(listingManagerFeature.MVEX__isAvailable__c) : false;
-        //         if (this.isAccessible) {
-        //             this.getListingDataMethod();
-        //         } else {
-        //             this.spinnerShow = false;
-        //         }
-        //     })
-        //     .catch(error => {
-        //         console.error('Error fetching accessible fields', error);
-        //         this.isAccessible = false;
-        //         this.spinnerShow = false;
-        //     });
-        this.isAccessible = true;
-        this.getListingDataMethod();
+        getMetadataRecords()
+            .then(data => {
+                const listingManagerFeature = data.find(
+                    item => item.DeveloperName === 'Listing_Manager'
+                );
+                this.isAccessible = listingManagerFeature ? Boolean(listingManagerFeature.MVEX__isAvailable__c) : false;
+                if (this.isAccessible) {
+                    this.getListingDataMethod();
+                } else {
+                    this.spinnerShow = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching accessible fields', error);
+                this.isAccessible = false;
+                this.spinnerShow = false;
+            });
     }
 
     /**

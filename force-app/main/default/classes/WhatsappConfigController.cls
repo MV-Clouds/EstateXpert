@@ -32,11 +32,11 @@ public without sharing class WhatsappConfigController {
             lastModifiedDate = '';
         }
 
-        List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt  WHERE Client_Id__c != null  ORDER BY SystemModstamp desc];
+        List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, MVEX__Config_Id__c, MVEX__Client_Secret__c, MVEX__Client_Id__c FROM MVEX__WBConnect_Configuration__mdt  WHERE MVEX__Client_Id__c != null  ORDER BY SystemModstamp desc];
         if (embeddedConfig.size() > 0) {
-            clientId = embeddedConfig[0].Client_Id__c;
-            clientSecret = embeddedConfig[0].Client_Secret__c;
-            configurationId = embeddedConfig[0].Config_Id__c;
+            clientId = embeddedConfig[0].MVEX__Client_Id__c;
+            clientSecret = embeddedConfig[0].MVEX__Client_Secret__c;
+            configurationId = embeddedConfig[0].MVEX__Config_Id__c;
         }
     }
 
@@ -57,12 +57,12 @@ public without sharing class WhatsappConfigController {
     @RemoteAction
     public static String saveFBLoginDetails(String sAccessToken, String phoneId, String wabaId, String appId) {
         try {
-            List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt WHERE Client_Id__c != null ORDER BY SystemModstamp desc];
+            List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, MVEX__Config_Id__c, MVEX__Client_Secret__c, MVEX__Client_Id__c FROM MVEX__WBConnect_Configuration__mdt WHERE MVEX__Client_Id__c != null ORDER BY SystemModstamp desc];
             if (embeddedConfig.size() < 1) {
                 return 'Failure';
             }
             
-            String tokenUrl = 'https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=' + embeddedConfig[0].Client_Id__c + '&client_secret=' + embeddedConfig[0].Client_Secret__c + '&fb_exchange_token=' + sAccessToken;
+            String tokenUrl = 'https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=' + embeddedConfig[0].MVEX__Client_Id__c + '&client_secret=' + embeddedConfig[0].MVEX__Client_Secret__c + '&fb_exchange_token=' + sAccessToken;
             HttpRequest req = new HttpRequest();
             req.setEndpoint(tokenUrl);
             req.setMethod('GET');

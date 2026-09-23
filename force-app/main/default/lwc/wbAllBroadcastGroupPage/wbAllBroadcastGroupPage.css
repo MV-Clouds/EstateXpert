@@ -1,6 +1,5 @@
 * {
     font-family: "Mulish";
-    user-select: none;
 }
 
 .wrapper {
@@ -342,7 +341,7 @@ span {
 }
 
 .portal_mapping {
-    font-size: 26px;
+    font-size: 18px;
     font-weight: 500;
     color: #0f1419;
     letter-spacing: 0.3px;

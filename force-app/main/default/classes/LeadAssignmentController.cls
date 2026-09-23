@@ -57,12 +57,8 @@ public with sharing class LeadAssignmentController {
             result.users = Database.query(userQuery);
 
             // Get rules
-            result.rules = [SELECT Id, Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c, Object_Name__c
-                            FROM Lead_Assignment_Setting__c
-                            WHERE Object_Name__c = 'Contact'
-                            AND (Default_User__c = false OR Default_User__c = null)
-                            WITH USER_MODE
-                            ORDER BY User_Order__c];
+            result.rules = [SELECT Id, Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c, MVEX__Object_Name__c
+                            FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'  AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null) WITH USER_MODE ORDER BY MVEX__User_Order__c];
 
             // Get the default assignee record (Default_User__c = true; Name stores the userId)
             List<Lead_Assignment_Setting__c> defaultRules = [
@@ -97,14 +93,14 @@ public with sharing class LeadAssignmentController {
 
             if (operationLower == 'insert') {
                 Map<String, Object> rule = (Map<String, Object>)JSON.deserializeUntyped(jsonString);
-                Lead_Assignment_Setting__c newRule = new Lead_Assignment_Setting__c();
+                MVEX__Lead_Assignment_Setting__c newRule = new MVEX__Lead_Assignment_Setting__c();
                 newRule.Name = (String)rule.get('Name');
-                newRule.Conditions__c = (String)rule.get('Conditions');
-                newRule.Object_Name__c = (String)rule.get('Object_Name');
-                newRule.Logic_Type__c = (String)rule.get('Logic_Type');
-                newRule.Logical_Expression__c = (String)rule.get('Logical_Expression');
-                newRule.User_Order__c = Integer.valueOf(rule.get('User_Order'));
-                newRule.Default_User__c = false;
+                newRule.MVEX__Conditions__c = (String)rule.get('Conditions');
+                newRule.MVEX__Object_Name__c = (String)rule.get('Object_Name');
+                newRule.MVEX__Logic_Type__c = (String)rule.get('Logic_Type');
+                newRule.MVEX__Logical_Expression__c = (String)rule.get('Logical_Expression');
+                newRule.MVEX__User_Order__c = Integer.valueOf(rule.get('User_Order'));
+                newRule.MVEX__Default_User__c = false;
 
                 insert as user newRule;
                 return newRule.Id;
@@ -113,14 +109,14 @@ public with sharing class LeadAssignmentController {
                 if (!rule.containsKey('Id') || String.isBlank((String)rule.get('Id'))) {
                     return 'Valid rule ID is required for update.';
                 }
-                Lead_Assignment_Setting__c existingRule = new Lead_Assignment_Setting__c();
+                MVEX__Lead_Assignment_Setting__c existingRule = new MVEX__Lead_Assignment_Setting__c();
                 existingRule.Id = (String)rule.get('Id');
                 existingRule.Name = (String)rule.get('Name');
-                existingRule.Conditions__c = (String)rule.get('Conditions');
-                existingRule.Object_Name__c = (String)rule.get('Object_Name');
-                existingRule.Logic_Type__c = (String)rule.get('Logic_Type');
-                existingRule.Logical_Expression__c = (String)rule.get('Logical_Expression');
-                existingRule.User_Order__c = Integer.valueOf(rule.get('User_Order'));
+                existingRule.MVEX__Conditions__c = (String)rule.get('Conditions');
+                existingRule.MVEX__Object_Name__c = (String)rule.get('Object_Name');
+                existingRule.MVEX__Logic_Type__c = (String)rule.get('Logic_Type');
+                existingRule.MVEX__Logical_Expression__c = (String)rule.get('Logical_Expression');
+                existingRule.MVEX__User_Order__c = Integer.valueOf(rule.get('User_Order'));
 
                 update as user existingRule;
                 return existingRule.Id;
@@ -129,15 +125,15 @@ public with sharing class LeadAssignmentController {
                 if (rules == null || rules.isEmpty()) {
                     return 'No rules provided to save.';
                 }
-                List<Lead_Assignment_Setting__c> rulesToUpdate = new List<Lead_Assignment_Setting__c>();
+                List<MVEX__Lead_Assignment_Setting__c> rulesToUpdate = new List<MVEX__Lead_Assignment_Setting__c>();
                 for (Object ruleObj : rules) {
                     Map<String, Object> ruleMap = (Map<String, Object>)ruleObj;
                     if (!ruleMap.containsKey('Id') || String.isBlank((String)ruleMap.get('Id'))) {
                         return 'Valid rule ID is required for order update.';
                     }
-                    Lead_Assignment_Setting__c rule = new Lead_Assignment_Setting__c();
+                    MVEX__Lead_Assignment_Setting__c rule = new MVEX__Lead_Assignment_Setting__c();
                     rule.Id = (String)ruleMap.get('Id');
-                    rule.User_Order__c = Integer.valueOf(ruleMap.get('User_Order'));
+                    rule.MVEX__User_Order__c = Integer.valueOf(ruleMap.get('User_Order'));
                     rulesToUpdate.add(rule);
                 }
                 if (!rulesToUpdate.isEmpty()) {
@@ -150,10 +146,10 @@ public with sharing class LeadAssignmentController {
                 if (String.isBlank(ruleId)) {
                     return 'Rule ID is required for deletion.';
                 }
-                List<Lead_Assignment_Setting__c> rulesToDelete = [
-                    SELECT Id FROM Lead_Assignment_Setting__c 
-                    WHERE Id = :ruleId AND Object_Name__c = 'Contact' 
-                    AND (Default_User__c = false OR Default_User__c = null)
+                List<MVEX__Lead_Assignment_Setting__c> rulesToDelete = [
+                    SELECT Id FROM MVEX__Lead_Assignment_Setting__c 
+                    WHERE Id = :ruleId AND MVEX__Object_Name__c = 'Contact'  
+                    AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null)
                     WITH USER_MODE LIMIT 1
                 ];
                 if (!rulesToDelete.isEmpty()) {
@@ -283,8 +279,8 @@ public with sharing class LeadAssignmentController {
     public class LeadAssignmentInitData {
         @AuraEnabled public List<FieldWrapper> objectFields = new List<FieldWrapper>();
         @AuraEnabled public List<User> users = new List<User>();
-        @AuraEnabled public List<Lead_Assignment_Setting__c> rules = new List<Lead_Assignment_Setting__c>();
-        @AuraEnabled public Lead_Assignment_Setting__c defaultRule;
+        @AuraEnabled public List<MVEX__Lead_Assignment_Setting__c> rules = new List<MVEX__Lead_Assignment_Setting__c>();
+        @AuraEnabled public MVEX__Lead_Assignment_Setting__c defaultRule;
     }
 
     public class FieldWrapper {

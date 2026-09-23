@@ -168,13 +168,9 @@
                         </div>
                     </template>
                     <template if:false={isDataAvailable}>
-                        <div class="empty-state">
-                            <div class="empty-state__content">
-                                <div class="empty-state__icon">
-                                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                </div>
-                                <div class="empty-state__message">No Checklist available for this object, please create a checklist first.</div>
-                            </div>
+                        <div class="exp-no-data-container">
+                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                            <div class="exp-no-data-message">No Checklist available for this object, please create a checklist first.</div>
                         </div>
                     </template>
                 </div>

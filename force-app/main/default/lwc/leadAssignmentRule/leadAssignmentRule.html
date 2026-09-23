@@ -74,8 +74,9 @@
                 </div>
             </template>
             <template if:false={isRulesAvailable}>
-                <div class="no-rules slds-text-align_center slds-p-around_medium">
-                    No Rules Found
+                <div class="exp-no-data-container">
+                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                    <div class="exp-no-data-message">No Rules Found</div>
                 </div>
             </template>
 

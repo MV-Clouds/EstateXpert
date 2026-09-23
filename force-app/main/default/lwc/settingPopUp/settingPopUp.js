@@ -100,7 +100,8 @@ export default class SettingPopUp extends LightningElement {
                     { id: 20, fieldName: 'Email', fieldAPIName: 'email', datatype: 'email', value: '', isRequired: false, placeHolder: '"test@rk.com"', helpText: 'Email address.', isFirst: false, isPicklist: false },
                     { id: 21, fieldName: 'Website', fieldAPIName: 'website', datatype: 'text', value: '', isRequired: false, placeHolder: '"http://www.estateagent.co.uk"', helpText: 'The URI-encoded URL for the branchs website, or that of its parent company if it doesnt have one of its own.', isFirst: false, isPicklist: false },
                     { id: 22, fieldName: 'Test Portal', fieldAPIName: 'is_test_portal', datatype: 'text', value: '', isRequired: true, placeHolder: 'true/false', helpText: 'If set to true feeds will be exported to the Zoopla sandbox.', isFirst: false, isPicklist: true, picklistOptions: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }] },
-                    { id: 23, fieldName: 'Feed Selector Field', fieldAPIName: 'differentiator_values', datatype: 'picklist', value: '', isRequired: true, placeHolder: 'Select a field', helpText: 'Define a field that separates different portal feeds.', isFirst: false, picklistOptions: this.pickListOptionsFields , isPicklist: true}
+                    { id: 23, fieldName: 'Feed Selector Field', fieldAPIName: 'differentiator_values', datatype: 'picklist', value: '', isRequired: true, placeHolder: 'Select a field', helpText: 'Define a field that separates different portal feeds.', isFirst: false, picklistOptions: this.pickListOptionsFields , isPicklist: true},
+                    { id: 24, fieldName: 'Sync Branch Details with Zoopla', fieldAPIName: 'sync_branch_with_zoopla', datatype: 'checkbox', value: false, isRequired: false, placeHolder: '', helpText: 'When enabled, branch details will be sent directly to Zoopla. Keep this disabled to only save the configuration in Salesforce.', isFirst: false, isPicklist: false, isCheckbox: true }
                 ];
             } else if (this.getPortalName === 'Rightmove' || this.getPortalName === 'Rightmove Overseas') {
                 this.fields = [
@@ -127,6 +128,9 @@ export default class SettingPopUp extends LightningElement {
                 const fieldData = this.fieldDatas.find(data => data.label === field.fieldAPIName);
                 if (fieldData) {
                     field.value = fieldData.value;
+                }
+                if (field.isCheckbox) {
+                    field.value = false;
                 }
             });
         
@@ -303,6 +307,29 @@ export default class SettingPopUp extends LightningElement {
             this.validateFields();
         } catch (error) {
             errorDebugger('SettingPopUp', 'handleChange', error, 'warn', 'Error occurred while handling the change');
+        }
+    }
+
+    /**
+    * Method Name: handleCheckboxChange
+    * @description: Used to handle checkbox value changes.
+    * Created Date: 21/09/2026
+    * Created By: Karan Singh
+    */
+    handleCheckboxChange(event) {
+        try {
+            const fieldName = event.target.dataset.field;
+            const checked = event.target.checked;
+
+            this.fields = this.fields.map(field => {
+                if (field.fieldName === fieldName) {
+                    return { ...field, value: checked };
+                }
+                return field;
+            });
+            this.validateFields();
+        } catch (error) {
+            errorDebugger('SettingPopUp', 'handleCheckboxChange', error, 'warn', 'Error in handleCheckboxChange');
         }
     }
 }

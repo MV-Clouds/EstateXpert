@@ -3,8 +3,6 @@ import getFieldMappingKeys from '@salesforce/apex/KeyMappingController.getFieldM
 import getGeneralFields from '@salesforce/apex/KeyMappingController.getGeneralFields';
 import getAllContentVersionImgs from '@salesforce/apex/KeyMappingController.getAllContentVersionImgs';
 import formattingFieldKeys from '@salesforce/apex/KeyMappingController.formattingFieldKeys';
-import getSignatureInfo from '@salesforce/apex/KeyMappingController.getSignatureInfo';
-import updateSignatureInfo from '@salesforce/apex/KeyMappingController.updateSignatureInfo';
 import { errorDebugger } from 'c/globalProperties';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
@@ -66,10 +64,6 @@ export default class KeyMappingContainer extends LightningElement {
             helpText: 'Add Listing images Into The Template.',
             showSearchbar: false,
             showRefresh: false,
-        },
-        {
-            label: 'Signature', name: 'signature',
-            helpText: 'Add Signature into Your file by Mapping Signature Key in The Template.', selected: false,
         }
     ];
 
@@ -103,13 +97,9 @@ export default class KeyMappingContainer extends LightningElement {
     @track searchFieldValue = null;
     customTimeout;
 
-    @track signatureSize;
-    savedSignatureSize = this.signatureSize;
-
     @track objectFieldKeys = [];   // e.g. ["{{#Account__c.Name__c}}", …]
     @track recipientFieldKeys = [];   // e.g. ["{{EXPRecipient.Name}}", …]
     @track generalFieldKeys = [];   // e.g. ["{{Doc.Company_Name}}", …]
-    @track signatureKey = [];   // e.g. ["{{Sign.EXP *Signature Key*}}"]
 
     /**
      * boolean to set showFulbrightButtonFor based on template type.
@@ -131,7 +121,6 @@ export default class KeyMappingContainer extends LightningElement {
             objectFields: this.activeMappingTabName == 'objectFields' || this.activeMappingTabName == 'recipientFields' ? true : false,
             generalFields: this.activeMappingTabName == 'generalFields' ? true : false,
             sfImages: this.activeMappingTabName == 'sfImages' ? true : false,
-            signature: this.activeMappingTabName == 'signature' ? true : false,
             pmImages: this.activeMappingTabName == 'pmImages' ? true : false,
         }
     }
@@ -242,13 +231,6 @@ export default class KeyMappingContainer extends LightningElement {
     }
 
     /**
-     * Getter to Enable/Disable signature update button
-     */
-    get isSignatureSetBtn() {
-        return this.savedSignatureSize === this.signatureSize;
-    }
-
-    /**
      * Getter to show/hide image max size limit info
      */
     get isImgMaxSizeLimit() {
@@ -268,7 +250,6 @@ export default class KeyMappingContainer extends LightningElement {
                 this.fetchGeneralFields();
                 this.fetchAllContentVersionImages();
                 this.fetchFormatMappingKeys();
-                this.fetchSignatureInfo();
             }
 
             window?.globalThis?.addEventListener('resize', this.resizeFunction);
@@ -472,7 +453,6 @@ export default class KeyMappingContainer extends LightningElement {
                         if (result.fieldFormatting && result.fieldFormatting.length) {
                             this.dateFormatKeys = result.fieldFormatting.find(ele => ele.formatType == 'DATE').fieldMappings;
                             this.timeFormatKeys = result.fieldFormatting.find(ele => ele.formatType == 'TIME').fieldMappings;
-                            this.signatureKey = result.signatureKey;
                         }
                     }
                     else {
@@ -481,22 +461,6 @@ export default class KeyMappingContainer extends LightningElement {
                 })
         } catch (error) {
             errorDebugger('FieldMappingKey', 'fetchFormatMappingKeys', error, 'warn');
-        }
-    }
-
-    /**
-     * Method to fetch signature size stored in template record field.
-     */
-    fetchSignatureInfo() {
-        try {
-            getSignatureInfo({ templateId: this.templateId })
-                .then(result => {
-                    this.isDataRefreshing = false;
-                    this.signatureSize = Math.max(result, 1);               // To avoid value lesser than 1
-                    this.savedSignatureSize = this.signatureSize;
-                })
-        } catch (error) {
-            errorDebugger('FieldMappingKeyV2', 'fetchSignatureInfo', error, 'warn');
         }
     }
 
@@ -1220,8 +1184,6 @@ export default class KeyMappingContainer extends LightningElement {
                 }, 1001);
             }
 
-            this.propertyMediaCount = this.propertyMediaCount + 1;
-
         } catch (error) {
             console.log('error in copySFImgAsHTMl : ', error.stack);
         }
@@ -1306,26 +1268,6 @@ export default class KeyMappingContainer extends LightningElement {
     }
 
     /**
-     * Set Signature size into variable
-     * @param {*} event 
-     */
-    setSignatureSize(event) {
-        this.signatureSize = event.target.value;
-    }
-
-    /**
-     * Update Signature size in backed.
-     */
-    updateSignatureSize() {
-        try {
-            this.savedSignatureSize = this.signatureSize;
-            updateSignatureInfo({ templateId: this.templateId, signatureSize: this.signatureSize });
-        } catch (error) {
-            errorDebugger('FieldMappingKeyV2', 'updateSignatureSize', error, 'warn');
-        }
-    }
-
-    /**
      * Dispatch & Trigger 'onclose' event into parent component when user click on close button
      */
     handleClose() {
@@ -1341,14 +1283,12 @@ export default class KeyMappingContainer extends LightningElement {
 
     /**
      * Triggers a preview event using CustomEvent.
-     * Also updates the signature size after triggering the event.
      */
     handlePreview() {
         let custEvent = new CustomEvent('preview', {
             detail: this.propertyMediaCount
         });
         this.dispatchEvent(custEvent);
-        this.updateSignatureSize();
     }
 
     handleSave() {
@@ -1356,7 +1296,6 @@ export default class KeyMappingContainer extends LightningElement {
             detail: this.propertyMediaCount
         });
         this.dispatchEvent(custEvent);
-        this.updateSignatureSize();
     }
 
     /**

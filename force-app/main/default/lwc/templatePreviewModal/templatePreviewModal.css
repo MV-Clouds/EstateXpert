@@ -1,402 +1,382 @@
 :host {
-  --pdfWidth: 72rem;
-  --pdfActualPreviewWidth: calc(var(--pdfWidth) - 18.9rem);
-  --ff_Bahnschrift: Bahnschrift, 'Segoe UI', 'Segoe UI Web (West European)', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
-  --ff_Montserrat: "Montserrat";
-  --ff_Poppins: Poppins;
-  --timeoutTime: 0s;
+    --primary-color: #0176D3;
+    --primary-dark: #0156A3;
+    --text-color: #2b2826;
+    --border-color: #e2e8f0;
+    --background-color: #f3f6f9;
 }
 
-.preview_mainDiv {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-  background: rgb(0 0 0 / 65%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9001;
-
+.wrapper {
+    z-index: 9999;
+    position: relative;
 }
 
-.preview_mainDiv[data-fix-position=true] {
-  position: static;
-  background: none;
+.wrapper[data-fix-position=true] {
+    position: static;
 }
 
-.preview_Contanier {
-  height: 85%;
-  width: max-content;
-  background: white;
-  border-radius: 6px;
-  overflow: hidden;
+.modal_container {
+    width: 90vw;
+    max-width: 1300px;
+    height: 85vh;
+    max-height: 900px;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    position: relative;
+    border-radius: 8px;
+    overflow: visible;
 }
 
-.preview_Contanier[data-full-width=true] {
-  width: 100% !important;
+.modal_container[data-full-width=true] {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
 }
 
-.preview_SubContanier {
-  width: max-content;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
+/* -------------------------------------------------------------
+   Close Button (Outside Header, matching sendEmails & other popups)
+   ------------------------------------------------------------- */
+.closs_icon_css {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    border-radius: 6px;
 }
 
-.preview_SubContanier[data-full-width=true] {
-  width: 100% !important;
+.closs_icon_css svg path {
+    fill: #1F2937;
 }
 
+.closs_icon_css:hover {
+    background: #E5E7EB;
+}
+
+/* -------------------------------------------------------------
+   Custom Header (Centered Blue Header matching sendEmails)
+   ------------------------------------------------------------- */
+.custom-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    position: relative;
+    padding: 1rem 1.25rem;
+    flex-shrink: 0;
+}
+
+.custom-header h2 {
+    color: #ffffff;
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* -------------------------------------------------------------
+   Modal Content (matching sendEmails .custom-content)
+   ------------------------------------------------------------- */
+.custom-content {
+    background-color: #F9FAFB;
+    height: calc(85vh - 70px);
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+.preview-layout-body {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    box-sizing: border-box;
+}
+
+/* -------------------------------------------------------------
+   Left Section (Settings Card)
+   ------------------------------------------------------------- */
 .preview_leftSection {
-  width: 25rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    width: 23rem;
+    min-width: 19rem;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
 }
 
-.titleSection {
-  width: 100%;
-  height: 3.5rem;
-  border-bottom: 1px solid #0176D3;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 18px;
-  font-family: var(--ff_Bahnschrift);
-  letter-spacing: 1px;
-  color: #0176D3;
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.optionSection {
-  width: 100%;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.section-subtitle {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0;
 }
 
 .recordSelectionSection {
-  width: 100%;
+    width: 100%;
 }
 
-.buttonSection {
-  width: 100%;
-  height: 5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
+.generate-btn-container {
+    display: flex;
+    justify-content: center;
 }
 
-.buttonSection.footerBtn {
-  flex-direction: row;
-  border-top: 1px solid rgb(160, 160, 160);
+.generate-preview-btn,
+.download-btn {
+    width: 100%;
+    justify-content: center;
 }
 
-.generatePreviewBtn {
-  background: #0176D3;
-  color: white;
-  transition: all 1s ease;
+/* -------------------------------------------------------------
+   Right Section (Canvas Preview Area)
+   ------------------------------------------------------------- */
+.preview_rightSection {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-.generatePreviewBtn:hover:not(:disabled) {
-  background: #0156A3;
+.preview_rightSection[data-full-width=true] {
+    width: 100%;
+}
+
+.iframe_outer {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview_iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #ffffff;
+}
+
+.generate_iframe {
+    position: absolute;
+    z-index: -9999;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+
+/* Summernote / Quick Preview */
+.quick_preview_css {
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background: #ffffff;
+}
+
+.scrollable-content {
+    max-width: 850px;
+    margin: 0 auto;
+    min-height: 100%;
+}
+
+/* Loading & Empty State */
+.loadingContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1.25rem;
+    box-sizing: border-box;
+    background: #f8fafc;
+}
+
+.intiImg {
+    max-width: 260px;
+    max-height: 180px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.08));
+}
+
+.loadingInfo {
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #64748b;
+    max-width: 380px;
+    line-height: 1.5;
+}
+
+/* Error State */
+.errorMessageContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: #f8fafc;
+}
+
+.popupContainer {
+    width: 18rem;
+}
+
+.popupBody {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.15);
+    border: 1px solid #fecaca;
+    text-align: center;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ballDesignIcon {
+    width: 3rem;
+    height: 3rem;
+    stroke: #ef4444;
+}
+
+.titleDiv h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #b91c1c;
+    margin: 0;
+}
+
+.messageDiv p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.45;
+}
+
+
+/* -------------------------------------------------------------
+   Buttons System (.blue-btn-css, .white-btn-css)
+   ------------------------------------------------------------- */
+.blue-btn-css {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    background: #0176D3;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.2);
+}
+
+.blue-btn-css:hover:not(:disabled) {
+    background: #0156A3;
     box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
     transform: translateY(-1px);
 }
 
-
-.blue-btn-css svg {
-  width: 18px;
-  height: 18px;
-  fill: white;
+.blue-btn-css:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #94a3b8;
+    transform: none;
+    box-shadow: none;
 }
 
-.blue-btn-css .cls-1 {
-  fill: none;
+.white-btn-css {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0.5rem 1.5rem;
+    background: #FFFFFF;
+    border: 1.5px solid #0176D3;
+    color: #0176D3;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-.exportBtn {
-  background: #0176D3;
-  color: white;
-  transition: all 1s ease;
-}
-
-.exportBtn:hover:not(:disabled) {
-  background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
-
-.blue-btn-css svg {
-  width: 18px;
-  height: 18px;
-  fill: white;
-}
-
-.closeBtn {
-  background: white;
-  color: #0176D3;
-  border: 1px solid #0176D3 !important;
-  transition: all 1s ease;
-}
-
-.closeBtn:hover {
+.white-btn-css:hover:not(:disabled) {
     background: #F3F6F9;
     box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
 }
 
-.white-btn-css svg {
-  width: 16px;
-  height: 16px;
-  fill: #0176D3;
+.white-btn-css:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #cbd5e1;
+    color: #94a3b8;
 }
 
-.preview_rightSection {
-  width: max-content;
-  height: 100%;
-  background: #f2f9ff;
-}
+/* -------------------------------------------------------------
+   Responsive Breakpoints
+   ------------------------------------------------------------- */
+@media screen and (max-width: 900px) {
+    .modal_container {
+        width: 96vw;
+        height: 94vh;
+    }
 
-.preview_rightSection[data-full-width=true] {
-  width: 100%;
-}
+    .preview-layout-body {
+        flex-direction: column;
+    }
 
-.iframe_outer {
-  width: min(var(--pdfWidth, 72rem), 60rem);
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.iframe_outer[data-full-width=true] {
-  width: 100% !important;
-}
-
-.preview_iframe {
-  width: 100%;
-  height: 100%;
-  float: right;
-  border: none;
-}
-
-.iframeToolbarSection {
-  visibility: hidden;
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  width: 10rem;
-  height: 3.5rem;
-  background: #323639;
-}
-
-.iframeToolbarSection.show {
-  visibility: visible;
-}
-
-.intiImg {
-  width: min(35rem, 70%);
-  filter: drop-shadow(2px 2px 3px #7b7b7b);
-}
-
-.generate_iframe {
-  position: absolute;
-  z-index: -999999;
-  visibility: hidden;
-}
-
-
-/* -------------------- ----------------------- Error Popup Detail CSS ----------------------- --------------------- */
-.errorMessageContainer {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  --designCurveColor: #FF000033;
-  --statusIconColor: #FF0000;
-}
-
-.popupContainer {
-  width: 16rem;
-  height: fit-content;
-}
-
-.popupBody {
-  background-color: white;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0px 0px 35px 0px #00000042;
-}
-
-.topDesingSection {
-  width: 100%;
-  min-height: max-content;
-  height: 9rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.curveDesign {
-  position: absolute;
-  top: -100%;
-  left: 0%;
-  transform: translate(-5%, 0%);
-  width: 110%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background-color: var(--designCurveColor);
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 2.75rem;
-}
-
-.contentSection {
-  width: 100%;
-  height: 13.5rem;
-  padding: 1rem 1rem 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.ballDesignIcon {
-  width: 4rem;
-  height: 4rem;
-  stroke: var(--statusIconColor);
-}
-
-.toastIcon .ballDesignIcon {
-  width: 24px;
-  height: 24px;
-  stroke: var(--statusIconColor);
-}
-
-.titleDiv {
-  font-size: 21px;
-  text-align: center;
-  width: 100%;
-  margin-bottom: 0.5rem;
-  color: var(--statusIconColor);
-}
-
-.titleDiv h2 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.messageDiv {
-  font-size: 14px;
-  text-align: center;
-  color: var(--statusIconColor);
-  opacity: 85%;
-  flex-grow: 1;
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
-.messageDiv p {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
-}
-
-/* -------------------- ----------------------- Error Popup Detail CSS - END - ----------------------- --------------------- */
-
-/* ------------------ ------------------------ Loading State CSS ------------------------- --------------------------- */
-
-.loadingContainer {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  --documerPageHeight: 17rem;
-}
-
-.loadingInfo {
-  width: max-content;
-  max-width: 94%;
-  text-align: center;
-  position: absolute;
-  top: calc(50% + (var(--documerPageHeight)/2) + 2rem);
-  left: 50%;
-  transform: translate(-50%, 0px);
-  font-size: 20px;
-  font-family: var(--ff_Poppins);
-  color: #0176D3;
-  text-transform: capitalize;
-}
-
-.customSetTimeout {
-  width: 0px;
-  height: 0px;
-}
-
-.customSetTimeout.setTimeAnimation {
-  animation: dummyAnimation var(--timeoutTime) linear 0s 1 forwards normal;
-}
-
-@keyframes dummyAnimation {
-  to {
-    width: 0px;
-  }
-}
-
-
-/* ------------------ ------------------------ Loading State CSS ------------------------- --------------------------- */
-@media screen and (max-width: 1440px) {
-  .preview_Contanier {
-    width: 90%;
-  }
-
-  .preview_SubContanier {
-    width: 100%;
-  }
-
-  .preview_leftSection {
-    min-width: 20rem;
-  }
-
-  .preview_rightSection {
-    flex-grow: 1;
-  }
-
-  .preview_rightSection[data-full-width=true] {
-    width: 100%;
-  }
-
-  .iframe_outer {
-    width: 100%;
-  }
-}
-
-.quick_preview_css {
-  flex: 2;
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 0px 2px 0px, rgba(60, 64, 67, 0.15) 0px 0px 6px 2px;
-  background-color: white;
-  margin: 2rem;
-  padding: 1rem;
-  font-size: 1rem;
-  transition: margin-left 0.3s ease;
-  overflow: scroll;
-  border-radius: 6px;
-  height: -webkit-fill-available;
+    .preview_leftSection {
+        width: 100%;
+        max-width: 100%;
+    }
 }

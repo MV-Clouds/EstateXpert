@@ -462,9 +462,9 @@
                 </div>
             </template>
             <template if:false={pagedInquries.length}>
-                <div class="no-prop">
-                    <img src={NoDataImageUrl} class="no-data-img" alt="No Data Found">
-                    <p>No Inquiry found. Please change your search filters and try again.</p>
+                <div class="exp-no-data-container">
+                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                    <div class="exp-no-data-message">No Inquiry found. Please change your search filters and try again.</div>
                 </div>
             </template>
             <template if:true={showPagination}>

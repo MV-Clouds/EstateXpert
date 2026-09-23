@@ -14,13 +14,12 @@ public without sharing class ContactTriggerHandler {
 
     public static void handleLeadAssignment(List<Contact> newLeads, Map<Id, Contact> oldLeadMap) {
         try {
-            // Fetch only conditional rules (records where Default_User__c is not true)
-            List<Lead_Assignment_Setting__c> allRules = [
-                SELECT Name, Conditions__c, Logic_Type__c, Logical_Expression__c, User_Order__c
-                FROM Lead_Assignment_Setting__c
-                WHERE Object_Name__c = 'Contact'
-                AND (Default_User__c = false OR Default_User__c = null)
-                ORDER BY User_Order__c ASC
+            List<MVEX__Lead_Assignment_Setting__c> allRules = [
+                SELECT Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c
+                FROM MVEX__Lead_Assignment_Setting__c
+                WHERE MVEX__Object_Name__c = 'Contact'
+                AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null)
+                ORDER BY MVEX__User_Order__c ASC
             ];
 
             // Fetch the default assignee record 
@@ -40,7 +39,7 @@ public without sharing class ContactTriggerHandler {
 
             List<Contact> leadsToProcess = new List<Contact>();
             for (Contact lead : newLeads) {
-                if (isInsert && !lead.Is_Converted__c) {
+                if (isInsert && !lead.MVEX__Is_Converted__c) {
                     leadsToProcess.add(lead);
                 }
             }
@@ -59,7 +58,7 @@ public without sharing class ContactTriggerHandler {
 
             for (Contact lead : leadsToProcess) {
                 Boolean isAssigned = false;
-                for (Lead_Assignment_Setting__c rule : allRules) {
+                for (MVEX__Lead_Assignment_Setting__c rule : allRules) {
                     Boolean isMatch = evaluateRule(lead, rule, fieldMap);
                     if (isMatch) {
                         lead.OwnerId = rule.Name;
@@ -81,9 +80,9 @@ public without sharing class ContactTriggerHandler {
         }
     }
 
-    private static Boolean evaluateRule(Contact lead, Lead_Assignment_Setting__c rule, Map<String, Schema.SObjectField> fieldMap) {
+    private static Boolean evaluateRule(Contact lead, MVEX__Lead_Assignment_Setting__c rule, Map<String, Schema.SObjectField> fieldMap) {
         try {
-            List<Condition> conditions = (List<Condition>) JSON.deserialize(rule.Conditions__c, List<Condition>.class);
+            List<Condition> conditions = (List<Condition>) JSON.deserialize(rule.MVEX__Conditions__c, List<Condition>.class);
             if (conditions == null || conditions.isEmpty()) {
                 return false;
             }
@@ -94,15 +93,15 @@ public without sharing class ContactTriggerHandler {
                 conditionResults.put(cond.Order, result);
             }
 
-            if ('All'.equalsIgnoreCase(rule.Logic_Type__c)) {
+            if ('All'.equalsIgnoreCase(rule.MVEX__Logic_Type__c)) {
                 for (Boolean result : conditionResults.values()) {
                     if (!result) {
                         return false;
                     }
                 }
                 return true;
-            } else if ('Custom'.equalsIgnoreCase(rule.Logic_Type__c) && !String.isBlank(rule.Logical_Expression__c)) {
-                Boolean customResult = evaluateLogicalExpression(rule.Logical_Expression__c, conditionResults);
+            } else if ('Custom'.equalsIgnoreCase(rule.MVEX__Logic_Type__c) && !String.isBlank(rule.MVEX__Logical_Expression__c)) {
+                Boolean customResult = evaluateLogicalExpression(rule.MVEX__Logical_Expression__c, conditionResults);
                 return customResult;
             }
 
@@ -453,6 +452,18 @@ public without sharing class ContactTriggerHandler {
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'LeadAssignmentHandler', 'sendSocialMediaNotifications', 'Failed to send social template email');
+        }
+    }
+
+    /**
+    * Method Name : publishContactChangeEvent
+    * @description : Publishes RefreshEvent platform event when a contact is created, updated, or deleted
+    */
+    public static void publishContactChangeEvent() {
+        try {
+            PlatformEventController.publishRefreshEvent('Marketing_List');
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'ContactTriggerHandler', 'publishContactChangeEvent', 'Failed to publish refresh event: ' + e.getMessage());
         }
     }
 }

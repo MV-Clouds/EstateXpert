@@ -41,7 +41,7 @@
                     <template if:true={showSpinner}>
                         <lightning-spinner size="medium"></lightning-spinner>
                     </template>
-                    <img src={currentImageUrl} alt="Current Image" draggable="false" />
+                    <img src={currentImageUrl} alt="Current Image" draggable="false" onerror={handleImageError} />
                 </div>
                 
                 <template if:true={hasMultipleImages}>
@@ -80,9 +80,9 @@
             </div>
             
             <div class="empty-state-container">
-                <div class="empty-state">
-                    <img src="/resource/MVEX__emptyState" alt="No images" class="empty-state-img" draggable="false" />
-                    <div class="empty-state-message">No Image Found.</div>
+                <div class="exp-no-data-container">
+                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                    <div class="exp-no-data-message">No Images Found</div>
                 </div>
             </div>
         </div>
@@ -108,7 +108,7 @@
                         <p class="fullscreen-loading-text">Loading image...</p>
                     </div>
                 </template>
-                <img src={modalImageUrl} alt="Image Preview" class="fullscreen-image" draggable="false" onload={handleImageLoad} />
+                <img src={modalImageUrl} alt="Image Preview" class="fullscreen-image" draggable="false" onload={handleImageLoad} onerror={handleImageError} />
             </div>
         </div>
     </template>

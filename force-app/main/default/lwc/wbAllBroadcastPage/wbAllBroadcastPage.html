@@ -237,10 +237,9 @@
                         </template>
 
                         <template if:false={paginatedData.length}>
-                            <div class="no-data-container">
-                                <div class="no-data-message">
-                                    No Broadcast Found
-                                </div>
+                            <div class="exp-no-data-container">
+                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                <div class="exp-no-data-message">No Broadcast Found</div>
                             </div>
                         </template>
 
@@ -350,13 +349,9 @@
                                                 </div>
 
                                                 <template if:false={filteredGroups.length}>
-                                                    <div class="empty-state__content">
-                                                        <div class="empty-state__icon">
-                                                            <img src="/resource/MVEX__emptyState" alt=""
-                                                                draggable="false">
-                                                        </div>
-                                                        <div class="empty-state__message">No Data Available to Show.
-                                                        </div>
+                                                    <div class="exp-no-data-container">
+                                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                                        <div class="exp-no-data-message">No Data Available to Show.</div>
                                                     </div>
                                                 </template>
                                             </div>

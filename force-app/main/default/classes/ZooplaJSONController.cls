@@ -10,21 +10,21 @@ public with sharing class ZooplaJSONController {
     /**
     * Method Name : createInputData
     * @param finalMapping - Map<String, Object>
-    * @param mediaList - List<MVEX__Property_File__c>
+    * @param mediaList - List<Property_File__c>
     * @return String
     * @description : Used to create input data for Zoopla.
     */
-    public static String createInputData(Map<String, Object> finalMapping, List<MVEX__Property_File__c> mediaList) {
+    public static String createInputData(Map<String, Object> finalMapping, List<Property_File__c> mediaList) {
         try {
             Map<String, Object> inputData = new Map<String, Object>();
     
-            List<MVEX__Portal_Listing_Mapping__c> portalListing = [SELECT Id, Name, MVEX__Value_Mapping__c, MVEX__Data_Type__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c = 'Zoopla' WITH USER_MODE];
+            List<Portal_Listing_Mapping__c> portalListing = [SELECT Id, Name, Value_Mapping__c, Data_Type__c FROM Portal_Listing_Mapping__c WHERE Portal_Name__c = 'Zoopla' WITH USER_MODE];
         
             Map<String, String> valueMappingMap = new Map<String, String>();
             Map<String, String> dataTypeMap = new Map<String, String>();
-            for (MVEX__Portal_Listing_Mapping__c mapping : portalListing) {
-                valueMappingMap.put(mapping.Name, mapping.MVEX__Value_Mapping__c);
-                dataTypeMap.put(mapping.Name, mapping.MVEX__Data_Type__c);
+            for (Portal_Listing_Mapping__c mapping : portalListing) {
+                valueMappingMap.put(mapping.Name, mapping.Value_Mapping__c);
+                dataTypeMap.put(mapping.Name, mapping.Data_Type__c);
             }
         
             for (String fieldName : finalMapping.keySet()) {
@@ -35,11 +35,11 @@ public with sharing class ZooplaJSONController {
             }
         
             List<Map<String, Object>> content = new List<Map<String, Object>>();
-            for (MVEX__Property_File__c mediaItem : mediaList) {
+            for (Property_File__c mediaItem : mediaList) {
                 Map<String, Object> mediaMap = new Map<String, Object>();
-                String mediaURL = String.isNotBlank(mediaItem.MVEX__ExternalLink__c) ? mediaItem.MVEX__ExternalLink__c : mediaItem.MVEX__BaseUrl__c;
+                String mediaURL = String.isNotBlank(mediaItem.ExternalLink__c) ? mediaItem.ExternalLink__c : mediaItem.BaseUrl__c;
                 mediaMap.put('url', mediaURL);
-                mediaMap.put('type', urlType(mediaItem.MVEX__Tags__c));
+                mediaMap.put('type', urlType(mediaItem.Tags__c));
                 content.add(mediaMap);
             }
             inputData.put('content', content);

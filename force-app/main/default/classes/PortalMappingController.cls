@@ -10,17 +10,16 @@ public with sharing class PortalMappingController {
 
     /**
     * Wrapper Class Name : ObjectFieldsWrapper
-    * @description : This Wrapper class used for method name getPortalRecords to return Portal__c object records.
+    * @description : This Wrapper class used for method name getPortalRecords to return MVEX__Portal__c object records.
     */
     public class ObjectFieldsWrapper {
         @AuraEnabled public List<PortalDetailWrapper> portalDetailsRecords;
         @AuraEnabled public List<MVEX__Portal__c> portalRecords;
-        @AuraEnabled public Boolean isXMLForPF;
     }
     
     /**
     * Wrapper Class Name : PortalDetailWrapper
-    * @description : This Wrapper class used for method name getPortalRecords to return Portal__c object records.
+    * @description : This Wrapper class used for method name getPortalRecords to return MVEX__Portal__c object records.
     */
     public class PortalDetailWrapper {
         @AuraEnabled public String portalName;
@@ -36,24 +35,18 @@ public with sharing class PortalMappingController {
     
     /**
     * Method Name : getPortalRecords
-    * @description : Get all the records of Portal__c object.
-    * @return List of Portal__c records.
+    * @description : Get all the records of MVEX__Portal__c object.
+    * @return List of MVEX__Portal__c records.
     */
     @AuraEnabled
     public static ObjectFieldsWrapper getPortalRecords(){
         ObjectFieldsWrapper result = new ObjectFieldsWrapper();
         result.portalDetailsRecords = new List<PortalDetailWrapper>();
         result.portalRecords = new List<MVEX__Portal__c>();
-        result.isXMLForPF = false;
         try {
             Map<String, Integer> generatorCountMap = new Map<String, Integer>();
     
             List<MVEX__PortalDetail__mdt> portalMetaRecords = [SELECT MasterLabel, MVEX__Logo_URL__c FROM MVEX__PortalDetail__mdt WITH USER_MODE ORDER BY MasterLabel LIMIT 100];
-
-            List<Control_Center_Feature__mdt> controlCenterFeatureRecords = [SELECT isAvailable__c FROM Control_Center_Feature__mdt WHERE DeveloperName = 'Is_XML_For_PF' WITH USER_MODE LIMIT 1];
-            if (controlCenterFeatureRecords.size() > 0 && controlCenterFeatureRecords[0].isAvailable__c) {
-                result.isXMLForPF = true;
-            }
 
             List<AggregateResult> portalRecordsGroupedByGenerator = [SELECT MVEX__Generator__c, COUNT(Id) recordCount FROM MVEX__Portal__c WITH USER_MODE
                                                                         GROUP BY MVEX__Generator__c LIMIT 50000];
@@ -75,7 +68,7 @@ public with sharing class PortalMappingController {
             result.portalRecords = [SELECT Id, MVEX__Endpoint__c, MVEX__Generator__c, Name, MVEX__Is_Active__c FROM MVEX__Portal__c WITH USER_MODE ORDER BY Name LIMIT 50000];
     
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getPortalRecords', 'Error while fetching Portal__c records.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getPortalRecords', 'Error while fetching MVEX__Portal__c records.');
         }
         return result;
     }    
@@ -109,7 +102,7 @@ public with sharing class PortalMappingController {
     * Change Description : Replaced the custom metadata with custom object for portal listing field mapping.
     */
     @AuraEnabled
-    public static List<FieldWrapper> getObjectFields(String portalName, Boolean isXMLForPF) {
+    public static List<FieldWrapper> getObjectFields(String portalName) {
         try {
             List<FieldWrapper> result = new List<FieldWrapper>();
 
@@ -117,11 +110,7 @@ public with sharing class PortalMappingController {
 
             List<MVEX__Portal_Listing_Mapping__c> portalListingMap ;
 
-            if (portalName == 'Propertyfinder' && isXMLForPF) {
-                portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c = 'Propertyfinder XML' WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
-            } else if (portalName != null) {
-                portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
-            }
+            portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
 
             sObject blockFields = getBlockedFields(portalName);
 
@@ -170,7 +159,7 @@ public with sharing class PortalMappingController {
 
             return result;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getObjectFields', 'Error while fetching Portal__c records.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getObjectFields', 'Error while fetching MVEX__Portal__c records.');
             return null;
         }
     }
@@ -207,7 +196,7 @@ public with sharing class PortalMappingController {
                 }
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getObjectFields', 'Error while fetching Portal__c records.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getObjectFields', 'Error while fetching MVEX__Portal__c records.');
             return null;
         }
     }
@@ -275,7 +264,7 @@ public with sharing class PortalMappingController {
 
             return 'Success';
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'saveChangedFields', 'Error while saving Portal_Listing_Mapping__c records.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'saveChangedFields', 'Error while saving MVEX__Portal_Listing_Mapping__c records.');
             return null;
         }
     }
@@ -313,15 +302,15 @@ public with sharing class PortalMappingController {
                 }
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'portalAction', 'Error while performing Portal__c record actions.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'portalAction', 'Error while performing MVEX__Portal__c record actions.');
             return null;
         }
     }
 
     /**
     * Method Name : updatePortalStatus
-    * @description : Method is used to update the Is_Active__c field value.
-    * @param portal Portal__c value.
+    * @description : Method is used to update the MVEX__Is_Active__c field value.
+    * @param portal MVEX__Portal__c value.
     * @param status Boolean value.
     * @param action String value.
     * @return update status.
@@ -332,7 +321,7 @@ public with sharing class PortalMappingController {
             update as user portal;
             return action;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'updatePortalStatus', 'Error while updating Portal__c record.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'updatePortalStatus', 'Error while updating MVEX__Portal__c record.');
             return null;
         }
 
@@ -340,8 +329,8 @@ public with sharing class PortalMappingController {
 
     /**
     * Method Name : updatePortalStatus
-    * @description : Method is used for deleting the Portal__c object record.
-    * @param portal Portal__c value.
+    * @description : Method is used for deleting the MVEX__Portal__c object record.
+    * @param portal MVEX__Portal__c value.
     * @return delete status.
     */
     private static String deletePortal(MVEX__Portal__c portal) {
@@ -349,7 +338,7 @@ public with sharing class PortalMappingController {
             delete as user portal;
             return 'deleted';
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'deletePortal', 'Error while deleting Portal__c record.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'deletePortal', 'Error while deleting MVEX__Portal__c record.');
             return null;
         }
 
@@ -373,18 +362,20 @@ public with sharing class PortalMappingController {
         @AuraEnabled public String is_test_portal;
         @AuraEnabled public String differentiator_values;
         @AuraEnabled public String xml_site;
-        @AuraEnabled public Boolean isXMLForPF = false;
+        @AuraEnabled public Boolean sync_branch_with_zoopla;
     }
 
     /**
     * Method Name : savePropertyPortalRecord
-    * @description : Method is used for deleting the Portal__c object record.
+    * @description : Method is used for deleting the MVEX__Portal__c object record.
     * @param portalWrapper propertyPortalWrapper value.
     * @param portalName String value.
     */
     @AuraEnabled
     public static String savePropertyPortalRecord(String portalWrapper, String portalName) {
         try {
+            System.debug('portalWrapper -> '+portalWrapper);
+            System.debug('portalName -> '+portalName);
             List<String> portalsName = new List<String>{'Bayut', 'Dubizzle'};
             
             if(portalName == null || portalName == '') {
@@ -402,7 +393,7 @@ public with sharing class PortalMappingController {
                 }
                 jsonBody = JSON.serialize(jsonBodyMap);
             } else {
-                jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
+                // jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
             }
 
             String portalId;
@@ -421,20 +412,20 @@ public with sharing class PortalMappingController {
                 updateNewlyCreatedPortalRecord(newportal.MVEX__Generator__c, newportal.Id, wrapper.xml_site);
             }
 
-            if (wrapper.portalname == 'Zoopla') {
+            if (wrapper.portalname == 'Zoopla' && wrapper.sync_branch_with_zoopla) {
                 ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
             }
 
             return 'success';
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'savePropertyPortalRecord', 'Error while saving Portal__c record.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'savePropertyPortalRecord', 'Error while saving MVEX__Portal__c record.');
             return e.getMessage();
         }
     }
 
     /**
     * Method Name : updatePropertyPortalRecord
-    * @description : Method is used for deleting the Portal__c object record.
+    * @description : Method is used for deleting the MVEX__Portal__c object record.
     * @param portalWrapper propertyPortalWrapper value.
     * @param portalName String value.
     */
@@ -462,13 +453,13 @@ public with sharing class PortalMappingController {
                 updateNewlyCreatedPortalRecord(newportal.MVEX__Generator__c, newportal.Id, wrapper.xml_site);
             }
 
-            if (wrapper.portalname == 'Zoopla') {
+            if (wrapper.portalname == 'Zoopla' && wrapper.sync_branch_with_zoopla) {
                 ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
             }
 
             return 'success';
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'savePropertyPortalRecord', 'Error while saving Portal__c record.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'savePropertyPortalRecord', 'Error while saving MVEX__Portal__c record.');
             return e.getMessage();
         }
     }
@@ -486,7 +477,7 @@ public with sharing class PortalMappingController {
     
             update as user portalRecord;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'updateNewlyCreatedPortalRecord', 'Error while updating XML_Feed_URL__c for portal');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'updateNewlyCreatedPortalRecord', 'Error while updating MVEX__XML_Feed_URL__c for portal');
         }
     }
     
@@ -528,7 +519,7 @@ public with sharing class PortalMappingController {
 
     /**
     * Method Name : getAllCustomFields
-    * @description : Method is used for fetching all the custom fields from the Listing__c object.
+    * @description : Method is used for fetching all the custom fields from the MVEX__Listing__c object.
     * @return List<FieldList> value.
     */
     @AuraEnabled
@@ -576,7 +567,7 @@ public with sharing class PortalMappingController {
                 }
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getAllCustomFields', 'Error while fetching custom fields from Listing__c object.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getAllCustomFields', 'Error while fetching custom fields from MVEX__Listing__c object.');
         }
         
         return siteInfoWrapper;
@@ -585,7 +576,7 @@ public with sharing class PortalMappingController {
     /**
     * Method Name : getAllEditDatas
     * @param portalId to stored the portal Id.
-    * @description : Method is used for fetching all the editable fields from the Listing__c object.
+    * @description : Method is used for fetching all the editable fields from the MVEX__Listing__c object.
     * @return SiteInfoWrapper.
     */
     @AuraEnabled
@@ -637,16 +628,16 @@ public with sharing class PortalMappingController {
 
             if (!portalData.isEmpty()) {
                 String fieldMappingJson = portalData[0].MVEX__Portal_Configuration__c;
-                Map<String, String> fieldMappingMap = (Map<String, String>) JSON.deserialize(fieldMappingJson, Map<String, String>.class);
+                Map<String, Object> fieldMappingMap = (Map<String, Object>) JSON.deserializeUntyped(fieldMappingJson);
                 
                 for (String apiName : fieldMappingMap.keySet()) {
-                    String value = fieldMappingMap.get(apiName);
+                    String value = String.valueOf(fieldMappingMap.get(apiName));
                     siteInfoWrapper.fieldsValue.add(new FieldList(apiName, value));
                 }
             }
 
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getAllCustomFields', 'Error while fetching custom fields from Listing__c object.');
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'getAllCustomFields', 'Error while fetching custom fields from MVEX__Listing__c object.');
         }
         
         return siteInfoWrapper;

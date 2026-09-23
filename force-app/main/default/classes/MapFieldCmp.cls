@@ -19,7 +19,7 @@ public with sharing class MapFieldCmp {
         try {
             List<Map<String, String>> fieldDetails = new List<Map<String, String>>();    
     
-            // Query Mapping_Metadata__mdt
+            // Query MVEX__Mapping_Metadata__mdt
             MVEX__Mapping_Metadata__mdt metaData = [SELECT MVEX__Mapping_String__c, MVEX__Automatic_Sync__c, MVEX__BlockedFields__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
         
             Schema.DescribeSObjectResult describeResult = Schema.getGlobalDescribe().get(objectName).getDescribe();

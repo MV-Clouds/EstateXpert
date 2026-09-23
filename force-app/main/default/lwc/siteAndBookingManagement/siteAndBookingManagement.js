@@ -720,6 +720,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     validateInputs() {
         if (this.showDateTimeInputs) {
+            if (!this.currentContact.Email || !this.currentContact.Name) {
+                this.showToast('Error', 'The selected inquiry does not have a name or email address.', 'error');
+                return false;
+            }
             if (!this.selectedDate || !this.selectedTime) {
                 this.showToast('Error', 'Please select a date and time.', 'error');
                 return false;

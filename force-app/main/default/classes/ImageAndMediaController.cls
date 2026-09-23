@@ -59,7 +59,7 @@ public with sharing class ImageAndMediaController {
     * @param recordId to stored the Listing record Id
     * @param mediaList to stored the images data
     * @return Boolean value
-    * @description : Used to create new Property_File__c records.
+    * @description : Used to create new MVEX__Property_File__c records.
     */
     @AuraEnabled
     public static String createmediaforlisting(Id recordId, List<MediaData> mediaList){
@@ -70,8 +70,12 @@ public with sharing class ImageAndMediaController {
                 MVEX__Property_File__c mediaRecord = new MVEX__Property_File__c();
                 mediaRecord.MVEX__BaseUrl__c = media.externalUrl;
                 if(media.name != '' && media.name != null){
-                    if (media.name.length() > 80) { 
-                        String truncatedName = media.name.substring(0, 80);
+                    String displayName = media.name;
+                    if (displayName.contains('/')) {
+                        displayName = displayName.substringAfterLast('/');
+                    }
+                    if (displayName.length() > 80) { 
+                        String truncatedName = displayName.substring(0, 80);
                         mediaRecord.Name = truncatedName; 
                         mediaRecord.MVEX__Filename__c = media.name;
                     } else {
@@ -97,7 +101,7 @@ public with sharing class ImageAndMediaController {
             }
             
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'createmediaforlisting', 'Error while creating Property_File__c record.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'createmediaforlisting', 'Error while creating MVEX__Property_File__c record.');
             return e.getMessage();
         }
     }
@@ -127,10 +131,10 @@ public with sharing class ImageAndMediaController {
 
     /**
     * Method Name : deletelistingmedia
-    * @param id to stored the Property_File__c record Id
+    * @param id to stored the MVEX__Property_File__c record Id
     * @param propertyId to stored the property Id
     * @return Boolean value
-    * @description : Used to delete Property_File__c records.
+    * @description : Used to delete MVEX__Property_File__c records.
     */
     @AuraEnabled
     public static Boolean deletelistingmedia(String id,String propertyId){
@@ -151,7 +155,7 @@ public with sharing class ImageAndMediaController {
             }   
             return true;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'deletelistingmedia', 'Error while deleting Property_File__c record.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'deletelistingmedia', 'Error while deleting MVEX__Property_File__c record.');
             return false;
         }
     }
@@ -169,12 +173,14 @@ public with sharing class ImageAndMediaController {
         public MVEX__AWS_Config__c awsConfigData  { get; set; }
         @AuraEnabled
         public Boolean isIntegrated  { get; set; }
+        @AuraEnabled
+        public String orgFolder { get; set; }
     }
 
     /**
     * Method Name : getS3ConfigSettings
-    * @return AWS_Config__c details
-    * @description : Used to return the AWS_Config__c custom setting record.
+    * @return MVEX__AWS_Config__c details
+    * @description : Used to return the MVEX__AWS_Config__c custom setting record.
     */
     @AuraEnabled
     public static AWSWrapper getS3ConfigSettings(){
@@ -188,11 +194,23 @@ public with sharing class ImageAndMediaController {
 
             newWrap.isIntegrated = awsCredential.MVEX__AWS_Access_Key__c != null && awsCredential.MVEX__AWS_Secret_Access_Key__c != null && awsCredential.MVEX__S3_Bucket_Name__c != null && awsCredential.MVEX__S3_Region_Name__c != null;
 
+            String orgId = UserInfo.getOrganizationId();
+            String orgName = '';
+            try {
+                Organization org = [SELECT Id, Name FROM Organization LIMIT 1];
+                if (org != null && String.isNotBlank(org.Name)) {
+                    orgName = org.Name.replaceAll('[^a-zA-Z0-9]', '_').replaceAll('_+', '_').replaceAll('^_|_$', '');
+                }
+            } catch (Exception orgEx) {
+                // fallback if organization query fails
+            }
+            newWrap.orgFolder = (String.isNotBlank(orgName) ? orgName + '_' : '') + orgId;
+
             newWrap.status = true;
 
             return newWrap;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'getS3ConfigSettings', 'Error while getting AWS_Config__c record.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'getS3ConfigSettings', 'Error while getting MVEX__AWS_Config__c record.');
             newWrap.contentVersionData = e.getMessage();
             newWrap.status = false;
             return newWrap;
@@ -202,9 +220,9 @@ public with sharing class ImageAndMediaController {
 
     /**
     * Method Name : updatePropertyFileRecords
-    * @param itemsToUpdate to stored the Property_File__c records
+    * @param itemsToUpdate to stored the MVEX__Property_File__c records
     * @return String value
-    * @description : Used to update the Property_File__c records.
+    * @description : Used to update the MVEX__Property_File__c records.
     */
     @AuraEnabled
     public static String updatePropertyFileRecords(List<Map<String, Object>> itemsToUpdate) {
@@ -229,7 +247,7 @@ public with sharing class ImageAndMediaController {
 
             return 'success';
         }catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'updatePropertyFileRecords', 'Error while updating Property_File__c records.');
+            ErrorHandler.insertErrorData(e, 'ImageAndMediaController', 'updatePropertyFileRecords', 'Error while updating MVEX__Property_File__c records.');
             return 'error' + e.getMessage() + e.getLineNumber();
         }
     }

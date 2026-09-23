@@ -10,23 +10,23 @@ public with sharing class RightmoveJSONController {
     /**
     * Method Name : buildJSON
     * @param fieldMap - Map<String, Object>
-    * @param mediaList - List<Property_File__c>
+    * @param mediaList - List<MVEX__Property_File__c>
     * @return String
     * @description : Used to build JSON for Rightmove.
     */
-    public static String buildJSON(Map<String, Object> fieldMap, List<Property_File__c> mediaList, String portalName) {
+    public static String buildJSON(Map<String, Object> fieldMap, List<MVEX__Property_File__c> mediaList, String portalName) {
         try {
             String escapedPortalName = String.escapeSingleQuotes(portalName);
 
             Map<String, Object> jsonMap = new Map<String, Object>();
         
-            List<Portal_Listing_Mapping__c> portalListing = [SELECT Id, Name, Value_Mapping__c, Data_Type__c FROM Portal_Listing_Mapping__c WHERE Portal_Name__c =: escapedPortalName WITH USER_MODE];
+            List<MVEX__Portal_Listing_Mapping__c> portalListing = [SELECT Id, Name, MVEX__Value_Mapping__c, MVEX__Data_Type__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: escapedPortalName WITH USER_MODE];
 
             Map<String, String> valueMappingMap = new Map<String, String>();
             Map<String, String> dataTypeMap = new Map<String, String>();
-            for (Portal_Listing_Mapping__c mapping : portalListing) {
-                valueMappingMap.put(mapping.Name, mapping.Value_Mapping__c);
-                dataTypeMap.put(mapping.Name, mapping.Data_Type__c);
+            for (MVEX__Portal_Listing_Mapping__c mapping : portalListing) {
+                valueMappingMap.put(mapping.Name, mapping.MVEX__Value_Mapping__c);
+                dataTypeMap.put(mapping.Name, mapping.MVEX__Data_Type__c);
             }
         
             for (String fieldName : fieldMap.keySet()) {
@@ -37,7 +37,7 @@ public with sharing class RightmoveJSONController {
             }
 
             List<Map<String, Object>> mediaContent = new List<Map<String, Object>>();
-            for (Property_File__c mediaItem : mediaList) {
+            for (MVEX__Property_File__c mediaItem : mediaList) {
                 Map<String, Object> mediaMap = new Map<String, Object>();
                 Datetime lastModifiedDatetime = mediaItem.LastModifiedDate;
                 String lastModifiedDate = lastModifiedDatetime.format('yyyy-MM-dd HH:mm:ss');
@@ -47,8 +47,8 @@ public with sharing class RightmoveJSONController {
                 String[] dateParts = dateTimeParts[0].split('-');
                 String formattedLastModifiedDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0] + ' ' + dateTimeParts[1];
                 
-                String mediaURL = String.isNotBlank(mediaItem.ExternalLink__c) ? mediaItem.ExternalLink__c : mediaItem.BaseUrl__c;
-                Integer mediaType = String.isNotBlank(mediaItem.Tags__c) ? urlType(mediaItem.Tags__c) : 1;
+                String mediaURL = String.isNotBlank(mediaItem.MVEX__ExternalLink__c) ? mediaItem.MVEX__ExternalLink__c : mediaItem.MVEX__BaseUrl__c;
+                Integer mediaType = String.isNotBlank(mediaItem.MVEX__Tags__c) ? urlType(mediaItem.MVEX__Tags__c) : 1;
                 mediaMap.put('media_type', mediaType);
                 mediaMap.put('media_url', mediaURL);
                 mediaMap.put('media_update_date', formattedLastModifiedDate);

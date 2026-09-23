@@ -124,41 +124,12 @@ public with sharing class EmailCampaignScheduler {
                 if (!emailMembersToUpdate.isEmpty()) {
                     update as user emailMembersToUpdate.values();
                 }
-                
-                // Recalculate campaign counts
-                for (String campaignId : campaignIds) {
-                    if (campaignMap.get(campaignId).Schedule_Type__c == 'Contact Field') {
-                        EmailCampaignController.recalculateCampaignCounts(campaignId);
-                    }
-                }
+
             } catch (Exception e) {
                 System.debug('Error in Schedular');
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'EmailCampaignScheduler', 'sendEmails', 'Error while sending mails');
-        }
-    }
-    
-    /**
-     * Method Name: parseEmailAddresses
-     * Date: 23/07/2024
-     * Created By: Rachit Shah
-     * @description: Gets email addresses from the campaign data.
-     */
-    public static List<String> parseEmailAddresses(String addresses) {
-        try {
-            List<String> emailList = new List<String>();
-            List<String> addressPairs = addresses.split('@@@');
-            for (String pair : addressPairs) {
-                List<String> parts = pair.split(':');
-                if (parts.size() == 2) {
-                    emailList.add(parts[1]);
-                }
-            }
-            return emailList;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'EmailCampaignScheduler', 'parseEmailAddresses', 'Error while parsing mails');
-            return null;
         }
     }
     

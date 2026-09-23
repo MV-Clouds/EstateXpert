@@ -585,6 +585,9 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     */
     deletePair(event) {
         try {
+            if (this.isAutoSyncEnabled) {
+                return;
+            }
             const index = event.currentTarget.dataset.id;
             this.dropDownPairs.splice(index, 1);
             this.filterAndUpdateListingOptions();

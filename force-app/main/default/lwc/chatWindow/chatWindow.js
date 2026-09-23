@@ -14,7 +14,6 @@ import emojiData from '@salesforce/resourceUrl/emojis_data';
 import NoPreviewAvailable from '@salesforce/resourceUrl/NoPreviewAvailable';
 import whatsappAudioIcon from '@salesforce/resourceUrl/whatsAppAudioIcon';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
-import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { NavigationMixin } from 'lightning/navigation';
 import { loadScript } from 'lightning/platformResourceLoader';

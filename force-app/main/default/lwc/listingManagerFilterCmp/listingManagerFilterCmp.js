@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
 import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
 import getPicklistValues from '@salesforce/apex/ListingManagerFilterController.getPicklistValues';
@@ -473,27 +473,110 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 finalQuery = 'TRUE';
             }
 
-            console.log('Final Query:', finalQuery); // Debug the final query string
-            this.isLoading = true;
-            this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+            if (!isSilent) {
+                this.isLoading = true;
+                this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+            }
             getFilteredListings({ filterConditions: finalQuery })
                 .then(result => {
                     this.filteredListings = result;
                     this.setFilteredListings();
-                    this.isLoading = false;
-                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                    if (!isSilent) {
+                        this.isLoading = false;
+                        this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                    }
                 })
                 .catch(error => {
                     errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
-                    this.isLoading = false;
-                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                    if (!isSilent) {
+                        this.isLoading = false;
+                        this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                    }
                 });
 
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
-            this.isLoading = false;
-            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+            if (!isSilent) {
+                this.isLoading = false;
+                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+            }
         }
+    }
+
+    /**
+     * Method Name: reapplyFilters
+     * @description: Public method to reapply filters programmatically from parent
+     */
+    @api
+    reapplyFilters(isSilent = false) {
+        this.applyFilters(isSilent);
+    }
+
+    /**
+     * Method Name: hasActiveFilters
+     * @description: Check if there are active applied filters
+     */
+    @api
+    hasActiveFilters() {
+        return this.getAppliedFilterDetails().length > 0;
+    }
+
+    /**
+     * Method Name: getAppliedFilterDetails
+     * @description: Returns an array of human-readable active filter objects.
+     */
+    getAppliedFilterDetails() {
+        let applied = [];
+        if (this.filterFields && this.filterFields.length > 0) {
+            this.filterFields.forEach((field, index) => {
+                const hasSelectedOptions = field.selectedOptions && field.selectedOptions.length > 0;
+                const hasMinValue = field.minValue != null && field.minValue !== '' && !isNaN(parseFloat(field.minValue));
+                const hasMaxValue = field.maxValue != null && field.maxValue !== '' && !isNaN(parseFloat(field.maxValue));
+                const hasMinDate = field.minDate != null && field.minDate !== '';
+                const hasMaxDate = field.maxDate != null && field.maxDate !== '';
+                const hasFieldChecked = field.fieldChecked === true;
+
+                if (hasSelectedOptions) {
+                    const values = field.selectedOptions.map(opt => opt.label || opt.value).join(', ');
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: values,
+                        displayText: `${field.label || 'Filter'}: ${values}`
+                    });
+                } else if (hasMinValue || hasMaxValue) {
+                    let rangeVal = '';
+                    if (hasMinValue && hasMaxValue) rangeVal = `${field.minValue} - ${field.maxValue}`;
+                    else if (hasMinValue) rangeVal = `>= ${field.minValue}`;
+                    else rangeVal = `<= ${field.maxValue}`;
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: rangeVal,
+                        displayText: `${field.label || 'Filter'}: ${rangeVal}`
+                    });
+                } else if (hasMinDate || hasMaxDate) {
+                    let dateVal = '';
+                    if (hasMinDate && hasMaxDate) dateVal = `${field.minDate} to ${field.maxDate}`;
+                    else if (hasMinDate) dateVal = `From ${field.minDate}`;
+                    else dateVal = `Until ${field.maxDate}`;
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: dateVal,
+                        displayText: `${field.label || 'Filter'}: ${dateVal}`
+                    });
+                } else if (hasFieldChecked) {
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: 'Yes',
+                        displayText: `${field.label || 'Filter'}: Yes`
+                    });
+                }
+            });
+        }
+        return applied;
     }
 
     /**
@@ -504,8 +587,9 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     setFilteredListings() {
         const filterlistings = this.filteredListings;
+        const appliedFilters = this.getAppliedFilterDetails();
         const customEvent = new CustomEvent('valueselected', {
-            detail: { filterlistings }
+            detail: { filterlistings, appliedFilters }
         });
         this.dispatchEvent(customEvent);
     }
@@ -518,8 +602,9 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     setFilteredListingsReset() {
         const filterlistings = true;
+        const appliedFilters = this.getAppliedFilterDetails();
         const customEvent = new CustomEvent('valuereset', {
-            detail: { filterlistings }
+            detail: { filterlistings, appliedFilters }
         });
         this.dispatchEvent(customEvent);
     }

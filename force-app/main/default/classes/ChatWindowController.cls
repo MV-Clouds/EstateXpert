@@ -20,7 +20,7 @@ public with sharing class ChatWindowController {
     */
     /* ---------------- Start ---------------- */
     public static MVEX__WhatsAppConfig__c wbConfig = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
-    public static List<MVEX__User_Theme_Preference__c> userPreferences = [SELECT MVEX__Theme__c FROM MVEX__User_Theme_Preference__c WHERE SetupOwnerId =: UserInfo.getUserId() WITH USER_MODE LIMIT 1];
+    public static List<User_Theme_Preference__c> userPreferences = [SELECT Theme__c FROM User_Theme_Preference__c WHERE SetupOwnerId =: UserInfo.getUserId() WITH USER_MODE LIMIT 1];
     /* ----------------  End  ---------------- */
     
     @AuraEnabled
@@ -84,9 +84,9 @@ public with sharing class ChatWindowController {
                 phoneSet.add((String) rec.get(phoneField));
             }
     
-            // Get last chat time per phone from Chat__c
+            // Get last chat time per phone from MVEX__Chat__c
             Map<String, DateTime> phoneToLastChat = new Map<String, DateTime>();
-            List<AggregateResult> chatAgg = [SELECT Phone__c, MAX(CreatedDate) maxDate FROM Chat__c WHERE Phone__c IN :phoneSet GROUP BY Phone__c];
+            List<AggregateResult> chatAgg = [SELECT MVEX__Phone__c, MAX(CreatedDate) maxDate FROM MVEX__Chat__c WHERE MVEX__Phone__c IN :phoneSet GROUP BY MVEX__Phone__c];
     
             for (AggregateResult ar : chatAgg) {
                 phoneToLastChat.put((String)ar.get('MVEX__Phone__c'), (DateTime)ar.get('maxDate'));
@@ -94,7 +94,7 @@ public with sharing class ChatWindowController {
     
             // Get count of unread outbound messages per phone
             Map<String, Integer> phoneToUnreadOutboundCount = new Map<String, Integer>();
-            List<AggregateResult> unreadOutboundAgg = [ SELECT Phone__c, COUNT(Id) countId FROM Chat__c WHERE Phone__c IN :phoneSet AND Message_Status__c != 'Seen' AND Type_of_Message__c = 'Inbound Messages' GROUP BY Phone__c];
+            List<AggregateResult> unreadOutboundAgg = [ SELECT MVEX__Phone__c, COUNT(Id) countId FROM MVEX__Chat__c WHERE MVEX__Phone__c IN :phoneSet AND MVEX__Message_Status__c != 'Seen' AND MVEX__Type_of_Message__c = 'Inbound Messages' GROUP BY MVEX__Phone__c];
     
             for (AggregateResult ar : unreadOutboundAgg) {
                 phoneToUnreadOutboundCount.put((String)ar.get('MVEX__Phone__c'), (Integer)ar.get('countId'));
@@ -155,11 +155,11 @@ public with sharing class ChatWindowController {
 
         Map<String, Object> combinedData = new Map<String, Object>();
         try {
-            List<Chat__c> chats = new List<Chat__c>();
-            List<WhatsappTemplate__c> templates = new List<WhatsappTemplate__c>();
+            List<MVEX__Chat__c> chats = new List<MVEX__Chat__c>();
+            List<MVEX__WhatsappTemplate__c> templates = new List<MVEX__WhatsappTemplate__c>();
             // Contact recordData = new Contact();
-            MVEX__User_Theme_Preference__c userPreference = !userPreferences.isEmpty() ? userPreferences[0] : null;
-            String theme = userPreference != null && userPreference.MVEX__Theme__c != null ? userPreference.MVEX__Theme__c : 'light'; // Default to Light
+            User_Theme_Preference__c userPreference = !userPreferences.isEmpty() ? userPreferences[0] : null;
+            String theme = userPreference != null && userPreference.Theme__c != null ? userPreference.Theme__c : 'light'; // Default to Light
 
             // Fetch metadata record from Object_Config__mdt
             List<MVEX__Object_Config__mdt> objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
@@ -198,20 +198,20 @@ public with sharing class ChatWindowController {
                 phoneNumber = (String) recordData.get(phoneField);
                 recordName = (String) recordData.get(nameField);
             }
-            chats = [SELECT Id, Type_of_Message__c, WhatsAppMessageId__c, Message__c, Message_Status__c, Message_Type__c, Reply_To__c, Reaction__c, WhatsappTemplate__c, WhatsappTemplate__r.Template_Name__c, CreatedDate, Last_Interaction_Date__c, Phone__c, File_Data__c FROM Chat__c WHERE Phone__c =:phoneNumber WITH USER_MODE ORDER BY CreatedDate asc];
-            //templates = [SELECT Id, Template_Name__c FROM Template__c WHERE Status__c = 'Active-Quality Pending' WITH USER_MODE ORDER BY LastModifiedDate desc];
+            chats = [SELECT Id, MVEX__Type_of_Message__c, MVEX__WhatsAppMessageId__c, MVEX__Message__c, MVEX__Message_Status__c, MVEX__Message_Type__c, MVEX__Reply_To__c, MVEX__Reaction__c, MVEX__WhatsappTemplate__c, MVEX__WhatsappTemplate__r.MVEX__Template_Name__c, CreatedDate, MVEX__Last_Interaction_Date__c, MVEX__Phone__c, MVEX__File_Data__c FROM MVEX__Chat__c WHERE MVEX__Phone__c =:phoneNumber WITH USER_MODE ORDER BY CreatedDate asc];
+            //templates = [SELECT Id, MVEX__Template_Name__c FROM Template__c WHERE MVEX__Status__c = 'Active-Quality Pending' WITH USER_MODE ORDER BY LastModifiedDate desc];
             // Step 1: Get template IDs with matching child variables
             Set<Id> matchingTemplateIds = new Set<Id>();
             Map<Id, Set<String>> templateIdToObjectNames = new Map<Id, Set<String>>();
-            for (Template_Variable__c tv : [
-                SELECT WhatsappTemplate__c, Object_Name__c
-                FROM Template_Variable__c
-                WHERE WhatsappTemplate__r.Status__c = 'Active-Quality Pending'
+            for (MVEX__Template_Variable__c tv : [
+                SELECT MVEX__WhatsappTemplate__c, MVEX__Object_Name__c
+                FROM MVEX__Template_Variable__c
+                WHERE MVEX__WhatsappTemplate__r.MVEX__Status__c = 'Active-Quality Pending'
             ]) {
-                if (!templateIdToObjectNames.containsKey(tv.WhatsappTemplate__c)) {
-                    templateIdToObjectNames.put(tv.WhatsappTemplate__c, new Set<String>());
+                if (!templateIdToObjectNames.containsKey(tv.MVEX__WhatsappTemplate__c)) {
+                    templateIdToObjectNames.put(tv.MVEX__WhatsappTemplate__c, new Set<String>());
                 }
-                templateIdToObjectNames.get(tv.WhatsappTemplate__c).add(tv.Object_Name__c);
+                templateIdToObjectNames.get(tv.MVEX__WhatsappTemplate__c).add(tv.MVEX__Object_Name__c);
             }
 
             for (Id templateId : templateIdToObjectNames.keySet()) {
@@ -224,23 +224,23 @@ public with sharing class ChatWindowController {
             // Step 2: Fetch templates with matching child variables
             if (!matchingTemplateIds.isEmpty()) {
                 templates.addAll(
-                    [SELECT Id, Name, Template_Name__c, Template_Type__c FROM WhatsappTemplate__c WHERE Id IN :matchingTemplateIds WITH USER_MODE ORDER BY LastModifiedDate DESC
+                    [SELECT Id, Name, MVEX__Template_Name__c, MVEX__Template_Type__c FROM MVEX__WhatsappTemplate__c WHERE Id IN :matchingTemplateIds WITH USER_MODE ORDER BY LastModifiedDate DESC
                 ]);
             }
 
             // Step 3: Fetch templates that have **no** child variables
-            List<WhatsappTemplate__c> templatesWithoutVariables = [SELECT Id, Name, Template_Name__c, Template_Type__c FROM WhatsappTemplate__c WHERE Status__c = 'Active-Quality Pending' AND Id NOT IN (SELECT WhatsappTemplate__c FROM Template_Variable__c) WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            List<MVEX__WhatsappTemplate__c> templatesWithoutVariables = [SELECT Id, Name, MVEX__Template_Name__c, MVEX__Template_Type__c FROM MVEX__WhatsappTemplate__c WHERE MVEX__Status__c = 'Active-Quality Pending' AND Id NOT IN (SELECT MVEX__WhatsappTemplate__c FROM MVEX__Template_Variable__c) WITH USER_MODE ORDER BY LastModifiedDate DESC];
 
             // Step 3.1: Always include all Interactive Message templates.
-            List<WhatsappTemplate__c> interactiveTemplates = [SELECT Id, Name, Template_Name__c, Template_Type__c FROM WhatsappTemplate__c WITH USER_MODE ORDER BY LastModifiedDate DESC];
+            List<MVEX__WhatsappTemplate__c> interactiveTemplates = [SELECT Id, Name, MVEX__Template_Name__c, MVEX__Template_Type__c FROM MVEX__WhatsappTemplate__c WITH USER_MODE ORDER BY LastModifiedDate DESC];
 
             // Step 4: Combine results
             templates.addAll(templatesWithoutVariables);
             templates.addAll(interactiveTemplates);
 
             // Step 5: Deduplicate templates merged from multiple sources
-            Map<Id, WhatsappTemplate__c> templateById = new Map<Id, WhatsappTemplate__c>();
-            for (WhatsappTemplate__c t : templates) {
+            Map<Id, MVEX__WhatsappTemplate__c> templateById = new Map<Id, MVEX__WhatsappTemplate__c>();
+            for (MVEX__WhatsappTemplate__c t : templates) {
                 templateById.put(t.Id, t);
             }
             templates = templateById.values();
@@ -261,11 +261,11 @@ public with sharing class ChatWindowController {
     *********************************************************
     @description     : Method is used to create a new chat message
     @param           : chatData - {Map<String, String>} - Map containing all the data to create a new chat
-    @return          : chat - {Chat__c} - the newly created chat
+    @return          : chat - {MVEX__Chat__c} - the newly created chat
     ********************************************************
     */
     @AuraEnabled
-    public static Chat__c createChat(Map<String, String> chatData ){
+    public static MVEX__Chat__c createChat(Map<String, String> chatData ){
         try {
 
             String message = chatData.get('message');
@@ -276,15 +276,15 @@ public with sharing class ChatWindowController {
             String phoneNumber = chatData.get('phoneNumber');
             String objectName = chatData.get('objectName');
 
-            Chat__c chat = new Chat__c();
-            chat.Message__c = message;
-            chat.WhatsappTemplate__c = templateId;
-            chat.Phone__c = phoneNumber;
-            chat.Type_of_Message__c	= 'OutBound Messages';
-            chat.Message_Status__c = null;
-            chat.Message_Type__c = messageType;
-            chat.Reply_To__c = replyToChatId;
-            chat.Object_Name__c = objectName;
+            MVEX__Chat__c chat = new MVEX__Chat__c();
+            chat.MVEX__Message__c = message;
+            chat.MVEX__WhatsappTemplate__c = templateId;
+            chat.MVEX__Phone__c = phoneNumber;
+            chat.MVEX__Type_of_Message__c	= 'OutBound Messages';
+            chat.MVEX__Message_Status__c = null;
+            chat.MVEX__Message_Type__c = messageType;
+            chat.MVEX__Reply_To__c = replyToChatId;
+            chat.MVEX__Object_Name__c = objectName;
 
             if(messageType == 'Image' || messageType == 'Document' || messageType == 'Video' || messageType == 'Audio'){
                 List<ContentVersion> cv = [SELECT Id, ContentSize, Title, ContentDocumentId FROM ContentVersion WHERE Id =: message WITH USER_MODE];
@@ -304,12 +304,12 @@ public with sharing class ChatWindowController {
                 cd.PreferencesAllowOriginalDownload= true;
                 insert as user cd;
 
-                chat.Message__c = [SELECT ContentDownloadUrl FROM ContentDistribution WHERE Id=:cd.Id WITH USER_MODE].ContentDownloadUrl;
+                chat.MVEX__Message__c = [SELECT ContentDownloadUrl FROM ContentDistribution WHERE Id=:cd.Id WITH USER_MODE].ContentDownloadUrl;
                 Map<String, Object> fileData = new Map<String, Object>{ 'fileName' => cv[0].Title, 'documentId' => cv[0].ContentDocumentId, 'contentVersionId' => message };
-                chat.File_Data__c = JSON.serialize(fileData);
+                chat.MVEX__File_Data__c = JSON.serialize(fileData);
             }
             insert as user chat;
-            chat = [SELECT Id, Type_of_Message__c, WhatsAppMessageId__c, Message__c, Message_Status__c, Message_Type__c, Reply_To__c, Reaction__c, WhatsappTemplate__c, WhatsappTemplate__r.Template_Name__c, CreatedDate, Last_Interaction_Date__c, File_Data__c FROM Chat__c WHERE Id =:chat.Id WITH USER_MODE];
+            chat = [SELECT Id, MVEX__Type_of_Message__c, MVEX__WhatsAppMessageId__c, MVEX__Message__c, MVEX__Message_Status__c, MVEX__Message_Type__c, MVEX__Reply_To__c, MVEX__Reaction__c, MVEX__WhatsappTemplate__c, MVEX__WhatsappTemplate__r.MVEX__Template_Name__c, CreatedDate, MVEX__Last_Interaction_Date__c, MVEX__File_Data__c FROM MVEX__Chat__c WHERE Id =:chat.Id WITH USER_MODE];
             return chat;
         } catch (Exception e) {
             if(e.getMessage().contains('STORAGE_LIMIT_EXCEEDED')){
@@ -327,15 +327,15 @@ public with sharing class ChatWindowController {
     @description     : Method is used to update the reaction of any chat message
     @param           : chatId - {String} - Id of the chat to update
     @param           : reaction - {String} - reaction to be updated
-    @return          : chat - {Chat__c} - the updated chat
+    @return          : chat - {MVEX__Chat__c} - the updated chat
     ********************************************************
     */
     @AuraEnabled
-    public static Chat__c updateReaction(String chatId, String reaction){
+    public static MVEX__Chat__c updateReaction(String chatId, String reaction){
         try{
-            Chat__c chat = new Chat__c();
+            MVEX__Chat__c chat = new MVEX__Chat__c();
             chat.Id = chatId;
-            chat.Reaction__c = reaction;
+            chat.MVEX__Reaction__c = reaction;
             update as user chat;
             return chat;
         }catch(Exception e){
@@ -355,13 +355,13 @@ public with sharing class ChatWindowController {
     public static Boolean updateThemePreference(String theme) {
         Boolean isSuccess = false;
         try {
-            MVEX__User_Theme_Preference__c userPreference = new MVEX__User_Theme_Preference__c();
+            User_Theme_Preference__c userPreference = new User_Theme_Preference__c();
             if (userPreferences.isEmpty()) {
                 userPreference.SetupOwnerId = UserInfo.getUserId();
             }else{
                 userPreference = userPreferences[0];
             }
-            userPreference.MVEX__Theme__c = theme;
+            userPreference.Theme__c = theme;
             upsert as User userPreference;
             isSuccess = true;
         } catch (Exception e) {
@@ -383,16 +383,16 @@ public with sharing class ChatWindowController {
     @AuraEnabled
     public static Map<String, Object> sendWhatsappMessage(String jsonData, String chatId, Boolean isReaction, String reaction) {
         Map<String, Object> resultMap = new Map<String, Object>{};
-        Chat__c chat = new Chat__c(Id = chatId);
+        MVEX__Chat__c chat = new MVEX__Chat__c(Id = chatId);
         try {
             HttpRequest httpReq = new HttpRequest();
             resultMap.put('errorMessage', null);
             // List<WBConnect_Configuration__mdt> wbConfig = WBConnect_Configuration__mdt.getAll().values(); 
             if(wbConfig==null){
                 if(!isReaction){
-                    chat.Message_Status__c = 'Failed';
+                    chat.MVEX__Message_Status__c = 'Failed';
                 }else{
-                    chat.Reaction__c = '<|USER|>' + reaction.substringAfter('<|USER|>');
+                    chat.MVEX__Reaction__c = '<|USER|>' + reaction.substringAfter('<|USER|>');
                 }
                 update as user chat;
                 resultMap.put('errorMessage', 'CUSTOM_SETTING_ERROR');
@@ -420,13 +420,13 @@ public with sharing class ChatWindowController {
                 System.debug('WhatsApp Message ID: ' + whatsAppMessageID);
                 // Update the chat record
                 if(!isReaction){
-                    chat.WhatsAppMessageId__c = whatsAppMessageID;
-                    chat.Message_Status__c = 'Sent';
+                    chat.MVEX__WhatsAppMessageId__c = whatsAppMessageID;
+                    chat.MVEX__Message_Status__c = 'Sent';
                 }
             }else{
                 System.debug('Error sending WhatsApp Message: '+response.getBody());
                 if(!isReaction){
-                    chat.Message_Status__c = 'Failed';
+                    chat.MVEX__Message_Status__c = 'Failed';
                 }
                 ErrorHandler.insertErrordata(null, 'ChatWindowController', 'sendWhatsappMessage', 'API Exception while sending a message and error at line 441');
             }
@@ -441,22 +441,22 @@ public with sharing class ChatWindowController {
                 if (templateMap != null && templateMap.containsKey('components')) {
                     List<Object> componentsList = (List<Object>) templateMap.get('components');
                     String componentsJsonString = JSON.serialize(componentsList);
-                    chat.Sent_Template_Details__c = componentsJsonString;
+                    chat.MVEX__Sent_Template_Details__c = componentsJsonString;
                 }
             } else if (jsonMap.containsKey('interactive')) {
                 // Interactive message – store the full payload JSON used for send
                 // so that the TemplatePreview LWC can render an accurate preview
-                chat.Sent_Template_Details__c = jsonData;
+                chat.MVEX__Sent_Template_Details__c = jsonData;
             }
 
             update as user chat;
-            chat = [SELECT Id, Type_of_Message__c, WhatsAppMessageId__c, Message__c, Message_Status__c, Message_Type__c, Reply_To__c, Reaction__c, WhatsappTemplate__c, WhatsappTemplate__r.Template_Name__c, CreatedDate, Last_Interaction_Date__c FROM Chat__c WHERE Id =:chat.Id WITH USER_MODE];
+            chat = [SELECT Id, MVEX__Type_of_Message__c, MVEX__WhatsAppMessageId__c, MVEX__Message__c, MVEX__Message_Status__c, MVEX__Message_Type__c, MVEX__Reply_To__c, MVEX__Reaction__c, MVEX__WhatsappTemplate__c, MVEX__WhatsappTemplate__r.MVEX__Template_Name__c, CreatedDate, MVEX__Last_Interaction_Date__c FROM MVEX__Chat__c WHERE Id =:chat.Id WITH USER_MODE];
             resultMap.put('chat', chat);
             return resultMap;
 
         } catch (Exception e) {
             if(!isReaction){
-                chat.Message_Status__c = 'Failed';
+                chat.MVEX__Message_Status__c = 'Failed';
                 update as user chat;
             }
             ErrorHandler.insertErrordata(e, 'ChatWindowController', 'sendWhatsappMessage', e.getMessage());
@@ -477,34 +477,37 @@ public with sharing class ChatWindowController {
     public static Map<String, object> getTemplateData(String templateId, String contactId, String objectApiName){
         try {
             Map<String, Object> templateData = new Map<String, Object>();
-            List<WhatsappTemplate__c> templates = new List<WhatsappTemplate__c>();
+            List<MVEX__WhatsappTemplate__c> templates = new List<MVEX__WhatsappTemplate__c>();
             Set<Id> matchingTemplateIds = new Set<Id>();
-            for (Template_Variable__c tv : [SELECT WhatsappTemplate__c FROM Template_Variable__c WHERE Object_Name__c = :objectApiName WITH USER_MODE]) {
-                matchingTemplateIds.add(tv.WhatsappTemplate__c);
+            for (MVEX__Template_Variable__c tv : [SELECT MVEX__WhatsappTemplate__c FROM MVEX__Template_Variable__c WHERE MVEX__Object_Name__c = :objectApiName WITH USER_MODE]) {
+                matchingTemplateIds.add(tv.MVEX__WhatsappTemplate__c);
             }
 
             // Fetch template details
             if (!matchingTemplateIds.isEmpty()) {
-                templates.addAll([
-                    SELECT Id, Template_Name__c, Template_Miscellaneous_Data__c, WBButton_Body__c, Button_Label__c, Button_Type__c, WBFooter_Body__c, WBHeader_Body__c, Header_Type__c, Language__c, WBTemplate_Body__c, Template_Category__c, Template_SubCatagory__c, Template_Type__c, Template_Variable__c,
-                        (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WB_Template_Variables__r) FROM WhatsappTemplate__c WHERE Id = :templateId AND Id IN :matchingTemplateIds WITH USER_MODE
-                ]);
+                templates.addAll([SELECT Id, MVEX__Template_Name__c, MVEX__Template_Miscellaneous_Data__c, MVEX__WBButton_Body__c, MVEX__Button_Label__c, 
+                                    MVEX__Button_Type__c, MVEX__WBFooter_Body__c, MVEX__WBHeader_Body__c, MVEX__Header_Type__c, MVEX__Language__c, 
+                                    MVEX__WBTemplate_Body__c, MVEX__Template_Category__c, MVEX__Template_SubCatagory__c, MVEX__Template_Type__c, 
+                                    MVEX__Template_Variable__c, (SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Type__c, MVEX__Alternate_Text__c FROM 
+                                    MVEX__WB_Template_Variables__r) FROM MVEX__WhatsappTemplate__c WHERE Id = :templateId AND Id IN :matchingTemplateIds WITH USER_MODE]);
             }
 
             // Fetch templates without child variables
-            List<WhatsappTemplate__c> templatesWithoutVariables = [
-                SELECT Id, Template_Name__c, Template_Miscellaneous_Data__c, WBButton_Body__c, Button_Label__c, Button_Type__c, WBFooter_Body__c, WBHeader_Body__c, Header_Type__c, Language__c, WBTemplate_Body__c, Template_Category__c, Template_SubCatagory__c, Template_Type__c, Template_Variable__c,
-                    (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WB_Template_Variables__r) FROM WhatsappTemplate__c WHERE Id = :templateId WITH USER_MODE
-            ];
+            List<MVEX__WhatsappTemplate__c> templatesWithoutVariables = [SELECT Id, MVEX__Template_Name__c, MVEX__Template_Miscellaneous_Data__c, MVEX__WBButton_Body__c, 
+                                                                            MVEX__Button_Label__c, MVEX__Button_Type__c, MVEX__WBFooter_Body__c, MVEX__WBHeader_Body__c, 
+                                                                            MVEX__Header_Type__c, MVEX__Language__c, MVEX__WBTemplate_Body__c, MVEX__Template_Category__c, 
+                                                                            MVEX__Template_SubCatagory__c, MVEX__Template_Type__c, MVEX__Template_Variable__c,
+                                                                            (SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Type__c, MVEX__Alternate_Text__c FROM 
+                                                                            MVEX__WB_Template_Variables__r) FROM MVEX__WhatsappTemplate__c WHERE Id = :templateId WITH USER_MODE];
             templates.addAll(templatesWithoutVariables);
 
-            if(templates.size() > 0 && templates[0].Template_Variable__c>0){
-                WhatsappTemplate__c template= templates[0];
+            if(templates.size() > 0 && templates[0].MVEX__Template_Variable__c>0){
+                MVEX__WhatsappTemplate__c template= templates[0];
                 Set<String> fieldSelectionCause = new Set<String>();
-                for (Template_Variable__c tv : template.WB_Template_Variables__r) {
-                    // Field_Name__c can contain relationship fields like 'CreatedBy.Name' or simple fields like 'Name'
-                    if (String.isNotBlank(tv.Field_Name__c)) {
-                        fieldSelectionCause.add(tv.Field_Name__c);
+                for (MVEX__Template_Variable__c tv : template.MVEX__WB_Template_Variables__r) {
+                    // MVEX__Field_Name__c can contain relationship fields like 'CreatedBy.Name' or simple fields like 'Name'
+                    if (String.isNotBlank(tv.MVEX__Field_Name__c)) {
+                        fieldSelectionCause.add(tv.MVEX__Field_Name__c);
                     }
                 }
                 
@@ -519,26 +522,26 @@ public with sharing class ChatWindowController {
                 List<Object> bodyVariables = new List<Object>();
                 if(records.size() > 0){
                     sObject record = records[0];
-                    for (Template_Variable__c tv: template.WB_Template_Variables__r) {
+                    for (MVEX__Template_Variable__c tv: template.MVEX__WB_Template_Variables__r) {
                         // Use getFieldValue to support relationship fields like 'CreatedBy.Name'
-                        Object valueToReplace = getFieldValue(record, tv.Field_Name__c);
-                        if (tv.Type__c == 'Header') {
-                            headerVariables.add(valueToReplace != null ? valueToReplace.toString() : (tv.Alternate_Text__c!= null ? tv.Alternate_Text__c : ' '));
-                            template.WBHeader_Body__c = template.WBHeader_Body__c.replace(tv.Name , valueToReplace != null ? valueToReplace.toString() : (tv.Alternate_Text__c!= null ? tv.Alternate_Text__c : ' ') );
-                        }else if(tv.Type__c == 'Body'){
-                            bodyVariables.add(valueToReplace != null ? valueToReplace.toString() : (tv.Alternate_Text__c!= null ? tv.Alternate_Text__c : ' '));
-                            template.WBTemplate_Body__c = template.WBTemplate_Body__c.replace(tv.Name , valueToReplace != null ? valueToReplace.toString() : (tv.Alternate_Text__c!= null ? tv.Alternate_Text__c : ' ') );
+                        Object valueToReplace = getFieldValue(record, tv.MVEX__Field_Name__c);
+                        if (tv.MVEX__Type__c == 'Header') {
+                            headerVariables.add(valueToReplace != null ? valueToReplace.toString() : (tv.MVEX__Alternate_Text__c!= null ? tv.MVEX__Alternate_Text__c : ' '));
+                            template.MVEX__WBHeader_Body__c = template.MVEX__WBHeader_Body__c.replace(tv.Name , valueToReplace != null ? valueToReplace.toString() : (tv.MVEX__Alternate_Text__c!= null ? tv.MVEX__Alternate_Text__c : ' ') );
+                        }else if(tv.MVEX__Type__c == 'Body'){
+                            bodyVariables.add(valueToReplace != null ? valueToReplace.toString() : (tv.MVEX__Alternate_Text__c!= null ? tv.MVEX__Alternate_Text__c : ' '));
+                            template.MVEX__WBTemplate_Body__c = template.MVEX__WBTemplate_Body__c.replace(tv.Name , valueToReplace != null ? valueToReplace.toString() : (tv.MVEX__Alternate_Text__c!= null ? tv.MVEX__Alternate_Text__c : ' ') );
                         }
                     }
                 }
 
-                if (template.Header_Type__c == 'Image') {
+                if (template.MVEX__Header_Type__c == 'Image') {
                     templateData.put('isImageUrl', true);
                 }
-                else if (template.Header_Type__c == 'Video') {
+                else if (template.MVEX__Header_Type__c == 'Video') {
                     templateData.put('isImageUrl', true);
                 }
-                else if (template.Header_Type__c == 'Document') {
+                else if (template.MVEX__Header_Type__c == 'Document') {
                     templateData.put('isImageUrl', true);
                 }
 
@@ -547,15 +550,15 @@ public with sharing class ChatWindowController {
                 templateData.put('bodyParams', bodyVariables);
                 templateData.put('template', templates[0]);
                 return templateData;
-            } else if (templates.size() > 0 && templates[0].Template_Variable__c < 1){
-                WhatsappTemplate__c template = templates[0];
-                if (template.Header_Type__c == 'Image') {
+            } else if (templates.size() > 0 && templates[0].MVEX__Template_Variable__c < 1){
+                MVEX__WhatsappTemplate__c template = templates[0];
+                if (template.MVEX__Header_Type__c == 'Image') {
                     templateData.put('isImageUrl', true);
                 }
-                else if (template.Header_Type__c == 'Video') {
+                else if (template.MVEX__Header_Type__c == 'Video') {
                     templateData.put('isImageUrl', true);
                 }
-                else if (template.Header_Type__c == 'Document') {
+                else if (template.MVEX__Header_Type__c == 'Document') {
                     templateData.put('isImageUrl', true);
                 }
 
@@ -591,12 +594,12 @@ public with sharing class ChatWindowController {
                 return null;
             }
 
-            WhatsappTemplate__c template = (WhatsappTemplate__c)templateData.get('template');
-            if (template == null || String.isBlank(template.WBTemplate_Body__c)) {
+            MVEX__WhatsappTemplate__c template = (MVEX__WhatsappTemplate__c)templateData.get('template');
+            if (template == null || String.isBlank(template.MVEX__WBTemplate_Body__c)) {
                 return null;
             }
 
-            String payload = template.WBTemplate_Body__c;
+            String payload = template.MVEX__WBTemplate_Body__c;
 
             // Replace the recipient number placeholder, if present
             if (!String.isBlank(phoneNumber)) {
@@ -620,7 +623,7 @@ public with sharing class ChatWindowController {
     */
     @AuraEnabled
     public static Integer updateStatus(List<String> messageIds) {
-        List<Chat__c> chats = [SELECT Id, WhatsAppMessageId__c, Message_Status__c FROM Chat__c WHERE Id IN :messageIds WITH USER_MODE];
+        List<MVEX__Chat__c> chats = [SELECT Id, MVEX__WhatsAppMessageId__c, MVEX__Message_Status__c FROM MVEX__Chat__c WHERE Id IN :messageIds WITH USER_MODE];
         String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
         String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + wbConfig.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
         
@@ -629,16 +632,16 @@ public with sharing class ChatWindowController {
 
         try {
             // First, complete all callouts and collect errors
-            for (Chat__c chat : chats) {
+            for (MVEX__Chat__c chat : chats) {
                 // Skip messages without a valid WhatsApp Message ID
-                if (String.isBlank(chat.WhatsAppMessageId__c)) {
+                if (String.isBlank(chat.MVEX__WhatsAppMessageId__c)) {
                     continue;
                 }
                 
                 String payload = JSON.serialize(new Map<String, Object>{
                     'messaging_product' => 'whatsapp',
                     'status' => 'read',
-                    'message_id' => chat.WhatsAppMessageId__c
+                    'message_id' => chat.MVEX__WhatsAppMessageId__c
                 });
                 Http http = new Http();
                 HttpRequest request = new HttpRequest();
@@ -664,7 +667,7 @@ public with sharing class ChatWindowController {
                         'apiResponse' => response.getBody() 
                     });
                 } else {
-                    chat.Message_Status__c = 'Seen';
+                    chat.MVEX__Message_Status__c = 'Seen';
                     successCount++;
                 }
             }
@@ -690,11 +693,11 @@ public with sharing class ChatWindowController {
     *********************************************************
     @description     : Method is used to create a new chat message for the Files which are stored in AWS
     @param           : chatData - {Map<String, String>} - Map containing all the data to create a new chat
-    @return          : chat - {Chat__c} - the newly created chat
+    @return          : chat - {MVEX__Chat__c} - the newly created chat
     ********************************************************
     */
     @AuraEnabled
-    public static Chat__c createChatForAWSFiles(Map<String, String> chatData ){
+    public static MVEX__Chat__c createChatForAWSFiles(Map<String, String> chatData ){
         try {
 
             String message = chatData.get('message');
@@ -705,18 +708,18 @@ public with sharing class ChatWindowController {
             String replyToChatId = chatData.get('replyToChatId');
             String phoneNumber = chatData.get('phoneNumber');
 
-            Chat__c chat = new Chat__c();
-            chat.Message__c = message;
-            chat.Phone__c = phoneNumber;
-            chat.Type_of_Message__c	= 'OutBound Messages';
-            chat.Message_Status__c = null;
-            chat.Message_Type__c = messageType;
-            chat.Reply_To__c = replyToChatId;
+            MVEX__Chat__c chat = new MVEX__Chat__c();
+            chat.MVEX__Message__c = message;
+            chat.MVEX__Phone__c = phoneNumber;
+            chat.MVEX__Type_of_Message__c	= 'OutBound Messages';
+            chat.MVEX__Message_Status__c = null;
+            chat.MVEX__Message_Type__c = messageType;
+            chat.MVEX__Reply_To__c = replyToChatId;
             Map<String, Object> fileData = new Map<String, Object>{ 'fileName' => fileName, 'mimeType' => mimeType };
-            chat.File_Data__c = JSON.serialize(fileData);
+            chat.MVEX__File_Data__c = JSON.serialize(fileData);
 
             insert as user chat;
-            chat = [SELECT Id, Type_of_Message__c, WhatsAppMessageId__c, Message__c, Message_Status__c, Message_Type__c, Reply_To__c, Reaction__c, WhatsappTemplate__c, WhatsappTemplate__r.Template_Name__c, CreatedDate, Last_Interaction_Date__c, File_Data__c FROM Chat__c WHERE Id =:chat.Id WITH USER_MODE];
+            chat = [SELECT Id, MVEX__Type_of_Message__c, MVEX__WhatsAppMessageId__c, MVEX__Message__c, MVEX__Message_Status__c, MVEX__Message_Type__c, MVEX__Reply_To__c, MVEX__Reaction__c, MVEX__WhatsappTemplate__c, MVEX__WhatsappTemplate__r.MVEX__Template_Name__c, CreatedDate, MVEX__Last_Interaction_Date__c, MVEX__File_Data__c FROM MVEX__Chat__c WHERE Id =:chat.Id WITH USER_MODE];
 
             return chat;
         } catch (Exception e) {
@@ -737,9 +740,9 @@ public with sharing class ChatWindowController {
         try {
             Map<String, Object> templateData = new Map<String, Object>();
 
-            List<Chat__c> chatRecs = [SELECT Sent_Template_Details__c FROM Chat__c WHERE Id = :chatId WITH USER_MODE];
+            List<MVEX__Chat__c> chatRecs = [SELECT MVEX__Sent_Template_Details__c FROM MVEX__Chat__c WHERE Id = :chatId WITH USER_MODE];
             if(chatRecs.size() > 0){
-                String templateMergeDetails = chatRecs[0].Sent_Template_Details__c;
+                String templateMergeDetails = chatRecs[0].MVEX__Sent_Template_Details__c;
                 if(String.isNotBlank(templateMergeDetails)){
                     // Store just the raw JSON string so LWC doesn't need to navigate
                     // SObject field names (which vary by namespace context)
@@ -748,17 +751,23 @@ public with sharing class ChatWindowController {
                 }
             }
 
-            List<WhatsappTemplate__c> templates = [SELECT Id, Template_Name__c, WBButton_Body__c, Button_Label__c, Button_Type__c, WBFooter_Body__c, WBHeader_Body__c, Header_Type__c, Language__c, WBTemplate_Body__c, Template_Category__c, Template_SubCatagory__c, MVEX__Template_Miscellaneous_Data__c, Template_Type__c, Template_Variable__c, (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WB_Template_Variables__r) FROM WhatsappTemplate__c WHERE Id = :templateId WITH USER_MODE ORDER BY CreatedDate DESC];
+            List<MVEX__WhatsappTemplate__c> templates = [SELECT Id, MVEX__Template_Name__c, MVEX__WBButton_Body__c, MVEX__Button_Label__c, MVEX__Button_Type__c, 
+                                                            MVEX__WBFooter_Body__c, MVEX__WBHeader_Body__c, MVEX__Header_Type__c, MVEX__Language__c, 
+                                                            MVEX__WBTemplate_Body__c, MVEX__Template_Category__c, MVEX__Template_SubCatagory__c, 
+                                                            MVEX__Template_Miscellaneous_Data__c, MVEX__Template_Type__c, MVEX__Template_Variable__c, 
+                                                            (SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Type__c, MVEX__Alternate_Text__c FROM 
+                                                            MVEX__WB_Template_Variables__r) FROM MVEX__WhatsappTemplate__c WHERE Id = :templateId WITH USER_MODE 
+                                                            ORDER BY CreatedDate DESC];
 
             if(templates.size() > 0){
-                WhatsappTemplate__c template = templates[0];
-                if (template.Header_Type__c == 'Image') {
+                MVEX__WhatsappTemplate__c template = templates[0];
+                if (template.MVEX__Header_Type__c == 'Image') {
                     templateData.put('isImageUrl', true);
                 }
-                else if (template.Header_Type__c == 'Video') {
+                else if (template.MVEX__Header_Type__c == 'Video') {
                     templateData.put('isImageUrl', true);
                 }
-                else if (template.Header_Type__c == 'Document') {
+                else if (template.MVEX__Header_Type__c == 'Document') {
                     templateData.put('isImageUrl', true);
                 }
 
@@ -819,25 +828,25 @@ public with sharing class ChatWindowController {
                        template data has changed (insert, update, delete, undelete) so the
                        component can refresh its template list without re-fetching all chats.
     @param           : objectApiName - {String} - API name of the current record object
-    @return          : List<WhatsappTemplate__c> - List of available templates
+    @return          : List<MVEX__WhatsappTemplate__c> - List of available templates
     *********************************************************
     */
     @AuraEnabled
-    public static List<WhatsappTemplate__c> getTemplatesOnly(String objectApiName) {
+    public static List<MVEX__WhatsappTemplate__c> getTemplatesOnly(String objectApiName) {
         try {
             Set<Id> matchingTemplateIds = new Set<Id>();
             Set<Id> allTemplateIdsWithVariables = new Set<Id>();
             Map<Id, Set<String>> templateIdToObjectNames = new Map<Id, Set<String>>();
-            for (Template_Variable__c tv : [
-                SELECT WhatsappTemplate__c, Object_Name__c, WhatsappTemplate__r.Status__c
-                FROM Template_Variable__c
+            for (MVEX__Template_Variable__c tv : [
+                SELECT MVEX__WhatsappTemplate__c, MVEX__Object_Name__c, MVEX__WhatsappTemplate__r.MVEX__Status__c
+                FROM MVEX__Template_Variable__c
             ]) {
-                allTemplateIdsWithVariables.add(tv.WhatsappTemplate__c);
-                if (tv.WhatsappTemplate__r.Status__c == 'Active-Quality Pending') {
-                    if (!templateIdToObjectNames.containsKey(tv.WhatsappTemplate__c)) {
-                        templateIdToObjectNames.put(tv.WhatsappTemplate__c, new Set<String>());
+                allTemplateIdsWithVariables.add(tv.MVEX__WhatsappTemplate__c);
+                if (tv.MVEX__WhatsappTemplate__r.MVEX__Status__c == 'Active-Quality Pending') {
+                    if (!templateIdToObjectNames.containsKey(tv.MVEX__WhatsappTemplate__c)) {
+                        templateIdToObjectNames.put(tv.MVEX__WhatsappTemplate__c, new Set<String>());
                     }
-                    templateIdToObjectNames.get(tv.WhatsappTemplate__c).add(tv.Object_Name__c);
+                    templateIdToObjectNames.get(tv.MVEX__WhatsappTemplate__c).add(tv.MVEX__Object_Name__c);
                 }
             }
             for (Id templateId : templateIdToObjectNames.keySet()) {
@@ -848,17 +857,17 @@ public with sharing class ChatWindowController {
             }
 
             return [
-                SELECT Id, Name, Template_Name__c, Template_Type__c
-                FROM WhatsappTemplate__c
+                SELECT Id, Name, MVEX__Template_Name__c, MVEX__Template_Type__c
+                FROM MVEX__WhatsappTemplate__c
                 WHERE Id IN :matchingTemplateIds
-                   OR (Status__c = 'Active-Quality Pending' AND Id NOT IN :allTemplateIdsWithVariables)
-                   OR Template_Type__c = 'Interactive Message'
+                   OR (MVEX__Status__c = 'Active-Quality Pending' AND Id NOT IN :allTemplateIdsWithVariables)
+                   OR MVEX__Template_Type__c = 'Interactive Message'
                 WITH USER_MODE
                 ORDER BY LastModifiedDate DESC
             ];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ChatWindowController', 'getTemplatesOnly', e.getMessage());
-            return new List<WhatsappTemplate__c>();
+            return new List<MVEX__WhatsappTemplate__c>();
         }
     }
 

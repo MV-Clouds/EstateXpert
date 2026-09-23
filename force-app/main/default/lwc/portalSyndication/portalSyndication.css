@@ -335,11 +335,13 @@
 }
 
 .portal-syndication .blue-btn-css {
-    height: 34px;
-    min-height: 34px;
+    height: 30px;
+    min-height: 30px;
+    gap: 4px;
 }
 
 .portal-syndication .red-btn-css {
-    height: 34px;
-    min-height: 34px;
+    height: 30px;
+    min-height: 30px;
+    gap: 4px;
 }

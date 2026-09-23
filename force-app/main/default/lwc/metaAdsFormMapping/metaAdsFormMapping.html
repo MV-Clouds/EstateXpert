@@ -145,14 +145,9 @@
                     <div class="slds-modal__content modalbody" id="modal-content-id-1">
                         <div class="content_body" style="position: relative;">
 
-                            <!-- Spinner Overlay (covers entire body while loading) -->
+                            <!-- Spinner Overlay (covers entire screen while loading) -->
                             <template if:true={isModalLoading}>
-                                <div class="wizard-spinner-overlay">
-                                    <div class="wizard-spinner-wrap">
-                                        <div class="wizard-spinner"></div>
-                                        <span class="wizard-spinner-text">{spinnerLabel}</span>
-                                    </div>
-                                </div>
+                                <c-spinner-component></c-spinner-component>
                             </template>
 
                             <!-- Section 1: Select Page (always visible) -->

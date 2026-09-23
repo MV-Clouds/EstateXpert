@@ -1245,29 +1245,51 @@
     }
 }
 
-.configuration-error-title {
-    font-size: 1.8rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin: 1.5rem 0 1rem 0;
+/* Credentials Missing State */
+.credentials-missing-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* min-height: 30rem; */
+    padding: 1rem;
 }
 
-.configuration-error-message {
-    font-size: 1rem;
-    color: #555;
-    line-height: 1.6;
-    margin: 1rem 0;
+.credentials-missing-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
+    /* max-width: 40rem; */
 }
 
-.configuration-error-message strong {
-    color: #ff6b6b;
+.credentials-empty-icon {
+    width: 200px;
+    height: auto;
+    margin-bottom: 2rem;
+    filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+.credentials-missing-message {
+    font-size: 18px;
+    color: #0176D3;
     font-weight: 600;
+    margin-bottom: 0.75rem;
 }
 
-.configuration-error-submessage {
-    font-size: 0.9rem;
-    color: #777;
-    margin: 1rem 0;
-    font-style: italic;
+.credentials-missing-submessage {
+    font-size: 14px;
+    color: #706e6b;
+    font-weight: 400;
+}
+
+.whatsapp-config-link {
+    color: #0176D3;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    font-size: 15px;
+}
+
+.whatsapp-config-link:hover {
+    color: #00bfff;
 }

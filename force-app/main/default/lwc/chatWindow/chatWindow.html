@@ -563,24 +563,21 @@
     </template>
     <template if:false={hasBusinessAccountConfigured}>
         <div class="configuration-error-content">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff6b6b" width="80" height="80">
-                <path
-                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-            </svg>
-            <h1 class="configuration-error-title">WhatsApp Configuration Required</h1>
-            <p class="configuration-error-message">
-                WhatsApp Business Account is not configured. Please complete the WhatsApp configuration to enable chat
-                functionality.
-            </p>
-            <p class="configuration-error-submessage">
-                Contact your administrator for assistance.
-            </p>
-            <button class="blue-btn-css" onclick={navigateToWhatsAppSetup}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
-                </svg>
-                Configure WhatsApp Integration
-            </button>
+            <div class="credentials-missing-container">
+                <div class="credentials-missing-content">
+                    <img src="/resource/MVEX__emptyState" alt="Credentials Required" class="credentials-empty-icon"
+                        draggable="false" />
+                    <div class="credentials-missing-message">
+                        WhatsApp Configuration Required
+                    </div>
+                    <div class="credentials-missing-submessage">
+                        Please complete the WhatsApp configuration to enable chat functionality.                    
+                    </div>
+                </div>
+            </div>
+            <a class="whatsapp-config-link" href={navigateToWhatsAppSetup}>
+                Click here to configure WhatsApp Integration
+            </a>
         </div>
     </template>
 </template>

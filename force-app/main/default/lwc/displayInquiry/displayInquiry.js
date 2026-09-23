@@ -19,15 +19,17 @@ import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmp
 import { errorDebugger } from 'c/globalProperties';
 import getObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
-import emptyState from '@salesforce/resourceUrl/emptyState';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+// import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
 import FORM_FACTOR from '@salesforce/client/formFactor';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
+    refreshChannelName = '/event/MVEX__RefreshEvent__e';
+    refreshSubscription = {};
     @track objectApiName = '';
     @track totalRecords = 0;
     @track inquiries = [];
@@ -163,7 +165,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track listingFieldOptions = [];
     @track isConstant = false;
     @track selectedRecordName = '';
-    @track NoDataImageUrl = emptyState;
     @track hideFilterButton = false;
     @track filteredGroupMembers = [];
     @track pagedFilteredInquiryData = [];
@@ -560,23 +561,82 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
             this.vfPageMessageHandler();
-            this.checkHideFilterButton();
+            this.handleSubscribeRefresh();
+            // this.checkHideFilterButton();
         } catch (error) {
             errorDebugger('displayInquiry', 'connectedCallback', error, 'warn', 'Error during initialization');
         }
     }
 
-    checkHideFilterButton() {
-        getMetadataRecords()
-            .then(result => {
-                const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
-                if (feature && feature.MVEX__isAvailable__c) {
-                    this.hideFilterButton = true;
-                }
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
-            });
+    // checkHideFilterButton() {
+    //     getMetadataRecords()
+    //         .then(result => {
+    //             const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
+    //             if (feature && feature.MVEX__isAvailable__c) {
+    //                 this.hideFilterButton = true;
+    //             }
+    //         })
+    //         .catch(error => {
+    //             errorDebugger('displayInquiry', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
+    //         });
+    // }
+
+    /**
+     * Method Name: getContactInfo
+     * @description: Resolves contact ID, contact Name, and hasContact for an inquiry record
+     */
+    getContactInfo(inquiry) {
+        if (!inquiry) {
+            return { contactId: null, contactName: '', contactname: '', hasContact: false };
+        }
+
+        // Find contact ID (mvex__contact__c or contact__c)
+        const contactIdKey = Object.keys(inquiry).find(
+            k => k.toLowerCase() === 'mvex__contact__c' || k.toLowerCase() === 'contact__c'
+        );
+        const contactId = contactIdKey ? inquiry[contactIdKey] : null;
+
+        let contactName = '';
+
+        // 1. Try relationship traversal: mvex__contact__r or contact__r
+        const parentObjKey = Object.keys(inquiry).find(
+            k => k.toLowerCase() === 'mvex__contact__r' || k.toLowerCase() === 'contact__r'
+        );
+        const parentObj = parentObjKey ? inquiry[parentObjKey] : null;
+        if (parentObj && typeof parentObj === 'object') {
+            const nameKey = Object.keys(parentObj).find(k => k.toLowerCase() === 'name');
+            const resolved = nameKey ? parentObj[nameKey] : null;
+            if (resolved !== null && resolved !== undefined && String(resolved).trim() !== '') {
+                contactName = String(resolved);
+            }
+        }
+
+        // 2. Fall back to refNameCache
+        if (!contactName && contactId && this.refNameCache && this.refNameCache[contactId]) {
+            contactName = this.refNameCache[contactId];
+        }
+
+        // 3. Fall back to referenceNameMappings
+        if (!contactName && contactId && this.referenceNameMappings && typeof this.referenceNameMappings === 'object') {
+            const mappingKey = Object.keys(this.referenceNameMappings).find(
+                k => k.toLowerCase() === 'mvex__contact__c' || k.toLowerCase() === 'contact__c'
+            );
+            if (mappingKey && this.referenceNameMappings[mappingKey]) {
+                contactName = this.referenceNameMappings[mappingKey][contactId] || '';
+            }
+        }
+
+        const hasContact = Boolean(contactId);
+        if (hasContact && !contactName) {
+            contactName = String(contactId);
+        }
+
+        return {
+            contactId: contactId,
+            contactName: contactName,
+            contactname: contactName.toLowerCase(),
+            hasContact: hasContact
+        };
     }
 
     processInquiryData(inquiries) {
@@ -584,6 +644,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
         return (inquiries || []).map(inquiry => {
             const row = { ...inquiry };
+            const contactInfo = this.getContactInfo(inquiry);
+            row.contactId = contactInfo.contactId;
+            row.contactName = contactInfo.contactName;
+            row.contactname = contactInfo.contactname;
+            row.hasContact = contactInfo.hasContact;
+
             row.displayFields = cols.map(col => {
                 // Ensure fieldName is lowercase to match inquiry data keys
                 const key = (col.fieldName || '').toLowerCase();
@@ -741,7 +807,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.sendMailInquiryDataList = [];
         this.searchTerm = '';
         this.fetchListings();
-        this.checkHideFilterButton();
+        // this.checkHideFilterButton();
     }
 
     /**
@@ -763,6 +829,17 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     });
                 }
             });
+
+            // Update contact info for totalinquiry if already populated
+            if (this.totalinquiry && this.totalinquiry.length > 0) {
+                this.totalinquiry.forEach(inquiry => {
+                    const contactInfo = this.getContactInfo(inquiry);
+                    inquiry.contactId = contactInfo.contactId;
+                    inquiry.contactName = contactInfo.contactName;
+                    inquiry.contactname = contactInfo.contactname;
+                    inquiry.hasContact = contactInfo.hasContact;
+                });
+            }
         } catch (error) {
             errorDebugger('displayInquiry', 'populateRefNameCacheFromMappings', error, 'warn', 'Error populating reference name cache');
         }
@@ -1608,6 +1685,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             Object.keys(item).forEach(key => {
                 newItem[key.toLowerCase()] = item[key];
             });
+            const contactInfo = this.getContactInfo(newItem);
+            newItem.contactId = contactInfo.contactId;
+            newItem.contactName = contactInfo.contactName;
+            newItem.contactname = contactInfo.contactname;
+            newItem.hasContact = contactInfo.hasContact;
             return newItem;
         });
     }
@@ -1639,8 +1721,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     applyFilters() {
         try {
             this.pagedFilteredInquiryData = this.modalFilteredInquiryData.filter(inquiry => {
-                const searchInquiry = inquiry.name.toLowerCase().includes(this.searchTerm);
-                return searchInquiry;
+                const searchInquiry = inquiry.name ? inquiry.name.toLowerCase().includes(this.searchTerm) : false;
+                const searchContact = inquiry.contactName ? inquiry.contactName.toLowerCase().includes(this.searchTerm) : false;
+                return searchInquiry || searchContact;
             });
 
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
@@ -2476,6 +2559,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             window?.globalThis?.removeEventListener('resize', this.updateScreenWidth);
             window?.globalThis?.removeEventListener('message', this.simpleTempFileGenResponse);
             window?.globalThis?.removeEventListener('click', this.handleClickOutside);
+            this.handleUnsubscribeRefresh();
             const richTextElement = this.template.querySelector('.richText');
             if (richTextElement) {
                 $(richTextElement).summernote('destroy');
@@ -3000,8 +3084,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
                         const fieldsData = JSON.parse(result.metadataRecords[0]);
+                        const excludedFields = ['name', 'mvex__contact__c', 'contact__c'];
                         this.inquiryColumns = fieldsData
-                            .filter(field => (field.fieldName || field.value || '').toLowerCase() !== 'name')
+                            .filter(field => !excludedFields.includes((field.fieldName || field.value || '').toLowerCase()))
                             .map(field => ({
                                 label: field.label || field.fieldLabel,
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
@@ -3308,6 +3393,151 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             }, 100);
         } catch (error) {
             errorDebugger('displayInquiry', 'updatePopupSortIcons', error, 'warn', 'Error updating popup sort icons');
+        }
+    }
+
+    /**
+    * Method Name : handleSubscribeRefresh
+    * @description : Subscribes to MVEX__RefreshEvent__e platform event to detect inquiry changes
+    */
+    handleSubscribeRefresh() {
+        const messageCallback = (response) => {
+            console.log('RefreshEvent received in displayInquiry:', response);
+            const payload = response?.data?.payload;
+            const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
+
+            if (featureName && (featureName.toLowerCase() === 'inquiry' || featureName.toLowerCase() === 'display_inquiry' || featureName.toLowerCase() === 'mvex__inquiry__c')) {
+                this.handleRefreshEventReceived();
+            }
+        };
+
+        subscribe(this.refreshChannelName, -1, messageCallback)
+            .then(response => {
+                this.refreshSubscription = response;
+            })
+            .catch(error => {
+                console.warn('Subscription error for ' + this.refreshChannelName + ':', error);
+                if (this.refreshChannelName.includes('MVEX__')) {
+                    this.refreshChannelName = '/event/RefreshEvent__e';
+                    subscribe(this.refreshChannelName, -1, messageCallback)
+                        .then(resp => {
+                            this.refreshSubscription = resp;
+                        })
+                        .catch(err => errorDebugger('displayInquiry', 'handleSubscribeRefresh', err, 'warn', 'Fallback subscription error'));
+                } else {
+                    errorDebugger('displayInquiry', 'handleSubscribeRefresh', error, 'warn', 'Subscription error');
+                }
+            });
+
+        onError(error => {
+            errorDebugger('displayInquiry', 'empApi', error, 'warn', 'empApi error');
+        });
+    }
+
+    /**
+    * Method Name : handleUnsubscribeRefresh
+    * @description : Unsubscribes from refresh platform event channel
+    */
+    handleUnsubscribeRefresh() {
+        if (this.refreshSubscription && this.refreshSubscription.id) {
+            unsubscribe(this.refreshSubscription, response => {
+                console.log('Unsubscribed from refresh event channel in displayInquiry:', response);
+            });
+        }
+    }
+
+    /**
+    * Method Name : handleRefreshEventReceived
+    * @description : Handles incoming refresh event and triggers data refresh with current filters and sorting
+    */
+    handleRefreshEventReceived() {
+        this.refreshInquiries();
+    }
+
+    /**
+    * Method Name : refreshInquiries
+    * @description : Refreshes the inquiry data from server while preserving applied filters, search term, and sorting
+    */
+    refreshInquiries() {
+        try {
+            const currentSearch = this.searchTerm;
+            const savedPage = this.currentPage;
+
+            let filterType = 'default';
+            if (this.conditiontype === 'linked') {
+                filterType = 'linked';
+            } else if (this.conditiontype === 'related') {
+                filterType = 'related';
+            }
+
+            getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
+                .then(result => {
+                    if (result.referenceNameMappings) {
+                        this.referenceNameMappings = result.referenceNameMappings;
+                        this.populateRefNameCacheFromMappings();
+                    }
+
+                    let listing = {};
+                    if (result.inquiries && result.inquiries.length > 0) {
+                        this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
+                    } else {
+                        this.totalinquiry = [];
+                    }
+
+                    if (result.listings && result.listings.length > 0) {
+                        listing = result.listings[0];
+                    }
+
+                    const convertoLowerCase = (obj) => {
+                        return Object.keys(obj).reduce((acc, key) => {
+                            acc[key.toLowerCase()] = obj[key];
+                            return acc;
+                        }, {});
+                    };
+                    this.listingRecord = convertoLowerCase(listing);
+
+                    if (filterType === 'linked') {
+                        this.pagedFilteredInquiryData = [...this.totalinquiry];
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    } else if (filterType === 'related') {
+                        this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry =>
+                            inquiry.mvex__listing__c === this.recordId
+                        );
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    } else if (this.conditiontype === 'none') {
+                        this.pagedFilteredInquiryData = [...this.totalinquiry];
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    } else {
+                        // Apply existing modal filter conditions (all, any, custom)
+                        this.applyFiltersData(this.listingRecord);
+                    }
+
+                    // Re-apply search term if user had entered one
+                    if (currentSearch && currentSearch.trim() !== '') {
+                        this.searchTerm = currentSearch;
+                        this.applyFilters();
+                    }
+
+                    // Re-apply sorting if sortField is set
+                    if (this.sortField) {
+                        this.sortData();
+                        this.updateSortIcons();
+                    }
+
+                    this.totalRecords = this.pagedFilteredInquiryData.length;
+                    this.isInquiryAvailable = this.totalRecords > 0;
+
+                    // Preserve page number if still valid
+                    const maxPage = this.totalPages || 1;
+                    this.currentPage = savedPage <= maxPage ? savedPage : maxPage;
+
+                    this.showToast('Success', 'Inquiry data refreshed successfully', 'success');
+                })
+                .catch(error => {
+                    errorDebugger('displayInquiry', 'refreshInquiries', error, 'warn', 'Error refreshing inquiries');
+                });
+        } catch (error) {
+            errorDebugger('displayInquiry', 'refreshInquiries', error, 'warn', 'Error in refreshInquiries');
         }
     }
 }

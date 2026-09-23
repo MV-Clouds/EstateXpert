@@ -293,6 +293,7 @@ public with sharing class ZooplaIntegrationController {
         public String email;
         public String website;
         public String is_test_portal;
+        public Object sync_branch_with_zoopla;
     }
 
     /**

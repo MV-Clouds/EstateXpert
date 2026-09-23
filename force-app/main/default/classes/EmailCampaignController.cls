@@ -1001,14 +1001,11 @@ public with sharing class EmailCampaignController {
                 
                 if (!emails.isEmpty()) {
                     Messaging.sendEmail(emails);
-                    System.enqueueJob(new CampaignUpdateQueueable(remainingEmailsMap, campaignMap, emails.size(), 'Success', null));
                 } else if (!gmails.isEmpty()) {
                     GmailIntegrationControllerV1.requestNewAccessToken(gmails, remainingEmailsMap, campaignMap, true);
                 }
 
             } catch (Exception e) {
-                System.enqueueJob(new CampaignUpdateQueueable(remainingEmailsMap, campaignMap, emails.size(), 'Failed', e.getMessage()));
-                
                 // Update MVEX__Email_Member__c status to 'Failed' for processed records
                 List<MVEX__Email_Member__c> emailMembersToUpdateList = new List<MVEX__Email_Member__c>();
                 for (String key : processedKeys) {

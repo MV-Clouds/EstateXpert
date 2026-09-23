@@ -23,13 +23,7 @@
                                     <h2 class="section-title">Email & Template Configuration</h2>
                                 </div>
                                 
-                                <div class="campaign-info-grid slds-m-bottom_medium">
-                                    <div class="config-item">
-                                        <lightning-input type="text" name="campaignName" label="Email Name"
-                                            value={campaignDetails.campaignName} placeholder="Enter email name"
-                                            data-id="campaignName" onchange={handleCampaignFieldChange} required
-                                            class="custom-input"></lightning-input>
-                                    </div>
+                                <div class="config-grid slds-m-bottom_medium">
                                     <div class="config-item">
                                         <lightning-combobox name="messagingService" label="Messaging Service"
                                             value={campaignDetails.messagingService} placeholder="Choose service..."
@@ -37,9 +31,6 @@
                                             dropdown-alignment="auto" onchange={handleCampaignFieldChange} required
                                             class="custom-combobox"></lightning-combobox>
                                     </div>
-                                </div>
-
-                                <div class="config-grid slds-m-bottom_medium">
                                     <div class="config-item">
                                         <lightning-combobox name="templateRelatedObject"
                                             label="Select Related Object"

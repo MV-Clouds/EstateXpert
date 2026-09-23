@@ -6,7 +6,7 @@ import getAllContacts from '@salesforce/apex/SendEmailsController.getAllContacts
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import createCampaignAndEmails from '@salesforce/apex/EmailCampaignController.createCampaignAndEmails';
+import sendEmails from '@salesforce/apex/SendEmailsController.sendEmails';
 import getBroadcastGroups from '@salesforce/apex/BroadcastMessageController.getBroadcastEmailGroups';
 
 export default class SendEmails extends LightningElement {
@@ -49,11 +49,10 @@ export default class SendEmails extends LightningElement {
     @track listingSearchTerm = '';
 
 
-    // Single object to store all campaign details
+    // Single object to store email details
     @track campaignDetails = {
         objectName: 'Contact',
         templateRelatedObject: 'Contact',
-        campaignName: '',
         templateType: 'EstateXpert Template',
         messagingService: '',
         selectedTemplate: '',
@@ -129,10 +128,10 @@ export default class SendEmails extends LightningElement {
 
     get isSendDisabled() {
         const hasRecipients = (this.selectedContacts && this.selectedContacts.length > 0) || (this.selectedBroadcastGroups && this.selectedBroadcastGroups.length > 0);
-        const hasCampaignDetails = this.campaignDetails.campaignName && this.campaignDetails.messagingService;
+        const hasMessagingService = !!this.campaignDetails.messagingService;
         const hasTemplate = !!this.selectedTemplate;
         const hasListingIfRequired = !this.showSingleListingSelector || !!this.selectedListing;
-        return !hasRecipients || !hasCampaignDetails || !hasTemplate || !hasListingIfRequired;
+        return !hasRecipients || !hasMessagingService || !hasTemplate || !hasListingIfRequired;
     }
 
     // Template options based on selected template type and listing
@@ -548,7 +547,7 @@ export default class SendEmails extends LightningElement {
         }
 
         try {
-            this.handleSingleCampaignSend();
+            this.handleSendEmails();
         } catch (error) {
             console.error('Error in handleFinish:', error);
             this.showToast('Error', 'An unexpected error occurred: ' + error.message, 'error');
@@ -556,105 +555,32 @@ export default class SendEmails extends LightningElement {
         }
     }
 
-    // Handle single campaign - create campaign record and send immediately
-    handleSingleCampaignSend() {
-        try {
-            // Create a single email record for immediate sending
-            const currentDateTime = new Date();
-            const singleEmailRecord = {
-                id: 1,
-                name: 'Immediate Email',
-                template: this.selectedTemplate,
-                templateType: this.campaignDetails.templateType === 'Email Template' ? 'EmailTemplate' : 'EstateXpertTemplate',
-                subject: this.templatePreview.subject || 'Marketing Email',
-                daysAfterStartDate: 0, // Send immediately
-                timeToSend: this.convertLocalToUTCTime(
-                    currentDateTime.getHours().toString().padStart(2, '0') + ':' +
-                    currentDateTime.getMinutes().toString().padStart(2, '0') + ':00', 
-                    0, 
-                    currentDateTime.toISOString().split('T')[0]
-                ),
-                exactDate: currentDateTime.toISOString().split('T')[0], // Today's date
-                disabled: false,
-                selectedListingId: this.selectedListing || '',
-                isListingSelectionDisabled: !this.selectedListing
-            };
-
-            // Transform data to match EmailCampaignController structure
-            const campaignEmailData = {
-                templateId: '', // No template ID for new campaigns
-                campaignId: '', // No campaign ID for new campaigns
-                relatedObject: this.campaignDetails.objectName,
-                campaignName: this.campaignDetails.campaignName,
-                messagingService: this.campaignDetails.messagingService,
-                saveForFuture: false, // Not saving as template
-                selectedPrimaryRecipients: this.transformRecipientsPrimary(this.selectedContactsDetails),
-                selectedCCRecipients: this.transformRecipients(this.selectedCCContactsDetails),
-                selectedBCCRecipients: [], // No BCC in current implementation
-                emails: [singleEmailRecord], // Single email record
-                specificDate: currentDateTime.toISOString().split('T')[0], // Today's date
-                selectedContactDateField: '', // Using specific date
-                deletedEmailList: [], // No deleted emails for new campaigns
-                // Add broadcast groups to the data
-                selectedBroadcastGroups: this.selectedBroadcastGroups
-            };
-
-            // Call EmailCampaignController.createCampaignAndEmails for single campaign too
-            createCampaignAndEmails({ jsonCampaignEmailData: JSON.stringify(campaignEmailData), isImmediateSend: true })
-                .then((campaignId) => {
-                    this.showToast('Success', 'Emails sent successfully!', 'success');
+    // Directly send emails without creating campaign records
+    handleSendEmails() {
+        sendEmails({
+            templateId: this.selectedTemplate,
+            relatedObject: this.campaignDetails.templateRelatedObject,
+            messagingService: this.campaignDetails.messagingService,
+            listingId: this.selectedListing || null,
+            primaryContactIds: this.selectedContacts || [],
+            broadcastGroupIds: this.selectedBroadcastGroups || [],
+            ccContactIds: this.selectedCCContacts || []
+        })
+            .then((result) => {
+                if (result && result.status === 'success') {
+                    this.showToast('Success', result.message || 'Emails sent successfully!', 'success');
                     this.closeModal();
-                })
-                .catch(error => {
-                    console.error('Error creating single campaign:', error);
-                    this.showToast('Error', 'Failed to send emails: ' + (error.body?.message || error.message), 'error');
-                })
-                .finally(() => {
-                    this.resetFinishButton();
-                });
-
-        } catch (error) {
-            console.error('Error preparing single campaign:', error);
-            this.showToast('Error', 'Failed to prepare email data: ' + error.message, 'error');
-            this.resetFinishButton();
-        }
-    }
-
-
-
-    // Transform primary recipients like emailCampaignTemplateForm.js
-    transformRecipientsPrimary(recipients) {
-        return recipients.map(recipient => recipient.id);
-    }
-
-    // Transform CC/BCC recipients like emailCampaignTemplateForm.js
-    transformRecipients(recipients) {
-        return recipients.map(recipient => `${recipient.id}:${recipient.email}`);
-    }
-
-    convertLocalToUTCTime(localTimeString, daysAfterStartDate = 0, baseDateString = null) {
-        if (!localTimeString) return '';
-        try {
-            let baseDateStr = baseDateString || new Date().toISOString().split('T')[0];
-            const dateObj = new Date(baseDateStr);
-            dateObj.setDate(dateObj.getDate() + (parseInt(daysAfterStartDate, 10) || 0));
-            
-            const timeStr = localTimeString.replace('Z', '');
-            const [hours, minutes, secondsAndMillis] = timeStr.split(':');
-            const seconds = secondsAndMillis ? secondsAndMillis.split('.')[0] : '00';
-            const millis = secondsAndMillis && secondsAndMillis.includes('.') ? secondsAndMillis.split('.')[1] : '000';
-            
-            dateObj.setHours(parseInt(hours, 10), parseInt(minutes, 10), parseInt(seconds, 10), parseInt(millis, 10));
-            
-            const utcHours = dateObj.getUTCHours().toString().padStart(2, '0');
-            const utcMinutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
-            const utcSeconds = dateObj.getUTCSeconds().toString().padStart(2, '0');
-            const utcMillis = dateObj.getUTCMilliseconds().toString().padStart(3, '0');
-            return `${utcHours}:${utcMinutes}:${utcSeconds}.${utcMillis}`;
-        } catch(e) {
-            console.error('Error converting to UTC:', e);
-            return localTimeString;
-        }
+                } else {
+                    this.showToast('Error', (result && result.message) ? result.message : 'Failed to send emails.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending emails:', error);
+                this.showToast('Error', 'Failed to send emails: ' + (error.body?.message || error.message), 'error');
+            })
+            .finally(() => {
+                this.resetFinishButton();
+            });
     }
 
     // Reset finish button state
@@ -668,8 +594,8 @@ export default class SendEmails extends LightningElement {
 
     // Validate form before submission
     validateForm() {
-        if (!this.campaignDetails.campaignName || !this.campaignDetails.messagingService) {
-            this.showToast('Error', 'Please fill in all email details.', 'error');
+        if (!this.campaignDetails.messagingService) {
+            this.showToast('Error', 'Please select a messaging service.', 'error');
             return false;
         }
         if (!this.selectedTemplate) {
@@ -719,7 +645,6 @@ export default class SendEmails extends LightningElement {
         this.campaignDetails = {
             objectName: 'Contact',
             templateRelatedObject: 'Contact',
-            campaignName: '',
             templateType: 'EstateXpert Template',
             messagingService: '',
             selectedTemplate: '',

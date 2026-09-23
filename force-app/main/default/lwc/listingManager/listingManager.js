@@ -259,6 +259,18 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
         return this.shownProcessedListingData.length === 0;
     }
 
+    get isFilterApplied() {
+        if (Array.isArray(this.appliedFilters) && this.appliedFilters.length > 0) {
+            return true;
+        }
+        if (this.unchangedProcessListings && this.processedListingData &&
+            this.unchangedProcessListings.length > 0 &&
+            this.processedListingData.length < this.unchangedProcessListings.length) {
+            return true;
+        }
+        return false;
+    }
+
     get hasAppliedFilters() {
         return (Array.isArray(this.appliedFilters) && this.appliedFilters.length > 0) ||
             (this.unchangedListingData && this.unchangedListingData.length > 0 && this.listingData && this.listingData.length === 0);
@@ -576,8 +588,14 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
 
                     let fieldValueraw;
 
-                    // Handle empty/null/undefined
-                    if (rawValue === null || rawValue === undefined || rawValue === '') {
+                    const isAddressType = (field.fieldType && field.fieldType.toUpperCase() === 'ADDRESS') ||
+                        (typeof rawValue === 'object' && rawValue !== null && ('street' in rawValue || 'city' in rawValue || 'state' in rawValue || 'postalCode' in rawValue || 'country' in rawValue)) ||
+                        (field.fieldName && field.fieldName.toLowerCase().endsWith('address__c'));
+
+                    if (isAddressType) {
+                        fieldValueraw = this.formatAddress(rawValue, listing, field.fieldName);
+                    }
+                    else if (rawValue === null || rawValue === undefined || rawValue === '') {
                         fieldValueraw = '-';
                     }
                     else if (field.fieldType === 'CURRENCY') {
@@ -590,6 +608,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     else if (field.format) {
                         fieldValueraw = this.applyFieldFormat(rawValue, field.format);
                     }
+                    else if (typeof rawValue === 'object' && rawValue !== null) {
+                        fieldValueraw = this.formatAddress(rawValue, listing, field.fieldName);
+                    }
                     else {
                         fieldValueraw = rawValue;
                     }
@@ -597,7 +618,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     return {
                         fieldName: field.fieldName,
                         value: fieldValueraw,
-                        rawValue: (rawValue === null || rawValue === undefined || rawValue === '') ? null : rawValue,
+                        rawValue: (fieldValueraw === '-' || rawValue === null || rawValue === undefined || rawValue === '')
+                            ? null
+                            : (typeof rawValue === 'object' ? fieldValueraw : rawValue),
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
@@ -686,6 +709,74 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name : formatAddress
+    * @description : Formats an Address object or compound address fields into a readable string
+    * @param {Object|String} addressValue - The raw address value or object
+    * @param {Object} listingRecord - The full listing record for fallback subfields
+    * @param {String} fieldName - The API name of the address field
+    * @return {String} Formatted address string or '-'
+    */
+    formatAddress(addressValue, listingRecord, fieldName) {
+        try {
+            let street = '';
+            let city = '';
+            let state = '';
+            let postalCode = '';
+            let country = '';
+
+            if (addressValue && typeof addressValue === 'object') {
+                street = addressValue.street || addressValue.Street || '';
+                city = addressValue.city || addressValue.City || '';
+                state = addressValue.state || addressValue.stateCode || addressValue.State || addressValue.StateCode || '';
+                postalCode = addressValue.postalCode || addressValue.PostalCode || '';
+                country = addressValue.country || addressValue.countryCode || addressValue.Country || addressValue.CountryCode || '';
+
+                // Handle Geolocation if it's not a standard address
+                if (!street && !city && !state && !country && ('latitude' in addressValue || 'longitude' in addressValue)) {
+                    const lat = addressValue.latitude != null ? addressValue.latitude : '';
+                    const lng = addressValue.longitude != null ? addressValue.longitude : '';
+                    return (lat || lng) ? `${lat}, ${lng}` : '-';
+                }
+            } else if (typeof addressValue === 'string' && addressValue.trim()) {
+                return addressValue.trim();
+            }
+
+            // Fallback to record-level sub-fields if any are missing
+            if (listingRecord) {
+                const cleanPrefix = fieldName ? fieldName.replace(/__c$/i, '') : 'MVEX__Listing_Address';
+                if (!street) {
+                    street = listingRecord[`${cleanPrefix}__Street__s`] || listingRecord.MVEX__Listing_Address__Street__s || listingRecord.Street__c || listingRecord.MVEX__Street__c || '';
+                }
+                if (!city) {
+                    city = listingRecord[`${cleanPrefix}__City__s`] || listingRecord.MVEX__Listing_Address__City__s || listingRecord.City__c || listingRecord.MVEX__City__c || '';
+                }
+                if (!state) {
+                    state = listingRecord[`${cleanPrefix}__StateCode__s`] || listingRecord[`${cleanPrefix}__State__s`] || listingRecord.MVEX__Listing_Address__StateCode__s || listingRecord.State__c || listingRecord.MVEX__State__c || '';
+                }
+                if (!postalCode) {
+                    postalCode = listingRecord[`${cleanPrefix}__PostalCode__s`] || listingRecord.MVEX__Listing_Address__PostalCode__s || '';
+                }
+                if (!country) {
+                    country = listingRecord[`${cleanPrefix}__CountryCode__s`] || listingRecord[`${cleanPrefix}__Country__s`] || listingRecord.MVEX__Listing_Address__CountryCode__s || listingRecord.Country__c || listingRecord.MVEX__Country__c || '';
+                }
+            }
+
+            if (street && typeof street === 'string') {
+                street = street.replace(/\r?\n+/g, ', ');
+            }
+
+            const addressParts = [street, city, state, postalCode, country]
+                .map(part => (typeof part === 'string' ? part.trim() : part))
+                .filter(part => part != null && part !== '');
+
+            return addressParts.length > 0 ? addressParts.join(', ') : '-';
+        } catch (error) {
+            console.error('Error formatting address:', error);
+            return '-';
+        }
+    }
+
+    /**
     * Method Name : handleFilteredListings
     * @description : set the data comming from the filter cmp
     * Date: 14/06/2024
@@ -722,7 +813,8 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             this.processedListingData = this.processedListingData.map(resetCheckedFlag);
             this.unchangedProcessListings = this.unchangedProcessListings.map(resetCheckedFlag);
 
-            const filteredListingIds = new Set(event.detail.filterlistings.map(filtered => filtered.Id));
+            const filteredListings = Array.isArray(event?.detail?.filterlistings) ? event.detail.filterlistings : [];
+            const filteredListingIds = new Set(filteredListings.map(filtered => filtered.Id).filter(Boolean));
             this.processedListingData = this.unchangedProcessListings.filter(processListing =>
                 filteredListingIds.has(processListing.Id)
             );
@@ -988,11 +1080,12 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 return;
             }
             this.mapMarkers = this.shownProcessedListingData.map(record => {
-                const street = record.MVEX__Listing_Address__Street__s || record.MVEX__Street__c || record.Street__c || '';
-                const city = record.MVEX__Listing_Address__City__s || record.MVEX__City__c || record.City__c || '';
-                const state = record.MVEX__Listing_Address__StateCode__s || record.MVEX__State__c || '';
-                const country = record.MVEX__Listing_Address__CountryCode__s || record.MVEX__Country__c || '';
-                const postalCode = record.MVEX__Listing_Address__PostalCode__s || '';
+                const addr = (record.MVEX__Listing_Address__c && typeof record.MVEX__Listing_Address__c === 'object') ? record.MVEX__Listing_Address__c : null;
+                const street = addr?.street || record.MVEX__Listing_Address__Street__s || record.MVEX__Street__c || record.Street__c || '';
+                const city = addr?.city || record.MVEX__Listing_Address__City__s || record.MVEX__City__c || record.City__c || '';
+                const state = addr?.state || addr?.stateCode || record.MVEX__Listing_Address__StateCode__s || record.MVEX__State__c || '';
+                const country = addr?.country || addr?.countryCode || record.MVEX__Listing_Address__CountryCode__s || record.MVEX__Country__c || '';
+                const postalCode = addr?.postalCode || record.MVEX__Listing_Address__PostalCode__s || '';
                 const rooms = record.MVEX__Number_of_Bedrooms__c || record.MVEX__Bedrooms__c || '';
                 const listingType = record.MVEX__Listing_Type__c || '';
                 const propertyType = record.MVEX__Property_Type__c || '';

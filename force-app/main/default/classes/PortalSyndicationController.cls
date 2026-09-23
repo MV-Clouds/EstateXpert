@@ -4,7 +4,7 @@
 * Created By : Karan Singh
 * Last Modified Date : 24/12/2024
 * Last Modified By : Karan Singh
-* @description : Used to create and manage PortalListing__c records.
+* @description : Used to create and manage MVEX__PortalListing__c records.
 */
 public with sharing class PortalSyndicationController {
 
@@ -15,7 +15,7 @@ public with sharing class PortalSyndicationController {
     * @param actionType to stored the action type
     * @param portalName to stored the portal name
     * @return String value
-    * @description : Used to create and manage PortalListing__c records.
+    * @description : Used to create and manage MVEX__PortalListing__c records.
     */
     @AuraEnabled
     public static string createPortalListingRecord(String listingId, String portalId, String actionType, String portalName){
@@ -23,11 +23,11 @@ public with sharing class PortalSyndicationController {
             List<String> portalNames = new List<String>{'Zoopla', 'Rightmove', 'Rightmove Overseas', 'Propertyfinder'};
 
             if (actionType == 'Publish' && !portalNames.contains(portalName)) {
-                PortalListing__c newPortalListing = new PortalListing__c();
-                newPortalListing.Listing__c = listingId;
-                newPortalListing.Portal__c = portalId;
-                newPortalListing.SystemIsActive__c = true;
-                newPortalListing.Listed_Date__c = System.today();
+                MVEX__PortalListing__c newPortalListing = new MVEX__PortalListing__c();
+                newPortalListing.MVEX__Listing__c = listingId;
+                newPortalListing.MVEX__Portal__c = portalId;
+                newPortalListing.MVEX__SystemIsActive__c = true;
+                newPortalListing.MVEX__Listed_Date__c = System.today();
                 insert as user newPortalListing;   
             } else if (actionType == 'Publish' && portalNames.contains(portalName)) {
                 if (portalName == 'Zoopla') {
@@ -57,12 +57,12 @@ public with sharing class PortalSyndicationController {
             } else if (actionType == 'Unpublish' && !portalNames.contains(portalName)) {
                 String escapeListingId = String.escapeSingleQuotes(listingId);
                 String escapePortalId = String.escapeSingleQuotes(portalId);
-                List<PortalListing__c> portalListings = [SELECT Id, SystemIsActive__c FROM PortalListing__c WHERE Listing__c =: escapeListingId
-                                                        AND Portal__c =: escapePortalId AND SystemIsActive__c = true WITH USER_MODE];
+                List<MVEX__PortalListing__c> portalListings = [SELECT Id, MVEX__SystemIsActive__c FROM MVEX__PortalListing__c WHERE MVEX__Listing__c =: escapeListingId
+                                                        AND MVEX__Portal__c =: escapePortalId AND MVEX__SystemIsActive__c = true WITH USER_MODE];
                 if (!portalListings.isEmpty()) {
-                    for (PortalListing__c portalListing : portalListings) {
-                        portalListing.SystemIsActive__c = false;
-                        portalListing.UnlistedDate__c = System.today();
+                    for (MVEX__PortalListing__c portalListing : portalListings) {
+                        portalListing.MVEX__SystemIsActive__c = false;
+                        portalListing.MVEX__UnlistedDate__c = System.today();
                     }
 
                     update as user portalListings;
@@ -74,7 +74,7 @@ public with sharing class PortalSyndicationController {
             return 'Success';
 
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PortalSyndicationController', 'createPortalListingRecord', 'Error while updating or creating PortalListing__c record.');
+            ErrorHandler.insertErrorData(e, 'PortalSyndicationController', 'createPortalListingRecord', 'Error while updating or creating MVEX__PortalListing__c record.');
             return e.getMessage();
         }
     }
@@ -91,23 +91,23 @@ public with sharing class PortalSyndicationController {
             FetchPortalListingRecord portalWrpList = new FetchPortalListingRecord();
             portalWrpList.portalData = new List<PortalWrapper>();
 
-            List<Portal__c> portalList = new List<Portal__c>([SELECT Id, Name, Generator__c, (SELECT Id, SystemIsActive__c FROM Portals_Listing__r WHERE SystemIsActive__c = true and Listing__c =: listingId) FROM Portal__c WHERE Is_Active__c = TRUE WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 1000]);
+            List<MVEX__Portal__c> portalList = new List<MVEX__Portal__c>([SELECT Id, Name, MVEX__Generator__c, (SELECT Id, MVEX__SystemIsActive__c FROM MVEX__Portals_Listing__r WHERE MVEX__SystemIsActive__c = true and MVEX__Listing__c =: listingId) FROM MVEX__Portal__c WHERE MVEX__Is_Active__c = TRUE WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 1000]);
 
-            Map<String, List<PortalListing__c>> portalStatuCheck = new Map<String, List<PortalListing__c>>();
+            Map<String, List<MVEX__PortalListing__c>> portalStatuCheck = new Map<String, List<MVEX__PortalListing__c>>();
 
-            for (Portal__c portal : portalList) {
-                if (portal.Portals_Listing__r != null && portal.Portals_Listing__r.size() > 0) {
-                    portalStatuCheck.put(portal.Id, portal.Portals_Listing__r);
+            for (MVEX__Portal__c portal : portalList) {
+                if (portal.MVEX__Portals_Listing__r != null && portal.MVEX__Portals_Listing__r.size() > 0) {
+                    portalStatuCheck.put(portal.Id, portal.MVEX__Portals_Listing__r);
                 } else {
                     portalStatuCheck.put(portal.Id, null);
                 }
             }
 
-            for (Portal__c portal : portalList) {
+            for (MVEX__Portal__c portal : portalList) {
                 PortalWrapper portalWrapper = new PortalWrapper();
                 portalWrapper.id = portal.Id;
                 portalWrapper.name = portal.Name;
-                portalWrapper.pname = portal.Generator__c;
+                portalWrapper.pname = portal.MVEX__Generator__c;
                 portalWrapper.status = portalStatuCheck?.get(portal?.Id) != null && portalStatuCheck?.get(portal?.Id)?.size() > 0 ? 'Active' : 'Inactive';
                 if (portalWrapper.status == 'Active') {
                     portalWrapper.buttonColor = 'destructive';
@@ -124,13 +124,77 @@ public with sharing class PortalSyndicationController {
                 portalWrpList.portalData.add(portalWrapper);
             }
 
-            List<Control_Center_Feature__mdt> controlCenterFeatureRecords = [SELECT isAvailable__c FROM Control_Center_Feature__mdt WHERE DeveloperName = 'Is_XML_For_PF' WITH USER_MODE LIMIT 1];
-            portalWrpList.isXMLForPF = controlCenterFeatureRecords.size() > 0 ? controlCenterFeatureRecords[0].isAvailable__c : false;
+            portalWrpList.zooplaFieldMappings = getZooplaFieldMappings();
 
             return portalWrpList;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'PortalSyndicationController', 'fetchPortals', 'Error while fetching portal records.');
             return null;
+        }
+    }
+
+    /**
+    * Method Name : getZooplaFieldMappings
+    * @return Map<String, String> of lowercase portal field name to Listing field label.
+    * @description : Used to get mapping between Zoopla portal fields and Salesforce Listing field labels.
+    */
+    @AuraEnabled(cacheable=true)
+    public static Map<String, String> getZooplaFieldMappings() {
+        try {
+            Map<String, String> fieldMappingMap = new Map<String, String>();
+
+            Map<String, String> apiNameToLabelMap = new Map<String, String>();
+            Schema.DescribeSObjectResult describeResult;
+            if (Schema.getGlobalDescribe().containsKey('MVEX__Listing__c')) {
+                describeResult = Schema.getGlobalDescribe().get('MVEX__Listing__c').getDescribe();
+            } else if (Schema.getGlobalDescribe().containsKey('Listing__c')) {
+                describeResult = Schema.getGlobalDescribe().get('Listing__c').getDescribe();
+            }
+
+            if (describeResult != null) {
+                for (Schema.SObjectField field : describeResult.fields.getMap().values()) {
+                    Schema.DescribeFieldResult dfr = field.getDescribe();
+                    apiNameToLabelMap.put(dfr.getName().toLowerCase(), dfr.getLabel());
+                }
+            }
+
+            List<MVEX__Portal_Listing_Mapping__c> mappings = [
+                SELECT Id, Name, MVEX__Listing_Field_API_Name__c 
+                FROM MVEX__Portal_Listing_Mapping__c 
+                WHERE MVEX__Portal_Name__c = 'Zoopla' 
+                AND MVEX__Listing_Field_API_Name__c != null 
+                WITH USER_MODE
+            ];
+
+            for (MVEX__Portal_Listing_Mapping__c mapping : mappings) {
+                if (String.isNotBlank(mapping.Name) && String.isNotBlank(mapping.MVEX__Listing_Field_API_Name__c)) {
+                    String apiName = mapping.MVEX__Listing_Field_API_Name__c.trim();
+                    String label = apiNameToLabelMap.get(apiName.toLowerCase());
+                    if (String.isBlank(label)) {
+                        String cleanApiName = apiName.replaceFirst('(?i)^mvex__', '');
+                        label = apiNameToLabelMap.get(cleanApiName.toLowerCase());
+                    }
+                    if (String.isBlank(label)) {
+                        label = apiNameToLabelMap.get(('mvex__' + apiName).toLowerCase());
+                    }
+                    fieldMappingMap.put(mapping.Name.toLowerCase(), String.isNotBlank(label) ? label : apiName);
+                }
+            }
+
+            // Default mappings for media / content
+            fieldMappingMap.put('content', 'Listing Media');
+            fieldMappingMap.put('content.url', 'Listing Media (URL)');
+            fieldMappingMap.put('content.type', 'Listing Media (Type)');
+
+            // Map base parent names if child is mapped
+            if (fieldMappingMap.containsKey('detailed_description.text') && !fieldMappingMap.containsKey('detailed_description')) {
+                fieldMappingMap.put('detailed_description', fieldMappingMap.get('detailed_description.text'));
+            }
+
+            return fieldMappingMap;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PortalSyndicationController', 'getZooplaFieldMappings', 'Error while fetching Zoopla field mappings.');
+            return new Map<String, String>();
         }
     }
 
@@ -159,6 +223,6 @@ public with sharing class PortalSyndicationController {
 
     public class FetchPortalListingRecord {
         @AuraEnabled public List<PortalWrapper> portalData;
-        @AuraEnabled public Boolean isXMLForPF;
+        @AuraEnabled public Map<String, String> zooplaFieldMappings;
     }
 }

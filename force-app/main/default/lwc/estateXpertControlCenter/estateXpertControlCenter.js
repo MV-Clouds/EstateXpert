@@ -36,14 +36,11 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
         if (currentPageReference && currentPageReference.state) {
-            const target = currentPageReference.state.c__openComponent || currentPageReference.state.c__target;
-            if ((target === 'templateHomePage' || target === 'templateBuilder') && !this._hasNavigatedToTemplate) {
-                this._hasNavigatedToTemplate = true;
-                setTimeout(() => {
-                    this.templateBuilderMethod();
-                }, 0);
-            } else if (!target) {
-                this._hasNavigatedToTemplate = false;
+            const target = currentPageReference.state.c__openComponent;
+            if (target === 'templateHomePage') {
+                this.templateBuilderMethod();
+            } else if (target === 'storageIntegration') {
+                this.generalIntegrationMethod();
             }
         }
     }
@@ -312,20 +309,25 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     goToControlCenter() {
-        // Always go back to control center, clear all state
-        this.currentView = 'controlCenter';
-        this.selectedComponent = null;
-        this.selectedComponentTitle = '';
-        this.selectedComponentDescription = '';
-        this.parentComponentTitle = '';
-        // Clear portal state
-        this.portalId = null;
-        this.portalGen = null;
-        this.portalName = null;
-        this.portalIconUrl = null;
-        this.portalStatus = null;
-        // Clear lead capture state
-        this.integrationType = null;
+        try {
+            this.currentView = 'controlCenter';
+            this.selectedComponent = null;
+            this.selectedComponentTitle = '';
+            this.selectedComponentDescription = '';
+            this.parentComponentTitle = '';
+            this.portalId = null;
+            this.portalGen = null;
+            this.portalName = null;
+            this.portalIconUrl = null;
+            this.portalStatus = null;
+            this.integrationType = null;
+        
+            if (window?.history?.replaceState && window?.location?.pathname) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } catch (e) {
+            console.log('Error in goToControlCenter:', e);
+        }
     }
 
     /**
@@ -394,7 +396,9 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     generalIntegrationMethod(event) {
-        event.preventDefault();
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
         this.openComponent(
             'storageIntegration', 
             'Integration Hub',

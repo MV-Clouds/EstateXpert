@@ -22,13 +22,19 @@ export default class PortalSyndication extends LightningElement {
     @track subscription = {};
     @track channelName = '/event/MVEX__ResponseEvent__e';
     @track isDataAvailable = false;
+    @track isEligibleForPortals = true;
+    @track isListingActive = false;
+    @track isListingAllowedForPortals = false;
+    @track listingStatus = 'Draft';
+    @track refreshSubscription = {};
+    @track refreshChannelName = '/event/MVEX__RefreshEvent__e';
     @track errorType = 'publish';
     @track isXMLForPF = false;
     @track zooplaFieldMappings = null;
 
     /**
     * Method Name: connectedCallback
-    * @description: Used to call fetchPortals method.
+    * @description: Used to call fetchPortals method and register subscriptions.
     * Created Date: 09/07/2024
     * Created By: Karan Singh
     */
@@ -36,6 +42,8 @@ export default class PortalSyndication extends LightningElement {
         try {
             loadStyle(this, MulishFontCss);
             this.fetchPortalDatas();
+            this.registerErrorListener();
+            this.handleSubscribeRefresh();
         } catch (error) {
             errorDebugger('PortalSyndication', 'connectedCallback', error, 'warn', 'Error occurred while fetching the portal datas');
         }
@@ -51,19 +59,35 @@ export default class PortalSyndication extends LightningElement {
     */
     fetchPortalDatas() {
         try {
+            this.showSpinner = true;
             fetchPortals({ listingId: this.recordId })
             .then(data => {
                 if (data) {
                     if (data.zooplaFieldMappings) {
                         this.zooplaFieldMappings = data.zooplaFieldMappings;
                     }
-                    this.portals = data.portalData.map(portal => ({
-                        ...portal,
-                        buttonLabel: portal.flag ? 'Unpublish' : 'Publish',
-                        buttonColor: portal.flag ? 'unpublish_css' : 'publish_css',
-                        badgeColor: portal.flag ? 'active_cls' : 'inactive_cls',
-                        isPublished: portal.flag
-                    }));
+                    this.isListingActive = data.isListingActive === true;
+                    this.isListingAllowedForPortals = data.isListingAllowedForPortals === true;
+                    this.isEligibleForPortals = data.isEligibleForPortals === true;
+                    this.listingStatus = data.listingStatus || (this.isListingActive ? 'Active' : 'Draft');
+
+                    if (data.portalData) {
+                        this.portals = data.portalData.map(portal => ({
+                            ...portal,
+                            buttonLabel: portal.flag ? 'Unpublish' : 'Publish',
+                            buttonColor: portal.flag ? 'unpublish_css' : 'publish_css',
+                            badgeColor: portal.flag ? 'active_cls' : 'inactive_cls',
+                            isPublished: portal.flag
+                        }));
+                    } else {
+                        this.portals = [];
+                    }
+                } else {
+                    this.portals = [];
+                    this.isListingActive = false;
+                    this.isListingAllowedForPortals = false;
+                    this.isEligibleForPortals = false;
+                    this.listingStatus = 'Draft';
                 }
 
                 this.isDataAvailable = this.portals.length > 0 ? true : false;
@@ -81,6 +105,7 @@ export default class PortalSyndication extends LightningElement {
             });
         } catch (error) {
             errorDebugger('PortalSyndication', 'fetchPortalDatas', error, 'warn', 'Error occurred while fetching the portal datas');
+            this.showSpinner = false;
         }
     }
 
@@ -205,6 +230,9 @@ export default class PortalSyndication extends LightningElement {
     */
     handleSubscribe() {
         try {
+            if (this.subscription && this.subscription.id) {
+                return;
+            }
             const self = this;
             const messageCallback = async function (response) {
                 let obj = JSON.parse(JSON.stringify(response));
@@ -323,27 +351,7 @@ export default class PortalSyndication extends LightningElement {
     * Last Updated By: Karan Singh
     */
     refreshComponent() {
-        try {
-            this.showSpinner = true;
-            fetchPortals({ listingId: this.recordId })
-                .then(data => {
-                    this.portals = data.portalData.map(portal => ({
-                        ...portal,
-                        buttonLabel: portal.flag ? 'Unpublish' : 'Publish',
-                        buttonColor: portal.flag ? 'unpublish_css' : 'publish_css',
-                        badgeColor: portal.flag ? 'active_cls' : 'inactive_cls',
-                        isPublished: portal.flag
-                    }));
-                    this.showSpinner = false;
-                })
-                .catch(error => {
-                    this.showSpinner = false;
-                    this.showToast('Error', error?.message || error?.body?.message, 'error');
-                });
-        } catch (error) {
-            errorDebugger('PortalSyndication', 'refreshComponent', error, 'warn', 'Error occurred while refreshing the component');
-            this.showSpinner = false;
-        }
+        this.fetchPortalDatas();
     }
 
     /**
@@ -462,6 +470,59 @@ export default class PortalSyndication extends LightningElement {
     }
 
     /**
+    * Method Name: handleSubscribeRefresh
+    * @description: Used to subscribe to MVEX__RefreshEvent__e platform event channel.
+    */
+    handleSubscribeRefresh() {
+        try {
+            if (this.refreshSubscription && this.refreshSubscription.id) {
+                return;
+            }
+
+            const self = this;
+            const messageCallback = function (response) {
+                const payload = response?.data?.payload;
+                const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
+                const recordId = payload?.MVEX__Record_Id__c || payload?.Record_Id__c;
+
+                const isTargetFeature = featureName && (
+                    featureName.toLowerCase() === 'portal_syndication' ||
+                    featureName.toLowerCase() === 'portalsyndication'
+                );
+
+                if (isTargetFeature) {
+                    if (recordId) {
+                        if (self.recordId && recordId === self.recordId) {
+                            self.fetchPortalDatas();
+                        }
+                    } else {
+                        self.fetchPortalDatas();
+                    }
+                }
+            };
+
+            subscribe(this.refreshChannelName, -1, messageCallback)
+                .then(response => {
+                    self.refreshSubscription = response;
+                })
+                .catch(error => {
+                    if (self.refreshChannelName.includes('MVEX__')) {
+                        self.refreshChannelName = '/event/RefreshEvent__e';
+                        subscribe(self.refreshChannelName, -1, messageCallback)
+                            .then(resp => {
+                                self.refreshSubscription = resp;
+                            })
+                            .catch(err => errorDebugger('PortalSyndication', 'handleSubscribeRefresh', err, 'warn', 'Fallback subscription error'));
+                    } else {
+                        errorDebugger('PortalSyndication', 'handleSubscribeRefresh', error, 'warn', 'Subscription error');
+                    }
+                });
+        } catch (error) {
+            errorDebugger('PortalSyndication', 'handleSubscribeRefresh', error, 'warn', 'Error occurred while subscribing to refresh event channel');
+        }
+    }
+
+    /**
     * Method Name: disconnectedCallback
     * @description: Used to unsubscribe from the platform event channel.
     * Created Date: 09/07/2024
@@ -471,11 +532,20 @@ export default class PortalSyndication extends LightningElement {
     */
     disconnectedCallback() {
         try {
-            unsubscribe(this.subscription, response => {
-                errorDebugger('PortalSyndication', 'disconnectedCallback', response, 'info', 'Unsubscribed from platform event channel');
-            });
+            if (this.subscription && this.subscription.id) {
+                unsubscribe(this.subscription, response => {
+                    errorDebugger('PortalSyndication', 'disconnectedCallback', response, 'info', 'Unsubscribed from platform event channel');
+                });
+                this.subscription = {};
+            }
+            if (this.refreshSubscription && this.refreshSubscription.id) {
+                unsubscribe(this.refreshSubscription, response => {
+                    errorDebugger('PortalSyndication', 'disconnectedCallback', response, 'info', 'Unsubscribed from refresh event channel');
+                });
+                this.refreshSubscription = {};
+            }
         } catch (error) {
-            errorDebugger('PortalSyndication', 'disconnectedCallback', error, 'warn', 'Error occurred while unsubscribing from the platform event channel');
+            errorDebugger('PortalSyndication', 'disconnectedCallback', error, 'warn', 'Error occurred while unsubscribing from the platform event channels');
         }
     }
 }

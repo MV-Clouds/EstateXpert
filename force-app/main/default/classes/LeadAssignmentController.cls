@@ -58,13 +58,13 @@ public with sharing class LeadAssignmentController {
 
             // Get rules
             result.rules = [SELECT Id, Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c, MVEX__Object_Name__c
-                            FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'  AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null) WITH USER_MODE ORDER BY MVEX__User_Order__c];
+                            FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'  AND (Default_User__c = false OR Default_User__c = null) WITH USER_MODE ORDER BY MVEX__User_Order__c];
 
-            // Get the default assignee record (MVEX__Default_User__c = true; Name stores the userId)
+            // Get the default assignee record (Default_User__c = true; Name stores the userId)
             List<MVEX__Lead_Assignment_Setting__c> defaultRules = [
-                SELECT Id, Name, MVEX__Default_User__c
+                SELECT Id, Name, Default_User__c
                 FROM MVEX__Lead_Assignment_Setting__c
-                WHERE MVEX__Object_Name__c = 'Contact' AND MVEX__Default_User__c = true
+                WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
                 WITH USER_MODE LIMIT 1
             ];
             if (!defaultRules.isEmpty()) {
@@ -100,7 +100,7 @@ public with sharing class LeadAssignmentController {
                 newRule.MVEX__Logic_Type__c = (String)rule.get('Logic_Type');
                 newRule.MVEX__Logical_Expression__c = (String)rule.get('Logical_Expression');
                 newRule.MVEX__User_Order__c = Integer.valueOf(rule.get('User_Order'));
-                newRule.MVEX__Default_User__c = false;
+                newRule.Default_User__c = false;
 
                 insert as user newRule;
                 return newRule.Id;
@@ -149,7 +149,7 @@ public with sharing class LeadAssignmentController {
                 List<MVEX__Lead_Assignment_Setting__c> rulesToDelete = [
                     SELECT Id FROM MVEX__Lead_Assignment_Setting__c 
                     WHERE Id = :ruleId AND MVEX__Object_Name__c = 'Contact'  
-                    AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null)
+                    AND (Default_User__c = false OR Default_User__c = null)
                     WITH USER_MODE LIMIT 1
                 ];
                 if (!rulesToDelete.isEmpty()) {
@@ -175,7 +175,7 @@ public with sharing class LeadAssignmentController {
                     // Check if a default assignee record already exists in database
                     List<MVEX__Lead_Assignment_Setting__c> existingDefaults = [
                         SELECT Id FROM MVEX__Lead_Assignment_Setting__c
-                        WHERE MVEX__Object_Name__c = 'Contact' AND MVEX__Default_User__c = true
+                        WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
                         WITH USER_MODE LIMIT 1
                     ];
                     if (!existingDefaults.isEmpty()) {
@@ -183,7 +183,7 @@ public with sharing class LeadAssignmentController {
                     }
                 }
                 defaultRule.Name                        = defaultUserId;  // userId stored in Name
-                defaultRule.MVEX__Default_User__c             = true;           // boolean flag
+                defaultRule.Default_User__c             = true;           // boolean flag
                 defaultRule.MVEX__Object_Name__c        = 'Contact';
                 defaultRule.MVEX__Conditions__c         = null;
                 defaultRule.MVEX__Logic_Type__c         = null;
@@ -200,13 +200,13 @@ public with sharing class LeadAssignmentController {
                 if (String.isNotBlank(defaultId)) {
                     toDelete = [
                         SELECT Id FROM MVEX__Lead_Assignment_Setting__c
-                        WHERE Id = :defaultId AND MVEX__Default_User__c = true
+                        WHERE Id = :defaultId AND Default_User__c = true
                         WITH USER_MODE LIMIT 1
                     ];
                 } else {
                     toDelete = [
                         SELECT Id FROM MVEX__Lead_Assignment_Setting__c
-                        WHERE MVEX__Object_Name__c = 'Contact' AND MVEX__Default_User__c = true
+                        WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
                         WITH USER_MODE LIMIT 1
                     ];
                 }

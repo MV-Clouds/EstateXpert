@@ -32,6 +32,7 @@ public with sharing class ListingTriggerHandler {
 
     public void afterUpdateEvent() {
         publishRefreshEvent();
+        publishPortalSyndicationRefreshEvent();
     }
 
     public void afterDeleteEvent() {
@@ -49,6 +50,25 @@ public with sharing class ListingTriggerHandler {
             EventBus.publish(refreshEvt);
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, CLASS_NAME, 'publishRefreshEvent', 'Error while publishing refresh event');
+        }
+    }
+
+    public void publishPortalSyndicationRefreshEvent() {
+        try {
+            List<MVEX__RefreshEvent__e> refreshEvents = new List<MVEX__RefreshEvent__e>();
+            if (recordNewList != null) {
+                for (MVEX__Listing__c listing : recordNewList) {
+                    MVEX__RefreshEvent__e refreshEvt = new MVEX__RefreshEvent__e();
+                    refreshEvt.Feature_Name__c = 'Portal_Syndication';
+                    refreshEvt.Record_Id__c = listing.Id;
+                    refreshEvents.add(refreshEvt);
+                }
+            }
+            if (!refreshEvents.isEmpty()) {
+                EventBus.publish(refreshEvents);
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, CLASS_NAME, 'publishPortalSyndicationRefreshEvent', 'Error while publishing portal syndication refresh event');
         }
     }
     

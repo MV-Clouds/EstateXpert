@@ -124,6 +124,25 @@ public with sharing class PortalSyndicationController {
                 portalWrpList.portalData.add(portalWrapper);
             }
 
+            Boolean isListingActive = false;
+            Boolean isListingAllowedForPortals = false;
+
+            if (String.isNotBlank(listingId)) {
+                String escapeListingId = String.escapeSingleQuotes(listingId);
+                List<MVEX__Listing__c> listings = [SELECT Id, MVEX__Status__c, MVEX__Listing_Allowed_For_Portals__c FROM MVEX__Listing__c WHERE Id = :escapeListingId 
+                                                    WITH USER_MODE LIMIT 1];
+                if (!listings.isEmpty()) {
+                    MVEX__Listing__c currentListing = listings[0];
+                    isListingActive = (currentListing.MVEX__Status__c == 'Active');
+                    isListingAllowedForPortals = (currentListing.MVEX__Listing_Allowed_For_Portals__c == true);
+                    portalWrpList.listingStatus = currentListing.MVEX__Status__c;
+                }
+            }
+
+            portalWrpList.isListingActive = isListingActive;
+            portalWrpList.isListingAllowedForPortals = isListingAllowedForPortals;
+            portalWrpList.isEligibleForPortals = (isListingActive && isListingAllowedForPortals);
+
             portalWrpList.zooplaFieldMappings = getZooplaFieldMappings();
 
             return portalWrpList;
@@ -224,5 +243,9 @@ public with sharing class PortalSyndicationController {
     public class FetchPortalListingRecord {
         @AuraEnabled public List<PortalWrapper> portalData;
         @AuraEnabled public Map<String, String> zooplaFieldMappings;
+        @AuraEnabled public Boolean isListingActive;
+        @AuraEnabled public Boolean isListingAllowedForPortals;
+        @AuraEnabled public Boolean isEligibleForPortals;
+        @AuraEnabled public String listingStatus;
     }
 }

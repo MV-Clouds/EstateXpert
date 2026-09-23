@@ -18,7 +18,7 @@ public without sharing class ContactTriggerHandler {
                 SELECT Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c
                 FROM MVEX__Lead_Assignment_Setting__c
                 WHERE MVEX__Object_Name__c = 'Contact'
-                AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null)
+                AND (Default_User__c = false OR Default_User__c = null)
                 ORDER BY MVEX__User_Order__c ASC
             ];
 
@@ -27,7 +27,7 @@ public without sharing class ContactTriggerHandler {
             List<MVEX__Lead_Assignment_Setting__c> defaultRules = [
                 SELECT Name
                 FROM MVEX__Lead_Assignment_Setting__c
-                WHERE MVEX__Object_Name__c = 'Contact' AND MVEX__Default_User__c = true
+                WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
                 LIMIT 1
             ];
             if (!defaultRules.isEmpty()) {

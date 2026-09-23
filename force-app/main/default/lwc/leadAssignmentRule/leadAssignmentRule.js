@@ -137,7 +137,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
 
     processRules(rules, defaultRuleData) {
         // Extract default assignee from the sentinel record if present
-        if (defaultRuleData && defaultRuleData.MVEX__Default_User__c && defaultRuleData.Name) {
+        if (defaultRuleData && (defaultRuleData?.MVEX__Default_User__c || defaultRuleData?.Default_User__c) && defaultRuleData.Name) {
             const defaultUserName = this.userOptions.find(u => u.value === defaultRuleData.Name)?.label || 'Unknown User';
             this.defaultAssignee = {
                 Id: defaultRuleData.Id,

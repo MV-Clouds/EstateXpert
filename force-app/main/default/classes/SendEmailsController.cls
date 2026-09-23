@@ -315,8 +315,6 @@ public with sharing class SendEmailsController {
             List<GmailIntegrationControllerV1.EmailWrapper> gmailsToSend = new List<GmailIntegrationControllerV1.EmailWrapper>();
             Map<String, Map<String, String>> contactEmailInfoMap = new Map<String, Map<String, String>>();
 
-            String replyToEmail = 'Label.EmailMessageEmailService';
-
             for (Contact recipientContact : primaryContacts) {
                 String personalizedBody = rawBody;
 
@@ -367,9 +365,6 @@ public with sharing class SendEmailsController {
                     gmailsToSend.add(singleGmail);
                 } else {
                     Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-                    if (String.isNotBlank(replyToEmail)) {
-                        email.setReplyTo(replyToEmail);
-                    }
                     email.setToAddresses(new List<String>{recipientContact.Email});
                     if (!ccEmailList.isEmpty()) {
                         email.setCcAddresses(ccEmailList);

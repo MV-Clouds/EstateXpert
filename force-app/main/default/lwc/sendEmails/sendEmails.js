@@ -19,23 +19,15 @@ export default class SendEmails extends LightningElement {
     @track previewObjectName = 'Contact';
 
     @track messagingServiceOptions = [];
+    @track messagingService = '';
+    @track templateRelatedObject = 'Contact';
     @track selectedTemplate = '';
-    @track selectedTemplateType = '';
-    @track templatePreview = {
-        subject: '',
-        body: '',
-        name: ''
-    };
 
-    @track allEmailTemplates = [];
     @track allCustomTemplates = [];
-    @track filteredEmailTemplates = [];
-    @track filteredCustomTemplates = [];
 
     @track listingOptions = [];
     @track selectedListing = null;
     @track selectedListingName = '';
-    @track activeTab = 'All';
 
     @track allContacts = [];
     @track selectedCCContacts = [];
@@ -44,33 +36,11 @@ export default class SendEmails extends LightningElement {
     @track selectedContactsDetails = [];
     @track selectedCCContactsDetails = [];
 
-
     @track isListingDropdownOpen = false;
     @track listingSearchTerm = '';
 
-
-    // Single object to store email details
-    @track campaignDetails = {
-        objectName: 'Contact',
-        templateRelatedObject: 'Contact',
-        templateType: 'EstateXpert Template',
-        messagingService: '',
-        selectedTemplate: '',
-        isObjectDropDownDisabled: false
-    };
-
     @track broadcastGroupOptions = [];
     @track selectedBroadcastGroups = [];
-
-    // Combobox options
-    objectOptions = [
-        { label: 'Contact', value: 'Contact' }
-    ];
-
-    templateTypeOptions = [
-        // { label: 'Email Template', value: 'Email Template' },
-        { label: 'EstateXpert Template', value: 'EstateXpert Template' }
-    ];
 
     get templateObjectOptions() {
         return [
@@ -79,87 +49,35 @@ export default class SendEmails extends LightningElement {
         ];
     }
 
-
     get showSingleListingSelector() {
-        return this.campaignDetails.templateRelatedObject === 'MVEX__Listing__c';
-    }
-
-    // Computed filtered listings based on active tab with enhanced listing data
-    get filteredListings() {
-        let listings;
-        if (this.activeTab === 'All') {
-            listings = this.listingOptions;
-        } else {
-            listings = this.listingOptions.filter(listing => listing.type === this.activeTab);
-        }
-
-        // Add computed classes to each listing (removed typeClass)
-        return listings.map(listing => ({
-            ...listing,
-            listingClass: this.getListingClass(listing)
-        }));
-    }
-
-    // Check if there are no listings
-    get hasNoListings() {
-        return this.listingOptions.length === 0;
-    }
-
-    // Template combobox label based on selection
-    get templateComboboxLabel() {
-        if (this.selectedListing) {
-            return `${this.campaignDetails.templateType} (Generic + Listing Templates)`;
-        }
-        return this.campaignDetails.templateType;
-    }
-
-    // Tab classes for active state
-    get allTabClass() {
-        return this.activeTab === 'All' ? 'slds-button slds-button_brand' : 'slds-button slds-button_neutral';
-    }
-
-    get rentTabClass() {
-        return this.activeTab === 'Rent' ? 'slds-button slds-button_brand' : 'slds-button slds-button_neutral';
-    }
-
-    get saleTabClass() {
-        return this.activeTab === 'Sale' ? 'slds-button slds-button_brand' : 'slds-button slds-button_neutral';
+        return this.templateRelatedObject === 'MVEX__Listing__c';
     }
 
     get isSendDisabled() {
         const hasRecipients = (this.selectedContacts && this.selectedContacts.length > 0) || (this.selectedBroadcastGroups && this.selectedBroadcastGroups.length > 0);
-        const hasMessagingService = !!this.campaignDetails.messagingService;
+        const hasMessagingService = !!this.messagingService;
         const hasTemplate = !!this.selectedTemplate;
         const hasListingIfRequired = !this.showSingleListingSelector || !!this.selectedListing;
         return !hasRecipients || !hasMessagingService || !hasTemplate || !hasListingIfRequired;
     }
 
-    // Template options based on selected template type and listing
+    // Template options based on selected related object
     get availableTemplates() {
-        const relatedObj = this.campaignDetails.templateRelatedObject;
+        const relatedObj = this.templateRelatedObject;
         return this.allCustomTemplates.filter(template =>
             template.objectName === relatedObj || template.objectName === 'Generic'
         );
     }
 
-    // Show template preview only for EstateXpert templates
-    get showTemplatePreview() {
-        return this.campaignDetails.templateType === 'EstateXpert Template' &&
-            this.selectedTemplate &&
-            this.templatePreview.body;
-    }
-
-
-    // Show broadcast groups only when no individual contacts selected and object is selected
+    // Show broadcast groups only when no individual contacts selected
     get showBroadcastGroups() {
-        return this.campaignDetails.objectName &&
-            (this.selectedContacts.length === 0 || this.selectedContacts.length === null) &&
+        return (!this.selectedContacts || this.selectedContacts.length === 0) &&
             this.filteredBroadcastGroups.length > 0;
     }
 
-    // Filter broadcast groups based on selected object
+    // Filter broadcast groups based on Contact object
     get filteredBroadcastGroups() {
-        if (!this.campaignDetails.objectName || !this.broadcastGroupOptions) {
+        if (!this.broadcastGroupOptions) {
             return [];
         }
 
@@ -189,7 +107,6 @@ export default class SendEmails extends LightningElement {
         return (this.selectedContactsDetails ? this.selectedContactsDetails.length : 0) + this.estimatedContactsFromGroups;
     }
 
-
     get selectedTemplateDisalbed() {
         return !this.selectedTemplate;
     }
@@ -197,8 +114,7 @@ export default class SendEmails extends LightningElement {
     connectedCallback() {
         loadStyle(this, MulishFontCss);
         if (this.objectApiName) {
-            this.campaignDetails.objectName = this.objectApiName;
-            this.campaignDetails.isObjectDropDownDisabled = true;
+            this.templateRelatedObject = this.objectApiName;
         }
 
         // Convert selectedContacts from objects to IDs if needed
@@ -262,25 +178,15 @@ export default class SendEmails extends LightningElement {
     loadTemplates() {
         getTemplatesByObject()
             .then(data => {
-                if (data) {
-                    this.allEmailTemplates = data.emailTemplates ? data.emailTemplates.map(template => ({
-                        label: template.label,
-                        value: template.value,
-                        type: template.type,
-                        subject: template.subject,
-                        body: template.body
-                    })) : [];
-
-                    this.allCustomTemplates = data.customTemplates ? data.customTemplates.map(template => ({
+                if (data && data.customTemplates) {
+                    this.allCustomTemplates = data.customTemplates.map(template => ({
                         label: template.label,
                         value: template.value,
                         type: template.type,
                         subject: template.subject,
                         body: template.body,
                         objectName: template.objectName
-                    })) : [];
-
-                    this.filterTemplatesByObject();
+                    }));
                 }
             })
             .catch(error => {
@@ -306,7 +212,6 @@ export default class SendEmails extends LightningElement {
                         selected: false
                     }));
                 }
-                this.activeTab = 'All';
             })
             .catch(error => {
                 this.listingOptions = [];
@@ -430,35 +335,14 @@ export default class SendEmails extends LightningElement {
         }
     }
 
-    // Filter templates based on selected object
-    filterTemplatesByObject() {
-        const objectName = this.campaignDetails.templateRelatedObject;
-
-        if (!objectName) {
-            this.filteredEmailTemplates = [];
-            this.filteredCustomTemplates = [];
-            return;
-        }
-
-        this.filteredEmailTemplates = [...this.allEmailTemplates];
-
-        this.filteredCustomTemplates = this.allCustomTemplates.filter(template =>
-            template.objectName === objectName || template.objectName === 'Generic'
-        );
-    }
-
-
-    // Handle related object change in template selection step (kept for Single Campaign)
+    // Handle related object change in template selection step
     handleRelatedObjectChange(event) {
-        this.campaignDetails.templateRelatedObject = event.detail.value;
-        this.campaignDetails.objectName = event.detail.value;
+        this.templateRelatedObject = event.detail.value;
 
         // Reset selections on related object change
         this.selectedTemplate = '';
         this.selectedListing = null;
         this.selectedListingName = '';
-
-
     }
 
     get filteredListingsOptions() {
@@ -511,21 +395,8 @@ export default class SendEmails extends LightningElement {
         }
     }
 
-
-    // Handle tab click for listing filters
-    handleTabClick(event) {
-        this.activeTab = event.currentTarget.dataset.tab;
-    }
-
-    // Handle campaign field changes
-    handleCampaignFieldChange(event) {
-        const fieldName = event.target.dataset.id;
-        const value = event.detail.value || event.target.value;
-
-        this.campaignDetails = {
-            ...this.campaignDetails,
-            [fieldName]: value
-        };
+    handleMessagingServiceChange(event) {
+        this.messagingService = event.detail.value;
     }
 
     // Handle template selection
@@ -555,12 +426,12 @@ export default class SendEmails extends LightningElement {
         }
     }
 
-    // Directly send emails without creating campaign records
+    // Directly send emails
     handleSendEmails() {
         sendEmails({
             templateId: this.selectedTemplate,
-            relatedObject: this.campaignDetails.templateRelatedObject,
-            messagingService: this.campaignDetails.messagingService,
+            relatedObject: this.templateRelatedObject,
+            messagingService: this.messagingService,
             listingId: this.selectedListing || null,
             primaryContactIds: this.selectedContacts || [],
             broadcastGroupIds: this.selectedBroadcastGroups || [],
@@ -594,7 +465,7 @@ export default class SendEmails extends LightningElement {
 
     // Validate form before submission
     validateForm() {
-        if (!this.campaignDetails.messagingService) {
+        if (!this.messagingService) {
             this.showToast('Error', 'Please select a messaging service.', 'error');
             return false;
         }
@@ -614,43 +485,19 @@ export default class SendEmails extends LightningElement {
         return true;
     }
 
-    // Add this method if you need custom validation
-    validateContacts() {
-        const primaryCombobox = this.template.querySelector('c-custom-combobox');
-        if (this.selectedContacts.length === 0) {
-            primaryCombobox?.isInvalidInput(true);
-            return false;
-        }
-        primaryCombobox?.isInvalidInput(false);
-        return true;
-    }
-
     // Close modal
     closeModal() {
         this.selectedTemplate = '';
-        this.selectedTemplateType = '';
-        this.templatePreview = { subject: '', body: '', name: '' };
         this.selectedListing = null;
         this.selectedListingName = '';
-        this.activeTab = 'All';
+        this.messagingService = '';
+        this.templateRelatedObject = this.objectApiName || 'Contact';
 
         // Reset contact selections
         this.selectedContacts = [];
         this.selectedCCContacts = [];
         this.selectedContactsDetails = [];
         this.selectedCCContactsDetails = [];
-
-
-
-        this.campaignDetails = {
-            objectName: 'Contact',
-            templateRelatedObject: 'Contact',
-            templateType: 'EstateXpert Template',
-            messagingService: '',
-            selectedTemplate: '',
-            isObjectDropDownDisabled: !!this.objectApiName
-        };
-
         this.selectedBroadcastGroups = [];
 
         this.dispatchEvent(new CustomEvent('close'));
@@ -675,15 +522,10 @@ export default class SendEmails extends LightningElement {
     handlePreviewSingleTemplate() {
         if (this.selectedTemplate) {
             this.selectedTemplateId = this.selectedTemplate;
-            this.previewObjectName = this.campaignDetails.templateRelatedObject;
+            this.previewObjectName = this.templateRelatedObject;
             this.templateStatus = true;
             this.isPreviewModal = true;
         }
-    }
-
-    // Method to compute listing class (removed type class logic)
-    getListingClass(listing) {
-        return `listing-item slds-box slds-box_x-small ${this.selectedListing === listing.value ? 'selected' : ''}`;
     }
 
     // Handle broadcast group selection

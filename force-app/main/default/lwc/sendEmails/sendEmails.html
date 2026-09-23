@@ -16,7 +16,7 @@
                     </header>
 
                     <div class="slds-modal__content slds-p-around_medium custom-content">
-                        <div class="combined-campaign-wrapper animate-fade-in">
+                        <div class="combined-email-wrapper animate-fade-in">
                             <!-- Section 1: Email Details & Template Configuration -->
                             <div class="section-card">
                                 <div class="section-header slds-m-bottom_small">
@@ -26,15 +26,15 @@
                                 <div class="config-grid slds-m-bottom_medium">
                                     <div class="config-item">
                                         <lightning-combobox name="messagingService" label="Messaging Service"
-                                            value={campaignDetails.messagingService} placeholder="Choose service..."
+                                            value={messagingService} placeholder="Choose service..."
                                             options={messagingServiceOptions} data-id="messagingService"
-                                            dropdown-alignment="auto" onchange={handleCampaignFieldChange} required
+                                            dropdown-alignment="auto" onchange={handleMessagingServiceChange} required
                                             class="custom-combobox"></lightning-combobox>
                                     </div>
                                     <div class="config-item">
                                         <lightning-combobox name="templateRelatedObject"
                                             label="Select Related Object"
-                                            value={campaignDetails.templateRelatedObject}
+                                            value={templateRelatedObject}
                                             options={templateObjectOptions} onchange={handleRelatedObjectChange}
                                             dropdown-alignment="auto" required class="custom-combobox">
                                         </lightning-combobox>

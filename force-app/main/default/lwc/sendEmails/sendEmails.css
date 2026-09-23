@@ -83,7 +83,7 @@
     z-index: 5;
 }
 
-.combined-campaign-wrapper {
+.combined-email-wrapper {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -93,19 +93,6 @@
 .template-section {
     display: flex;
     flex-direction: column;
-}
-
-/* Email Details Form */
-.campaign-details {
-    padding: 1.25rem;
-    flex: 1;
-    overflow-y: auto;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
-        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    margin-bottom: 1rem;
 }
 
 .form-grid {
@@ -1142,12 +1129,7 @@
     cursor: not-allowed;
 }
 
-/* Recipient & Email Details */
-.campaign-info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
+
 
 .recipient-selection-container {
     flex: 1;
@@ -1337,8 +1319,7 @@
 /* Responsive fixes */
 @media (max-width: 1024px) {
 
-    .recipient-grid,
-    .campaign-info-grid {
+    .recipient-grid {
         grid-template-columns: 1fr;
     }
 }

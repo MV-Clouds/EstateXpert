@@ -162,11 +162,20 @@ public with sharing class InstagramPostController {
     }
 
     private static String getMediaTypeFromUrl(String mediaUrl) {
-        if (mediaUrl.toLowerCase().endsWith('.mp4')) {
-            return 'REELS';
-        } else {
+        if (String.isBlank(mediaUrl)) {
             return 'IMAGE';
         }
+        
+        String lowerUrl = mediaUrl.toLowerCase();
+        if (lowerUrl.contains('?')) {
+            lowerUrl = lowerUrl.substringBefore('?');
+        }
+        
+        if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov')) {
+            return 'REELS';
+        }
+        
+        return 'IMAGE';
     }
 
     @AuraEnabled(cacheable=true)
@@ -262,8 +271,12 @@ public with sharing class InstagramPostController {
                     WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE
                 ];
         
-                for (   MVEX__Property_File__c file : propertyFiles) {
-                    mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
+                for (MVEX__Property_File__c file : propertyFiles) {
+                    if (String.isNotBlank(file.MVEX__ExternalLink__c)) {
+                        mediaUrlMap.put(file.Name, file.MVEX__ExternalLink__c);
+                    } else {
+                        mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
+                    }
                 }
             }
         

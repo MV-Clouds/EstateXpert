@@ -33,9 +33,9 @@ public with sharing class PortalSyndicationController {
                 if (portalName == 'Zoopla') {
                     ZooplaIntegrationController.getListingRecordForSync(listingId, portalId);
                 } else if (portalName == 'Rightmove') {
-                    // RightmoveIntegrationController.getListingRecordForSync(listingId, portalId);
+                    RightmoveIntegrationController.getListingRecordForSync(listingId, portalId);
                 } else if (portalName == 'Rightmove Overseas') {
-                    // RightmoveOverseaIntegration.getListingRecordForSync(listingId, portalId);
+                    RightmoveOverseaIntegration.getListingRecordForSync(listingId, portalId);
                 } else if (portalName == 'Propertyfinder') {
                     PropertyFinderIntegration.getListingRecordForSync(listingId, portalId, 'create');
                 }
@@ -50,7 +50,7 @@ public with sharing class PortalSyndicationController {
                 if (portalName == 'Zoopla') {
                     ZooplaIntegrationController.zooplaDeleteListings(listingsJson);
                 } else if (portalName == 'Rightmove' || portalName == 'Rightmove Overseas') {
-                    // RightmoveIntegrationController.rightmoveDeleteListings(listingsJson);
+                    RightmoveIntegrationController.rightmoveDeleteListings(listingsJson);
                 } else if (portalName == 'Propertyfinder') {
                     PropertyFinderIntegration.propertyFinderDeleteListings(listingsJson);
                 }

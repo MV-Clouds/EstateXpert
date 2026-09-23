@@ -36,9 +36,22 @@ public with sharing class PlatformEventController {
     * @description : Used to publish MVEX__RefreshEvent__e platform event to notify clients to refresh.
     */
     public static void publishRefreshEvent(String featureName) {
+        publishRefreshEvent(featureName, null);
+    }
+
+    /**
+    * Method Name : publishRefreshEvent
+    * @param {string} featureName - The feature name (e.g., Marketing_List, Listing_Manager)
+    * @param {string} recordId - The record Id to refresh specific client views
+    * @description : Used to publish MVEX__RefreshEvent__e platform event to notify clients to refresh.
+    */
+    public static void publishRefreshEvent(String featureName, String recordId) {
         try {
             MVEX__RefreshEvent__e event = new MVEX__RefreshEvent__e();
             event.Feature_Name__c = featureName;
+            if (String.isNotBlank(recordId)) {
+                event.Record_Id__c = recordId;
+            }
             EventBus.publish(event);
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'PlatformEventController', 'publishRefreshEvent', 'Error while publishing refresh event.');

@@ -4,25 +4,25 @@ private class LeadAssignmentControllerTest {
     @testSetup
     static void setupTestData() {
         // Create test rules
-        Lead_Assignment_Setting__c rule1 = new Lead_Assignment_Setting__c(
+        MVEX__Lead_Assignment_Setting__c rule1 = new MVEX__Lead_Assignment_Setting__c(
             Name = 'Test Rule 1',
-            Conditions__c = '{"field":"Status","operator":"equals","value":"New"}',
-            Object_Name__c = 'Contact',
-            Logic_Type__c = 'AND',
-            Logical_Expression__c = '1',
-            User_Order__c = 1,
-            Default_User__c = false
+            MVEX__Conditions__c = '{"field":"Status","operator":"equals","value":"New"}',
+            MVEX__Object_Name__c = 'Contact',
+            MVEX__Logic_Type__c = 'AND',
+            MVEX__Logical_Expression__c = '1',
+            MVEX__User_Order__c = 1,
+            MVEX__Default_User__c = false
         );
-        Lead_Assignment_Setting__c rule2 = new Lead_Assignment_Setting__c(
+        MVEX__Lead_Assignment_Setting__c rule2 = new MVEX__Lead_Assignment_Setting__c(
             Name = 'Test Rule 2',
-            Conditions__c = '{"field":"Status","operator":"equals","value":"Qualified"}',
-            Object_Name__c = 'Contact',
-            Logic_Type__c = 'OR',
-            Logical_Expression__c = '1 OR 2',
-            User_Order__c = 2,
-            Default_User__c = false
+            MVEX__Conditions__c = '{"field":"Status","operator":"equals","value":"Qualified"}',
+            MVEX__Object_Name__c = 'Contact',
+            MVEX__Logic_Type__c = 'OR',
+            MVEX__Logical_Expression__c = '1 OR 2',
+            MVEX__User_Order__c = 2,
+            MVEX__Default_User__c = false
         );
-        insert new List<Lead_Assignment_Setting__c>{ rule1, rule2 };
+        insert new List<MVEX__Lead_Assignment_Setting__c>{ rule1, rule2 };
     }
     
     @isTest
@@ -67,8 +67,8 @@ private class LeadAssignmentControllerTest {
         System.assertEquals(insertResult, updateResult, 'Update should return same rule ID');
         
         // Test Save (bulk update user orders)
-        List<Lead_Assignment_Setting__c> existingRules = [
-            SELECT Id FROM Lead_Assignment_Setting__c WHERE Object_Name__c = 'Contact' AND (Default_User__c = false OR Default_User__c = null) LIMIT 2
+        List<MVEX__Lead_Assignment_Setting__c> existingRules = [
+            SELECT Id FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact' AND (MVEX__Default_User__c = false OR MVEX__Default_User__c = null) LIMIT 2
         ];
         List<Map<String, Object>> saveRules = new List<Map<String, Object>>{
             new Map<String, Object>{ 'Id' => existingRules[0].Id, 'User_Order' => 10 },

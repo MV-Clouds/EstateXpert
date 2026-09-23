@@ -24,7 +24,7 @@ public class ContactTriggerHandlerTest {
         List<String> numOps = new List<String>{'lessThan', 'greaterThan', 'lessOrEqual', 'greaterOrEqual', 'invalidOp'};
         List<String> values = new List<String>{'100', '10', '50', '50', '0'};
         
-        List<Lead_Assignment_Setting__c> settings = new List<Lead_Assignment_Setting__c>();
+        List<MVEX__Lead_Assignment_Setting__c> settings = new List<MVEX__Lead_Assignment_Setting__c>();
 
         for(Integer i = 0; i < numOps.size(); i++) {
             ContactTriggerHandler.Condition cond = new ContactTriggerHandler.Condition();
@@ -33,13 +33,13 @@ public class ContactTriggerHandlerTest {
             cond.Value = values[i];
             cond.Order = 1;
 
-            settings.add(new Lead_Assignment_Setting__c(
+            settings.add(new MVEX__Lead_Assignment_Setting__c(
                 Name = UserInfo.getUserId(),
-                Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cond}),
-                Logic_Type__c = 'All',
-                User_Order__c = i,
-                Object_Name__c = 'Contact',
-                Default_User__c = false
+                MVEX__Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cond}),
+                MVEX__Logic_Type__c = 'All',
+                MVEX__User_Order__c = i,
+                MVEX__Object_Name__c = 'Contact',
+                MVEX__Default_User__c = false
             ));
         }
         insert settings;
@@ -68,14 +68,14 @@ public class ContactTriggerHandlerTest {
         ContactTriggerHandler.Condition c3 = new ContactTriggerHandler.Condition();
         c3.Lead_Field = 'LeadSource'; c3.Condition = 'equals'; c3.Value = 'Web'; c3.Order = 3;
 
-        Lead_Assignment_Setting__c rule = new Lead_Assignment_Setting__c(
+        MVEX__Lead_Assignment_Setting__c rule = new MVEX__Lead_Assignment_Setting__c(
             Name = UserInfo.getUserId(),
-            Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{c1, c2, c3}),
-            Logic_Type__c = 'Custom',
-            Logical_Expression__c = '(1 OR 2) AND 3',
-            User_Order__c = 1,
-            Object_Name__c = 'Contact',
-            Default_User__c = false
+            MVEX__Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{c1, c2, c3}),
+            MVEX__Logic_Type__c = 'Custom',
+            MVEX__Logical_Expression__c = '(1 OR 2) AND 3',
+            MVEX__User_Order__c = 1,
+            MVEX__Object_Name__c = 'Contact',
+            MVEX__Default_User__c = false
         );
         insert rule;
 
@@ -92,7 +92,7 @@ public class ContactTriggerHandlerTest {
         Contact con = new Contact(LastName = 'Check', Description = 'Apple;Orange');
         
         List<String> ops = new List<String>{'startsWith', 'contains', 'doesNotContain', 'includes', 'excludes', 'invalid'};
-        List<Lead_Assignment_Setting__c> settings = new List<Lead_Assignment_Setting__c>();
+        List<MVEX__Lead_Assignment_Setting__c> settings = new List<MVEX__Lead_Assignment_Setting__c>();
 
         for(String op : ops) {
             ContactTriggerHandler.Condition c = new ContactTriggerHandler.Condition();
@@ -100,13 +100,13 @@ public class ContactTriggerHandlerTest {
             c.Condition = op;
             c.Value = 'Apple';
             c.Order = 1;
-            settings.add(new Lead_Assignment_Setting__c(
+            settings.add(new MVEX__Lead_Assignment_Setting__c(
                 Name = UserInfo.getUserId(),
-                Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{c}),
-                Logic_Type__c = 'All',
-                User_Order__c = 1,
-                Object_Name__c = 'Contact',
-                Default_User__c = false
+                MVEX__Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{c}),
+                MVEX__Logic_Type__c = 'All',
+                MVEX__User_Order__c = 1,
+                MVEX__Object_Name__c = 'Contact',
+                MVEX__Default_User__c = false
             ));
         }
 
@@ -115,13 +115,13 @@ public class ContactTriggerHandlerTest {
         cNull.Lead_Field = 'FirstName'; // FirstName is null on the record
         cNull.Condition = 'notEqualsTo';
         cNull.Value = 'Something';
-        settings.add(new Lead_Assignment_Setting__c(
+        settings.add(new MVEX__Lead_Assignment_Setting__c(
             Name = UserInfo.getUserId(),
-            Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cNull}),
-            Logic_Type__c = 'All',
-            User_Order__c = 10,
-            Object_Name__c = 'Contact',
-            Default_User__c = false
+            MVEX__Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cNull}),
+            MVEX__Logic_Type__c = 'All',
+            MVEX__User_Order__c = 10,
+            MVEX__Object_Name__c = 'Contact',
+            MVEX__Default_User__c = false
         ));
 
         insert settings;
@@ -136,10 +136,10 @@ public class ContactTriggerHandlerTest {
         Contact con = new Contact(FirstName = 'Fallback', LastName = 'Lead', LeadSource = 'Other');
         
         // Insert a default assignee setting
-        Lead_Assignment_Setting__c defaultRule = new Lead_Assignment_Setting__c(
+        MVEX__Lead_Assignment_Setting__c defaultRule = new MVEX__Lead_Assignment_Setting__c(
             Name = UserInfo.getUserId(),
-            Object_Name__c = 'Contact',
-            Default_User__c = true
+            MVEX__Object_Name__c = 'Contact',
+            MVEX__Default_User__c = true
         );
         insert defaultRule;
 
@@ -171,7 +171,7 @@ public class ContactTriggerHandlerTest {
 
     @isTest
     static void testExceptionBlocks() {
-        delete [SELECT Id FROM Lead_Assignment_Setting__c];
+        delete [SELECT Id FROM MVEX__Lead_Assignment_Setting__c];
         
         Test.startTest();
         
@@ -179,27 +179,27 @@ public class ContactTriggerHandlerTest {
         ContactTriggerHandler.handleLeadAssignment(null, null);
         
         // 2. Force error in evaluateRule (JSON Deserialization error)
-        Lead_Assignment_Setting__c badRule = new Lead_Assignment_Setting__c(
-            Conditions__c = '{ invalid json }',
-            Logic_Type__c = 'All',
-            Object_Name__c = 'Contact'
+        MVEX__Lead_Assignment_Setting__c badRule = new MVEX__Lead_Assignment_Setting__c(
+            MVEX__Conditions__c = '{ invalid json }',
+            MVEX__Logic_Type__c = 'All',
+            MVEX__Object_Name__c = 'Contact'
         );
         // We use a contact to try and trigger the rule evaluation
         Contact con = new Contact(LastName = 'Test');
-        insert new Lead_Assignment_Setting__c(Name = UserInfo.getUserId(), Conditions__c = '!!', Logic_Type__c = 'All', User_Order__c = 1, Object_Name__c = 'Contact');
+        insert new MVEX__Lead_Assignment_Setting__c(Name = UserInfo.getUserId(), MVEX__Conditions__c = '!!', MVEX__Logic_Type__c = 'All', MVEX__User_Order__c = 1, MVEX__Object_Name__c = 'Contact');
         ContactTriggerHandler.handleLeadAssignment(new List<Contact>{con}, null);
 
         // 3. Force error in notifyOwner
         ContactTriggerHandler.notifyOwner(null, null);
 
         // 4. Force error in tokenizeExpression/evaluateLogicalExpression
-        Lead_Assignment_Setting__c badLogicRule = new Lead_Assignment_Setting__c(
+        MVEX__Lead_Assignment_Setting__c badLogicRule = new MVEX__Lead_Assignment_Setting__c(
             Name = UserInfo.getUserId(),
-            Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>()),
-            Logic_Type__c = 'Custom',
-            Logical_Expression__c = '1 AND (2 OR)',
-            User_Order__c = 1,
-            Object_Name__c = 'Contact'
+            MVEX__Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>()),
+            MVEX__Logic_Type__c = 'Custom',
+            MVEX__Logical_Expression__c = '1 AND (2 OR)',
+            MVEX__User_Order__c = 1,
+            MVEX__Object_Name__c = 'Contact'
         );
         // Note: The evaluateLogicalExpression is wrapped in try-catch
         
@@ -216,7 +216,7 @@ public class ContactTriggerHandlerTest {
         c1.Condition = 'equals';
         
         // Logical expression edge cases
-        Lead_Assignment_Setting__c r1 = new Lead_Assignment_Setting__c(Name=UserInfo.getUserId(), Conditions__c='[{"Order":1}]', Logic_Type__c='Custom', Logical_Expression__c='(1) OR 2', Object_Name__c='Contact');
+        MVEX__Lead_Assignment_Setting__c r1 = new MVEX__Lead_Assignment_Setting__c(Name=UserInfo.getUserId(), MVEX__Conditions__c='[{\"Order\":1}]', MVEX__Logic_Type__c='Custom', MVEX__Logical_Expression__c='(1) OR 2', MVEX__Object_Name__c='Contact');
         insert r1;
 
         Contact con = new Contact(FirstName = 'Test',LastName = 'Test');
@@ -233,7 +233,7 @@ public class ContactTriggerHandlerTest {
 
     private static Boolean testEvaluateCondition(Contact con, String field, String op, String val) {
         // Clear existing settings
-        delete [SELECT Id FROM Lead_Assignment_Setting__c];
+        delete [SELECT Id FROM MVEX__Lead_Assignment_Setting__c];
         
         ContactTriggerHandler.Condition cond = new ContactTriggerHandler.Condition();
         cond.Lead_Field = field;
@@ -244,12 +244,12 @@ public class ContactTriggerHandlerTest {
         // Create a unique dummy user/group ID for matching
         String testOwnerId = UserInfo.getUserId();
         
-        Lead_Assignment_Setting__c rule = new Lead_Assignment_Setting__c(
+        MVEX__Lead_Assignment_Setting__c rule = new MVEX__Lead_Assignment_Setting__c(
             Name = testOwnerId,
-            Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cond}),
-            Logic_Type__c = 'All',
-            User_Order__c = 1,
-            Object_Name__c = 'Contact'
+            MVEX__Conditions__c = JSON.serialize(new List<ContactTriggerHandler.Condition>{cond}),
+            MVEX__Logic_Type__c = 'All',
+            MVEX__User_Order__c = 1,
+            MVEX__Object_Name__c = 'Contact'
         );
         insert rule;
         

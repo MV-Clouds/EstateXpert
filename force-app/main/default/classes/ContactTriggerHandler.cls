@@ -24,10 +24,10 @@ public without sharing class ContactTriggerHandler {
 
             // Fetch the default assignee record 
             String defaultAssigneeUserId = null;
-            List<Lead_Assignment_Setting__c> defaultRules = [
+            List<MVEX__Lead_Assignment_Setting__c> defaultRules = [
                 SELECT Name
-                FROM Lead_Assignment_Setting__c
-                WHERE Object_Name__c = 'Contact' AND Default_User__c = true
+                FROM MVEX__Lead_Assignment_Setting__c
+                WHERE MVEX__Object_Name__c = 'Contact' AND MVEX__Default_User__c = true
                 LIMIT 1
             ];
             if (!defaultRules.isEmpty()) {

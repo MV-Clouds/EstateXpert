@@ -32,7 +32,7 @@ public without sharing class WhatsappConfigController {
             lastModifiedDate = '';
         }
 
-        List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt order by SystemModstamp desc];
+        List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt  WHERE Client_Id__c != null  ORDER BY SystemModstamp desc];
         if (embeddedConfig.size() > 0) {
             clientId = embeddedConfig[0].Client_Id__c;
             clientSecret = embeddedConfig[0].Client_Secret__c;
@@ -57,7 +57,7 @@ public without sharing class WhatsappConfigController {
     @RemoteAction
     public static String saveFBLoginDetails(String sAccessToken, String phoneId, String wabaId, String appId) {
         try {
-            List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt order by SystemModstamp desc];
+            List<MVEX__WBConnect_Configuration__mdt> embeddedConfig = [SELECT Id, Config_Id__c, Client_Secret__c, Client_Id__c FROM MVEX__WBConnect_Configuration__mdt WHERE Client_Id__c != null ORDER BY SystemModstamp desc];
             if (embeddedConfig.size() < 1) {
                 return 'Failure';
             }

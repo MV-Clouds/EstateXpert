@@ -155,9 +155,9 @@
             </div>
         </template>
         <template if:false={isContactDataAvailable}>
-            <div class="no-prop">
-                <img src={NoDataImageUrl} class="no-data-img" alt="No Data Found">
-                <p>No related contacts found for this property listing.</p>
+            <div class="exp-no-data-container">
+                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                <div class="exp-no-data-message">No related contacts found for this property listing.</div>
             </div>
         </template>
     </div>

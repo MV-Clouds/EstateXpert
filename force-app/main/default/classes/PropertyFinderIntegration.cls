@@ -17,8 +17,8 @@ public with sharing class PropertyFinderIntegration {
         try {
             String escapePortalId = String.escapeSingleQuotes(portalId);
 
-            List<Portal__c> portalPropertyFinder = [SELECT Id, Field_Mapping__c, Portal_Configuration__c, Is_Active__c FROM Portal__c 
-                                                        WHERE Id =: escapePortalId AND Is_Active__c = true WITH USER_MODE LIMIT 1];
+            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
+                                                        WHERE Id =: escapePortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
 
             if (portalPropertyFinder.isEmpty()) {
                 response.status = 'Failed';
@@ -26,8 +26,8 @@ public with sharing class PropertyFinderIntegration {
                 return response;
             }
 
-            Portal__c propertyFinderPortal = portalPropertyFinder[0];
-            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.Portal_Configuration__c);
+            MVEX__Portal__c propertyFinderPortal = portalPropertyFinder[0];
+            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.MVEX__Portal_Configuration__c);
 
             String apiKey = (String) configMap.get('apiKey');
             String apiSecret = (String) configMap.get('apiSecret');
@@ -86,18 +86,18 @@ public with sharing class PropertyFinderIntegration {
                 listingInfo.put(listingReference, listingDetails);
             }
             
-            List<Listing__c> properties = [SELECT Id, Name, Broker_s_Listing_ID__c FROM Listing__c WHERE Broker_s_Listing_ID__c IN :listingReferences 
+            List<MVEX__Listing__c> properties = [SELECT Id, Name, MVEX__Broker_s_Listing_ID__c FROM MVEX__Listing__c WHERE MVEX__Broker_s_Listing_ID__c IN :listingReferences 
                                             WITH USER_MODE ORDER BY Name ASC];
 
             List<Map<String, Object>> resultData = new List<Map<String, Object>>();
             
-            for (Listing__c property : properties) {
+            for (MVEX__Listing__c property : properties) {
                 Map<String, Object> resultItem = new Map<String, Object>();
                 resultItem.put('id', property.Id);
                 resultItem.put('name', property.Name);
-                resultItem.put('listing_reference', property.Broker_s_Listing_ID__c);
-                resultItem.put('updateDate', listingInfo.get(property.Broker_s_Listing_ID__c).get('updateDate'));
-                resultItem.put('channel', listingInfo.get(property.Broker_s_Listing_ID__c).get('channel'));
+                resultItem.put('listing_reference', property.MVEX__Broker_s_Listing_ID__c);
+                resultItem.put('updateDate', listingInfo.get(property.MVEX__Broker_s_Listing_ID__c).get('updateDate'));
+                resultItem.put('channel', listingInfo.get(property.MVEX__Broker_s_Listing_ID__c).get('channel'));
                 resultData.add(resultItem);
             }
             
@@ -119,17 +119,17 @@ public with sharing class PropertyFinderIntegration {
             String escapeListingId = String.escapeSingleQuotes(listingId);
             String escapePortalId = String.escapeSingleQuotes(portalId);
             String pfListingId = null;
-            List<Portal__c> portalPropertyFinder = [SELECT Id, Field_Mapping__c, Portal_Configuration__c, Is_Active__c FROM Portal__c WHERE Id =: escapePortalId AND Is_Active__c = true WITH USER_MODE LIMIT 1];
+            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id =: escapePortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
 
             if (portalPropertyFinder.isEmpty()) {
                 updatePortalListingRecord(listingId, portalId, 'Portal configuration is missing.', 'Exception');
                 return;
             }
 
-            Portal__c propertyFinderPortal = portalPropertyFinder[0];
+            MVEX__Portal__c propertyFinderPortal = portalPropertyFinder[0];
 
-            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.Field_Mapping__c);
-            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.Portal_Configuration__c);
+            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.MVEX__Field_Mapping__c);
+            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.MVEX__Portal_Configuration__c);
             Map<String, Object> finalMapping = new Map<String, Object>();
 
             String apiKey = (String) configMap.get('apiKey');
@@ -159,7 +159,7 @@ public with sharing class PropertyFinderIntegration {
                     pfListingId = (String) listingRecord.get('MVEX__PF_Listing_ID__c');
                 }
 
-                List<Property_File__c> media = [SELECT Id, BaseUrl__c, ExternalLink__c, Tags__c, MVEX__Original_Height__c, MVEX__Original_Width__c, LastModifiedDate FROM Property_File__c WHERE Property__c = :propertyId AND IsOnPortalFeed__c = true WITH USER_MODE Order BY Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC];
+                List<MVEX__Property_File__c> media = [SELECT Id, MVEX__BaseUrl__c, MVEX__ExternalLink__c, MVEX__Tags__c, MVEX__Original_Height__c, MVEX__Original_Width__c, LastModifiedDate FROM MVEX__Property_File__c WHERE MVEX__Property__c = :propertyId AND MVEX__IsOnPortalFeed__c = true WITH USER_MODE Order BY MVEX__Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC];
                 
                 for (String key : jsonMap.keySet()) {
                     String label = (String) jsonMap.get(key);
@@ -259,35 +259,35 @@ public with sharing class PropertyFinderIntegration {
                 portalIds.add(listing.get('portalId'));
             }
 
-            List<Portal__c> portalPropertyFinder = [SELECT Id, Field_Mapping__c, Portal_Configuration__c, Is_Active__c FROM Portal__c 
-                                                    WHERE Id IN :portalIds AND Is_Active__c = true WITH USER_MODE];
+            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
+                                                    WHERE Id IN :portalIds AND MVEX__Is_Active__c = true WITH USER_MODE];
 
             if (portalPropertyFinder.isEmpty()) {
                 return;
             }
 
-            Map<Id, Portal__c> portalMap = new Map<Id, Portal__c>(portalPropertyFinder);
+            Map<Id, MVEX__Portal__c> portalMap = new Map<Id, MVEX__Portal__c>(portalPropertyFinder);
             
             Set<String> listingIds = listingsMap.keySet();
             String query = 'SELECT Id, MVEX__PF_Listing_ID__c FROM MVEX__Listing__c WHERE Id IN :listingIds';
-            List<Listing__c> listings = Database.query(query, AccessLevel.USER_MODE);
+            List<MVEX__Listing__c> listings = Database.query(query, AccessLevel.USER_MODE);
 
             // Map to store PortalListing Id and response code for failed deletions
             Map<String, Object> failedDeletions = new Map<String, Object>();
             Map<String, Object> failedDeletionsForListings = new Map<String, Object>();
 
             Http h3 = new Http();
-            for (Listing__c listing : listings) {
+            for (MVEX__Listing__c listing : listings) {
                 Map<String, String> listingMap = listingsMap.get(listing.Id);
-                Portal__c portal = portalMap.get(listingMap.get('portalId'));
+                MVEX__Portal__c portal = portalMap.get(listingMap.get('portalId'));
                 String portalListingId = listingMap.get('portalListingId');
                 
-                if (portal != null && listing.PF_Listing_ID__c != null) {
-                    Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(portal.Portal_Configuration__c);
+                if (portal != null && listing.MVEX__PF_Listing_ID__c != null) {
+                    Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(portal.MVEX__Portal_Configuration__c);
                     String apiKey = (String) configMap.get('apiKey');
                     String apiSecret = (String) configMap.get('apiSecret');
 
-                    String endpoint = propertyFinderProductionEndpoint + 'listings/' + listing.PF_Listing_ID__c;
+                    String endpoint = propertyFinderProductionEndpoint + 'listings/' + listing.MVEX__PF_Listing_ID__c;
                     String accessToken = getAccesstoken(apiKey, apiSecret);
 
                     HttpRequest req3 = new HttpRequest();
@@ -310,20 +310,20 @@ public with sharing class PropertyFinderIntegration {
         }
     }
 
-    // Method to update PortalListing__c for failed deletions and store response in API_Response_Unpublish__c.
-    // Note: Successful deletions are not updated in PortalListing__c; only failed deletions are processed and logged.
+    // Method to update MVEX__PortalListing__c for failed deletions and store response in MVEX__API_Response_Unpublish__c.
+    // Note: Successful deletions are not updated in MVEX__PortalListing__c; only failed deletions are processed and logged.
     public static void updatePortalListingRecordForDeletion(Map<String, Object> failedDeletions, Map<String, Object> failedDeletionsForListings, Set<String> listingIds) {
         if (failedDeletions == null || failedDeletions.isEmpty()) {
             return;
         }
         try {
-            List<PortalListing__c> toUpdate = [SELECT Id, API_Response_Unpublish__c, SystemIsActive__c FROM PortalListing__c
+            List<MVEX__PortalListing__c> toUpdate = [SELECT Id, MVEX__API_Response_Unpublish__c, MVEX__SystemIsActive__c FROM MVEX__PortalListing__c
                                                 WHERE Id IN :failedDeletions.keySet() WITH USER_MODE];
 
-            List<PortalListing__c> updateList = new List<PortalListing__c>();
-            for (PortalListing__c pl : toUpdate) {
-                pl.API_Response_Unpublish__c = String.valueOf(failedDeletions.get(pl.Id));
-                pl.SystemIsActive__c = true;
+            List<MVEX__PortalListing__c> updateList = new List<MVEX__PortalListing__c>();
+            for (MVEX__PortalListing__c pl : toUpdate) {
+                pl.MVEX__API_Response_Unpublish__c = String.valueOf(failedDeletions.get(pl.Id));
+                pl.MVEX__SystemIsActive__c = true;
                 updateList.add(pl);
             }
             if (!updateList.isEmpty()) {
@@ -345,9 +345,9 @@ public with sharing class PropertyFinderIntegration {
             String pfListingId = (String) jsonMap.get('id');
             if (pfListingId != null) {
                 // Update the listing record with the Property Finder listing ID
-                List<Listing__c> listingsToUpdate = [SELECT Id, PF_Listing_ID__c FROM Listing__c WHERE Id =: listingId WITH USER_MODE];
+                List<MVEX__Listing__c> listingsToUpdate = [SELECT Id, MVEX__PF_Listing_ID__c FROM MVEX__Listing__c WHERE Id =: listingId WITH USER_MODE];
                 if (!listingsToUpdate.isEmpty()) {
-                    listingsToUpdate[0].PF_Listing_ID__c = pfListingId;
+                    listingsToUpdate[0].MVEX__PF_Listing_ID__c = pfListingId;
                     update as user listingsToUpdate;
                 }
             }
@@ -359,12 +359,12 @@ public with sharing class PropertyFinderIntegration {
     public static void updatePortalListingRecord(String listingId, String portalId, String apiResponse, String status) {
         try {
             if (status == 'Success') {
-                PortalListing__c newPortalListing = new PortalListing__c();
-                newPortalListing.Listing__c = listingId;
-                newPortalListing.Portal__c = portalId;
-                newPortalListing.SystemIsActive__c = true;
-                newPortalListing.Listed_Date__c = System.today();
-                newPortalListing.API_Response__c = apiResponse;
+                MVEX__PortalListing__c newPortalListing = new MVEX__PortalListing__c();
+                newPortalListing.MVEX__Listing__c = listingId;
+                newPortalListing.MVEX__Portal__c = portalId;
+                newPortalListing.MVEX__SystemIsActive__c = true;
+                newPortalListing.MVEX__Listed_Date__c = System.today();
+                newPortalListing.MVEX__API_Response__c = apiResponse;
                 insert as user newPortalListing;  
             }
             PlatformEventController.publishEvent(status, apiResponse, 'Property Finder', listingId);

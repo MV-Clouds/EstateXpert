@@ -10,7 +10,7 @@ public with sharing class ZooplaJSONController {
     /**
     * Method Name : createInputData
     * @param finalMapping - Map<String, Object>
-    * @param mediaList - List<Property_File__c>
+    * @param mediaList - List<MVEX__Property_File__c>
     * @return String
     * @description : Used to create input data for Zoopla.
     */

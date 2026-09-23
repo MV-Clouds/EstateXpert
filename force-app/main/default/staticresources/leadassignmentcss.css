@@ -41,3 +41,25 @@
   --slds-c-icon-color-foreground-default: #ffffff !important;
   --slds-g-shadow-outline-focus-1: none !important;
 }
+
+.exp-no-data-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+}
+
+.exp-no-data-container img {
+  width: 200px;
+}
+
+.exp-no-data-message {
+  color: #0176D3;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 0.85rem;
+  text-align: center;
+  letter-spacing: 0.3px;
+}

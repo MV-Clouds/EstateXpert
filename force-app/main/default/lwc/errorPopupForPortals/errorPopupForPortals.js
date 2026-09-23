@@ -23,10 +23,38 @@ export default class ErrorPopupForPortals extends LightningElement {
     connectedCallback() {
         try {
             loadStyle(this, MulishFontCss);
-            this.errors = JSON.parse(this.jsonbody);
+            let parsed = JSON.parse(this.jsonbody);
+            this.errors = Array.isArray(parsed) ? parsed.map((err, index) => {
+                let pathVal = err.path;
+                if (this.portalname === 'Zoopla' && pathVal) {
+                    let clean = String(pathVal).trim()
+                        .replace(/^#\/?/, '')
+                        .replace(/^\/+|\/+$/g, '')
+                        .replace(/\//g, '.')
+                        .replace(/\[\d+\]/g, '')
+                        .replace(/\.\d+\./g, '.')
+                        .replace(/\.\d+$/g, '')
+                        .trim()
+                        .toLowerCase();
+                    if (clean === 'content' || clean.startsWith('content.') || clean.startsWith('content[')) {
+                        if (clean.includes('url')) {
+                            pathVal = 'Listing Media (URL)';
+                        } else if (clean.includes('type')) {
+                            pathVal = 'Listing Media (Type)';
+                        } else {
+                            pathVal = 'Listing Media';
+                        }
+                    }
+                }
+                return {
+                    ...err,
+                    path: pathVal,
+                    id: err.id || `${pathVal || 'err'}-${index}`
+                };
+            }) : [];
             if (this.portalname === 'Zoopla') {
                 this.firstHeader = 'Error Message';
-                this.secondHeader = 'Path';
+                this.secondHeader = 'Listing Field / Media';
             } else if (this.portalname === 'Rightmove' || this.portalname === 'Rightmove Overseas') {
                 this.firstHeader = 'Error Message';
                 this.secondHeader = 'Value';

@@ -1,7 +1,7 @@
 import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/leadassignmentcss';
+import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import getLeadAssignmentInitData from '@salesforce/apex/LeadAssignmentController.getLeadAssignmentInitData';
 import manageRule from '@salesforce/apex/LeadAssignmentController.manageRule';
 import getRecordNames from '@salesforce/apex/LeadAssignmentController.getRecordNames';
@@ -23,6 +23,12 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
     @track hasUnsavedChanges = false;
     @track visibleIconName = 'utility:chevronright';
     @track logicError = '';
+
+    // Default Assignee state
+    @track defaultAssignee = null;           // { Id, selectedUser, selectedUserName } or null
+    @track showDefaultAssigneePopup = false;
+    @track defaultAssigneeUser = '';         // staging value inside the popup
+    @track defaultAssigneeUserName = '';
 
     conditionOptions = [
         { label: 'Equals', value: 'equals', types: ['STRING', 'PICKLIST', 'BOOLEAN', 'DATE', 'DATETIME', 'REFERENCE', 'DOUBLE', 'CURRENCY', 'INTEGER', 'URL', 'PHONE', 'EMAIL'] },
@@ -67,6 +73,18 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         return (this.currentRule?.conditions?.length || 0) <= 1;
     }
 
+    get hasDefaultAssignee() {
+        return this.defaultAssignee !== null && this.defaultAssignee.selectedUser !== '';
+    }
+
+    get defaultAssigneeDisplayName() {
+        return this.hasDefaultAssignee ? this.defaultAssignee.selectedUserName : 'Not Configured';
+    }
+
+    get defaultAssigneePopupTitle() {
+        return this.hasDefaultAssignee ? 'Edit Default Assignee' : 'Set Default Assignee';
+    }
+
     connectedCallback() {
         this.isLoading = true;
         loadStyle(this, MulishFontCss);
@@ -97,7 +115,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                     label: user.Name,
                     value: user.Id
                 }));
-                this.processRules(data.rules || []);
+                this.processRules(data.rules || [], data.defaultRule || null);
             })
             .catch(error => {
                 this.showToast('Error', 'Initialization failed: ' + (error.body?.message || error.message), 'error');
@@ -117,7 +135,19 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         }
     }
 
-    processRules(rules) {
+    processRules(rules, defaultRuleData) {
+        // Extract default assignee from the sentinel record if present
+        if (defaultRuleData && (defaultRuleData?.MVEX__Default_User__c || defaultRuleData?.Default_User__c) && defaultRuleData.Name) {
+            const defaultUserName = this.userOptions.find(u => u.value === defaultRuleData.Name)?.label || 'Unknown User';
+            this.defaultAssignee = {
+                Id: defaultRuleData.Id,
+                selectedUser: defaultRuleData.Name,
+                selectedUserName: defaultUserName
+            };
+        } else {
+            this.defaultAssignee = null;
+        }
+
         const groupedRules = new Map();
         rules.forEach(rule => {
             let conditions = rule.MVEX__Conditions__c ? JSON.parse(rule.MVEX__Conditions__c) : [];
@@ -153,6 +183,9 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                 let inputType = 'text';
                 let placeholder = 'Enter Value';
                 let isCombobox = field.isPicklist || field.isMultiPicklist || field.isBoolean || false;
+                // Substring operators should always use a plain text input regardless of field type
+                const substringOps = ['startsWith', 'contains', 'doesNotContain'];
+                const forceText = substringOps.includes(condition.selectedCondition);
                 if (field.isDate) {
                     formattedValue = condition.selectedValue ? new Date(condition.selectedValue).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
                     inputType = 'date';
@@ -162,14 +195,14 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                     inputType = 'datetime-local';
                     placeholder = 'Select DateTime';
                 } else if (field.isUrl) {
-                    inputType = 'url';
-                    placeholder = 'Enter URL';
+                    inputType = forceText ? 'text' : 'url';
+                    placeholder = forceText ? 'Enter URL substring' : 'Enter URL';
                 } else if (field.isPhone) {
-                    inputType = 'tel';
-                    placeholder = 'Enter Phone Number';
+                    inputType = forceText ? 'text' : 'tel';
+                    placeholder = forceText ? 'Enter Phone substring' : 'Enter Phone Number';
                 } else if (field.isEmail) {
-                    inputType = 'email';
-                    placeholder = 'Enter Email';
+                    inputType = forceText ? 'text' : 'email';
+                    placeholder = forceText ? 'Enter Email substring' : 'Enter Email';
                 } else if (field.isReference) {
                     formattedValue = condition.selectedValue || 'No Record Selected';
                 } else if (['DOUBLE', 'CURRENCY', 'INTEGER'].includes(field.dataType)) {
@@ -343,6 +376,72 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         this.logicError = '';
     }
 
+    // ─── Default Assignee handlers ───────────────────────────────────────────
+
+    openDefaultAssigneePopup() {
+        // Pre-fill popup with existing value if already configured
+        this.defaultAssigneeUser     = this.hasDefaultAssignee ? this.defaultAssignee.selectedUser : '';
+        this.defaultAssigneeUserName = this.hasDefaultAssignee ? this.defaultAssignee.selectedUserName : '';
+        this.showDefaultAssigneePopup = true;
+    }
+
+    closeDefaultAssigneePopup() {
+        this.showDefaultAssigneePopup = false;
+        this.defaultAssigneeUser     = '';
+        this.defaultAssigneeUserName = '';
+    }
+
+    handleDefaultUserChange(event) {
+        const userId   = event.target.value;
+        const userName = this.userOptions.find(u => u.value === userId)?.label || '';
+        this.defaultAssigneeUser  = userId;
+        this.defaultAssigneeUserName = userName;
+    }
+
+    saveDefaultAssignee() {
+        if (!this.defaultAssigneeUser) {
+            this.showToast('Error', 'Please select a user as the Default Assignee.', 'error');
+            return;
+        }
+        this.isLoading = true;
+        const payload = {
+            Id: this.hasDefaultAssignee ? this.defaultAssignee.Id : null,
+            Default_User_Id: this.defaultAssigneeUser
+        };
+        manageRule({ operation: 'saveDefault', ruleData: payload })
+            .then(resultId => {
+                this.defaultAssignee = {
+                    Id: resultId || (this.hasDefaultAssignee ? this.defaultAssignee.Id : null),
+                    selectedUser: this.defaultAssigneeUser,
+                    selectedUserName: this.defaultAssigneeUserName
+                };
+                this.showToast('Success', 'Default assignee saved successfully.', 'success');
+                this.closeDefaultAssigneePopup();
+            })
+            .catch(error => {
+                this.showToast('Error', 'Failed to save default assignee: ' + (error.body?.message || error.message), 'error');
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
+    }
+
+    removeDefaultAssignee() {
+        if (!this.hasDefaultAssignee) return;
+        this.isLoading = true;
+        manageRule({ operation: 'deleteDefault', ruleData: { Id: this.defaultAssignee.Id } })
+            .then(() => {
+                this.defaultAssignee = null;
+                this.showToast('Success', 'Default assignee removed.', 'success');
+            })
+            .catch(error => {
+                this.showToast('Error', 'Failed to remove default assignee: ' + (error.body?.message || error.message), 'error');
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
+    }
+
     closeDeleteConfirmation() {
         this.showDeleteConfirmation = false;
         this.currentDeleteIndex = null;
@@ -394,6 +493,9 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                 let inputType = 'text';
                 let placeholder = 'Enter Value';
                 let isCombobox = field.isPicklist || field.isMultiPicklist || field.isBoolean || false;
+                // Substring operators should always use a plain text input regardless of field type
+                const substringOps = ['startsWith', 'contains', 'doesNotContain'];
+                const forceText = substringOps.includes(condition.selectedCondition);
                 if (field.isDate) {
                     formattedValue = condition.selectedValue ? new Date(condition.selectedValue).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
                     inputType = 'date';
@@ -403,14 +505,14 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                     inputType = 'datetime-local';
                     placeholder = 'Select DateTime';
                 } else if (field.isUrl) {
-                    inputType = 'url';
-                    placeholder = 'Enter URL';
+                    inputType = forceText ? 'text' : 'url';
+                    placeholder = forceText ? 'Enter URL substring' : 'Enter URL';
                 } else if (field.isPhone) {
-                    inputType = 'tel';
-                    placeholder = 'Enter Phone Number';
+                    inputType = forceText ? 'text' : 'tel';
+                    placeholder = forceText ? 'Enter Phone substring' : 'Enter Phone Number';
                 } else if (field.isEmail) {
-                    inputType = 'email';
-                    placeholder = 'Enter Email';
+                    inputType = forceText ? 'text' : 'email';
+                    placeholder = forceText ? 'Enter Email substring' : 'Enter Email';
                 } else if (['DOUBLE', 'CURRENCY', 'INTEGER'].includes(field.dataType)) {
                     inputType = 'number';
                     placeholder = 'Enter Number';
@@ -451,18 +553,40 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
     handleConditionChange(event) {
         const conditionIndex = parseInt(event.target.dataset.conditionIndex, 10);
         const selectedCondition = event.target.value;
+        // Substring operators must use plain text input to avoid browser email/URL/phone format validation
+        const substringOps = ['startsWith', 'contains', 'doesNotContain'];
+        const forceText = substringOps.includes(selectedCondition);
         this.currentRule.conditions = this.currentRule.conditions.map((condition, cIndex) => {
             if (cIndex === conditionIndex) {
                 const conditionLabel = this.conditionOptions.find(c => c.value === selectedCondition)?.label || selectedCondition;
                 const field = this.fieldOptions.find(f => f.value === condition.selectedField) || {};
                 let formattedValue = condition.selectedValue;
+                // Recompute inputType and placeholder based on new condition + existing field
+                let inputType = 'text';
+                let placeholder = 'Enter Value';
                 if (field.isDate) {
                     formattedValue = condition.selectedValue ? new Date(condition.selectedValue).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+                    inputType = 'date';
+                    placeholder = 'Select Date';
                 } else if (field.isDateTime) {
                     formattedValue = condition.selectedValue ? new Date(condition.selectedValue).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-                } else if (field.isUrl || field.isPhone || field.isEmail) {
+                    inputType = 'datetime-local';
+                    placeholder = 'Select DateTime';
+                } else if (field.isUrl) {
+                    inputType = forceText ? 'text' : 'url';
+                    placeholder = forceText ? 'Enter URL substring' : 'Enter URL';
+                    formattedValue = condition.selectedValue || '';
+                } else if (field.isPhone) {
+                    inputType = forceText ? 'text' : 'tel';
+                    placeholder = forceText ? 'Enter Phone substring' : 'Enter Phone Number';
+                    formattedValue = condition.selectedValue || '';
+                } else if (field.isEmail) {
+                    inputType = forceText ? 'text' : 'email';
+                    placeholder = forceText ? 'Enter Email substring' : 'Enter Email';
                     formattedValue = condition.selectedValue || '';
                 } else if (['DOUBLE', 'CURRENCY', 'INTEGER'].includes(field.dataType)) {
+                    inputType = 'number';
+                    placeholder = 'Enter Number';
                     formattedValue = condition.selectedValue || '';
                 } else if (field.isReference) {
                     formattedValue = condition.selectedValue || 'No Record Selected';
@@ -470,6 +594,8 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                 return {
                     ...condition,
                     selectedCondition,
+                    inputType,
+                    placeholder,
                     displayCondition: `${field.label || condition.selectedField} ${conditionLabel} ${formattedValue}`
                 };
             }

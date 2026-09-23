@@ -6,13 +6,13 @@ import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import picaLib from '@salesforce/resourceUrl/imageConverter';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import NoUploadImage from "@salesforce/resourceUrl/NoUploadImage";
-import { CurrentPageReference } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import postToInstagram from '@salesforce/apex/InstagramPostController.postToInstagram';
 import getPropertyMediaUrls from '@salesforce/apex/InstagramPostController.getPropertyMediaUrls';
 import checkInstagramIntegration from '@salesforce/apex/InstagramPostController.checkInstagramIntegration';
 
-export default class InstagramPostFromListing extends LightningElement {
+export default class InstagramPostFromListing extends NavigationMixin(LightningElement) {
 
     @track listingId;
     @track confData;
@@ -841,6 +841,29 @@ export default class InstagramPostFromListing extends LightningElement {
 
     closeAction() {
         this.dispatchEvent(new CloseActionScreenEvent());
+    }
+
+    navigateToStorageIntegration(event) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        this[NavigationMixin.GenerateUrl]({
+            type: 'standard__navItemPage',
+            attributes: {
+                apiName: 'Control_Center_Dev'
+            },
+            state: {
+                c__openComponent: 'storageIntegration'
+            }
+        }).then((url) => {
+            window.open(url, '_blank');
+        }).catch((error) => {
+            console.error('Error generating tab URL:', error);
+            window.open('/lightning/n/MVEX__Control_Center?c__openComponent=storageIntegration', '_blank');
+        }).finally(() => {
+            this.closeAction();
+        });
     }
 
 }

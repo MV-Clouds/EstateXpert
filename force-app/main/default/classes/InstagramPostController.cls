@@ -9,10 +9,10 @@ public with sharing class InstagramPostController {
     @AuraEnabled
     public static Map<String, Object> createInstagramContainer(List<String> mediaUrls, String caption) {
         try {
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
+            MVEX__IG_Configuration__c instaCredential = MVEX__IG_Configuration__c.getOrgDefaults();
 
-            String userId = instaCredential.User_Id__c;
-            String accessToken = instaCredential.Long_Access_Token__c;
+            String userId = instaCredential.MVEX__User_Id__c;
+            String accessToken = instaCredential.MVEX__Long_Access_Token__c;
 
             Http http = new Http();
             Map<String, Object> result = new Map<String, Object>();
@@ -117,10 +117,10 @@ public with sharing class InstagramPostController {
     @AuraEnabled
     public static String publishToInstagram(String containerId, List<String> containerIds, Boolean isCarousel, String caption, List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
         try {
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
+            MVEX__IG_Configuration__c instaCredential = MVEX__IG_Configuration__c.getOrgDefaults();
 
-            String userId = instaCredential.User_Id__c;
-            String accessToken = instaCredential.Long_Access_Token__c;
+            String userId = instaCredential.MVEX__User_Id__c;
+            String accessToken = instaCredential.MVEX__Long_Access_Token__c;
             
             Map<String, Object> params = new Map<String, Object>();
             params.put('userId', userId);
@@ -170,9 +170,9 @@ public with sharing class InstagramPostController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static AWS_Config__c getS3ConfigSettings() {
+    public static MVEX__AWS_Config__c getS3ConfigSettings() {
         try {
-            return AWS_Config__c.getOrgDefaults();
+            return MVEX__AWS_Config__c.getOrgDefaults();
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'InstagramPostController', 'getS3ConfigSettings', 'Error while getting S3 config settings.');
             return null;
@@ -248,22 +248,22 @@ public with sharing class InstagramPostController {
         try {
             Map<String, String> mediaUrlMap = new Map<String, String>();
     
-            Listing__c listingRecord = [
-                SELECT Property__c 
-                FROM Listing__c 
+            MVEX__Listing__c listingRecord = [
+                SELECT MVEX__Property__c 
+                FROM MVEX__Listing__c 
                 WHERE Id = :listingId WITH USER_MODE
                 LIMIT 1
             ];
         
-            if (listingRecord != null && listingRecord.Property__c != null) {
-                List<Property_File__c> propertyFiles = [
-                    SELECT Name, BaseUrl__c,Size__c,ExternalLink__c
-                    FROM Property_File__c 
-                    WHERE Property__c = :listingRecord.Property__c AND IsDeleted = false AND Size__c != null  WITH USER_MODE
+            if (listingRecord != null && listingRecord.MVEX__Property__c != null) {
+                List<MVEX__Property_File__c> propertyFiles = [
+                    SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c
+                    FROM MVEX__Property_File__c 
+                    WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE
                 ];
         
-                for (Property_File__c file : propertyFiles) {
-                    mediaUrlMap.put(file.Name, file.BaseUrl__c);
+                for (   MVEX__Property_File__c file : propertyFiles) {
+                    mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
                 }
             }
         
@@ -279,8 +279,8 @@ public with sharing class InstagramPostController {
     @AuraEnabled(cacheable=true)
     public static Boolean checkInstagramIntegration() {
         try {
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
-            if (instaCredential != null && instaCredential.User_Id__c != null && instaCredential.Long_Access_Token__c != null) {
+            MVEX__IG_Configuration__c instaCredential = MVEX__IG_Configuration__c.getOrgDefaults();
+            if (instaCredential != null && instaCredential.MVEX__User_Id__c != null && instaCredential.MVEX__Long_Access_Token__c != null) {
                 return true;
             } else {
                 return false;
@@ -301,10 +301,10 @@ public with sharing class InstagramPostController {
         InstagramPostResponse apexResponse = new InstagramPostResponse();
         try {
 
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
+            MVEX__IG_Configuration__c instaCredential = MVEX__IG_Configuration__c.getOrgDefaults();
 
-            String userId = instaCredential.User_Id__c;
-            String accessToken = instaCredential.Long_Access_Token__c;
+            String userId = instaCredential.MVEX__User_Id__c;
+            String accessToken = instaCredential.MVEX__Long_Access_Token__c;
 
             Http http = new Http();
 
@@ -442,9 +442,9 @@ public with sharing class InstagramPostController {
             emailBody = emailBody.replace('{!errorDetails}', errorMessage);
             emailBody = emailBody.replace('{!User}', userName);
     
-            GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
+            MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
     
-            String refreshToken = settings.Refresh_Token__c;
+            String refreshToken = settings.MVEX__Refresh_Token__c;
     
             if(refreshToken != null && emailId != null){
                 List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();

@@ -79,7 +79,7 @@ public with sharing class GmailIntegrationControllerV1 {
     }
     
     
-    public static void requestNewAccessToken(List<EmailWrapper> gmails, Map<String, Integer> remainingEmails, Map<String, Marketing_Campaign__c> campaign, Boolean IsCampaignData) {
+    public static void requestNewAccessToken(List<EmailWrapper> gmails, Map<String, Integer> remainingEmails, Map<String, MVEX__Marketing_Campaign__c> campaign, Boolean IsCampaignData) {
         try {
             
             // Serialize parameters to JSON strings
@@ -101,7 +101,7 @@ public with sharing class GmailIntegrationControllerV1 {
             // Deserialize parameters
             List<EmailWrapper> gmails = (List<EmailWrapper>) JSON.deserialize(gmailsJson, List<EmailWrapper>.class);
             Map<String, Integer> remainingEmails = (Map<String, Integer>) JSON.deserialize(remainingEmailsJson, Map<String, Integer>.class);
-            Map<String, Marketing_Campaign__c> campaign = (Map<String, Marketing_Campaign__c>) JSON.deserialize(campaignJson, Map<String, Marketing_Campaign__c>.class);
+            Map<String, MVEX__Marketing_Campaign__c> campaign = (Map<String, MVEX__Marketing_Campaign__c>) JSON.deserialize(campaignJson, Map<String, MVEX__Marketing_Campaign__c>.class);
             Boolean isCampaignData = Boolean.valueOf(isCampaignDataString);
     
             if (gmails == null || gmails.isEmpty()) {
@@ -109,8 +109,8 @@ public with sharing class GmailIntegrationControllerV1 {
             }
     
             // Step 1: Refresh the access token
-            GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
-            String refreshToken = settings.Refresh_Token__c;
+            MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
+            String refreshToken = settings.MVEX__Refresh_Token__c;
             
             // Fetch Client ID and Secret from Custom Metadata
             String clientId = '';

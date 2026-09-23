@@ -23,7 +23,7 @@
         <inputParameters>
             <name>campaignId</name>
             <value>
-                <elementReference>$Record.Marketing_Campaign__r.Id</elementReference>
+                <elementReference>$Record.MVEX__Marketing_Campaign__r.Id</elementReference>
             </value>
         </inputParameters>
         <inputParameters>
@@ -35,7 +35,7 @@
         <inputParameters>
             <name>listingId</name>
             <value>
-                <elementReference>$Record.Listing__c</elementReference>
+                <elementReference>$Record.MVEX__Listing__c</elementReference>
             </value>
         </inputParameters>
         <inputParameters>
@@ -59,7 +59,7 @@
         <inputParameters>
             <name>templateType</name>
             <value>
-                <elementReference>$Record.Template_Type__c</elementReference>
+                <elementReference>$Record.MVEX__Template_Type__c</elementReference>
             </value>
         </inputParameters>
         <inputParameters>
@@ -82,7 +82,7 @@
             <assignToReference>BccContacts</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>$Record.Marketing_Campaign__r.BCC_Contacts__c</elementReference>
+                <elementReference>$Record.MVEX__Marketing_Campaign__r.MVEX__BCC_Contacts__c</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -114,7 +114,7 @@
             <assignToReference>CcContacts</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>$Record.Marketing_Campaign__r.CC_Contacts__c</elementReference>
+                <elementReference>$Record.MVEX__Marketing_Campaign__r.MVEX__CC_Contacts__c</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -130,7 +130,7 @@
             <assignToReference>ObjectApiName</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_All_Template_Records.Object_API_Name__c</elementReference>
+                <elementReference>Get_All_Template_Records.MVEX__Object_API_Name__c</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -176,7 +176,7 @@
             <assignToReference>Subject</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_All_Template_Records.Subject__c</elementReference>
+                <elementReference>Get_All_Template_Records.MVEX__Subject__c</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -192,7 +192,7 @@
             <assignToReference>TemplatewBodyValue</assignToReference>
             <operator>Add</operator>
             <value>
-                <elementReference>All_Body_Data.Template_Value_Simple__c</elementReference>
+                <elementReference>All_Body_Data.MVEX__Template_Value_Simple__c</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -208,7 +208,7 @@
             <assignToReference>PrimaryContactEmails</assignToReference>
             <operator>Add</operator>
             <value>
-                <elementReference>Loop_through_all_the_campaign_member_to_get_records.RecipientId__c</elementReference>
+                <elementReference>Loop_through_all_the_campaign_member_to_get_records.MVEX__RecipientId__c</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -300,7 +300,7 @@
             <name>Not_null</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>All_Body_Data.Template_Value_Simple__c</leftValueReference>
+                <leftValueReference>All_Body_Data.MVEX__Template_Value_Simple__c</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>false</booleanValue>
@@ -375,7 +375,7 @@
             <name>Primary_contact_Emails</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>Loop_through_all_the_campaign_member_to_get_records.Contact_Type__c</leftValueReference>
+                <leftValueReference>Loop_through_all_the_campaign_member_to_get_records.MVEX__Contact_Type__c</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
                     <stringValue>Primary</stringValue>
@@ -466,24 +466,24 @@
         <locationX>1194</locationX>
         <locationY>1500</locationY>
         <inputAssignments>
-            <field>Error_Message__c</field>
+            <field>MVEX__Error_Message__c</field>
             <value>
                 <stringValue>Error While Getting Template Records</stringValue>
             </value>
         </inputAssignments>
         <inputAssignments>
-            <field>Label__c</field>
+            <field>MVEX__Label__c</field>
             <value>
                 <stringValue>Error From Schedule Marketing Email Flow</stringValue>
             </value>
         </inputAssignments>
         <inputAssignments>
-            <field>Source_of_Error__c</field>
+            <field>MVEX__Source_of_Error__c</field>
             <value>
                 <stringValue>Flow</stringValue>
             </value>
         </inputAssignments>
-        <object>Error_Handling__c</object>
+        <object>MVEX__Error_Handling__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordCreates>
     <recordCreates>
@@ -492,24 +492,24 @@
         <locationX>1458</locationX>
         <locationY>492</locationY>
         <inputAssignments>
-            <field>Error_Message__c</field>
+            <field>MVEX__Error_Message__c</field>
             <value>
                 <stringValue>Error While Getting Campaign Records</stringValue>
             </value>
         </inputAssignments>
         <inputAssignments>
-            <field>Label__c</field>
+            <field>MVEX__Label__c</field>
             <value>
                 <stringValue>Error From Schedule Marketing Email Flow</stringValue>
             </value>
         </inputAssignments>
         <inputAssignments>
-            <field>Source_of_Error__c</field>
+            <field>MVEX__Source_of_Error__c</field>
             <value>
                 <stringValue>Flow</stringValue>
             </value>
         </inputAssignments>
-        <object>Error_Handling__c</object>
+        <object>MVEX__Error_Handling__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordCreates>
     <recordLookups>
@@ -526,7 +526,7 @@
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>$Record.Template_Id__c</elementReference>
+                <elementReference>$Record.MVEX__Template_Id__c</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
@@ -550,11 +550,11 @@
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>$Record.Template_Id__c</elementReference>
+                <elementReference>$Record.MVEX__Template_Id__c</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>Template__c</object>
+        <object>MVEX__Template__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
@@ -571,14 +571,14 @@
         </faultConnector>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>Marketing_Campaign__c</field>
+            <field>MVEX__Marketing_Campaign__c</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>$Record.Marketing_Campaign__r.Id</elementReference>
+                <elementReference>$Record.MVEX__Marketing_Campaign__r.Id</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>false</getFirstRecordOnly>
-        <object>Marketing_Campaign_Member__c</object>
+        <object>MVEX__Marketing_Campaign_Member__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
@@ -592,28 +592,28 @@
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>Template__c</field>
+            <field>MVEX__Template__c</field>
             <operator>EqualTo</operator>
             <value>
                 <elementReference>Get_All_Template_Records.Id</elementReference>
             </value>
         </filters>
         <filters>
-            <field>Value_Type__c</field>
+            <field>MVEX__Value_Type__c</field>
             <operator>EqualTo</operator>
             <value>
                 <stringValue>Body Value</stringValue>
             </value>
         </filters>
         <getFirstRecordOnly>false</getFirstRecordOnly>
-        <object>Template_Data__c</object>
+        <object>MVEX__Template_Data__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <start>
         <locationX>336</locationX>
         <locationY>0</locationY>
-        <filterFormula>ISPICKVAL({!$Record.Marketing_Campaign__r.Schedule_Type__c}, &quot;Specific Date&quot;)</filterFormula>
-        <object>Marketing_Email__c</object>
+        <filterFormula>ISPICKVAL({!$Record.MVEX__Marketing_Campaign__r.MVEX__Schedule_Type__c}, &quot;Specific Date&quot;)</filterFormula>
+        <object>MVEX__Marketing_Email__c</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <scheduledPaths>
             <name>Schedule_Emails</name>
@@ -623,7 +623,7 @@
             <label>Schedule Emails</label>
             <offsetNumber>0</offsetNumber>
             <offsetUnit>Minutes</offsetUnit>
-            <recordField>Send_Date_Time__c</recordField>
+            <recordField>MVEX__Send_Date_Time__c</recordField>
             <timeSource>RecordField</timeSource>
         </scheduledPaths>
         <triggerType>RecordAfterSave</triggerType>
@@ -656,7 +656,7 @@
         <isCollection>true</isCollection>
         <isInput>true</isInput>
         <isOutput>false</isOutput>
-        <objectType>Marketing_Campaign_Member__c</objectType>
+        <objectType>MVEX__Marketing_Campaign_Member__c</objectType>
     </variables>
     <variables>
         <name>ObjectApiName</name>

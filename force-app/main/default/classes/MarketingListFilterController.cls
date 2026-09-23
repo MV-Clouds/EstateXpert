@@ -19,12 +19,12 @@ public with sharing class MarketingListFilterController {
         try{
             List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
 
-            MarketingListFilterConfig__mdt filterConfig = [SELECT BlockedFields__c FROM MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
+            MVEX__MarketingListFilterConfig__mdt filterConfig = [SELECT MVEX__BlockedFields__c FROM MVEX__MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
 
             // Parse the blocked fields
             Set<String> blockedFields = new Set<String>();
-            if (filterConfig != null && filterConfig.BlockedFields__c != null) {
-                blockedFields.addAll(filterConfig.BlockedFields__c.split(';'));
+            if (filterConfig != null && filterConfig.MVEX__BlockedFields__c != null) {
+                blockedFields.addAll(filterConfig.MVEX__BlockedFields__c.split(';'));
             }
 
             // Get the Describe result for the given object
@@ -215,25 +215,25 @@ public with sharing class MarketingListFilterController {
             contactQuery += ' FROM Contact ORDER BY CreatedDate DESC LIMIT 1000';
             wrapper.contacts = Database.query(contactQuery, AccessLevel.USER_MODE);
 
-            // Collect fields for Inquiry__c query
-            Set<String> inquiryFields = new Set<String>{'Contact__c'};
+            // Collect fields for MVEX__Inquiry__c query
+            Set<String> inquiryFields = new Set<String>{'MVEX__Contact__c'};
             for (FilterCondition filter : inquiryFilters) {
                 inquiryFields.add(filter.fieldPath);
             }
 
-            // Check field accessibility for Inquiry__c
-            Map<String, Schema.SObjectField> inquiryFieldsMap = Schema.SObjectType.Inquiry__c.fields.getMap();
+            // Check field accessibility for MVEX__Inquiry__c
+            Map<String, Schema.SObjectField> inquiryFieldsMap = Schema.SObjectType.MVEX__Inquiry__c.fields.getMap();
             Set<String> validInquiryFields = new Set<String>();
             for (String fieldName : inquiryFields) {
-                if (fieldName == 'Id' || fieldName == 'Contact__c' || (inquiryFieldsMap.containsKey(fieldName) && inquiryFieldsMap.get(fieldName).getDescribe().isAccessible())) {
+                if (fieldName == 'Id' || fieldName == 'MVEX__Contact__c' || (inquiryFieldsMap.containsKey(fieldName) && inquiryFieldsMap.get(fieldName).getDescribe().isAccessible())) {
                     validInquiryFields.add(fieldName);
                 }
             }
             inquiryFields = validInquiryFields;
 
-            // Build Inquiry__c query
+            // Build MVEX__Inquiry__c query
             String inquiryQuery = 'SELECT ' + String.join(new List<String>(inquiryFields), ', ') + 
-                                 ' FROM Inquiry__c WHERE Contact__c != NULL ORDER BY CreatedDate DESC LIMIT 10000';
+                                 ' FROM MVEX__Inquiry__c WHERE MVEX__Contact__c != NULL ORDER BY CreatedDate DESC LIMIT 10000';
             wrapper.inquiries = Database.query(inquiryQuery, AccessLevel.USER_MODE);
 
             return wrapper;
@@ -250,7 +250,7 @@ public with sharing class MarketingListFilterController {
         @AuraEnabled
         public List<Contact> contacts { get; set; }
         @AuraEnabled
-        public List<Inquiry__c> inquiries { get; set; }
+        public List<MVEX__Inquiry__c> inquiries { get; set; }
         @AuraEnabled
         public List<FilterCondition> contactFilters { get; set; }
         @AuraEnabled
@@ -285,8 +285,8 @@ public with sharing class MarketingListFilterController {
     @AuraEnabled
     public static String getStaticFields() {
         try{
-            MarketingListFilterConfig__mdt filterConfig = [SELECT StaticFields__c FROM MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
-            return filterConfig.StaticFields__c;
+            MVEX__MarketingListFilterConfig__mdt filterConfig = [SELECT MVEX__StaticFields__c FROM MVEX__MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
+            return filterConfig.MVEX__StaticFields__c;
         }catch(Exception e){
             ErrorHandler.insertErrorData(e, 'MarketingListFilterController', 'getStaticFields', e.getMessage());
             return null;

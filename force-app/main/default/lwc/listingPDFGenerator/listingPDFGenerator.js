@@ -1,5 +1,5 @@
 import { LightningElement, track, wire } from "lwc";
-import { CurrentPageReference } from 'lightning/navigation';
+import { CurrentPageReference, NavigationMixin } from 'lightning/navigation';
 import getListingAndTemplates from '@salesforce/apex/TemplateBuilderController.getListingAndTemplates';
 import searchContactsWithEmail from '@salesforce/apex/TemplateBuilderController.searchContactsWithEmail';
 import sendEmailWithPDF from '@salesforce/apex/TemplateBuilderController.sendEmailWithPDF';
@@ -8,16 +8,11 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import listingpdfcss from '@salesforce/resourceUrl/listingpdfcss';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-// ── Salesforce SingleEmailMessage limits ─────────────────────────────────
-//   • Max recipients per Messaging.sendEmail() call = 100 (SF limit).
-//     We cap at 10 as a practical UI guard (per-transaction safe usage).
-//   • Subject: 255 chars max (safe across all email clients + SF)
-//   • Plain-text body: 32 000 chars max
 const MAX_RECIPIENTS  = 10;
 const MAX_SUBJECT_LEN = 255;
 const MAX_BODY_LEN    = 32000;
 
-export default class ListingPDFGenerator extends LightningElement {
+export default class ListingPDFGenerator extends NavigationMixin(LightningElement) {
 
     @track templateid;
     @track recordId;
@@ -33,21 +28,16 @@ export default class ListingPDFGenerator extends LightningElement {
     @track isStep2 = false;
     @track selectedValue = null;
     @track vfGeneratePageSRC;
-    @track isDataAvailable = true;
+    @track isDataAvailable = false;
     @track vfEmailPageSRC;
-
     @track isStep3 = false;
     @track previousStep = 1;
-
-    // Contact search
     @track contactSearchTerm = '';
     @track contactSearchResults = [];
     @track selectedContacts = [];
     @track showContactDropdown = false;
     @track isContactSearching = false;
     @track _contactSearchTimer;
-
-    // Email compose
     @track emailSubject = '';
     @track emailBody = '';
     @track freeTypedEmail = '';
@@ -56,7 +46,6 @@ export default class ListingPDFGenerator extends LightningElement {
         return this.freeTypedEmail && !this.isContactSearching;
     }
 
-    // ── Limit-related getters ─────────────────────────────────────────────
     get maxRecipients()  { return MAX_RECIPIENTS; }
     get maxSubjectLen()  { return MAX_SUBJECT_LEN; }
     get maxBodyLen()     { return MAX_BODY_LEN; }
@@ -87,7 +76,6 @@ export default class ListingPDFGenerator extends LightningElement {
     get bodyCounterClass() {
         return this.bodyCharsLeft <= 200 ? 'char-counter char-counter--warn' : 'char-counter';
     }
-    // ─────────────────────────────────────────────────────────────────────
 
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
@@ -98,7 +86,7 @@ export default class ListingPDFGenerator extends LightningElement {
 
     get loadingInfo() {
         return this.isSpinner === false
-            ? 'To generate a preview, please select any Template first.'
+            ? 'To generate a preview, please select a PDF Template first.'
             : 'Generating Preview...';
     }
 
@@ -150,6 +138,7 @@ export default class ListingPDFGenerator extends LightningElement {
                     if (a.label > b.label) return 1;
                     return 0;
                 });
+                this.isDataAvailable = true;
             } else {
                 this.isDataAvailable = false;
             }
@@ -178,7 +167,6 @@ export default class ListingPDFGenerator extends LightningElement {
                 }
 
                 if (completedChannel === 'Email' && pdfBase64) {
-                    // PDF is ready — now call Apex with the base64 data
                     this.dispatchEmailWithBase64(pdfBase64);
                 }
 
@@ -233,7 +221,7 @@ export default class ListingPDFGenerator extends LightningElement {
             const previewTimeout = this.template.querySelector('[data-id="previewTimeout"]');
 
             if (!this.selectedValue) {
-                this.showToast('Error', 'Please select template first.', 'error');
+                this.showToast('Error', 'Please select a PDF template first.', 'error');
                 return;
             }
 
@@ -268,6 +256,29 @@ export default class ListingPDFGenerator extends LightningElement {
 
     closeActionScreen() {
         this.dispatchEvent(new CloseActionScreenEvent());
+    }
+
+    navigateToTemplateBuilder(event) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        this[NavigationMixin.GenerateUrl]({
+            type: 'standard__navItemPage',
+            attributes: {
+                apiName: 'MVEX__Control_Center'
+            },
+            state: {
+                c__openComponent: 'templateHomePage'
+            }
+        }).then((url) => {
+            window.open(url, '_blank');
+        }).catch((error) => {
+            console.error('Error generating tab URL:', error);
+            window.open('/lightning/n/MVEX__Control_Center?c__openComponent=templateHomePage', '_blank');
+        }).finally(() => {
+            this.closeActionScreen();
+        });
     }
 
     showPicklistOptions() {
@@ -316,7 +327,7 @@ export default class ListingPDFGenerator extends LightningElement {
             this.vfGeneratePageSRC = null;
             this.generatePreview();
         } else {
-            this.showToast('Error', 'Please select template first.', 'error');
+            this.showToast('Error', 'Please select a PDF template first.', 'error');
         }
     }
 
@@ -347,19 +358,15 @@ export default class ListingPDFGenerator extends LightningElement {
 
     goToStep3() {
         if (!this.selectedValue) {
-            this.showToast('Error', 'Please select a template first.', 'error');
+            this.showToast('Error', 'Please select a PDF template first.', 'error');
             return;
         }
         this.previousStep = this.isStep1 ? 1 : 2;
         this.isStep1 = false;
         this.isStep2 = false;
         this.isStep3 = true;
-
-        // Set default subject and body
         this.emailSubject = `Listing Document – ${this.listingName || 'Property'}`;
         this.emailBody = `Hi,\n\nPlease find attached the listing document for your reference.\n\nKind regards`;
-
-        // Reset contact state each time
         this.selectedContacts = [];
         this.contactSearchTerm = '';
         this.contactSearchResults = [];
@@ -383,7 +390,6 @@ export default class ListingPDFGenerator extends LightningElement {
         const term = event.target.value;
         this.contactSearchTerm = term;
 
-        // Handle space/enter to add email pill directly
         if (term.endsWith(' ') || term.endsWith(',')) {
             const trimmed = term.slice(0, -1).trim();
             if (this.isValidEmail(trimmed)) {
@@ -399,7 +405,6 @@ export default class ListingPDFGenerator extends LightningElement {
             return;
         }
 
-        // If it looks like a valid email, store it for "use this email" option
         this.freeTypedEmail = this.isValidEmail(term.trim()) ? term.trim() : '';
 
         clearTimeout(this._contactSearchTimer);
@@ -430,7 +435,6 @@ export default class ListingPDFGenerator extends LightningElement {
                     initials: this.getInitials(c.Name)
                 }));
                 this.isContactSearching = false;
-                // Keep dropdown open even if empty (to show free-type option)
                 this.showContactDropdown = true;
             })
             .catch((error) => {
@@ -454,7 +458,7 @@ export default class ListingPDFGenerator extends LightningElement {
             this.selectedContacts = [
                 ...this.selectedContacts,
                 {
-                    id: 'manual_' + email,   // synthetic id for non-SF contacts
+                    id: 'manual_' + email,
                     name: email,
                     email: email,
                     initials: email.charAt(0).toUpperCase()
@@ -491,7 +495,6 @@ export default class ListingPDFGenerator extends LightningElement {
             return;
         }
 
-        // Prevent duplicates
         const alreadyAdded = this.selectedContacts.some(c => c.id === id);
         if (!alreadyAdded) {
             this.selectedContacts = [
@@ -500,7 +503,6 @@ export default class ListingPDFGenerator extends LightningElement {
             ];
         }
 
-        // Reset search
         this.contactSearchTerm = '';
         this.contactSearchResults = [];
         this.showContactDropdown = false;
@@ -512,7 +514,6 @@ export default class ListingPDFGenerator extends LightningElement {
     }
 
     hideContactDropdown() {
-        // Small delay so selectContact mousedown fires first
         setTimeout(() => {
             this.showContactDropdown = false;
         }, 150);
@@ -524,7 +525,6 @@ export default class ListingPDFGenerator extends LightningElement {
 
     handleSubjectChange(event) {
         const val = event.target.value;
-        // Hard-clamp at the server-side limit
         this.emailSubject = val.length > MAX_SUBJECT_LEN ? val.slice(0, MAX_SUBJECT_LEN) : val;
         if (val.length > MAX_SUBJECT_LEN) {
             event.target.value = this.emailSubject;
@@ -533,7 +533,6 @@ export default class ListingPDFGenerator extends LightningElement {
 
     handleBodyChange(event) {
         const val = event.target.value;
-        // Hard-clamp at the server-side limit
         this.emailBody = val.length > MAX_BODY_LEN ? val.slice(0, MAX_BODY_LEN) : val;
         if (val.length > MAX_BODY_LEN) {
             event.target.value = this.emailBody;
@@ -553,7 +552,6 @@ export default class ListingPDFGenerator extends LightningElement {
         const newSRC = '/apex/MVEX__DocGeneratePage?paraData='
             + encodeURIComponent(JSON.stringify(paraData));
 
-        // Reset first so LWC detects the change if same URL
         this.vfEmailPageSRC = null;
 
         setTimeout(() => {
@@ -592,7 +590,6 @@ export default class ListingPDFGenerator extends LightningElement {
     }
 
     dispatchEmailWithBase64(pdfBase64) {
-        // Split into SF contacts and manual emails
         const contactIds = this.selectedContacts
             .filter(c => !c.id.toString().startsWith('manual_'))
             .map(c => c.id);
@@ -603,7 +600,7 @@ export default class ListingPDFGenerator extends LightningElement {
 
         sendEmailWithPDF({
             contactIds,
-            manualEmails,          // <-- new param
+            manualEmails,
             subject: this.emailSubject,
             body: this.emailBody,
             templateId: this.templateid,

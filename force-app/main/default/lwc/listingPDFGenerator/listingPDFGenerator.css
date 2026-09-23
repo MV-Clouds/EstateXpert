@@ -331,7 +331,6 @@
   justify-content: center;
   padding: 3rem 1rem;
   background: #FFFFFF;
-  border-radius: 8px;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   flex: 1;
 }
@@ -344,11 +343,35 @@
 }
 
 .emptyStateMessage {
-  font-size: 16px;
+  font-size: 17px;
   color: #0176D3;
   text-align: center;
   font-weight: 500;
-  /* margin-bottom: 2rem; */
+  margin-bottom: 0.5rem;
+}
+
+.emptyStateSubMessage {
+  font-size: 14px;
+  color: #475569;
+  text-align: center;
+  font-weight: 400;
+  max-width: 32rem;
+  line-height: 1.5;
+}
+
+.emptyStateLink {
+  margin-top: 0.75rem;
+  font-size: 14px;
+  color: #0176D3;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out;
+}
+
+.emptyStateLink:hover {
+  color: #014486;
+  text-decoration: underline;
 }
 
 @media only screen and (max-width: 1440px) {

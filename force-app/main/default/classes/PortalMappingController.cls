@@ -472,15 +472,6 @@ public with sharing class PortalMappingController {
                 updateNewlyCreatedPortalRecord(newportal.MVEX__Generator__c, newportal.Id, wrapper.xml_site);
             }
 
-            Boolean shouldSyncZoopla = false;
-            if (wrapper.sync_branch_with_zoopla != null) {
-                if (wrapper.sync_branch_with_zoopla instanceof Boolean) {
-                    shouldSyncZoopla = (Boolean)wrapper.sync_branch_with_zoopla;
-                } else if (wrapper.sync_branch_with_zoopla instanceof String) {
-                    shouldSyncZoopla = Boolean.valueOf((String)wrapper.sync_branch_with_zoopla);
-                }
-            }
-
             if (wrapper.portalname == 'Zoopla' && shouldSyncZoopla) {
                 ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
             }

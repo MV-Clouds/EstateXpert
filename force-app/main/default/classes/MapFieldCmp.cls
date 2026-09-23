@@ -19,8 +19,8 @@ public with sharing class MapFieldCmp {
         try {
             List<Map<String, String>> fieldDetails = new List<Map<String, String>>();    
     
-            // Query Mapping_Metadata__mdt
-            Mapping_Metadata__mdt metaData = [SELECT Mapping_String__c, Automatic_Sync__c, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            // Query MVEX__Mapping_Metadata__mdt
+            MVEX__Mapping_Metadata__mdt metaData = [SELECT MVEX__Mapping_String__c, MVEX__Automatic_Sync__c, MVEX__BlockedFields__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
         
             Schema.DescribeSObjectResult describeResult = Schema.getGlobalDescribe().get(objectName).getDescribe();
         
@@ -38,8 +38,8 @@ public with sharing class MapFieldCmp {
             allFieldsMap.keySet().removeAll(unwritableFields);
     
             Set<String> blockedFields = new Set<String>();
-            if (metaData.BlockedFields__c != null) {
-                blockedFields.addAll(new List<String>(metaData.BlockedFields__c.split(';')));
+            if (metaData.MVEX__BlockedFields__c != null) {
+                blockedFields.addAll(new List<String>(metaData.MVEX__BlockedFields__c.split(';')));
             }
 
             allFieldsMap.keySet().removeAll(blockedFields);
@@ -79,9 +79,9 @@ public with sharing class MapFieldCmp {
             String devName = 'MappingString';
             String masterLabel = 'MappingString';
 
-            List<Mapping_Metadata__mdt> metaList = [SELECT MasterLabel, DeveloperName, BlockedFields__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            List<MVEX__Mapping_Metadata__mdt> metaList = [SELECT MasterLabel, DeveloperName, MVEX__BlockedFields__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
 
-            Mapping_Metadata__mdt config = new Mapping_Metadata__mdt();
+            MVEX__Mapping_Metadata__mdt config = new MVEX__Mapping_Metadata__mdt();
 
             if (!metaList.isEmpty()) {
                 config = metaList[0];
@@ -101,7 +101,7 @@ public with sharing class MapFieldCmp {
             if (!metaList.isEmpty()) {
                 Metadata.CustomMetadataValue instance1 = new Metadata.CustomMetadataValue();
                 instance1.field = 'MVEX__BlockedFields__c';
-                instance1.value = metaList[0].BlockedFields__c;
+                instance1.value = metaList[0].MVEX__BlockedFields__c;
                 mdata.values.add(instance1);
             }
 
@@ -130,15 +130,15 @@ public with sharing class MapFieldCmp {
             List<String> metadataValues = new List<String>();
     
             // Fetch records
-            List<Mapping_Metadata__mdt> metadataRecords = [SELECT Mapping_String__c, Automatic_Sync__c FROM Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            List<MVEX__Mapping_Metadata__mdt> metadataRecords = [SELECT MVEX__Mapping_String__c, MVEX__Automatic_Sync__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
             
             // Check if records exist
             if (!metadataRecords.isEmpty()) {
-                Mapping_Metadata__mdt metadataRecord = metadataRecords[0];
+                MVEX__Mapping_Metadata__mdt metadataRecord = metadataRecords[0];
                 
                 // Add field values to the list
-                metadataValues.add(metadataRecord.Mapping_String__c);
-                metadataValues.add(String.valueOf(metadataRecord.Automatic_Sync__c));
+                metadataValues.add(metadataRecord.MVEX__Mapping_String__c);
+                metadataValues.add(String.valueOf(metadataRecord.MVEX__Automatic_Sync__c));
             }
             
             return metadataValues;

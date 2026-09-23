@@ -11,6 +11,7 @@ export default class TemplatePreviewModal extends LightningElement {
     @api objectname;
     @api recordId;
     @api templateType;
+    @api isCalledFromGenerateDoc = false;
 
     _isActive
     @api get isActive() { return this._isActive }

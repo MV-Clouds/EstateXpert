@@ -26,9 +26,9 @@ public with sharing class IntegrationPopupController {
             }
     
             if (integrationType == 'AWS') {
-                AWS_Config__c awsSettings = AWS_Config__c.getOrgDefaults();
+                MVEX__AWS_Config__c awsSettings = MVEX__AWS_Config__c.getOrgDefaults();
                 if (awsSettings == null) {
-                    awsSettings = new AWS_Config__c();
+                    awsSettings = new MVEX__AWS_Config__c();
                     awsSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
     
@@ -39,9 +39,9 @@ public with sharing class IntegrationPopupController {
                 upsert as user awsSettings;
     
             } else if (integrationType == 'Gmail') {
-                GmailConfig__c gmailSettings = GmailConfig__c.getOrgDefaults();
+                MVEX__GmailConfig__c gmailSettings = MVEX__GmailConfig__c.getOrgDefaults();
                 if (gmailSettings == null) {
-                    gmailSettings = new GmailConfig__c();
+                    gmailSettings = new MVEX__GmailConfig__c();
                     gmailSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
     
@@ -54,9 +54,9 @@ public with sharing class IntegrationPopupController {
                 upsert as user gmailSettings;
 
             } else if (integrationType == 'Instagram') {
-                IG_Configuration__c instagramSettings = IG_Configuration__c.getOrgDefaults();
+                MVEX__IG_Configuration__c instagramSettings = MVEX__IG_Configuration__c.getOrgDefaults();
                 if (instagramSettings == null) {
-                    instagramSettings = new IG_Configuration__c();
+                    instagramSettings = new MVEX__IG_Configuration__c();
                     instagramSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
     
@@ -67,9 +67,9 @@ public with sharing class IntegrationPopupController {
                 upsert as user instagramSettings;
 
             } else if (integrationType == 'Google') {
-                GoogleLeadConfig__c googleSettings = GoogleLeadConfig__c.getOrgDefaults();
+                MVEX__GoogleLeadConfig__c googleSettings = MVEX__GoogleLeadConfig__c.getOrgDefaults();
                 if (googleSettings == null) {
-                    googleSettings = new GoogleLeadConfig__c();
+                    googleSettings = new MVEX__GoogleLeadConfig__c();
                     googleSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
     
@@ -80,9 +80,9 @@ public with sharing class IntegrationPopupController {
                 upsert as user googleSettings;
 
             } else if (integrationType == 'Meta') {
-                MetaLeadConfig__c metaSettings = MetaLeadConfig__c.getOrgDefaults();
+                MVEX__MetaLeadConfig__c metaSettings = MVEX__MetaLeadConfig__c.getOrgDefaults();
                 if (metaSettings == null) {
-                    metaSettings = new MetaLeadConfig__c();
+                    metaSettings = new MVEX__MetaLeadConfig__c();
                     metaSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
     
@@ -118,9 +118,9 @@ public with sharing class IntegrationPopupController {
         FieldWrapper result = new FieldWrapper();
         try {
             if (integrationType == 'AWS') {
-                result.objectData = AWS_Config__c.getOrgDefaults();
+                result.objectData = MVEX__AWS_Config__c.getOrgDefaults();
             } else if (integrationType == 'Gmail') {
-                GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
+                MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
                 
                 // Fetch Credentials from Custom Metadata
                 List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
@@ -142,7 +142,7 @@ public with sharing class IntegrationPopupController {
                     result.siteUrl = getSiteUrl(settings.MVEX__Redirect_URI__c, 'Gmail');
                 }
             } else if (integrationType == 'Instagram') {
-                IG_Configuration__c instaSettings = IG_Configuration__c.getOrgDefaults();
+                MVEX__IG_Configuration__c instaSettings = MVEX__IG_Configuration__c.getOrgDefaults();
 
                   // Fetch Credentials from Custom Metadata
                 List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
@@ -150,18 +150,18 @@ public with sharing class IntegrationPopupController {
                 if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
                     String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
                     if(parts.size() >= 3) {
-                        instaSettings.MVEX__ClientID__c = parts[0];
+                        instaSettings.MVEX__ClientId__c = parts[0];
                         instaSettings.MVEX__ClientSecret__c = parts[1];
                         instaSettings.MVEX__Redirect_URI__c = parts[2];
                     }
                 }
 
                 result.objectData = instaSettings;
-                result.siteUrl = getSiteUrl(instaSettings.Redirect_URI__c, 'Instagram');
+                result.siteUrl = getSiteUrl(instaSettings.MVEX__Redirect_URI__c, 'Instagram');
             } else if (integrationType == 'Google'){
-                result.objectData = GoogleLeadConfig__c.getOrgDefaults();
+                result.objectData = MVEX__GoogleLeadConfig__c.getOrgDefaults();
             } else if (integrationType == 'Meta'){
-                result.objectData = MetaLeadConfig__c.getOrgDefaults();
+                result.objectData = MVEX__MetaLeadConfig__c.getOrgDefaults();
             }
             return result;
         } catch (Exception e) {
@@ -233,11 +233,11 @@ public with sharing class IntegrationPopupController {
         List<SocialMediaDataWrapper> wrapperList = new List<SocialMediaDataWrapper>();
 
         try {
-            IG_Configuration__c instagramCredential = IG_Configuration__c.getOrgDefaults();
+            MVEX__IG_Configuration__c instagramCredential = MVEX__IG_Configuration__c.getOrgDefaults();
 
             SocialMediaDataWrapper instagramWrapper = new SocialMediaDataWrapper();
             instagramWrapper.integraName = 'Instagram';
-            instagramWrapper.isValid = instagramCredential.ClientId__c != null && instagramCredential.ClientSecret__c != null;
+            instagramWrapper.isValid = instagramCredential.MVEX__ClientId__c != null && instagramCredential.MVEX__ClientSecret__c != null;
             instagramWrapper.integrationData = instagramCredential;
             wrapperList.add(instagramWrapper);
 
@@ -259,18 +259,18 @@ public with sharing class IntegrationPopupController {
         List<FieldWrapperData> wrapperList = new List<FieldWrapperData>();
 
         try {
-            GoogleLeadConfig__c googleAdsCredential = GoogleLeadConfig__c.getOrgDefaults();
-            MetaLeadConfig__c metaPageCredential = MetaLeadConfig__c.getOrgDefaults();
+            MVEX__GoogleLeadConfig__c googleAdsCredential = MVEX__GoogleLeadConfig__c.getOrgDefaults();
+            MVEX__MetaLeadConfig__c metaPageCredential = MVEX__MetaLeadConfig__c.getOrgDefaults();
 
             FieldWrapperData googleAdsWrapper = new FieldWrapperData();
             googleAdsWrapper.integrationName = 'GoogleAds';
-            googleAdsWrapper.isValid = googleAdsCredential.Google_lead_Form_Secret__c != null && googleAdsCredential.Google_Ads_Endpoint__c != null;
+            googleAdsWrapper.isValid = googleAdsCredential.MVEX__Google_lead_Form_Secret__c != null && googleAdsCredential.MVEX__Google_Ads_Endpoint__c != null;
             googleAdsWrapper.integrationData = googleAdsCredential;
             wrapperList.add(googleAdsWrapper);
 
             FieldWrapperData metaWrapper = new FieldWrapperData();
             metaWrapper.integrationName = 'Meta';
-            metaWrapper.isValid = metaPageCredential.ACCESS_TOKEN__c != null && metaPageCredential.APP_SECRET__c != null;
+            metaWrapper.isValid = metaPageCredential.MVEX__ACCESS_TOKEN__c != null && metaPageCredential.MVEX__APP_SECRET__c != null;
             metaWrapper.integrationData = metaPageCredential;
             wrapperList.add(metaWrapper);
 
@@ -303,27 +303,27 @@ public with sharing class IntegrationPopupController {
 
         try {
             // Fetching integration details
-            AWS_Config__c awsCredential = AWS_Config__c.getOrgDefaults();
-            GmailConfig__c gmailCredential = GmailConfig__c.getOrgDefaults();
-            IG_Configuration__c instagramCredential = IG_Configuration__c.getOrgDefaults();
+            MVEX__AWS_Config__c awsCredential = MVEX__AWS_Config__c.getOrgDefaults();
+            MVEX__GmailConfig__c gmailCredential = MVEX__GmailConfig__c.getOrgDefaults();
+            MVEX__IG_Configuration__c instagramCredential = MVEX__IG_Configuration__c.getOrgDefaults();
 
             // Gmail Integration
             FieldWrapperData gmailWrapper = new FieldWrapperData();
             gmailWrapper.integrationName = 'Gmail';
             gmailWrapper.integrationData = gmailCredential;
-            gmailWrapper.isValid = gmailCredential.Client_ID__c != null && gmailCredential.Client_Secret__c != null && gmailCredential.Redirect_URI__c != null && gmailCredential.Refresh_Token__c != null;
+            gmailWrapper.isValid = gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
             wrapperList.add(gmailWrapper);
 
             FieldWrapperData awsWrapper = new FieldWrapperData();
             awsWrapper.integrationName = 'AWS';
             awsWrapper.integrationData = awsCredential;
-            awsWrapper.isValid = awsCredential.AWS_Access_Key__c != null && awsCredential.AWS_Secret_Access_Key__c != null && awsCredential.S3_Bucket_Name__c != null && awsCredential.S3_Region_Name__c != null;
+            awsWrapper.isValid = awsCredential.MVEX__AWS_Access_Key__c != null && awsCredential.MVEX__AWS_Secret_Access_Key__c != null && awsCredential.MVEX__S3_Bucket_Name__c != null && awsCredential.MVEX__S3_Region_Name__c != null;
             wrapperList.add(awsWrapper);
 
 
             FieldWrapperData instagramWrapper = new FieldWrapperData();
             instagramWrapper.integrationName = 'Instagram';
-            instagramWrapper.isValid = instagramCredential.ClientId__c != null && instagramCredential.ClientSecret__c != null;
+            instagramWrapper.isValid = instagramCredential.MVEX__ClientId__c != null && instagramCredential.MVEX__ClientSecret__c != null;
             instagramWrapper.integrationData = instagramCredential;
             wrapperList.add(instagramWrapper);
 
@@ -382,7 +382,7 @@ public with sharing class IntegrationPopupController {
     */
     public static String deleteGmailConfig(String recordId){
         try {
-            delete as user new GmailConfig__c(Id = recordId);
+            delete as user new MVEX__GmailConfig__c(Id = recordId);
             return 'success';
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'deleteGmailConfig', 'Error while deleting gmail config.');
@@ -399,7 +399,7 @@ public with sharing class IntegrationPopupController {
     @AuraEnabled
     public static String revokeAWSAccess(String recordId){
         try {
-            delete as user new AWS_Config__c(Id = recordId);
+            delete as user new MVEX__AWS_Config__c(Id = recordId);
             return 'success';
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeAWSAccess', 'Error while revoking aws access.');
@@ -410,7 +410,7 @@ public with sharing class IntegrationPopupController {
     @AuraEnabled
     public static string revokeInstagramAccess(String recordId){
         try {
-            delete as user new IG_Configuration__c(Id = recordId);
+            delete as user new MVEX__IG_Configuration__c(Id = recordId);
             return 'success';
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeInstagramAccess', 'Error while revoking Instagram access.');
@@ -428,10 +428,10 @@ public with sharing class IntegrationPopupController {
     public static string revokeGoogleAccess(String recordId,String integrationType){
         try {
             if(integrationType == 'Google'){
-                delete as user new GoogleLeadConfig__c(Id = recordId);
+                delete as user new MVEX__GoogleLeadConfig__c(Id = recordId);
                 return 'success';
             } else if(integrationType == 'Meta'){
-                delete as user new MetaLeadConfig__c(Id = recordId);
+                delete as user new MVEX__MetaLeadConfig__c(Id = recordId);
                 return 'success';
             } else {
                 return 'No integrationType match found';

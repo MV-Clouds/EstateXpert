@@ -384,7 +384,6 @@ public with sharing class PortalMappingController {
             String escapePortalName = String.escapeSingleQuotes(portalName);
 
             PropertyPortalWrapper wrapper = (PropertyPortalWrapper)JSON.deserialize(portalWrapper, PropertyPortalWrapper.class);
-            System.debug('wrapper -> '+wrapper);
             List<MVEX__Portal_Listing_Mapping__c> portalListingMaps = [SELECT Id, MVEX__Listing_Field_API_Name__c, Name FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: escapePortalName AND MVEX__Listing_Field_API_Name__c != null WITH USER_MODE];
             Map<String, String> jsonBodyMap = new Map<String, String>();
             String jsonBody = '';
@@ -394,7 +393,7 @@ public with sharing class PortalMappingController {
                 }
                 jsonBody = JSON.serialize(jsonBodyMap);
             } else {
-                jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
+                // jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
             }
 
             String portalId;

@@ -39,11 +39,11 @@ public with sharing class MarketingListCmpController {
                 allFields.add(fieldName);
             }
 
-            MarketingListFilterConfig__mdt filterConfig = [SELECT BlockedFields__c FROM MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
+            MVEX__MarketingListFilterConfig__mdt filterConfig = [SELECT MVEX__BlockedFields__c FROM MVEX__MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
 
             Set<String> blockedFields = new Set<String>();
-            if (filterConfig != null && filterConfig.BlockedFields__c != null) {
-                blockedFields.addAll(filterConfig.BlockedFields__c.split(';'));
+            if (filterConfig != null && filterConfig.MVEX__BlockedFields__c != null) {
+                blockedFields.addAll(filterConfig.MVEX__BlockedFields__c.split(';'));
             }
             List<String> filteredFields = new List<String>();
 
@@ -72,7 +72,7 @@ public with sharing class MarketingListCmpController {
             String contactFields = String.join(filteredFields, ', ');
             String queryFields = String.escapeSingleQuotes(contactFields);
             Integer pageSize = getPageSizeFromConfig();
-            String query = 'SELECT ' + queryFields + ' FROM Contact';
+            String query = 'SELECT ' + queryFields + ' FROM Contact LIMIT 50000';
 
             List<Contact> contacts = Database.query(query, AccessLevel.USER_MODE);
 
@@ -156,15 +156,15 @@ public with sharing class MarketingListCmpController {
 
             String originalTemplateBody = ''; // Store original template body
 
-            List<Template__c> temp = [SELECT Id, Template_Name__c,
-                                        (SELECT Id, Template_Value_Simple__c,Value_Type__c FROM Template_Data__r WHERE Value_Type__c = 'Body Value' ORDER BY Order_No_Simple__c ASC),
-                                        (SELECT Id, Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c, Header_margin_top__c, Footer_margin_bottom__c FROM Template_Pages__r ORDER BY Page_Number__c ASC)
-                                        FROM Template__c WHERE Id =: templateId WITH USER_MODE LIMIT 1 ];
+            List<MVEX__Template__c> temp = [SELECT Id, MVEX__Template_Name__c,
+                                        (SELECT Id, MVEX__Template_Value_Simple__c,MVEX__Value_Type__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c = 'Body Value' ORDER BY MVEX__Order_No_Simple__c ASC),
+                                        (SELECT Id, MVEX__Page_Margin__c, MVEX__Page_Orientation__c, MVEX__Page_Size__c, MVEX__Unit_of_Page_Configs__c, MVEX__Show_Header__c, MVEX__Show_Footer__c, MVEX__Header_margin_top__c, MVEX__Footer_margin_bottom__c FROM MVEX__Template_Pages__r ORDER BY MVEX__Page_Number__c ASC)
+                                        FROM MVEX__Template__c WHERE Id =: templateId WITH USER_MODE LIMIT 1 ];
 
             if(temp.size() > 0){
-                for(Template_Data__c fieldData : temp[0].Template_Data__r){
-                    String value = fieldData.Template_Value_Simple__c != null ? fieldData.Template_Value_Simple__c : '';
-                    if(fieldData.Value_Type__c == 'Body Value'){
+                for(MVEX__Template_Data__c fieldData : temp[0].MVEX__Template_Data__r){
+                    String value = fieldData.MVEX__Template_Value_Simple__c != null ? fieldData.MVEX__Template_Value_Simple__c : '';
+                    if(fieldData.MVEX__Value_Type__c == 'Body Value'){
                         originalTemplateBody += value; // Build original template body
                     }
                 }    
@@ -194,16 +194,16 @@ public with sharing class MarketingListCmpController {
                 }
                 
                 // Query broadcast group members and add to contacts list
-                List<Broadcast_Group_Member__c> groupMembers = [
-                    SELECT Contact_Id__c, Contact_Id__r.Name, Contact_Id__r.Email
-                    FROM Broadcast_Group_Member__c 
-                    WHERE Broadcast_Group_ID__c IN :broadcastGroupIds
+                List<MVEX__Broadcast_Group_Member__c> groupMembers = [
+                    SELECT MVEX__Contact_Id__c, MVEX__Contact_Id__r.Name, MVEX__Contact_Id__r.Email
+                    FROM MVEX__Broadcast_Group_Member__c 
+                    WHERE MVEX__Broadcast_Group_ID__c IN :broadcastGroupIds
                     WITH USER_MODE
                 ];
                 
-                for (Broadcast_Group_Member__c member : groupMembers) {
-                    if (objectName == 'Contact' && member.Contact_Id__c != null) {
-                        allContactIds.add(member.Contact_Id__c);
+                for (MVEX__Broadcast_Group_Member__c member : groupMembers) {
+                    if (objectName == 'Contact' && member.MVEX__Contact_Id__c != null) {
+                        allContactIds.add(member.MVEX__Contact_Id__c);
                     }
                 }
             }
@@ -225,18 +225,18 @@ public with sharing class MarketingListCmpController {
             
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
 
-            List<Template__c> temps = [SELECT Id, Name,Label__c,Object_Name__c, Object_API_Name__c,Template_Body__c,Template_Type__c, Template_Name__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate,Subject__c,
-                                        (SELECT Id, Name, Template_Value_Simple__c FROM Template_Data__r WHERE Value_Type__c = 'Extracted Mapping Keys' ORDER BY Order_No_Simple__c ASC)
-                                        FROM Template__c  WHERE Id =:templateId WITH USER_MODE];
+            List<MVEX__Template__c> temps = [SELECT Id, Name,MVEX__Label__c,MVEX__Object_Name__c, MVEX__Object_API_Name__c,MVEX__Template_Body__c,MVEX__Template_Type__c, MVEX__Template_Name__c, MVEX__Template_pattern__c, MVEX__Template_Status__c, MVEX__Description__c, CreatedDate, LastModifiedDate,MVEX__Subject__c,
+                                        (SELECT Id, Name, MVEX__Template_Value_Simple__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c = 'Extracted Mapping Keys' ORDER BY MVEX__Order_No_Simple__c ASC)
+                                        FROM MVEX__Template__c  WHERE Id =:templateId WITH USER_MODE];
             String extractedKeyString = '';
 
             // get extracted Keys stored in field...
-            for(Template_Data__c fieldData : temps[0].Template_Data__r){
-                extractedKeyString +=  fieldData.Template_Value_Simple__c;
+            for(MVEX__Template_Data__c fieldData : temps[0].MVEX__Template_Data__r){
+                extractedKeyString +=  fieldData.MVEX__Template_Value_Simple__c;
             }
 
             extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
-            String sourceObjectAPI = temps[0].Object_API_Name__c;
+            String sourceObjectAPI = temps[0].MVEX__Object_API_Name__c;
             // Type cast extracted key field value to key mappign keys, child object info and merge tempalte keys....
             Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);
 
@@ -282,7 +282,7 @@ public with sharing class MarketingListCmpController {
 
                     if(sendMethod == 'single'){
                         email.setToAddresses(new List<String>{contactEmail});
-                        email.setSubject(temps[0].Subject__c);
+                        email.setSubject(temps[0].MVEX__Subject__c);
                         email.setHtmlBody(personalizedTemplateBody); // Use personalized body
                         String replyToEmail = Label.EmailMessageEmailService;
 
@@ -294,7 +294,7 @@ public with sharing class MarketingListCmpController {
                     } else if(sendMethod == 'gmail'){
                         GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
                         singleGmail.toAddresses = new List<String>{contactEmail};
-                        singleGmail.subject = temps[0].Subject__c;
+                        singleGmail.subject = temps[0].MVEX__Subject__c;
                         singleGmail.body = personalizedTemplateBody; // Use personalized body
 
                         gmails.add(singleGmail);
@@ -356,15 +356,15 @@ public with sharing class MarketingListCmpController {
             String phoneField = (String) request.get('phoneField');
             String communicationType = (String) request.get('communicationType');
     
-            Broadcast_Group__c broadcastGroup;
+            MVEX__Broadcast_Group__c broadcastGroup;
     
-            broadcastGroup = new Broadcast_Group__c();
+            broadcastGroup = new MVEX__Broadcast_Group__c();
             broadcastGroup.Name = name;
-            broadcastGroup.Description__c = description;
-            broadcastGroup.Object_Name__c = objectApiName;
-            broadcastGroup.List_View__c = listViewName;
-            broadcastGroup.Phone_Field__c = phoneField;
-            broadcastGroup.Communication_Type__c = communicationType;
+            broadcastGroup.MVEX__Description__c = description;
+            broadcastGroup.MVEX__Object_Name__c = objectApiName;
+            broadcastGroup.MVEX__List_View__c = listViewName;
+            broadcastGroup.MVEX__Phone_Field__c = phoneField;
+            broadcastGroup.MVEX__Communication_Type__c = communicationType;
 
             Database.SaveResult insertResult = Database.insert(broadcastGroup, false, AccessLevel.USER_MODE);
             if (!insertResult.isSuccess()) {
@@ -373,27 +373,27 @@ public with sharing class MarketingListCmpController {
             }
     
             // Handle group members
-            Map<String, Broadcast_Group_Member__c> existingMembersMap = new Map<String, Broadcast_Group_Member__c>();
+            Map<String, MVEX__Broadcast_Group_Member__c> existingMembersMap = new Map<String, MVEX__Broadcast_Group_Member__c>();
             if (isUpdate) {
-                for (Broadcast_Group_Member__c member : [SELECT Id, Phone_Number__c FROM Broadcast_Group_Member__c WHERE Broadcast_Group_ID__c = :broadcastGroup.Id WITH USER_MODE]) {
-                    existingMembersMap.put(member.Phone_Number__c, member);
+                for (MVEX__Broadcast_Group_Member__c member : [SELECT Id, MVEX__Phone_Number__c FROM MVEX__Broadcast_Group_Member__c WHERE MVEX__Broadcast_Group_ID__c = :broadcastGroup.Id WITH USER_MODE]) {
+                    existingMembersMap.put(member.MVEX__Phone_Number__c, member);
                 }
             }
     
-            List<Broadcast_Group_Member__c> newMembersToInsert = new List<Broadcast_Group_Member__c>();
+            List<MVEX__Broadcast_Group_Member__c> newMembersToInsert = new List<MVEX__Broadcast_Group_Member__c>();
             Set<String> receivedPhoneNumbers = new Set<String>(phoneNumbers);
             Set<String> existingPhoneNumbers = existingMembersMap.keySet();
     
             for (String phone : receivedPhoneNumbers) {
                 if (String.isNotBlank(phone) && !existingPhoneNumbers.contains(phone)) {
-                    newMembersToInsert.add(new Broadcast_Group_Member__c(
-                        Broadcast_Group_ID__c = broadcastGroup.Id,
-                        Phone_Number__c = phone
+                    newMembersToInsert.add(new MVEX__Broadcast_Group_Member__c(
+                        MVEX__Broadcast_Group_ID__c = broadcastGroup.Id,
+                        MVEX__Phone_Number__c = phone
                     ));
                 }
             }
     
-            List<Broadcast_Group_Member__c> membersToDelete = new List<Broadcast_Group_Member__c>();
+            List<MVEX__Broadcast_Group_Member__c> membersToDelete = new List<MVEX__Broadcast_Group_Member__c>();
             for (String existingPhone : existingPhoneNumbers) {
                 if (!receivedPhoneNumbers.contains(existingPhone)) {
                     membersToDelete.add(existingMembersMap.get(existingPhone));

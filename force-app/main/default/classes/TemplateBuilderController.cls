@@ -1,8 +1,8 @@
 public with sharing class TemplateBuilderController {
 
-    public static List<Template_Data__c> recordToInsert_global = new List<Template_Data__c>();
-    public static List<Template_Data__c> recordToUpdate_global = new List<Template_Data__c>();
-    public static List<Template_Data__c> recordToDelete_global = new List<Template_Data__c>();
+    public static List<MVEX__Template_Data__c> recordToInsert_global = new List<MVEX__Template_Data__c>();
+    public static List<MVEX__Template_Data__c> recordToUpdate_global = new List<MVEX__Template_Data__c>();
+    public static List<MVEX__Template_Data__c> recordToDelete_global = new List<MVEX__Template_Data__c>();
 
     public class ObjectInfoWrapper {
         @AuraEnabled public Map<String, String> objectData { get; set; }
@@ -38,7 +38,7 @@ public with sharing class TemplateBuilderController {
 
             objInfo.objectData = objectNamesMap;
 
-            Schema.DescribeFieldResult fieldResult = Template__c.Template_pattern__c.getDescribe();
+            Schema.DescribeFieldResult fieldResult = MVEX__Template__c.MVEX__Template_pattern__c.getDescribe();
             List<Schema.PicklistEntry> picklistEntries = fieldResult.getPicklistValues();
             List<String> picklistValues = new List<String>();
 
@@ -60,12 +60,12 @@ public with sharing class TemplateBuilderController {
     /** 
    * Method Name: insertTemplate
    * @description: Insert Template
-   * @return Template__c id.
+   * @return MVEX__Template__c id.
    * Date: 17/09/2024 
    * Created By: Karan Singh
    */ 
     @AuraEnabled
-    public static String insertTemplate(Template__c template) {
+    public static String insertTemplate(MVEX__Template__c template) {
         try {
             insert as user template;
             return template.Id;
@@ -131,15 +131,15 @@ public with sharing class TemplateBuilderController {
             TemplateDataWrapper tdw = new TemplateDataWrapper();
             tdw.templateBody = '';
     
-            List<Template__c> temp = [SELECT Id, Template_Name__c,
-                                    (SELECT Id, Template_Value_Simple__c,Value_Type__c FROM Template_Data__r WHERE Value_Type__c = 'Body Value' ORDER BY Order_No_Simple__c ASC),
-                                    (SELECT Id, Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c, Header_margin_top__c, Footer_margin_bottom__c FROM Template_Pages__r ORDER BY Page_Number__c ASC)
-                                    FROM Template__c WHERE Id =: escapedTemplateId WITH USER_MODE LIMIT 1 ];
+            List<MVEX__Template__c> temp = [SELECT Id, MVEX__Template_Name__c,
+                                    (SELECT Id, MVEX__Template_Value_Simple__c,MVEX__Value_Type__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c = 'Body Value' ORDER BY MVEX__Order_No_Simple__c ASC),
+                                    (SELECT Id, MVEX__Page_Margin__c, MVEX__Page_Orientation__c, MVEX__Page_Size__c, MVEX__Unit_of_Page_Configs__c, MVEX__Show_Header__c, MVEX__Show_Footer__c, MVEX__Header_margin_top__c, MVEX__Footer_margin_bottom__c FROM MVEX__Template_Pages__r ORDER BY MVEX__Page_Number__c ASC)
+                                    FROM MVEX__Template__c WHERE Id =: escapedTemplateId WITH USER_MODE LIMIT 1 ];
     
             if(temp.size() > 0){
-                for(Template_Data__c fieldData : temp[0].Template_Data__r){
-                    String value = fieldData.Template_Value_Simple__c != null ? fieldData.Template_Value_Simple__c : '';
-                    if(fieldData.Value_Type__c == 'Body Value'){
+                for(MVEX__Template_Data__c fieldData : temp[0].MVEX__Template_Data__r){
+                    String value = fieldData.MVEX__Template_Value_Simple__c != null ? fieldData.MVEX__Template_Value_Simple__c : '';
+                    if(fieldData.MVEX__Value_Type__c == 'Body Value'){
                         tdw.templateBody += value;
                     }
                 }    
@@ -161,16 +161,16 @@ public with sharing class TemplateBuilderController {
 
     /** 
    * Method Name: getTemplates
-   * @description: Retrieves all Template__c records.
-   * @return List of Template__c records.
+   * @description: Retrieves all MVEX__Template__c records.
+   * @return List of MVEX__Template__c records.
    * Date: 11/06/2024 
    * Created By: Rachit Shah 
    */ 
     
     @AuraEnabled
-    public static List<Template__c> getTemplates() {
+    public static List<MVEX__Template__c> getTemplates() {
         try {
-            List<Template__c> templates = [SELECT Id, Name, Template_Name__c, Object_Name__c, Object_API_Name__c, Template_Status__c, Template_Body__c, Template_pattern__c, Description__c, CreatedDate, LastModifiedDate, Subject__c FROM Template__c WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 50000];
+            List<MVEX__Template__c> templates = [SELECT Id, Name, MVEX__Template_Name__c, MVEX__Object_Name__c, MVEX__Object_API_Name__c, MVEX__Template_Status__c, MVEX__Template_Body__c, MVEX__Template_pattern__c, MVEX__Description__c, CreatedDate, LastModifiedDate, MVEX__Subject__c FROM MVEX__Template__c WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 50000];
             return templates;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'TemplateBuilderController', 'getTemplates', e.getMessage());
@@ -181,7 +181,7 @@ public with sharing class TemplateBuilderController {
 
     /** 
    * Method Name: deleteTemplate
-   * @description: Deletes a Template__c record by its Id.
+   * @description: Deletes a MVEX__Template__c record by its Id.
    * @param templateId Id of the template to delete.
    * @return void.
    * Date: 11/06/2024 
@@ -192,7 +192,7 @@ public with sharing class TemplateBuilderController {
     public static void deleteTemplate(String templateId) {
         try {
             String escapedTemplateId = String.escapeSingleQuotes(templateId);
-            List<Template__c> template = [SELECT Id FROM Template__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
+            List<MVEX__Template__c> template = [SELECT Id FROM MVEX__Template__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
             if (template.size() > 0) {
                 delete as user template;
             }
@@ -204,7 +204,7 @@ public with sharing class TemplateBuilderController {
     
     /**
    * Method Name: updateTemplateStatus
-   * @description: Updates the status of a Template__c record by its Id.
+   * @description: Updates the status of a MVEX__Template__c record by its Id.
    * @param templateId Id of the template to update.
    * @param status New status value.
    * @return void.
@@ -215,9 +215,9 @@ public with sharing class TemplateBuilderController {
     public static void updateTemplateStatus(String templateId, Boolean status) {
         try {
             String escapedTemplateId = String.escapeSingleQuotes(templateId);
-            List<Template__c> template = [SELECT Id, Template_Status__c FROM Template__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
+            List<MVEX__Template__c> template = [SELECT Id, MVEX__Template_Status__c FROM MVEX__Template__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
             if (template.size() > 0) {
-                template[0].Template_Status__c = status;
+                template[0].MVEX__Template_Status__c = status;
                 update as user template;
             }
         } catch (Exception e) {
@@ -233,8 +233,8 @@ public with sharing class TemplateBuilderController {
         @AuraEnabled public boolean isSuccess;
         @AuraEnabled public String returnMessage;
         @AuraEnabled public Obj_Label_API objectLabelAPI;
-        @auraEnabled public Template__c template;
-        @auraEnabled public Template_Page__c pageConfigs;
+        @auraEnabled public MVEX__Template__c template;
+        @auraEnabled public MVEX__Template_Page__c pageConfigs;
     }
 
     /**
@@ -247,31 +247,31 @@ public with sharing class TemplateBuilderController {
         RetrunWrapper retrunWrapper = new RetrunWrapper();
         try {
             String escapedTemplateId = String.escapeSingleQuotes(templateId);
-            List<Template__c> temp = [SELECT Id, Name, Object_API_Name__c, Template_Name__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate, createdBy.Name, lastModifiedBy.Name,
-                                        (SELECT Id, Name, Template__c, Template_Value_Simple__c, Order_No_Simple__c, Value_Type__c FROM Template_Data__r WHERE Value_Type__c != null ORDER BY Order_No_Simple__c ASC )
-                                        FROM Template__c WHERE Id =: escapedTemplateId WITH USER_MODE LIMIT 1];
+            List<MVEX__Template__c> temp = [SELECT Id, Name, MVEX__Object_API_Name__c, MVEX__Template_Name__c, MVEX__Template_pattern__c, MVEX__Template_Status__c, MVEX__Description__c, CreatedDate, LastModifiedDate, createdBy.Name, lastModifiedBy.Name,
+                                        (SELECT Id, Name, MVEX__Template__c, MVEX__Template_Value_Simple__c, MVEX__Order_No_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c != null ORDER BY MVEX__Order_No_Simple__c ASC )
+                                        FROM MVEX__Template__c WHERE Id =: escapedTemplateId WITH USER_MODE LIMIT 1];
 
             if(temp.size() > 0){
                 retrunWrapper.isSuccess = true;
 
-                List<Template_Page__c> pageConfigs = [SELECT Id, Name, Template__c, Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c, Header_margin_top__c, Footer_margin_bottom__c 
-                                                        FROM Template_Page__c WHERE Template__c =: temp[0].Id WITH USER_MODE ORDER BY Page_Number__c ASC  LIMIT 1];
+                List<MVEX__Template_Page__c> pageConfigs = [SELECT Id, Name, MVEX__Template__c, MVEX__Page_Margin__c, MVEX__Page_Orientation__c, MVEX__Page_Size__c, MVEX__Unit_of_Page_Configs__c, MVEX__Show_Header__c, MVEX__Show_Footer__c, MVEX__Header_margin_top__c, MVEX__Footer_margin_bottom__c 
+                                                        FROM MVEX__Template_Page__c WHERE MVEX__Template__c =: temp[0].Id WITH USER_MODE ORDER BY MVEX__Page_Number__c ASC  LIMIT 1];
 
                 if(pageConfigs.size() == 0){
-                    Template_Page__c page = new Template_Page__c();
-                    page.Template__c = temp[0].Id;
-                    page.Page_Number__c = 1;
-                    page.Page_Margin__c = '1;1;1;1';        // [top;bottom;left;right]
-                    page.Page_Orientation__c = 'portrait';
-                    page.Page_Size__c = 'a4';
-                    page.Unit_of_Page_Configs__c = 'in';
-                    page.Show_Header__c = true;
-                    page.Header_margin_top__c = 0.10;          // px to inch
-                    page.Show_Footer__c = true;
-                    page.Footer_margin_bottom__c = 0.10;       // px to inch
+                    MVEX__Template_Page__c page = new MVEX__Template_Page__c();
+                    page.MVEX__Template__c = temp[0].Id;
+                    page.MVEX__Page_Number__c = 1;
+                    page.MVEX__Page_Margin__c = '1;1;1;1';        // [top;bottom;left;right]
+                    page.MVEX__Page_Orientation__c = 'portrait';
+                    page.MVEX__Page_Size__c = 'a4';
+                    page.MVEX__Unit_of_Page_Configs__c = 'in';
+                    page.MVEX__Show_Header__c = true;
+                    page.MVEX__Header_margin_top__c = 0.10;          // px to inch
+                    page.MVEX__Show_Footer__c = true;
+                    page.MVEX__Footer_margin_bottom__c = 0.10;       // px to inch
                     insert as user page;
-                    pageConfigs = [SELECT Id, Name, Template__c, Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c, Header_margin_top__c, Footer_margin_bottom__c 
-                                    FROM Template_Page__c WHERE Id =: page.Id WITH USER_MODE ORDER BY Page_Number__c ASC LIMIT 1];
+                    pageConfigs = [SELECT Id, Name, MVEX__Template__c, MVEX__Page_Margin__c, MVEX__Page_Orientation__c, MVEX__Page_Size__c, MVEX__Unit_of_Page_Configs__c, MVEX__Show_Header__c, MVEX__Show_Footer__c, MVEX__Header_margin_top__c, MVEX__Footer_margin_bottom__c 
+                                    FROM MVEX__Template_Page__c WHERE Id =: page.Id WITH USER_MODE ORDER BY MVEX__Page_Number__c ASC LIMIT 1];
                 }
 
                 retrunWrapper.template = temp[0];
@@ -291,9 +291,9 @@ public with sharing class TemplateBuilderController {
     }
 
     /**
-    * @param {Template__c} templateRecord, template record with basic field values,
+    * @param {MVEX__Template__c} templateRecord, template record with basic field values,
     * @param {Map<String, List<String>>}, templateValues, Tempalce data with value as per value type,
-    * @param {Template_Page__c}, pageConfigs, page config recor dwith field values,
+    * @param {MVEX__Template_Page__c}, pageConfigs, page config recor dwith field values,
     * @return {String} , update status
     * @description : Method to Save the Template data, page configs and field mappings.
     *               1. Update the Template record.
@@ -301,19 +301,19 @@ public with sharing class TemplateBuilderController {
     *               3. Update the Template data with header, footer, mapping key data and body(if batch save is not rerequired).
     */
     @AuraEnabled
-    public static string saveTemplateApex(Template__c templateRecord, Map<String, List<String>> templateValues, Template_Page__c pageConfigs, Integer listingCount){
+    public static string saveTemplateApex(MVEX__Template__c templateRecord, Map<String, List<String>> templateValues, MVEX__Template_Page__c pageConfigs, Integer listingCount){
         try {
 
-            List<Template__c> temp = [SELECT Id, Name, Object_API_Name__c, Template_Name__c, ListingMediaCount__c, Template_pattern__c, Template_Status__c, Description__c, CreatedDate, LastModifiedDate,
-                                        (SELECT Id, Name, Template__c, Template_Value_Simple__c, Order_No_Simple__c, Value_Type__c FROM Template_Data__r ORDER BY Order_No_Simple__c),
-                                        (SELECT Id FROM Template_Pages__r) FROM Template__c WHERE Id =: templateRecord.Id WITH USER_MODE LIMIT 1];
+            List<MVEX__Template__c> temp = [SELECT Id, Name, MVEX__Object_API_Name__c, MVEX__Template_Name__c, MVEX__ListingMediaCount__c, MVEX__Template_pattern__c, MVEX__Template_Status__c, MVEX__Description__c, CreatedDate, LastModifiedDate,
+                                        (SELECT Id, Name, MVEX__Template__c, MVEX__Template_Value_Simple__c, MVEX__Order_No_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__r ORDER BY MVEX__Order_No_Simple__c),
+                                        (SELECT Id FROM MVEX__Template_Pages__r) FROM MVEX__Template__c WHERE Id =: templateRecord.Id WITH USER_MODE LIMIT 1];
 
             if(temp.size() > 0){
-                Template__c templateToUpdate = temp[0];
-                templateToUpdate.Template_Name__c = templateRecord.Template_Name__c;
-                templateToUpdate.Template_Status__c = templateRecord.Template_Status__c;
-                templateToUpdate.Description__c = templateRecord.Description__c;
-                templateToUpdate.ListingMediaCount__c = listingCount;
+                MVEX__Template__c templateToUpdate = temp[0];
+                templateToUpdate.MVEX__Template_Name__c = templateRecord.MVEX__Template_Name__c;
+                templateToUpdate.MVEX__Template_Status__c = templateRecord.MVEX__Template_Status__c;
+                templateToUpdate.MVEX__Description__c = templateRecord.MVEX__Description__c;
+                templateToUpdate.MVEX__ListingMediaCount__c = listingCount;
 
                 if(templateValues != null && templateValues.keySet().size() > 0){
                     for(String valueType : templateValues.keySet()){
@@ -342,7 +342,7 @@ public with sharing class TemplateBuilderController {
                 
                 update as user templateToUpdate;
 
-                update pageConfigs;
+                update as user pageConfigs;
 
                 return 'Template Updated Successfully';
             } else {
@@ -364,11 +364,11 @@ public with sharing class TemplateBuilderController {
     @AuraEnabled
     public static String saveTempDataRecords_forValueTypes(Map<String, string> templateDataList ,Map<String, String> tempIdVsValueType, boolean isLastBatch){
         try {
-            Map<String, List<Template_Data__c>> dataToUpdate = setupTemplateDataForUpdate(templateDataList, tempIdVsValueType, isLastBatch);
+            Map<String, List<MVEX__Template_Data__c>> dataToUpdate = setupTemplateDataForUpdate(templateDataList, tempIdVsValueType, isLastBatch);
 
-            List<Template_Data__c> recordToInsert = dataToUpdate?.get('recordToInsert');
-            List<Template_Data__c> recordToUpdate = dataToUpdate?.get('recordToUpdate');
-            List<Template_Data__c> recordToDelete = dataToUpdate?.get('recordToDelete');
+            List<MVEX__Template_Data__c> recordToInsert = dataToUpdate?.get('recordToInsert');
+            List<MVEX__Template_Data__c> recordToUpdate = dataToUpdate?.get('recordToUpdate');
+            List<MVEX__Template_Data__c> recordToDelete = dataToUpdate?.get('recordToDelete');
 
             if(recordToInsert != null && recordToInsert.size() > 0) recordToInsert_global.addAll(recordToInsert);
             if(recordToUpdate != null && recordToUpdate.size() > 0) recordToUpdate_global.addAll(recordToUpdate);
@@ -390,11 +390,11 @@ public with sharing class TemplateBuilderController {
     @AuraEnabled
     public static String saveTempDataRecordsInBatch(Map<String, string> templateDataList ,Map<String, String> tempIdVsValueType, boolean isLastBatch){
         try {
-            Map<String, List<Template_Data__c>> dataToUpdate = setupTemplateDataForUpdate(templateDataList, tempIdVsValueType, isLastBatch);
+            Map<String, List<MVEX__Template_Data__c>> dataToUpdate = setupTemplateDataForUpdate(templateDataList, tempIdVsValueType, isLastBatch);
 
-            List<Template_Data__c> recordToInsert = dataToUpdate?.get('recordToInsert');
-            List<Template_Data__c> recordToUpdate = dataToUpdate?.get('recordToUpdate');
-            List<Template_Data__c> recordToDelete = dataToUpdate?.get('recordToDelete');
+            List<MVEX__Template_Data__c> recordToInsert = dataToUpdate?.get('recordToInsert');
+            List<MVEX__Template_Data__c> recordToUpdate = dataToUpdate?.get('recordToUpdate');
+            List<MVEX__Template_Data__c> recordToDelete = dataToUpdate?.get('recordToDelete');
 
             if(recordToUpdate.size() < 1000) {
                 update as user recordToUpdate;
@@ -419,7 +419,7 @@ public with sharing class TemplateBuilderController {
      * @param {boolean}, isLastBatch, to indentify last batch,
      * @description : Method Setup List of Tempalte Data from Insert, Update and Delete as per contnet going to save...
      */
-    public static Map<String, List<Template_Data__c>> setupTemplateDataForUpdate(Map<String, string> templateDataList ,Map<String, String> tempIdVsValueType, boolean isLastBatch){
+    public static Map<String, List<MVEX__Template_Data__c>> setupTemplateDataForUpdate(Map<String, string> templateDataList ,Map<String, String> tempIdVsValueType, boolean isLastBatch){
         try {
             List<String> batchOrderNumber = new List<String>(templateDataList.keySet());
             Integer startOrderNumber = batchOrderNumber.size() > 0 ? Integer.valueOf(batchOrderNumber[0]) : 0;
@@ -430,62 +430,62 @@ public with sharing class TemplateBuilderController {
             String escapedTempId = String.escapeSingleQuotes(tempId);
             String escapedValueType = String.escapeSingleQuotes(valueType);
             
-            List<Template_Data__c> storedTempDataRecords = [SELECT Id, Order_No_Simple__c, Template_Value_Simple__c, Value_Type__c FROM Template_Data__c
-                                                                WHERE Template__c = : escapedTempId AND Order_No_Simple__c >= :startOrderNumber AND Order_No_Simple__c <= :endOrderNumber
-                                                                AND Value_Type__c =: escapedValueType WITH USER_MODE ORDER BY Order_No_Simple__c ASC];
+            List<MVEX__Template_Data__c> storedTempDataRecords = [SELECT Id, MVEX__Order_No_Simple__c, MVEX__Template_Value_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__c
+                                                                WHERE MVEX__Template__c = : escapedTempId AND MVEX__Order_No_Simple__c >= :startOrderNumber AND MVEX__Order_No_Simple__c <= :endOrderNumber
+                                                                AND MVEX__Value_Type__c =: escapedValueType WITH USER_MODE ORDER BY MVEX__Order_No_Simple__c ASC LIMIT 50000];
 
             Integer batchedStoredRecords =  storedTempDataRecords.size();
                                                                 
-            List<Template_Data__c> recordToInsert = new List<Template_Data__c>();
-            List<Template_Data__c> recordToUpdate = new List<Template_Data__c>();
-            List<Template_Data__c> recordToDelete = new List<Template_Data__c>();
+            List<MVEX__Template_Data__c> recordToInsert = new List<MVEX__Template_Data__c>();
+            List<MVEX__Template_Data__c> recordToUpdate = new List<MVEX__Template_Data__c>();
+            List<MVEX__Template_Data__c> recordToDelete = new List<MVEX__Template_Data__c>();
 
             if(batchedStoredRecords > 0){
                 for(Integer i = startOrderNumber; i <= endOrderNumber; i++){
                     // If recieved data records  is lesser than or equal to total stored record...
                     // Update All Record as per order number....
                     if(i <= (batchedStoredRecords + startOrderNumber - 1)){
-                        Template_Data__c dt = storedTempDataRecords[i - startOrderNumber];
-                        dt.Template_Value_Simple__c = templateDataList.get(String.valueOf(i));
+                        MVEX__Template_Data__c dt = storedTempDataRecords[i - startOrderNumber];
+                        dt.MVEX__Template_Value_Simple__c = templateDataList.get(String.valueOf(i));
                         recordToUpdate.add(dt);
                     }
                     // If revied data records  is lesser than stored record...
                     // Update All Record as per order number....
                     else if(i > (batchedStoredRecords + startOrderNumber - 1)){
-                        Template_Data__c dt = new Template_Data__c();
-                        dt.Template__c = tempId;
-                        dt.Template_Value_Simple__c = templateDataList.get(String.valueOf(i));
-                        dt.Order_No_Simple__c = (i);
-                        dt.Value_Type__c = ValueType;
+                        MVEX__Template_Data__c dt = new MVEX__Template_Data__c();
+                        dt.MVEX__Template__c = tempId;
+                        dt.MVEX__Template_Value_Simple__c = templateDataList.get(String.valueOf(i));
+                        dt.MVEX__Order_No_Simple__c = (i);
+                        dt.MVEX__Value_Type__c = ValueType;
                         recordToInsert.add(dt);
                     }
                 }
             } else {
                 for(integer i = startOrderNumber; i <= endOrderNumber; i++){
-                    Template_Data__c dt = new Template_Data__c();
-                    dt.Template__c = tempId;
-                    dt.Template_Value_Simple__c = templateDataList.get(String.valueOf(i));
-                    dt.Order_No_Simple__c = (i);
-                    dt.Value_Type__c = ValueType;
+                    MVEX__Template_Data__c dt = new MVEX__Template_Data__c();
+                    dt.MVEX__Template__c = tempId;
+                    dt.MVEX__Template_Value_Simple__c = templateDataList.get(String.valueOf(i));
+                    dt.MVEX__Order_No_Simple__c = (i);
+                    dt.MVEX__Value_Type__c = ValueType;
                     recordToInsert.add(dt);
                 }
             }
 
-            Integer totalStoredDataRecords = Database.countQuery('SELECT Count() FROM Template_Data__c WHERE Template__c =: escapedTempId AND Value_Type__c =: escapedValueType', AccessLevel.USER_MODE);
+            Integer totalStoredDataRecords = Database.countQuery('SELECT Count() FROM MVEX__Template_Data__c WHERE MVEX__Template__c =: escapedTempId AND MVEX__Value_Type__c =: escapedValueType', AccessLevel.USER_MODE);
 
             if(isLastBatch && endOrderNumber < totalStoredDataRecords){
                 // if it is last batch and endOrderNumber is lesser than totalStoredDataRecords...
                 // Delete additon template data record....
-                List<Template_Data__c> templateDataToDelete = [SELECT Id, Order_No_Simple__c, Template_Value_Simple__c, Value_Type__c FROM Template_Data__c
-                                                                WHERE Template__c = : tempId AND Order_No_Simple__c >= :endOrderNumber + 1
-                                                                AND Order_No_Simple__c <= :totalStoredDataRecords AND Value_Type__c =: valueType WITH USER_MODE
-                                                                ORDER BY Order_No_Simple__c ASC LIMIT 50000];
+                List<MVEX__Template_Data__c> templateDataToDelete = [SELECT Id, MVEX__Order_No_Simple__c, MVEX__Template_Value_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__c
+                                                                WHERE MVEX__Template__c = : tempId AND MVEX__Order_No_Simple__c >= :endOrderNumber + 1
+                                                                AND MVEX__Order_No_Simple__c <= :totalStoredDataRecords AND MVEX__Value_Type__c =: valueType WITH USER_MODE
+                                                                ORDER BY MVEX__Order_No_Simple__c ASC LIMIT 50000];
                 
                 recordToDelete.addAll(templateDataToDelete);
             }
             
 
-            return new Map<String, List<Template_Data__c>>{
+            return new Map<String, List<MVEX__Template_Data__c>>{
                 'recordToInsert' => recordToInsert,
                 'recordToUpdate' => recordToUpdate,
                 'recordToDelete' => recordToDelete
@@ -498,7 +498,7 @@ public with sharing class TemplateBuilderController {
 
     public class TemplateRecord {
         @AuraEnabled public String listingName;
-        @AuraEnabled public List<Template__c> templates;
+        @AuraEnabled public List<MVEX__Template__c> templates;
     }
 
     @AuraEnabled
@@ -506,11 +506,11 @@ public with sharing class TemplateBuilderController {
         TemplateRecord templateRecord = new TemplateRecord();
         try {
             String escapedRecordId = String.escapeSingleQuotes(recordId);
-            List<Listing__c> listing = [SELECT Id, Name FROM Listing__c WHERE Id = :escapedRecordId WITH USER_MODE LIMIT 1];
+            List<MVEX__Listing__c> listing = [SELECT Id, Name FROM MVEX__Listing__c WHERE Id = :escapedRecordId WITH USER_MODE LIMIT 1];
             if(listing.size() > 0){
                 templateRecord.listingName = listing[0].Name;
             }
-            List<Template__c> templates = [SELECT Id, Template_Name__c FROM Template__c WHERE Object_API_Name__c = 'MVEX__Listing__c' AND Template_Status__c = true AND MVEX__Template_pattern__c = 'PDF Template' WITH USER_MODE ORDER BY Template_Name__c ASC];
+            List<MVEX__Template__c> templates = [SELECT Id, MVEX__Template_Name__c FROM MVEX__Template__c WHERE MVEX__Object_API_Name__c = 'MVEX__Listing__c' AND MVEX__Template_Status__c = true AND MVEX__Template_pattern__c = 'PDF Template' WITH USER_MODE ORDER BY MVEX__Template_Name__c ASC LIMIT 50000];
             templateRecord.templates = templates;
             
         } catch (Exception e) {
@@ -524,13 +524,8 @@ public with sharing class TemplateBuilderController {
         try {
             String likeParam = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
 
-            List<Contact> contacts = [
-                SELECT Id, Name, Email 
-                FROM Contact 
-                WHERE (Name LIKE :likeParam OR Email LIKE :likeParam)
-                AND Email != null
-                ORDER BY Name ASC
-            ];
+            List<Contact> contacts = [SELECT Id, Name, Email FROM Contact WHERE (Name LIKE :likeParam OR Email LIKE :likeParam)
+                                        AND Email != null WITH USER_MODE ORDER BY Name ASC LIMIT 50000];
 
             return contacts;
 
@@ -598,7 +593,7 @@ public with sharing class TemplateBuilderController {
         } finally {
             if (contentDocumentId != null) {
                 try {
-                    delete new ContentDocument(Id = contentDocumentId);
+                    delete as user new ContentDocument(Id = contentDocumentId);
                 } catch (Exception deleteEx) {
                     ErrorHandler.insertErrorData(deleteEx, 'TemplateBuilderController', 'sendListingEmailWithPDF - deleteFiles', deleteEx.getMessage());
                 }
@@ -644,10 +639,7 @@ public with sharing class TemplateBuilderController {
 
             // ── Process Contacts ─────────────────────────────────────────
             if (!noContacts) {
-                Map<Id, Contact> contactMap = new Map<Id, Contact>(
-                    [SELECT Id, Name, Email FROM Contact
-                     WHERE Id IN :contactIds AND Email != null]
-                );
+                Map<Id, Contact> contactMap = new Map<Id, Contact>([SELECT Id, Name, Email FROM Contact WHERE Id IN :contactIds AND Email != null WITH USER_MODE LIMIT 50000]);
 
                 for (Id cId : contactIds) {
                     Contact c = contactMap.get(cId);
@@ -767,7 +759,7 @@ public with sharing class TemplateBuilderController {
      * @param newName    - Name for the cloned template.
      * @return Map<String,String> with keys: status ('success'/'error'), message, clonedId,
      *         objectApiName, templateType — so the LWC can navigate to the editor directly.
-     * @description: Clones a Template__c parent record and all its child Template_Data__c and Template_Page__c records.
+     * @description: Clones a MVEX__Template__c parent record and all its child MVEX__Template_Data__c and MVEX__Template_Page__c records.
      * Created Date: 04/06/2026
      * Created By: Karan Singh
      */
@@ -778,13 +770,13 @@ public with sharing class TemplateBuilderController {
             String escapedTemplateId = String.escapeSingleQuotes(templateId);
             String escapedNewName    = String.escapeSingleQuotes(newName);
 
-            List<Template__c> sourceTemplates = [SELECT Id, Template_Name__c, Object_Name__c, Object_API_Name__c, Template_Status__c, Template_Body__c,
-                                                Template_pattern__c, Description__c, Subject__c, ListingMediaCount__c,
-                                                (SELECT Template_Value_Simple__c, Order_No_Simple__c, Value_Type__c FROM Template_Data__r
-                                                ORDER BY Order_No_Simple__c ASC),
-                                                (SELECT Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c,
-                                                Header_margin_top__c, Footer_margin_bottom__c, Page_Number__c FROM Template_Pages__r ORDER BY Page_Number__c ASC)
-                                                FROM Template__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
+            List<MVEX__Template__c> sourceTemplates = [SELECT Id, MVEX__Template_Name__c, MVEX__Object_Name__c, MVEX__Object_API_Name__c, MVEX__Template_Status__c, MVEX__Template_Body__c,
+                                                MVEX__Template_pattern__c, MVEX__Description__c, MVEX__Subject__c, MVEX__ListingMediaCount__c,
+                                                (SELECT MVEX__Template_Value_Simple__c, MVEX__Order_No_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__r
+                                                ORDER BY MVEX__Order_No_Simple__c ASC),
+                                                (SELECT MVEX__Page_Margin__c, MVEX__Page_Orientation__c, MVEX__Page_Size__c, MVEX__Unit_of_Page_Configs__c, MVEX__Show_Header__c, MVEX__Show_Footer__c,
+                                                MVEX__Header_margin_top__c, MVEX__Footer_margin_bottom__c, MVEX__Page_Number__c FROM MVEX__Template_Pages__r ORDER BY MVEX__Page_Number__c ASC)
+                                                FROM MVEX__Template__c WHERE Id = :escapedTemplateId WITH USER_MODE LIMIT 1];
 
             if (sourceTemplates.isEmpty()) {
                 result.put('status', 'error');
@@ -792,48 +784,48 @@ public with sharing class TemplateBuilderController {
                 return result;
             }
 
-            Template__c source = sourceTemplates[0];
+            MVEX__Template__c source = sourceTemplates[0];
 
-            Template__c cloned = new Template__c(
-                Template_Name__c     = escapedNewName,
-                Object_Name__c       = source.Object_Name__c,
-                Object_API_Name__c   = source.Object_API_Name__c,
-                Template_Status__c   = source.Template_Status__c,
-                Template_Body__c     = source.Template_Body__c,
-                Template_pattern__c  = source.Template_pattern__c,
-                Description__c       = source.Description__c,
-                Subject__c           = source.Subject__c,
-                ListingMediaCount__c = source.ListingMediaCount__c
+            MVEX__Template__c cloned = new MVEX__Template__c(
+                MVEX__Template_Name__c     = escapedNewName,
+                MVEX__Object_Name__c       = source.MVEX__Object_Name__c,
+                MVEX__Object_API_Name__c   = source.MVEX__Object_API_Name__c,
+                MVEX__Template_Status__c   = source.MVEX__Template_Status__c,
+                MVEX__Template_Body__c     = source.MVEX__Template_Body__c,
+                MVEX__Template_pattern__c  = source.MVEX__Template_pattern__c,
+                MVEX__Description__c       = source.MVEX__Description__c,
+                MVEX__Subject__c           = source.MVEX__Subject__c,
+                MVEX__ListingMediaCount__c = source.MVEX__ListingMediaCount__c
             );
 
             insert as user cloned;
 
-            List<Template_Data__c> dataToInsert = new List<Template_Data__c>();
-            for (Template_Data__c td : source.Template_Data__r) {
-                dataToInsert.add(new Template_Data__c(
-                    Template__c              = cloned.Id,
-                    Template_Value_Simple__c = td.Template_Value_Simple__c,
-                    Order_No_Simple__c       = td.Order_No_Simple__c,
-                    Value_Type__c            = td.Value_Type__c
+            List<MVEX__Template_Data__c> dataToInsert = new List<MVEX__Template_Data__c>();
+            for (MVEX__Template_Data__c td : source.MVEX__Template_Data__r) {
+                dataToInsert.add(new MVEX__Template_Data__c(
+                    MVEX__Template__c              = cloned.Id,
+                    MVEX__Template_Value_Simple__c = td.MVEX__Template_Value_Simple__c,
+                    MVEX__Order_No_Simple__c       = td.MVEX__Order_No_Simple__c,
+                    MVEX__Value_Type__c            = td.MVEX__Value_Type__c
                 ));
             }
             if (!dataToInsert.isEmpty()) {
                 insert as user dataToInsert;
             }
 
-            List<Template_Page__c> pagesToInsert = new List<Template_Page__c>();
-            for (Template_Page__c tp : source.Template_Pages__r) {
-                pagesToInsert.add(new Template_Page__c(
-                    Template__c             = cloned.Id,
-                    Page_Margin__c          = tp.Page_Margin__c,
-                    Page_Orientation__c     = tp.Page_Orientation__c,
-                    Page_Size__c            = tp.Page_Size__c,
-                    Unit_of_Page_Configs__c = tp.Unit_of_Page_Configs__c,
-                    Show_Header__c          = tp.Show_Header__c,
-                    Show_Footer__c          = tp.Show_Footer__c,
-                    Header_margin_top__c    = tp.Header_margin_top__c,
-                    Footer_margin_bottom__c = tp.Footer_margin_bottom__c,
-                    Page_Number__c          = tp.Page_Number__c
+            List<MVEX__Template_Page__c> pagesToInsert = new List<MVEX__Template_Page__c>();
+            for (MVEX__Template_Page__c tp : source.MVEX__Template_Pages__r) {
+                pagesToInsert.add(new MVEX__Template_Page__c(
+                    MVEX__Template__c             = cloned.Id,
+                    MVEX__Page_Margin__c          = tp.MVEX__Page_Margin__c,
+                    MVEX__Page_Orientation__c     = tp.MVEX__Page_Orientation__c,
+                    MVEX__Page_Size__c            = tp.MVEX__Page_Size__c,
+                    MVEX__Unit_of_Page_Configs__c = tp.MVEX__Unit_of_Page_Configs__c,
+                    MVEX__Show_Header__c          = tp.MVEX__Show_Header__c,
+                    MVEX__Show_Footer__c          = tp.MVEX__Show_Footer__c,
+                    MVEX__Header_margin_top__c    = tp.MVEX__Header_margin_top__c,
+                    MVEX__Footer_margin_bottom__c = tp.MVEX__Footer_margin_bottom__c,
+                    MVEX__Page_Number__c          = tp.MVEX__Page_Number__c
                 ));
             }
             if (!pagesToInsert.isEmpty()) {
@@ -843,8 +835,8 @@ public with sharing class TemplateBuilderController {
             result.put('status',        'success');
             result.put('message',       'Template cloned successfully.');
             result.put('clonedId',      cloned.Id);
-            result.put('objectApiName', source.Object_API_Name__c != null ? source.Object_API_Name__c : '');
-            result.put('templateType',  source.Template_pattern__c != null ? source.Template_pattern__c : '');
+            result.put('objectApiName', source.MVEX__Object_API_Name__c != null ? source.MVEX__Object_API_Name__c : '');
+            result.put('templateType',  source.MVEX__Template_pattern__c != null ? source.MVEX__Template_pattern__c : '');
             return result;
 
         } catch (Exception e) {

@@ -37,11 +37,11 @@ public class InstagramMediaPublisher implements Schedulable {
 
             if (publishResponse.getStatusCode() == 200) {
 
-                AWS_Config__c awsData = AWS_Config__c.getOrgDefaults();
-                String awsAccessKey = awsData.AWS_Access_Key__c;
-                String awsSecretKey = awsData.AWS_Secret_Access_Key__c;
-                String awsRegion = awsData.S3_Region_Name__c;
-                String awsBucketName = awsData.S3_Bucket_Name__c;
+                MVEX__AWS_Config__c awsData = MVEX__AWS_Config__c.getOrgDefaults();
+                String awsAccessKey = awsData.MVEX__AWS_Access_Key__c;
+                String awsSecretKey = awsData.MVEX__AWS_Secret_Access_Key__c;
+                String awsRegion = awsData.MVEX__S3_Region_Name__c;
+                String awsBucketName = awsData.MVEX__S3_Bucket_Name__c;
 
                 String endpoint = 'https://' + awsBucketName + '.s3.amazonaws.com/';
 

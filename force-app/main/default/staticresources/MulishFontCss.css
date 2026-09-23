@@ -10,8 +10,8 @@
   color: white;
   gap: 8px;
   padding: 0 16px;
-  height: 36px;
-  min-height: 36px;
+  height: 30px;
+  min-height: 30px;
   font-size: 14px;
   border: none;
   border-radius: 6px;
@@ -42,8 +42,8 @@
   color: #0176D3;
   gap: 8px;
   padding: 0 16px;
-  height: 36px;
-  min-height: 36px;
+  height: 30px;
+  min-height: 30px;
   font-size: 14px;
   border: 1px solid #0176d3;
   border-radius: 6px;
@@ -76,8 +76,8 @@
   color: white;
   gap: 8px;
   padding: 0 16px;
-  height: 36px;
-  min-height: 36px;
+  height: 30px;
+  min-height: 30px;
   font-size: 14px;
   border: none;
   border-radius: 6px;
@@ -105,9 +105,9 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
   border-radius: 6px;
   background: #ffffff;
   transition: all 0.2s ease;
@@ -247,7 +247,7 @@
 }
 
 .header-search-bar-css .slds-input {
-  min-height: 36px;
+  min-height: 30px;
 }
 
 .header-combobox .slds-form-element__help {
@@ -255,7 +255,7 @@
 }
 
 .header-combobox .slds-combobox__input {
-  min-height: 36px;
+  min-height: 30px;
   align-items: center;
 }
 
@@ -568,10 +568,40 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(1, 118, 211, 0.1); */
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   border: 1px solid rgba(1, 118, 211, 0.1);
   position: relative;
+}
+
+.exp-no-data-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+}
+
+.exp-no-data-container img {
+  width: 200px;
+}
+
+.exp-no-data-message {
+  color: #0176D3;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 0.85rem;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.exp-no-sub-data-message {
+  font-size: 14px;
+  color: #706e6b;
+  font-weight: 400;
+  margin-top: 0.85rem;
+  text-align: center;
+  letter-spacing: 0.3px;
 }
 
 /* cyrillic-ext */

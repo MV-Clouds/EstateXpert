@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .wrapper {
@@ -104,28 +103,6 @@
     margin: 16px;
     height: 100%;
     overflow: auto;
-}
-
-.no-data-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    height: 100%;
-}
-
-.no-data-container img {
-    width: 20%;
-}
-
-.no-data-message {
-    color: #0176D3;
-    font-size: 26px;
-    font-weight: 500;
-    margin-top: 0.85rem;
-    text-align: center;
-    letter-spacing: 0.3px;
 }
 
 .container {
@@ -242,7 +219,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 500;
     text-align: left;
     gap: 15px;
@@ -286,8 +263,8 @@
 
 .filter-icon-container {
     cursor: pointer;
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     justify-content: center;
     align-items: center;

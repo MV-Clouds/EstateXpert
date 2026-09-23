@@ -1,4 +1,4 @@
-import { LightningElement,track} from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
 import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
 import getPicklistValues from '@salesforce/apex/MarketingListFilterController.getPicklistValues';
@@ -523,6 +523,11 @@ export default class MarketingListFilterCmp extends LightningElement {
         }
     }
 
+    @api
+    reapplyFilters() {
+        this.applyFilters();
+    }
+
     // Helper method to evaluate a single condition against a record
     evaluateCondition(record, filter) {
         let fieldValue = filter.fieldPath.includes('.')
@@ -726,6 +731,64 @@ export default class MarketingListFilterCmp extends LightningElement {
     }
 
     /**
+     * Method Name: getAppliedFilterDetails
+     * @description: Returns an array of human-readable active filter objects.
+     */
+    getAppliedFilterDetails() {
+        let applied = [];
+        if (this.filterFields && this.filterFields.length > 0) {
+            this.filterFields.forEach((field, index) => {
+                const hasSelectedOptions = field.selectedOptions && field.selectedOptions.length > 0;
+                const hasMinValue = field.minValue != null && field.minValue !== '' && !isNaN(parseFloat(field.minValue));
+                const hasMaxValue = field.maxValue != null && field.maxValue !== '' && !isNaN(parseFloat(field.maxValue));
+                const hasMinDate = field.minDate != null && field.minDate !== '';
+                const hasMaxDate = field.maxDate != null && field.maxDate !== '';
+                const hasFieldChecked = field.fieldChecked === true;
+
+                if (hasSelectedOptions) {
+                    const values = field.selectedOptions.map(opt => opt.label || opt.value).join(', ');
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: values,
+                        displayText: `${field.label || 'Filter'}: ${values}`
+                    });
+                } else if (hasMinValue || hasMaxValue) {
+                    let rangeVal = '';
+                    if (hasMinValue && hasMaxValue) rangeVal = `${field.minValue} - ${field.maxValue}`;
+                    else if (hasMinValue) rangeVal = `>= ${field.minValue}`;
+                    else rangeVal = `<= ${field.maxValue}`;
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: rangeVal,
+                        displayText: `${field.label || 'Filter'}: ${rangeVal}`
+                    });
+                } else if (hasMinDate || hasMaxDate) {
+                    let dateVal = '';
+                    if (hasMinDate && hasMaxDate) dateVal = `${field.minDate} to ${field.maxDate}`;
+                    else if (hasMinDate) dateVal = `From ${field.minDate}`;
+                    else dateVal = `Until ${field.maxDate}`;
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: dateVal,
+                        displayText: `${field.label || 'Filter'}: ${dateVal}`
+                    });
+                } else if (hasFieldChecked) {
+                    applied.push({
+                        id: field.apiName || field.label || `filter_${index}`,
+                        label: field.label || 'Filter',
+                        value: 'Yes',
+                        displayText: `${field.label || 'Filter'}: Yes`
+                    });
+                }
+            });
+        }
+        return applied;
+    }
+
+    /**
     * Method Name: setFilteredContacts
     * @description: set Contacts in the Parent contact manager component.
     * Date: 25/06/2024
@@ -733,16 +796,18 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     setFilteredContacts() {
         const filtercontacts = this.filteredContacts;
+        const appliedFilters = this.getAppliedFilterDetails();
         const customEvent = new CustomEvent('valueselected', {
-            detail: { filtercontacts }
+            detail: { filtercontacts, appliedFilters }
         });
         this.dispatchEvent(customEvent);
     }
 
     setFilteredContactsReset() {
         const filtercontacts = true;
+        const appliedFilters = this.getAppliedFilterDetails();
         const customEvent = new CustomEvent('valuereset', {
-            detail: { filtercontacts }
+            detail: { filtercontacts, appliedFilters }
         });
         this.dispatchEvent(customEvent);
     }

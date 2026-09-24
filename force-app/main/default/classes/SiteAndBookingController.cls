@@ -117,7 +117,7 @@ public with sharing class SiteAndBookingController {
     public static void sendEmailsAndCreateShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String durationValue, String communicationMethod, Boolean isReschedule) {
         try {
             // Determine the appropriate email template based on whether it's a schedule or reschedule
-            String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
+            String templateName = isReschedule ? 'RescheduleConfirmationEmail_New' : 'Showing_Confirmation_New';
             List<EmailTemplate> templateList = [SELECT Id, Subject, HtmlValue, Body FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
             if (templateList.isEmpty()) {
                 throw new AuraHandledException('Email template not found: ' + templateName);
@@ -428,7 +428,7 @@ public with sharing class SiteAndBookingController {
             showing = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email, MVEX__Listing__c FROM Event WHERE Id = :showing.Id LIMIT 1];
 
             // 4. Pick the correct EmailTemplate
-            String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
+            String templateName = isReschedule ? 'RescheduleConfirmationEmail_New' : 'Showing_Confirmation_New';
             List<EmailTemplate> etList = [SELECT Id FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
             if (etList.isEmpty()) {
                 throw new AuraHandledException('Email template not found: ' + templateName);

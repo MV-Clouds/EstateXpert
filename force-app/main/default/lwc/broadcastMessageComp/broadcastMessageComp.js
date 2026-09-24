@@ -4,7 +4,7 @@ import getListViewsForObject from '@salesforce/apex/BroadcastMessageController.g
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import processBroadcastMessageWithObject from '@salesforce/apex/BroadcastMessageController.processBroadcastMessageWithObject';
 import getBroadcastGroupDetails from '@salesforce/apex/BroadcastMessageController.getBroadcastGroupDetails';
-import getSessionId from '@salesforce/apex/BroadcastMessageController.getSessionId';
+import getSessionId from '@salesforce/apex/GenerateDocumentController.getSessionId';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { NavigationMixin } from 'lightning/navigation';

@@ -61,44 +61,6 @@ public with sharing class WBTemplateController {
 
     /*
     *********************************************************
-    @description     : Send preview message.
-    @param           : 
-    @return          : errorMessage
-    ********************************************************
-    */
-    @AuraEnabled
-    public static String sendPreviewTemplate(String jsonData) {
-        String errorMessage=null;
-        try {
-            HttpRequest httpReq = new HttpRequest();
-            MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults(); 
-            if(config==null){
-                errorMessage='Custom Setting records are missing.';
-                return errorMessage;
-            }
-            String accessToken = (config.MVEX__Access_Token_1__c != null ? config.MVEX__Access_Token_1__c : '') + (config.MVEX__Access_Token_2__c != null ? config.MVEX__Access_Token_2__c : '');
-            String endpoint = config.MVEX__whatsapp_endpoint__c + '/' + config.MVEX__APIVersion__c + '/' + config.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
-            httpReq.setEndpoint(endpoint);
-            httpReq.setMethod('POST');
-            httpReq.setHeader('Content-Type', 'application/json');
-            httpReq.setHeader('Authorization', 'Bearer ' + accessToken);
-            httpReq.setBody(jsonData);
-            Http http = new Http();
-            HttpResponse response = http.send(httpReq);
-            Integer statusCode = response.getStatusCode();
-            if(statusCode != 200){
-                errorMessage='Failed to send Template';
-                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'sendPreviewTemplate', 'API Exception while sending a message and error at line 94');
-            }
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WBTemplateController', 'sendPreviewTemplate', e.getMessage());
-        }
-        return errorMessage;
-    }
-
-    /*
-    *********************************************************
     @description     : Used to fetch all the field related to object name
     @param           : 
     @return          : fieldNames - Return fields that query for the objectname that pass.
@@ -373,27 +335,6 @@ public with sharing class WBTemplateController {
         }
     }
 
-   /*
-    *********************************************************
-    @description     : Fetch records based on the object name
-    @param           : 
-    @return          : records - Return record that query for the objectname that pass.
-    ********************************************************
-    */
-    @AuraEnabled
-    public static List<sObject> getRecordsBySObject(String objectName) {
-        String sObjectName=objectName;
-        List<sObject> records = new List<sObject>();
-        
-        try {
-            String query = 'SELECT Id, Name, Phone FROM ' + sObjectName + ' WHERE Phone != null LIMIT 200';           
-            records = Database.query(String.escapeSingleQuotes(query), AccessLevel.USER_MODE);
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WBTemplateController', 'getRecordsBySObject', e.getMessage());
-        }
-        return records;
-    }
-
     /*
     *********************************************************
     @description     : This method use to fetch template data and variable mapping done in js.
@@ -467,45 +408,6 @@ public with sharing class WBTemplateController {
         }
 
         return wrapper;
-    }
-
-    /*
-    *********************************************************
-    @description     : Fetch records based on the dynamic object name, fieldname and recordid
-    @param           : objectName, fieldNames, recordId
-    @return          : resultMap {Map<String, Object>} - Return queried data.
-    ********************************************************
-    */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Object> fetchDynamicRecordData(String objectName, List<String> fieldNames, String recordId) {
-        Map<String, Object> resultMap = new Map<String, Object>();
-
-        try {
-            if (String.isEmpty(objectName) || fieldNames.isEmpty() || String.isEmpty(recordId)) {
-                ErrorHandler.insertErrordata(null, 'WBTemplateController', 'fetchDynamicRecordData', 'Object name, field names or record ID cannot be empty.');
-                throw new AuraHandledException('Invalid input parameters');
-            }
-
-            if (!fieldNames.contains('Phone')) {
-                    fieldNames.add('Phone');
-            }
-            String fields = String.join(fieldNames, ',');
-            
-            String queryString = 'SELECT ' + fields + ' FROM ' + objectName + ' WHERE Id = :recordId LIMIT 1';            
-            List<SObject> queriedData = Database.query(queryString);
-
-            if (!queriedData.isEmpty()) {
-                resultMap.put('queriedData', queriedData[0]);  
-            } else {
-                resultMap.put('queriedData', null);
-            }
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WBTemplateController', 'fetchDynamicRecordData', e.getMessage());
-            resultMap.put('error', e.getMessage());
-        }
-
-        return resultMap;
     }
    
     /*

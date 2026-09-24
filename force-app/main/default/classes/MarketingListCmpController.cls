@@ -30,7 +30,21 @@ public with sharing class MarketingListCmpController {
    @AuraEnabled
    public static WrapperClass getContactData(){
        try {
-            List<Map<String, String>> configuredFields = getConfiguredFields(); // Method to get selected fields from the config
+            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Fields_Data__c, MVEX__Page_Size__c FROM MVEX__Configuration_Settings__c 
+                                                                WHERE MVEX__Feature_Name__c = 'Marketing_List_Fields' WITH USER_MODE LIMIT 1];
+
+            List<Map<String, String>> configuredFields = new List<Map<String, String>>();
+            Integer pageSize = 30;
+
+            if (!configs.isEmpty()) {
+                MVEX__Configuration_Settings__c config = configs[0];
+                if (String.isNotBlank(config.MVEX__Fields_Data__c)) {
+                    configuredFields = (List<Map<String, String>>)JSON.deserialize(config.MVEX__Fields_Data__c, List<Map<String, String>>.class);
+                }
+                if (config.MVEX__Page_Size__c != null) {
+                    pageSize = Integer.valueOf(config.MVEX__Page_Size__c);
+                }
+            }
 
             Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Contact.fields.getMap();
             List<String> allFields = new List<String>();
@@ -71,7 +85,6 @@ public with sharing class MarketingListCmpController {
 
             String contactFields = String.join(filteredFields, ', ');
             String queryFields = String.escapeSingleQuotes(contactFields);
-            Integer pageSize = getPageSizeFromConfig();
             String query = 'SELECT ' + queryFields + ' FROM Contact LIMIT 50000';
 
             List<Contact> contacts = Database.query(query, AccessLevel.USER_MODE);
@@ -87,53 +100,6 @@ public with sharing class MarketingListCmpController {
            return null;
        }
    }
-
-    /**
-    * Method Name : getConfiguredFields
-    * @description : Retrieves the configured fields (API names and labels) from custom metadata.
-    * @return List<Map<String, String>>.
-    */
-    private static List<Map<String, String>> getConfiguredFields() {
-        try {
-            // Query Custom Object instead of Metadata
-            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Fields_Data__c  FROM MVEX__Configuration_Settings__c 
-                                                            WHERE MVEX__Feature_Name__c = 'Marketing_List_Fields' WITH USER_MODE LIMIT 1];
-            
-            List<Map<String, String>> fields = new List<Map<String, String>>();
-            
-            if (!configs.isEmpty()) {
-                MVEX__Configuration_Settings__c config = configs[0];
-                String fieldsDataJson = config.MVEX__Fields_Data__c;
-                
-                if (String.isNotBlank(fieldsDataJson)) {
-                    // Deserialize JSON to List<Map<String, String>>
-                    fields = (List<Map<String, String>>)JSON.deserialize(fieldsDataJson, List<Map<String, String>>.class);
-                }
-            }
-            
-            return fields;
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'MarketingListCmpController', 'getConfiguredFields', 'Error while getting configured fields.');
-            return null;
-        }
-    }
-
-    // Helper method to get pageSize from metadata
-    private static Integer getPageSizeFromConfig() {
-        try {
-            // Query Custom Object instead of Metadata
-            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Page_Size__c FROM MVEX__Configuration_Settings__c 
-                                                            WHERE MVEX__Feature_Name__c = 'Marketing_List_Fields' WITH USER_MODE LIMIT 1];
-        
-            if (!configs.isEmpty()) {
-                MVEX__Configuration_Settings__c config = configs[0];
-                return config.MVEX__Page_Size__c != null ? Integer.valueOf(config.MVEX__Page_Size__c) : 30; // Default to 30 if not set
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'MarketingListCmpController', 'getPageSizeFromConfig', 'Error while getting page size from config.');
-        }
-        return 30;
-    }
 
     /**
      * Class Name : sendEmail
@@ -284,7 +250,7 @@ public with sharing class MarketingListCmpController {
                         email.setToAddresses(new List<String>{contactEmail});
                         email.setSubject(temps[0].MVEX__Subject__c);
                         email.setHtmlBody(personalizedTemplateBody); // Use personalized body
-                        String replyToEmail = Label.EmailMessageEmailService;
+                        String replyToEmail = 'replyemailservice@2399seg7dczkd2wdrur97lyz9f5kxoq6rsi3uyqam30un540ms.dm-9p5p6uac.ind136.apex.salesforce.com';
 
                         if(replyToEmail != null){
                             email.setReplyTo(replyToEmail);

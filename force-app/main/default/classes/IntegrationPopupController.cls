@@ -442,4 +442,63 @@ public with sharing class IntegrationPopupController {
             return e.getMessage();
         }
     }
+
+    /**
+    * Class Name : FieldWrapper
+    * @description : Wrapper class for storing field details
+    */
+    public class FieldWrapper {
+        @AuraEnabled public String siteUrl;
+        @AuraEnabled public Object objectData;
+    }
+    
+    /**
+    * Method Name : getSettings
+    * @param integrationType : String to stored the integration type.
+    * @return FieldWrapper : Wrapper class for storing field details.
+    * @description : Method to get integration settings.
+    */
+    @AuraEnabled
+    public static FieldWrapper getSettings(String integrationType) {
+        FieldWrapper result = new FieldWrapper();
+        try {
+            if (integrationType == 'Gmail') {
+                MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
+
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
+                
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 3) {
+                        settings.MVEX__Client_ID__c = parts[0];
+                        settings.MVEX__Client_Secret__c = parts[1];
+                        settings.MVEX__Redirect_URI__c = parts[2];
+                    }
+                }
+                
+                result.objectData = settings;
+                result.siteUrl = settings.MVEX__Redirect_URI__c;
+            } else if (integrationType == 'Instagram') {
+                MVEX__IG_Configuration__c instaSettings = MVEX__IG_Configuration__c.getOrgDefaults();
+
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
+                
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 3) {
+                        instaSettings.MVEX__ClientId__c = parts[0];
+                        instaSettings.MVEX__ClientSecret__c = parts[1];
+                        instaSettings.MVEX__Redirect_URI__c = parts[2];
+                    }
+                }
+
+                result.objectData = instaSettings;
+                result.siteUrl = instaSettings.MVEX__Redirect_URI__c;
+            }
+            return result;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSettings', 'Error while getting settings.');
+            return null;
+        }
+    }
 }

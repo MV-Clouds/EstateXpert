@@ -39,6 +39,10 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
     integrationToDeactivate = null;
 
+    // Cached integration settings from Metadata (avoids redundant Apex getSettings calls)
+    gmailSettingsData = null;
+    instagramSettingsData = null;
+
     // Disable Save buttons until minimum required fields are filled
     get isGmailSaveDisabled() {
         return !this.gmailRefreshToken || this.gmailRefreshToken.trim() === '';
@@ -381,20 +385,47 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         }
     }
 
+    // ══ Integration Settings Cache Helper ════════════════════════════════════
+
+    /**
+    * Method Name: getIntegrationSettings
+    * @description: Retrieves integration configuration (Client ID, Secret, Redirect URI)
+    *               from Apex and caches it locally so it is not re-fetched redundantly on Save.
+    * @param {String} integrationType - 'Gmail' | 'Instagram'
+    * @return {Promise<Object>} Cached or newly fetched settings data.
+    */
+    getIntegrationSettings(integrationType) {
+        if (integrationType === 'Gmail' && this.gmailSettingsData) {
+            return Promise.resolve(this.gmailSettingsData);
+        }
+        if (integrationType === 'Instagram' && this.instagramSettingsData) {
+            return Promise.resolve(this.instagramSettingsData);
+        }
+        return getSettings({ integrationType })
+            .then(data => {
+                if (integrationType === 'Gmail') {
+                    this.gmailSettingsData = data;
+                } else if (integrationType === 'Instagram') {
+                    this.instagramSettingsData = data;
+                }
+                return data;
+            });
+    }
+
     // ══ Gmail — Connect / Input section state ═════════════════════════════════
 
     /**
     * Method Name: handleGmailConnect
     * @description: Shown when Gmail is inactive. Redirects to Gmail OAuth login page
     *               (same as integrationPopUp) and reveals the input section for manual token entry.
-    *               Uses getSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
+    *               Uses cached getIntegrationSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
     * Created Date: 16/03/2026
     * Created By: Karan Singh
     */
     handleGmailConnect() {
         try {
             this.isSpinner = true;
-            getSettings({ integrationType: 'Gmail' })
+            this.getIntegrationSettings('Gmail')
                 .then(data => {
                     this.isSpinner = false;
                     if (!data || !data.objectData) {
@@ -459,7 +490,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 return;
             }
             this.isSpinner = true;
-            getSettings({ integrationType: 'Gmail' })
+            this.getIntegrationSettings('Gmail')
                 .then(data => {
                     if (!data || !data.objectData) {
                         // Throw so the .catch() handles spinner + toast
@@ -508,7 +539,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     handleInstagramConnect() {
         try {
             this.isSpinner = true;
-            getSettings({ integrationType: 'Instagram' })
+            this.getIntegrationSettings('Instagram')
                 .then(data => {
                     this.isSpinner = false;
                     if (!data || !data.objectData) {
@@ -581,7 +612,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 return;
             }
             this.isSpinner = true;
-            getSettings({ integrationType: 'Instagram' })
+            this.getIntegrationSettings('Instagram')
                 .then(data => {
                     if (!data || !data.objectData) {
                         // Throw so the .catch() handles spinner + toast

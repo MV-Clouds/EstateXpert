@@ -1159,7 +1159,7 @@ export default class AwsFileUploader extends NavigationMixin(LightningElement) {
             this[NavigationMixin.GenerateUrl]({
                 type: 'standard__navItemPage',
                 attributes: {
-                    apiName: 'Control_Center_Dev'
+                    apiName: 'MVEX__Control_Center'
                 },
                 state: {
                     c__openComponent: 'storageIntegration'

@@ -11,6 +11,9 @@ import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.r
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
+import Google_Oauth_URL from '@salesforce/label/c.Google_Oauth_URL';
+import Gmail_Send_Scope from '@salesforce/label/c.Gmail_Send_Scope';
+import Insta_Oauth_URL from '@salesforce/label/c.Insta_Oauth_URL';
 
 export default class StorageIntegration extends NavigationMixin(LightningElement) {
     @track isDataLoaded = false;
@@ -412,9 +415,9 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {
-                            url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + fieldsData.MVEX__Client_ID__c +
+                            url: Google_Oauth_URL + 'client_id=' + fieldsData.MVEX__Client_ID__c +
                                  '&redirect_uri=' + fieldsData.MVEX__Redirect_URI__c +
-                                 '&response_type=code&access_type=offline&prompt=consent&scope=https://www.googleapis.com/auth/gmail.send'
+                                 '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope
                         }
                     });
                 })
@@ -527,7 +530,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {
-                            url: 'https://www.instagram.com/oauth/authorize?client_id=' + clientId +
+                            url: Insta_Oauth_URL + 'client_id=' + clientId +
                                  '&redirect_uri=' + redirectUri +
                                  '&response_type=code&scope=business_basic%2Cbusiness_manage_messages%2Cbusiness_manage_comments%2Cbusiness_content_publish'
                         }

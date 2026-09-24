@@ -352,7 +352,7 @@ export default class SinglePropertyView extends LightningElement {
 
     formatPrice(record) {
         if (record.MVEX__Listing_Type__c === 'Sale') {
-            return record.MVEX__Sale_Price__c ? `AED ${record.MVEX__Sale_Price__c.toLocaleString()}` : 'Price not available';
+            return record.MVEX__Listing_Price__c ? `AED ${record.MVEX__Listing_Price__c.toLocaleString()}` : 'Price not available';
         } else if (record.MVEX__Listing_Type__c === 'Rent') {
             return record.MVEX__Rental_Price__c && record.MVEX__Rent_Frequency__c
                 ? `AED ${record.MVEX__Rental_Price__c.toLocaleString()} / ${record.MVEX__Rent_Frequency__c}`

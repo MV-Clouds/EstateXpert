@@ -19,7 +19,7 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled
-    public static Map<String, Object> getPropertyData(String listingId) {
+    public static Map<String, Object> getPropertyAndContactData(String listingId) {
         try {
             String escapedListingId = String.escapeSingleQuotes(listingId);
             Map<String, Object> result = new Map<String, Object>();
@@ -98,7 +98,7 @@ public with sharing class SiteAndBookingController {
             
             return result;
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'getPropertyData', e.getMessage());
+            ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'getPropertyAndContactData', e.getMessage());
             return null;
         }
     }

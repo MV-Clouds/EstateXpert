@@ -3,7 +3,7 @@ import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import EvoCalendarZip from '@salesforce/resourceUrl/evoCalender';
 import emptyState from '@salesforce/resourceUrl/emptyState';
-import getPropertyData from '@salesforce/apex/SiteAndBookingController.getPropertyData';
+import getPropertyAndContactData from '@salesforce/apex/SiteAndBookingController.getPropertyAndContactData';
 import sendEmailsAndCreateShowings from '@salesforce/apex/SiteAndBookingController.sendEmailsAndCreateShowings';
 import createShowings from '@salesforce/apex/SiteAndBookingController.createShowings';
 import sendWhatsappMessage from '@salesforce/apex/SiteAndBookingController.sendWhatsappMessage';
@@ -202,9 +202,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             })
             .then(() => {
                 this.scriptsLoaded = true;
-                this.loadAllTemplates();
-                this.loadPropertyData();
-                this.loadAllShowings(); // Load events for *both* calendars
+                this.loadPropertyAndContactData();
             })
             .catch(error => {
                 this.showToast('Error', 'Failed to load resources: ' + error.message, 'error');
@@ -264,8 +262,8 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     // --- DATA LOADING ---
 
-    loadPropertyData() {
-        getPropertyData({ listingId: this.recordId })
+    loadPropertyAndContactData() {
+        getPropertyAndContactData({ listingId: this.recordId })
             .then(data => {
                 this.listing = data.listing?.length > 0 ? data.listing[0] : {};
                 this.images = data.images.map(file => file.MVEX__BaseUrl__c);
@@ -508,6 +506,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     // --- MODAL 1: "View Schedule" Handlers ---
 
     openScheduleModal() {
+        this.loadAllShowings();
         this.showScheduleModal = true;
     }
 
@@ -526,6 +525,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     openManageModal(event) {
         try {
+            this.loadAllShowings();
+            if (!this.templateMap || this.templateMap.size === 0) {
+                this.loadAllTemplates();
+            }
             this.currentContact = JSON.parse(event.currentTarget.dataset.contact);
             this.currentShowingId = this.currentContact.ShowingId;
             this.currentContactId = this.currentContact.Id;
@@ -677,7 +680,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         // Reset to default sort
         this.sortField = 'Name';
         this.sortOrder = 'asc';
-        this.loadPropertyData();
+        this.loadPropertyAndContactData();
         this.loadAllShowings();
         this.updateSortIcons();
         this.showToast('Success', 'Successfully refreshed Showing records!', 'success');
@@ -856,7 +859,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     handleApexSuccess(message) {
         this.showToast('Success', message, 'success');
-        this.loadPropertyData(); // Refresh table
+        this.loadPropertyAndContactData(); // Refresh table
         this.loadAllShowings();  // Refresh calendar events
         this.closeManageModal();
         this.isLoading = false;

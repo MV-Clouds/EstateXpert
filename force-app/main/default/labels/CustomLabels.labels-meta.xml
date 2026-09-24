@@ -179,4 +179,11 @@
         <shortDescription>thumbnail</shortDescription>
         <value>https://estatexpertlistingimages.s3.us-east-1.amazonaws.com/videothumbnail.jpeg</value>
     </labels>
+    <labels>
+        <fullName>AWS_S3_ENDPONT</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>AWS_S3_ENDPONT</shortDescription>
+        <value>https://s3.amazonaws.com/</value>
+    </labels>
 </CustomLabels>

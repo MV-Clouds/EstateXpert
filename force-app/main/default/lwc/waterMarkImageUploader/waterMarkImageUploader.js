@@ -24,6 +24,18 @@ export default class WaterMarkImageUploader extends LightningElement {
     @track imageSize;
     @track uploaderFlipClass = 'flip-card'; 
 
+    get hasExistingImage() {
+        return Boolean(this.isImageData && this.fromData && this.data && this.data.length > 0);
+    }
+
+    get showUploadButton() {
+        return !this.hasExistingImage;
+    }
+
+    get isUploadDisabled() {
+        return !this.fromUploader || !this.filesUploaded || this.filesUploaded.length === 0;
+    }
+
     /**
     * Method Name: connectedCallback
     * @description: Used to fetch data.
@@ -86,7 +98,7 @@ export default class WaterMarkImageUploader extends LightningElement {
             event.preventDefault();
             const files = event.dataTransfer.files;
 
-            if (this.filesUploaded.length === 1 || this.data.length > 0) {
+            if (this.hasExistingImage) {
                 this.toast('Error', 'You already have an image uploaded. To upload a new image, please delete the existing one first.', 'error');
                 return;
             }
@@ -105,13 +117,12 @@ export default class WaterMarkImageUploader extends LightningElement {
                     return;
                 }
 
-                this.filesUploaded.push(file);
+                this.filesUploaded = [file];
                 this.fileName = file.name;
                 this.showImagePreview(file);
                 this.isImageData = true;
                 this.fromData = false;
                 this.fromUploader = true;
-                this.uploaderFlipClass = 'flip-card';
             }
         } catch (error) {
             errorDebugger('WaterMarkImageUploader', 'handleDrop', error, 'warn', 'Error occurred while handling the drop');
@@ -142,8 +153,9 @@ export default class WaterMarkImageUploader extends LightningElement {
     */
     handleSelectedFiles(event) {
         try {
-            if (this.filesUploaded.length === 1 || this.data.length > 0) {
+            if (this.hasExistingImage) {
                 this.toast('Error', 'You already have an image uploaded. To upload a new image, please delete the existing one first.', 'error');
+                this.template.querySelector('.slds-file-selector__input').value = null;
                 return;
             }
 
@@ -163,18 +175,41 @@ export default class WaterMarkImageUploader extends LightningElement {
                     return;
                 }
 
-                this.filesUploaded.push(file);
+                this.filesUploaded = [file];
                 this.fileName = file.name;
                 this.showImagePreview(file);
                 this.isImageData = true;
                 this.fromData = false;
                 this.fromUploader = true;
-                this.uploaderFlipClass = 'flip-card';
             }
 
             this.template.querySelector('.slds-file-selector__input').value = null;
         } catch (error) {
             errorDebugger('WaterMarkImageUploader', 'handleSelectedFiles', error, 'warn', 'Error occurred while handling the selected files');
+        }
+    }
+
+    /**
+    * Method Name: handleRemoveClientImage
+    * @description: Used to remove client-side image immediately without confirmation.
+    */
+    handleRemoveClientImage() {
+        try {
+            this.filesUploaded = [];
+            this.fileName = '';
+            this.imageSrc = null;
+            this.imageName = '';
+            this.imageSize = '';
+            this.fromUploader = false;
+            this.isImageData = false;
+            this.toast('Success', 'Image has been removed successfully.', 'success');
+
+            const fileInput = this.template.querySelector('.slds-file-selector__input');
+            if (fileInput) {
+                fileInput.value = null;
+            }
+        } catch (error) {
+            errorDebugger('WaterMarkImageUploader', 'handleRemoveClientImage', error, 'warn', 'Error occurred while removing client-side image');
         }
     }
 
@@ -227,14 +262,17 @@ export default class WaterMarkImageUploader extends LightningElement {
     * Created By: Karan Singh
     */
     handleSave() {
-        this.isSpinner = true;
         try {
-            if (this.filesUploaded.length > 0) {
+            if (this.hasExistingImage) {
+                this.toast('Warning', 'A watermark image is already uploaded. To upload a new image, please delete the existing one first.', 'warning');
+                return;
+            }
+            if (this.filesUploaded && this.filesUploaded.length > 0) {
+                this.isSpinner = true;
                 this.uploadHelper();
             }
             else {
-                this.toast('Error', 'Please select file to upload!!', 'error');
-                this.isSpinner = false;
+                this.toast('Error', 'Please select a file to upload.', 'error');
             }
         } catch (error) {
             errorDebugger('WaterMarkImageUploader', 'handleSave', error, 'warn', 'Error occurred while saving the file');
@@ -332,6 +370,8 @@ export default class WaterMarkImageUploader extends LightningElement {
                 this.isSpinner = false;
                 this.data = [];
                 this.filesUploaded = [];
+                this.fromData = false;
+                this.fromUploader = false;
                 this.uploaderFlipClass = 'flip-card'; // Reset flip class
             } else {
                 this.isSpinner = true;
@@ -343,6 +383,8 @@ export default class WaterMarkImageUploader extends LightningElement {
                         this.isSpinner = false;
                         this.data = [];
                         this.filesUploaded = [];
+                        this.fromData = false;
+                        this.fromUploader = false;
                     })
                     .catch(error => {
                         this.toast('Error while deleting File', error.message, 'error');

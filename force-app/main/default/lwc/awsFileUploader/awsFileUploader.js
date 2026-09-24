@@ -1,4 +1,5 @@
 import { LightningElement, track, api } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import getS3ConfigSettings from "@salesforce/apex/ImageAndMediaController.getS3ConfigSettings";
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import createmediaforlisting from "@salesforce/apex/ImageAndMediaController.createmediaforlisting";
@@ -10,7 +11,7 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 import thumbnailUrl from '@salesforce/label/c.thumbnail';
 
-export default class AwsFileUploader extends LightningElement {
+export default class AwsFileUploader extends NavigationMixin(LightningElement) {
 
     @api propertyId;
     @track confData;
@@ -39,6 +40,7 @@ export default class AwsFileUploader extends LightningElement {
     @track isScrolling = false;
     @track isIntegrated = false;
     @track orgFolder = '';
+    @track showWatermarkModal = false;
 
     /**
     * Method Name: options
@@ -63,7 +65,7 @@ export default class AwsFileUploader extends LightningElement {
             return true;
         }
         if (this.isAWS) {
-            return this.selectedFilesToUpload.length === 0;
+            return !this.isIntegrated || this.selectedFilesToUpload.length === 0;
         } else {
             return !(this.imageTitleToUpload && this.imageUrlToUpload);
         }
@@ -122,6 +124,14 @@ export default class AwsFileUploader extends LightningElement {
         } catch (error) {
             errorDebugger('AwsFileUploader', 'renderedCallback', error, 'warn', 'Error while loading script and fetching data');
         }
+    }
+
+    /**
+    * Method Name: disconnectedCallback
+    * @description: Cleans up dynamically injected watermark modal styles when component is destroyed.
+    */
+    disconnectedCallback() {
+        this.removeWatermarkModalStyles();
     }
 
     /**
@@ -255,15 +265,18 @@ export default class AwsFileUploader extends LightningElement {
                         this.logo = result.contentVersionData;
                         this.isIntegrated = result.isIntegrated;
                     } else {
+                        this.isIntegrated = false;
                         this.showToast('Error', result.contentVersionData, 'error');
                     }
                 }).catch(error => {
                     this.showSpinner = false;
+                    this.isIntegrated = false;
                     this.showToast('Error', error, 'error');
                     errorDebugger('AwsFileUploader', 'getS3ConfigDataAsync:getS3ConfigSettings', error, 'warn', 'Error while getting s3 config data');
                 });
         } catch (error) {
             this.showSpinner = false;
+            this.isIntegrated = false;
             errorDebugger('AwsFileUploader', 'getS3ConfigDataAsync', error, 'warn', 'Error while getting s3 config data');
         }
     }
@@ -1111,6 +1124,7 @@ export default class AwsFileUploader extends LightningElement {
     */
     handleDialogueClose() {
         try {
+            this.removeWatermarkModalStyles();
             this.dispatchEvent(new CustomEvent('close'));
         } catch (error) {
             errorDebugger('AwsFileUploader', 'handleDialogueClose', error, 'warn', 'Error while handling dialogue close');
@@ -1125,11 +1139,103 @@ export default class AwsFileUploader extends LightningElement {
     */
     handleDialogueCloseAndRefresh() {
         try {
+            this.removeWatermarkModalStyles();
             this.showSpinner = false;
             this.dispatchEvent(new CustomEvent('closeandrefresh'));
         } catch (error) {
             errorDebugger('AwsFileUploader', 'handleDialogueCloseAndRefresh', error, 'warn', 'Error while handling dialogue close and refresh');
         }
+    }
+
+    /**
+    * Method Name: navigateToAwsIntegration
+    * @description: Navigates to the Control Center Integration Hub in a new tab and closes current popup.
+    */
+    navigateToAwsIntegration(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        try {
+            this[NavigationMixin.GenerateUrl]({
+                type: 'standard__navItemPage',
+                attributes: {
+                    apiName: 'Control_Center_Dev'
+                },
+                state: {
+                    c__openComponent: 'storageIntegration'
+                }
+            }).then((url) => {
+                window.open(url, '_blank');
+            }).catch((error) => {
+                console.error('Error generating tab URL:', error);
+                window.open('/lightning/n/MVEX__Control_Center?c__openComponent=storageIntegration', '_blank');
+            }).finally(() => {
+                this.handleDialogueClose();
+            });
+        } catch (error) {
+            window.open('/lightning/n/MVEX__Control_Center?c__openComponent=storageIntegration', '_blank');
+            this.handleDialogueClose();
+        }
+    }
+
+    /**
+    * Method Name: applyWatermarkModalStyles
+    * @description: Dynamically injects style to ensure WaterMark popup has a compact width (~32rem) without altering the child component.
+    */
+    applyWatermarkModalStyles() {
+        try {
+            if (typeof document !== 'undefined' && !document.getElementById('watermark-modal-custom-width-style')) {
+                const style = document.createElement('style');
+                style.id = 'watermark-modal-custom-width-style';
+                style.innerText = `
+                    .watermark-modal-wrapper .slds-modal__container,
+                    .watermark-modal-wrapper .slds-modal_small .slds-modal__container {
+                        width: 40rem !important;
+                        max-width: 40rem !important;
+                        min-width: 20rem !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        } catch (error) {
+            console.warn('Could not inject watermark modal styles:', error);
+        }
+    }
+
+    /**
+    * Method Name: removeWatermarkModalStyles
+    * @description: Cleans up dynamically injected watermark popup style.
+    */
+    removeWatermarkModalStyles() {
+        try {
+            if (typeof document !== 'undefined') {
+                const existing = document.getElementById('watermark-modal-custom-width-style');
+                if (existing) {
+                    existing.remove();
+                }
+            }
+        } catch (error) {
+            console.warn('Could not remove watermark modal styles:', error);
+        }
+    }
+
+    /**
+    * Method Name: handleOpenWatermarkModal
+    * @description: Opens the WaterMarkImageUploader popup above the current modal with compact width.
+    */
+    handleOpenWatermarkModal() {
+        this.applyWatermarkModalStyles();
+        this.showWatermarkModal = true;
+    }
+
+    /**
+    * Method Name: handleCloseWatermarkModal
+    * @description: Closes the WaterMarkImageUploader popup and refreshes S3 config.
+    */
+    handleCloseWatermarkModal() {
+        this.removeWatermarkModalStyles();
+        this.showWatermarkModal = false;
+        this.getS3ConfigDataAsync();
     }
 
     /**

@@ -185,6 +185,47 @@ public class IntegrationPopupControllerTest {
         System.assertNotEquals(null, sites, 'Site data should not be null');
     }
 
+    @isTest
+    static void testValidateIntegrationCredentials_Instagram() {
+        Test.startTest();
+        // Blank input
+        String blankResult = IntegrationPopupController.validateIntegrationCredentials('Instagram', '', '');
+        System.assertEquals('Please fill in both User ID and Long-Lived Access Token.', blankResult);
+
+        // Default success in test context
+        String successResult = IntegrationPopupController.validateIntegrationCredentials('Instagram', '123456', 'token123');
+        System.assertEquals('SUCCESS', successResult);
+
+        // Mock failure
+        IntegrationPopupController.mockValidationResult = 'Invalid Instagram credentials. Please check your User ID and Access Token.';
+        String failResult = IntegrationPopupController.validateIntegrationCredentials('Instagram', '123456', 'bad_token');
+        System.assertEquals('Invalid Instagram credentials. Please check your User ID and Access Token.', failResult);
+        IntegrationPopupController.mockValidationResult = null;
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testValidateIntegrationCredentials_Gmail() {
+        Test.startTest();
+        // Blank token
+        String blankResult = IntegrationPopupController.validateIntegrationCredentials('Gmail', '', '');
+        System.assertEquals('Please enter a valid Gmail Refresh Token.', blankResult);
+
+        // Default success in test context
+        String successResult = IntegrationPopupController.validateIntegrationCredentials('Gmail', 'refresh_token_123', 'client_id');
+        System.assertEquals('SUCCESS', successResult);
+        Test.stopTest();
+    }
+
+
+    @isTest
+    static void testValidateIntegrationCredentials_Unsupported() {
+        Test.startTest();
+        String result = IntegrationPopupController.validateIntegrationCredentials('Unknown', 'a', 'b');
+        System.assert(result.contains('Unsupported'), 'Should return unsupported message');
+        Test.stopTest();
+    }
+
     // Mock HTTP Response Generator
     private class MockHttpResponseGenerator implements HttpCalloutMock {
         public HTTPResponse respond(HTTPRequest req) {

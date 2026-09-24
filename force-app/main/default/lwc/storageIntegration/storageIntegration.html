@@ -11,7 +11,7 @@
                     <!-- Row 1: AWS + Instagram -->
                     <div class="cards_row">
                         <!-- AWS Card -->
-                        <template if:true={featureAvailability.Cloud_Storage_Integration}>
+                        <template if:true={isCloudStorageAvailable}>
                             <div class="integration_card">
                                 <div class="card_header">
                                     <div class="card_title_section">
@@ -124,7 +124,7 @@
                         </template>
 
                         <!-- Instagram Card -->
-                        <template if:true={featureAvailability.Social_Media_Integration}>
+                        <template if:true={isSocialMediaAvailable}>
                             <div class="integration_card">
                                 <div class="card_header">
                                     <div class="card_title_section">
@@ -313,7 +313,7 @@
                     <!-- Row 2: Gmail -->
                     <div class="cards_row">
                         <!-- Gmail Card -->
-                        <template if:true={featureAvailability.Email_Integration}>
+                        <template if:true={isEmailAvailable}>
                             <div class="integration_card">
                                 <div class="card_header">
                                     <div class="card_title_section">

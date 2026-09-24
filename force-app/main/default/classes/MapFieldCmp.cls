@@ -20,7 +20,7 @@ public with sharing class MapFieldCmp {
             List<Map<String, String>> fieldDetails = new List<Map<String, String>>();    
     
             // Query MVEX__Mapping_Metadata__mdt
-            MVEX__Mapping_Metadata__mdt metaData = [SELECT MVEX__Mapping_String__c, MVEX__Automatic_Sync__c, MVEX__BlockedFields__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            MVEX__Mapping_Metadata__mdt metaData = [SELECT MVEX__Mapping_String__c, MVEX__BlockedFields__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
         
             Schema.DescribeSObjectResult describeResult = Schema.getGlobalDescribe().get(objectName).getDescribe();
         
@@ -69,12 +69,11 @@ public with sharing class MapFieldCmp {
    
     /**
      * Method Name : saveMappings
-     * @description : save mapping in the of the fields.
+     * @description : save mapping of the fields.
      * @param mappingsData String value.
-     * @param checkboxValue Boolean value.
      */
     @AuraEnabled
-    public static void saveMappings(String mappingsData, Boolean checkboxValue){
+    public static void saveMappings(String mappingsData){
         try {
             String devName = 'MappingString';
             String masterLabel = 'MappingString';
@@ -105,11 +104,6 @@ public with sharing class MapFieldCmp {
                 mdata.values.add(instance1);
             }
 
-            Metadata.CustomMetadataValue instance2 = new Metadata.CustomMetadataValue();
-            instance2.field = 'MVEX__Automatic_Sync__c';
-            instance2.value = checkboxValue;
-            mdata.values.add(instance2);
-
             Metadata.DeployContainer container = new Metadata.DeployContainer();
             container.addMetadata(mdata);
             
@@ -125,23 +119,17 @@ public with sharing class MapFieldCmp {
    * @return List of string.
    */
     @AuraEnabled
-    public static List<String> getMetadata() {
+    public static String getMetadata() {
         try {
-            List<String> metadataValues = new List<String>();
-    
             // Fetch records
-            List<MVEX__Mapping_Metadata__mdt> metadataRecords = [SELECT MVEX__Mapping_String__c, MVEX__Automatic_Sync__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
+            List<MVEX__Mapping_Metadata__mdt> metadataRecords = [SELECT MVEX__Mapping_String__c FROM MVEX__Mapping_Metadata__mdt WITH USER_MODE LIMIT 1];
             
             // Check if records exist
             if (!metadataRecords.isEmpty()) {
-                MVEX__Mapping_Metadata__mdt metadataRecord = metadataRecords[0];
-                
-                // Add field values to the list
-                metadataValues.add(metadataRecord.MVEX__Mapping_String__c);
-                metadataValues.add(String.valueOf(metadataRecord.MVEX__Automatic_Sync__c));
+                return metadataRecords[0].MVEX__Mapping_String__c;
             }
             
-            return metadataValues;
+            return null;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MapFieldCmp', 'getMetadata', 'Error while getting metadata.');
             return null;

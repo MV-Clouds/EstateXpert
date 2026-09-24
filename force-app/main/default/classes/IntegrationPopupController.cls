@@ -123,6 +123,9 @@ public with sharing class IntegrationPopupController {
                 result.objectData = MVEX__AWS_Config__c.getOrgDefaults();
             } else if (integrationType == 'Gmail') {
                 MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
+                if (settings == null) {
+                    settings = new MVEX__GmailConfig__c();
+                }
                 
                 // Fetch Credentials from Custom Metadata
                 List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
@@ -250,7 +253,7 @@ public with sharing class IntegrationPopupController {
 
             SocialMediaDataWrapper instagramWrapper = new SocialMediaDataWrapper();
             instagramWrapper.integraName = 'Instagram';
-            instagramWrapper.isValid = instagramCredential.MVEX__ClientId__c != null && instagramCredential.MVEX__ClientSecret__c != null;
+            instagramWrapper.isValid = instagramCredential != null && instagramCredential.MVEX__ClientId__c != null && instagramCredential.MVEX__ClientSecret__c != null;
             instagramWrapper.integrationData = instagramCredential;
             wrapperList.add(instagramWrapper);
 
@@ -324,7 +327,7 @@ public with sharing class IntegrationPopupController {
             FieldWrapperData gmailWrapper = new FieldWrapperData();
             gmailWrapper.integrationName = 'Gmail';
             gmailWrapper.integrationData = gmailCredential;
-            gmailWrapper.isValid = gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
+            gmailWrapper.isValid = gmailCredential != null && gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
             wrapperList.add(gmailWrapper);
 
             FieldWrapperData awsWrapper = new FieldWrapperData();
@@ -535,6 +538,12 @@ public with sharing class IntegrationPopupController {
                 if (mockValidationResult != null) {
                     return mockValidationResult;
                 }
+                // Return stub identifier so the LWC can save it during tests
+                if (integrationType == 'Gmail') {
+                    return 'SUCCESS|test@example.com';
+                } else if (integrationType == 'Instagram') {
+                    return 'SUCCESS|test_user';
+                }
                 return 'SUCCESS';
             }
 
@@ -572,6 +581,7 @@ public with sharing class IntegrationPopupController {
             Map<String, Object> responseBody = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
             String returnedUserId = (String) responseBody.get('user_id');
             String returnedId     = (String) responseBody.get('id');
+            String username       = (String) responseBody.get('username');
             String trimmedUserId  = userId.trim();
 
             Boolean matches = (returnedUserId != null && returnedUserId.equals(trimmedUserId)) ||
@@ -580,7 +590,8 @@ public with sharing class IntegrationPopupController {
             if (!matches) {
                 return 'The provided User ID does not match the authenticated Instagram account.';
             }
-            return 'SUCCESS';
+            // Return username so LWC can persist it — format: SUCCESS|{username}
+            return 'SUCCESS|' + (String.isNotBlank(username) ? username : trimmedUserId);
         } else {
             Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
             if (errorResponse != null && errorResponse.containsKey('error')) {
@@ -643,7 +654,32 @@ public with sharing class IntegrationPopupController {
         HttpResponse res = http.send(req);
 
         if (res.getStatusCode() == 200) {
-            return 'SUCCESS';
+            // Token exchange succeeded — now fetch the user's email via userinfo endpoint
+            Map<String, Object> tokenResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            String freshAccessToken = (String) tokenResponse.get('access_token');
+
+            String userEmail = '';
+            if (String.isNotBlank(freshAccessToken)) {
+                try {
+                    HttpRequest userReq = new HttpRequest();
+                    userReq.setMethod('GET');
+                    userReq.setEndpoint('https://www.googleapis.com/oauth2/v2/userinfo');
+                    userReq.setHeader('Authorization', 'Bearer ' + freshAccessToken);
+                    userReq.setTimeout(10000);
+
+                    HttpResponse userRes = new Http().send(userReq);
+                    if (userRes.getStatusCode() == 200) {
+                        Map<String, Object> userInfo = (Map<String, Object>) JSON.deserializeUntyped(userRes.getBody());
+                        userEmail = (String) userInfo.get('email');
+                    }
+                } catch (Exception ex) {
+                    // Non-fatal — email fetch failed, return SUCCESS without email
+                    ErrorHandler.insertErrorData(ex, 'IntegrationPopupController', 'validateGmail', 'Could not fetch Gmail userinfo: ' + ex.getMessage());
+                }
+            }
+
+            // Return SUCCESS|{email} so LWC can persist the email address
+            return 'SUCCESS|' + (String.isNotBlank(userEmail) ? userEmail : '');
         } else {
             Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
             if (errorResponse != null && errorResponse.containsKey('error_description')) {

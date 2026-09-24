@@ -181,6 +181,11 @@
                                     <template if:true={instagramData.showDetails}>
                                         <div class="details_section">
                                             <div class="detail_row">
+                                                <span class="detail_label">User Name</span>
+                                                <span
+                                                    class="detail_value">{instagramData.integrationData.Username__c}</span>
+                                            </div>
+                                            <div class="detail_row">
                                                 <span class="detail_label">User ID</span>
                                                 <span
                                                     class="detail_value">{instagramData.integrationData.MVEX__User_Id__c}</span>
@@ -367,6 +372,11 @@
 
                                     <template if:true={gmailData.showDetails}>
                                         <div class="details_section">
+                                            <div class="detail_row">
+                                                <span class="detail_label">Email Address</span>
+                                                <span
+                                                    class="detail_value">{gmailData.integrationData.EmailAddress}</span>
+                                            </div>
                                             <div class="detail_row">
                                                 <span class="detail_label">Created Date & Time</span>
                                                 <span

@@ -569,10 +569,29 @@ public with sharing class IntegrationPopupController {
             return 'Please fill in both User ID and Long-Lived Access Token.';
         }
 
+        String graphApiVersion = 'v24.0';
+        MVEX__IG_Configuration__c igConfig = MVEX__IG_Configuration__c.getOrgDefaults();
+        if (igConfig != null) {
+            String configVersion;
+            try {
+                configVersion = (String) igConfig.get('APIVersion__c');
+            } catch (Exception e1) {
+                configVersion = null;
+            }
+            if (String.isNotBlank(configVersion)) {
+                graphApiVersion = configVersion.trim();
+            }
+        }
+        if (String.isBlank(graphApiVersion)) {
+            graphApiVersion = 'v24.0';
+        }
+        if (!graphApiVersion.toLowerCase().startsWith('v')) {
+            graphApiVersion = 'v' + graphApiVersion;
+        }
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         req.setMethod('GET');
-        req.setEndpoint('https://graph.instagram.com/v21.0/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8'));
+        req.setEndpoint('https://graph.instagram.com/' + graphApiVersion + '/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8'));
         req.setTimeout(20000);
 
         HttpResponse res = http.send(req);

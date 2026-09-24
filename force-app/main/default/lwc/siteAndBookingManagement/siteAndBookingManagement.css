@@ -426,10 +426,10 @@
     width: 11rem;
 }
 
-c-template-preview {
+/* c-template-preview {
     max-height: none !important;
     --max-height-of-the-preview-div: none !important;
-}
+} */
 
 /* ================================
 == RESPONSIVE

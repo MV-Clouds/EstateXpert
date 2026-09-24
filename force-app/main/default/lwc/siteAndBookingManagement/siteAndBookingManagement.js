@@ -14,11 +14,12 @@ import updateShowing from '@salesforce/apex/SiteAndBookingController.updateShowi
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
-import getTemplateData from '@salesforce/apex/ChatWindowController.getTemplateData';
-import createChat from '@salesforce/apex/ChatWindowController.createChat';
+// import getTemplateData from '@salesforce/apex/ChatWindowController.getTemplateData';
+// import createChat from '@salesforce/apex/ChatWindowController.createChat';
 import previewEmailTemplate from '@salesforce/apex/SiteAndBookingController.previewEmailTemplate';
-import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
+// import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import FORM_FACTOR from '@salesforce/client/formFactor';
+import TIME_ZONE from '@salesforce/i18n/timeZone';
 
 // Define paths
 const JQUERY_PATH = `${EvoCalendarZip}/evo-jquery.js`;
@@ -27,6 +28,7 @@ const EVO_CALENDAR_CSS_PATH = `${EvoCalendarZip}/evo-calendar.css`;
 const EVO_CALENDAR_NAVY_CSS_PATH = `${EvoCalendarZip}/evo-calendar.royal-navy.css`;
 
 export default class SiteAndBookingManagement extends NavigationMixin(LightningElement) {
+    userTimeZone = TIME_ZONE;
     @api recordId;
     @track listing = {};
     @track images = [];
@@ -219,7 +221,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     */
     async checkBusinessAccountConfig() {
         try {
-            const result = await hasBusinessAccountId();
+            const result = false;
             this.hasBusinessAccountConfigured = result;
             // Update default communication method based on configuration
             if (!result) {
@@ -277,7 +279,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                         ...contact,
                         Json: JSON.stringify(contactData), // Stringify the contact data for the button
                         FormattedScheduleDate: scheduleDate ? scheduleDate.toLocaleString('en-US', {
-                            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone
                         }) : '',
                         isShowingDisabled: !contact.ShowingId
                     };
@@ -325,9 +327,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.calendarEvents = result.map(showing => ({
                     id: showing.Id,
                     name: showing.ContactName,
-                    date: new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+                    date: new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: this.userTimeZone }),
                     description:
-                        `<div data-id="${showing.Id}" class="showing-link" ><div class="event-desc-line">Time: ${new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+                        `<div data-id="${showing.Id}" class="showing-link" ><div class="event-desc-line">Time: ${new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone })}</div>
                             <div class="event-desc-line">Status: ${showing.MVEX__Status__c}</div>
                             <div class="event-desc-line">Listing: ${showing.ListingName}</div>
                         </div>`,
@@ -664,10 +666,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     }
 
     handleRefreshClick() {
-        const childComponent = this.template.querySelector('c-template-preview');
-        if (childComponent && this.selectedTemplate) {
-            childComponent.refreshComponent(this.selectedTemplate);
-        }
+        // const childComponent = this.template.querySelector('c-template-preview');
+        // if (childComponent && this.selectedTemplate) {
+        //     childComponent.refreshComponent(this.selectedTemplate);
+        // }
     }
 
     handleRefreshData() {
@@ -969,54 +971,54 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             return;
         }
         this.isLoading = true;
-        getTemplateData({ templateId: templateId, contactId: this.currentShowingId, objectApiName: this.selectedObject })
-            .then((templateData) => {
-                if (!templateData) {
-                    this.isLoading = false;
-                    this.showToast('Error', 'Selected template not found.', 'error');
-                    return;
-                }
+        // getTemplateData({ templateId: templateId, contactId: this.currentShowingId, objectApiName: this.selectedObject })
+        //     .then((templateData) => {
+        //         if (!templateData) {
+        //             this.isLoading = false;
+        //             this.showToast('Error', 'Selected template not found.', 'error');
+        //             return;
+        //         }
 
-                this.templateData = templateData.template;
-                this.isTextHeader = this.templateData?.MVEX__Header_Type__c === 'Text';
-                this.isImageHeader = this.templateData?.MVEX__Header_Type__c === 'Image';
-                this.isVideoHeader = this.templateData?.MVEX__Header_Type__c === 'Video';
-                this.isDocHeader = this.templateData?.MVEX__Header_Type__c === 'Document';
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(this.templateData?.MVEX__WBHeader_Body__c || '', 'text/html');
-                this.headerBody = doc.documentElement.textContent || '';
-                this.templateBody = this.templateData?.MVEX__WBTemplate_Body__c;
-                if (this.templateData?.MVEX__Template_Category__c === 'Authentication') {
-                    // Generate once so preview and payload always show the same code
-                    if (!this.generatedAuthCode) {
-                        this.generatedAuthCode = String(Math.floor(Math.random() * 900000) + 100000);
-                    }
-                    this.templateBody = this.generatedAuthCode + ' ' + this.templateBody;
-                }
-                this.footerBody = this.templateData?.MVEX__WBFooter_Body__c || '';
-                if (this.isImageHeader || this.isVideoHeader || this.isDocHeader) {
-                    const parser1 = new DOMParser();
-                    const doc1 = parser1.parseFromString(this.headerBody, 'text/html');
-                    this.headerBody = doc1.documentElement.textContent || '';
-                }
-                const buttonBody = this.templateData.MVEX__WBButton_Body__c ? JSON.parse(this.templateData.MVEX__WBButton_Body__c) : [];
-                this.buttonList = buttonBody.map((buttonLabel, index) => ({
-                    id: index,
-                    btntext: buttonLabel.text.trim(),
-                    btnType: buttonLabel.type,
-                    iconName: this.getIconName(buttonLabel.type)
-                }));
+        //         this.templateData = templateData.template;
+        //         this.isTextHeader = this.templateData?.MVEX__Header_Type__c === 'Text';
+        //         this.isImageHeader = this.templateData?.MVEX__Header_Type__c === 'Image';
+        //         this.isVideoHeader = this.templateData?.MVEX__Header_Type__c === 'Video';
+        //         this.isDocHeader = this.templateData?.MVEX__Header_Type__c === 'Document';
+        //         const parser = new DOMParser();
+        //         const doc = parser.parseFromString(this.templateData?.MVEX__WBHeader_Body__c || '', 'text/html');
+        //         this.headerBody = doc.documentElement.textContent || '';
+        //         this.templateBody = this.templateData?.MVEX__WBTemplate_Body__c;
+        //         if (this.templateData?.MVEX__Template_Category__c === 'Authentication') {
+        //             // Generate once so preview and payload always show the same code
+        //             if (!this.generatedAuthCode) {
+        //                 this.generatedAuthCode = String(Math.floor(Math.random() * 900000) + 100000);
+        //             }
+        //             this.templateBody = this.generatedAuthCode + ' ' + this.templateBody;
+        //         }
+        //         this.footerBody = this.templateData?.MVEX__WBFooter_Body__c || '';
+        //         if (this.isImageHeader || this.isVideoHeader || this.isDocHeader) {
+        //             const parser1 = new DOMParser();
+        //             const doc1 = parser1.parseFromString(this.headerBody, 'text/html');
+        //             this.headerBody = doc1.documentElement.textContent || '';
+        //         }
+        //         const buttonBody = this.templateData.MVEX__WBButton_Body__c ? JSON.parse(this.templateData.MVEX__WBButton_Body__c) : [];
+        //         this.buttonList = buttonBody.map((buttonLabel, index) => ({
+        //             id: index,
+        //             btntext: buttonLabel.text.trim(),
+        //             btnType: buttonLabel.type,
+        //             iconName: this.getIconName(buttonLabel.type)
+        //         }));
 
-                this.headerParams = templateData.headerParams || [];
-                this.bodyParams = templateData.bodyParams || [];
-                this.isLoading = false;
-                if (callback) callback();
-            })
-            .catch(error => {
-                this.isLoading = false;
-                this.showToast('Error', 'Failed to fetch template data: ' + error.body?.message, 'error');
-                console.error('Error fetchTemplateData:', error);
-            });
+        //         this.headerParams = templateData.headerParams || [];
+        //         this.bodyParams = templateData.bodyParams || [];
+        //         this.isLoading = false;
+        //         if (callback) callback();
+        //     })
+        //     .catch(error => {
+        //         this.isLoading = false;
+        //         this.showToast('Error', 'Failed to fetch template data: ' + error.body?.message, 'error');
+        //         console.error('Error fetchTemplateData:', error);
+        //     });
     }
 
     getIconName(btntype) {

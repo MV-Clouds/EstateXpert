@@ -86,8 +86,8 @@ public with sharing class SiteAndBookingController {
                 contactMap.put('MobilePhone', c.Phone);
                 contactMap.put('ShowingId', ev == null ? '' : ev.Id);
                 contactMap.put('ShowingStatus', ev == null ? 'Not Scheduled' : ev.MVEX__Status__c);
-                contactMap.put('ScheduleDate', ev == null ? '' : String.valueOf(ev.MVEX__Scheduled_Date__c));
-                contactMap.put('RescheduleDate', ev == null ? '' : String.valueOf(ev.MVEX__Reschedule_Date__c));
+                contactMap.put('ScheduleDate', ev == null ? null : ev.MVEX__Scheduled_Date__c);
+                contactMap.put('RescheduleDate', ev == null ? null : ev.MVEX__Reschedule_Date__c);
                 contactMap.put('CommunicationMethod', ev == null ? '' : ev.MVEX__Communication_Method__c);
                 formattedContacts.add(contactMap);
             }
@@ -118,7 +118,11 @@ public with sharing class SiteAndBookingController {
         try {
             // Determine the appropriate email template based on whether it's a schedule or reschedule
             String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
-            EmailTemplate template = [SELECT Id, Subject, HtmlValue, Body FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            List<EmailTemplate> templateList = [SELECT Id, Subject, HtmlValue, Body FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            if (templateList.isEmpty()) {
+                throw new AuraHandledException('Email template not found: ' + templateName);
+            }
+            EmailTemplate template = templateList[0];
 
             System.debug('scheduleDateTime: ' + scheduleDateTime);
             // Create or update showings
@@ -425,7 +429,11 @@ public with sharing class SiteAndBookingController {
 
             // 4. Pick the correct EmailTemplate
             String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
-            EmailTemplate et = [SELECT Id FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            List<EmailTemplate> etList = [SELECT Id FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            if (etList.isEmpty()) {
+                throw new AuraHandledException('Email template not found: ' + templateName);
+            }
+            EmailTemplate et = etList[0];
 
             // 5. Build email for preview using renderStoredEmailTemplate
             Messaging.SingleEmailMessage mail = Messaging.renderStoredEmailTemplate(et.Id, showing.MVEX__Buyer__c, showing.Id);

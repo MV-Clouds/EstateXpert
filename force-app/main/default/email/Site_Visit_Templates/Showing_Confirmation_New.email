@@ -1,0 +1,77 @@
+<messaging:emailTemplate subject="Showing Confirmation: {!relatedTo.MVEX__Listing__r.Name}" recipientType="Contact" relatedToType="Event">
+    <messaging:htmlEmailBody >
+        <html>
+            <head>
+                <meta charset="UTF-8"/>
+                <style>
+                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; margin: 0; padding: 20px; color: #333333; }
+                    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-top: 5px solid #0176D3; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+                    .header { padding: 20px 30px; border-bottom: 1px solid #eeeeee; }
+                    .header h2 { margin: 0; color: #0176D3; font-size: 22px; font-weight: 500; }
+                    .content { padding: 10px 30px; line-height: 1.6; }
+                    .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                    .details-table th { text-align: left; padding: 10px; border-bottom: 1px solid #eeeeee; color: #666666; font-weight: bold; width: 130px; }
+                    .details-table td { padding: 10px; border-bottom: 1px solid #eeeeee; color: #1a1a1a; }
+                    .button-container { text-align: center; margin: 30px 0 10px; }
+                    .btn { background-color: #0176D3; color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; display: inline-block; }
+                    .footer { background-color: #f9f9f9; padding: 20px 30px; font-size: 13px; color: #777777; text-align: center; border-top: 1px solid #eeeeee; }
+                    .footer p { margin: 5px 0; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h2>Showing Confirmation</h2>
+                    </div>
+                    <div class="content">
+                        <p>Dear &nbsp;<apex:outputText value="{!recipient.Name}" escape="true"/>,</p>
+                        <p>This email is to confirm your scheduled showing for the property at <strong><apex:outputText value="{!relatedTo.MVEX__Listing__r.Name}" escape="true"/></strong>.</p>
+                        
+                        <table class="details-table">
+                            <tr>
+                                <th>Property</th>
+                                <td><apex:outputText value="{!relatedTo.MVEX__Listing__r.Name}" escape="true"/></td>
+                            </tr>
+                            <tr>
+                                <th>Date &amp; Time</th>
+                                <td><apex:outputField value="{!relatedTo.MVEX__Scheduled_Date__c}" /></td>
+                            </tr>
+                            <tr>
+                                <th>Location</th>
+                                <td>
+                                    <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(relatedTo.MVEX__Listing__r.MVEX__Listing_Address__Street__s))}">
+                                        {!relatedTo.MVEX__Listing__r.MVEX__Listing_Address__Street__s}<br/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(relatedTo.MVEX__Listing__r.MVEX__Listing_Address__City__s))}">
+                                        {!relatedTo.MVEX__Listing__r.MVEX__Listing_Address__City__s}
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(relatedTo.MVEX__Listing__r.MVEX__Listing_Address__StateCode__s))}">
+                                        , {!relatedTo.MVEX__Listing__r.MVEX__Listing_Address__StateCode__s}
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(relatedTo.MVEX__Listing__r.MVEX__Listing_Address__PostalCode__s))}">
+                                        {!relatedTo.MVEX__Listing__r.MVEX__Listing_Address__PostalCode__s}
+                                    </apex:outputPanel>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Agent</th>
+                                <td><apex:outputText value="{!$User.FirstName} {!$User.LastName}" escape="true"/></td>
+                            </tr>
+                        </table>
+
+                        <p>Please arrive on time. If you need to make any changes to your appointment, you may do so using the link below.</p>
+
+                        <div class="button-container">
+                            <a href="https://estatexpert-dev-ed.develop.my.salesforce-sites.com/apex/MVEX__SinglePropertyView?listingrecordid={!relatedTo.MVEX__Listing__r.Id}&urlType=sitevisit&objectId={!relatedTo.Id}" class="btn">View or Manage Showing</a>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <p><strong><apex:outputText value="{!$User.FirstName} {!$User.LastName}" escape="true"/></strong> | Real Estate Agent</p>
+                        <p><apex:outputText value="{!$User.Email}" escape="true"/></p>
+                        <p style="margin-top: 15px;">EstateXpert &bull; <a href="https://mvclouds.com" style="color: #0176D3;">mvclouds.com</a></p>
+                    </div>
+                </div>
+            </body>
+        </html>
+    </messaging:htmlEmailBody>
+</messaging:emailTemplate>

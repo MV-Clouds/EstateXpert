@@ -367,6 +367,19 @@ public without sharing class ContactTriggerHandler {
             }
 
             if (!ownerIdsToNotify.isEmpty()) {
+                // Check email notification toggle setting
+                Boolean emailNotifEnabled = true;
+                List<MVEX__Configuration_Settings__c> notifConfigs = [
+                    SELECT MVEX__Fields_Data__c
+                    FROM MVEX__Configuration_Settings__c
+                    WHERE Name = 'Lead_Assignment_Notification'
+                    LIMIT 1
+                ];
+                if (!notifConfigs.isEmpty() && notifConfigs[0].MVEX__Fields_Data__c != null) {
+                    emailNotifEnabled = notifConfigs[0].MVEX__Fields_Data__c.trim().equalsIgnoreCase('true');
+                }
+
+                if (emailNotifEnabled) {
                 Map<Id, User> userMap = new Map<Id, User>([SELECT Id, Email FROM User WHERE Id IN :ownerIdsToNotify AND Email != null]);
 
                 List<EmailTemplate> ownerTemplates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Assigned_Notification' LIMIT 1];
@@ -382,6 +395,7 @@ public without sharing class ContactTriggerHandler {
                         mail.setSaveAsActivity(false);
                         emails.add(mail);
                     }
+                }
                 }
             }
 

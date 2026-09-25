@@ -276,6 +276,55 @@ public with sharing class LeadAssignmentController {
         return result;
     }
 
+    /**
+     * Retrieves the email notification enabled setting for lead assignment.
+     * Reads MVEX__Fields_Data__c ('true'/'false') from the config record
+     * Name = 'Lead_Assignment_Notification'. Defaults to true if not found.
+     */
+    @AuraEnabled
+    public static Boolean getEmailNotificationEnabled() {
+        try {
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT MVEX__Fields_Data__c
+                FROM MVEX__Configuration_Settings__c
+                WHERE Name = 'Lead_Assignment_Notification'
+                WITH USER_MODE LIMIT 1
+            ];
+            if (!configs.isEmpty() && configs[0].MVEX__Fields_Data__c != null) {
+                return configs[0].MVEX__Fields_Data__c.trim().equalsIgnoreCase('true');
+            }
+            return true; 
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'LeadAssignmentController', 'getEmailNotificationEnabled', 'Error fetching email notification setting.');
+            return true;
+        }
+    }
+
+    /**
+     * Saves the email notification enabled setting for lead assignment.
+     * Upserts a Configuration_Settings__c record keyed by Name = 'Lead_Assignment_Notification',
+     * storing 'true' or 'false' in MVEX__Fields_Data__c.
+     */
+    @AuraEnabled
+    public static void setEmailNotificationEnabled(Boolean isEnabled) {
+        try {
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT Id
+                FROM MVEX__Configuration_Settings__c
+                WHERE Name = 'Lead_Assignment_Notification'
+                WITH USER_MODE LIMIT 1
+            ];
+            MVEX__Configuration_Settings__c config = configs.isEmpty()
+                ? new MVEX__Configuration_Settings__c(Name = 'Lead_Assignment_Notification', MVEX__Feature_Name__c = 'Lead_Assignment_Notification')
+                : configs[0];
+            config.MVEX__Fields_Data__c = isEnabled ? 'true' : 'false';
+            upsert as user config;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'LeadAssignmentController', 'setEmailNotificationEnabled', 'Error saving email notification setting.');
+            throw e;
+        }
+    }
+
     public class LeadAssignmentInitData {
         @AuraEnabled public List<FieldWrapper> objectFields = new List<FieldWrapper>();
         @AuraEnabled public List<User> users = new List<User>();

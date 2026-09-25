@@ -18,7 +18,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     @track updateProperty = [];
     @track PropertyOptions = [];
     @track MainPropertyOptions = [];
-    @track checkboxValue = false;
     @track isLoading = true;
     @track savebutton = true;
     @track showConfirmationModal = false;
@@ -26,27 +25,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     @track isDirectAccess = false;
     @track hasChanges = false;
     @track originalDropDownPairs = [];
-    @track originalCheckboxValue = false;
-
-    /**
-    * Method Name: delButtonClass
-    * @description: handle the delete button enable/disable.
-    * Date: 28/06/2024
-    * Created By: Vyom Soni
-    */
-    get delButtonClass() {
-        return this.isAutoSyncEnabled ? 'slds-m-left_x-small del-button disabled-del' : ' slds-m-left_x-small del-button';
-    }
-
-    /**
-    * Method Name: isAutoSyncEnabled
-    * @description: handle the autosync checkbox enable/disable..
-    * Date: 28/06/2024
-    * Created By: Vyom Soni
-    */
-    get isAutoSyncEnabled() {
-        return this.checkboxValue;
-    }
+    customTimeout;
 
     /**
     * Method Name: dropDownPairsWithIndex
@@ -96,7 +75,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             const propertyInputValue = pair.propertyOpen ? propertySearch : propertyDisplayLabel;
 
             // Property field is locked until a listing field has been chosen
-            const isPropertyDisabled = !pair.selectedListing || this.isAutoSyncEnabled;
+            const isPropertyDisabled = !pair.selectedListing
 
             return {
                 ...pair,
@@ -110,16 +89,10 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 propertyInputValue,
                 isPropertyDisabled,
                 // Show hint text below the property combobox before a listing is selected
-                showPropertyHint: !pair.selectedListing && !this.isAutoSyncEnabled,
+                showPropertyHint: !pair.selectedListing ,
                 propertyPlaceholder: !pair.selectedListing
                     ? 'Select Listing Field first'
                     : 'Search Property Field…',
-                listingComboboxClass: this.isAutoSyncEnabled
-                    ? 'custom-combobox disabled'
-                    : 'custom-combobox',
-                propertyComboboxClass: isPropertyDisabled
-                    ? 'custom-combobox disabled'
-                    : 'custom-combobox'
             };
         });
     }
@@ -171,6 +144,10 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 container.scrollTop = container.scrollHeight;
             }
             this.isScroll = false;
+        }
+
+        if (!this.customTimeout) {
+            this.customTimeout = this.template.querySelector('c-custom-timeout');
         }
     }
 
@@ -277,19 +254,16 @@ export default class MapFields extends NavigationMixin(LightningElement) {
         try {
             getMetadata()
                 .then(result => {
-                    if (result[0] != null) {
-                        this.parseAndSetMappings(result[0]);
-                    }
-                    if (result[1] == null) {
-                        this.setCheckboxValue(result[0]);
+                    if (result != null) {
+                        this.parseAndSetMappings(result);
                     } else {
-                        this.setCheckboxValue(result[1]);
+                        // No saved mappings — load defaults
+                        this.buildDefaultMappings();
                     }
-                    // Store AFTER both mappings and checkbox value are fully set
+                    // Store state after mappings are set
                     this.storeOriginalState();
                 }).catch(error => {
                     errorDebugger('MapFields', 'getMetadataFunction', error, 'warn', 'Error in getMetadataFunction');
-
                 });
             this.filterAndUpdateListingOptions();
             this.filterAndUpdatePropertyOptions();
@@ -345,12 +319,48 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     * @description: set the checkbox value
     * Date: 28/06/2024
     * Created By: Vyom Soni
+    * Last Modified Date: 24/09/2026
+    * Modified By: Dhruv Kakadiya
     */
-    setCheckboxValue(checkboxValue) {
-        if (checkboxValue == 'true') {
-            this.checkboxValue = true;
-        } else {
-            this.checkboxValue = false;
+    buildDefaultMappings() {
+        try {
+            this.dropDownPairs = [];
+            this.filterAndUpdateListingOptions();
+            this.filterAndUpdatePropertyOptions();
+
+            const propertyApiNames = new Set(
+                (this.MainPropertyOptions || []).map(o => o.value)
+            );
+
+            (this.MainListingOptions || []).forEach(listingField => {
+                if (propertyApiNames.has(listingField.value)) {
+                    const newPair = {
+                        id: this.dropDownPairs.length,
+                        selectedListing: listingField.value,
+                        selectedProperty: listingField.value,
+                        listingOptions: this.ListingOptions,
+                        propertyOptions: this.filterPropertyOptions(listingField.value),
+                        isPropertyPicklistDisabled: false,
+                        listingOpen: false,
+                        propertyOpen: false,
+                        listingSearch: '',
+                        propertySearch: ''
+                    };
+                    this.dropDownPairs.push(newPair);
+                    this.filterAndUpdateListingOptions();
+                    this.filterAndUpdatePropertyOptions();
+                }
+            });
+
+            this.isLoading = false;
+
+            // Enable Save if all pairs are complete
+            const allComplete = this.dropDownPairs.length > 0 &&
+                this.dropDownPairs.every(p => p.selectedListing && p.selectedProperty);
+            this.savebutton = !allComplete;
+        } catch (error) {
+            this.isLoading = false;
+            errorDebugger('MapFields', 'buildDefaultMappings', error, 'warn', 'Error in buildDefaultMappings');
         }
     }
 
@@ -585,9 +595,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     */
     deletePair(event) {
         try {
-            if (this.isAutoSyncEnabled) {
-                return;
-            }
             const index = event.currentTarget.dataset.id;
             this.dropDownPairs.splice(index, 1);
             this.filterAndUpdateListingOptions();
@@ -608,20 +615,50 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     * @description: handle checkbox 
     * Date: 28/06/2024
     * Created By: Vyom Soni
+    * Last Modified Date: 24/09/2026
+    * Modified By: Dhruv Kakadiya
     */
-    handleCheckboxChange() {
-        if (this.checkboxValue == false) {
-            this.checkboxValue = true;
-        } else {
-            this.checkboxValue = false;
+    handleDefaults() {
+        try {
+            this.isLoading = true;
+            const timeoutCmp = this.customTimeout || this.template.querySelector('c-custom-timeout');
+            if (timeoutCmp) {
+                timeoutCmp.setCustomTimeoutMethod(() => {
+                    try {
+                        this.buildDefaultMappings();
+                        this.checkForChanges();
+                        this.showToast('Info', 'Default field mappings have been loaded', 'info');
+                    } catch (error) {
+                        errorDebugger('MapFields', 'handleDefaults', error, 'warn', 'Error in handleDefaults');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }, 300);
+            } else {
+                this.buildDefaultMappings();
+                this.checkForChanges();
+                this.showToast('Info', 'Default field mappings have been loaded', 'info');
+                this.isLoading = false;
+            }
+        } catch (error) {
+            this.isLoading = false;
+            errorDebugger('MapFields', 'handleDefaults', error, 'warn', 'Error in handleDefaults');
         }
-        this.savebutton = false;
-        this.checkForChanges();
+    }
+
+    handleTimeout(event) {
+        try {
+            if (event?.detail?.function) {
+                event?.detail?.function();
+            }
+        } catch (error) {
+            errorDebugger('MapFields', 'handleTimeout', error, 'warn', 'Error in handleTimeout');
+        }
     }
 
     /**
-    * Method Name: handleCheckboxChange
-    * @description: handle checkbox 
+    * Method Name: createMappingString
+    * @description: build the mapping string from the current dropdown pairs
     * Date: 28/06/2024
     * Created By: Vyom Soni
     */
@@ -650,8 +687,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     saveMappingsToMetadata() {
         try {
             const mappingsData = this.createMappingString();
-            const checkboxValue = this.checkboxValue;
-            saveMappings({ mappingsData, checkboxValue })
+            saveMappings({ mappingsData })
                 .then(() => {
                     this.showToast('Success', 'Mappings saved successfully', 'success');
                     this.savebutton = true;
@@ -768,7 +804,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     storeOriginalState() {
         try {
             this.originalDropDownPairs = JSON.parse(JSON.stringify(this.dropDownPairs));
-            this.originalCheckboxValue = this.checkboxValue;
             this.hasChanges = false;
         } catch (error) {
             errorDebugger('MapFields', 'storeOriginalState', error, 'warn', 'Error in storeOriginalState');
@@ -783,21 +818,19 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     */
     checkForChanges() {
         try {
-            const currentState = JSON.stringify({
-                pairs: this.dropDownPairs.map(pair => ({
+            const currentState = JSON.stringify(
+                this.dropDownPairs.map(pair => ({
                     selectedListing: pair.selectedListing,
                     selectedProperty: pair.selectedProperty
-                })),
-                checkbox: this.checkboxValue
-            });
+                }))
+            );
 
-            const originalState = JSON.stringify({
-                pairs: this.originalDropDownPairs.map(pair => ({
+            const originalState = JSON.stringify(
+                this.originalDropDownPairs.map(pair => ({
                     selectedListing: pair.selectedListing,
                     selectedProperty: pair.selectedProperty
-                })),
-                checkbox: this.originalCheckboxValue
-            });
+                }))
+            );
 
             this.hasChanges = currentState !== originalState;
         } catch (error) {
@@ -814,7 +847,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     revertChanges() {
         try {
             this.dropDownPairs = JSON.parse(JSON.stringify(this.originalDropDownPairs));
-            this.checkboxValue = this.originalCheckboxValue;
             this.hasChanges = false;
             this.savebutton = true;
             this.filterAndUpdateListingOptions();
@@ -841,7 +873,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             const index = parseInt(event.currentTarget.dataset.index, 10);
             const field = event.currentTarget.dataset.field;
 
-            if (this.isAutoSyncEnabled) return;
             if (field === 'property' && !this.dropDownPairs[index].selectedListing) return;
 
             // Open the targeted dropdown; close every other open dropdown

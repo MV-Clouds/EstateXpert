@@ -2,9 +2,11 @@ import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
-import getLeadAssignmentInitData from '@salesforce/apex/LeadAssignmentController.getLeadAssignmentInitData';
-import manageRule from '@salesforce/apex/LeadAssignmentController.manageRule';
-import getRecordNames from '@salesforce/apex/LeadAssignmentController.getRecordNames';
+import getLeadAssignmentInitData from '@salesforce/apex/ControlCenterController.getLeadAssignmentInitData';
+import manageRule from '@salesforce/apex/ControlCenterController.manageRule';
+import getRecordNames from '@salesforce/apex/ControlCenterController.getRecordNames';
+import getEmailNotificationEnabled from '@salesforce/apex/ControlCenterController.getEmailNotificationEnabled';
+import setEmailNotificationEnabled from '@salesforce/apex/ControlCenterController.setEmailNotificationEnabled';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class LeadAssignmentRule extends NavigationMixin(LightningElement) {
@@ -22,6 +24,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
     @track currentDeleteIndex = null;
     @track hasUnsavedChanges = false;
     @track visibleIconName = 'utility:chevronright';
+    @track emailNotificationEnabled = true;
     @track logicError = '';
 
     // Default Assignee state
@@ -85,9 +88,23 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         return this.hasDefaultAssignee ? 'Edit Default Assignee' : 'Set Default Assignee';
     }
 
+    get isNotificationEnabled(){
+        return this.emailNotificationEnabled ? 'Enabled' : 'Disabled';
+    }
+
     connectedCallback() {
         this.isLoading = true;
         loadStyle(this, MulishFontCss);
+
+        // Load email notification toggle state
+        getEmailNotificationEnabled()
+            .then(result => {
+                this.emailNotificationEnabled = result;
+            })
+            .catch(() => {
+                this.emailNotificationEnabled = true; // safe default
+            });
+
         getLeadAssignmentInitData({ objectName: 'Contact' })
             .then(data => {
                 console.log('Initialization data received:', data);
@@ -374,6 +391,25 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         this.isEditMode = false;
         this.currentEditIndex = null;
         this.logicError = '';
+    }
+
+    // ─── Email Notification Toggle ────────────────────────────────────────────
+    handleEmailToggle(event) {
+        const newValue = event.target.checked;
+        this.emailNotificationEnabled = newValue;
+        setEmailNotificationEnabled({ isEnabled: newValue })
+            .then(() => {
+                this.showToast(
+                    'Success',
+                    `Email notifications ${newValue ? 'enabled' : 'disabled'} for lead assignment.`,
+                    'success'
+                );
+            })
+            .catch(error => {
+                // Revert optimistic update on failure
+                this.emailNotificationEnabled = !newValue;
+                this.showToast('Error', 'Failed to update email notification setting: ' + (error.body?.message || error.message), 'error');
+            });
     }
 
     // ─── Default Assignee handlers ───────────────────────────────────────────

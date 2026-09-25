@@ -5,6 +5,9 @@ global class PostInstallScript implements InstallHandler {
         createDefaultConfigRecords();
         // Change 2: Handle Custom Setting from Custom Label
         // setupEmbeddedSignUpConfig();
+        
+        // Empty WBConnect Configuration custom metadata fields
+        emptyWBConnectConfiguration();
     }
 
     /**
@@ -57,6 +60,47 @@ global class PostInstallScript implements InstallHandler {
 
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'PostInstallScript', 'createDefaultConfigRecords', 'Error while updating or creating PortalListing__c record.');
+        }
+    }
+
+    /**
+     * Method to empty WBConnect_Configuration Custom Metadata
+     */
+    private void emptyWBConnectConfiguration() {
+        try {
+            Metadata.CustomMetadata customMetadata =  new Metadata.CustomMetadata();
+            customMetadata.fullName = 'MVEX__WBConnect_Configuration.WBConnect_Configuration';
+            customMetadata.label = 'WBConnect_Configuration';
+            
+            List<String> fieldsToEmpty = new List<String>{
+                'MVEX__Access_Token__c',
+                'MVEX__APIEndpoint__c',
+                'MVEX__API_Endpoint__c',
+                'MVEX__APIVersion__c',
+                'MVEX__API_Version__c',
+                'MVEX__Application_Id__c',
+                'MVEX__Business_Account_Id__c',
+                'MVEX__Client_Id__c',
+                'MVEX__Client_Secret__c',
+                'MVEX__Config_Id__c',
+                'MVEX__Phone_Number_Id__c'
+            };
+            
+            for (String fieldName : fieldsToEmpty) {
+                Metadata.CustomMetadataValue customField = new Metadata.CustomMetadataValue();
+                customField.field = fieldName;
+                customField.value = ''; // Use empty string to clear string fields
+                customMetadata.values.add(customField);
+            }
+            
+            Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+            mdContainer.addMetadata(customMetadata);
+            
+            if (!Test.isRunningTest()) {
+                Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, null);
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PostInstallScript', 'emptyWBConnectConfiguration', 'Error while emptying WBConnect_Configuration custom metadata.');
         }
     }
 }

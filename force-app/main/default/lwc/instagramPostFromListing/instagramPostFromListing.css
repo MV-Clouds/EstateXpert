@@ -429,7 +429,7 @@
 }
 
 .credentials-empty-icon {
-    width: 15rem;
+    width: 200px;
     height: auto;
     margin-bottom: 2rem;
     filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.1));

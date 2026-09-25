@@ -126,10 +126,15 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
                         if (Object.prototype.hasOwnProperty.call(result, key)) {
                             const fileUrl = result[key];
 
+                            const lowerKey = key.toLowerCase();
+                            const isRemoteVideo = lowerKey.endsWith('.mp4') || lowerKey.endsWith('.mov') || lowerKey.endsWith('.quicktime');
+
                             const jpegFile = {
                                 name: key,
                                 size: 0,
                                 preview: fileUrl,
+                                url: fileUrl,
+                                isRemoteVideo: isRemoteVideo,
                                 isDelete: false
                             };
                             this.awsObjectKeysToPreserve.push(key);
@@ -541,16 +546,17 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
                             });
                             fileProcessingPromises.push(jpegFilePromise);
                         } else {
-                            const thumbnailPromise = this.createThumbnail(file).then(preview => {
+                            const fileObjPromise = Promise.resolve().then(() => {
                                 this.selectedFilesToUpload.push(file);
                                 return {
                                     name: file.name,
                                     size: file.size,
-                                    preview: preview,
+                                    preview: URL.createObjectURL(file),
+                                    isRemoteVideo: isVideo,
                                     isDelete: true
                                 };
                             });
-                            fileProcessingPromises.push(thumbnailPromise);
+                            fileProcessingPromises.push(fileObjPromise);
                         }
                     } else {
                         this.largeImageFiles.push(file.name);
@@ -697,7 +703,7 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
         const isSuccess = await this.uploadToAWS();
 
         if (isSuccess) {
-            this.fileURLs = this.selectedFileWithPreview.map(file => file.preview);
+            this.fileURLs = this.selectedFileWithPreview.map(file => file.url || file.preview);
             postToInstagram({ mediaUrls: this.fileURLs, caption: this.caption, awsObjectKeys: this.awsObjectKeys, awsObjectKeysToPreserve: this.awsObjectKeysToPreserve })
                 .then(result => {
                     if (result.status === 'SUCCESS') {
@@ -759,11 +765,11 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
                     const result = results.find(res => res.key === file.name);
 
                     if (result) {
-                        file.preview = result.Location;
+                        file.url = result.Location;
                     }
                 });
 
-                this.fileURLs = this.selectedFileWithPreview.map(file => file.preview);
+                this.fileURLs = this.selectedFileWithPreview.map(file => file.url || file.preview);
                 this.awsObjectKeys = results.map(result => result.key);
 
                 return true;

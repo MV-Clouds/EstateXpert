@@ -8,7 +8,9 @@ import getSettings from '@salesforce/apex/IntegrationPopupController.getSettings
 import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeAWSAccess';
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
+import validateIntegrationCredentials from '@salesforce/apex/IntegrationPopupController.validateIntegrationCredentials';
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
+import GMAIL_SENDING_ENDPOINT from '@salesforce/label/c.Gmail_Sending_Endpoint';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -22,7 +24,11 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track gmailData = { isValid: false, integrationData: {}, showDetails: false };
     @track instagramData = { isValid: false, integrationData: {}, showDetails: false };
     @track isWaterMarkUploader = false;
-    @track featureAvailability = {};
+    @track featureAvailability = {
+        Cloud_Storage_Integration: true,
+        Social_Media_Integration: true,
+        Email_Integration: true
+    };
     @track activeIntegrationCount = 0;
 
     // Card-level state for Gmail inline flow 
@@ -35,6 +41,18 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track instagramLongToken = '';       // Long-Lived Access Token input
 
     integrationToDeactivate = null;
+
+    get isCloudStorageAvailable() {
+        return this.featureAvailability && this.featureAvailability.Cloud_Storage_Integration !== false;
+    }
+
+    get isSocialMediaAvailable() {
+        return this.featureAvailability && this.featureAvailability.Social_Media_Integration !== false;
+    }
+
+    get isEmailAvailable() {
+        return this.featureAvailability && this.featureAvailability.Email_Integration !== false;
+    }
 
     // Disable Save buttons until minimum required fields are filled
     get isGmailSaveDisabled() {
@@ -139,10 +157,16 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                         this.awsData = { ...item, showDetails: false };
                         if (item.isValid) activeCount++;
                     } else if (item.integrationName === 'Gmail') {
-                        this.gmailData = { ...item, showDetails: false };
+                        const gData = item.integrationData ? { ...item.integrationData } : {};
+                        gData.EmailAddress = gData.Email__c || gData.EmailAddress || '';
+                        gData.Email__c = gData.EmailAddress;
+                        this.gmailData = { ...item, integrationData: gData, showDetails: false };
                         if (item.isValid) activeCount++;
                     } else if (item.integrationName === 'Instagram') {
-                        this.instagramData = { ...item, showDetails: false };
+                        const igData = item.integrationData ? { ...item.integrationData } : {};
+                        igData.Username__c = igData.Username__c || '';
+                        igData.MVEX__User_Id__c = igData.MVEX__User_Id__c || '';
+                        this.instagramData = { ...item, integrationData: igData, showDetails: false };
                         if (item.isValid) activeCount++;
                     }
                 });
@@ -398,13 +422,13 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                         this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
                         return;
                     }
-                    const fieldsData = data.objectData;
-                    const requiredFields = ['MVEX__Redirect_URI__c', 'MVEX__Client_ID__c', 'MVEX__Client_Secret__c'];
-                    for (const field of requiredFields) {
-                        if (!fieldsData[field]) {
-                            this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
-                            return;
-                        }
+                    const fieldsData = data.objectData || {};
+                    const clientId = fieldsData.MVEX__Client_ID__c;
+                    const clientSecret = fieldsData.MVEX__Client_Secret__c;
+                    const redirectUri = fieldsData.MVEX__Redirect_URI__c || data.siteUrl;
+                    if (!clientId || !clientSecret || !redirectUri) {
+                        this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
+                        return;
                     }
                     // Show the inline input section so the user can also paste manually
                     this.showGmailInput = true;
@@ -412,9 +436,10 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {
-                            url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + fieldsData.MVEX__Client_ID__c +
-                                 '&redirect_uri=' + fieldsData.MVEX__Redirect_URI__c +
-                                 '&response_type=code&access_type=offline&prompt=consent&scope=https://www.googleapis.com/auth/gmail.send'
+                            url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + clientId +
+                                 '&redirect_uri=' + redirectUri +
+                             '&response_type=code&access_type=offline&prompt=consent' +
+                             '&scope=' + GMAIL_SENDING_ENDPOINT + 'auth/gmail.send%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email'
                         }
                     });
                 })
@@ -459,26 +484,44 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             getSettings({ integrationType: 'Gmail' })
                 .then(data => {
                     if (!data || !data.objectData) {
-                        // Throw so the .catch() handles spinner + toast
                         throw new Error('MISSING_CONFIG');
                     }
-                    const fieldsData = data.objectData;
-                    const payload = JSON.stringify({
-                        MVEX__Client_ID__c:     fieldsData.MVEX__Client_ID__c     || '',
-                        MVEX__Client_Secret__c: fieldsData.MVEX__Client_Secret__c || '',
-                        MVEX__Redirect_URI__c:  fieldsData.MVEX__Redirect_URI__c  || '',
-                        MVEX__Refresh_Token__c: token
-                    });
-                    return saveSettings({ jsonData: payload, integrationType: 'Gmail' });
+                    const fieldsData = data.objectData || {};
+                    const clientId = fieldsData.MVEX__Client_ID__c || '';
+                    const clientSecret = fieldsData.MVEX__Client_Secret__c || '';
+                    const redirectUri = fieldsData.MVEX__Redirect_URI__c || data.siteUrl || '';
+
+                    // Validate Gmail refresh token before saving
+                    return validateIntegrationCredentials({ integrationType: 'Gmail', credential1: token, credential2: clientId })
+                        .then(validationResult => {
+                            if (!validationResult || !validationResult.startsWith('SUCCESS')) {
+                                const valError = new Error(validationResult);
+                                valError.isValidationError = true;
+                                throw valError;
+                            }
+                            // Parse email from 'SUCCESS|email@example.com'
+                            const parts = validationResult.split('|');
+                            const connectedEmail = parts.length > 1 ? parts[1] : '';
+
+                            const payload = JSON.stringify({
+                                MVEX__Client_ID__c:     clientId,
+                                MVEX__Client_Secret__c: clientSecret,
+                                MVEX__Redirect_URI__c:  redirectUri,
+                                MVEX__Refresh_Token__c: token,
+                                Email__c:         connectedEmail
+                            });
+                            return saveSettings({ jsonData: payload, integrationType: 'Gmail' });
+                        });
                 })
                 .then(() => {
-                    // Reaches here only when saveSettings resolves successfully
                     this.showToast('Success', 'Gmail has been authorized successfully.', 'success');
                     this.getSocialMediaDataToShow();
                 })
                 .catch(error => {
                     if (error && error.message === 'MISSING_CONFIG') {
                         this.showToast('Error', 'Missing Gmail configuration. Please check Custom Metadata.', 'error');
+                    } else if (error && error.isValidationError) {
+                        this.showToast('Error', 'Invalid credentials detected. Please check your Refresh Token and try again.', 'error');
                     } else {
                         errorDebugger('StorageIntegration', 'saveGmailToken', error, 'warn', 'Error saving Gmail token');
                         this.showToast('Error', 'An error occurred while saving the token. Please try again.', 'error');
@@ -512,8 +555,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                         this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
                         return;
                     }
-                    const fieldsData = data.objectData;
-                    // Field names must match what integrationPopUp uses (MVEX__ClientId__c, MVEX__ClientSecret__c)
+                    const fieldsData = data.objectData || {};
+                    // Field names support unmanaged IG_Configuration__c as well as fallback
                     const clientId     = fieldsData.MVEX__ClientId__c     || fieldsData.MVEX__ClientID__c;
                     const clientSecret = fieldsData.MVEX__ClientSecret__c || fieldsData.MVEX__ClientSecret__c;
                     const redirectUri  = fieldsData.MVEX__Redirect_URI__c || data.siteUrl;
@@ -584,18 +627,38 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                         // Throw so the .catch() handles spinner + toast
                         throw new Error('MISSING_CONFIG');
                     }
-                    const fieldsData = data.objectData;
-                    const clientId     = fieldsData.MVEX__ClientId__c     || fieldsData.MVEX__ClientID__c     || '';
-                    const clientSecret = fieldsData.MVEX__ClientSecret__c || '';
-                    const redirectUri  = fieldsData.MVEX__Redirect_URI__c  || data.siteUrl || '';
-                    const payload = JSON.stringify({
-                        MVEX__ClientId__c:          clientId,
-                        MVEX__ClientSecret__c:      clientSecret,
-                        MVEX__Redirect_URI__c:      redirectUri,
-                        MVEX__User_Id__c:           userId,
-                        MVEX__Long_Access_Token__c: longToken
-                    });
-                    return saveSettings({ jsonData: payload, integrationType: 'Instagram' });
+                    const fieldsData = data.objectData || {};
+                    const clientId     = (fieldsData.MVEX__ClientId__c  || fieldsData.MVEX__ClientID__c || '').trim();
+                    const clientSecret = (fieldsData.MVEX__ClientSecret__c || '').trim();
+                    const redirectUri  = (fieldsData.MVEX__Redirect_URI__c  || data.siteUrl || '').trim();
+
+                    if (!clientId || !clientSecret || !redirectUri) {
+                        throw new Error('MISSING_CONFIG');
+                    }
+
+                    // Validate credentials with Instagram API
+                    return validateIntegrationCredentials({ integrationType: 'Instagram', credential1: userId, credential2: longToken })
+                        .then(validationResult => {
+                            if (!validationResult || !validationResult.startsWith('SUCCESS')) {
+                                const valError = new Error(validationResult);
+                                valError.isValidationError = true;
+                                throw valError;
+                            }
+
+                            // Parse username from 'SUCCESS|username'
+                            const parts = validationResult.split('|');
+                            const username = parts.length > 1 ? parts[1] : '';
+
+                            const payload = JSON.stringify({
+                                MVEX__ClientId__c:          clientId,
+                                MVEX__ClientSecret__c:      clientSecret,
+                                MVEX__Redirect_URI__c:      redirectUri,
+                                MVEX__User_Id__c:           userId,
+                                MVEX__Long_Access_Token__c: longToken,
+                                Username__c:          username
+                            });
+                            return saveSettings({ jsonData: payload, integrationType: 'Instagram' });
+                        });
                 })
                 .then(() => {
                     // Reaches here only when saveSettings resolves successfully
@@ -605,6 +668,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 .catch(error => {
                     if (error && error.message === 'MISSING_CONFIG') {
                         this.showToast('Error', 'Missing Instagram configuration. Please check Custom Metadata.', 'error');
+                    } else if (error && error.isValidationError) {
+                        this.showToast('Error', 'Invalid credentials detected. Please check your User ID and Access Token and try again.', 'error');
                     } else {
                         errorDebugger('StorageIntegration', 'saveInstagramToken', error, 'warn', 'Error saving Instagram token');
                         this.showToast('Error', 'An error occurred while saving the token. Please try again.', 'error');
@@ -628,7 +693,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     deactivateGmail() {
         try {
             this.isSpinner = true;
-            revokeGmailAccess({ refreshToken: this.gmailData.integrationData.MVEX__Refresh_Token__c, recordId: this.gmailData.integrationData.Id })
+            const refreshToken = (this.gmailData.integrationData && this.gmailData.integrationData.MVEX__Refresh_Token__c) || '';
+            revokeGmailAccess({ refreshToken: refreshToken, recordId: this.gmailData.integrationData.Id })
             .then(data => {
                 if (data === 'success') {
                     this.showToast('Success', 'Gmail integration has been deactivated. Click Connect to re-authorize.', 'success');

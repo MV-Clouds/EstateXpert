@@ -835,3 +835,101 @@ lightning-combobox .slds-dropdown,
     border-radius: 8px;
     padding: 0.5rem 0.75rem;
 }
+
+/* Empty state image */
+.exp-no-data-container {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Disable user selection for the whole component */
+.exp-no-data-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.exp-no-data-container img{
+    width: 200px;
+    height: auto;
+    filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+/* ─── Email Notification Toggle Switch ─────────────────────────────────── */
+
+.email-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.email-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.email-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background-color: #D1D5DB;
+    border-radius: 24px;
+    transition: background-color 0.2s ease;
+}
+
+.email-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    top: 3px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.email-toggle-switch input:checked + .email-toggle-slider {
+    background-color: #2563EB;
+}
+
+.email-toggle-switch input:checked + .email-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.toggle-status-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mvex-text-secondary, #6B7280);
+}
+
+/* ─── Compact Inline Toggle (header bar) ────────────────────────────────── */
+
+.email-notif-toggle-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 12px;
+    height: 34px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    background: #F9FAFB;
+    color: #374151;
+}
+
+.email-notif-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
+}
+

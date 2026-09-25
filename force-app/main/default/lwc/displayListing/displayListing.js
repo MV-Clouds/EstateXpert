@@ -4,7 +4,6 @@ import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import NoImageFound from '@salesforce/resourceUrl/blankImage';
 import propertyIcons from '@salesforce/resourceUrl/PropertyIcons';
 import location_icon from '@salesforce/resourceUrl/location_icon';
-import mapCss_V1 from '@salesforce/resourceUrl/mapCss_V1';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -13,7 +12,6 @@ import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
 import { errorDebugger } from 'c/globalProperties';
 import emptyState from '@salesforce/resourceUrl/emptyState';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
@@ -100,7 +98,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track visiblePages = 5;
     @track divElement;
     @track NoDataImageUrl = emptyState;
-    @track hideFilterButton = false;
     @track listingColumns = [];
     @track isConfigOpen = false;
     @track modalFilteredListingData = [];
@@ -449,7 +446,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     async connectedCallback() {
         try {
             loadStyle(this, MulishFontCss);
-            loadStyle(this, mapCss_V1);
             this.isLoading = true;
 
             // Wait for both required data loads before fetching filter configuration
@@ -460,25 +456,10 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
 
             await this.fetchListingConfiguration(); // This will call fetchMetadataRecords internally
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
-            this.checkHideFilterButton();
         } catch (error) {
             errorDebugger('DisplayListing', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
             this.isLoading = false;
         }
-    }
-
-    checkHideFilterButton() {
-        getMetadataRecords()
-            .then(result => {
-
-                const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
-                if (feature && feature.MVEX__isAvailable__c) {
-                    this.hideFilterButton = true;
-                }
-            })
-            .catch(error => {
-                errorDebugger('DisplayListing', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
-            });
     }
 
     /**

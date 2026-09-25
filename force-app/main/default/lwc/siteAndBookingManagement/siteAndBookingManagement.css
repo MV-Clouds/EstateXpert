@@ -444,3 +444,7 @@
     height: 34px;
     min-height: 34px;
 }
+
+.exp-no-data-container{
+    margin-top: 3rem;
+}

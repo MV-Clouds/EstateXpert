@@ -1,7 +1,7 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
-import designcss from '@salesforce/resourceUrl/listingManagerCss';
+import designcss from '@salesforce/resourceUrl/MulishFontCss';
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
@@ -26,6 +26,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track configuredPhoneField = 'Phone';
     refreshSubscription = {};
     refreshChannelName = '/event/MVEX__RefreshEvent__e';
+    realtimeRefreshTimer = null;
+    isSilentSync = false;
     isManualRefreshing = false;
     @track data;
     @track addModal = false;
@@ -471,6 +473,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
 
     handleLoading(event) {
+        if (this.isSilentSync) {
+            return;
+        }
         this.listingLoading = event.detail;
     }
 
@@ -547,7 +552,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             
             // Verify feature name before doing any operation
             if (featureName && (featureName.toLowerCase() === 'marketing_list' || featureName.toLowerCase() === 'marketing_list_fields')) {
-                this.handleRefreshEventReceived();
+                this.handleRealtimeRefresh();
             }
         };
 
@@ -585,15 +590,61 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
 
     /**
-    * Method Name: handleRefreshEventReceived
-    * @description: Displays info toast when contact change platform event is received
-    */
-    handleRefreshEventReceived() {
-        this.showToast(
-            'Contact Updates Available',
-            'A contact has been created, updated, or deleted. Please click the Refresh button to refresh the marketing list with your current filters.',
-            'info'
-        );
+     * Method Name : handleRealtimeRefresh
+     * @description : Smoothly synchronize contact changes in real-time without interrupting user
+     */
+    handleRealtimeRefresh() {
+        try {
+            clearTimeout(this.realtimeRefreshTimer);
+            this.realtimeRefreshTimer = setTimeout(async () => {
+                this.isSilentSync = true;
+                const savedPage = this.currentPage;
+                const selectedIds = new Set((this.selectedContactList || []).map(p => p.Id));
+
+                // 1. Fetch latest contacts from Apex silently
+                await this.getContactDataMethod(true);
+
+                // 2. If filters are active, re-apply them against latest DB state silently
+                const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
+                const hasFilters = this.hasAppliedFilters || (filterCmp && typeof filterCmp.hasActiveFilters === 'function' && filterCmp.hasActiveFilters());
+                if (filterCmp && typeof filterCmp.reapplyFilters === 'function' && hasFilters) {
+                    filterCmp.reapplyFilters(true);
+                } else {
+                    // Restore checked status if no filter reapplication was triggered
+                    if (selectedIds.size > 0 && Array.isArray(this.processedContactData)) {
+                        this.processedContactData.forEach(item => {
+                            if (selectedIds.has(item.Id)) {
+                                item.isChecked = true;
+                            }
+                        });
+                        this.updateSelectedProperties();
+                    }
+
+                    if (Array.isArray(this.processedContactData)) {
+                        const maxPage = Math.ceil(this.processedContactData.length / this.pageSize) || 1;
+                        this.currentPage = Math.min(savedPage, maxPage);
+                        this.updateShownData();
+                    }
+                }
+
+                setTimeout(() => {
+                    this.isSilentSync = false;
+                }, 300);
+
+                // Display info toast notification about the real-time update
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Contacts Updated',
+                        message: 'The contacts data has been synchronized with the latest changes.',
+                        variant: 'info',
+                        mode: 'dismissable'
+                    })
+                );
+            }, 300);
+        } catch (error) {
+            console.error('Error in handleRealtimeRefresh in marketingListCmp:', error);
+            this.isSilentSync = false;
+        }
     }
 
     /**
@@ -710,6 +761,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     disconnectedCallback() {
         window?.globalThis?.removeEventListener('resize', this.handleResize);
+        clearTimeout(this.realtimeRefreshTimer);
         this.handleUnsubscribeRefresh();
     }
 
@@ -758,8 +810,10 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
      * Date: 22/06/2024
      * Created By:Vyom Soni
      */
-    getContactDataMethod() {
-        this.spinnerShow = true;
+    getContactDataMethod(isSilent = false) {
+        if (!isSilent) {
+            this.spinnerShow = true;
+        }
         return getContactData()
             .then(result => {
                 this.contactData = result.contacts;
@@ -774,18 +828,27 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     relationshipName: field.relationshipName
                 }));
 
+                const selectedIds = new Set((this.selectedContactList || []).map(c => c.Id));
+
                 this.contactData.forEach((con) => {
-                    con.isChecked = false;
+                    con.isChecked = isSilent && selectedIds.has(con.Id);
                 });
                 this.processContacts();
                 return result;
             })
             .catch(error => {
                 this.isManualRefreshing = false;
-                this.spinnerShow = false;
-                this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
+                if (!isSilent) {
+                    this.spinnerShow = false;
+                    this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
+                }
                 console.log('error in getContactData -> ' + JSON.stringify(error, null, 2));
                 throw error;
+            })
+            .finally(() => {
+                if (!isSilent && !this.isManualRefreshing) {
+                    this.spinnerShow = false;
+                }
             });
     }
 
@@ -921,7 +984,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.updateShownData();
             }
 
-            if (!this.isManualRefreshing) {
+            if (!this.isManualRefreshing && !this.isSilentSync) {
                 this.spinnerShow = false;
             }
         } catch (error) {
@@ -1075,28 +1138,37 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 return;
             }
 
-            this.sortField = 'Name';
-            this.sortOrder = 'asc';
+            const savedPage = this.isSilentSync ? this.currentPage : 1;
+            const selectedIds = new Set((this.selectedContactList || []).map(p => p.Id));
 
-            // Reset all icons to remove rotation classes
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+            if (!this.isManualRefreshing && !this.isSilentSync) {
+                this.sortField = 'Name';
+                this.sortOrder = 'asc';
 
-            // Deselect all items in processedListingData and unchangedProcessListings
-            const resetCheckedFlag = item => ({ ...item, isChecked: false });
+                // Reset all icons to remove rotation classes
+                const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+                this.isSortApplied = false;
+            }
+
+            // Reset or preserve checked flag based on isSilentSync
+            const resetCheckedFlag = item => ({
+                ...item,
+                isChecked: this.isSilentSync && selectedIds.has(item.Id)
+            });
             this.processedContactData = this.processedContactData.map(resetCheckedFlag);
-            this.isSortApplied = false;
-
             this.unchangedProcessContact = this.unchangedProcessContact.map(resetCheckedFlag);
 
-            // Apply filtered listings
-            const filteredListingIds = new Set(event.detail.filtercontacts.map(filtered => filtered.Id));
+            // Apply filtered contacts safely
+            const filteredContacts = Array.isArray(event?.detail?.filtercontacts) ? event.detail.filtercontacts : [];
+            const filteredListingIds = new Set(filteredContacts.map(filtered => filtered.Id).filter(Boolean));
             this.processedContactData = this.unchangedProcessContact.filter(processListing =>
                 filteredListingIds.has(processListing.Id)
             );
 
-            // Reset current page and update view
-            this.currentPage = 1;
+            // Reset or maintain current page and update view
+            const maxPage = Math.ceil(this.processedContactData.length / this.pageSize) || 1;
+            this.currentPage = this.isSilentSync ? Math.min(savedPage, maxPage) : 1;
             this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();

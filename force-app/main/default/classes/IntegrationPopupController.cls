@@ -8,8 +8,11 @@
 */
 public with sharing class IntegrationPopupController {
 
+    @TestVisible public static String mockValidationResult = null;
     public static String GMAILENDPOINT = System.label.Google_Endpoint;
     public static String AWSS3ENDPOINT = System.label.AWS_S3_ENDPONT;
+    public static String gmailEndpoint = System.label.Gmail_Sending_Endpoint;
+    public static final String instagramEndpoint = System.label.InstagramEndPoint;
 
     /**
     * Method Name : createPortalListingRecord
@@ -311,7 +314,7 @@ public with sharing class IntegrationPopupController {
             FieldWrapperData gmailWrapper = new FieldWrapperData();
             gmailWrapper.integrationName = 'Gmail';
             gmailWrapper.integrationData = gmailCredential;
-            gmailWrapper.isValid = gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
+            gmailWrapper.isValid = gmailCredential != null && gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
             wrapperList.add(gmailWrapper);
 
             FieldWrapperData awsWrapper = new FieldWrapperData();
@@ -499,6 +502,201 @@ public with sharing class IntegrationPopupController {
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSettings', 'Error while getting settings.');
             return null;
+        }
+    }
+
+    /**
+    * Method Name : validateIntegrationCredentials
+    * @param integrationType : 'Instagram', 'Gmail', or 'AWS'
+    * @param credential1 : Primary credential (Instagram userId / Gmail refreshToken / AWS accessKey)
+    * @param credential2 : Secondary credential (Instagram accessToken / Gmail clientId / AWS secretKey)
+    * @return String : 'SUCCESS' or a descriptive error message
+    * @description : General credential validator. Routes to the appropriate API call
+    *               based on integrationType. Replaces the previous Instagram-only method.
+    */
+    @AuraEnabled
+    public static String validateIntegrationCredentials(String integrationType, String credential1, String credential2) {
+        try {
+            if (String.isBlank(integrationType)) {
+                return 'Integration type is required.';
+            }
+
+            if (Test.isRunningTest()) {
+                if (mockValidationResult != null) {
+                    return mockValidationResult;
+                }
+                // Return stub identifier so the LWC can save it during tests
+                if (integrationType == 'Gmail') {
+                    return 'SUCCESS|test@example.com';
+                } else if (integrationType == 'Instagram') {
+                    return 'SUCCESS|test_user';
+                }
+                return 'SUCCESS';
+            }
+
+            if (integrationType == 'Instagram') {
+                return validateInstagram(credential1, credential2);
+            } else if (integrationType == 'Gmail') {
+                return validateGmail(credential1, credential2);
+            } 
+
+            return 'Unsupported integration type: ' + integrationType;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'IntegrationPopupController', 'validateIntegrationCredentials', 'Error while validating credentials.');
+            return 'Failed to validate credentials: ' + e.getMessage();
+        }
+    }
+
+    /**
+    * @description : Validates Instagram credentials against Graph API /me endpoint.
+    *               credential1 = userId, credential2 = accessToken
+    */
+    public static String validateInstagram(String userId, String accessToken) {
+        if (String.isBlank(userId) || String.isBlank(accessToken)) {
+            return 'Please fill in both User ID and Long-Lived Access Token.';
+        }
+
+        String graphApiVersion = 'v24.0';
+        MVEX__IG_Configuration__c igConfig = MVEX__IG_Configuration__c.getOrgDefaults();
+        if (igConfig != null) {
+            String configVersion;
+            try {
+                configVersion = (String) igConfig.get('APIVersion__c');
+            } catch (Exception e1) {
+                configVersion = null;
+            }
+            if (String.isNotBlank(configVersion)) {
+                graphApiVersion = configVersion.trim();
+            }
+        }
+        if (String.isBlank(graphApiVersion)) {
+            graphApiVersion = 'v24.0';
+        }
+        if (!graphApiVersion.toLowerCase().startsWith('v')) {
+            graphApiVersion = 'v' + graphApiVersion;
+        }
+        Http http = new Http();
+        HttpRequest req = new HttpRequest();
+        req.setMethod('GET');
+        String endpoint = instagramEndpoint + graphApiVersion + '/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8');
+        req.setEndpoint(endpoint);
+        req.setTimeout(20000);
+
+        HttpResponse res = http.send(req);
+
+        if (res.getStatusCode() == 200) {
+            Map<String, Object> responseBody = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            String returnedUserId = (String) responseBody.get('user_id');
+            String returnedId     = (String) responseBody.get('id');
+            String username       = (String) responseBody.get('username');
+            String trimmedUserId  = userId.trim();
+
+            Boolean matches = (returnedUserId != null && returnedUserId.equals(trimmedUserId)) ||
+                              (returnedId     != null && returnedId.equals(trimmedUserId));
+
+            if (!matches) {
+                return 'The provided User ID does not match the authenticated Instagram account.';
+            }
+            // Return username so LWC can persist it — format: SUCCESS|{username}
+            return 'SUCCESS|' + (String.isNotBlank(username) ? username : trimmedUserId);
+        } else {
+            Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            if (errorResponse != null && errorResponse.containsKey('error')) {
+                Map<String, Object> errorDetail = (Map<String, Object>) errorResponse.get('error');
+                if (errorDetail != null && errorDetail.containsKey('message')) {
+                    return (String) errorDetail.get('message');
+                }
+            }
+            return 'Invalid Instagram credentials. Please check your User ID and Access Token.';
+        }
+    }
+
+    /**
+    * @description : Validates a Gmail refresh token by exchanging it for an access token
+    *               via Google's token endpoint. The tokeninfo endpoint cannot be used here
+    *               because users provide a refresh token, not an access token.
+    *               credential1 = refreshToken, credential2 = clientId (optional hint — we look up from metadata)
+    */
+    public static String validateGmail(String refreshToken, String clientId) {
+        if (String.isBlank(refreshToken)) {
+            return 'Please enter a valid Gmail Refresh Token.';
+        }
+
+        // Fetch Client ID and Client Secret from Custom Metadata
+        String metaClientId     = clientId != null ? clientId.trim() : '';
+        String metaClientSecret = '';
+
+        List<MVEX__recordManagerConfig__mdt> mdtList = [
+            SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt
+            WHERE MVEX__Integration_Type__c = 'Gmail' LIMIT 1
+        ];
+        if (!mdtList.isEmpty() && String.isNotBlank(mdtList[0].MVEX__FieldsData__c)) {
+            String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+            if (parts.size() >= 2) {
+                if (String.isBlank(metaClientId) && String.isNotBlank(parts[0])) {
+                    metaClientId = parts[0].trim();
+                }
+                metaClientSecret = parts[1].trim();
+            }
+        }
+
+        if (String.isBlank(metaClientId) || String.isBlank(metaClientSecret)) {
+            return 'Gmail configuration is incomplete. Please check Custom Metadata (Client ID / Client Secret).';
+        }
+
+        // Exchange the refresh token for an access token — this validates the token
+        String requestBody = 'grant_type=refresh_token' +
+                             '&client_id='     + EncodingUtil.urlEncode(metaClientId,     'UTF-8') +
+                             '&client_secret=' + EncodingUtil.urlEncode(metaClientSecret, 'UTF-8') +
+                             '&refresh_token=' + EncodingUtil.urlEncode(refreshToken.trim(), 'UTF-8');
+
+        Http http = new Http();
+        HttpRequest req = new HttpRequest();
+        req.setMethod('POST');
+        req.setEndpoint('https://oauth2.googleapis.com/token');
+        req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.setBody(requestBody);
+        req.setTimeout(20000);
+
+        HttpResponse res = http.send(req);
+
+        if (res.getStatusCode() == 200) {
+            // Token exchange succeeded — now fetch the user's email via userinfo endpoint
+            Map<String, Object> tokenResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            String freshAccessToken = (String) tokenResponse.get('access_token');
+
+            String userEmail = '';
+            if (String.isNotBlank(freshAccessToken)) {
+                try {
+                    HttpRequest userReq = new HttpRequest();
+                    userReq.setMethod('GET');
+                    String endpoint = gmailEndpoint + 'oauth2/v2/userinfo';
+                    userReq.setEndpoint(endpoint);
+                    userReq.setHeader('Authorization', 'Bearer ' + freshAccessToken);
+                    userReq.setTimeout(10000);
+
+                    HttpResponse userRes = new Http().send(userReq);
+                    if (userRes.getStatusCode() == 200) {
+                        Map<String, Object> userInfo = (Map<String, Object>) JSON.deserializeUntyped(userRes.getBody());
+                        userEmail = (String) userInfo.get('email');
+                    }
+                } catch (Exception ex) {
+                    // Non-fatal — email fetch failed, return SUCCESS without email
+                    ErrorHandler.insertErrorData(ex, 'IntegrationPopupController', 'validateGmail', 'Could not fetch Gmail userinfo: ' + ex.getMessage());
+                }
+            }
+
+            // Return SUCCESS|{email} so LWC can persist the email address
+            return 'SUCCESS|' + (String.isNotBlank(userEmail) ? userEmail : '');
+        } else {
+            Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            if (errorResponse != null && errorResponse.containsKey('error_description')) {
+                return (String) errorResponse.get('error_description');
+            }
+            if (errorResponse != null && errorResponse.containsKey('error')) {
+                return 'Invalid Gmail credentials: ' + (String) errorResponse.get('error');
+            }
+            return 'Invalid Gmail Refresh Token. Please re-authorize and try again.';
         }
     }
 }

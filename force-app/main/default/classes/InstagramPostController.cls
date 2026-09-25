@@ -18,7 +18,25 @@ public with sharing class InstagramPostController {
             Map<String, Object> result = new Map<String, Object>();
             result.put('success', false);
 
-            System.debug('Creating Instagram container with mediaURLS: ' + mediaUrls);
+            String graphApiVersion = 'v24.0';
+            MVEX__IG_Configuration__c igConfig = MVEX__IG_Configuration__c.getOrgDefaults();
+            if (igConfig != null) {
+                String configVersion;
+                try {
+                    configVersion = (String) igConfig.get('APIVersion__c');
+                } catch (Exception e1) {
+                    configVersion = null;
+                }
+                if (String.isNotBlank(configVersion)) {
+                    graphApiVersion = configVersion.trim();
+                }
+            }
+            if (String.isBlank(graphApiVersion)) {
+                graphApiVersion = 'v24.0';
+            }
+            if (!graphApiVersion.toLowerCase().startsWith('v')) {
+                graphApiVersion = 'v' + graphApiVersion;
+            }
 
             if (mediaUrls.size() == 1) {
                 String mediaUrl = mediaUrls[0];
@@ -26,7 +44,8 @@ public with sharing class InstagramPostController {
 
                 HttpRequest req = new HttpRequest();
                 req.setTimeout(120000);
-                req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
+                String endpoint = INSTAGRAM_ENDPOINT + graphApiVersion + '/' + userId + '/media';
+                req.setEndpoint(endpoint);
                 req.setMethod('POST');
                 req.setHeader('Content-Type', 'application/json');
 
@@ -162,11 +181,20 @@ public with sharing class InstagramPostController {
     }
 
     private static String getMediaTypeFromUrl(String mediaUrl) {
-        if (mediaUrl.toLowerCase().endsWith('.mp4')) {
-            return 'REELS';
-        } else {
+        if (String.isBlank(mediaUrl)) {
             return 'IMAGE';
         }
+        
+        String lowerUrl = mediaUrl.toLowerCase();
+        if (lowerUrl.contains('?')) {
+            lowerUrl = lowerUrl.substringBefore('?');
+        }
+        
+        if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov')) {
+            return 'REELS';
+        }
+        
+        return 'IMAGE';
     }
 
     @AuraEnabled(cacheable=true)
@@ -248,15 +276,26 @@ public with sharing class InstagramPostController {
         try {
             Map<String, String> mediaUrlMap = new Map<String, String>();
     
-            MVEX__Listing__c listingRecord = [SELECT MVEX__Property__c FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
+            MVEX__Listing__c listingRecord = [
+                SELECT MVEX__Property__c 
+                FROM MVEX__Listing__c 
+                WHERE Id = :listingId WITH USER_MODE
+                LIMIT 1
+            ];
         
             if (listingRecord != null && listingRecord.MVEX__Property__c != null) {
-                List<MVEX__Property_File__c> propertyFiles = [SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c FROM MVEX__Property_File__c 
-                                                                WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND IsDeleted = false AND 
-                                                                MVEX__Size__c != null  WITH USER_MODE];
+                List<MVEX__Property_File__c> propertyFiles = [
+                    SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c
+                    FROM MVEX__Property_File__c 
+                    WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE
+                ];
         
                 for (MVEX__Property_File__c file : propertyFiles) {
-                    mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
+                    if (String.isNotBlank(file.MVEX__ExternalLink__c)) {
+                        mediaUrlMap.put(file.Name, file.MVEX__ExternalLink__c);
+                    } else {
+                        mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
+                    }
                 }
             }
         

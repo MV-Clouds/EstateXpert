@@ -17,11 +17,21 @@ public without sharing class ContactTriggerHandler {
             List<MVEX__Lead_Assignment_Setting__c> allRules = [
                 SELECT Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c
                 FROM MVEX__Lead_Assignment_Setting__c
+                WHERE MVEX__Object_Name__c = 'Contact'
+                AND (Default_User__c = false OR Default_User__c = null)
                 ORDER BY MVEX__User_Order__c ASC
             ];
 
-            if (allRules.isEmpty()) {
-                return;
+            // Fetch the default assignee record 
+            String defaultAssigneeUserId = null;
+            List<MVEX__Lead_Assignment_Setting__c> defaultRules = [
+                SELECT Name
+                FROM MVEX__Lead_Assignment_Setting__c
+                WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
+                LIMIT 1
+            ];
+            if (!defaultRules.isEmpty()) {
+                defaultAssigneeUserId = defaultRules[0].Name;
             }
 
             Boolean isInsert = (oldLeadMap == null);
@@ -39,9 +49,11 @@ public without sharing class ContactTriggerHandler {
             }
 
             User sysAdmin = null;
-            List<User> sysAdmins = [SELECT Id FROM User WHERE Profile.Name = 'System Administrator' AND IsActive = TRUE LIMIT 1];
-            if (!sysAdmins.isEmpty()) {
-                sysAdmin = sysAdmins[0];
+            if (String.isBlank(defaultAssigneeUserId)) {
+                List<User> sysAdmins = [SELECT Id FROM User WHERE Profile.Name = 'System Administrator' AND IsActive = TRUE LIMIT 1];
+                if (!sysAdmins.isEmpty()) {
+                    sysAdmin = sysAdmins[0];
+                }
             }
 
             for (Contact lead : leadsToProcess) {
@@ -54,8 +66,13 @@ public without sharing class ContactTriggerHandler {
                         break;
                     }
                 }
-                if (!isAssigned && sysAdmin != null) {
-                    lead.OwnerId = sysAdmin.Id;
+                if (!isAssigned) {
+                    if (String.isNotBlank(defaultAssigneeUserId)) {
+                        // Assign to the configured Default Assignee
+                        lead.OwnerId = defaultAssigneeUserId;
+                    } else if (sysAdmin != null) {
+                        lead.OwnerId = sysAdmin.Id;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -350,6 +367,19 @@ public without sharing class ContactTriggerHandler {
             }
 
             if (!ownerIdsToNotify.isEmpty()) {
+                // Check email notification toggle setting
+                Boolean emailNotifEnabled = true;
+                List<MVEX__Configuration_Settings__c> notifConfigs = [
+                    SELECT MVEX__Fields_Data__c
+                    FROM MVEX__Configuration_Settings__c
+                    WHERE Name = 'Lead_Assignment_Notification'
+                    LIMIT 1
+                ];
+                if (!notifConfigs.isEmpty() && notifConfigs[0].MVEX__Fields_Data__c != null) {
+                    emailNotifEnabled = notifConfigs[0].MVEX__Fields_Data__c.trim().equalsIgnoreCase('true');
+                }
+
+                if (emailNotifEnabled) {
                 Map<Id, User> userMap = new Map<Id, User>([SELECT Id, Email FROM User WHERE Id IN :ownerIdsToNotify AND Email != null]);
 
                 List<EmailTemplate> ownerTemplates = [SELECT Id FROM EmailTemplate WHERE DeveloperName = 'Lead_Assigned_Notification' LIMIT 1];
@@ -365,6 +395,7 @@ public without sharing class ContactTriggerHandler {
                         mail.setSaveAsActivity(false);
                         emails.add(mail);
                     }
+                }
                 }
             }
 

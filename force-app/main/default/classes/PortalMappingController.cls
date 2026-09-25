@@ -15,7 +15,6 @@ public with sharing class PortalMappingController {
     public class ObjectFieldsWrapper {
         @AuraEnabled public List<PortalDetailWrapper> portalDetailsRecords;
         @AuraEnabled public List<MVEX__Portal__c> portalRecords;
-        @AuraEnabled public Boolean isXMLForPF;
     }
     
     /**
@@ -44,16 +43,10 @@ public with sharing class PortalMappingController {
         ObjectFieldsWrapper result = new ObjectFieldsWrapper();
         result.portalDetailsRecords = new List<PortalDetailWrapper>();
         result.portalRecords = new List<MVEX__Portal__c>();
-        result.isXMLForPF = false;
         try {
             Map<String, Integer> generatorCountMap = new Map<String, Integer>();
     
             List<MVEX__PortalDetail__mdt> portalMetaRecords = [SELECT MasterLabel, MVEX__Logo_URL__c FROM MVEX__PortalDetail__mdt WITH USER_MODE ORDER BY MasterLabel LIMIT 100];
-
-            List<MVEX__Control_Center_Feature__mdt> controlCenterFeatureRecords = [SELECT MVEX__isAvailable__c FROM MVEX__Control_Center_Feature__mdt WHERE DeveloperName = 'Is_XML_For_PF' WITH USER_MODE LIMIT 1];
-            if (controlCenterFeatureRecords.size() > 0 && controlCenterFeatureRecords[0].MVEX__isAvailable__c) {
-                result.isXMLForPF = true;
-            }
 
             List<AggregateResult> portalRecordsGroupedByGenerator = [SELECT MVEX__Generator__c, COUNT(Id) recordCount FROM MVEX__Portal__c WITH USER_MODE
                                                                         GROUP BY MVEX__Generator__c LIMIT 50000];
@@ -109,7 +102,7 @@ public with sharing class PortalMappingController {
     * Change Description : Replaced the custom metadata with custom object for portal listing field mapping.
     */
     @AuraEnabled
-    public static List<FieldWrapper> getObjectFields(String portalName, Boolean isXMLForPF) {
+    public static List<FieldWrapper> getObjectFields(String portalName) {
         try {
             List<FieldWrapper> result = new List<FieldWrapper>();
 
@@ -117,11 +110,7 @@ public with sharing class PortalMappingController {
 
             List<MVEX__Portal_Listing_Mapping__c> portalListingMap ;
 
-            if (portalName == 'Propertyfinder' && isXMLForPF) {
-                portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c = 'Propertyfinder XML' WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
-            } else if (portalName != null) {
-                portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
-            }
+            portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
 
             sObject blockFields = getBlockedFields(portalName);
 
@@ -373,8 +362,7 @@ public with sharing class PortalMappingController {
         @AuraEnabled public String is_test_portal;
         @AuraEnabled public String differentiator_values;
         @AuraEnabled public String xml_site;
-        @AuraEnabled public Boolean isXMLForPF = false;
-        @AuraEnabled public Object sync_branch_with_zoopla;
+        @AuraEnabled public Boolean sync_branch_with_zoopla;
     }
 
     /**
@@ -386,6 +374,8 @@ public with sharing class PortalMappingController {
     @AuraEnabled
     public static String savePropertyPortalRecord(String portalWrapper, String portalName) {
         try {
+            System.debug('portalWrapper -> '+portalWrapper);
+            System.debug('portalName -> '+portalName);
             List<String> portalsName = new List<String>{'Bayut', 'Dubizzle'};
             
             if(portalName == null || portalName == '') {
@@ -422,16 +412,7 @@ public with sharing class PortalMappingController {
                 updateNewlyCreatedPortalRecord(newportal.MVEX__Generator__c, newportal.Id, wrapper.xml_site);
             }
 
-            Boolean shouldSyncZoopla = false;
-            if (wrapper.sync_branch_with_zoopla != null) {
-                if (wrapper.sync_branch_with_zoopla instanceof Boolean) {
-                    shouldSyncZoopla = (Boolean)wrapper.sync_branch_with_zoopla;
-                } else if (wrapper.sync_branch_with_zoopla instanceof String) {
-                    shouldSyncZoopla = Boolean.valueOf((String)wrapper.sync_branch_with_zoopla);
-                }
-            }
-
-            if (wrapper.portalname == 'Zoopla' && shouldSyncZoopla) {
+            if (wrapper.portalname == 'Zoopla' && wrapper.sync_branch_with_zoopla) {
                 ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
             }
 
@@ -472,7 +453,7 @@ public with sharing class PortalMappingController {
                 updateNewlyCreatedPortalRecord(newportal.MVEX__Generator__c, newportal.Id, wrapper.xml_site);
             }
 
-            if (wrapper.portalname == 'Zoopla' && shouldSyncZoopla) {
+            if (wrapper.portalname == 'Zoopla' && wrapper.sync_branch_with_zoopla) {
                 ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
             }
 

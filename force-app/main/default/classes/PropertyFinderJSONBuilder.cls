@@ -1,16 +1,16 @@
 public with sharing class PropertyFinderJSONBuilder {
     
-    public static String buildJSON(Map<String, Object> fieldMap, List<Property_File__c> mediaList) {
+    public static String buildJSON(Map<String, Object> fieldMap, List<MVEX__Property_File__c> mediaList) {
         try {
             Map<String, Object> jsonMap = new Map<String, Object>();
         
-            List<Portal_Listing_Mapping__c> portalListing = [SELECT Id, Name, Value_Mapping__c, Data_Type__c FROM Portal_Listing_Mapping__c WHERE Portal_Name__c =: 'Propertyfinder' WITH USER_MODE];
+            List<MVEX__Portal_Listing_Mapping__c> portalListing = [SELECT Id, Name, MVEX__Value_Mapping__c, MVEX__Data_Type__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: 'Propertyfinder' WITH USER_MODE];
 
             Map<String, String> valueMappingMap = new Map<String, String>();
             Map<String, String> dataTypeMap = new Map<String, String>();
-            for (Portal_Listing_Mapping__c mapping : portalListing) {
-                valueMappingMap.put(mapping.Name, mapping.Value_Mapping__c);
-                dataTypeMap.put(mapping.Name, mapping.Data_Type__c);
+            for (MVEX__Portal_Listing_Mapping__c mapping : portalListing) {
+                valueMappingMap.put(mapping.Name, mapping.MVEX__Value_Mapping__c);
+                dataTypeMap.put(mapping.Name, mapping.MVEX__Data_Type__c);
             }
         
             for (String fieldName : fieldMap.keySet()) {
@@ -25,9 +25,9 @@ public with sharing class PropertyFinderJSONBuilder {
             List<Map<String, Object>> imagesList = new List<Map<String, Object>>();
             Map<String, String> videosMap = new Map<String, String>();
 
-            for (Property_File__c mediaItem : mediaList) {
-                String mediaURL = String.isNotBlank(mediaItem.ExternalLink__c) ? mediaItem.ExternalLink__c : mediaItem.BaseUrl__c;
-                String mediaType = String.isNotBlank(mediaItem.Tags__c) ? mediaItem.Tags__c : 'original';
+            for (MVEX__Property_File__c mediaItem : mediaList) {
+                String mediaURL = String.isNotBlank(mediaItem.MVEX__ExternalLink__c) ? mediaItem.MVEX__ExternalLink__c : mediaItem.MVEX__BaseUrl__c;
+                String mediaType = String.isNotBlank(mediaItem.MVEX__Tags__c) ? mediaItem.MVEX__Tags__c : 'original';
                 
                 if (mediaType == '360tour' || mediaType == 'Virtual Tour') {
                     // Add to videos section

@@ -58,8 +58,18 @@ public with sharing class LeadAssignmentController {
 
             // Get rules
             result.rules = [SELECT Id, Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c, MVEX__Object_Name__c
-                            FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact' WITH USER_MODE ORDER BY MVEX__User_Order__c];
+                            FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'  AND (Default_User__c = false OR Default_User__c = null) WITH USER_MODE ORDER BY MVEX__User_Order__c];
 
+            // Get the default assignee record (Default_User__c = true; Name stores the userId)
+            List<MVEX__Lead_Assignment_Setting__c> defaultRules = [
+                SELECT Id, Name, Default_User__c
+                FROM MVEX__Lead_Assignment_Setting__c
+                WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
+                WITH USER_MODE LIMIT 1
+            ];
+            if (!defaultRules.isEmpty()) {
+                result.defaultRule = defaultRules[0];
+            }
             return result;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'LeadAssignmentController', 'getLeadAssignmentInitData', 'Error while fetching init data.');
@@ -90,6 +100,7 @@ public with sharing class LeadAssignmentController {
                 newRule.MVEX__Logic_Type__c = (String)rule.get('Logic_Type');
                 newRule.MVEX__Logical_Expression__c = (String)rule.get('Logical_Expression');
                 newRule.MVEX__User_Order__c = Integer.valueOf(rule.get('User_Order'));
+                newRule.Default_User__c = false;
 
                 insert as user newRule;
                 return newRule.Id;
@@ -137,13 +148,70 @@ public with sharing class LeadAssignmentController {
                 }
                 List<MVEX__Lead_Assignment_Setting__c> rulesToDelete = [
                     SELECT Id FROM MVEX__Lead_Assignment_Setting__c 
-                    WHERE Id = :ruleId AND MVEX__Object_Name__c = 'Contact' 
+                    WHERE Id = :ruleId AND MVEX__Object_Name__c = 'Contact'  
+                    AND (Default_User__c = false OR Default_User__c = null)
                     WITH USER_MODE LIMIT 1
                 ];
                 if (!rulesToDelete.isEmpty()) {
                     delete as user rulesToDelete;
                 } else {
                     return 'Rule not found for Rule ID: ' + ruleId;
+                }
+                return 'Success';
+            } else if (operationLower == 'savedefault') {
+                // upsert the default assignee record.
+                Map<String, Object> rule = (Map<String, Object>)JSON.deserializeUntyped(jsonString);
+                String defaultUserId = (String)rule.get('Default_User_Id');
+                String existingId    = (String)rule.get('Id');
+
+                if (String.isBlank(defaultUserId)) {
+                    return 'Default User ID is required.';
+                }
+
+                MVEX__Lead_Assignment_Setting__c defaultRule = new MVEX__Lead_Assignment_Setting__c();
+                if (String.isNotBlank(existingId)) {
+                    defaultRule.Id = existingId;
+                } else {
+                    // Check if a default assignee record already exists in database
+                    List<MVEX__Lead_Assignment_Setting__c> existingDefaults = [
+                        SELECT Id FROM MVEX__Lead_Assignment_Setting__c
+                        WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
+                        WITH USER_MODE LIMIT 1
+                    ];
+                    if (!existingDefaults.isEmpty()) {
+                        defaultRule.Id = existingDefaults[0].Id;
+                    }
+                }
+                defaultRule.Name                        = defaultUserId;  // userId stored in Name
+                defaultRule.Default_User__c             = true;           // boolean flag
+                defaultRule.MVEX__Object_Name__c        = 'Contact';
+                defaultRule.MVEX__Conditions__c         = null;
+                defaultRule.MVEX__Logic_Type__c         = null;
+                defaultRule.MVEX__Logical_Expression__c = null;
+                defaultRule.MVEX__User_Order__c         = null;
+
+                upsert as user defaultRule;
+                return defaultRule.Id;
+            } else if (operationLower == 'deletedefault') {
+                // Remove the default assignee record (identified by Default_User__c = true)
+                Map<String, Object> rule = (Map<String, Object>)JSON.deserializeUntyped(jsonString);
+                String defaultId = (String)rule.get('Id');
+                List<MVEX__Lead_Assignment_Setting__c> toDelete;
+                if (String.isNotBlank(defaultId)) {
+                    toDelete = [
+                        SELECT Id FROM MVEX__Lead_Assignment_Setting__c
+                        WHERE Id = :defaultId AND Default_User__c = true
+                        WITH USER_MODE LIMIT 1
+                    ];
+                } else {
+                    toDelete = [
+                        SELECT Id FROM MVEX__Lead_Assignment_Setting__c
+                        WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
+                        WITH USER_MODE LIMIT 1
+                    ];
+                }
+                if (!toDelete.isEmpty()) {
+                    delete as user toDelete;
                 }
                 return 'Success';
             } else {
@@ -208,10 +276,60 @@ public with sharing class LeadAssignmentController {
         return result;
     }
 
+    /**
+     * Retrieves the email notification enabled setting for lead assignment.
+     * Reads MVEX__Fields_Data__c ('true'/'false') from the config record
+     * Name = 'Lead_Assignment_Notification'. Defaults to true if not found.
+     */
+    @AuraEnabled
+    public static Boolean getEmailNotificationEnabled() {
+        try {
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT MVEX__Fields_Data__c
+                FROM MVEX__Configuration_Settings__c
+                WHERE Name = 'Lead_Assignment_Notification'
+                WITH USER_MODE LIMIT 1
+            ];
+            if (!configs.isEmpty() && configs[0].MVEX__Fields_Data__c != null) {
+                return configs[0].MVEX__Fields_Data__c.trim().equalsIgnoreCase('true');
+            }
+            return true; 
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'LeadAssignmentController', 'getEmailNotificationEnabled', 'Error fetching email notification setting.');
+            return true;
+        }
+    }
+
+    /**
+     * Saves the email notification enabled setting for lead assignment.
+     * Upserts a Configuration_Settings__c record keyed by Name = 'Lead_Assignment_Notification',
+     * storing 'true' or 'false' in MVEX__Fields_Data__c.
+     */
+    @AuraEnabled
+    public static void setEmailNotificationEnabled(Boolean isEnabled) {
+        try {
+            List<MVEX__Configuration_Settings__c> configs = [
+                SELECT Id
+                FROM MVEX__Configuration_Settings__c
+                WHERE Name = 'Lead_Assignment_Notification'
+                WITH USER_MODE LIMIT 1
+            ];
+            MVEX__Configuration_Settings__c config = configs.isEmpty()
+                ? new MVEX__Configuration_Settings__c(Name = 'Lead_Assignment_Notification', MVEX__Feature_Name__c = 'Lead_Assignment_Notification')
+                : configs[0];
+            config.MVEX__Fields_Data__c = isEnabled ? 'true' : 'false';
+            upsert as user config;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'LeadAssignmentController', 'setEmailNotificationEnabled', 'Error saving email notification setting.');
+            throw e;
+        }
+    }
+
     public class LeadAssignmentInitData {
         @AuraEnabled public List<FieldWrapper> objectFields = new List<FieldWrapper>();
         @AuraEnabled public List<User> users = new List<User>();
         @AuraEnabled public List<MVEX__Lead_Assignment_Setting__c> rules = new List<MVEX__Lead_Assignment_Setting__c>();
+        @AuraEnabled public MVEX__Lead_Assignment_Setting__c defaultRule;
     }
 
     public class FieldWrapper {

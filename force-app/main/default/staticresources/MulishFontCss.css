@@ -247,7 +247,7 @@
 }
 
 .header-search-bar-css .slds-input {
-  min-height: 30px;
+  min-height: 36px;
 }
 
 .header-combobox .slds-form-element__help {
@@ -255,7 +255,7 @@
 }
 
 .header-combobox .slds-combobox__input {
-  min-height: 30px;
+  min-height: 36px;
   align-items: center;
 }
 
@@ -571,6 +571,14 @@
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   border: 1px solid rgba(1, 118, 211, 0.1);
   position: relative;
+}
+
+.main_content_cls .section-control {
+  background: #0176d3;
+  color: white;
+  margin: auto;
+  --slds-c-icon-color-foreground-default: #ffffff !important;
+  --slds-g-shadow-outline-focus-1: none !important;  
 }
 
 .exp-no-data-container {

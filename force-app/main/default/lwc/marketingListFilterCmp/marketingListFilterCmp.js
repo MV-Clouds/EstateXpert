@@ -360,7 +360,8 @@ export default class MarketingListFilterCmp extends LightningElement {
         this.screenWidth = window.innerWidth;
     }
 
-    applyFilters() {
+    applyFilters(isSilent = false) {
+        const silent = typeof isSilent === 'boolean' ? isSilent : false;
         try {
             console.time('MethodTime');
             let contactFilters = [];
@@ -438,8 +439,10 @@ export default class MarketingListFilterCmp extends LightningElement {
             filterData.contactFilters = contactFilters;
             filterData.inquiryFilters = inquiryFilters;
 
-            this.isLoading = true;
-            this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+            if (!silent) {
+                this.isLoading = true;
+                this.dispatchEvent(new CustomEvent('loading', { detail: true }));
+            }
             getFilteredContacts({ filterData: JSON.stringify(filterData) })
                 .then(result => {
                     // Process records in JavaScript
@@ -493,39 +496,50 @@ export default class MarketingListFilterCmp extends LightningElement {
                     // Map final Contact IDs to contact records
                     this.filteredContacts = contacts.filter(c => finalContactIds.has(c.Id));
                     this.setFilteredContacts();
-                    this.isLoading = false;
-                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                    if (!silent) {
+                        this.isLoading = false;
+                        this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                    }
                 })
                 .catch(error => {
                     errorDebugger('MarketingListFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters');
-                    this.isLoading = false;
-                    this.dispatchEvent(new CustomEvent('loading', { detail: false }));
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error Applying Filters',
-                            message: error.body?.message || 'An error occurred while applying filters.',
-                            variant: 'error',
-                        })
-                    );
+                    if (!silent) {
+                        this.isLoading = false;
+                        this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Error Applying Filters',
+                                message: error.body?.message || 'An error occurred while applying filters.',
+                                variant: 'error',
+                            })
+                        );
+                    }
                 });
             console.timeEnd('MethodTime');
         } catch (error) {
             errorDebugger('MarketingListFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters');
-            this.isLoading = false;
-            this.dispatchEvent(new CustomEvent('loading', { detail: false }));
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error Applying Filters',
-                    message: 'An error occurred while applying filters.',
-                    variant: 'error',
-                })
-            );
+            if (!silent) {
+                this.isLoading = false;
+                this.dispatchEvent(new CustomEvent('loading', { detail: false }));
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error Applying Filters',
+                        message: 'An error occurred while applying filters.',
+                        variant: 'error',
+                    })
+                );
+            }
         }
     }
 
     @api
-    reapplyFilters() {
-        this.applyFilters();
+    reapplyFilters(isSilent = false) {
+        this.applyFilters(isSilent);
+    }
+
+    @api
+    hasActiveFilters() {
+        return this.getAppliedFilterDetails().length > 0;
     }
 
     // Helper method to evaluate a single condition against a record

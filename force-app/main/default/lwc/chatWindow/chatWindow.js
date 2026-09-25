@@ -1010,6 +1010,15 @@ export default class ChatWindow extends NavigationMixin(LightningElement) {
         });
     }
 
+    navigateToWhatsAppSetup() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/apex/MVEX__facebookSDK'
+            }
+        });
+    }
+
     handleDocError(event) {
         event.target.onerror = null;
         event.target.src = this.NoPreviewAvailable;

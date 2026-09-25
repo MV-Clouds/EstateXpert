@@ -11,19 +11,19 @@ public class IntegrationPopupControllerTest {
         Test.stopTest();
         
         // Verify the AWS_Config__c settings were saved
-        AWS_Config__c settings = AWS_Config__c.getOrgDefaults();
+        MVEX__AWS_Config__c settings = MVEX__AWS_Config__c.getOrgDefaults();
         System.assertNotEquals(null, settings, 'AWS settings should be created');
-        System.assertEquals('test_access_key', settings.AWS_Access_Key__c, 'Access key should match');
+        System.assertEquals('test_access_key', settings.MVEX__AWS_Access_Key__c, 'Access key should match');
     }
 
     @isTest
     static void testGetSettings() {
         // Setup test data
-        AWS_Config__c awsConfig = new AWS_Config__c(
-            AWS_Access_Key__c = 'access_key',
-            AWS_Secret_Access_Key__c = 'secret_key',
-            S3_Bucket_Name__c = 'test-bucket',
-            S3_Region_Name__c = 'us-west-1'
+        MVEX__AWS_Config__c awsConfig = new MVEX__AWS_Config__c(
+            MVEX__AWS_Access_Key__c = 'access_key',
+            MVEX__AWS_Secret_Access_Key__c = 'secret_key',
+            MVEX__S3_Bucket_Name__c = 'test-bucket',
+            MVEX__S3_Region_Name__c = 'us-west-1'
         );
         insert awsConfig;
 
@@ -39,9 +39,9 @@ public class IntegrationPopupControllerTest {
     @isTest
     static void testRevokeAWSAccess() {
         // Setup test data
-        AWS_Config__c awsConfig = new AWS_Config__c(
-            AWS_Access_Key__c = 'test_access_key',
-            AWS_Secret_Access_Key__c = 'test_secret_key'
+        MVEX__AWS_Config__c awsConfig = new MVEX__AWS_Config__c(
+            MVEX__AWS_Access_Key__c = 'test_access_key',
+            MVEX__AWS_Secret_Access_Key__c = 'test_secret_key'
         );
         insert awsConfig;
 
@@ -55,9 +55,9 @@ public class IntegrationPopupControllerTest {
 
     @isTest
     static void testGetIntegrationDetails() {
-        AWS_Config__c awsConfig = new AWS_Config__c(
-            AWS_Access_Key__c = 'test_access_key',
-            AWS_Secret_Access_Key__c = 'test_secret_key'
+        MVEX__AWS_Config__c awsConfig = new MVEX__AWS_Config__c(
+            MVEX__AWS_Access_Key__c = 'test_access_key',
+            MVEX__AWS_Secret_Access_Key__c = 'test_secret_key'
         );
         insert awsConfig;
 
@@ -109,38 +109,38 @@ public class IntegrationPopupControllerTest {
     @isTest
     static void testRevokeAllAccess() {
         // Setup Gmail config
-        GmailConfig__c gmailConfig = new GmailConfig__c(
-            Client_ID__c = 'test_client_id',
-            Client_Secret__c = 'test_secret',
-            Redirect_URI__c = 'https://test.com',
-            Refresh_Token__c = 'test_refresh_token'
+        MVEX__GmailConfig__c gmailConfig = new MVEX__GmailConfig__c(
+            MVEX__Client_ID__c = 'test_client_id',
+            MVEX__Client_Secret__c = 'test_secret',
+            MVEX__Redirect_URI__c = 'https://test.com',
+            MVEX__Refresh_Token__c = 'test_refresh_token'
         );
         insert gmailConfig;
         
         // Setup WhatsApp config
-        WhatsAppConfig__c whatsappConfig = new WhatsAppConfig__c();
+        MVEX__WhatsAppConfig__c whatsappConfig = new MVEX__WhatsAppConfig__c();
         insert whatsappConfig;
         
         // Setup Instagram config
-        IG_Configuration__c instaConfig = new IG_Configuration__c(
-            ClientId__c = 'test_client_id',
-            ClientSecret__c = 'test_secret'
+        MVEX__IG_Configuration__c instaConfig = new MVEX__IG_Configuration__c(
+            MVEX__ClientId__c = 'test_client_id',
+            MVEX__ClientSecret__c = 'test_secret'
         );
         insert instaConfig;
         
         // Setup Google config
-        GoogleLeadConfig__c googleConfig = new GoogleLeadConfig__c(
-            Google_Lead_Form_Secret__c = 'test-google-key'
+        MVEX__GoogleLeadConfig__c googleConfig = new MVEX__GoogleLeadConfig__c(
+            MVEX__Google_Lead_Form_Secret__c = 'test-google-key'
         );
         insert googleConfig;
         
         // Setup Meta config
-        MetaLeadConfig__c metaConfig = new MetaLeadConfig__c(
-            ACCESS_TOKEN__c = 'test_access_token',
-            VERIFY_TOKEN__c = 'test_verify_token',
-            FB_API_VERSION__c = 'v12.0',
-            APP_ID__c = 'test_app_id',
-            APP_SECRET__c = 'test_app_secret'
+        MVEX__MetaLeadConfig__c metaConfig = new MVEX__MetaLeadConfig__c(
+            MVEX__ACCESS_TOKEN__c = 'test_access_token',
+            MVEX__VERIFY_TOKEN__c = 'test_verify_token',
+            MVEX__FB_API_VERSION__c = 'v12.0',
+            MVEX__APP_ID__c = 'test_app_id',
+            MVEX__APP_SECRET__c = 'test_app_secret'
         );
         insert metaConfig;
         
@@ -162,9 +162,9 @@ public class IntegrationPopupControllerTest {
     @isTest
     static void testSocialMediaAndGoogleData() {
         // Setup Instagram config
-        IG_Configuration__c instaConfig = new IG_Configuration__c(
-            ClientId__c = 'test_client_id',
-            ClientSecret__c = 'test_secret'
+        MVEX__IG_Configuration__c instaConfig = new MVEX__IG_Configuration__c(
+            MVEX__ClientId__c = 'test_client_id',
+            MVEX__ClientSecret__c = 'test_secret'
         );
         insert instaConfig;
         

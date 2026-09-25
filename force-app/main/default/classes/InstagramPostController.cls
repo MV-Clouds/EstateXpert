@@ -161,7 +161,7 @@ public with sharing class InstagramPostController {
                 String mediaType = getMediaTypeFromUrl(mediaUrl);
 
                 HttpRequest req = new HttpRequest();
-                req.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+                req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
                 req.setMethod('POST');
                 req.setHeader('Content-Type', 'application/json');
 
@@ -216,7 +216,7 @@ public with sharing class InstagramPostController {
 
                     HttpRequest req = new HttpRequest();
                     req.setTimeout(120000);
-                    req.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+                    req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
                     req.setMethod('POST');
                     req.setHeader('Content-Type', 'application/json');
 

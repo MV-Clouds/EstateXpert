@@ -13,6 +13,9 @@ import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMeta
 import GMAIL_SENDING_ENDPOINT from '@salesforce/label/c.Gmail_Sending_Endpoint';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
+import Google_Oauth_URL from '@salesforce/label/c.Google_Oauth_URL';
+import Gmail_Send_Scope from '@salesforce/label/c.Gmail_Send_Scope';
+import Insta_Oauth_URL from '@salesforce/label/c.Insta_Oauth_URL';
 
 export default class StorageIntegration extends NavigationMixin(LightningElement) {
     @track isDataLoaded = false;
@@ -42,17 +45,9 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
     integrationToDeactivate = null;
 
-    get isCloudStorageAvailable() {
-        return this.featureAvailability && this.featureAvailability.Cloud_Storage_Integration !== false;
-    }
-
-    get isSocialMediaAvailable() {
-        return this.featureAvailability && this.featureAvailability.Social_Media_Integration !== false;
-    }
-
-    get isEmailAvailable() {
-        return this.featureAvailability && this.featureAvailability.Email_Integration !== false;
-    }
+    // Cached integration settings from Metadata (avoids redundant Apex getSettings calls)
+    gmailSettingsData = null;
+    instagramSettingsData = null;
 
     // Disable Save buttons until minimum required fields are filled
     get isGmailSaveDisabled() {
@@ -402,20 +397,47 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         }
     }
 
+    // ══ Integration Settings Cache Helper ════════════════════════════════════
+
+    /**
+    * Method Name: getIntegrationSettings
+    * @description: Retrieves integration configuration (Client ID, Secret, Redirect URI)
+    *               from Apex and caches it locally so it is not re-fetched redundantly on Save.
+    * @param {String} integrationType - 'Gmail' | 'Instagram'
+    * @return {Promise<Object>} Cached or newly fetched settings data.
+    */
+    getIntegrationSettings(integrationType) {
+        if (integrationType === 'Gmail' && this.gmailSettingsData) {
+            return Promise.resolve(this.gmailSettingsData);
+        }
+        if (integrationType === 'Instagram' && this.instagramSettingsData) {
+            return Promise.resolve(this.instagramSettingsData);
+        }
+        return getSettings({ integrationType })
+            .then(data => {
+                if (integrationType === 'Gmail') {
+                    this.gmailSettingsData = data;
+                } else if (integrationType === 'Instagram') {
+                    this.instagramSettingsData = data;
+                }
+                return data;
+            });
+    }
+
     // ══ Gmail — Connect / Input section state ═════════════════════════════════
 
     /**
     * Method Name: handleGmailConnect
     * @description: Shown when Gmail is inactive. Redirects to Gmail OAuth login page
     *               (same as integrationPopUp) and reveals the input section for manual token entry.
-    *               Uses getSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
+    *               Uses cached getIntegrationSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
     * Created Date: 16/03/2026
     * Created By: Karan Singh
     */
     handleGmailConnect() {
         try {
             this.isSpinner = true;
-            getSettings({ integrationType: 'Gmail' })
+            this.getIntegrationSettings('Gmail')
                 .then(data => {
                     this.isSpinner = false;
                     if (!data || !data.objectData) {
@@ -436,10 +458,9 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {
-                            url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + clientId +
-                                 '&redirect_uri=' + redirectUri +
-                             '&response_type=code&access_type=offline&prompt=consent' +
-                             '&scope=' + GMAIL_SENDING_ENDPOINT + 'auth/gmail.send%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email'
+                            url: Google_Oauth_URL + 'client_id=' + fieldsData.MVEX__Client_ID__c +
+                                 '&redirect_uri=' + fieldsData.MVEX__Redirect_URI__c +
+                                 '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope
                         }
                     });
                 })
@@ -481,7 +502,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 return;
             }
             this.isSpinner = true;
-            getSettings({ integrationType: 'Gmail' })
+            this.getIntegrationSettings('Gmail')
                 .then(data => {
                     if (!data || !data.objectData) {
                         throw new Error('MISSING_CONFIG');
@@ -548,7 +569,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     handleInstagramConnect() {
         try {
             this.isSpinner = true;
-            getSettings({ integrationType: 'Instagram' })
+            this.getIntegrationSettings('Instagram')
                 .then(data => {
                     this.isSpinner = false;
                     if (!data || !data.objectData) {
@@ -570,7 +591,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {
-                            url: 'https://www.instagram.com/oauth/authorize?client_id=' + clientId +
+                            url: Insta_Oauth_URL + 'client_id=' + clientId +
                                  '&redirect_uri=' + redirectUri +
                                  '&response_type=code&scope=business_basic%2Cbusiness_manage_messages%2Cbusiness_manage_comments%2Cbusiness_content_publish'
                         }
@@ -621,7 +642,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                 return;
             }
             this.isSpinner = true;
-            getSettings({ integrationType: 'Instagram' })
+            this.getIntegrationSettings('Instagram')
                 .then(data => {
                     if (!data || !data.objectData) {
                         // Throw so the .catch() handles spinner + toast

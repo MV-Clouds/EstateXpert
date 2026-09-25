@@ -3,138 +3,132 @@
         <c-spinner-component></c-spinner-component>
     </template>
     <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
-        <template if:true={isAccessible}>
-            <div class="main">
-                <template if:false={isMobileOrTablet}>
-                    <div class="custom-header">
-                        <div class="sub_main_header_css">
-                            <div class="header_block_css">
-                                Marketing List
-                                <template if:false={isSelected}>
-                                    <span class="count-badge">{totalContacts} {contactItems}</span>
-                                </template>
-                                <template if:true={isSelected}>
-                                    <span class="count-badge selected-badge">{totalSelected} {items} Selected</span>
-                                </template>
-                            </div>
+        <div class="main">
+            <template if:false={isMobileOrTablet}>
+                <div class="custom-header">
+                    <div class="sub_main_header_css">
+                        <div class="header_block_css">
+                            Marketing List
+                            <template if:false={isSelected}>
+                                <span class="count-badge">{totalContacts} {contactItems}</span>
+                            </template>
+                            <template if:true={isSelected}>
+                                <span class="count-badge selected-badge">{totalSelected} {items} Selected</span>
+                            </template>
+                        </div>
 
-                            <div class="header-buttons">
-                                <button onclick={openConfigureSettings} class="blue-btn-css">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        <div class="header-buttons">
+                            <button onclick={openConfigureSettings} class="blue-btn-css">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12 15.5C10.07 15.5 8.5 13.93 8.5 12C8.5 10.07 10.07 8.5 12 8.5C13.93 8.5 15.5 10.07 15.5 12C15.5 13.93 13.93 15.5 12 15.5ZM19.43 12.97C19.47 12.65 19.5 12.33 19.5 12C19.5 11.67 19.47 11.34 19.43 11L21.54 9.37C21.73 9.22 21.78 8.95 21.66 8.73L19.66 5.27C19.54 5.05 19.27 4.96 19.05 5.05L16.56 6.05C16.04 5.66 15.5 5.32 14.87 5.07L14.5 2.42C14.46 2.18 14.25 2 14 2H10C9.75 2 9.54 2.18 9.5 2.42L9.13 5.07C8.5 5.32 7.96 5.67 7.44 6.05L4.95 5.05C4.73 4.96 4.46 5.05 4.34 5.27L2.34 8.73C2.21 8.95 2.27 9.22 2.46 9.37L4.57 11C4.53 11.34 4.5 11.67 4.5 12C4.5 12.33 4.53 12.65 4.57 12.97L2.46 14.63C2.27 14.78 2.21 15.05 2.34 15.27L4.34 18.73C4.46 18.95 4.73 19.03 4.95 18.95L7.44 17.94C7.96 18.34 8.5 18.68 9.13 18.93L9.5 21.58C9.54 21.82 9.75 22 10 22H14C14.25 22 14.46 21.82 14.5 21.58L14.87 18.93C15.5 18.67 16.04 18.33 16.56 17.94L19.05 18.95C19.27 19.03 19.54 18.95 19.66 18.73L21.66 15.27C21.78 15.05 21.73 14.78 21.54 14.63L19.43 12.97Z"
+                                        fill="white" />
+                                </svg>
+                                Customize View
+                            </button>
+                            <template if:true={isConfigOpen}>
+                                <c-record-config-body-cmp feature-name="Marketing_List_Fields"
+                                    onclose={handleCloseModal}></c-record-config-body-cmp>
+                            </template>
+
+
+                            <button onclick={goTOContactPage} class="blue-btn-css">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
+                                        fill="white" />
+                                </svg>
+                                New Contact
+                            </button>
+
+                            <div class="filter-tab-wrapper">
+                                <div class="filter-toggle-btn" onclick={wrapFilter}>
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M12 15.5C10.07 15.5 8.5 13.93 8.5 12C8.5 10.07 10.07 8.5 12 8.5C13.93 8.5 15.5 10.07 15.5 12C15.5 13.93 13.93 15.5 12 15.5ZM19.43 12.97C19.47 12.65 19.5 12.33 19.5 12C19.5 11.67 19.47 11.34 19.43 11L21.54 9.37C21.73 9.22 21.78 8.95 21.66 8.73L19.66 5.27C19.54 5.05 19.27 4.96 19.05 5.05L16.56 6.05C16.04 5.66 15.5 5.32 14.87 5.07L14.5 2.42C14.46 2.18 14.25 2 14 2H10C9.75 2 9.54 2.18 9.5 2.42L9.13 5.07C8.5 5.32 7.96 5.67 7.44 6.05L4.95 5.05C4.73 4.96 4.46 5.05 4.34 5.27L2.34 8.73C2.21 8.95 2.27 9.22 2.46 9.37L4.57 11C4.53 11.34 4.5 11.67 4.5 12C4.5 12.33 4.53 12.65 4.57 12.97L2.46 14.63C2.27 14.78 2.21 15.05 2.34 15.27L4.34 18.73C4.46 18.95 4.73 19.03 4.95 18.95L7.44 17.94C7.96 18.34 8.5 18.68 9.13 18.93L9.5 21.58C9.54 21.82 9.75 22 10 22H14C14.25 22 14.46 21.82 14.5 21.58L14.87 18.93C15.5 18.67 16.04 18.33 16.56 17.94L19.05 18.95C19.27 19.03 19.54 18.95 19.66 18.73L21.66 15.27C21.78 15.05 21.73 14.78 21.54 14.63L19.43 12.97Z"
-                                            fill="white" />
-                                    </svg>
-                                    Customize View
-                                </button>
-                                <template if:true={isConfigOpen}>
-                                    <c-record-config-body-cmp feature-name="Marketing_List_Fields"
-                                        onclose={handleCloseModal}></c-record-config-body-cmp>
-                                </template>
-                                <template if:true={hasBusinessAccountConfigured}>
-                                    <button onclick={handleSendMessage} class="blue-btn-css"
-                                        disabled={isSendMessageDisabled} title={sendMessageButtonTitle}>
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M3.50002 12C3.50002 7.30558 7.3056 3.5 12 3.5C16.6944 3.5 20.5 7.30558 20.5 12C20.5 16.6944 16.6944 20.5 12 20.5C10.3278 20.5 8.77127 20.0182 7.45798 19.1861C7.21357 19.0313 6.91408 18.9899 6.63684 19.0726L3.75769 19.9319L4.84173 17.3953C4.96986 17.0955 4.94379 16.7521 4.77187 16.4751C3.9657 15.176 3.50002 13.6439 3.50002 12ZM12 1.5C6.20103 1.5 1.50002 6.20101 1.50002 12C1.50002 13.8381 1.97316 15.5683 2.80465 17.0727L1.08047 21.107C0.928048 21.4637 0.99561 21.8763 1.25382 22.1657C1.51203 22.4552 1.91432 22.5692 2.28599 22.4582L6.78541 21.1155C8.32245 21.9965 10.1037 22.5 12 22.5C17.799 22.5 22.5 17.799 22.5 12C22.5 6.20101 17.799 1.5 12 1.5ZM14.2925 14.1824L12.9783 15.1081C12.3628 14.7575 11.6823 14.2681 10.9997 13.5855C10.2901 12.8759 9.76402 12.1433 9.37612 11.4713L10.2113 10.7624C10.5697 10.4582 10.6678 9.94533 10.447 9.53028L9.38284 7.53028C9.23954 7.26097 8.98116 7.0718 8.68115 7.01654C8.38113 6.96129 8.07231 7.046 7.84247 7.24659L7.52696 7.52195C6.76823 8.18414 6.3195 9.2723 6.69141 10.3741C7.07698 11.5163 7.89983 13.314 9.58552 14.9997C11.3991 16.8133 13.2413 17.5275 14.3186 17.8049C15.1866 18.0283 16.008 17.7288 16.5868 17.2572L17.1783 16.7752C17.4313 16.5691 17.5678 16.2524 17.544 15.9269C17.5201 15.6014 17.3389 15.308 17.0585 15.1409L15.3802 14.1409C15.0412 13.939 14.6152 13.9552 14.2925 14.1824Z"
-                                                fill="white" />
-                                        </svg>
-                                        Send Message
-                                    </button>
-                                </template>
-                                <button onclick={handleAdd} class="blue-btn-css"
-                                    disabled={isSendEmailDisabled} title={sendEmailButtonTitle}>
-                                    <svg width="18" height="18" version="1.1" viewBox="0 0 512 512">
-                                        <g>
-                                            <path
-                                                d="M2.072,127.79c-1.335,4.946-2.058,10.14-2.058,15.502c0,241.727-0.087,226.177,0.18,229.813L157.121,229.27L2.072,127.79z"
-                                                fill="white" />
-                                            <path
-                                                d="M255.904,281.128c-23.968,0-35.227-10.26-66.592-30.789L15.964,409.225c10.888,11.717,26.415,19.066,43.633,19.066h392.611c17.219,0,32.746-7.35,43.633-19.066L322.495,250.34C291.131,270.868,279.87,281.128,255.904,281.128z"
-                                                fill="white" />
-                                            <path
-                                                d="M271.397,239.225l217.829-142.57c-10.174-8.093-23.036-12.946-37.017-12.946H59.597c-13.981,0-26.842,4.853-37.018,12.946l217.829,142.57C249.821,245.385,261.986,245.386,271.397,239.225z"
-                                                fill="white" />
-                                            <path
-                                                d="M509.734,127.79l-155.05,101.48l156.928,143.835C511.704,371.862,513.168,140.518,509.734,127.79z"
-                                                fill="white" />
+                                        <g id="SVGRepo_bgCarrier" stroke-width="1.5"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                            stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M0 3H16V1H0V3Z" fill={filterIconColor}></path>
+                                            <path d="M2 7H14V5H2V7Z" fill={filterIconColor}></path>
+                                            <path d="M4 11H12V9H4V11Z" fill={filterIconColor}></path>
+                                            <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
                                         </g>
                                     </svg>
-                                    Send Emails
-                                </button>
-                                <button onclick={goTOContactPage} class="blue-btn-css">
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
-                                            fill="white" />
-                                    </svg>
-                                    New Contact
-                                </button>
-
-                                <div class="filter-tab-wrapper">
-                                    <div class="filter-toggle-btn" onclick={wrapFilter}>
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <g id="SVGRepo_bgCarrier" stroke-width="1.5"></g>
-                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                stroke-linejoin="round"></g>
-                                            <g id="SVGRepo_iconCarrier">
-                                                <path d="M0 3H16V1H0V3Z" fill={filterIconColor}></path>
-                                                <path d="M2 7H14V5H2V7Z" fill={filterIconColor}></path>
-                                                <path d="M4 11H12V9H4V11Z" fill={filterIconColor}></path>
-                                                <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
-                                            </g>
-                                        </svg>
-                                        <template if:true={hasAppliedFilters}>
-                                            <span class="filter-applied-dot" title="Filter Applied"></span>
-                                        </template>
-                                    </div>
+                                    <template if:true={hasAppliedFilters}>
+                                        <span class="filter-applied-dot" title="Filter Applied"></span>
+                                    </template>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </template>
-                <div class="body">
-                    <template if:false={fieldsModal}>
-                        <div class="innerDiv2 main_content_cls">
-                            <template if:true={listingSpinnerLoading}>
-                                <c-spinner-component is-absolute="true"></c-spinner-component>
-                            </template>
-                            <template if:true={showList}>
-                                <template if:false={showSection}>
-                                    <div class="table-content" id="table-content">
-                                        <table aria-multiselectable="true"
-                                            class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
-                                            role="grid"
-                                            aria-label="Example advanced table of Opportunities in actionable mode">
-                                            <thead>
-                                                <tr class="slds-line-height_reset fields-names table_tr_cls">
-                                                    <th class="slds-text-align_right slds-cell_action-mode colume1"
-                                                        scope="col">
-                                                        <span id="column-group-header"
-                                                            class="slds-assistive-text">Choose a row</span>
-                                                        <div class="header-checkbox-div">
-                                                            <label class="custom-checkbox">
-                                                                <input type="checkbox" onchange={selectAllCheckbox}
-                                                                    checked={checkAll}>
-                                                                <span class="checkmark"></span>
-                                                            </label>
+                </div>
+            </template>
+            <div class="body">
+                <template if:false={fieldsModal}>
+                    <div class="innerDiv2 main_content_cls">
+                        <template if:true={listingSpinnerLoading}>
+                            <c-spinner-component is-absolute="true"></c-spinner-component>
+                        </template>
+                        <template if:true={showList}>
+                            <template if:false={showSection}>
+                                <div class="table-content" id="table-content">
+                                    <table aria-multiselectable="true"
+                                        class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
+                                        role="grid"
+                                        aria-label="Example advanced table of Opportunities in actionable mode">
+                                        <thead>
+                                            <tr class="slds-line-height_reset fields-names table_tr_cls">
+                                                <th class="slds-text-align_right slds-cell_action-mode colume1"
+                                                    scope="col">
+                                                    <span id="column-group-header"
+                                                        class="slds-assistive-text">Choose a row</span>
+                                                    <div class="header-checkbox-div">
+                                                        <label class="custom-checkbox">
+                                                            <input type="checkbox" onchange={selectAllCheckbox}
+                                                                checked={checkAll}>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                    </div>
+                                                </th>
+                                                <th aria-sort="none" data-id="Name" onclick={sortClick}
+                                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
+                                                    scope="col">
+                                                    <div class="slds-text-link_reset sort-cover" role="button"
+                                                        tabindex="0">
+                                                        <span class="slds-assistive-text">Sort by: </span>
+                                                        <div class="slds-has-flexi-truncate center-trancate-head">
+                                                            <span class="slds-truncate" title="Title">Contact
+                                                                Name</span>
+                                                            <span
+                                                                class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                <svg data-index="Name" class="listing-manager-icon"
+                                                                    viewBox="0 0 384 512"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                </svg>
+                                                            </span>
                                                         </div>
-                                                    </th>
-                                                    <th aria-sort="none" data-id="Name" onclick={sortClick}
+                                                    </div>
+                                                </th>
+                                                <template for:each={fields} for:item="contact" for:index="index">
+                                                    <th key={contact.fieldName} data-id={contact.fieldName}
+                                                        onclick={sortClick} aria-sort="none"
                                                         class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
                                                         scope="col">
                                                         <div class="slds-text-link_reset sort-cover" role="button"
                                                             tabindex="0">
                                                             <span class="slds-assistive-text">Sort by: </span>
-                                                            <div class="slds-has-flexi-truncate center-trancate-head">
-                                                                <span class="slds-truncate" title="Title">Contact
-                                                                    Name</span>
+                                                            <div
+                                                                class="slds-has-flexi-truncate center-trancate-head">
+                                                                <span class="slds-truncate"
+                                                                    title={contact.fieldLabel}>{contact.fieldLabel}</span>
                                                                 <span
                                                                     class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                    <svg data-index="Name" class="listing-manager-icon"
+                                                                    <svg data-index={contact.fieldName}
+                                                                        class="listing-manager-icon"
                                                                         viewBox="0 0 384 512"
                                                                         xmlns="http://www.w3.org/2000/svg">
                                                                         <path
@@ -144,495 +138,153 @@
                                                             </div>
                                                         </div>
                                                     </th>
-                                                    <template for:each={fields} for:item="contact" for:index="index">
-                                                        <th key={contact.fieldName} data-id={contact.fieldName}
-                                                            onclick={sortClick} aria-sort="none"
-                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
-                                                            scope="col">
-                                                            <div class="slds-text-link_reset sort-cover" role="button"
-                                                                tabindex="0">
-                                                                <span class="slds-assistive-text">Sort by: </span>
-                                                                <div
-                                                                    class="slds-has-flexi-truncate center-trancate-head">
-                                                                    <span class="slds-truncate"
-                                                                        title={contact.fieldLabel}>{contact.fieldLabel}</span>
-                                                                    <span
-                                                                        class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                        <svg data-index={contact.fieldName}
-                                                                            class="listing-manager-icon"
-                                                                            viewBox="0 0 384 512"
-                                                                            xmlns="http://www.w3.org/2000/svg">
-                                                                            <path
-                                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                                        </svg>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </th>
-                                                    </template>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <template for:each={shownProcessedContactData} for:item="contact"
-                                                    for:index="index">
-                                                    <tr key={contact.Id} aria-selected="false" class="table-tr">
-                                                        <td class="slds-text-align_right slds-cell_action-mode checkbox-cell"
-                                                            role="gridcell">
-                                                            <label class="custom-checkbox custom-checkbox-body">
-                                                                <input data-id={index} type="checkbox"
-                                                                    checked={contact.isChecked}
-                                                                    value={contact.isChecked}
-                                                                    onchange={checkBoxValueChange}>
-                                                                <span class="checkmark"></span>
-                                                            </label>
-                                                        </td>
-                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
-                                                            <div class="slds-truncate">
-                                                                <a data-id={contact.Id} onclick={redirectToRecord}
-                                                                    tabindex="0">{contact.Name}</a>
-                                                            </div>
-                                                        </td>
-                                                        <template for:each={contact.orderedFields} for:item="field"
-                                                            for:index="index2">
-                                                            <td key={field.fieldName} class="slds-cell_action-mode"
-                                                                role="gridcell">
-                                                                <div class="slds-truncate">
-                                                                    <template if:true={field.isRedirectable}>
-                                                                        <a data-id={field.lookupId}
-                                                                            data-object={field.objectApiName}
-                                                                            onclick={redirectToRecord}>{field.value}</a>
-                                                                    </template>
-                                                                    <template if:false={field.isRedirectable}>
-                                                                        {field.value}
-                                                                    </template>
-                                                                </div>
-                                                            </td>
-                                                        </template>
-                                                    </tr>
                                                 </template>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </template>
-                                <template if:true={showSection}>
-                                    <div class="noresult">
-                                        <div class="no-data-container">
-                                            <img src="/resource/MVEX__emptyState" alt="No contacts found" draggable="false" class="no-data-image" />
-                                            <div class="no-data-message">No Contacts Found</div>
-
-                                            <template if:true={hasAppliedFilters}>
-                                                <p class="no-data-hint">
-                                                    No contacts match the applied filters. Try adjusting your criteria:
-                                                </p>
-                                                <div class="applied-filter-badges">
-                                                    <template for:each={displayedAppliedFilters} for:item="filter">
-                                                        <span key={filter.id} class="applied-filter-pill" title={filter.displayText}>
-                                                            <strong class="pill-label">{filter.label}:</strong>
-                                                            <span class="pill-value">{filter.value}</span>
-                                                        </span>
-                                                    </template>
-                                                    <template if:true={hasMoreFilters}>
-                                                        <button class="more-filters-pill" onclick={toggleShowAllFilters} title="View all applied filters">
-                                                            +{remainingFilterCount} more
-                                                        </button>
-                                                    </template>
-                                                    <template if:true={canCollapseFilters}>
-                                                        <button class="collapse-filters-btn" onclick={toggleShowAllFilters} title="Show fewer filters">
-                                                            Show less
-                                                        </button>
-                                                    </template>
-                                                </div>
-                                                <div class="no-data-action-wrapper">
-                                                    <button class="blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
-                                                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
-                                                            <path d="M2 7H14V5H2V7Z" fill="currentColor"></path>
-                                                            <path d="M4 11H12V9H4V11Z" fill="currentColor"></path>
-                                                            <path d="M10 15H6V13H10V15Z" fill="currentColor"></path>
-                                                        </svg>
-                                                        Modify Filters
-                                                    </button>
-                                                </div>
-                                            </template>
-
-                                            <template if:false={hasAppliedFilters}>
-                                                <p class="no-data-hint">
-                                                    We did not find any contacts in the system.
-                                                </p>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                                <template if:true={showPagination}>
-                                    <div class="paginationDiv slds-var-p-around_medium">
-                                        <div class="btnCover">
-                                            <div class="pagination-container">
-                                                <button class="pagination-btn-css" disabled={isFirstPage}
-                                                    onclick={handlePrevious}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                        viewBox="0 0 520 520" fill="#fff">
-                                                        <path
-                                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                                    </svg>
-                                                    Previous
-                                                </button>
-
-                                                <template for:each={pageNumbers} for:item="page">
-                                                    <template if:false={page.isEllipsis}>
-                                                        <button key={page.number} data-id={page.number}
-                                                            class={page.className} onclick={handlePageChange}>
-                                                            {page.number}
-                                                        </button>
-                                                    </template>
-                                                    <template if:true={page.isEllipsis}>
-                                                        <span key={page.number} class="pagination-ellipsis">...</span>
-                                                    </template>
-                                                </template>
-
-                                                <button class="pagination-btn-css" disabled={isLastPage}
-                                                    onclick={handleNext}>
-                                                    Next
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                        viewBox="0 0 520 520" fill="#fff">
-                                                        <path
-                                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </template>
-                        </div>
-                    </template>
-                    <template if:false={isMobileOrTablet}>
-                        <div class="innerDiv1">
-                            <div class="filterDiv">
-                                <c-marketing-list-filter-cmp class="marketing-list-cmp"
-                                    onvalueselected={handleFilteredContacts} onmodalvaluechange={handlAddModalChange}
-                                    onvaluereset={handleReset} onloading={handleLoading}>
-                                </c-marketing-list-filter-cmp>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </template>
-        <template if:false={isAccessible}>
-            <div class="restricted-access">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                        fill="currentColor" />
-                </svg>
-                <h1>Access Restricted</h1>
-                <p>You don't have permission to access this page. Please contact your administrator for further
-                    assistance.</p>
-            </div>
-        </template>
-    </div>
-
-    <c-send-emails if:true={isModalOpen} onclose={handleModalClose} show-modal={isModalOpen}
-        object-api-name={objectName} selected-contacts={selectedContactList}>
-    </c-send-emails>
-
-    <template if:true={showTemplate}>
-        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
-            class="slds-modal slds-fade-in-open slds-modal_small">
-            <div class="slds-modal__container">
-                <div class="slds-modal__close close-icon-css" onclick={handleCloseTemplate}>
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                            fill="white" />
-                    </svg>
-                </div>
-
-                <div class="slds-modal__header blue-header">
-                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Send Message</h1>
-                </div>
-
-                <div class="slds-modal__content modal-body">
-                    <div class="custom-modal-body" id="modal-content-id-1">
-                        <div class="template-selector-section">
-                            <div class="template-selector-wrapper">
-                                <lightning-combobox name="template" label="Select Template" options={templateOptions}
-                                    onchange={handleInputChange} value={selectedTemplate} required
-                                    message-when-value-missing="Template is required" class="template-combobox">
-                                </lightning-combobox>
-                            </div>
-
-                            <div class="template-prev">
-                                <div class="preview-box-container">
-                                    <template if:true={selectedTemplate}>
-                                        <div class="preview-box">
-                                            <c-template-preview template-id={selectedTemplate}
-                                                record-id={previewRecordId} object-api-name={selectedObject}>
-                                            </c-template-preview>
-                                        </div>
-                                    </template>
-                                    <template if:false={selectedTemplate}>
-                                        <div class="preview-placeholder">
-                                            Please select a template to preview.
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="preview-section-right">
-                            <lightning-input type="search" label="Search contacts" variant="label-hidden"
-                                placeholder="Search by name or phone" onchange={handleSearch} data-id="search-input"
-                                class="contact-search">
-                            </lightning-input>
-
-                            <div class="selected-contacts-section">
-                                <!-- <p class="contacts-table-label">Selected Contacts</p> -->
-                                <div class="table-content popup-table">
-                                    <table aria-multiselectable="true"
-                                        class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
-                                        role="grid">
-                                        <thead>
-                                            <tr class="slds-line-height_reset fields-names table_tr_cls">
-                                                <th aria-sort="none" data-id="Name" onclick={sortSelectedContact}
-                                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
-                                                    scope="col">
-                                                    <div class="slds-text-link_reset sort-cover" role="button"
-                                                        tabindex="0">
-                                                        <span class="slds-assistive-text">Sort by: </span>
-                                                        <div class="slds-has-flexi-truncate center-trancate-head">
-                                                            <span class="slds-truncate" title="Name">Name</span>
-                                                            <span
-                                                                class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                <svg data-index="Name"
-                                                                    class="selected-contacts-icon listing-manager-icon"
-                                                                    viewBox="0 0 384 512"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path
-                                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                                </svg>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </th>
-                                                <th aria-sort="none" data-id="Phone" onclick={sortSelectedContact}
-                                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
-                                                    scope="col">
-                                                    <div class="slds-text-link_reset sort-cover" role="button"
-                                                        tabindex="0">
-                                                        <span class="slds-assistive-text">Sort by: </span>
-                                                        <div class="slds-has-flexi-truncate center-trancate-head">
-                                                            <span class="slds-truncate" title="Phone">Phone</span>
-                                                            <span
-                                                                class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                <svg data-index="Phone"
-                                                                    class="selected-contacts-icon listing-manager-icon"
-                                                                    viewBox="0 0 384 512"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path
-                                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                                </svg>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </th>
-                                                <th class="slds-is-resizable slds-cell_action-mode colume2" scope="col">
-                                                    <div class="slds-has-flexi-truncate center-trancate-head">
-                                                        <span class="slds-truncate" title="Action">Action</span>
-                                                    </div>
-                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template if:true={filteredSelectedContacts.length}>
-                                                <template for:each={filteredSelectedContacts} for:item="contact"
-                                                    for:index="index">
-                                                    <tr key={contact.Id} class="table-tr">
-                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
-                                                            <div class="slds-truncate">
-                                                                {contact.Name}
-                                                            </div>
-                                                        </td>
-                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
-                                                            <div class="slds-truncate">
-                                                                {contact.Phone}
-                                                            </div>
-                                                        </td>
-                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
-                                                            <div class="slds-truncate center-trancate-text">
-                                                                <button class="delete-icon-css"
-                                                                    onclick={handleRemoveContact} data-id={contact.Id}
-                                                                    data-index={index} title="Remove">
-                                                                    <svg width="15" height="15" viewBox="0 0 14 14"
-                                                                        fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                            stroke="#212529" stroke-width="1.25"
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round" />
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </template>
-                                            </template>
-                                            <template if:false={filteredSelectedContacts.length}>
-                                                <tr>
-                                                    <td colspan="3" class="no-results-cell">
-                                                        <div class="no-results-container">
-                                                            <lightning-icon icon-name="utility:search"
-                                                                size="small"></lightning-icon>
-                                                            <span>No matching contacts found</span>
+                                            <template for:each={shownProcessedContactData} for:item="contact"
+                                                for:index="index">
+                                                <tr key={contact.Id} aria-selected="false" class="table-tr">
+                                                    <td class="slds-text-align_right slds-cell_action-mode checkbox-cell"
+                                                        role="gridcell">
+                                                        <label class="custom-checkbox custom-checkbox-body">
+                                                            <input data-id={index} type="checkbox"
+                                                                checked={contact.isChecked}
+                                                                value={contact.isChecked}
+                                                                onchange={checkBoxValueChange}>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                    </td>
+                                                    <td class="slds-cell_action-mode conat_cls" scope="row">
+                                                        <div class="slds-truncate">
+                                                            <a data-id={contact.Id} onclick={redirectToRecord}
+                                                                tabindex="0">{contact.Name}</a>
                                                         </div>
                                                     </td>
+                                                    <template for:each={contact.orderedFields} for:item="field"
+                                                        for:index="index2">
+                                                        <td key={field.fieldName} class="slds-cell_action-mode"
+                                                            role="gridcell">
+                                                            <div class="slds-truncate">
+                                                                <template if:true={field.isRedirectable}>
+                                                                    <a data-id={field.lookupId}
+                                                                        data-object={field.objectApiName}
+                                                                        onclick={redirectToRecord}>{field.value}</a>
+                                                                </template>
+                                                                <template if:false={field.isRedirectable}>
+                                                                    {field.value}
+                                                                </template>
+                                                            </div>
+                                                        </td>
+                                                    </template>
                                                 </tr>
                                             </template>
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="popUpFooter slds-text-align--center">
-                        <button class="blue-btn-css" onclick={handleConfirmPopup}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
-                                    fill="currentColor" />
-                            </svg>
-                            Send
-                        </button>
-                        <button class="white-btn-css" onclick={handleSchedulePopup}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M19 4H18V2H16V4H8V2H6V4H5C3.89 4 3.01 4.9 3.01 6L3 20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V10H19V20ZM19 8H5V6H19V8ZM12 13H17V18H12V13Z"
-                                    fill="currentColor" />
-                            </svg>
-                            Schedule
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Backdrop for main modal -->
-        <div class="slds-backdrop slds-backdrop_open main-modal-backdrop"></div>
+                            </template>
+                            <template if:true={showSection}>
+                                <div class="noresult">
+                                    <div class="no-data-container">
+                                        <img src="/resource/MVEX__emptyState" alt="No contacts found" draggable="false" class="no-data-image" />
+                                        <div class="no-data-message">No Contacts Found</div>
 
-        <!-- Schedule Modal -->
-        <template if:true={popUpLastPage}>
-            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handleBackdropClick}></div>
+                                        <template if:true={hasAppliedFilters}>
+                                            <p class="no-data-hint">
+                                                No contacts match the applied filters. Try adjusting your criteria:
+                                            </p>
+                                            <div class="applied-filter-badges">
+                                                <template for:each={displayedAppliedFilters} for:item="filter">
+                                                    <span key={filter.id} class="applied-filter-pill" title={filter.displayText}>
+                                                        <strong class="pill-label">{filter.label}:</strong>
+                                                        <span class="pill-value">{filter.value}</span>
+                                                    </span>
+                                                </template>
+                                                <template if:true={hasMoreFilters}>
+                                                    <button class="more-filters-pill" onclick={toggleShowAllFilters} title="View all applied filters">
+                                                        +{remainingFilterCount} more
+                                                    </button>
+                                                </template>
+                                                <template if:true={canCollapseFilters}>
+                                                    <button class="collapse-filters-btn" onclick={toggleShowAllFilters} title="Show fewer filters">
+                                                        Show less
+                                                    </button>
+                                                </template>
+                                            </div>
+                                            <div class="no-data-action-wrapper">
+                                                <button class="blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
+                                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
+                                                        <path d="M2 7H14V5H2V7Z" fill="currentColor"></path>
+                                                        <path d="M4 11H12V9H4V11Z" fill="currentColor"></path>
+                                                        <path d="M10 15H6V13H10V15Z" fill="currentColor"></path>
+                                                    </svg>
+                                                    Modify Filters
+                                                </button>
+                                            </div>
+                                        </template>
 
-            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="datetime-modal-heading"
-                class="slds-modal slds-fade-in-open schedule-modal" aria-describedby="modal-content-id-2">
-                <div class="slds-modal__container schedule-modal-container">
-                    <div class="slds-modal__close close-icon-css" onclick={handlePreviousLastPage}>
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="white" />
-                        </svg>
-                    </div>
-
-                    <div class="slds-modal__header blue-header">
-                        <h2 class="slds-modal__title" id="datetime-modal-heading">Schedule Date & Time</h2>
-                    </div>
-
-                    <div class="slds-modal__content schedule-modal-content" id="modal-content-id-2">
-                        <div class="datetime-selection-wrapper">
-
-                            <div class="timezone-note">
-                                <svg class="w-6 h-6 text-gray-800 dark:text-white cal-icon" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z" />
-                                </svg>
-                                <div class="schedule-message">
-                                    <p class="main-line">Schedule your message</p>
-                                    <p class="next-line">Choose when to send the template.</p>
+                                        <template if:false={hasAppliedFilters}>
+                                            <p class="no-data-hint">
+                                                We did not find any contacts in the system.
+                                            </p>
+                                        </template>
+                                    </div>
                                 </div>
-                            </div>
-                            <lightning-input type="datetime-local" name="scheduleDateTime" label="Select Date and Time"
-                                value={selectedDateTime} onchange={handleInputChange} required
-                                message-when-value-missing="Please select a date and time" variant="label-stacked">
-                            </lightning-input>
+                            </template>
+                            <template if:true={showPagination}>
+                                <div class="paginationDiv slds-var-p-around_medium">
+                                    <div class="btnCover">
+                                        <div class="pagination-container">
+                                            <button class="pagination-btn-css" disabled={isFirstPage}
+                                                onclick={handlePrevious}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                                </svg>
+                                                Previous
+                                            </button>
 
-                        </div>
+                                            <template for:each={pageNumbers} for:item="page">
+                                                <template if:false={page.isEllipsis}>
+                                                    <button key={page.number} data-id={page.number}
+                                                        class={page.className} onclick={handlePageChange}>
+                                                        {page.number}
+                                                    </button>
+                                                </template>
+                                                <template if:true={page.isEllipsis}>
+                                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                                </template>
+                                            </template>
 
-                        <div class="schedule-modal-footer slds-text-align--center">
-                            <button class="white-btn-css" onclick={handlePreviousLastPage}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Cancel
-                            </button>
-                            <button class="blue-btn-css" onclick={handleSchedule}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Confirm &amp; Send
-                            </button>
-                        </div>
+                                            <button class="pagination-btn-css" disabled={isLastPage}
+                                                onclick={handleNext}>
+                                                Next
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
                     </div>
-
-                </div>
-            </section>
-        </template>
-
-        <div class="slds-backdrop slds-backdrop_open main-modal-backdrop"></div>
-
-        <template if:true={popUpConfirmPage}>
-            <div class="slds-backdrop slds-backdrop_open schedule-modal-backdrop" onclick={handleBackdropClick}></div>
-
-            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="confirm-modal-heading"
-                class="slds-modal slds-fade-in-open confirm-modal" aria-describedby="modal-content-id-3">
-                <div class="slds-modal__container schedule-modal-container">
-                    <div class="slds-modal__close close-icon-css" onclick={handlePreviousLastPage}>
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="white" />
-                        </svg>
-                    </div>
-
-                    <div class="slds-modal__header blue-header">
-                        <h2 class="slds-modal__title" id="confirm-modal-heading">Are you sure?</h2>
-                    </div>
-
-                    <div class="slds-modal__content schedule-modal-content" id="modal-content-id-3">
-                        <p>Are you sure you want to send this template to the selected contacts?</p>
-
-
-                        <div class="schedule-modal-footer slds-text-align--center">
-                            <button class="white-btn-css" onclick={handlePreviousLastPage}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Cancel
-                            </button>
-                            <button class="blue-btn-css" onclick={handleSendOnPopup}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Confirm &amp; Send
-                            </button>
+                </template>
+                <template if:false={isMobileOrTablet}>
+                    <div class="innerDiv1">
+                        <div class="filterDiv">
+                            <c-marketing-list-filter-cmp class="marketing-list-cmp"
+                                onvalueselected={handleFilteredContacts} onmodalvaluechange={handlAddModalChange}
+                                onvaluereset={handleReset} onloading={handleLoading}>
+                            </c-marketing-list-filter-cmp>
                         </div>
                     </div>
-
-                </div>
-            </section>
-        </template>
-    </template>
+                </template>
+            </div>
+        </div>
+    </div>
 </template>

@@ -3,12 +3,9 @@ import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import FORM_FACTOR from "@salesforce/client/formFactor";
-import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
-    featureAvailability = {};
-    isLoading = true;
-    currentView = 'controlCenter'; // 'controlCenter' or 'childComponent'
+    currentView = 'controlCenter';
     selectedComponent = null;
     selectedComponentTitle = '';
     selectedComponentDescription = '';
@@ -25,8 +22,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     // Lead capture state
     integrationType = null; // 'Google' or 'Meta'
 
-    _hasNavigatedToTemplate = false;
-
     /**
      * Method Name: getStateParameters
      * @description: Retrieves and processes the current page reference parameters
@@ -37,9 +32,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     getStateParameters(currentPageReference) {
         if (currentPageReference && currentPageReference.state) {
             const target = currentPageReference.state.c__openComponent;
-            if (target === 'templateHomePage') {
-                this.templateBuilderMethod();
-            } else if (target === 'storageIntegration') {
+            if (target === 'storageIntegration') {
                 this.generalIntegrationMethod();
             }
         }
@@ -52,81 +45,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Vyom Soni
      */
     connectedCallback() {
-        // Load Mulish font
-        loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log("Css loaded successfully");
-            })
-            .catch((error) => {
-                console.log("Error loading style:", error);
-            });
-    }
-
-    /**
-     * Method Name: metadataRecords
-     * @description: Wires the apex method to fetch control center feature metadata records
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    @wire(getMetadataRecords)
-    metadataRecords({ error, data }) {
-        if (data) {
-            this.featureAvailability = data.reduce((acc, record) => {
-                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
-                return acc;
-            }, {});
-            setTimeout(() => {
-                this.isLoading = false;
-            }, 1000);
-        } else if (error) {
-            console.error("Error fetching metadata records:", error);
-            this.isLoading = false;
-        }
-    }
-
-    /**
-     * Method Name: isWhatsappSectionAvailable
-     * @description: Getter to determine if the WhatsApp section should be visible
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isWhatsappSectionAvailable() {
-        return !this.featureAvailability?.Whatsapp_Flow_Builder &&
-            !this.featureAvailability?.Whatsapp_Template_Builder &&
-            !this.featureAvailability?.Whatsapp_Embedded_Signup
-            ? false
-            : true;
-    }
-
-    /**
-     * Method Name: isIntegrationSectionAvailable
-     * @description: Getter to determine if the Integration Hub section should be visible
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isIntegrationSectionAvailable() {
-        return !this.featureAvailability?.General_Integrations &&
-            !this.featureAvailability?.Portal_Integration &&
-            !this.featureAvailability?.Lead_Capture
-            ? false
-            : true;
-    }
-
-    /**
-     * Method Name: isGeneralSectionAvailable
-     * @description: Getter to determine if the General Features section should be visible
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isGeneralSectionAvailable() {
-        return !this.featureAvailability?.Map_Listing_And_Property &&
-            !this.featureAvailability?.Map_Listing_And_Inquiry &&
-            !this.featureAvailability?.Configure_Settings &&
-            !this.featureAvailability?.Lead_Assignment_Rule &&
-            !this.featureAvailability?.Object_Config &&
-            !this.featureAvailability?.Template_Builder
-            ? false
-            : true;
+        loadStyle(this, MulishFontCss);
     }
 
     /**
@@ -447,29 +366,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: templateBuilderMethod
-     * @description: Used to open templateHomePage component.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    templateBuilderMethod(event) {
-        if (event && typeof event.preventDefault === 'function') {
-            event.preventDefault();
-        }
-        let componentDef = {
-            componentDef: "MVEX:templateHomePage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    /**
      * Method Name: portalIntegrationMethod
      * @description: Used to open portalMapping component in-place.
      * Date: 09/09/2024
@@ -493,80 +389,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     handlePortalNavigation(event) {
         const { portalId, portalGen, portalName, portalIconUrl, portalStatus, isXMLForPF } = event.detail;
-        
-        // Store portal parameters
         this.portalId = portalId;
         this.portalGen = portalGen;
         this.portalName = portalName;
         this.portalIconUrl = portalIconUrl;
         this.portalStatus = portalStatus;
         this.isXMLForPF = isXMLForPF;
-        
-        // Set parent component for breadcrumb
         this.parentComponentTitle = 'Portal Integration';
-        
-        // Navigate to landing page
         this.selectedComponent = 'portalMappingLandingPage';
         this.selectedComponentTitle = portalName;
         this.currentView = 'childComponent';
-    }
-
-    /**
-     * Method Name: whatsappEmbeddedSignuprMethod
-     * @description: Used to open WhatsApp Embedded Signup.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    whatsappEmbeddedSignuprMethod(event) {
-        event.preventDefault();
-        // For VF page, we still need to navigate
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: '/apex/MVEX__facebookSDK'
-            }
-        });
-    }
-
-    /**
-     * Method Name: whatsappTemplateBuilderMethod
-     * @description: Used to open WhatsApp template builder.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    whatsappTemplateBuilderMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:wbAllTemplatePage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    /**
-     * Method Name: whatsappFlowBuilderMethod
-     * @description: Used to open WhatsApp flow builder.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    whatsappFlowBuilderMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:wbAllFlowsPage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
     }
 }

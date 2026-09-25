@@ -19,7 +19,7 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled
-    public static Map<String, Object> getPropertyData(String listingId) {
+    public static Map<String, Object> getPropertyAndContactData(String listingId) {
         try {
             String escapedListingId = String.escapeSingleQuotes(listingId);
             Map<String, Object> result = new Map<String, Object>();
@@ -86,8 +86,8 @@ public with sharing class SiteAndBookingController {
                 contactMap.put('MobilePhone', c.Phone);
                 contactMap.put('ShowingId', ev == null ? '' : ev.Id);
                 contactMap.put('ShowingStatus', ev == null ? 'Not Scheduled' : ev.MVEX__Status__c);
-                contactMap.put('ScheduleDate', ev == null ? '' : String.valueOf(ev.MVEX__Scheduled_Date__c));
-                contactMap.put('RescheduleDate', ev == null ? '' : String.valueOf(ev.MVEX__Reschedule_Date__c));
+                contactMap.put('ScheduleDate', ev == null ? null : ev.MVEX__Scheduled_Date__c);
+                contactMap.put('RescheduleDate', ev == null ? null : ev.MVEX__Reschedule_Date__c);
                 contactMap.put('CommunicationMethod', ev == null ? '' : ev.MVEX__Communication_Method__c);
                 formattedContacts.add(contactMap);
             }
@@ -98,7 +98,7 @@ public with sharing class SiteAndBookingController {
             
             return result;
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'getPropertyData', e.getMessage());
+            ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'getPropertyAndContactData', e.getMessage());
             return null;
         }
     }
@@ -117,8 +117,12 @@ public with sharing class SiteAndBookingController {
     public static void sendEmailsAndCreateShowings(List<Id> contactIds, String listingId, Datetime scheduleDateTime, String durationValue, String communicationMethod, Boolean isReschedule) {
         try {
             // Determine the appropriate email template based on whether it's a schedule or reschedule
-            String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
-            EmailTemplate template = [SELECT Id, Subject, HtmlValue, Body FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            String templateName = isReschedule ? 'RescheduleConfirmationEmail_New' : 'Showing_Confirmation_New';
+            List<EmailTemplate> templateList = [SELECT Id, Subject, HtmlValue, Body FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            if (templateList.isEmpty()) {
+                throw new AuraHandledException('Email template not found: ' + templateName);
+            }
+            EmailTemplate template = templateList[0];
 
             System.debug('scheduleDateTime: ' + scheduleDateTime);
             // Create or update showings
@@ -375,21 +379,13 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, String dateStr, String timeStr) {
+    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, Datetime scheduleDateTime) {
         try {
             Savepoint sp = Database.setSavepoint();
             Event showing;
 
-            // 1. Create DateTime from date and time strings
-            DateTime scheduledDateTime = System.now(); 
-            if (String.isNotBlank(dateStr) && String.isNotBlank(timeStr)) {
-                try {
-                    String gmtDateTimeStr = dateStr + ' ' + timeStr + ':00';
-                    scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
-                } catch (Exception e) {
-                    System.debug('Error parsing date/time: ' + e.getMessage());
-                }
-            }
+            // 1. Create DateTime from passed in scheduleDateTime
+            DateTime scheduledDateTime = scheduleDateTime != null ? scheduleDateTime : System.now();
 
             // 2. Check if showing exists; if not, create a temporary one
             if (String.isNotBlank(showingId)) {
@@ -424,8 +420,12 @@ public with sharing class SiteAndBookingController {
             showing = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email, MVEX__Listing__c FROM Event WHERE Id = :showing.Id LIMIT 1];
 
             // 4. Pick the correct EmailTemplate
-            String templateName = isReschedule ? 'RescheduleConfirmationEmail' : 'Showing_Confirmation';
-            EmailTemplate et = [SELECT Id FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            String templateName = isReschedule ? 'RescheduleConfirmationEmail_New' : 'Showing_Confirmation_New';
+            List<EmailTemplate> etList = [SELECT Id FROM EmailTemplate WHERE DeveloperName = :templateName WITH USER_MODE LIMIT 1];
+            if (etList.isEmpty()) {
+                throw new AuraHandledException('Email template not found: ' + templateName);
+            }
+            EmailTemplate et = etList[0];
 
             // 5. Build email for preview using renderStoredEmailTemplate
             Messaging.SingleEmailMessage mail = Messaging.renderStoredEmailTemplate(et.Id, showing.MVEX__Buyer__c, showing.Id);

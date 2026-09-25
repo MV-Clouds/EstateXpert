@@ -276,20 +276,4 @@ public with sharing class MarketingListFilterController {
         @AuraEnabled
         public Integer index { get; set; }
     }
-
-    /**
-    * Method Name : getStaticFields
-    * @description : get the static fields from the custom metadata.
-    * @return String of JSON data.
-    */
-    @AuraEnabled
-    public static String getStaticFields() {
-        try{
-            MVEX__MarketingListFilterConfig__mdt filterConfig = [SELECT MVEX__StaticFields__c FROM MVEX__MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
-            return filterConfig.MVEX__StaticFields__c;
-        }catch(Exception e){
-            ErrorHandler.insertErrorData(e, 'MarketingListFilterController', 'getStaticFields', e.getMessage());
-            return null;
-        }
-    }
 }

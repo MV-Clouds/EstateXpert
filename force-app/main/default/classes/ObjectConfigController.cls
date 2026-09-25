@@ -6,54 +6,6 @@
 * Created By: Rachit Shah
 **/
 public with sharing class ObjectConfigController {
-    
-    /*
-    *********************************************************
-    @description     : Method to get objects with phone field.
-    @return          : List<Map<String, String>> - return list of objects with phone field.
-    ********************************************************
-    */
-    @AuraEnabled
-    public static List<Map<String, String>> getObjectsWithPhoneField() {
-        List<Map<String, String>> objectList = new List<Map<String, String>>();
-        try {
-            // Query FieldDefinition to fetch all objects having at least one Phone field
-            List<FieldDefinition> phoneFields = [SELECT EntityDefinition.QualifiedApiName, EntityDefinition.Label, QualifiedApiName FROM FieldDefinition WHERE (DataType = 'Phone' OR DataType = 'Email') AND EntityDefinition.IsCustomizable = true AND EntityDefinition.IsApexTriggerable = true AND EntityDefinition.IsQueryable = true WITH USER_MODE];
-
-            Set<String> processedObjects = new Set<String>();
-
-            // Get Object Descriptions
-            Map<String, Schema.SObjectType> schemaMap = Schema.getGlobalDescribe();
-
-            for (FieldDefinition field : phoneFields) {
-                String objectName = field.EntityDefinition.QualifiedApiName;
-                
-                // Ensure object exists in schema description
-                if (schemaMap.containsKey(objectName)) {
-                    Schema.DescribeSObjectResult objDescribe = schemaMap.get(objectName).getDescribe();
-
-                    // Check field-level permissions
-                    if (objDescribe.fields.getMap().containsKey(field.QualifiedApiName)) {
-                        Schema.DescribeFieldResult fieldDescribe = objDescribe.fields.getMap().get(field.QualifiedApiName).getDescribe();
-
-                        if (fieldDescribe.isAccessible() && fieldDescribe.isCreateable()) {
-                            if (!processedObjects.contains(objectName)) {
-                                objectList.add(new Map<String, String>{
-                                    'label' => field.EntityDefinition.Label,
-                                    'value' => objectName
-                                });
-                                processedObjects.add(objectName);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'ObjectConfigController', 'getObjectsWithPhoneField', e.getStackTraceString());
-        }
-        return objectList;
-    }
-
     /*
     *********************************************************
     @description     : Fetch required fields for the selected object

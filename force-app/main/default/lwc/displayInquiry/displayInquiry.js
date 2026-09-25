@@ -560,7 +560,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
             this.vfPageMessageHandler();
             this.handleSubscribeRefresh();
-            // this.checkHideFilterButton();
         } catch (error) {
             errorDebugger('displayInquiry', 'connectedCallback', error, 'warn', 'Error during initialization');
         }
@@ -792,7 +791,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.sendMailInquiryDataList = [];
         this.searchTerm = '';
         this.fetchListings();
-        // this.checkHideFilterButton();
     }
 
     /**

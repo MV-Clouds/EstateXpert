@@ -2,7 +2,6 @@ import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import designcss from '@salesforce/resourceUrl/MulishFontCss';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -56,7 +55,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track fieldsModal = false;
     isSortApplied = false;
 
-    @track isAccessible = false;
     @track listingLoading = false;
 
     /**
@@ -347,7 +345,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 console.error('Error loading styles', error);
             });
         this.handleSubscribeRefresh();
-        this.getAccessible();
+        this.getContactDataMethod();
     }
 
     handleLoading(event) {
@@ -486,27 +484,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.isManualRefreshing = false;
                 this.spinnerShow = false;
                 this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
-            });
-    }
-
-    getAccessible() {
-        getMetadataRecords()
-            .then(data => {
-                const marketingListFeature = data.find(
-                    item => item.DeveloperName === 'Marketing_List'
-                );
-                this.isAccessible = marketingListFeature ? Boolean(marketingListFeature.MVEX__isAvailable__c) : false;
-
-                if (this.isAccessible) {
-                    this.getContactDataMethod();
-                } else {
-                    this.spinnerShow = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching accessible fields', error);
-                this.isAccessible = false;
-                this.spinnerShow = false;
             });
     }
 

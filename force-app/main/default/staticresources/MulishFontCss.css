@@ -247,7 +247,7 @@
 }
 
 .header-search-bar-css .slds-input {
-  min-height: 30px;
+  min-height: 36px;
 }
 
 .header-combobox .slds-form-element__help {
@@ -255,7 +255,7 @@
 }
 
 .header-combobox .slds-combobox__input {
-  min-height: 30px;
+  min-height: 36px;
   align-items: center;
 }
 

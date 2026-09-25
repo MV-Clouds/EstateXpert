@@ -61,7 +61,10 @@
                                                 <path d="M4 11H12V9H4V11Z" fill={filterIconColor}></path>
                                                 <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
                                             </g>
-                                        </svg>                                        
+                                        </svg>
+                                        <template if:true={isFilterApplied}>
+                                            <span class="filter-applied-dot" title="Filter Applied"></span>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -205,8 +208,8 @@
                                                         <template for:each={listing.orderedFields} for:item="field"
                                                             for:index="index2">
                                                             <td key={field.fieldName} class="slds-cell_action-mode"
-                                                                role="gridcell">
-                                                                <div class="slds-truncate center-trancate-text">
+                                                                role="gridcell" title={field.value}>
+                                                                <div class="slds-truncate center-trancate-text" title={field.value}>
                                                                     <template if:true={field.isRedirectable}>
                                                                         <a data-id={field.lookupId}
                                                                             data-object={field.objectApiName}

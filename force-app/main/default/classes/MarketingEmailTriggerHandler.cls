@@ -76,9 +76,6 @@ public with sharing class MarketingEmailTriggerHandler {
                 if (campaign.Schedule_Type__c == 'Specific Date' && campaign.Start_Date__c == null) {
                     email.addError('Specific date must be set for campaigns with Specific Date schedule type.');
                 }
-                if (campaign.Schedule_Type__c == 'Contact Field' && String.isEmpty(campaign.SelectedContactDateField__c)) {
-                    email.addError('Contact date field must be set for campaigns with Contact Field schedule type.');
-                }
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MarketingEmailTriggerHandler', 'validateMarketingEmails', 'Error validating marketing emails');

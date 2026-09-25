@@ -314,7 +314,8 @@ export default class ListingManagerFilterCmp extends LightningElement {
    * Date: 14/06/2024
    * Created By: Vyom Soni
    */
-    applyFilters(event) {
+    applyFilters(isSilent = false) {
+        const silent = typeof isSilent === 'boolean' ? isSilent : false;
         try {
 
             // Initialize queryFilters as an array with null values to ensure correct indexing
@@ -473,7 +474,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 finalQuery = 'TRUE';
             }
 
-            if (!isSilent) {
+            if (!silent) {
                 this.isLoading = true;
                 this.dispatchEvent(new CustomEvent('loading', { detail: true }));
             }
@@ -481,14 +482,14 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 .then(result => {
                     this.filteredListings = result;
                     this.setFilteredListings();
-                    if (!isSilent) {
+                    if (!silent) {
                         this.isLoading = false;
                         this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                     }
                 })
                 .catch(error => {
                     errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
-                    if (!isSilent) {
+                    if (!silent) {
                         this.isLoading = false;
                         this.dispatchEvent(new CustomEvent('loading', { detail: false }));
                     }
@@ -496,7 +497,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters: ' + JSON.stringify(error));
-            if (!isSilent) {
+            if (!silent) {
                 this.isLoading = false;
                 this.dispatchEvent(new CustomEvent('loading', { detail: false }));
             }

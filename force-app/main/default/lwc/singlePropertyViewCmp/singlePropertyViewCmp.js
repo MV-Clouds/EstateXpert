@@ -53,6 +53,7 @@ export default class SinglePropertyView extends LightningElement {
     showToast = false;
     toastMessage = '';
     toastType = '';
+    isListingInactive = false;
 
     plvimg1 = plvimg + '/plvimgs/Bedroom.png';
     plvimg2 = plvimg + '/plvimgs/Bathroom.png';
@@ -286,7 +287,13 @@ export default class SinglePropertyView extends LightningElement {
             .then(result => {
                 if (!result.listingData || result.listingData.length === 0) {
                     this.showError = true;
-                    this.errorMessage = 'No property data found for the provided ID.';
+                    this.errorMessage = 'This Listing could not be found. It may have been removed or the link has expired.';
+                    this.spinnerdatatable = false;
+                    return;
+                }
+                
+                if (result.listingData[0].MVEX__Status__c !== 'Active') {
+                    this.isListingInactive = true;
                     this.spinnerdatatable = false;
                     return;
                 }
@@ -335,7 +342,7 @@ export default class SinglePropertyView extends LightningElement {
             .catch(error => {
                 this.spinnerdatatable = false;
                 this.showError = true;
-                this.errorMessage = 'Failed to load property data. Please try again later.';
+                this.errorMessage = 'We encountered a temporary issue while loading this property. Please refresh the page or contact your agent.';
                 console.error('Error loading listing data:', error);
             });
     }
@@ -691,5 +698,9 @@ export default class SinglePropertyView extends LightningElement {
 
     handleToastClose() {
         this.showToast = false;
+    }
+
+    goBack() {
+        window.history.back();
     }
 }

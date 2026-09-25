@@ -19,7 +19,7 @@ public without sharing class SinglePropertyViewCmpController {
                                         MVEX__Number_of_Cheques__c, MVEX__Off_Market_Date__c, MVEX__Off_Plan__c, MVEX__On_Market_Date__c, MVEX__Parking_Available__c,
                                         MVEX__Parking_Spaces__c, MVEX__Private_Amenities__c, MVEX__Property__c, MVEX__Property_Category__c, MVEX__Property_Status__c, MVEX__Property_Sub_Type__c,
                                         MVEX__Property_Type__c, MVEX__Rent_Frequency__c, MVEX__Rental_Price__c, MVEX__RERA_Permit_Number__c, MVEX__Sale_Date__c, MVEX__Sale_Price__c, MVEX__Service_Charge__c,
-                                        MVEX__Lot_Size__c, MVEX__Sq_Ft__c, MVEX__Status__c, MVEX__Taxes__c, MVEX__Year_Built__c FROM MVEX__Listing__c WHERE Id = :recordId AND MVEX__Status__c = 'Active' LIMIT 1];
+                                        MVEX__Lot_Size__c, MVEX__Sq_Ft__c, MVEX__Status__c, MVEX__Taxes__c, MVEX__Year_Built__c FROM MVEX__Listing__c WHERE Id = :recordId LIMIT 1];
 
             List<MVEX__Property_File__c> media = [SELECT Id, Name, MVEX__BaseUrl__c FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing[0].MVEX__Property__c];
 

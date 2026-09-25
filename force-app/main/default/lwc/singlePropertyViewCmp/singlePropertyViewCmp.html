@@ -2,8 +2,22 @@
     <template if:true={showError}>
         <c-no-property-found show-error={showError} error-message={errorMessage}></c-no-property-found>
     </template>
-    <template if:false={showError}>
-        <template if:true={spinnerdatatable}>
+    <template if:true={isListingInactive}>
+        <div class="inactive-listing-container">
+            <div class="inactive-content">
+                <svg class="inactive-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#ff4d4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 9L9 15M9 9L15 15" stroke="#ff4d4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1 class="inactive-title">Listing Unavailable</h1>
+                <p class="inactive-message">This Listing is no longer active. It may have been sold or rented.</p>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={isListingInactive}>
+        <template if:false={showError}>
+            <template if:true={spinnerdatatable}>
             <c-spinner-component></c-spinner-component>
         </template>
         <template if:false={showOfferForm}>
@@ -578,6 +592,7 @@
                 </div>
             </section>
             <div class="slds-backdrop custom-backdrop slds-backdrop_open"></div>
+        </template>
         </template>
     </template>
     <c-custom-toast message={toastMessage} type={toastType} show={showToast}

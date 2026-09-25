@@ -10,6 +10,7 @@ import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revok
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
 import validateIntegrationCredentials from '@salesforce/apex/IntegrationPopupController.validateIntegrationCredentials';
 import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
+import GMAIL_SENDING_ENDPOINT from '@salesforce/label/c.Gmail_Sending_Endpoint';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -438,7 +439,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                             url: 'https://accounts.google.com/o/oauth2/auth?client_id=' + clientId +
                                  '&redirect_uri=' + redirectUri +
                              '&response_type=code&access_type=offline&prompt=consent' +
-                             '&scope=https://www.googleapis.com/auth/gmail.send%20https://www.googleapis.com/auth/userinfo.email'
+                             '&scope=' + GMAIL_SENDING_ENDPOINT + 'auth/gmail.send%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email'
                         }
                     });
                 })

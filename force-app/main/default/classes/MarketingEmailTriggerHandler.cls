@@ -1,9 +1,9 @@
 public with sharing class MarketingEmailTriggerHandler {
     
-    List<Marketing_Email__c> newMarketingEmails;
-    List<Marketing_Email__c> oldMarketingEmails;
-    Map<Id, Marketing_Email__c> newMarketingEmailsMap;
-    Map<Id, Marketing_Email__c> oldMarketingEmailsMap;
+    List<MVEX__Marketing_Email__c> newMarketingEmails;
+    List<MVEX__Marketing_Email__c> oldMarketingEmails;
+    Map<Id, MVEX__Marketing_Email__c> newMarketingEmailsMap;
+    Map<Id, MVEX__Marketing_Email__c> oldMarketingEmailsMap;
     Boolean isInsert;
     Boolean isUpdate;
     Boolean isDelete;
@@ -13,7 +13,7 @@ public with sharing class MarketingEmailTriggerHandler {
     /**
      * Constructor for setting all the data from the trigger
      */
-    public MarketingEmailTriggerHandler(List<Marketing_Email__c> newList, List<Marketing_Email__c> oldList, Map<Id, Marketing_Email__c> newMap, Map<Id, Marketing_Email__c> oldMap, Boolean isInsert, Boolean isUpdate, Boolean isDelete, Boolean isUndelete) {
+    public MarketingEmailTriggerHandler(List<MVEX__Marketing_Email__c> newList, List<MVEX__Marketing_Email__c> oldList, Map<Id, MVEX__Marketing_Email__c> newMap, Map<Id, MVEX__Marketing_Email__c> oldMap, Boolean isInsert, Boolean isUpdate, Boolean isDelete, Boolean isUndelete) {
         this.newMarketingEmails = newList;
         this.oldMarketingEmails = oldList;
         this.newMarketingEmailsMap = newMap;
@@ -45,15 +45,15 @@ public with sharing class MarketingEmailTriggerHandler {
     public void onAfterDelete() {
         Set<Id> emailIds = new Set<Id>();
         Set<Id> campaignIds = new Set<Id>();
-        for (Marketing_Email__c email : oldMarketingEmails) {
+        for (MVEX__Marketing_Email__c email : oldMarketingEmails) {
             emailIds.add(email.Id);
-            campaignIds.add(email.Marketing_Campaign__c);
+            campaignIds.add(email.MVEX__Marketing_Campaign__c);
         }
 
         // Fetch and delete associated Email_Member__c records
-        List<Email_Member__c> emailMembersToDelete = [SELECT Id FROM Email_Member__c WHERE Marketing_Email__c IN :emailIds WITH USER_MODE];
+        List<MVEX__Email_Member__c> emailMembersToDelete = [SELECT Id FROM MVEX__Email_Member__c WHERE MVEX__Marketing_Email__c IN :emailIds WITH USER_MODE];
 
-        if (!emailMembersToDelete.isEmpty() && Schema.sObjectType.Email_Member__c.isDeletable()) {
+        if (!emailMembersToDelete.isEmpty() && Schema.sObjectType.MVEX__Email_Member__c.isDeletable()) {
             delete as user emailMembersToDelete;
         }
     }
@@ -62,18 +62,18 @@ public with sharing class MarketingEmailTriggerHandler {
     /**
      * Method to validate marketing email records
      */
-    private void validateMarketingEmails(List<Marketing_Email__c> marketingEmails) {
+    private void validateMarketingEmails(List<MVEX__Marketing_Email__c> marketingEmails) {
         try {
             Set<Id> campaignIds = new Set<Id>();
-            for (Marketing_Email__c email : marketingEmails) {
-                campaignIds.add(email.Marketing_Campaign__c);
+            for (MVEX__Marketing_Email__c email : marketingEmails) {
+                campaignIds.add(email.MVEX__Marketing_Campaign__c);
             }
 
-            Map<Id, Marketing_Campaign__c> campaigns = new Map<Id, Marketing_Campaign__c>([SELECT Id, Schedule_Type__c, Start_Date__c, SelectedContactDateField__c FROM Marketing_Campaign__c WHERE Id IN :campaignIds WITH USER_MODE]);
+            Map<Id, MVEX__Marketing_Campaign__c> campaigns = new Map<Id, MVEX__Marketing_Campaign__c>([SELECT Id, MVEX__Schedule_Type__c, MVEX__Start_Date__c, MVEX__SelectedContactDateField__c FROM MVEX__Marketing_Campaign__c WHERE Id IN :campaignIds WITH USER_MODE]);
 
-            for (Marketing_Email__c email : marketingEmails) {
-                Marketing_Campaign__c campaign = campaigns.get(email.Marketing_Campaign__c);
-                if (campaign.Schedule_Type__c == 'Specific Date' && campaign.Start_Date__c == null) {
+            for (MVEX__Marketing_Email__c email : marketingEmails) {
+                MVEX__Marketing_Campaign__c campaign = campaigns.get(email.MVEX__Marketing_Campaign__c);
+                if (campaign.MVEX__Schedule_Type__c == 'Specific Date' && campaign.MVEX__Start_Date__c == null) {
                     email.addError('Specific date must be set for campaigns with Specific Date schedule type.');
                 }
             }

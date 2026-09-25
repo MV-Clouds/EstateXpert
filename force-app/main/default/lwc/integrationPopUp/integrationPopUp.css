@@ -1,46 +1,5 @@
 * {
   font-family: 'Mulish';
-  user-select: none;
-}
-
-.custom-modal__container {
-  width: 55%;
-  max-width: 100%;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  padding-inline: 2rem;
-}
-
-.custom-modal__header {
-  background: #0070d2;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  border: none;
-}
-
-.custom-modal__header h2 {
-  margin: 0;
-}
-
-.custom-modal__content {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: aliceblue;
-}
-
-.close-btn {
-  width: 2rem;
-  height: 2rem;
-  position: absolute;
-  top: -2.5rem;
-  right: -1.8rem;
-  margin-left: 0;
-  bottom: 0;
 }
 
 .body-cover {
@@ -83,50 +42,7 @@
   width: 100%;
 }
 
-.custom-modal__footer {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  border-radius: 0rem 0rem 0.25rem 0.25rem;
-  align-items: center;
-  padding: 1rem;
-  width: 100%;
-  padding-bottom: 0;
-}
-
-.cancel-btn {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
-  padding: 0px 20px;
-  background: #FFFFFF;
-  border: 1px solid #0176D3;
-  color: #0176D3;
-  border-radius: 5px;
-}
-
-.save-btn {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 34px;
-  text-align: center;
-  border: 1px solid #0176D3;
-  padding: 0px 20px;
-  background: #0176D3;
-  color: white;
-  border-radius: 5px;
-}
-
-.custom-backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
-}
-
 @media only screen and (max-width: 768px) {
-  .custom-modal__container {
-    width: 80%;
-  }
-
   .body-cover {
     flex-direction: column;
   }
@@ -138,45 +54,10 @@
   .content-section {
     width: 100%;
   }
-}
 
-.copyclass button {
-  background-color: #0070d2;
-  border: none;
-  padding: 8px;
-  margin-top: 7px;
-  border-radius: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.copyclass {
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-  align-items: center;
-}
-
-.custom-input:invalid+.copy-button {
-  margin-top: 18px;
-  /* Move the button down when there's an error */
-}
-
-.closs_icon_css {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background: #F3F6F9;
-  transition: all 0.2s ease;
-}
-
-.closs_icon_css svg path {
-  fill: #1F2937;
+  .footerbtns {
+    flex-wrap: wrap;
+  }
 }
 
 .blue-header {
@@ -214,76 +95,4 @@
   background: #FFFFFF;
   border-top: 1px solid #E5E7EB;
   flex-shrink: 0;
-}
-
-.cancel_btn_css {
-  min-height: 36px;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 0.5rem 1.5rem;
-  background: #FFFFFF;
-  border: 1.5px solid #0176D3;
-  color: #0176D3;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancel_btn_css:hover {
-  background: #F3F6F9;
-  box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
-}
-
-.save_btn_css {
-  min-height: 36px;
-  font-size: 14px;
-  font-weight: 500;
-  border: none;
-  padding: 0.5rem 1.5rem;
-  background: #0176D3;
-  color: white;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.save_btn_css:hover:not(:disabled) {
-  background: #0156A3;
-  box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-  transform: translateY(-1px);
-}
-
-.textAreaBody {
-  --sds-c-textarea-sizing-min-height: 120px;
-}
-
-.save-btn:disabled,
-.save_btn_css:disabled {
-  background: #c9c9c9;
-  border: 1px solid #c9c9c9;
-  cursor: not-allowed;
-}
-
-.copy-button1 {
-  margin-top: 0px !important;
-}
-
-.copy_input {
-  margin-bottom: 6px;
-  margin-top: 6px;
-  pointer-events: none;
-}
-
-@media only screen and (max-width: 768px) {
-  .footerbtns {
-    flex-wrap: wrap;
-  }
 }

@@ -1,5 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
-import getListingDetails from '@salesforce/apex/ListingMapController.getListingDetails';
+import getListingDetails from '@salesforce/apex/ControlCenterController.getListingDetails';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class RecordPageMapView extends LightningElement {

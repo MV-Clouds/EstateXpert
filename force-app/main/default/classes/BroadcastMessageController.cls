@@ -128,17 +128,6 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static List<MVEX__Broadcast__c> getBroadcastRecs() {
-        List<MVEX__Broadcast__c> broadcastRecs = new List<MVEX__Broadcast__c>();
-        try {
-            broadcastRecs = [SELECT Id, Name, MVEX__Recipient_Count__c, MVEX__WhatsappTemplate__c, MVEX__WhatsappTemplate__r.MVEX__Template_Name__c, MVEX__Status__c, MVEX__Total_Sent__c, MVEX__Total_Delivered__c, MVEX__Total_Read__c, MVEX__Total_Failed__c FROM MVEX__Broadcast__c WITH USER_MODE ORDER BY LastModifiedDate DESC];
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastRecs', e.getMessage());
-        }
-        return broadcastRecs;
-    }
-
-    @AuraEnabled
     public static List<Map<String, Object>> getBroadcastRecsWithReplies() {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
         try {
@@ -588,34 +577,6 @@ public with sharing class BroadcastMessageController {
     }
 
     @AuraEnabled
-    public static List<MVEX__Broadcast_Group__c> getBroadcastGroupsByBroadcastId(String broadcastId) {
-        try {
-            MVEX__Broadcast__c broadcast = [
-                SELECT MVEX__Broadcast_Group_IDs__c 
-                FROM MVEX__Broadcast__c 
-                WHERE Id = :broadcastId 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
-
-            if (broadcast.MVEX__Broadcast_Group_IDs__c == null) {
-                return new List<MVEX__Broadcast_Group__c>();
-            }
-
-            List<String> groupIds = broadcast.MVEX__Broadcast_Group_IDs__c.split(',');
-            return [
-                SELECT Id, Name, MVEX__Count_of_Members__c, MVEX__Description__c, MVEX__Object_Name__c, MVEX__Phone_Field__c, MVEX__Email_Field__c, MVEX__Communication_Type__c
-                FROM MVEX__Broadcast_Group__c 
-                WHERE Id IN :groupIds 
-                WITH USER_MODE
-            ];
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastGroupsByBroadcastId', e.getMessage());
-            return new List<MVEX__Broadcast_Group__c>();
-        }
-    }
-
-    @AuraEnabled
     public static List<Map<String, Object>> getBroadcastGroupsWithStats(String broadcastId) {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
         
@@ -837,22 +798,6 @@ public with sharing class BroadcastMessageController {
             ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getBroadcastMembersByGroupId', e.getMessage());
             return new List<BroadcastMemberWrapper>();
         }
-    }
-
-    @AuraEnabled
-    public static String getSessionId() {
-        String sessionId;
-        try {
-            if (Test.isRunningTest()) {
-                sessionId = 'testSessionId';
-            } else {
-                sessionId = Page.UserSessionIdPage.getContent().toString();
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'BroadcastMessageController', 'getSessionId', e.getMessage());
-            sessionId = 'Error: ' + e.getMessage();
-        }
-        return sessionId;
     }
 
     @AuraEnabled

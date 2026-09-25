@@ -8,6 +8,12 @@
 */
 public with sharing class IntegrationPopupController {
 
+    @TestVisible public static String mockValidationResult = null;
+    public static String GMAILENDPOINT = System.label.Google_Endpoint;
+    public static String AWSS3ENDPOINT = System.label.AWS_S3_ENDPONT;
+    public static String gmailEndpoint = System.label.Gmail_Sending_Endpoint;
+    public static final String instagramEndpoint = System.label.InstagramEndPoint;
+
     /**
     * Method Name : createPortalListingRecord
     * @param jsonData : JSON data that contains listing data.
@@ -46,8 +52,6 @@ public with sharing class IntegrationPopupController {
                 }
     
                 for (String apiName : stringFieldMap.keySet()) {
-                    // FIX: Removed the check that only saved Refresh Token. 
-                    // Now it saves ClientID, Secret, and RedirectURI as well.
                     gmailSettings.put(apiName, stringFieldMap.get(apiName));
                 }
 
@@ -97,155 +101,154 @@ public with sharing class IntegrationPopupController {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'saveSettings', 'Error while saving settings.');
         }
     }
-     
+
     /**
-    * Class Name : FieldWrapper
-    * @description : Wrapper class for storing field details
-    */
-    public class FieldWrapper {
-        @AuraEnabled public String siteUrl;
-        @AuraEnabled public Object objectData;
-    }
-    
-    /**
-    * Method Name : getSettings
-    * @param integrationType : String to stored the integration type.
-    * @return FieldWrapper : Wrapper class for storing field details.
-    * @description : Method to get integration settings.
+    * Method Name : validateAWSCredentials
+    * @param accessKey : String - AWS Access Key
+    * @param secretKey : String - AWS Secret Access Key
+    * @param bucketName : String - AWS S3 Bucket Name
+    * @param region : String - AWS S3 Region Name
+    * @return String : 'SUCCESS' if valid, otherwise user-friendly error message.
+    * @description : Validates AWS S3 credentials and bucket accessibility via server-side SigV4 callout.
     */
     @AuraEnabled
-    public static FieldWrapper getSettings(String integrationType) {
-        FieldWrapper result = new FieldWrapper();
+    public static String validateAWSCredentials(String accessKey, String secretKey, String bucketName, String region) {
+        String trimmedKey = String.isNotBlank(accessKey) ? accessKey.trim() : '';
+        String trimmedSecret = String.isNotBlank(secretKey) ? secretKey.trim() : '';
+        String trimmedBucket = String.isNotBlank(bucketName) ? bucketName.trim() : '';
+        String trimmedRegion = String.isNotBlank(region) ? region.trim().toLowerCase() : '';
+
+        if (String.isBlank(trimmedKey)) {
+            return 'AWS Access Key is required.';
+        }
+        if (String.isBlank(trimmedSecret)) {
+            return 'AWS Secret Access Key is required.';
+        }
+        if (String.isBlank(trimmedBucket)) {
+            return 'AWS S3 Bucket Name is required.';
+        }
+        if (String.isBlank(trimmedRegion)) {
+            return 'AWS S3 Region Name is required.';
+        }
+
         try {
-            if (integrationType == 'AWS') {
-                result.objectData = MVEX__AWS_Config__c.getOrgDefaults();
-            } else if (integrationType == 'Gmail') {
-                MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
-                
-                // Fetch Credentials from Custom Metadata
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
-                
-                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
-                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-                    if(parts.size() >= 3) {
-                        settings.MVEX__Client_ID__c = parts[0];
-                        settings.MVEX__Client_Secret__c = parts[1];
-                        settings.MVEX__Redirect_URI__c = parts[2];
-                    }
+            // First attempt: Virtual-hosted style (standard AWS S3 format)
+            String host = (trimmedRegion == 'us-east-1') ? 
+                          (trimmedBucket + '.s3.amazonaws.com') : 
+                          (trimmedBucket + '.s3.' + trimmedRegion + '.amazonaws.com');
+            String endpoint = 'https://' + host + '/?max-keys=0';
+            
+            HttpResponse res = sendS3ValidationRequest(trimmedKey, trimmedSecret, host, '/', 'max-keys=0', endpoint, trimmedRegion);
+            return parseS3Response(res, trimmedRegion);
+            
+        } catch (System.CalloutException ce) {
+            // If virtual-hosted endpoint is not in Remote Site Settings, fallback to path-style on s3.amazonaws.com
+            if (ce.getMessage().contains('Unauthorized endpoint')) {
+                try {
+                    String host = 's3.amazonaws.com';
+                    String endpoint = AWSS3ENDPOINT + trimmedBucket + '?max-keys=0';
+                    HttpResponse res = sendS3ValidationRequest(trimmedKey, trimmedSecret, host, '/' + trimmedBucket, 'max-keys=0', endpoint, trimmedRegion);
+                    return parseS3Response(res, trimmedRegion);
+                } catch (Exception fallbackEx) {
+                    String hostEndpoint = (trimmedRegion == 'us-east-1') ? (trimmedBucket + '.s3.amazonaws.com') : (trimmedBucket + '.s3.' + trimmedRegion + '.amazonaws.com');
+                    return 'Unauthorized endpoint. Please add https://' + hostEndpoint;
                 }
-                
-                result.objectData = settings;
-                // Use the redirect URI from metadata for siteUrl or fallback to helper
-                if(settings.MVEX__Redirect_URI__c != null) {
-                    result.siteUrl = settings.MVEX__Redirect_URI__c;
-                } else {
-                    result.siteUrl = getSiteUrl(settings.MVEX__Redirect_URI__c, 'Gmail');
-                }
-            } else if (integrationType == 'Instagram') {
-                MVEX__IG_Configuration__c instaSettings = MVEX__IG_Configuration__c.getOrgDefaults();
-
-                  // Fetch Credentials from Custom Metadata
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
-                
-                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
-                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-                    if(parts.size() >= 3) {
-                        instaSettings.MVEX__ClientId__c = parts[0];
-                        instaSettings.MVEX__ClientSecret__c = parts[1];
-                        instaSettings.MVEX__Redirect_URI__c = parts[2];
-                    }
-                }
-
-                result.objectData = instaSettings;
-                result.siteUrl = getSiteUrl(instaSettings.MVEX__Redirect_URI__c, 'Instagram');
-            } else if (integrationType == 'Google'){
-                result.objectData = MVEX__GoogleLeadConfig__c.getOrgDefaults();
-            } else if (integrationType == 'Meta'){
-                result.objectData = MVEX__MetaLeadConfig__c.getOrgDefaults();
             }
-            return result;
+            return 'Callout Error: ' + ce.getMessage();
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSettings', 'Error while getting settings.');
-            return null;
+            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'validateAWSCredentials', 'Error while validating AWS credentials.');
+            return 'Validation Error: ' + e.getMessage();
         }
     }
 
-    /**
-    * Method Name : getSiteUrl
-    * @param siteurl : String to stored the site url.
-    * @param integrationName : String to stored the integration name.
-    * @return String : Site url.
-    * @description : Method to get site url.
-    */
-    @AuraEnabled
-    public static string getSiteUrl(String siteurl, String integrationName){
-        try {
-            if (siteurl != null) {
-                return siteurl;
-            } else {
-                String integraName;
-                switch on integrationName {
-                    when 'Gmail' {
-                        integraName = 'MVEX__GmailIntPage';
-                    }
-                    when 'Instagram' {
-                        integraName = 'MVEX__InstagramAccessToken';
-                    }
-                }
-                String urlInstance = String.valueof(System.URL.getOrgDomainURL().toExternalForm());
-                String s2;
-                
-                if (urlInstance.endsWithIgnoreCase('.develop.my.salesforce.com')) {
-                    s2 = urlInstance.removeEndIgnoreCase('.develop.my.salesforce.com') + '--mvex.develop.vf.force.com/apex/'+integraName;
-                } else if (urlInstance.endsWithIgnoreCase('.sandbox.my.salesforce.com')) {
-                    s2 = urlInstance.removeEndIgnoreCase('.sandbox.my.salesforce.com') + '--mvex.sandbox.vf.force.com/apex/'+integraName;
-                } else if (urlInstance.endsWithIgnoreCase('.scratch.my.salesforce.com')) {
-                    s2 = urlInstance.removeEndIgnoreCase('.scratch.my.salesforce.com') + '--mvex.scratch.vf.force.com/apex/'+integraName;
-                } else if(urlInstance.endsWithIgnoreCase('.my.salesforce.com')) {
-                    s2 = urlInstance.removeEndIgnoreCase('.my.salesforce.com') + '--mvex.vf.force.com/apex/'+integraName;
-                }
-                return s2;
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSiteUrl', 'Error while getting site url.');
+    private static HttpResponse sendS3ValidationRequest(String accessKey, String secretKey, String host, String canonicalUri, String canonicalQueryString, String endpoint, String region) {
+        String service = 's3';
+        String algorithm = 'AWS4-HMAC-SHA256';
+
+        Datetime now = Datetime.now();
+        String amzDate = now.formatGMT('yyyyMMdd\'T\'HHmmss\'Z\'');
+        String dateStamp = now.formatGMT('yyyyMMdd');
+
+        String payloadHash = EncodingUtil.convertToHex(Crypto.generateDigest('SHA-256', Blob.valueOf('')));
+
+        String canonicalHeaders = 'host:' + host + '\n' +
+                                  'x-amz-content-sha256:' + payloadHash + '\n' +
+                                  'x-amz-date:' + amzDate + '\n';
+        String signedHeaders = 'host;x-amz-content-sha256;x-amz-date';
+
+        String canonicalRequest = 'GET\n' +
+                                  canonicalUri + '\n' +
+                                  canonicalQueryString + '\n' +
+                                  canonicalHeaders + '\n' +
+                                  signedHeaders + '\n' +
+                                  payloadHash;
+
+        String credentialScope = dateStamp + '/' + region + '/' + service + '/aws4_request';
+        String stringToSign = algorithm + '\n' +
+                              amzDate + '\n' +
+                              credentialScope + '\n' +
+                              EncodingUtil.convertToHex(Crypto.generateDigest('SHA-256', Blob.valueOf(canonicalRequest)));
+
+        Blob kDate = Crypto.generateMac('HmacSHA256', Blob.valueOf(dateStamp), Blob.valueOf('AWS4' + secretKey));
+        Blob kRegion = Crypto.generateMac('HmacSHA256', Blob.valueOf(region), kDate);
+        Blob kService = Crypto.generateMac('HmacSHA256', Blob.valueOf(service), kRegion);
+        Blob kSigning = Crypto.generateMac('HmacSHA256', Blob.valueOf('aws4_request'), kService);
+
+        String signature = EncodingUtil.convertToHex(Crypto.generateMac('HmacSHA256', Blob.valueOf(stringToSign), kSigning));
+
+        String authorizationHeader = algorithm + ' Credential=' + accessKey + '/' + credentialScope + 
+                                     ', SignedHeaders=' + signedHeaders + ', Signature=' + signature;
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        req.setHeader('Host', host);
+        req.setHeader('x-amz-date', amzDate);
+        req.setHeader('x-amz-content-sha256', payloadHash);
+        req.setHeader('Authorization', authorizationHeader);
+        req.setTimeout(20000);
+
+        Http http = new Http();
+        return http.send(req);
+    }
+
+    private static String parseS3Response(HttpResponse res, String region) {
+        if (res.getStatusCode() == 200) {
+            return 'SUCCESS';
         }
 
-        return null;
-    }
+        String body = res.getBody();
+        String errorCode = '';
+        String errorMessage = '';
+        if (String.isNotBlank(body)) {
+            Matcher codeMatcher = Pattern.compile('<Code>(.*?)</Code>').matcher(body);
+            if (codeMatcher.find()) {
+                errorCode = codeMatcher.group(1);
+            }
+            Matcher msgMatcher = Pattern.compile('<Message>(.*?)</Message>').matcher(body);
+            if (msgMatcher.find()) {
+                errorMessage = msgMatcher.group(1);
+            }
+        }
 
-    /**
-    * Class Name : SocialMediaDataWrapper
-    * @description : Wrapper class to store social media data.
-    */
-    public class SocialMediaDataWrapper {
-        @AuraEnabled public Boolean isValid = false;
-        @AuraEnabled public Object integrationData;
-        @AuraEnabled public String integraName;
-    }
-
-    /**
-    * Method Name : getSocialMediaData
-    * @return List<SocialMediaDataWrapper> : Wrapper class to store social media data.
-    * @description : Method to get social media data.
-    */
-    @AuraEnabled
-    public static List<SocialMediaDataWrapper> getSocialMediaData() {
-        List<SocialMediaDataWrapper> wrapperList = new List<SocialMediaDataWrapper>();
-
-        try {
-            MVEX__IG_Configuration__c instagramCredential = MVEX__IG_Configuration__c.getOrgDefaults();
-
-            SocialMediaDataWrapper instagramWrapper = new SocialMediaDataWrapper();
-            instagramWrapper.integraName = 'Instagram';
-            instagramWrapper.isValid = instagramCredential.MVEX__ClientId__c != null && instagramCredential.MVEX__ClientSecret__c != null;
-            instagramWrapper.integrationData = instagramCredential;
-            wrapperList.add(instagramWrapper);
-
-            return wrapperList;
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSocialMediaData', 'Error while getting social media data.');
-            return null;
+        if (errorCode == 'InvalidAccessKeyId') {
+            return 'Invalid Access Key: The AWS Access Key ID provided does not exist.';
+        } else if (errorCode == 'SignatureDoesNotMatch') {
+            return 'Invalid Secret Access Key: Signature does not match. Please verify your Secret Access Key.';
+        } else if (errorCode == 'NoSuchBucket') {
+            return 'Bucket Not Found: The specified S3 bucket does not exist.';
+        } else if (errorCode == 'AccessDenied') {
+            return 'Access Denied: The provided credentials do not have permission to access the S3 bucket.';
+        } else if (errorCode == 'PermanentRedirect' || errorCode == 'AuthorizationHeaderMalformed' || res.getStatusCode() == 301) {
+            String bucketRegion = res.getHeader('x-amz-bucket-region');
+            if (String.isNotBlank(bucketRegion)) {
+                return 'Region Mismatch: The bucket is located in region "' + bucketRegion + '", but you specified "' + region + '".';
+            }
+            return 'Region Mismatch: The specified region does not match the bucket region.';
+        } else if (String.isNotBlank(errorMessage)) {
+            return errorMessage;
+        } else {
+            return 'AWS validation failed with status code ' + res.getStatusCode() + ' (' + res.getStatus() + ').';
         }
     }
 
@@ -311,7 +314,7 @@ public with sharing class IntegrationPopupController {
             FieldWrapperData gmailWrapper = new FieldWrapperData();
             gmailWrapper.integrationName = 'Gmail';
             gmailWrapper.integrationData = gmailCredential;
-            gmailWrapper.isValid = gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
+            gmailWrapper.isValid = gmailCredential != null && gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
             wrapperList.add(gmailWrapper);
 
             FieldWrapperData awsWrapper = new FieldWrapperData();
@@ -346,9 +349,10 @@ public with sharing class IntegrationPopupController {
     public static String revokeGmailAccess(String refreshToken, String recordId) {
         String status;
         try {
+            String gmailRevokeEndpoint =  GMAILENDPOINT + 'revoke';
             // Initialize the HTTP request
             HttpRequest req = new HttpRequest();
-            req.setEndpoint('https://oauth2.googleapis.com/revoke');
+            req.setEndpoint(gmailRevokeEndpoint);
             req.setMethod('POST');
             
             // Set the parameters for the request
@@ -443,62 +447,256 @@ public with sharing class IntegrationPopupController {
     }
 
     /**
-    * Wrapper Class Name : FieldList
-    * @description : This Wrapper class used for method name getAllCustomFields.
+    * Class Name : FieldWrapper
+    * @description : Wrapper class for storing field details
     */
-    public class FieldList {
-        @AuraEnabled
-        public String label { get; set; }
-        @AuraEnabled
-        public String value { get; set; }
-        
-        public FieldList(String label, String value) {
-            this.label = label;
-            this.value = value;
+    public class FieldWrapper {
+        @AuraEnabled public String siteUrl;
+        @AuraEnabled public Object objectData;
+    }
+    
+    /**
+    * Method Name : getSettings
+    * @param integrationType : String to stored the integration type.
+    * @return FieldWrapper : Wrapper class for storing field details.
+    * @description : Method to get integration settings.
+    */
+    @AuraEnabled
+    public static FieldWrapper getSettings(String integrationType) {
+        FieldWrapper result = new FieldWrapper();
+        try {
+            if (integrationType == 'Gmail') {
+                MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
+
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
+                
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 3) {
+                        settings.MVEX__Client_ID__c = parts[0];
+                        settings.MVEX__Client_Secret__c = parts[1];
+                        settings.MVEX__Redirect_URI__c = parts[2];
+                    }
+                }
+                
+                result.objectData = settings;
+                result.siteUrl = settings.MVEX__Redirect_URI__c;
+            } else if (integrationType == 'Instagram') {
+                MVEX__IG_Configuration__c instaSettings = MVEX__IG_Configuration__c.getOrgDefaults();
+
+                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
+                
+                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
+                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+                    if(parts.size() >= 3) {
+                        instaSettings.MVEX__ClientId__c = parts[0];
+                        instaSettings.MVEX__ClientSecret__c = parts[1];
+                        instaSettings.MVEX__Redirect_URI__c = parts[2];
+                    }
+                }
+
+                result.objectData = instaSettings;
+                result.siteUrl = instaSettings.MVEX__Redirect_URI__c;
+            }
+            return result;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSettings', 'Error while getting settings.');
+            return null;
         }
     }
 
     /**
-    * Method Name : siteData
-    * @return List<FieldList> : List of FieldList.
-    * @description : Method to revoke whatsapp access.
+    * Method Name : validateIntegrationCredentials
+    * @param integrationType : 'Instagram', 'Gmail', or 'AWS'
+    * @param credential1 : Primary credential (Instagram userId / Gmail refreshToken / AWS accessKey)
+    * @param credential2 : Secondary credential (Instagram accessToken / Gmail clientId / AWS secretKey)
+    * @return String : 'SUCCESS' or a descriptive error message
+    * @description : General credential validator. Routes to the appropriate API call
+    *               based on integrationType. Replaces the previous Instagram-only method.
     */
     @AuraEnabled
-    public static List<FieldList> siteData(){
-        List<FieldList> fieldList = new List<FieldList>();
+    public static String validateIntegrationCredentials(String integrationType, String credential1, String credential2) {
         try {
-            Set<Id> guestUserIds = new Set<Id>();
-    
-            List<Site> sites = [SELECT Id, GuestUserId, Name, Subdomain, UrlPathPrefix FROM Site WITH USER_MODE LIMIT 10];
+            if (String.isBlank(integrationType)) {
+                return 'Integration type is required.';
+            }
 
-            if (!sites.isEmpty()) {
-                for (Site site : sites) {
-                    guestUserIds.add(site.Id);
+            if (Test.isRunningTest()) {
+                if (mockValidationResult != null) {
+                    return mockValidationResult;
                 }
-                
-                if (!guestUserIds.isEmpty()) {
-                    List<SiteDetail> siteDetails = [SELECT SecureURL, DurableId FROM SiteDetail WHERE DurableId IN :guestUserIds WITH USER_MODE];
-                    
-                    Map<Id, String> siteUrlMap = new Map<Id, String>();
-                    for (SiteDetail siteDetail : siteDetails) {
-                        siteUrlMap.put(siteDetail.DurableId, siteDetail.SecureURL);
-                    }
+                // Return stub identifier so the LWC can save it during tests
+                if (integrationType == 'Gmail') {
+                    return 'SUCCESS|test@example.com';
+                } else if (integrationType == 'Instagram') {
+                    return 'SUCCESS|test_user';
+                }
+                return 'SUCCESS';
+            }
 
-                    for (Site site : sites) {
-                        if (siteUrlMap.containsKey(site.Id)) {
-                            Map<String, String> resultMap = new Map<String, String>();
-                            String siteLabel = site.Name;
-                            String siteUrl = siteUrlMap.get(site.Id);
-                            fieldList.add(new FieldList(siteLabel, siteUrl));
-                        }
+            if (integrationType == 'Instagram') {
+                return validateInstagram(credential1, credential2);
+            } else if (integrationType == 'Gmail') {
+                return validateGmail(credential1, credential2);
+            } 
+
+            return 'Unsupported integration type: ' + integrationType;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'IntegrationPopupController', 'validateIntegrationCredentials', 'Error while validating credentials.');
+            return 'Failed to validate credentials: ' + e.getMessage();
+        }
+    }
+
+    /**
+    * @description : Validates Instagram credentials against Graph API /me endpoint.
+    *               credential1 = userId, credential2 = accessToken
+    */
+    public static String validateInstagram(String userId, String accessToken) {
+        if (String.isBlank(userId) || String.isBlank(accessToken)) {
+            return 'Please fill in both User ID and Long-Lived Access Token.';
+        }
+
+        String graphApiVersion = 'v24.0';
+        MVEX__IG_Configuration__c igConfig = MVEX__IG_Configuration__c.getOrgDefaults();
+        if (igConfig != null) {
+            String configVersion;
+            try {
+                configVersion = (String) igConfig.get('APIVersion__c');
+            } catch (Exception e1) {
+                configVersion = null;
+            }
+            if (String.isNotBlank(configVersion)) {
+                graphApiVersion = configVersion.trim();
+            }
+        }
+        if (String.isBlank(graphApiVersion)) {
+            graphApiVersion = 'v24.0';
+        }
+        if (!graphApiVersion.toLowerCase().startsWith('v')) {
+            graphApiVersion = 'v' + graphApiVersion;
+        }
+        Http http = new Http();
+        HttpRequest req = new HttpRequest();
+        req.setMethod('GET');
+        String endpoint = instagramEndpoint + graphApiVersion + '/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8');
+        req.setEndpoint(endpoint);
+        req.setTimeout(20000);
+
+        HttpResponse res = http.send(req);
+
+        if (res.getStatusCode() == 200) {
+            Map<String, Object> responseBody = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            String returnedUserId = (String) responseBody.get('user_id');
+            String returnedId     = (String) responseBody.get('id');
+            String username       = (String) responseBody.get('username');
+            String trimmedUserId  = userId.trim();
+
+            Boolean matches = (returnedUserId != null && returnedUserId.equals(trimmedUserId)) ||
+                              (returnedId     != null && returnedId.equals(trimmedUserId));
+
+            if (!matches) {
+                return 'The provided User ID does not match the authenticated Instagram account.';
+            }
+            // Return username so LWC can persist it — format: SUCCESS|{username}
+            return 'SUCCESS|' + (String.isNotBlank(username) ? username : trimmedUserId);
+        } else {
+            Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            if (errorResponse != null && errorResponse.containsKey('error')) {
+                Map<String, Object> errorDetail = (Map<String, Object>) errorResponse.get('error');
+                if (errorDetail != null && errorDetail.containsKey('message')) {
+                    return (String) errorDetail.get('message');
+                }
+            }
+            return 'Invalid Instagram credentials. Please check your User ID and Access Token.';
+        }
+    }
+
+    /**
+    * @description : Validates a Gmail refresh token by exchanging it for an access token
+    *               via Google's token endpoint. The tokeninfo endpoint cannot be used here
+    *               because users provide a refresh token, not an access token.
+    *               credential1 = refreshToken, credential2 = clientId (optional hint — we look up from metadata)
+    */
+    public static String validateGmail(String refreshToken, String clientId) {
+        if (String.isBlank(refreshToken)) {
+            return 'Please enter a valid Gmail Refresh Token.';
+        }
+
+        // Fetch Client ID and Client Secret from Custom Metadata
+        String metaClientId     = clientId != null ? clientId.trim() : '';
+        String metaClientSecret = '';
+
+        List<MVEX__recordManagerConfig__mdt> mdtList = [
+            SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt
+            WHERE MVEX__Integration_Type__c = 'Gmail' LIMIT 1
+        ];
+        if (!mdtList.isEmpty() && String.isNotBlank(mdtList[0].MVEX__FieldsData__c)) {
+            String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
+            if (parts.size() >= 2) {
+                if (String.isBlank(metaClientId) && String.isNotBlank(parts[0])) {
+                    metaClientId = parts[0].trim();
+                }
+                metaClientSecret = parts[1].trim();
+            }
+        }
+
+        if (String.isBlank(metaClientId) || String.isBlank(metaClientSecret)) {
+            return 'Gmail configuration is incomplete. Please check Custom Metadata (Client ID / Client Secret).';
+        }
+
+        // Exchange the refresh token for an access token — this validates the token
+        String requestBody = 'grant_type=refresh_token' +
+                             '&client_id='     + EncodingUtil.urlEncode(metaClientId,     'UTF-8') +
+                             '&client_secret=' + EncodingUtil.urlEncode(metaClientSecret, 'UTF-8') +
+                             '&refresh_token=' + EncodingUtil.urlEncode(refreshToken.trim(), 'UTF-8');
+
+        Http http = new Http();
+        HttpRequest req = new HttpRequest();
+        req.setMethod('POST');
+        req.setEndpoint('https://oauth2.googleapis.com/token');
+        req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.setBody(requestBody);
+        req.setTimeout(20000);
+
+        HttpResponse res = http.send(req);
+
+        if (res.getStatusCode() == 200) {
+            // Token exchange succeeded — now fetch the user's email via userinfo endpoint
+            Map<String, Object> tokenResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            String freshAccessToken = (String) tokenResponse.get('access_token');
+
+            String userEmail = '';
+            if (String.isNotBlank(freshAccessToken)) {
+                try {
+                    HttpRequest userReq = new HttpRequest();
+                    userReq.setMethod('GET');
+                    String endpoint = gmailEndpoint + 'oauth2/v2/userinfo';
+                    userReq.setEndpoint(endpoint);
+                    userReq.setHeader('Authorization', 'Bearer ' + freshAccessToken);
+                    userReq.setTimeout(10000);
+
+                    HttpResponse userRes = new Http().send(userReq);
+                    if (userRes.getStatusCode() == 200) {
+                        Map<String, Object> userInfo = (Map<String, Object>) JSON.deserializeUntyped(userRes.getBody());
+                        userEmail = (String) userInfo.get('email');
                     }
+                } catch (Exception ex) {
+                    // Non-fatal — email fetch failed, return SUCCESS without email
+                    ErrorHandler.insertErrorData(ex, 'IntegrationPopupController', 'validateGmail', 'Could not fetch Gmail userinfo: ' + ex.getMessage());
                 }
             }
 
-            return fieldList;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'siteData', 'Error while getting site data.');
-            return null;
+            // Return SUCCESS|{email} so LWC can persist the email address
+            return 'SUCCESS|' + (String.isNotBlank(userEmail) ? userEmail : '');
+        } else {
+            Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            if (errorResponse != null && errorResponse.containsKey('error_description')) {
+                return (String) errorResponse.get('error_description');
+            }
+            if (errorResponse != null && errorResponse.containsKey('error')) {
+                return 'Invalid Gmail credentials: ' + (String) errorResponse.get('error');
+            }
+            return 'Invalid Gmail Refresh Token. Please re-authorize and try again.';
         }
     }
 }

@@ -10,24 +10,6 @@ public with sharing class RecordManagersCmpController {
         @AuraEnabled public String label;
     }
 
-    // --- HELPER TO IDENTIFY CONFIGURATION RECORDS ---
-    // This maps the frontend "Feature Name" to the stored "Feature Name" in the custom object
-    private static String getStoredFeatureName(String objectApiName, String featureName) {
-        if (featureName == 'Listing_Configuration' && objectApiName == 'MVEX__Listing__c') {
-            return 'Listing_Configuration';
-        } else if (featureName == 'Listing_Filter_Config' && objectApiName == 'MVEX__Listing__c') {
-            return 'Listing_Filter_Config';
-        } else if (featureName == 'Inquiry_Filter_Config' && objectApiName == 'MVEX__Inquiry__c') {
-            return 'Inquiry_Filter_Config';
-        } else if (objectApiName == 'MVEX__Listing__c') {
-            return 'Listing Manager'; 
-        } else if (objectApiName == 'MVEX__Inquiry__c') {
-            return 'Inquiry Manager';
-        } else {
-            return 'Marketing List';
-        }
-    }
-
     /**
      * Method Name : getObjectFields
      * @description : Get object fields and fetch configuration from Custom Object.
@@ -146,68 +128,6 @@ public with sharing class RecordManagersCmpController {
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'saveMappings', e.getStackTraceString());
             return e.getMessage();
-        }
-    }
-
-    /**
-     * Method Name : getListingFieldsParent
-     * @description : Get listing fields excluding blocked ones defined in Global Config.
-     */
-    @AuraEnabled
-    public static List<FieldDetails> getListingFieldsParent(String objectApiName) {
-        try {
-            List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
-
-            // Fetch Blocked Fields from the "Global Config" record in Custom Object
-            List<MVEX__Configuration_Settings__c> configList = [SELECT MVEX__Blocked_Fields__c FROM MVEX__Configuration_Settings__c 
-                                                                WHERE MVEX__Feature_Name__c = 'Suggested_Listing_Fields' WITH USER_MODE LIMIT 1];
-
-            Set<String> blockedFields = new Set<String>();
-            if (!configList.isEmpty() && configList[0].MVEX__Blocked_Fields__c != null) {
-                blockedFields.addAll(configList[0].MVEX__Blocked_Fields__c.split(';'));
-            }
-        
-            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectApiName).getDescribe();
-            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
-        
-            for (String fieldName : fieldsMap.keySet()) {
-                if (blockedFields.contains(fieldName)) {
-                    continue;
-                }
-                Schema.SObjectField field = fieldsMap.get(fieldName);
-                Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
-        
-                FieldDetails fieldDetails = new FieldDetails();
-                fieldDetails.label = fieldDescribe.getLabel();
-                fieldDetails.value = fieldDescribe.getName();
-                fieldDetails.fieldType = String.valueOf(fieldDescribe.getType());
-
-                if (fieldDescribe.getType() == Schema.DisplayType.Reference) {
-                    List<Schema.SObjectType> referenceTo = fieldDescribe.getReferenceTo();
-                    if (!referenceTo.isEmpty()) {
-                        fieldDetails.referenceObjectName = referenceTo[0].getDescribe().getName();
-                    }
-                    fieldDetails.relationshipName = fieldDescribe.getRelationshipName();
-                } else {
-                    fieldDetails.referenceObjectName = objectApiName;
-                }
-
-                if (fieldDescribe.getType() == Schema.DisplayType.Picklist) {
-                    List<PicklistValue> picklistValues = new List<PicklistValue>();
-                    for (Schema.PicklistEntry picklistEntry : fieldDescribe.getPicklistValues()) {
-                        PicklistValue picklistValue = new PicklistValue();
-                        picklistValue.label = picklistEntry.getLabel();
-                        picklistValue.value = picklistEntry.getValue();
-                        picklistValues.add(picklistValue);
-                    }
-                    fieldDetails.picklistValues = picklistValues;
-                }
-                fieldDetailsList.add(fieldDetails);
-            }
-            return fieldDetailsList;
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'RecordManagersCmpController', 'getListingFieldsParent', 'Error while getting listing fields.');
-            return null;
         }
     }
 }

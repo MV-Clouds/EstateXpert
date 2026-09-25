@@ -9,6 +9,8 @@
 public with sharing class IntegrationPopupController {
 
     @TestVisible public static String mockValidationResult = null;
+    public static String gmailEndpoint = System.label.Gmail_Sending_Endpoint;
+    public static final String instagramEndpoint = System.label.InstagramEndPoint;
 
     /**
     * Method Name : createPortalListingRecord
@@ -564,7 +566,7 @@ public with sharing class IntegrationPopupController {
     * @description : Validates Instagram credentials against Graph API /me endpoint.
     *               credential1 = userId, credential2 = accessToken
     */
-    private static String validateInstagram(String userId, String accessToken) {
+    public static String validateInstagram(String userId, String accessToken) {
         if (String.isBlank(userId) || String.isBlank(accessToken)) {
             return 'Please fill in both User ID and Long-Lived Access Token.';
         }
@@ -591,7 +593,8 @@ public with sharing class IntegrationPopupController {
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         req.setMethod('GET');
-        req.setEndpoint('https://graph.instagram.com/' + graphApiVersion + '/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8'));
+        String endpoint = instagramEndpoint + graphApiVersion + '/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8');
+        req.setEndpoint(endpoint);
         req.setTimeout(20000);
 
         HttpResponse res = http.send(req);
@@ -629,7 +632,7 @@ public with sharing class IntegrationPopupController {
     *               because users provide a refresh token, not an access token.
     *               credential1 = refreshToken, credential2 = clientId (optional hint — we look up from metadata)
     */
-    private static String validateGmail(String refreshToken, String clientId) {
+    public static String validateGmail(String refreshToken, String clientId) {
         if (String.isBlank(refreshToken)) {
             return 'Please enter a valid Gmail Refresh Token.';
         }
@@ -682,7 +685,8 @@ public with sharing class IntegrationPopupController {
                 try {
                     HttpRequest userReq = new HttpRequest();
                     userReq.setMethod('GET');
-                    userReq.setEndpoint('https://www.googleapis.com/oauth2/v2/userinfo');
+                    String endpoint = gmailEndpoint + 'oauth2/v2/userinfo';
+                    userReq.setEndpoint(endpoint);
                     userReq.setHeader('Authorization', 'Bearer ' + freshAccessToken);
                     userReq.setTimeout(10000);
 

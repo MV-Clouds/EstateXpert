@@ -18,7 +18,25 @@ public with sharing class InstagramPostController {
             Map<String, Object> result = new Map<String, Object>();
             result.put('success', false);
 
-            System.debug('Creating Instagram container with mediaURLS: ' + mediaUrls);
+            String graphApiVersion = 'v24.0';
+            MVEX__IG_Configuration__c igConfig = MVEX__IG_Configuration__c.getOrgDefaults();
+            if (igConfig != null) {
+                String configVersion;
+                try {
+                    configVersion = (String) igConfig.get('APIVersion__c');
+                } catch (Exception e1) {
+                    configVersion = null;
+                }
+                if (String.isNotBlank(configVersion)) {
+                    graphApiVersion = configVersion.trim();
+                }
+            }
+            if (String.isBlank(graphApiVersion)) {
+                graphApiVersion = 'v24.0';
+            }
+            if (!graphApiVersion.toLowerCase().startsWith('v')) {
+                graphApiVersion = 'v' + graphApiVersion;
+            }
 
             if (mediaUrls.size() == 1) {
                 String mediaUrl = mediaUrls[0];
@@ -26,7 +44,8 @@ public with sharing class InstagramPostController {
 
                 HttpRequest req = new HttpRequest();
                 req.setTimeout(120000);
-                req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
+                String endpoint = INSTAGRAM_ENDPOINT + graphApiVersion + '/' + userId + '/media';
+                req.setEndpoint(endpoint);
                 req.setMethod('POST');
                 req.setHeader('Content-Type', 'application/json');
 

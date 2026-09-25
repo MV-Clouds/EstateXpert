@@ -741,7 +741,15 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.showToast('Error', 'Schedule date and time cannot be in the past.', 'error');
                 return false;
             }
+        } else if (this.selectedAction === 'Confirm') {
+            // For Confirm action, ensure the existing scheduled date is not in the past
+            const existingDateStr = this.currentContact.ScheduleDate || this.currentContact.RescheduleDate;
+            if (existingDateStr && new Date(existingDateStr) < new Date()) {
+                this.showToast('Error', 'Cannot send confirmation for a past date. Please reschedule instead.', 'error');
+                return false;
+            }
         }
+
         if (this.showCommunicationInputs && this.isWhatsAppSelected && !this.selectedTemplate) {
             this.showToast('Error', 'Please select a WhatsApp template.', 'error');
             return false;
@@ -878,14 +886,16 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         const isReschedule = (this.selectedAction === 'Reschedule');
 
         console.log('loadEmailPreview', this.currentShowingId, this.currentContactId, this.recordId, this.selectedDate, this.selectedTime);
+        const dateTimeIso = (this.selectedDate && this.selectedTime) 
+            ? this.localDateTimeToUtcISO(this.selectedDate, this.selectedTime) 
+            : null;
 
         previewEmailTemplate({
             showingId: this.currentShowingId || null,
             isReschedule: isReschedule,
             contactId: this.currentContactId || null,
             listingId: this.recordId || null,
-            dateStr: this.selectedDate,
-            timeStr: this.selectedTime,
+            scheduleDateTime: dateTimeIso
         })
             .then(result => {
                 this.previewEmailHtml = result.htmlBody || '<p>No content.</p>';

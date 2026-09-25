@@ -379,21 +379,13 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, String dateStr, String timeStr) {
+    public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, Datetime scheduleDateTime) {
         try {
             Savepoint sp = Database.setSavepoint();
             Event showing;
 
-            // 1. Create DateTime from date and time strings
-            DateTime scheduledDateTime = System.now(); 
-            if (String.isNotBlank(dateStr) && String.isNotBlank(timeStr)) {
-                try {
-                    String gmtDateTimeStr = dateStr + ' ' + timeStr + ':00';
-                    scheduledDateTime = DateTime.valueOfGmt(gmtDateTimeStr);
-                } catch (Exception e) {
-                    System.debug('Error parsing date/time: ' + e.getMessage());
-                }
-            }
+            // 1. Create DateTime from passed in scheduleDateTime
+            DateTime scheduledDateTime = scheduleDateTime != null ? scheduleDateTime : System.now();
 
             // 2. Check if showing exists; if not, create a temporary one
             if (String.isNotBlank(showingId)) {

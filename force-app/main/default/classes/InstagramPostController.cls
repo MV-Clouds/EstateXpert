@@ -162,11 +162,20 @@ public with sharing class InstagramPostController {
     }
 
     private static String getMediaTypeFromUrl(String mediaUrl) {
-        if (mediaUrl.toLowerCase().endsWith('.mp4')) {
-            return 'REELS';
-        } else {
+        if (String.isBlank(mediaUrl)) {
             return 'IMAGE';
         }
+        
+        String lowerUrl = mediaUrl.toLowerCase();
+        if (lowerUrl.contains('?')) {
+            lowerUrl = lowerUrl.substringBefore('?');
+        }
+        
+        if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov')) {
+            return 'REELS';
+        }
+        
+        return 'IMAGE';
     }
 
     @AuraEnabled(cacheable=true)
@@ -248,15 +257,26 @@ public with sharing class InstagramPostController {
         try {
             Map<String, String> mediaUrlMap = new Map<String, String>();
     
-            MVEX__Listing__c listingRecord = [SELECT MVEX__Property__c FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
+            MVEX__Listing__c listingRecord = [
+                SELECT MVEX__Property__c 
+                FROM MVEX__Listing__c 
+                WHERE Id = :listingId WITH USER_MODE
+                LIMIT 1
+            ];
         
             if (listingRecord != null && listingRecord.MVEX__Property__c != null) {
-                List<MVEX__Property_File__c> propertyFiles = [SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c FROM MVEX__Property_File__c 
-                                                                WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND IsDeleted = false AND 
-                                                                MVEX__Size__c != null  WITH USER_MODE];
+                List<MVEX__Property_File__c> propertyFiles = [
+                    SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c
+                    FROM MVEX__Property_File__c 
+                    WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE
+                ];
         
                 for (MVEX__Property_File__c file : propertyFiles) {
-                    mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
+                    if (String.isNotBlank(file.MVEX__ExternalLink__c)) {
+                        mediaUrlMap.put(file.Name, file.MVEX__ExternalLink__c);
+                    } else {
+                        mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
+                    }
                 }
             }
         

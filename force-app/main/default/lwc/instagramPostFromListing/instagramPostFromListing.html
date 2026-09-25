@@ -98,8 +98,14 @@
                                         data-index={index} draggable="true" ondragstart={handleDragStart}
                                         ondragenter={handleDragEnter} ondragleave={handleDragLeave}
                                         ondragend={handleDragEnd}>
-                                        <img src={file.preview} alt={file.name} class="image-preview-selected"
-                                            draggable="true" data-index={index} />
+                                        <template if:false={file.isRemoteVideo}>
+                                            <img src={file.preview} alt={file.name} class="image-preview-selected"
+                                                draggable="true" data-index={index} />
+                                        </template>
+                                        <template if:true={file.isRemoteVideo}>
+                                            <video src={file.preview} class="image-preview-selected"
+                                                draggable="true" data-index={index} autoplay muted loop></video>
+                                        </template>
                                         <div class="overlay-selected">
                                             <div class="cancel-button-selected" data-name={file.name}
                                                 onclick={handleRemoveFile}><lightning-icon icon-name='utility:close'

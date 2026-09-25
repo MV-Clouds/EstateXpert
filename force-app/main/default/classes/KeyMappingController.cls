@@ -200,49 +200,6 @@ public with sharing class KeyMappingController {
     }
 
     /**
-     * Method Name : getObjectFields
-     * @param objAPI string
-     * @return List<Schema.DescribeFieldResult>, list of Schema.DescribeFieldResult class
-     * @description : Method to collect object field and its using schema class.
-     */
-    @AuraEnabled
-    public static RetrunWrapper getChildObjects(string sourceObjectAPI){
-        RetrunWrapper retrunWrapper = new RetrunWrapper();
-        try {
-            list<MappingObjects> childObjs = new list<MappingObjects>();
-
-            Schema.SObjectType sobjType = Schema.getGlobalDescribe().get(sourceObjectAPI);
-            Schema.DescribeSObjectResult sourceObj = sobjType.getDescribe();
-            List<Schema.ChildRelationship> childObjects = sourceObj.getChildRelationships();
-            for(Schema.ChildRelationship child :  childObjects){
-                if(child.getRelationshipName() != null){
-                    Schema.DescribeSObjectResult childObj = child.getChildSObject().getDescribe();
-                    Schema.DescribeFieldResult childField = child.getField().getDescribe();
-    
-                    MappingObjects childObject = new MappingObjects();
-                    childObject.label = childObj.getLabel();
-                    // childObject.name = childObj.getName();
-                    childObject.name = child.getRelationshipName();
-                    childObject.objectAPI =  childObj.getName();
-                    childObject.objectLabel = childObj.getLabel();
-                    childObject.additionalInfo = childField.getLabel() + ' ('+ childField.getName() +')';
-                    childObjs.add(childObject);
-                }
-
-            }
-
-            retrunWrapper.isSuccess = true;
-            retrunWrapper.fieldMappingsWithObj = childObjs;
-            return retrunWrapper;
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'KeyMappingController', 'getChildObjects', e.getMessage());
-            retrunWrapper.isSuccess = false;
-            return retrunWrapper;
-        }
-    }
-
-    /**
      * Method Name : getGeneralFields
      * @return RetrunWrapper, RetrunWrapper class
      * @description : Method to collect All General Field for mapping keys.
@@ -357,48 +314,6 @@ public with sharing class KeyMappingController {
         };
 
         return dateFormats;      
-    }
-
-    /**
-     * Method Name : getMerginTemplateKeys
-     * @param sourceObjectAPI string
-     * @return RetrunWrapper
-     * @description : Method to create mapping key for merge template.
-     */
-    @AuraEnabled
-    public static RetrunWrapper getMerginTemplateKeys(string sourceObjectAPI, String templateId){
-        RetrunWrapper retrunWrapper = new RetrunWrapper();
-        try {
-            List<MVEX__Template__c> activeTemps = [SELECT Id, Name, MVEX__Template_Name__c FROM MVEX__Template__c WHERE MVEX__Template_Status__c = true AND Id != :templateId AND MVEX__Template_pattern__c IN ('PDF Template') AND MVEX__Object_API_Name__c =: sourceObjectAPI WITH USER_MODE LIMIT 50000];
-            if(activeTemps != null){
-                list<MappingObjects> fieldMappingsWithObj = new list<MappingObjects>();
-                MappingObjects mergeTemps = new MappingObjects();
-                list<MappingFields> fieldMappings = new list<MappingFields>();
-                mergeTemps.name = 'Merge Tempaltes';
-                mergeTemps.name = 'megreTempaltes';
-                for(MVEX__Template__c temp : activeTemps){
-                    MappingFields tempKeys = new MappingFields();
-                    tempKeys.label = temp.MVEX__Template_Name__c;
-                    tempKeys.name = temp.Id;
-                    tempKeys.key = mergeTemplatekeys.replace('tempId', temp.Id +' '+ formattingKeys.replace('formatKey', temp.MVEX__Template_Name__c));
-                    fieldMappings.add(tempKeys);
-                }
-                mergeTemps.fieldMappings = fieldMappings;
-                fieldMappingsWithObj.add(mergeTemps);
-                retrunWrapper.fieldMappingsWithObj = fieldMappingsWithObj;
-            }
-            else{
-                retrunWrapper.returnMessage = 'There is No Active Tempale Avalibale To Merge';
-            }
-
-            retrunWrapper.isSuccess = true;
-            return retrunWrapper;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'KeyMappingController', 'getMerginTemplateKeys', e.getMessage());
-            retrunWrapper.isSuccess = false;
-            retrunWrapper.returnMessage = e.getMessage();
-            return retrunWrapper;
-        }
     }
 
     /**

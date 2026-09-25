@@ -4,7 +4,7 @@ import getListingData from '@salesforce/apex/ListingManagerController.getListing
 import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { NavigationMixin } from 'lightning/navigation';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
-import LISTING_OBJECT from '@salesforce/schema/MVEX__Listing__c';
+import LISTING_OBJECT from '@salesforce/schema/Listing__c';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 import USER_CURRENCY from '@salesforce/i18n/currency';

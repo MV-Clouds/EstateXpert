@@ -159,61 +159,6 @@ public without sharing class DataMappingControllerV2 {
             return mapingKeyVsValuesGroup;
         }
     }
-
-    public static map<String, Map<String, String>> getMappingsKeyValues1(List<MVEX__Template__c> temps, String recordId, Boolean includeMergTemKeys){
-        Map<String, Map<String, String>> mapingKeyVsValuesGroup = new Map<String, Map<String, String>>{
-            'objectNGeneral' => new map<string, string>(),
-            'margeTemplate' => new map<string, string>(),
-            'salesforceImages' => new map<string, string>(),
-            'listingMediaImages' => new map<string, string>()
-        };
-        try {
-                String extractedKeyString = '';
-                String sourceObjectAPI = '';
-
-                if(!temps.isEmpty()){
-                    for(MVEX__Template_Data__c fieldData : temps[0].MVEX__Template_Data__r){
-                        extractedKeyString +=  fieldData.MVEX__Template_Value_Simple__c;
-                    }
-
-                    extractedKeyString = extractedKeyString != '' ? extractedKeyString : 'null';
-
-                    sourceObjectAPI = temps[0].MVEX__Object_API_Name__c;
-                }
-
-                Map<String, Object> extractedKeyMap = (Map<String, Object>) JSON.deserializeUntyped(extractedKeyString);
-                // Collect and Store mapping keys in to set of string from keys stored in field...
-                Set<String> extractedKeys = collectMappingKeys(extractedKeyMap);
-                // collect mapping key values for object field and general fields....
-                Map<String, String> mappigKeysValue = getMappingKeyVsValue(new List<String>(extractedKeys), sourceObjectAPI, recordId);
-                mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(mappigKeysValue);
-
-                // Collect and Store Salesforce image SRC in to set ...
-                Map<String, String> sfImagesSRCVsID = getSFimageVsId(extractedKeyMap);
-                mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(sfImagesSRCVsID);
-
-                // this varibale will be FALSE when it call from "getKeyNValueFromMergeTemps" Method...
-                if(includeMergTemKeys == true){
-                    // collect merge template key from keys stored in field ...
-                    set<String> mergTemplateKeys = collectMergeTemplateKeys(extractedKeyMap);
-
-                    // create map for merge template key with Values....
-                    map<String, Map<String, String>> keyWithValues = getKeyNValueFromMergeTemps(new List<String>(mergTemplateKeys), sourceObjectAPI, recordId);
-
-                    // colelct extracted key with actual value from marge template add them into exsiting map of main tempalte.
-                    mapingKeyVsValuesGroup?.get('objectNGeneral')?.putAll(keyWithValues?.get('objectNGeneral'));
-                    mapingKeyVsValuesGroup?.get('salesforceImages')?.putAll(keyWithValues?.get('salesforceImages'));
-                    mapingKeyVsValuesGroup?.get('margeTemplate')?.putAll(keyWithValues?.get('margeTemplate'));
-
-                    // Note : no need to add signatureImage for merge tempalte key, because signature key will be same for each template...
-                }
-                                        
-            return mapingKeyVsValuesGroup;
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'DataMappingControllerV2', 'getMappingsKeyValues1', e.getMessage());
-            return mapingKeyVsValuesGroup;
-        }
-    }
    
     /**
      * @method getMappingsKeyValues,
@@ -609,7 +554,6 @@ public without sharing class DataMappingControllerV2 {
 
             // Get Mapping Key Values from the merge templates... Add with existing merge and value
             map<String, Map<String, String>> keyWithValues = getMappingsKeyValues(validTemplateListIds, recordId, false);
-            // map<String, Map<String, String>> keyWithValues = getMappingsKeyValues1(mergeTemps, recordId, false);
             keyWithValuesGroup?.get('objectNGeneral')?.putAll(keyWithValues.get('objectNGeneral'));
             keyWithValuesGroup?.get('salesforceImages')?.putAll(keyWithValues.get('salesforceImages'));
 

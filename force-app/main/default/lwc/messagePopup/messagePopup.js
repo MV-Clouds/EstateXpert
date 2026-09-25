@@ -73,13 +73,6 @@ export default class MessagePopup extends LightningElement {
         return `--duration : ${this.duration/1000}s`;
     }
 
-    customTimeout;
-    renderedCallback(){
-        if(!this.customTimeout){
-            this.customTimeout = this.template.querySelector('c-custom-timeout');
-        }
-    }
-
     connectedCallback(){
         try {
             loadStyle(this, MulishFontCss)
@@ -122,12 +115,9 @@ export default class MessagePopup extends LightningElement {
             this.template.host.style.setProperty('--duration', duration + 'ms');
 
             this.showPopup = true;
-            // this.timeoutInstance = setTimeout(() => {
-            //     this.showPopup = false;
-            // }, duration);
-            this.customTimeout?.setCustomTimeoutMethod(() => {
+            this.timeoutInstance = setTimeout(() => {
                 this.showPopup = false;
-			}, duration);
+            }, duration);
             
         } catch (error) {
             console.error('error in showToast poupMessgae : ', error.stack);
@@ -183,15 +173,4 @@ export default class MessagePopup extends LightningElement {
             console.error('error in closeModal poupMessgae', error.stack);
         }
     }
-
-    handleTimeout(event){
-		try {
-			if(event?.detail?.function){
-				event?.detail?.function();
-			}
-		} catch (error) {
-			console.log('error in handleTimeout', error.stack);
-		}
-	}
-
 }

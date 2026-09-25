@@ -1,22 +1,14 @@
 <template>
     <template if:false={isDirectAccess}>
+        <c-custom-timeout ontimeoutmethod={handleTimeout}></c-custom-timeout>
         <template if:true={isLoading}>
             <c-spinner-component></c-spinner-component>
         </template>
         <div class="wrapper">
             <div class="main_content_cls">
                 <div class="slds-m-around_medium navbar">
-                    <div class="selected-condition">
-                        <div class="checkbox-container">
-                            <label class="custom-checkbox custom-checkbox-body">
-                                <input type="checkbox" checked={checkboxValue} onchange={handleCheckboxChange}>
-                                <span class="checkmark"></span>
-                            </label>
-                            <label class="label-text">Auto Sync</label>
-                        </div>
-                    </div>
                     <div class="save-btn">
-                        <button disabled={isAutoSyncEnabled} onclick={addNewPair} class="blue-btn-css">
+                        <button onclick={addNewPair} class="blue-btn-css">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
@@ -39,6 +31,15 @@
                                     fill="currentColor" />
                             </svg>
                             <template if:false={isMobileOrTablet}>Revert Changes</template>
+                        </button>
+                        <button onclick={handleDefaults} class="blue-btn-css">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M13 3C8.03 3 4 7.03 4 12H1L4.89 15.89L4.96 16.03L9 12H6C6 8.13 9.13 5 13 5C16.87 5 20 8.13 20 12C20 15.87 16.87 19 13 19C11.07 19 9.32 18.21 8.06 16.94L6.64 18.36C8.27 19.99 10.51 21 13 21C17.97 21 22 16.97 22 12C22 7.03 17.97 3 13 3ZM12 8V13L16.28 15.54L17 14.33L13.5 12.25V8H12Z"
+                                    fill="currentColor" />
+                            </svg>
+                            <template if:false={isMobileOrTablet}>Restore Defaults</template>
                         </button>
                     </div>
                 </div>
@@ -72,13 +73,13 @@
                                         <!-- Listing Field — always selectable (unless Auto Sync) -->
                                         <td data-label="Listing Field">
                                             <div class="combobox_cls">
-                                                <div class={pair.listingComboboxClass}>
+                                                <div class="custom-combobox">
                                                     <input type="text" class="combobox-input"
                                                         value={pair.listingInputValue}
                                                         placeholder="Search Listing Field&#8230;"
                                                         data-index={pair._index} data-field="listing"
                                                         onfocus={handleComboFocus} onblur={handleComboBlur}
-                                                        oninput={handleSearchInput} disabled={isAutoSyncEnabled}
+                                                        oninput={handleSearchInput}
                                                         autocomplete="off" />
                                                     <span class="combobox-chevron">
                                                         <svg width="12" height="8" viewBox="0 0 12 8" fill="none"
@@ -111,7 +112,7 @@
                                         <!-- Property Field — locked until a Listing Field is chosen -->
                                         <td data-label="Property Field">
                                             <div class="combobox_cls">
-                                                <div class={pair.propertyComboboxClass}>
+                                                <div class="custom-combobox">
                                                     <input type="text" class="combobox-input"
                                                         value={pair.propertyInputValue}
                                                         placeholder={pair.propertyPlaceholder} data-index={pair._index}
@@ -149,7 +150,7 @@
                                         <td data-label="Actions">
                                             <div class="action-btn">
                                                 <button class="delete-icon-css" data-id={pair._index}
-                                                    onclick={deletePair} disabled={isAutoSyncEnabled}>
+                                                    onclick={deletePair}>
                                                     <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path

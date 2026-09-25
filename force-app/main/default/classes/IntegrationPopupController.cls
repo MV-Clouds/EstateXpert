@@ -11,7 +11,7 @@ public with sharing class IntegrationPopupController {
     @TestVisible public static String mockValidationResult = null;
     public static String GMAILENDPOINT = System.label.Google_Endpoint;
     public static String AWSS3ENDPOINT = System.label.AWS_S3_ENDPONT;
-    public static String gmailEndpoint = System.label.Gmail_Sending_Endpoint;
+    public static String gmailSendEndpoint = System.label.Gmail_Sending_Endpoint;
     public static final String instagramEndpoint = System.label.InstagramEndPoint;
 
     /**
@@ -670,7 +670,7 @@ public with sharing class IntegrationPopupController {
                 try {
                     HttpRequest userReq = new HttpRequest();
                     userReq.setMethod('GET');
-                    String endpoint = gmailEndpoint + 'oauth2/v2/userinfo';
+                    String endpoint = gmailSendEndpoint + 'oauth2/v2/userinfo';
                     userReq.setEndpoint(endpoint);
                     userReq.setHeader('Authorization', 'Bearer ' + freshAccessToken);
                     userReq.setTimeout(10000);

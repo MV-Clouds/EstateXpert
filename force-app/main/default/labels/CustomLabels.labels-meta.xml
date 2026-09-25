@@ -186,4 +186,25 @@
         <shortDescription>AWS_S3_ENDPONT</shortDescription>
         <value>https://s3.amazonaws.com/</value>
     </labels>
+    <labels>
+        <fullName>Gmail_Send_Scope</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Gmail_Send_Scope</shortDescription>
+        <value>https://www.googleapis.com/auth/gmail.send</value>
+    </labels>
+    <labels>
+        <fullName>Google_Oauth_URL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Google_Oauth_URL</shortDescription>
+        <value>https://accounts.google.com/o/oauth2/auth?</value>
+    </labels>
+    <labels>
+        <fullName>Insta_Oauth_URL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Insta_Oauth_URL</shortDescription>
+        <value>https://www.instagram.com/oauth/authorize?</value>
+    </labels>
 </CustomLabels>

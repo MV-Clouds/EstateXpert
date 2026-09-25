@@ -484,16 +484,6 @@
                 const mergeTemplateKeysString = '{!JSENCODE(mergeTemplateKeys)}';
                 const mergeTemplateKeys = mergeTemplateKeysString ? JSON.parse(mergeTemplateKeysString) : {};
 
-                // ###
-                const signatureImageCvIdString =  '{!JSENCODE(signatureImageCvId)}';
-                const signatureImageCvId = signatureImageCvIdString ? JSON.parse(signatureImageCvIdString) : null;
-                const signatureKey = '{!JSENCODE(signatureKey)}';
-                const signatureSize = '{!signatureSize}';
-
-                if(signatureImageCvId && signatureImageCvId[signatureKey]){
-                    salesforceImages[signatureKey] = signatureImageCvId[signatureKey];
-                }
-
                 const imageMaxSize = '{!imageMaxSize}';
 
                 const selfMergeTempKey = Object.keys(mergeTemplateKeys)?.find(key => mergeTemplateKeys[key] === currentTempId);
@@ -666,16 +656,6 @@
                         }
                     })
 
-                    let signatureValue = '';
-                    if(salesforceImages[signatureKey]){
-                        const signatureImageInPt = (signatureSize * pageFormats()[pageSize][0]) / 100;
-                        signatureValue = `<p><img style="width : ${signatureImageInPt}pt; max-width:100%;" src="${salesforceImages[signatureKey]}" ></p>`
-                    }
-                    
-                    bodyElement.innerHTML = bodyElement.innerHTML.replaceAll(signatureKey, signatureValue);
-                    headerElement.innerHTML = headerElement.innerHTML.replaceAll(signatureKey, signatureValue);
-                    footerElement.innerHTML = footerElement.innerHTML.replaceAll(signatureKey, signatureValue);
-
                     bodyElement.innerHTML = processIfElseExpressions(bodyElement.innerHTML);
                     headerElement.innerHTML = processIfElseExpressions(headerElement.innerHTML);
                     footerElement.innerHTML = processIfElseExpressions(footerElement.innerHTML);
@@ -708,7 +688,7 @@
                         return result ? thenText : (elseText ?? '');
                     });
                 }
-                
+
 
                 function generateFile(bodyElement, headerElement, footerElement) {
                     if (selectedExtension === '.pdf' || useMode === 'preview') {
@@ -716,16 +696,16 @@
                     }
                 }
 
-                function generatePDF(bodyElement, headerElement, footerElement){
-                            
+                function generatePDF(bodyElement, headerElement, footerElement) {
+
                     const opt = {
-                        margin: [   marginTop, 
-                                    marginLeft, 
-                                    marginBottom, 
-                                    marginRight],
+                        margin: [marginTop,
+                            marginLeft,
+                            marginBottom,
+                            marginRight],
                         filename: fileName + '.pdf',
                         image: { type: 'jpeg', quality: 1 },
-                        html2canvas: { scale: 3 , useCORS: true , letterRendering: true},
+                        html2canvas: { scale: 3, useCORS: true, letterRendering: true },
                         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
                         jsPDF: { unit: 'px', format: pageSize, orientation: pageOriantation, hotfixes: ["px_scaling"] },
                     };
@@ -733,34 +713,36 @@
                     const isHeaderContent = !(!headerElement?.querySelector('.note-editable')?.innerHTML?.trim());
                     const isFooterContent = !(!footerElement?.querySelector('.note-editable')?.innerHTML?.trim());
 
-                    if(showHeader === true && isHeaderContent){
+                    if (showHeader === true && isHeaderContent) {
 
-                        const headerImgs =  headerElement.querySelectorAll('img');
+                        const headerImgs = headerElement.querySelectorAll('img');
                         headerImgs.forEach(ele => {
-                            if(ele.src.startsWith('http')){
+                            if (ele.src.startsWith('http')) {
                                 ele.src = dummyImgSrc;
                             }
                         });
-                
-                        opt.header = {  element : headerElement, 
-                                        margins : [headerMarginTop, marginLeft, 0, marginRight], 
-                                        maxHeight : headerFooterMaxHeight,
-                                        };             
+
+                        opt.header = {
+                            element: headerElement,
+                            margins: [headerMarginTop, marginLeft, 0, marginRight],
+                            maxHeight: headerFooterMaxHeight,
+                        };
                     }
 
-                    if(showFooter === true && isFooterContent){
+                    if (showFooter === true && isFooterContent) {
 
-                        const footerImgs =  footerElement.querySelectorAll('img');
+                        const footerImgs = footerElement.querySelectorAll('img');
                         footerImgs.forEach(ele => {
-                            if(ele.src.startsWith('http')){
+                            if (ele.src.startsWith('http')) {
                                 ele.src = dummyImgSrc;
                             }
                         });
 
-                        opt.footer = { element : footerElement, 
-                                        margins : [0, marginLeft, footerMarginBottom, marginRight], 
-                                        maxHeight : headerFooterMaxHeight,
-                                        };            
+                        opt.footer = {
+                            element: footerElement,
+                            margins: [0, marginLeft, footerMarginBottom, marginRight],
+                            maxHeight: headerFooterMaxHeight,
+                        };
                     }
 
                     docIcon && (docIcon.style = 'animation : none');
@@ -768,27 +750,27 @@
 
 
                     html2pdf().set(opt).from(bodyElement).outputPdf()
-                    .then(function (rawPDF){
-                        if(useMode === 'preview'){
-                            intialLoading.style.display = 'none';
-                            displayPDF(rawPDF);
-                        }
-                        else{
-                            const pdfBlob = new Blob([getArrayBuffer(rawPDF)], { type: 'application/pdf' }) 
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                                const fileData = reader.result.split(',')[1];
-                                let downlaodUrl =  reader.result;
-
-                                handleGeneratedFiles(fileData, pdfBlob, downlaodUrl);
+                        .then(function (rawPDF) {
+                            if (useMode === 'preview') {
+                                intialLoading.style.display = 'none';
+                                displayPDF(rawPDF);
                             }
-                            reader.readAsDataURL(pdfBlob);
-                        }
-                    })
-                    .catch(function (error){
-                        console.log('error to store pdf file : ', error.stack)
-                        sendInfoToLWC('unknown', false, error);
-                    })
+                            else {
+                                const pdfBlob = new Blob([getArrayBuffer(rawPDF)], { type: 'application/pdf' })
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                    const fileData = reader.result.split(',')[1];
+                                    let downlaodUrl = reader.result;
+
+                                    handleGeneratedFiles(fileData, pdfBlob, downlaodUrl);
+                                }
+                                reader.readAsDataURL(pdfBlob);
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log('error to store pdf file : ', error.stack)
+                            sendInfoToLWC('unknown', false, error);
+                        })
                 }
 
 
@@ -818,7 +800,7 @@
                                 completedChannel: 'Email',
                                 status: true,
                                 error: null,
-                                pdfBase64: fileData   
+                                pdfBase64: fileData
                             };
                             parent.postMessage(message, '*');
                         }
@@ -892,22 +874,22 @@
                     }
                 }
 
-                function getArrayBuffer(data){
+                function getArrayBuffer(data) {
                     let len = data.length,
-                    ab = new ArrayBuffer(len),
-                    u8 = new Uint8Array(ab);
+                        ab = new ArrayBuffer(len),
+                        u8 = new Uint8Array(ab);
 
                     while (len--) u8[len] = data.charCodeAt(len);
                     return ab;
                 };
 
 
-                function unescapeHtml(html){
+                function unescapeHtml(html) {
                     let doc = new DOMParser().parseFromString(html, "text/html");
                     return doc.documentElement.innerText
                 }
 
-                function pageFormats(){
+                function pageFormats() {
                     return {
                         'a0': [2383.94, 3370.39],
                         'a1': [1683.78, 2383.94],
@@ -950,53 +932,53 @@
                         'ledger': [1224, 792],
                         'tabloid': [792, 1224],
                         'credit-card': [153, 243],
-                        'executive' : [522, 756],
-                        'statement' : [396, 594],
+                        'executive': [522, 756],
+                        'statement': [396, 594],
                     }
                 };
 
 
-                function unitMultiplier(unit){
+                function unitMultiplier(unit) {
                     switch (unit) {
                         case 'pt':
-                        return 1;
-                    
+                            return 1;
+
                         case 'mm':
-                        return 72 / 25.4;
-                    
+                            return 72 / 25.4;
+
                         case 'cm':
-                        return 72 / 2.54;
-                    
+                            return 72 / 2.54;
+
                         case 'in':
-                        return 72;
-                    
+                            return 72;
+
                         case 'px':
-                        return 72 / 96;
-                    
+                            return 72 / 96;
+
                         case 'pc':
-                        return 12;
-                    
+                            return 12;
+
                         case 'em':
-                        return 12;
-                    
+                            return 12;
+
                         case 'ex':
-                        return 6;
-                    
+                            return 6;
+
                         default:
-                        return null;
+                            return null;
                     }
                 };
 
-                function toPx(value){
+                function toPx(value) {
                     let toPt = unitMultiplier(pageUnit) * value;
                     return (toPt * 1.3334);
                 }
 
-                function ptToCm(value){
+                function ptToCm(value) {
                     return (value / 28.3465);
                 }
 
-                function ptToPx(value){
+                function ptToPx(value) {
                     return (value * 1.3334);
                 }
 
@@ -1053,21 +1035,21 @@
                     });
                 }
 
-                function setZoomLevel(event){
+                function setZoomLevel(event) {
                     const clickedButton = event.currentTarget.dataset.name
                     let zoomOffset = 10;
 
-                    if(zoomLevel <= 25){
+                    if (zoomLevel <= 25) {
                         zoomOffset = clickedButton == 'zoomIn' ? 0 : zoomOffset;
                     }
-                    else if(zoomLevel >= 500){ 
+                    else if (zoomLevel >= 500) {
                         zoomOffset = clickedButton == 'zoomOut' ? 0 : zoomOffset;
                     }
 
-                    if( clickedButton == "zoomIn"){
+                    if (clickedButton == "zoomIn") {
                         zoomLevel = zoomLevel - zoomOffset;
                     }
-                    else if(clickedButton == "zoomOut"){
+                    else if (clickedButton == "zoomOut") {
                         zoomLevel = zoomLevel + zoomOffset;
                     }
 
@@ -1081,46 +1063,46 @@
                     onscroll();
                 });
 
-                function onscroll(){
+                function onscroll() {
                     let scrollHeight = content.scrollHeight;
                     const addon = currentPage === 1 ? 16 : 4;
                     const singlePageHeight = (content.scrollHeight / pdfPages) - addon;
 
-                    currentPage =  Math.floor((content.scrollTop / (singlePageHeight)) + 1);
+                    currentPage = Math.floor((content.scrollTop / (singlePageHeight)) + 1);
 
                     const pageToSetInut = document.querySelector('[data-name="pageToSet"]');
                     pageToSetInut.value = currentPage;
 
                     const scrollToTopBtn = document.querySelector('.scrollTopBtn');
-                    if(content.scrollTop > 0){
+                    if (content.scrollTop > 0) {
                         scrollToTopBtn.style = 'display : block !important';
                     }
-                    else{
+                    else {
                         scrollToTopBtn.style = '';
                     }
 
                     setPageBtnStatus();
                 }
 
-                function onPageChange(event){
+                function onPageChange(event) {
                     const dataName = event.currentTarget.dataset.name;
 
                     let pageNoToSet = currentPage;
-                    if(dataName == "pageToSet"){
+                    if (dataName == "pageToSet") {
                         pageNoToSet = event.target.value;
                     }
-                    else if(dataName == "pagePlus"){
+                    else if (dataName == "pagePlus") {
                         pageNoToSet = currentPage + 1;
                     }
-                    else if(dataName == "pageMinus"){
+                    else if (dataName == "pageMinus") {
                         pageNoToSet = currentPage - 1;
                     }
 
-                    if((pageNoToSet > pdfPages || pageNoToSet <= 0) && pageNoToSet != ''){
+                    if ((pageNoToSet > pdfPages || pageNoToSet <= 0) && pageNoToSet != '') {
                         pageToSet.value = currentPage;
                     }
-                    else{
-                        if(pageNoToSet != currentPage && pageNoToSet != ''){
+                    else {
+                        if (pageNoToSet != currentPage && pageNoToSet != '') {
                             const singlePageHeight = content.scrollHeight / pdfPages;
                             content.scrollTop = (singlePageHeight) * (pageNoToSet - 1);
                             currentPage = pageNoToSet;
@@ -1132,23 +1114,23 @@
 
                 }
 
-                function setPageBtnStatus(){
-                    if(currentPage <= 1){
+                function setPageBtnStatus() {
+                    if (currentPage <= 1) {
                         pageMinus.setAttribute('disabled', 'true');
                     }
-                    else{
+                    else {
                         pageMinus.removeAttribute('disabled');
                     }
 
-                    if(currentPage >= pdfPages){
+                    if (currentPage >= pdfPages) {
                         pagePlus.setAttribute('disabled', 'true');
                     }
-                    else{
+                    else {
                         pagePlus.removeAttribute('disabled');
                     }
                 }
 
-                function scrollToTop(){
+                function scrollToTop() {
                     content.scrollTop = 0;
                     onscroll();
                 }

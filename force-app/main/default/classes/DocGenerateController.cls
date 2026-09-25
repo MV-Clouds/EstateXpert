@@ -27,9 +27,6 @@ global with sharing class DocGenerateController {
     public static String mappingKeyVsMappingValues {get; set;}
     public static String salesforceImages {get; set;}
     public static String mergeTemplateKeys {get; set;}
-    public static String signatureImageCvId {get; set;}
-    public static String signatureKey {get; set;}
-    public static Decimal signatureSize {get; set;}
     public static integer imageMaxSize {get; set;}
 
     public static String sessionId {get; set;}
@@ -74,10 +71,9 @@ global with sharing class DocGenerateController {
                 headerHtml = '';
                 footerHtml = '';
 
-                signatureKey = KeyMappingController.signatureKey;
                 imageMaxSize = KeyMappingController.maxImageSize;
     
-                List<Template__c> temp = new List<Template__c>();
+                List<MVEX__Template__c> temp = new List<MVEX__Template__c>();
 
                 List<String> valueTypes = new List<String>{'Body Value', 'Header Value', 'Footer Value'};
                 Integer totalTemplateDataRecords = Database.countQuery('SELECT Count() FROM MVEX__Template_Data__c WHERE MVEX__Template__c =: templateId AND MVEX__Value_Type__c IN :valueTypes');
@@ -113,36 +109,34 @@ global with sharing class DocGenerateController {
      */
     public static void setTemplateDetails(List<String> getValueTypes, String templateID, String recordId){
         try {
-            List<Template__c> temp = [SELECT Id, Template_Name__c, Signature_Size__c, 
-                            (SELECT Id, Template_Value_Simple__c,Value_Type__c FROM Template_Data__r WHERE Value_Type__c IN: getValueTypes ORDER BY Order_No_Simple__c ASC),
-                            (SELECT Id, Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c, Header_margin_top__c, Footer_margin_bottom__c FROM Template_Pages__r ORDER BY Page_Number__c ASC)
-                            FROM Template__c WHERE Id =: templateID WITH USER_MODE LIMIT 1 ];
+            List<MVEX__Template__c> temp = [SELECT Id, MVEX__Template_Name__c, 
+                            (SELECT Id, MVEX__Template_Value_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__r WHERE MVEX__Value_Type__c IN: getValueTypes ORDER BY MVEX__Order_No_Simple__c ASC),
+                            (SELECT Id, MVEX__Page_Margin__c, MVEX__Page_Orientation__c, MVEX__Page_Size__c, MVEX__Unit_of_Page_Configs__c, MVEX__Show_Header__c, MVEX__Show_Footer__c, MVEX__Header_margin_top__c, MVEX__Footer_margin_bottom__c FROM MVEX__Template_Pages__r ORDER BY MVEX__Page_Number__c ASC)
+                            FROM MVEX__Template__c WHERE Id =: templateID WITH USER_MODE LIMIT 1 ];
 
             if(temp.size() > 0){
-                Template_Page__c pageConfigs = temp[0].Template_Pages__r[0];
-                showHeader = pageConfigs.Show_Header__c;
-                showFooter = pageConfigs.Show_Footer__c;
-                pageMargins = pageConfigs.Page_Margin__c;
-                pageConfigUnit = pageConfigs.Unit_of_Page_Configs__c;
-                pageOrientation = pageConfigs.Page_Orientation__c;
-                pageSize = pageConfigs.Page_Size__c;
-                headerMarginTop = pageConfigs.Header_margin_top__c;
-                footerMarginBottom = pageConfigs.Footer_margin_bottom__c;
+                MVEX__Template_Page__c pageConfigs = temp[0].MVEX__Template_Pages__r[0];
+                showHeader = pageConfigs.MVEX__Show_Header__c;
+                showFooter = pageConfigs.MVEX__Show_Footer__c;
+                pageMargins = pageConfigs.MVEX__Page_Margin__c;
+                pageConfigUnit = pageConfigs.MVEX__Unit_of_Page_Configs__c;
+                pageOrientation = pageConfigs.MVEX__Page_Orientation__c;
+                pageSize = pageConfigs.MVEX__Page_Size__c;
+                headerMarginTop = pageConfigs.MVEX__Header_margin_top__c;
+                footerMarginBottom = pageConfigs.MVEX__Footer_margin_bottom__c;
                 
-                for(Template_Data__c fieldData : temp[0].Template_Data__r){
-                    String value = fieldData.Template_Value_Simple__c != null ? fieldData.Template_Value_Simple__c : '';
-                    if(fieldData.Value_Type__c == 'Body Value'){
+                for(MVEX__Template_Data__c fieldData : temp[0].MVEX__Template_Data__r){
+                    String value = fieldData.MVEX__Template_Value_Simple__c != null ? fieldData.MVEX__Template_Value_Simple__c : '';
+                    if(fieldData.MVEX__Value_Type__c == 'Body Value'){
                         bodyHtml += value;
                     }
-                    else if(fieldData.Value_Type__c == 'Header Value' && showHeader == true){
+                    else if(fieldData.MVEX__Value_Type__c == 'Header Value' && showHeader == true){
                         headerHtml += value;
                     }
-                    else if(fieldData.Value_Type__c == 'Footer Value' && showFooter == true){
+                    else if(fieldData.MVEX__Value_Type__c == 'Footer Value' && showFooter == true){
                         footerHtml += value;
                     }
-                }    
-
-                signatureSize = temp[0].Signature_Size__c != null ? temp[0].Signature_Size__c : 50;
+                }
             }
             else{
                 apexError = 'Template not available for deleted.';
@@ -155,7 +149,6 @@ global with sharing class DocGenerateController {
             salesforceImages = JSON.serialize(mappingKeys.get('salesforceImages'));
             mergeTemplateKeys = JSON.serialize(mappingKeys.get('margeTemplate'));
             listingImageMedia = JSON.serialize(mappingKeys.get('listingMediaImages'));
-            signatureImageCvId = JSON.serialize(mappingKeys.get('signatureImage'));
 
         } catch (Exception e) {
             apexError = e.getMessage();
@@ -179,9 +172,9 @@ global with sharing class DocGenerateController {
     
             mappingKey = mappingKey != null ? mappingKey : '';
     
-            List<Template__c> temp = [SELECT Id, Template_pattern__c, Template_Name__c, Template_Status__c FROM Template__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
+            List<MVEX__Template__c> temp = [SELECT Id, MVEX__Template_pattern__c, MVEX__Template_Name__c, MVEX__Template_Status__c FROM MVEX__Template__c WHERE Id =: templateId WITH USER_MODE LIMIT 1];
     
-            if(temp.size() > 0 && temp[0]?.Template_pattern__c == 'PDF Template' && temp[0]?.Template_Status__c == true ){
+            if(temp.size() > 0 && temp[0]?.MVEX__Template_pattern__c == 'PDF Template' && temp[0]?.MVEX__Template_Status__c == true ){
     
                 Integer batchSize = 25;
                 
@@ -190,15 +183,15 @@ global with sharing class DocGenerateController {
                 Integer endIndex = (offset + batchSize) >= bodyValueRecords ? bodyValueRecords : (offset + batchSize);
                 isLastBatch = (offset + batchSize) >= bodyValueRecords ? true : false;
     
-                for(Template_Data__c fieldData : [SELECT Id, Order_No_Simple__c, Template_Value_Simple__c, Value_Type__c FROM Template_Data__c
-                                                    WHERE Template__c = : templateId AND Order_No_Simple__c >= :offset AND Order_No_Simple__c <= :endIndex
-                                                    AND Value_Type__c =: 'Body Value' WITH USER_MODE ORDER BY Order_No_Simple__c ASC]){
-                    String data = fieldData.Template_Value_Simple__c;
+                for(MVEX__Template_Data__c fieldData : [SELECT Id, MVEX__Order_No_Simple__c, MVEX__Template_Value_Simple__c, MVEX__Value_Type__c FROM MVEX__Template_Data__c
+                                                    WHERE MVEX__Template__c = : templateId AND MVEX__Order_No_Simple__c >= :offset AND MVEX__Order_No_Simple__c <= :endIndex
+                                                    AND MVEX__Value_Type__c =: 'Body Value' WITH USER_MODE ORDER BY MVEX__Order_No_Simple__c ASC]){
+                    String data = fieldData.MVEX__Template_Value_Simple__c;
                     bodyHtml.add(data);
                 }
 
                 return new list<string>{string.valueOf(isLastBatch), string.join(bodyHtml,'').unescapeHtml4()};
-            } else if (temp.size() > 0 && temp[0]?.Template_pattern__c == 'PDF Template' && temp[0]?.Template_Status__c == false) {
+            } else if (temp.size() > 0 && temp[0]?.MVEX__Template_pattern__c == 'PDF Template' && temp[0]?.MVEX__Template_Status__c == false) {
                 String data = '<span style="color: red;"> '+mappingKey+' --- Inactive Template --- </span>';
                 bodyHtml.add(data);
                 isLastBatch = true;
@@ -215,10 +208,5 @@ global with sharing class DocGenerateController {
             ErrorHandler.insertErrorData(e, 'DocGenerateController', 'fetchTemplateData', 'Error while fetching template data.');
             return new list<string>{'true', ''};
         } 
-    }
-
-    @RemoteAction
-    global static string fetchSignatureBase64(String id){
-        return null;
     }
 }

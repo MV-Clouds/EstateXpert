@@ -9,7 +9,6 @@ import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeA
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
 import validateIntegrationCredentials from '@salesforce/apex/IntegrationPopupController.validateIntegrationCredentials';
-import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 import GMAIL_SENDING_ENDPOINT from '@salesforce/label/c.Gmail_Sending_Endpoint';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
@@ -27,11 +26,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track gmailData = { isValid: false, integrationData: {}, showDetails: false };
     @track instagramData = { isValid: false, integrationData: {}, showDetails: false };
     @track isWaterMarkUploader = false;
-    @track featureAvailability = {
-        Cloud_Storage_Integration: true,
-        Social_Media_Integration: true,
-        Email_Integration: true
-    };
     @track activeIntegrationCount = 0;
 
     // Card-level state for Gmail inline flow 
@@ -57,22 +51,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     get isInstagramSaveDisabled() {
         return (!this.instagramUserId   || this.instagramUserId.trim()   === '') ||
                (!this.instagramLongToken || this.instagramLongToken.trim() === '');
-    }
-
-    @wire(getMetadataRecords)
-    metadataRecords({ error, data }) {
-        if (data) {
-            this.featureAvailability = data.reduce((acc, record) => {
-                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
-                return acc;
-            }, {});
-            setTimeout(() => {
-                this.isSpinner = false;
-            }, 1000);
-        } else if (error) {
-            console.error("Error fetching metadata records:", error);
-            this.isSpinner = false;
-        }
     }
 
     /**

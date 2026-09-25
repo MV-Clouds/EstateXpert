@@ -3,156 +3,179 @@
         <c-spinner-component></c-spinner-component>
     </template>
     <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
-        <template if:true={isAccessible}>
-            <div class="main">
-                <template if:false={isMobileOrTablet}>
-                    <div class="custom-header">
-                        <div class="sub_main_header_css">
-                            <div class="header_block_css">
-                                Listing Manager <span class="count-badge">{totalListings} {lisitngItems}</span>
-                            </div>
-                            <div class="header-buttons">
-                                <button onclick={openConfigureSettings} class="blue-btn-css">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M12 15.5C10.07 15.5 8.5 13.93 8.5 12C8.5 10.07 10.07 8.5 12 8.5C13.93 8.5 15.5 10.07 15.5 12C15.5 13.93 13.93 15.5 12 15.5ZM19.43 12.97C19.47 12.65 19.5 12.33 19.5 12C19.5 11.67 19.47 11.34 19.43 11L21.54 9.37C21.73 9.22 21.78 8.95 21.66 8.73L19.66 5.27C19.54 5.05 19.27 4.96 19.05 5.05L16.56 6.05C16.04 5.66 15.5 5.32 14.87 5.07L14.5 2.42C14.46 2.18 14.25 2 14 2H10C9.75 2 9.54 2.18 9.5 2.42L9.13 5.07C8.5 5.32 7.96 5.67 7.44 6.05L4.95 5.05C4.73 4.96 4.46 5.05 4.34 5.27L2.34 8.73C2.21 8.95 2.27 9.22 2.46 9.37L4.57 11C4.53 11.34 4.5 11.67 4.5 12C4.5 12.33 4.53 12.65 4.57 12.97L2.46 14.63C2.27 14.78 2.21 15.05 2.34 15.27L4.34 18.73C4.46 18.95 4.73 19.03 4.95 18.95L7.44 17.94C7.96 18.34 8.5 18.68 9.13 18.93L9.5 21.58C9.54 21.82 9.75 22 10 22H14C14.25 22 14.46 21.82 14.5 21.58L14.87 18.93C15.5 18.67 16.04 18.33 16.56 17.94L19.05 18.95C19.27 19.03 19.54 18.95 19.66 18.73L21.66 15.27C21.78 15.05 21.73 14.78 21.54 14.63L19.43 12.97Z"
-                                            fill="white" />
-                                    </svg>
-                                    Customize View
-                                </button>
-                                <button onclick={goTONewListing} class="blue-btn-css">
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
-                                            fill="white" />
-                                    </svg>
-                                    New Listing
-                                </button>
-                                <div class="tab-btns">
-                                    <ul>
-                                        <li class="tab-div active-tab-div" onclick={handleMenuTabClick} data-tab-id="1">
-                                            <svg class="activeSvg menusvg" width="16" height="12" viewBox="0 0 24 14"
-                                                fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path data-tab-index="1"
-                                                    d="M0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333ZM0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333Z"
-                                                    fill="#131314" />
-                                            </svg>
-                                        </li>
-                                        <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="2">
-                                            <svg class="menusvg" width="24" height="25" viewBox="0 0 24 25" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path data-tab-index="3"
-                                                    d="M18 0C14.7 0 12 2.7 12 6C12 6.992 12.383 8.004 12.875 9.125C13.396 10.2913 13.9802 11.4283 14.625 12.531C15.4274 13.907 16.2823 15.2517 17.188 16.562L18 17.75L18.813 16.562C18.813 16.562 20.102 14.727 21.375 12.532C22.0199 11.429 22.6041 10.2917 23.125 9.125C23.617 8.004 24 6.992 24 6C24 2.7 21.3 0 18 0ZM7.969 1.938L0 5.344V24.53L8.031 21.062L16.031 24.062L24 20.655V11.937C23.38 13.1092 22.7128 14.2558 22 15.374V19.343L17 21.468V19.843L15.531 17.718C15.3523 17.4585 15.1753 17.1978 15 16.936V21.561L9 19.311V4.438L10.094 4.845C10.1873 4.17893 10.3657 3.5276 10.625 2.907L7.969 1.938ZM18 2C20.219 2 22 3.781 22 6C22 6.387 21.758 7.3 21.312 8.313C20.867 9.324 20.238 10.473 19.625 11.531C18.809 12.937 18.457 13.437 18 14.125C17.543 13.437 17.191 12.937 16.375 11.531C15.762 10.473 15.133 9.324 14.687 8.312C14.242 7.302 14 6.387 14 6C14 3.781 15.781 2 18 2ZM7 4.5V19.344L2 21.469V6.656L7 4.5ZM18 4.5C17.6022 4.5 17.2206 4.65804 16.9393 4.93934C16.658 5.22064 16.5 5.60218 16.5 6C16.5 6.39782 16.658 6.77936 16.9393 7.06066C17.2206 7.34196 17.6022 7.5 18 7.5C18.3978 7.5 18.7794 7.34196 19.0607 7.06066C19.342 6.77936 19.5 6.39782 19.5 6C19.5 5.60218 19.342 5.22064 19.0607 4.93934C18.7794 4.65804 18.3978 4.5 18 4.5Z"
-                                                    fill="#131314" />
-                                            </svg>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="filter-tab-wrapper">
-                                    <div class="filter-toggle-btn" onclick={wrapFilter}>
-                                      
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g id="SVGRepo_bgCarrier" stroke-width="1.5"></g>
-                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                            <g id="SVGRepo_iconCarrier">
-                                                <path d="M0 3H16V1H0V3Z" fill={filterIconColor}></path>
-                                                <path d="M2 7H14V5H2V7Z" fill={filterIconColor}></path>
-                                                <path d="M4 11H12V9H4V11Z" fill={filterIconColor}></path>
-                                                <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
-                                            </g>
+        <div class="main">
+            <template if:false={isMobileOrTablet}>
+                <div class="custom-header">
+                    <div class="sub_main_header_css">
+                        <div class="header_block_css">
+                            Listing Manager <span class="count-badge">{totalListings} {lisitngItems}</span>
+                        </div>
+                        <div class="header-buttons">
+                            <button onclick={openConfigureSettings} class="blue-btn-css">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12 15.5C10.07 15.5 8.5 13.93 8.5 12C8.5 10.07 10.07 8.5 12 8.5C13.93 8.5 15.5 10.07 15.5 12C15.5 13.93 13.93 15.5 12 15.5ZM19.43 12.97C19.47 12.65 19.5 12.33 19.5 12C19.5 11.67 19.47 11.34 19.43 11L21.54 9.37C21.73 9.22 21.78 8.95 21.66 8.73L19.66 5.27C19.54 5.05 19.27 4.96 19.05 5.05L16.56 6.05C16.04 5.66 15.5 5.32 14.87 5.07L14.5 2.42C14.46 2.18 14.25 2 14 2H10C9.75 2 9.54 2.18 9.5 2.42L9.13 5.07C8.5 5.32 7.96 5.67 7.44 6.05L4.95 5.05C4.73 4.96 4.46 5.05 4.34 5.27L2.34 8.73C2.21 8.95 2.27 9.22 2.46 9.37L4.57 11C4.53 11.34 4.5 11.67 4.5 12C4.5 12.33 4.53 12.65 4.57 12.97L2.46 14.63C2.27 14.78 2.21 15.05 2.34 15.27L4.34 18.73C4.46 18.95 4.73 19.03 4.95 18.95L7.44 17.94C7.96 18.34 8.5 18.68 9.13 18.93L9.5 21.58C9.54 21.82 9.75 22 10 22H14C14.25 22 14.46 21.82 14.5 21.58L14.87 18.93C15.5 18.67 16.04 18.33 16.56 17.94L19.05 18.95C19.27 19.03 19.54 18.95 19.66 18.73L21.66 15.27C21.78 15.05 21.73 14.78 21.54 14.63L19.43 12.97Z"
+                                        fill="white" />
+                                </svg>
+                                Customize View
+                            </button>
+                            <button onclick={goTONewListing} class="blue-btn-css">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z"
+                                        fill="white" />
+                                </svg>
+                                New Listing
+                            </button>
+                            <div class="tab-btns">
+                                <ul>
+                                    <li class="tab-div active-tab-div" onclick={handleMenuTabClick} data-tab-id="1">
+                                        <svg class="activeSvg menusvg" width="16" height="12" viewBox="0 0 24 14"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path data-tab-index="1"
+                                                d="M0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333ZM0 8.33337H2.66667V5.66671H0V8.33337ZM0 13.6667H2.66667V11H0V13.6667ZM0 3.00004H2.66667V0.333374H0V3.00004ZM5.33333 8.33337H24V5.66671H5.33333V8.33337ZM5.33333 13.6667H24V11H5.33333V13.6667ZM5.33333 0.333374V3.00004H24V0.333374H5.33333Z"
+                                                fill="#131314" />
                                         </svg>
-                                        <template if:true={isFilterApplied}>
-                                            <span class="filter-applied-dot" title="Filter Applied"></span>
-                                        </template>
-                                    </div>
+                                    </li>
+                                    <li class="tab-div" onclick={handleMenuTabClick} data-tab-id="2">
+                                        <svg class="menusvg" width="24" height="25" viewBox="0 0 24 25" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path data-tab-index="3"
+                                                d="M18 0C14.7 0 12 2.7 12 6C12 6.992 12.383 8.004 12.875 9.125C13.396 10.2913 13.9802 11.4283 14.625 12.531C15.4274 13.907 16.2823 15.2517 17.188 16.562L18 17.75L18.813 16.562C18.813 16.562 20.102 14.727 21.375 12.532C22.0199 11.429 22.6041 10.2917 23.125 9.125C23.617 8.004 24 6.992 24 6C24 2.7 21.3 0 18 0ZM7.969 1.938L0 5.344V24.53L8.031 21.062L16.031 24.062L24 20.655V11.937C23.38 13.1092 22.7128 14.2558 22 15.374V19.343L17 21.468V19.843L15.531 17.718C15.3523 17.4585 15.1753 17.1978 15 16.936V21.561L9 19.311V4.438L10.094 4.845C10.1873 4.17893 10.3657 3.5276 10.625 2.907L7.969 1.938ZM18 2C20.219 2 22 3.781 22 6C22 6.387 21.758 7.3 21.312 8.313C20.867 9.324 20.238 10.473 19.625 11.531C18.809 12.937 18.457 13.437 18 14.125C17.543 13.437 17.191 12.937 16.375 11.531C15.762 10.473 15.133 9.324 14.687 8.312C14.242 7.302 14 6.387 14 6C14 3.781 15.781 2 18 2ZM7 4.5V19.344L2 21.469V6.656L7 4.5ZM18 4.5C17.6022 4.5 17.2206 4.65804 16.9393 4.93934C16.658 5.22064 16.5 5.60218 16.5 6C16.5 6.39782 16.658 6.77936 16.9393 7.06066C17.2206 7.34196 17.6022 7.5 18 7.5C18.3978 7.5 18.7794 7.34196 19.0607 7.06066C19.342 6.77936 19.5 6.39782 19.5 6C19.5 5.60218 19.342 5.22064 19.0607 4.93934C18.7794 4.65804 18.3978 4.5 18 4.5Z"
+                                                fill="#131314" />
+                                        </svg>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="filter-tab-wrapper">
+                                <div class="filter-toggle-btn" onclick={wrapFilter}>
+                                    
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="1.5"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M0 3H16V1H0V3Z" fill={filterIconColor}></path>
+                                            <path d="M2 7H14V5H2V7Z" fill={filterIconColor}></path>
+                                            <path d="M4 11H12V9H4V11Z" fill={filterIconColor}></path>
+                                            <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
+                                        </g>
+                                    </svg>
+                                    <template if:true={isFilterApplied}>
+                                        <span class="filter-applied-dot" title="Filter Applied"></span>
+                                    </template>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </template>
-                <div class="body">
-                    <template if:false={fieldsModal}>
-                        <div class="innerDiv2 main_content_cls">
-                            <template if:true={listingSpinnerLoading}>
-                                <c-spinner-component is-absolute="true"></c-spinner-component>
-                            </template>
-                            <template if:true={showSection}>
-                                <div class="noresult">
-                                    <div class="no-data-container">
-                                        <img src="/resource/MVEX__emptyState" alt="No listings found" draggable="false" class="no-data-image" />
-                                        <div class="no-data-message">No Listings Found</div>
+                </div>
+            </template>
+            <div class="body">
+                <template if:false={fieldsModal}>
+                    <div class="innerDiv2 main_content_cls">
+                        <template if:true={listingSpinnerLoading}>
+                            <c-spinner-component is-absolute="true"></c-spinner-component>
+                        </template>
+                        <template if:true={showSection}>
+                            <div class="noresult">
+                                <div class="no-data-container">
+                                    <img src="/resource/MVEX__emptyState" alt="No listings found" draggable="false" class="no-data-image" />
+                                    <div class="no-data-message">No Listings Found</div>
 
-                                        <template if:true={hasAppliedFilters}>
-                                            <p class="no-data-hint">
-                                                No listings match the applied filters. Try adjusting your criteria:
-                                            </p>
-                                            <div class="applied-filter-badges">
-                                                <template for:each={displayedAppliedFilters} for:item="filter">
-                                                    <span key={filter.id} class="applied-filter-pill" title={filter.displayText}>
-                                                        <strong class="pill-label">{filter.label}:</strong>
-                                                        <span class="pill-value">{filter.value}</span>
-                                                    </span>
-                                                </template>
-                                                <template if:true={hasMoreFilters}>
-                                                    <button class="more-filters-pill" onclick={toggleShowAllFilters} title="View all applied filters">
-                                                        +{remainingFilterCount} more
-                                                    </button>
-                                                </template>
-                                                <template if:true={canCollapseFilters}>
-                                                    <button class="collapse-filters-btn" onclick={toggleShowAllFilters} title="Show fewer filters">
-                                                        Show less
-                                                    </button>
-                                                </template>
-                                            </div>
-                                            <div class="no-data-action-wrapper">
-                                                <button class="blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
-                                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
-                                                        <path d="M2 7H14V5H2V7Z" fill="currentColor"></path>
-                                                        <path d="M4 11H12V9H4V11Z" fill="currentColor"></path>
-                                                        <path d="M10 15H6V13H10V15Z" fill="currentColor"></path>
-                                                    </svg>
-                                                    Modify Filters
+                                    <template if:true={hasAppliedFilters}>
+                                        <p class="no-data-hint">
+                                            No listings match the applied filters. Try adjusting your criteria:
+                                        </p>
+                                        <div class="applied-filter-badges">
+                                            <template for:each={displayedAppliedFilters} for:item="filter">
+                                                <span key={filter.id} class="applied-filter-pill" title={filter.displayText}>
+                                                    <strong class="pill-label">{filter.label}:</strong>
+                                                    <span class="pill-value">{filter.value}</span>
+                                                </span>
+                                            </template>
+                                            <template if:true={hasMoreFilters}>
+                                                <button class="more-filters-pill" onclick={toggleShowAllFilters} title="View all applied filters">
+                                                    +{remainingFilterCount} more
                                                 </button>
-                                            </div>
-                                        </template>
+                                            </template>
+                                            <template if:true={canCollapseFilters}>
+                                                <button class="collapse-filters-btn" onclick={toggleShowAllFilters} title="Show fewer filters">
+                                                    Show less
+                                                </button>
+                                            </template>
+                                        </div>
+                                        <div class="no-data-action-wrapper">
+                                            <button class="blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
+                                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
+                                                    <path d="M2 7H14V5H2V7Z" fill="currentColor"></path>
+                                                    <path d="M4 11H12V9H4V11Z" fill="currentColor"></path>
+                                                    <path d="M10 15H6V13H10V15Z" fill="currentColor"></path>
+                                                </svg>
+                                                Modify Filters
+                                            </button>
+                                        </div>
+                                    </template>
 
-                                        <template if:false={hasAppliedFilters}>
-                                            <p class="no-data-hint">
-                                                We did not find any listings in the system.
-                                            </p>
-                                        </template>
-                                    </div>
+                                    <template if:false={hasAppliedFilters}>
+                                        <p class="no-data-hint">
+                                            We did not find any listings in the system.
+                                        </p>
+                                    </template>
                                 </div>
-                            </template>
+                            </div>
+                        </template>
 
-                            <template if:false={showSection}>
-                                <!-- LIST VIEW -->
-                                <template if:true={showList}>
-                                    <div class="table-content" id="table-content">
-                                        <table aria-multiselectable="true"
-                                            class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
-                                            role="grid"
-                                            aria-label="Example advanced table of Opportunities in actionable mode">
-                                            <thead>
-                                                <tr class="slds-line-height_reset fields-names table_tr_cls">
-                                                    <th class="slds-cell_action-mode imageColume" scope="col">
-                                                        <div class="slds-truncate slds-assistive-text" title="Actions">
-                                                            Actions</div>
-                                                    </th>
-                                                    <th aria-sort="none" data-id="Name" onclick={sortClick}
+                        <template if:false={showSection}>
+                            <!-- LIST VIEW -->
+                            <template if:true={showList}>
+                                <div class="table-content" id="table-content">
+                                    <table aria-multiselectable="true"
+                                        class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
+                                        role="grid"
+                                        aria-label="Example advanced table of Opportunities in actionable mode">
+                                        <thead>
+                                            <tr class="slds-line-height_reset fields-names table_tr_cls">
+                                                <th class="slds-cell_action-mode imageColume" scope="col">
+                                                    <div class="slds-truncate slds-assistive-text" title="Actions">
+                                                        Actions</div>
+                                                </th>
+                                                <th aria-sort="none" data-id="Name" onclick={sortClick}
+                                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
+                                                    scope="col">
+                                                    <div class="slds-text-link_reset sort-cover" role="button"
+                                                        tabindex="0">
+                                                        <span class="slds-assistive-text">Sort by: </span>
+                                                        <div class="slds-has-flexi-truncate center-trancate-head">
+                                                            <span class="slds-truncate" title="Title">Listing
+                                                                Name</span>
+                                                            <span
+                                                                class="slds-icon_container slds-icon-utility-arrowdown">
+                                                                <svg data-index="Name" class="listing-manager-icon"
+                                                                    viewBox="0 0 384 512"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                                </svg>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                                <template for:each={fields} for:item="listing" for:index="index">
+                                                    <th key={listing.fieldName} data-id={listing.fieldName}
+                                                        onclick={sortClick} aria-sort="none"
                                                         class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
                                                         scope="col">
-                                                        <div class="slds-text-link_reset sort-cover" role="button"
-                                                            tabindex="0">
+                                                        <div class="sort-cover" role="button" tabindex="0">
                                                             <span class="slds-assistive-text">Sort by: </span>
-                                                            <div class="slds-has-flexi-truncate center-trancate-head">
-                                                                <span class="slds-truncate" title="Title">Listing
-                                                                    Name</span>
+                                                            <div
+                                                                class="slds-has-flexi-truncate center-trancate-head">
+                                                                <span class="slds-truncate"
+                                                                    title={listing.fieldLabel}>{listing.fieldLabel}</span>
                                                                 <span
                                                                     class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                    <svg data-index="Name" class="listing-manager-icon"
+                                                                    <svg data-index={listing.fieldName}
+                                                                        class="listing-manager-icon"
                                                                         viewBox="0 0 384 512"
                                                                         xmlns="http://www.w3.org/2000/svg">
                                                                         <path
@@ -162,150 +185,113 @@
                                                             </div>
                                                         </div>
                                                     </th>
-                                                    <template for:each={fields} for:item="listing" for:index="index">
-                                                        <th key={listing.fieldName} data-id={listing.fieldName}
-                                                            onclick={sortClick} aria-sort="none"
-                                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
-                                                            scope="col">
-                                                            <div class="sort-cover" role="button" tabindex="0">
-                                                                <span class="slds-assistive-text">Sort by: </span>
-                                                                <div
-                                                                    class="slds-has-flexi-truncate center-trancate-head">
-                                                                    <span class="slds-truncate"
-                                                                        title={listing.fieldLabel}>{listing.fieldLabel}</span>
-                                                                    <span
-                                                                        class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                        <svg data-index={listing.fieldName}
-                                                                            class="listing-manager-icon"
-                                                                            viewBox="0 0 384 512"
-                                                                            xmlns="http://www.w3.org/2000/svg">
-                                                                            <path
-                                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                                        </svg>
-                                                                    </span>
-                                                                </div>
+                                                </template>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={shownProcessedListingData} for:item="listing"
+                                                for:index="index">
+                                                <tr key={listing.Id} aria-selected="false" class="table-tr">
+                                                    <td class="slds-cell_action-mode" role="gridcell">
+                                                        <div class="slds-truncate center-trancate-text">
+                                                            <img class="property-image" src={listing.media_url}
+                                                                alt="Listing Image" draggable="false" />
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell_action-mode conat_cls" scope="row">
+                                                        <div class="slds-truncate center-trancate-text">
+                                                            <a data-id={listing.Id} onclick={redirectToRecord}
+                                                                tabindex="0">{listing.Name}</a>
+                                                        </div>
+                                                    </td>
+                                                    <template for:each={listing.orderedFields} for:item="field"
+                                                        for:index="index2">
+                                                        <td key={field.fieldName} class="slds-cell_action-mode"
+                                                            role="gridcell" title={field.value}>
+                                                            <div class="slds-truncate center-trancate-text" title={field.value}>
+                                                                <template if:true={field.isRedirectable}>
+                                                                    <a data-id={field.lookupId}
+                                                                        data-object={field.objectApiName}
+                                                                        onclick={redirectToRecord}>{field.value}</a>
+                                                                </template>
+                                                                <template if:false={field.isRedirectable}>
+                                                                    {field.value}
+                                                                </template>
                                                             </div>
-                                                        </th>
+                                                        </td>
                                                     </template>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                <template for:each={shownProcessedListingData} for:item="listing"
-                                                    for:index="index">
-                                                    <tr key={listing.Id} aria-selected="false" class="table-tr">
-                                                        <td class="slds-cell_action-mode" role="gridcell">
-                                                            <div class="slds-truncate center-trancate-text">
-                                                                <img class="property-image" src={listing.media_url}
-                                                                    alt="Listing Image" draggable="false" />
-                                                            </div>
-                                                        </td>
-                                                        <td class="slds-cell_action-mode conat_cls" scope="row">
-                                                            <div class="slds-truncate center-trancate-text">
-                                                                <a data-id={listing.Id} onclick={redirectToRecord}
-                                                                    tabindex="0">{listing.Name}</a>
-                                                            </div>
-                                                        </td>
-                                                        <template for:each={listing.orderedFields} for:item="field"
-                                                            for:index="index2">
-                                                            <td key={field.fieldName} class="slds-cell_action-mode"
-                                                                role="gridcell" title={field.value}>
-                                                                <div class="slds-truncate center-trancate-text" title={field.value}>
-                                                                    <template if:true={field.isRedirectable}>
-                                                                        <a data-id={field.lookupId}
-                                                                            data-object={field.objectApiName}
-                                                                            onclick={redirectToRecord}>{field.value}</a>
-                                                                    </template>
-                                                                    <template if:false={field.isRedirectable}>
-                                                                        {field.value}
-                                                                    </template>
-                                                                </div>
-                                                            </td>
-                                                        </template>
-                                                    </tr>
-                                                </template>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </template>
-
-                                <!-- MAP VIEW -->
-                                <template if:true={showMap}>
-                                    <div class="map-view-container">
-                                        <div class="mapCmp">
-                                            <lightning-map class="map-class" map-markers={mapMarkers} list-view="hide">
-                                            </lightning-map>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <!-- UNIFIED PAGINATION -->
-                                <template if:true={showPagination}>
-                                    <div class="paginationDiv">
-                                        <div class="btnCover">
-                                            <div class="pagination-container">
-                                                <button class="pagination-btn-css" disabled={isFirstPage}
-                                                    onclick={handlePrevious}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                        viewBox="0 0 520 520" fill="#fff">
-                                                        <path
-                                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                                    </svg>
-                                                    Previous
-                                                </button>
-
-                                                <template for:each={pageNumbers} for:item="page">
-                                                    <template if:false={page.isEllipsis}>
-                                                        <button key={page.number} data-id={page.number}
-                                                            class={page.className} onclick={handlePageChange}>
-                                                            {page.number}
-                                                        </button>
-                                                    </template>
-                                                    <template if:true={page.isEllipsis}>
-                                                        <span key={page.number} class="pagination-ellipsis">...</span>
-                                                    </template>
-                                                </template>
-
-                                                <button class="pagination-btn-css" disabled={isLastPage}
-                                                    onclick={handleNext}>
-                                                    Next
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                        viewBox="0 0 520 520" fill="#fff">
-                                                        <path
-                                                            d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </template>
+
+                            <!-- MAP VIEW -->
+                            <template if:true={showMap}>
+                                <div class="map-view-container">
+                                    <div class="mapCmp">
+                                        <lightning-map class="map-class" map-markers={mapMarkers} list-view="hide">
+                                        </lightning-map>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- UNIFIED PAGINATION -->
+                            <template if:true={showPagination}>
+                                <div class="paginationDiv">
+                                    <div class="btnCover">
+                                        <div class="pagination-container">
+                                            <button class="pagination-btn-css" disabled={isFirstPage}
+                                                onclick={handlePrevious}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                                </svg>
+                                                Previous
+                                            </button>
+
+                                            <template for:each={pageNumbers} for:item="page">
+                                                <template if:false={page.isEllipsis}>
+                                                    <button key={page.number} data-id={page.number}
+                                                        class={page.className} onclick={handlePageChange}>
+                                                        {page.number}
+                                                    </button>
+                                                </template>
+                                                <template if:true={page.isEllipsis}>
+                                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                                </template>
+                                            </template>
+
+                                            <button class="pagination-btn-css" disabled={isLastPage}
+                                                onclick={handleNext}>
+                                                Next
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={isMobileOrTablet}>
+                    <div class="innerDiv1">
+                        <div class="filterDiv">
+                            <c-listing-manager-filter-cmp onvalueselected={handleFilteredListings}
+                                onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}
+                                onloading={handleLoading}>
+                            </c-listing-manager-filter-cmp>
                         </div>
-                    </template>
-                    <template if:false={isMobileOrTablet}>
-                        <div class="innerDiv1">
-                            <div class="filterDiv">
-                                <c-listing-manager-filter-cmp onvalueselected={handleFilteredListings}
-                                    onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}
-                                    onloading={handleLoading}>
-                                </c-listing-manager-filter-cmp>
-                            </div>
-                        </div>
-                    </template>
-                </div>
+                    </div>
+                </template>
             </div>
-        </template>
-        <template if:false={isAccessible}>
-            <div class="restricted-access">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                        fill="currentColor" />
-                </svg>
-                <h1>Access Restricted</h1>
-                <p>You don't have permission to access this page. Please contact your administrator for further
-                    assistance.</p>
-            </div>
-        </template>
+        </div>
     </div>
     <template if:true={isConfigOpen}>
         <c-record-config-body-cmp feature-name="Listing_Manager_Fields"

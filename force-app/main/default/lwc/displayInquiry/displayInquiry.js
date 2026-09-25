@@ -19,7 +19,6 @@ import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmp
 import { errorDebugger } from 'c/globalProperties';
 import getObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
@@ -165,7 +164,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track listingFieldOptions = [];
     @track isConstant = false;
     @track selectedRecordName = '';
-    @track hideFilterButton = false;
     @track filteredGroupMembers = [];
     @track pagedFilteredInquiryData = [];
     @track modalFilteredInquiryData = [];
@@ -562,23 +560,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
             this.vfPageMessageHandler();
             this.handleSubscribeRefresh();
-            this.checkHideFilterButton();
         } catch (error) {
             errorDebugger('displayInquiry', 'connectedCallback', error, 'warn', 'Error during initialization');
         }
-    }
-
-    checkHideFilterButton() {
-        getMetadataRecords()
-            .then(result => {
-                const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
-                if (feature && feature.MVEX__isAvailable__c) {
-                    this.hideFilterButton = true;
-                }
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
-            });
     }
 
     /**
@@ -807,7 +791,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.sendMailInquiryDataList = [];
         this.searchTerm = '';
         this.fetchListings();
-        // this.checkHideFilterButton();
     }
 
     /**

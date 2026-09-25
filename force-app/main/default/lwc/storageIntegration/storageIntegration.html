@@ -11,475 +11,469 @@
                     <!-- Row 1: AWS + Instagram -->
                     <div class="cards_row">
                         <!-- AWS Card -->
-                        <template if:true={isCloudStorageAvailable}>
-                            <div class="integration_card">
-                                <div class="card_header">
-                                    <div class="card_title_section">
-                                        <img src="/resource/MVEX__controlcenterimg/aws.png" alt="AWS"
-                                            class="integration_icon" draggable="false">
-                                        <div class="title_status">
-                                            <h3>AWS</h3>
-                                            <template if:true={awsData.isValid}>
-                                                <div class="status_badge">
-                                                    <span class="status_dot"></span>
-                                                    <span>Active</span>
-                                                </div>
-                                            </template>
-                                            <template if:false={awsData.isValid}>
-                                                <div class="status_badge inactive">
-                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
-                                                        <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
-                                                            stroke-width="1.5" stroke-linecap="round" />
-                                                    </svg>
-                                                    <span>Not Connected</span>
-                                                </div>
-                                            </template>
-                                        </div>
+                        <div class="integration_card">
+                            <div class="card_header">
+                                <div class="card_title_section">
+                                    <img src="/resource/MVEX__controlcenterimg/aws.png" alt="AWS"
+                                        class="integration_icon" draggable="false">
+                                    <div class="title_status">
+                                        <h3>AWS</h3>
+                                        <template if:true={awsData.isValid}>
+                                            <div class="status_badge">
+                                                <span class="status_dot"></span>
+                                                <span>Active</span>
+                                            </div>
+                                        </template>
+                                        <template if:false={awsData.isValid}>
+                                            <div class="status_badge inactive">
+                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
+                                                    <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
+                                                        stroke-width="1.5" stroke-linecap="round" />
+                                                </svg>
+                                                <span>Not Connected</span>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
-                                <p class="card_description">Securely store listing images and videos in the cloud.
-                                    Agents can upload and access media files directly from listing record pages with
-                                    automatic backup and reliable storage.</p>
+                            </div>
+                            <p class="card_description">Securely store listing images and videos in the cloud.
+                                Agents can upload and access media files directly from listing record pages with
+                                automatic backup and reliable storage.</p>
 
-                                <template if:true={awsData.isValid}>
-                                    <div class="card_footer">
-                                        <div class="info-div">
-                                            <div class="sync_info">
-                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
-                                                    <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
-                                                        stroke-linecap="round" />
-                                                </svg>
-                                                <span>{awsData.integrationData.relativeTime}</span>
-                                            </div>
-                                            <a class="view_details_link" data-integration="AWS" onclick={toggleDetails}>
-                                                <template if:false={awsData.showDetails}>View Details</template>
-                                                <template if:true={awsData.showDetails}>Hide Details</template>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <template if:true={awsData.showDetails}>
-                                        <div class="details_section">
-                                            <div class="detail_row">
-                                                <span class="detail_label">Bucket Name</span>
-                                                <span
-                                                    class="detail_value">{awsData.integrationData.MVEX__S3_Bucket_Name__c}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">Region</span>
-                                                <span
-                                                    class="detail_value">{awsData.integrationData.MVEX__S3_Region_Name__c}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">Created Date & Time</span>
-                                                <span class="detail_value">{awsData.integrationData.CreatedDate}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">Last Modified Date & Time</span>
-                                                <span
-                                                    class="detail_value">{awsData.integrationData.LastModifiedDate}</span>
-                                            </div>
-                                            <div class="card_actions">
-                                                <button class="action_btn secondary"
-                                                    onclick={awsWatermarkUploaderMethod}>
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M12 3C12 3 6 9.24 6 13.5C6 16.8137 8.68629 19.5 12 19.5C15.3137 19.5 18 16.8137 18 13.5C18 9.24 12 3 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    </svg>
-                                                    Set Watermark
-                                                </button>
-                                                <button class="action_btn outline deactivate_btn"
-                                                    onclick={handleDeactivateClick} data-integration="AWS">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" />
-                                                        <path
-                                                            d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
-                                                            stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" />
-                                                    </svg>
-                                                    Deactivate
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </template>
-                                <template if:false={awsData.isValid}>
-                                    <div class="card_footer">
-                                        <button class="action_btn primary full_width" onclick={newIntegrationModal}
-                                            data-name="AWS">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                            <template if:true={awsData.isValid}>
+                                <div class="card_footer">
+                                    <div class="info-div">
+                                        <div class="sync_info">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
+                                                <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
+                                                    stroke-linecap="round" />
                                             </svg>
-                                            Connect
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
-                        <!-- Instagram Card -->
-                        <template if:true={isSocialMediaAvailable}>
-                            <div class="integration_card">
-                                <div class="card_header">
-                                    <div class="card_title_section">
-                                        <img src="/resource/MVEX__controlcenterimg/instagram.png" alt="Instagram"
-                                            class="integration_icon" draggable="false">
-                                        <div class="title_status">
-                                            <h3>Instagram</h3>
-                                            <template if:true={instagramData.isValid}>
-                                                <div class="status_badge">
-                                                    <span class="status_dot"></span>
-                                                    <span>Active</span>
-                                                </div>
-                                            </template>
-                                            <template if:false={instagramData.isValid}>
-                                                <div class="status_badge inactive">
-                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
-                                                        <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
-                                                            stroke-width="1.5" stroke-linecap="round" />
-                                                    </svg>
-                                                    <span>Not Connected</span>
-                                                </div>
-                                            </template>
+                                            <span>{awsData.integrationData.relativeTime}</span>
                                         </div>
+                                        <a class="view_details_link" data-integration="AWS" onclick={toggleDetails}>
+                                            <template if:false={awsData.showDetails}>View Details</template>
+                                            <template if:true={awsData.showDetails}>Hide Details</template>
+                                        </a>
                                     </div>
                                 </div>
-                                <p class="card_description">Publish listing images directly to Instagram from each
-                                    listing record page. Upload
-                                    property photos with custom captions and hashtags to showcase properties instantly
-                                    without switching
-                                    platforms.</p>
 
-                                <template if:true={instagramData.isValid}>
-                                    <div class="card_footer">
-                                        <div class="info-div">
-                                            <div class="sync_info">
-                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
-                                                    <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
-                                                        stroke-linecap="round" />
-                                                </svg>
-                                                <span>{instagramData.integrationData.relativeTime}</span>
-                                            </div>
-                                            <a class="view_details_link" data-integration="Instagram"
-                                                onclick={toggleDetails}>
-                                                <template if:false={instagramData.showDetails}>View Details</template>
-                                                <template if:true={instagramData.showDetails}>Hide Details</template>
-                                            </a>
+                                <template if:true={awsData.showDetails}>
+                                    <div class="details_section">
+                                        <div class="detail_row">
+                                            <span class="detail_label">Bucket Name</span>
+                                            <span
+                                                class="detail_value">{awsData.integrationData.MVEX__S3_Bucket_Name__c}</span>
                                         </div>
-                                    </div>
-
-                                    <template if:true={instagramData.showDetails}>
-                                        <div class="details_section">
-                                            <div class="detail_row">
-                                                <span class="detail_label">User Name</span>
-                                                <span
-                                                    class="detail_value">{instagramData.integrationData.Username__c}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">User ID</span>
-                                                <span
-                                                    class="detail_value">{instagramData.integrationData.MVEX__User_Id__c}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">Created Date & Time</span>
-                                                <span
-                                                    class="detail_value">{instagramData.integrationData.CreatedDate}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">Last Modified Date & Time</span>
-                                                <span
-                                                    class="detail_value">{instagramData.integrationData.LastModifiedDate}</span>
-                                            </div>
-                                            <div class="card_actions">
-                                                <button class="action_btn outline deactivate_btn"
-                                                    onclick={handleDeactivateClick} data-integration="Instagram">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" />
-                                                        <path
-                                                            d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
-                                                            stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" />
-                                                    </svg>
-                                                    Deactivate
-                                                </button>
-                                            </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Region</span>
+                                            <span
+                                                class="detail_value">{awsData.integrationData.MVEX__S3_Region_Name__c}</span>
                                         </div>
-                                    </template>
-                                </template>
-
-                                <!-- ── INACTIVE state: Connect button (default) OR inline input ── -->
-                                <template if:false={instagramData.isValid}>
-                                    <!-- Connect button: visible only when input section is hidden -->
-                                    <template if:false={showInstagramInput}>
-                                        <div class="card_footer">
-                                            <button class="action_btn primary full_width"
-                                                onclick={handleInstagramConnect}>
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" />
-                                                    <circle cx="12" cy="12" r="9" stroke="currentColor"
-                                                        stroke-width="2" />
-                                                </svg>
-                                                Connect
-                                            </button>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Created Date & Time</span>
+                                            <span class="detail_value">{awsData.integrationData.CreatedDate}</span>
                                         </div>
-                                    </template>
-
-                                    <!-- Input section: shown after Connect click -->
-                                    <template if:true={showInstagramInput}>
-                                        <div class="token_input_section">
-                                            <p class="token_oauth_note">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="12" cy="12" r="10" stroke="#E1306C"
-                                                        stroke-width="1.8" />
-                                                    <path d="M12 8v4M12 16h.01" stroke="#E1306C" stroke-width="1.8"
-                                                        stroke-linecap="round" />
-                                                </svg>
-                                                Complete the authorization in the opened tab, then fill in the fields
-                                                below. Or enter them
-                                                directly if you have the tokens.
-                                            </p>
-                                            <!-- Field 1: User ID -->
-                                            <label class="token_input_label">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="12" cy="8" r="4" stroke="currentColor"
-                                                        stroke-width="1.8" />
-                                                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor"
-                                                        stroke-width="1.8" stroke-linecap="round" />
-                                                </svg>
-                                                User ID
-                                            </label>
-                                            <div class="token_textarea_wrap">
-                                                <input type="text" class="token_text_input"
-                                                    placeholder="Enter your Instagram User ID..."
-                                                    oninput={handleInstagramUserIdChange} />
-                                            </div>
-                                            <!-- Field 2: Long-Lived Access Token -->
-                                            <label class="token_input_label">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <rect x="3" y="11" width="18" height="11" rx="2"
-                                                        stroke="currentColor" stroke-width="1.8" />
-                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor"
-                                                        stroke-width="1.8" stroke-linecap="round" />
-                                                </svg>
-                                                Long-Lived Access Token
-                                            </label>
-                                            <div class="token_textarea_wrap">
-                                                <textarea class="token_textarea"
-                                                    placeholder="Paste your Instagram long-lived access token here..."
-                                                    oninput={handleInstagramLongTokenChange} rows="3">
-                                                </textarea>
-                                            </div>
-                                            <div class="card_actions">
-                                                <button class="action_btn primary" onclick={saveInstagramToken}
-                                                    disabled={isInstagramSaveDisabled}>
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
-                                                        <circle cx="12" cy="12" r="9" stroke="currentColor"
-                                                            stroke-width="2" />
-                                                    </svg>
-                                                    Save
-                                                </button>
-                                                <button class="action_btn outline" onclick={handleInstagramCancel}>
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor"
-                                                            stroke-width="2" stroke-linecap="round" />
-                                                    </svg>
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                    <!-- End Row 1 -->
-
-                    <!-- Row 2: Gmail -->
-                    <div class="cards_row">
-                        <!-- Gmail Card -->
-                        <template if:true={isEmailAvailable}>
-                            <div class="integration_card">
-                                <div class="card_header">
-                                    <div class="card_title_section">
-                                        <img src="/resource/MVEX__controlcenterimg/gmail.png" alt="Gmail"
-                                            class="integration_icon" draggable="false">
-                                        <div class="title_status">
-                                            <h3>Gmail</h3>
-                                            <template if:true={gmailData.isValid}>
-                                                <div class="status_badge">
-                                                    <span class="status_dot"></span>
-                                                    <span>Active</span>
-                                                </div>
-                                            </template>
-                                            <template if:false={gmailData.isValid}>
-                                                <div class="status_badge inactive">
-                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
-                                                        <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
-                                                            stroke-width="1.5" stroke-linecap="round" />
-                                                    </svg>
-                                                    <span>Not Connected</span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="card_description">Send professional marketing emails directly from Salesforce
-                                    using your Gmail account. Compose, personalize, and track campaigns to leads and
-                                    clients without switching platforms.</p>
-
-                                <template if:true={gmailData.isValid}>
-                                    <div class="card_footer">
-                                        <div class="info-div">
-                                            <div class="sync_info">
-                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
-                                                    <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
-                                                        stroke-linecap="round" />
-                                                </svg>
-                                                <span>{gmailData.integrationData.relativeTime}</span>
-                                            </div>
-                                            <a class="view_details_link" data-integration="Gmail"
-                                                onclick={toggleDetails}>
-                                                <template if:false={gmailData.showDetails}>View Details</template>
-                                                <template if:true={gmailData.showDetails}>Hide Details</template>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <template if:true={gmailData.showDetails}>
-                                        <div class="details_section">
-                                            <div class="detail_row">
-                                                <span class="detail_label">Email Address</span>
-                                                <span
-                                                    class="detail_value">{gmailData.integrationData.EmailAddress}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">Created Date & Time</span>
-                                                <span
-                                                    class="detail_value">{gmailData.integrationData.CreatedDate}</span>
-                                            </div>
-                                            <div class="detail_row">
-                                                <span class="detail_label">Last Modified Date & Time</span>
-                                                <span
-                                                    class="detail_value">{gmailData.integrationData.LastModifiedDate}</span>
-                                            </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Last Modified Date & Time</span>
+                                            <span
+                                                class="detail_value">{awsData.integrationData.LastModifiedDate}</span>
                                         </div>
                                         <div class="card_actions">
+                                            <button class="action_btn secondary"
+                                                onclick={awsWatermarkUploaderMethod}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M12 3C12 3 6 9.24 6 13.5C6 16.8137 8.68629 19.5 12 19.5C15.3137 19.5 18 16.8137 18 13.5C18 9.24 12 3 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                Set Watermark
+                                            </button>
                                             <button class="action_btn outline deactivate_btn"
-                                                onclick={handleDeactivateClick} data-integration="Gmail">
+                                                onclick={handleDeactivateClick} data-integration="AWS">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M12 2V12" stroke="currentColor" stroke-width="2"
                                                         stroke-linecap="round" />
                                                     <path
                                                         d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
-                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                                        stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" />
                                                 </svg>
                                                 Deactivate
                                             </button>
                                         </div>
-                                    </template>
+                                    </div>
                                 </template>
+                            </template>
+                            <template if:false={awsData.isValid}>
+                                <div class="card_footer">
+                                    <button class="action_btn primary full_width" onclick={newIntegrationModal}
+                                        data-name="AWS">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                                        </svg>
+                                        Connect
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
 
-                                <!-- ── INACTIVE state: Connect button (default) OR inline input ── -->
-                                <template if:false={gmailData.isValid}>
-                                    <!-- Connect button: visible only when input section is hidden -->
-                                    <template if:false={showGmailInput}>
-                                        <div class="card_footer">
-                                            <button class="action_btn primary full_width" onclick={handleGmailConnect}>
+                        <!-- Instagram Card -->
+                        <div class="integration_card">
+                            <div class="card_header">
+                                <div class="card_title_section">
+                                    <img src="/resource/MVEX__controlcenterimg/instagram.png" alt="Instagram"
+                                        class="integration_icon" draggable="false">
+                                    <div class="title_status">
+                                        <h3>Instagram</h3>
+                                        <template if:true={instagramData.isValid}>
+                                            <div class="status_badge">
+                                                <span class="status_dot"></span>
+                                                <span>Active</span>
+                                            </div>
+                                        </template>
+                                        <template if:false={instagramData.isValid}>
+                                            <div class="status_badge inactive">
+                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
+                                                    <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
+                                                        stroke-width="1.5" stroke-linecap="round" />
+                                                </svg>
+                                                <span>Not Connected</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="card_description">Publish listing images directly to Instagram from each
+                                listing record page. Upload
+                                property photos with custom captions and hashtags to showcase properties instantly
+                                without switching
+                                platforms.</p>
+
+                            <template if:true={instagramData.isValid}>
+                                <div class="card_footer">
+                                    <div class="info-div">
+                                        <div class="sync_info">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
+                                                <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
+                                                    stroke-linecap="round" />
+                                            </svg>
+                                            <span>{instagramData.integrationData.relativeTime}</span>
+                                        </div>
+                                        <a class="view_details_link" data-integration="Instagram"
+                                            onclick={toggleDetails}>
+                                            <template if:false={instagramData.showDetails}>View Details</template>
+                                            <template if:true={instagramData.showDetails}>Hide Details</template>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <template if:true={instagramData.showDetails}>
+                                    <div class="details_section">
+                                        <div class="detail_row">
+                                            <span class="detail_label">User Name</span>
+                                            <span
+                                                class="detail_value">{instagramData.integrationData.Username__c}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">User ID</span>
+                                            <span
+                                                class="detail_value">{instagramData.integrationData.MVEX__User_Id__c}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Created Date & Time</span>
+                                            <span
+                                                class="detail_value">{instagramData.integrationData.CreatedDate}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Last Modified Date & Time</span>
+                                            <span
+                                                class="detail_value">{instagramData.integrationData.LastModifiedDate}</span>
+                                        </div>
+                                        <div class="card_actions">
+                                            <button class="action_btn outline deactivate_btn"
+                                                onclick={handleDeactivateClick} data-integration="Instagram">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2"
+                                                    <path d="M12 2V12" stroke="currentColor" stroke-width="2"
                                                         stroke-linecap="round" />
+                                                    <path
+                                                        d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
+                                                        stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" />
+                                                </svg>
+                                                Deactivate
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- ── INACTIVE state: Connect button (default) OR inline input ── -->
+                            <template if:false={instagramData.isValid}>
+                                <!-- Connect button: visible only when input section is hidden -->
+                                <template if:false={showInstagramInput}>
+                                    <div class="card_footer">
+                                        <button class="action_btn primary full_width"
+                                            onclick={handleInstagramConnect}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" />
+                                                <circle cx="12" cy="12" r="9" stroke="currentColor"
+                                                    stroke-width="2" />
+                                            </svg>
+                                            Connect
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Input section: shown after Connect click -->
+                                <template if:true={showInstagramInput}>
+                                    <div class="token_input_section">
+                                        <p class="token_oauth_note">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="12" cy="12" r="10" stroke="#E1306C"
+                                                    stroke-width="1.8" />
+                                                <path d="M12 8v4M12 16h.01" stroke="#E1306C" stroke-width="1.8"
+                                                    stroke-linecap="round" />
+                                            </svg>
+                                            Complete the authorization in the opened tab, then fill in the fields
+                                            below. Or enter them
+                                            directly if you have the tokens.
+                                        </p>
+                                        <!-- Field 1: User ID -->
+                                        <label class="token_input_label">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="12" cy="8" r="4" stroke="currentColor"
+                                                    stroke-width="1.8" />
+                                                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor"
+                                                    stroke-width="1.8" stroke-linecap="round" />
+                                            </svg>
+                                            User ID
+                                        </label>
+                                        <div class="token_textarea_wrap">
+                                            <input type="text" class="token_text_input"
+                                                placeholder="Enter your Instagram User ID..."
+                                                oninput={handleInstagramUserIdChange} />
+                                        </div>
+                                        <!-- Field 2: Long-Lived Access Token -->
+                                        <label class="token_input_label">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <rect x="3" y="11" width="18" height="11" rx="2"
+                                                    stroke="currentColor" stroke-width="1.8" />
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor"
+                                                    stroke-width="1.8" stroke-linecap="round" />
+                                            </svg>
+                                            Long-Lived Access Token
+                                        </label>
+                                        <div class="token_textarea_wrap">
+                                            <textarea class="token_textarea"
+                                                placeholder="Paste your Instagram long-lived access token here..."
+                                                oninput={handleInstagramLongTokenChange} rows="3">
+                                            </textarea>
+                                        </div>
+                                        <div class="card_actions">
+                                            <button class="action_btn primary" onclick={saveInstagramToken}
+                                                disabled={isInstagramSaveDisabled}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
                                                     <circle cx="12" cy="12" r="9" stroke="currentColor"
                                                         stroke-width="2" />
                                                 </svg>
-                                                Connect
+                                                Save
+                                            </button>
+                                            <button class="action_btn outline" onclick={handleInstagramCancel}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" />
+                                                </svg>
+                                                Cancel
                                             </button>
                                         </div>
-                                    </template>
-
-                                    <!-- Input section: shown after Connect click -->
-                                    <template if:true={showGmailInput}>
-                                        <div class="token_input_section">
-                                            <p class="token_oauth_note">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="12" cy="12" r="10" stroke="#0176D3"
-                                                        stroke-width="1.8" />
-                                                    <path d="M12 8v4M12 16h.01" stroke="#0176D3" stroke-width="1.8"
-                                                        stroke-linecap="round" />
-                                                </svg>
-                                                Complete the authorization in the opened tab, then paste the token
-                                                below. Or paste the token
-                                                directly if you have it.
-                                            </p>
-                                            <label class="token_input_label">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <rect x="3" y="11" width="18" height="11" rx="2"
-                                                        stroke="currentColor" stroke-width="1.8" />
-                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor"
-                                                        stroke-width="1.8" stroke-linecap="round" />
-                                                </svg>
-                                                Refresh Token
-                                            </label>
-                                            <div class="token_textarea_wrap">
-                                                <textarea class="token_textarea"
-                                                    placeholder="Paste your Gmail refresh token here..."
-                                                    oninput={handleGmailTokenChange} rows="3">
-                                                </textarea>
-                                            </div>
-                                            <div class="card_actions">
-                                                <button class="action_btn primary" onclick={saveGmailToken}
-                                                    disabled={isGmailSaveDisabled}>
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
-                                                        <circle cx="12" cy="12" r="9" stroke="currentColor"
-                                                            stroke-width="2" />
-                                                    </svg>
-                                                    Save
-                                                </button>
-                                                <button class="action_btn outline" onclick={handleGmailCancel}>
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor"
-                                                            stroke-width="2" stroke-linecap="round" />
-                                                    </svg>
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </template>
+                                    </div>
                                 </template>
+                            </template>
+                        </div>
+                    </div>
+                    <!-- End Row 1 -->
+
+                    <!-- Row 2: Gmail -->
+                    <div class="cards_row">
+                        <!-- Gmail Card -->
+                        <div class="integration_card">
+                            <div class="card_header">
+                                <div class="card_title_section">
+                                    <img src="/resource/MVEX__controlcenterimg/gmail.png" alt="Gmail"
+                                        class="integration_icon" draggable="false">
+                                    <div class="title_status">
+                                        <h3>Gmail</h3>
+                                        <template if:true={gmailData.isValid}>
+                                            <div class="status_badge">
+                                                <span class="status_dot"></span>
+                                                <span>Active</span>
+                                            </div>
+                                        </template>
+                                        <template if:false={gmailData.isValid}>
+                                            <div class="status_badge inactive">
+                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="6" cy="6" r="5" stroke="#999" stroke-width="1.5" />
+                                                    <line x1="3" y1="6" x2="9" y2="6" stroke="#999"
+                                                        stroke-width="1.5" stroke-linecap="round" />
+                                                </svg>
+                                                <span>Not Connected</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
-                        </template>
+                            <p class="card_description">Send professional marketing emails directly from Salesforce
+                                using your Gmail account. Compose, personalize, and track campaigns to leads and
+                                clients without switching platforms.</p>
+
+                            <template if:true={gmailData.isValid}>
+                                <div class="card_footer">
+                                    <div class="info-div">
+                                        <div class="sync_info">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="8" cy="8" r="7" stroke="#666" stroke-width="1.5" />
+                                                <path d="M8 4V8L11 10" stroke="#666" stroke-width="1.5"
+                                                    stroke-linecap="round" />
+                                            </svg>
+                                            <span>{gmailData.integrationData.relativeTime}</span>
+                                        </div>
+                                        <a class="view_details_link" data-integration="Gmail"
+                                            onclick={toggleDetails}>
+                                            <template if:false={gmailData.showDetails}>View Details</template>
+                                            <template if:true={gmailData.showDetails}>Hide Details</template>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <template if:true={gmailData.showDetails}>
+                                    <div class="details_section">
+                                        <div class="detail_row">
+                                            <span class="detail_label">Email Address</span>
+                                            <span
+                                                class="detail_value">{gmailData.integrationData.EmailAddress}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Created Date & Time</span>
+                                            <span
+                                                class="detail_value">{gmailData.integrationData.CreatedDate}</span>
+                                        </div>
+                                        <div class="detail_row">
+                                            <span class="detail_label">Last Modified Date & Time</span>
+                                            <span
+                                                class="detail_value">{gmailData.integrationData.LastModifiedDate}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card_actions">
+                                        <button class="action_btn outline deactivate_btn"
+                                            onclick={handleDeactivateClick} data-integration="Gmail">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 2V12" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" />
+                                                <path
+                                                    d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                            </svg>
+                                            Deactivate
+                                        </button>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- ── INACTIVE state: Connect button (default) OR inline input ── -->
+                            <template if:false={gmailData.isValid}>
+                                <!-- Connect button: visible only when input section is hidden -->
+                                <template if:false={showGmailInput}>
+                                    <div class="card_footer">
+                                        <button class="action_btn primary full_width" onclick={handleGmailConnect}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 12H15M12 9V15" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" />
+                                                <circle cx="12" cy="12" r="9" stroke="currentColor"
+                                                    stroke-width="2" />
+                                            </svg>
+                                            Connect
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Input section: shown after Connect click -->
+                                <template if:true={showGmailInput}>
+                                    <div class="token_input_section">
+                                        <p class="token_oauth_note">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="12" cy="12" r="10" stroke="#0176D3"
+                                                    stroke-width="1.8" />
+                                                <path d="M12 8v4M12 16h.01" stroke="#0176D3" stroke-width="1.8"
+                                                    stroke-linecap="round" />
+                                            </svg>
+                                            Complete the authorization in the opened tab, then paste the token
+                                            below. Or paste the token
+                                            directly if you have it.
+                                        </p>
+                                        <label class="token_input_label">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <rect x="3" y="11" width="18" height="11" rx="2"
+                                                    stroke="currentColor" stroke-width="1.8" />
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor"
+                                                    stroke-width="1.8" stroke-linecap="round" />
+                                            </svg>
+                                            Refresh Token
+                                        </label>
+                                        <div class="token_textarea_wrap">
+                                            <textarea class="token_textarea"
+                                                placeholder="Paste your Gmail refresh token here..."
+                                                oninput={handleGmailTokenChange} rows="3">
+                                            </textarea>
+                                        </div>
+                                        <div class="card_actions">
+                                            <button class="action_btn primary" onclick={saveGmailToken}
+                                                disabled={isGmailSaveDisabled}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                    <circle cx="12" cy="12" r="9" stroke="currentColor"
+                                                        stroke-width="2" />
+                                                </svg>
+                                                Save
+                                            </button>
+                                            <button class="action_btn outline" onclick={handleGmailCancel}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" />
+                                                </svg>
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
                     </div>
                     <!-- End Row 2 -->
                 </div>

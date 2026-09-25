@@ -209,9 +209,4 @@ global with sharing class DocGenerateController {
             return new list<string>{'true', ''};
         } 
     }
-
-    @Deprecated
-    global static string fetchSignatureBase64(String id){
-        return null;
-    }
 }

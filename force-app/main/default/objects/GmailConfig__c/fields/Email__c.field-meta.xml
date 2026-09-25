@@ -3,7 +3,8 @@
     <fullName>Email__c</fullName>
     <deprecated>false</deprecated>
     <label>Email</label>
+    <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
-    <type>TextArea</type>
+    <type>Text</type>
 </CustomField>

@@ -2,11 +2,11 @@ import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
-import getLeadAssignmentInitData from '@salesforce/apex/LeadAssignmentController.getLeadAssignmentInitData';
-import manageRule from '@salesforce/apex/LeadAssignmentController.manageRule';
-import getRecordNames from '@salesforce/apex/LeadAssignmentController.getRecordNames';
-import getEmailNotificationEnabled from '@salesforce/apex/LeadAssignmentController.getEmailNotificationEnabled';
-import setEmailNotificationEnabled from '@salesforce/apex/LeadAssignmentController.setEmailNotificationEnabled';
+import getLeadAssignmentInitData from '@salesforce/apex/ControlCenterController.getLeadAssignmentInitData';
+import manageRule from '@salesforce/apex/ControlCenterController.manageRule';
+import getRecordNames from '@salesforce/apex/ControlCenterController.getRecordNames';
+import getEmailNotificationEnabled from '@salesforce/apex/ControlCenterController.getEmailNotificationEnabled';
+import setEmailNotificationEnabled from '@salesforce/apex/ControlCenterController.setEmailNotificationEnabled';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class LeadAssignmentRule extends NavigationMixin(LightningElement) {

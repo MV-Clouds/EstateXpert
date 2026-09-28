@@ -97,6 +97,17 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     */
     connectedCallback(){
         try {
+            const clientId = '898941498423-vnu1k5g98q4e6i518525q377o1d4v3v0.apps.googleusercontent.com';
+            const redirectUri = 'https://qa1-ep-lightning-dev-ed.my.salesforce.com/services/oauth2/callback';
+            const hehe = 'https://accounts.google.com/o/oauth2/auth?client_id=' + clientId +
+                                 '&redirect_uri=' + redirectUri +
+                             '&response_type=code&access_type=offline&prompt=consent' +
+                             '&scope=' + GMAIL_SENDING_ENDPOINT + 'auth/gmail.send%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email';
+            console.log(';gmail url', hehe)
+            const hehe1 = Google_Oauth_URL + 'client_id=' + clientId +
+                                 '&redirect_uri=' + redirectUri +
+                                 '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope + '%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email';
+            console.log(';gmail url', hehe1)
             loadStyle(this, MulishFontCss);
             this.getSocialMediaDataToShow();
         } catch (error) {
@@ -436,9 +447,9 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {
-                            url: Google_Oauth_URL + 'client_id=' + fieldsData.MVEX__Client_ID__c +
-                                 '&redirect_uri=' + fieldsData.MVEX__Redirect_URI__c +
-                                 '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope
+                            url: Google_Oauth_URL + 'client_id=' + clientId +
+                                 '&redirect_uri=' + redirectUri +
+                                 '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope + '%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email'
                         }
                     });
                 })

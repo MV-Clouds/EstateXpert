@@ -36,20 +36,6 @@
         <value>https://www.googleapis.com/</value>
     </labels>
     <labels>
-        <fullName>Google_Drive_Endpoint</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Google Drive Endpoint</shortDescription>
-        <value>https://oauth2.googleapis.com/token</value>
-    </labels>
-    <labels>
-        <fullName>Google_Drive_Scope</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Google Drive Scope</shortDescription>
-        <value>https://www.googleapis.com/auth/drive.file</value>
-    </labels>
-    <labels>
         <fullName>Google_Endpoint</fullName>
         <language>en_US</language>
         <protected>true</protected>
@@ -64,39 +50,11 @@
         <value>https://graph.instagram.com/v21.0/</value>
     </labels>
     <labels>
-        <fullName>Lead_Welcome_Email_Template</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Lead Welcome Email Template</shortDescription>
-        <value>Welcome_Lead_Email_Template</value>
-    </labels>
-    <labels>
-        <fullName>Outlook_Batch_Url</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Outlook Batch Url</shortDescription>
-        <value>https://graph.microsoft.com/v1.0/$batch</value>
-    </labels>
-    <labels>
-        <fullName>Outlook_Endpoint</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Outlook Endpoint</shortDescription>
-        <value>https://login.microsoftonline.com/common/oauth2/v2.0/</value>
-    </labels>
-    <labels>
         <fullName>PropertyFinder_Endpoint_Production</fullName>
         <language>en_US</language>
         <protected>true</protected>
         <shortDescription>PropertyFinder_Endpoint_Production</shortDescription>
         <value>https://atlas.propertyfinder.com/v1/</value>
-    </labels>
-    <labels>
-        <fullName>ReminderBeforeDays</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>ReminderBeforeDays</shortDescription>
-        <value>1</value>
     </labels>
     <labels>
         <fullName>Rightmove_Endpoint_Production</fullName>
@@ -111,20 +69,6 @@
         <protected>true</protected>
         <shortDescription>Rightmove Endpoint Sandbox</shortDescription>
         <value>https://adfapi.adftest.rightmove.com/v1/property/</value>
-    </labels>
-    <labels>
-        <fullName>Whatsapp_Endpoint</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Whatsapp Endpoint &amp; Version</shortDescription>
-        <value>https://graph.facebook.com/;v24.0</value>
-    </labels>
-    <labels>
-        <fullName>Whatsapp_Webhook_Gmail_API</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Whatsapp Webhook Gmail API</shortDescription>
-        <value>https://gmail.googleapis.com/gmail/v1/users/me/messages/send</value>
     </labels>
     <labels>
         <fullName>Zoopla_Doc_Endpoint</fullName>

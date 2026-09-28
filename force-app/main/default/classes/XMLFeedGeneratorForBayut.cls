@@ -32,17 +32,17 @@ public with sharing class XMLFeedGeneratorForBayut {
 
             // Retrieve portal listings
             Set<Id> listingIds = new Set<Id>();
-            List<PortalListing__c> portalListings;
+            List<MVEX__PortalListing__c> portalListings;
             if (String.isNotBlank(recordID)) {
-                portalListings = [SELECT Id, Listing__c FROM PortalListing__c WHERE Portal__c = :recordID AND SystemIsActive__c = TRUE WITH USER_MODE
+                portalListings = [SELECT Id, MVEX__Listing__c FROM MVEX__PortalListing__c WHERE MVEX__Portal__c = :recordID AND MVEX__SystemIsActive__c = TRUE WITH USER_MODE
                                     ORDER BY CreatedDate DESC];
             } else {
-                portalListings = [SELECT Id, Listing__c FROM PortalListing__c WHERE SystemIsActive__c = TRUE WITH USER_MODE ORDER BY CreatedDate DESC];
+                portalListings = [SELECT Id, MVEX__Listing__c FROM MVEX__PortalListing__c WHERE MVEX__SystemIsActive__c = TRUE WITH USER_MODE ORDER BY CreatedDate DESC];
             }
 
-            for (PortalListing__c pl : portalListings) {
-                if (pl.Listing__c != null) {
-                    listingIds.add(pl.Listing__c);
+            for (MVEX__PortalListing__c pl : portalListings) {
+                if (pl.MVEX__Listing__c != null) {
+                    listingIds.add(pl.MVEX__Listing__c);
                 }
             }
 
@@ -75,19 +75,15 @@ public with sharing class XMLFeedGeneratorForBayut {
             }
 
             // Query property media
-            Map<Id, List<Property_File__c>> propertyMediaMap = new Map<Id, List<Property_File__c>>();
+            Map<Id, List<MVEX__Property_File__c>> propertyMediaMap = new Map<Id, List<MVEX__Property_File__c>>();
             if (!propertyIds.isEmpty()) {
-                for (Property_File__c media : [
-                    SELECT BaseUrl__c, ExternalLink__c, Property__c, Tags__c
-                    FROM Property_File__c
-                    WHERE Property__c IN :propertyIds AND IsOnPortalFeed__c = TRUE
-                    WITH USER_MODE
-                    ORDER BY Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC
-                ]) {
-                    if (!propertyMediaMap.containsKey(media.Property__c)) {
-                        propertyMediaMap.put(media.Property__c, new List<Property_File__c>());
+                for (MVEX__Property_File__c media : [SELECT MVEX__BaseUrl__c, MVEX__ExternalLink__c, MVEX__Property__c, MVEX__Tags__c
+                                                        FROM MVEX__Property_File__c WHERE MVEX__Property__c IN :propertyIds AND MVEX__IsOnPortalFeed__c = TRUE
+                                                        WITH USER_MODE ORDER BY MVEX__Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC]) {
+                    if (!propertyMediaMap.containsKey(media.MVEX__Property__c)) {
+                        propertyMediaMap.put(media.MVEX__Property__c, new List<MVEX__Property_File__c>());
                     }
-                    propertyMediaMap.get(media.Property__c).add(media);
+                    propertyMediaMap.get(media.MVEX__Property__c).add(media);
                 }
             }
 
@@ -128,15 +124,15 @@ public with sharing class XMLFeedGeneratorForBayut {
                     List<String> floorPlanParts = new List<String>();
                     List<String> videoParts = new List<String>();
 
-                    for (Property_File__c media : propertyMediaMap.get(propertyId)) {
-                        String imageUrl = String.isNotBlank(media.ExternalLink__c) ? media.ExternalLink__c : media.BaseUrl__c;
+                    for (MVEX__Property_File__c media : propertyMediaMap.get(propertyId)) {
+                        String imageUrl = String.isNotBlank(media.MVEX__ExternalLink__c) ? media.MVEX__ExternalLink__c : media.MVEX__BaseUrl__c;
                         if (String.isBlank(imageUrl)) continue;
 
                         String escapedUrl = manuallyEscapeXml(imageUrl);
                         Boolean isSpecialMedia = false;
 
-                        if (String.isNotBlank(media.Tags__c)) {
-                            List<String> tags = media.Tags__c.toLowerCase().split(';');
+                        if (String.isNotBlank(media.MVEX__Tags__c)) {
+                            List<String> tags = media.MVEX__Tags__c.toLowerCase().split(';');
                             if (tags.contains('floorplan')) {
                                 floorPlanParts.add('<Floor_Plan>' + escapedUrl + '</Floor_Plan>');
                                 isSpecialMedia = true;
@@ -196,15 +192,11 @@ public with sharing class XMLFeedGeneratorForBayut {
         try {
             String picklistValue = (isForBayut && isForDubizzle) || isForBayut ? 'Bayut' : 'Dubizzle';
             Map<String, Map<String, String>> fieldApiNameToLabelMap = new Map<String, Map<String, String>>();
-            for (Portal_Listing_Mapping__c mapping : [
-                SELECT Name, Listing_Field_API_Name__c, Value_Mapping__c
-                FROM Portal_Listing_Mapping__c
-                WHERE Portal_Name__c = :picklistValue AND Listing_Field_API_Name__c != NULL
-                WITH USER_MODE
-            ]) {
+            for (MVEX__Portal_Listing_Mapping__c mapping : [SELECT Name, MVEX__Listing_Field_API_Name__c, MVEX__Value_Mapping__c FROM MVEX__Portal_Listing_Mapping__c
+                                                                WHERE MVEX__Portal_Name__c = :picklistValue AND MVEX__Listing_Field_API_Name__c != NULL WITH USER_MODE]) {
                 fieldApiNameToLabelMap.put(
-                    mapping.Listing_Field_API_Name__c,
-                    new Map<String, String>{ 'Label' => mapping.Name, 'ValueMapping' => mapping.Value_Mapping__c }
+                    mapping.MVEX__Listing_Field_API_Name__c,
+                    new Map<String, String>{ 'Label' => mapping.Name, 'ValueMapping' => mapping.MVEX__Value_Mapping__c }
                 );
             }
             return fieldApiNameToLabelMap;

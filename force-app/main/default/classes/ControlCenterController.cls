@@ -58,12 +58,8 @@ public with sharing class ControlCenterController {
                             FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'  AND (Default_User__c = false OR Default_User__c = null) WITH USER_MODE ORDER BY MVEX__User_Order__c];
 
             // Get the default assignee record (Default_User__c = true; Name stores the userId)
-            List<MVEX__Lead_Assignment_Setting__c> defaultRules = [
-                SELECT Id, Name, Default_User__c
-                FROM MVEX__Lead_Assignment_Setting__c
-                WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
-                WITH USER_MODE LIMIT 1
-            ];
+            List<MVEX__Lead_Assignment_Setting__c> defaultRules = [SELECT Id, Name, Default_User__c FROM MVEX__Lead_Assignment_Setting__c
+                                                                    WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true WITH USER_MODE LIMIT 1];
             if (!defaultRules.isEmpty()) {
                 result.defaultRule = defaultRules[0];
             }
@@ -282,12 +278,7 @@ public with sharing class ControlCenterController {
     @AuraEnabled
     public static Boolean getEmailNotificationEnabled() {
         try {
-            List<MVEX__Configuration_Settings__c> configs = [
-                SELECT MVEX__Fields_Data__c
-                FROM MVEX__Configuration_Settings__c
-                WHERE Name = 'Lead_Assignment_Notification'
-                WITH USER_MODE LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Lead_Assignment_Notification' WITH USER_MODE LIMIT 1];
             if (!configs.isEmpty() && configs[0].MVEX__Fields_Data__c != null) {
                 return configs[0].MVEX__Fields_Data__c.trim().equalsIgnoreCase('true');
             }
@@ -306,12 +297,7 @@ public with sharing class ControlCenterController {
     @AuraEnabled
     public static void setEmailNotificationEnabled(Boolean isEnabled) {
         try {
-            List<MVEX__Configuration_Settings__c> configs = [
-                SELECT Id
-                FROM MVEX__Configuration_Settings__c
-                WHERE Name = 'Lead_Assignment_Notification'
-                WITH USER_MODE LIMIT 1
-            ];
+            List<MVEX__Configuration_Settings__c> configs = [SELECT Id FROM MVEX__Configuration_Settings__c WHERE Name = 'Lead_Assignment_Notification' WITH USER_MODE LIMIT 1];
             MVEX__Configuration_Settings__c config = configs.isEmpty()
                 ? new MVEX__Configuration_Settings__c(Name = 'Lead_Assignment_Notification', MVEX__Feature_Name__c = 'Lead_Assignment_Notification')
                 : configs[0];

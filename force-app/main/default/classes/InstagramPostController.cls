@@ -92,19 +92,11 @@ public with sharing class InstagramPostController {
         try {
             Map<String, String> mediaUrlMap = new Map<String, String>();
     
-            MVEX__Listing__c listingRecord = [
-                SELECT MVEX__Property__c 
-                FROM MVEX__Listing__c 
-                WHERE Id = :listingId WITH USER_MODE
-                LIMIT 1
-            ];
+            MVEX__Listing__c listingRecord = [SELECT MVEX__Property__c FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
         
             if (listingRecord != null && listingRecord.MVEX__Property__c != null) {
-                List<MVEX__Property_File__c> propertyFiles = [
-                    SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c
-                    FROM MVEX__Property_File__c 
-                    WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE
-                ];
+                List<MVEX__Property_File__c> propertyFiles = [SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c FROM MVEX__Property_File__c 
+                                                                WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE];
         
                 for (MVEX__Property_File__c file : propertyFiles) {
                     if (String.isNotBlank(file.MVEX__ExternalLink__c)) {
@@ -198,7 +190,6 @@ public with sharing class InstagramPostController {
                     System.schedule('Instagram Media Publish ' + mediaContainerId, cronExpression, job);
 
                     apexResponse.status = 'SUCCESS';
-                    // apexResponse.message = 'Media container created. Publishing scheduled.';
                     apexResponse.message = 'Instagram post is successfully created.';
                     return apexResponse;
                 } else {
@@ -275,9 +266,7 @@ public with sharing class InstagramPostController {
     }
 
     public static void sendEmailNotification(String errorMessage) {
-
         try {
-            
             String emailId = UserInfo.getUserEmail();
             String userName = UserInfo.getName();
             String errorEmailId = System.Label.ErrorNotificationEmail;
@@ -290,37 +279,15 @@ public with sharing class InstagramPostController {
             emailBody = emailBody.replace('{!errorDetails}', errorMessage);
             emailBody = emailBody.replace('{!User}', userName);
     
-            MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
-    
-            String refreshToken = settings.MVEX__Refresh_Token__c;
-    
-            if(refreshToken != null && emailId != null){
-                List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
-    
-                GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
-                singleGmail.toAddresses = new List<String>{emailId , errorEmailId};
-                singleGmail.subject = emailTemplate.Subject;
-                singleGmail.body = emailBody;
-    
-                gmails.add(singleGmail);
-    
-                GmailIntegrationControllerV1.requestNewAccessToken(gmails,null,null,false);
-    
-            }
-            else if(emailId != null){
-                    
+            if(emailId != null){
                 Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                 mail.setToAddresses(new String[] { emailId, errorEmailId});
                 mail.setSubject(emailTemplate.Subject);
                 mail.setHtmlBody(emailBody);
-        
                 Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
-                System.debug('Email sent to user: ' + emailId);
             }
                 
         } catch (Exception e) {
-            System.debug('Error: ' + e.getMessage());
-            System.debug('Error: ' + e.getLineNumber());
             ErrorHandler.insertErrordata(e, 'InstagramPostController', 'sendEmailNotification', 'Error while sending email notification.');
         }
 

@@ -14,22 +14,14 @@ public without sharing class ContactTriggerHandler {
 
     public static void handleLeadAssignment(List<Contact> newLeads, Map<Id, Contact> oldLeadMap) {
         try {
-            List<MVEX__Lead_Assignment_Setting__c> allRules = [
-                SELECT Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c
-                FROM MVEX__Lead_Assignment_Setting__c
-                WHERE MVEX__Object_Name__c = 'Contact'
-                AND (Default_User__c = false OR Default_User__c = null)
-                ORDER BY MVEX__User_Order__c ASC
-            ];
+            List<MVEX__Lead_Assignment_Setting__c> allRules = [SELECT Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c
+                                                                FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'
+                                                                AND (Default_User__c = false OR Default_User__c = null) ORDER BY MVEX__User_Order__c ASC];
 
             // Fetch the default assignee record 
             String defaultAssigneeUserId = null;
-            List<MVEX__Lead_Assignment_Setting__c> defaultRules = [
-                SELECT Name
-                FROM MVEX__Lead_Assignment_Setting__c
-                WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
-                LIMIT 1
-            ];
+            List<MVEX__Lead_Assignment_Setting__c> defaultRules = [SELECT Name FROM MVEX__Lead_Assignment_Setting__c
+                                                                    WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true LIMIT 1];
             if (!defaultRules.isEmpty()) {
                 defaultAssigneeUserId = defaultRules[0].Name;
             }
@@ -369,12 +361,8 @@ public without sharing class ContactTriggerHandler {
             if (!ownerIdsToNotify.isEmpty()) {
                 // Check email notification toggle setting
                 Boolean emailNotifEnabled = true;
-                List<MVEX__Configuration_Settings__c> notifConfigs = [
-                    SELECT MVEX__Fields_Data__c
-                    FROM MVEX__Configuration_Settings__c
-                    WHERE Name = 'Lead_Assignment_Notification'
-                    LIMIT 1
-                ];
+                List<MVEX__Configuration_Settings__c> notifConfigs = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c
+                                                                        WHERE Name = 'Lead_Assignment_Notification' LIMIT 1];
                 if (!notifConfigs.isEmpty() && notifConfigs[0].MVEX__Fields_Data__c != null) {
                     emailNotifEnabled = notifConfigs[0].MVEX__Fields_Data__c.trim().equalsIgnoreCase('true');
                 }

@@ -141,7 +141,7 @@ global without sharing class MetaLeadWebhook {
             }
 
             // --- 4. Process Field Mappings ---
-            List<MetaLeadFieldMapping__mdt> mappingRecords = [SELECT MVEX__New_Field_Mapping__c FROM MetaLeadFieldMapping__mdt LIMIT 1];
+            List<MVEX__MetaLeadFieldMapping__mdt> mappingRecords = [SELECT MVEX__New_Field_Mapping__c FROM MVEX__MetaLeadFieldMapping__mdt LIMIT 1];
             // Deserialize the JSON string into a list of mappings
             List<FieldMapping> fieldMappings = new List<FieldMapping>();
             if (!mappingRecords.isEmpty() && String.isNotBlank(mappingRecords[0].MVEX__New_Field_Mapping__c)) {

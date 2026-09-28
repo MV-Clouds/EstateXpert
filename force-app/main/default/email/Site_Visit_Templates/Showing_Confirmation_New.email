@@ -24,7 +24,7 @@
                         <h2>Showing Confirmation</h2>
                     </div>
                     <div class="content">
-                        <p>Dear &nbsp;<apex:outputText value="{!recipient.Name}" escape="true"/>,</p>
+                        <p>Dear &nbsp;<apex:outputText value="{!recipient.FirstName}" escape="true"/>,</p>
                         <p>This email is to confirm your scheduled showing for the property at <strong><apex:outputText value="{!relatedTo.MVEX__Listing__r.Name}" escape="true"/></strong>.</p>
                         
                         <table class="details-table">

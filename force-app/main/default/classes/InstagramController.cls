@@ -5,6 +5,7 @@ public without sharing class InstagramController {
     public String errorMessage { get; set; }
     public String longLivedToken { get; set; }
     public String instagramUserId { get; set; }
+    public static final String instagramEndpoint = System.label.InstagramEndPoint;
     @TestVisible public static List<MVEX__recordManagerConfig__mdt> mockMetadata = null;
     
     public InstagramController() {
@@ -129,7 +130,7 @@ public without sharing class InstagramController {
             HttpRequest request = new HttpRequest();
             
             request.setMethod('GET');
-            request.setEndpoint('https://graph.instagram.com/v21.0/me?fields=user_id,username&access_token=' + longRefreshToken);
+            request.setEndpoint(instagramEndpoint + 'me?fields=user_id,username&access_token=' + longRefreshToken);
             
             HttpResponse response = http.send(request);
             

@@ -899,6 +899,8 @@
 .position_css lightning-combobox,
 .position_css .slds-combobox {
   text-align: left !important;
+  width: 100% !important;
+  display: block !important;
 }
 
 .position_css lightning-combobox .slds-combobox__input,

@@ -5,6 +5,7 @@ import getLeadForms from '@salesforce/apex/MetaAdsFormMappingController.getLeadF
 import getSalesforceLeadFields from '@salesforce/apex/MetaAdsFormMappingController.getSalesforceLeadFields';
 import getExistingMappings from '@salesforce/apex/MetaAdsFormMappingController.getExistingMappings';
 import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveMapping';
+import deactivateConnection from '@salesforce/apex/MetaAdsTokenController.deactivateConnection';
 
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
@@ -26,6 +27,9 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track selectedFormId = '';
     @track currentFormFields = [];   // [{ key, label, value, options }]
     @track formsLoaded = false;      // true once forms have been fetched for selected page
+
+    pendingAction = null;
+    pendingRow = null;
 
     // Overall JSON state — { pageId: { pageName, forms: { formId: { formName, mappings: {} } } } }
     fullMappingJson = {};
@@ -434,9 +438,11 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     async saveMapping() {
         // ── Validate: all required SF fields must be mapped ──────────────────
-        const unmappedRequired = this.currentFormFields.filter(f => f.required && !f.value);
+        const mappedSfFields = new Set(this.currentFormFields.map(f => f.value).filter(Boolean));
+        const unmappedRequired = this.salesforceLeadFields.filter(sf => sf.required === 'true' && !mappedSfFields.has(sf.value));
+        
         if (unmappedRequired.length > 0) {
-            const names = unmappedRequired.map(f => f.label).join(', ');
+            const names = unmappedRequired.map(f => f.label.split(' (')[0]).join(', ');
             this.showToast('Validation Error',
                 `The following required Salesforce fields must be mapped before saving: ${names}`,
                 'error');
@@ -542,7 +548,9 @@ export default class MetaAdsFormMapping extends LightningElement {
             }
         }
         if (targetRow) {
-            this.deleteRow(targetRow);
+            this.pendingAction = 'delete';
+            this.pendingRow = targetRow;
+            this.showMessagePopup('Warning', 'Confirm Delete', 'Are you sure you want to delete this mapping?');
         }
     }
 
@@ -573,10 +581,6 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     async deleteRow(row) {
-        if (!confirm('Are you sure you want to delete this mapping?')) {
-            return;
-        }
-
         try {
             this.isLoading = true;
             if (this.fullMappingJson[row.pageId]) {
@@ -606,6 +610,53 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.showToast('Error', e.message, 'error');
         } finally {
             this.isLoading = false;
+        }
+    }
+
+    handleDeactivateClick() {
+        this.pendingAction = 'deactivate';
+        this.showMessagePopup('Warning', 'Deactivate Integration', 'Are you sure you want to deactivate the Meta Ads integration? This will remove the connection.');
+    }
+
+    async confirmDeactivate() {
+        this.isLoading = true;
+        try {
+            const result = await deactivateConnection();
+            if (result && result.success) {
+                this.showToast('Success', 'Integration deactivated successfully.', 'success');
+                this.fullMappingJson = {};
+                this.availablePages = [];
+                this.buildTableData();
+            } else {
+                this.showToast('Error', result?.message || 'Failed to deactivate integration.', 'error');
+            }
+        } catch (error) {
+            this.showToast('Error', error.body ? error.body.message : error.message, 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    handleConfirmation(event) {
+        if (event.detail === true) {
+            if (this.pendingAction === 'delete') {
+                this.deleteRow(this.pendingRow);
+            } else if (this.pendingAction === 'deactivate') {
+                this.confirmDeactivate();
+            }
+        }
+        this.pendingAction = null;
+        this.pendingRow = null;
+    }
+
+    showMessagePopup(Status, Title, Message) {
+        const messageContainer = this.template.querySelector('c-message-popup')
+        if (messageContainer) {
+            messageContainer.showMessagePopup({
+                status: Status,
+                title: Title,
+                message: Message,
+            });
         }
     }
 

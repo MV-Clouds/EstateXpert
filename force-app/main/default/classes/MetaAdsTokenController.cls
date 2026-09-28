@@ -175,6 +175,7 @@ public without sharing class MetaAdsTokenController {
      * @return Map containing success flag
      */
     @RemoteAction
+    @AuraEnabled
     public static Map<String, Object> deactivateConnection() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {

@@ -10,6 +10,13 @@
                     <div class="broadcast-title">Meta Ads Form Mappings</div>
                 </div>
                 <div class="header-right-info">
+                    <button class="blue-btn-css" onclick={handleDeactivateClick}>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                            <path d="M8 12L5.5 14.5C4.12 15.88 1.88 15.88 0.5 14.5C-0.88 13.12 -0.88 10.88 0.5 9.5L3 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M12 8L14.5 5.5C15.88 4.12 18.12 4.12 19.5 5.5C20.88 6.88 20.88 9.12 19.5 10.5L17 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        Deactivate
+                    </button>
                     <button class="blue-btn-css" onclick={openNewMappingModal}>
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -119,6 +126,12 @@
                 <div class="no-records-message">
                     <div class="empty-state">
                         <div class="empty-state__content">
+                            <div class="empty-icon">
+                                <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 4h16v16H4z" stroke="#0176D3" stroke-width="1.5" stroke-linejoin="round"></path>
+                                    <path d="M8 9h8M8 13h5" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round"></path>
+                                </svg>
+                            </div>
                             <div class="empty-state__message">No Data Available to Show.</div>
                         </div>
                     </div>
@@ -266,4 +279,5 @@
             <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
         </template>
     </div>
+    <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
 </template>

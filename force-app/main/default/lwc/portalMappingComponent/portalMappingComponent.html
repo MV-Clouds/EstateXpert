@@ -1,134 +1,561 @@
 <template>
-    <div class="main_div_portal_mapping_container">
-        <div class="main_body">
-            <div class="body_1">
-                <div class="section-header section-header--available">
-                    <div class="section-header__left">
-                        <span class="section-header__dot"></span>
-                        <p class="section-header__title">Available Portals</p>
+    <template if:true={showMainView}>
+        <!-- Main Portal Mapping View -->
+        <div class="main_div_portal_mapping_container">
+            <div class="main_body">
+                <div class="body_1">
+                    <div class="section-header section-header--available">
+                        <div class="section-header__left">
+                            <span class="section-header__dot"></span>
+                            <p class="section-header__title">Available Portals</p>
+                        </div>
+                        <p class="section-header__subtitle">Pick a portal and add a new connection</p>
                     </div>
-                    <p class="section-header__subtitle">Pick a portal and add a new connection</p>
+
+                    <div class="grid-style available-portals">
+                        <template for:each={portals} for:item="portal">
+                            <div key={portal.Id} class="portal-box">
+                                <div class="available-card-top">
+                                    <p class="portal-name">{portal.portalName}</p>
+                                    <button class="preview-icon-css add_icon_css" onclick={handleNew}
+                                        data-portalname={portal.portalName} data-portaliconurl={portal.logoURL}
+                                        type="button" title="Add Integration">
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="3"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="portal_img_cls">
+                                    <img src={portal.logoURL} alt={portal.portalName} class="portal-logo"
+                                        draggable="false">
+                                </div>
+
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
-                <div class="grid-style available-portals">
-                    <template for:each={portals} for:item="portal">
-                        <div key={portal.Id} class="portal-box">
-                            <div class="available-card-top">
-                                <p class="portal-name">{portal.portalName}</p>
-                                <button class="preview-icon-css add_icon_css" onclick={handleNew}
-                                    data-portalname={portal.portalName} data-portaliconurl={portal.logoURL}
-                                    type="button" title="Add Integration">
-                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="3"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div class="portal_img_cls">
-                                <img src={portal.logoURL} alt={portal.portalName} class="portal-logo"
-                                    draggable="false">
-                            </div>
-
+                <div class="body_2">
+                    <div class="section-header section-header--connected">
+                        <div class="section-header__left">
+                            <span class="section-header__dot"></span>
+                            <p class="section-header__title">Connected Portals</p>
+                        </div>
+                        <p class="section-header__subtitle">Manage mapped portals and status</p>
+                    </div>
+                    <template if:true={isPortalData}>
+                        <div class="field-mapping-container">
+                            <template for:each={portalRecordList} for:item="record" for:index="index">
+                                <div key={record.val.Id} class="portalMapping_data-row">
+                                    <div class="name_icon_css">
+                                        <img src={record.val.MVEX__Endpoint__c} alt={record.val.MVEX__Generator__c}
+                                            class="small-logo" draggable="false">
+                                        <p class="font_style_css">
+                                            {record.val.Name}
+                                        </p>
+                                    </div>
+                                    <div class="status_btn_cls">
+                                        <div class="tableStatusCol">
+                                            <div class="slds-truncate">
+                                                <div class="container">
+                                                    <div class="content">
+                                                        <label class="switch">
+                                                            <input type="checkbox" checked={record.val.MVEX__Is_Active__c}
+                                                                onchange={handleStatusChange}
+                                                                data-portal-id={record.val.Id}
+                                                                data-portal-name={record.val.Name} />
+                                                            <small></small>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="action-btn">
+                                            <button class="preview-icon-css action-div" data-portalname={record.val.Name}
+                                                data-portaliconurl={record.val.MVEX__Endpoint__c}
+                                                data-portalstatus={record.val.MVEX__Is_Active__c}
+                                                data-portalgen={record.val.MVEX__Generator__c} data-portalid={record.val.Id}
+                                                onclick={handleClick}>
+                                                <svg width="14" height="14" fill="#000000"
+                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                                                    enable-background="new 0 0 52 52" xml:space="preserve">
+                                                    <path
+                                                        d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
+                                                    </path>
+                                                    <path
+                                                        d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                            <button class="edit-icon-css action-div" onclick={handleEditPortal}
+                                                data-portal-id={record.val.Id}
+                                                data-portaliconurl={record.val.MVEX__Endpoint__c}
+                                                data-portalgen={record.val.MVEX__Generator__c}>
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                                                        stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                            <button class="delete-icon-css delete-div" onclick={handleDelete}
+                                                data-portal-id={record.val.Id} data-portal-name={record.val.Name}>
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                                        stroke="#212529" stroke-width="1.25" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={isPortalData}>
+                        <div class="exp-no-data-container">
+                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                            <div class="exp-no-data-message">No Portals are available to show.</div>
                         </div>
                     </template>
                 </div>
             </div>
+        </div>
+    </template>
 
-            <div class="body_2">
-                <div class="section-header section-header--connected">
-                    <div class="section-header__left">
-                        <span class="section-header__dot"></span>
-                        <p class="section-header__title">Connected Portals</p>
-                    </div>
-                    <p class="section-header__subtitle">Manage mapped portals and status</p>
+    <template if:true={showLandingPageView}>
+        <!-- Landing Page View -->
+        <div class="main_div_portal_mapping_landing_container">
+            <div class="landing_field-mapping-container">
+                <div class="action">
+                    <button class="white-btn-css" onclick={handleBackToMain} aria-label="Back">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="currentColor"/>
+                        </svg>
+                        <template if:false={isMobileOrTablet}>Back</template>
+                    </button>
+                    <button class="blue-btn-css" onclick={handleLandingSave} disabled={isLandingButtonsDisabled} aria-label="Save">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                        </svg>
+                        <template if:false={isMobileOrTablet}>Save</template>
+                    </button>
+                    <button class="blue-btn-css" onclick={revertTheChanges} disabled={isLandingButtonsDisabled} aria-label="Revert Changes">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 5V2L7 7L12 12V9C15.31 9 18 11.69 18 15C18 18.31 15.31 21 12 21C8.69 21 6 18.31 6 15H4C4 19.42 7.58 23 12 23C16.42 23 20 19.42 20 15C20 10.58 16.42 7 12 5Z"
+                                fill="currentColor" />
+                        </svg>
+                        <template if:false={isMobileOrTablet}>Revert Changes</template>
+                    </button>
+                    <button class="white-btn-css" onclick={viewListOfPortals} aria-label="View Listings">
+                        <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
+                            enable-background="new 0 0 52 52" xml:space="preserve">
+                            <path
+                                d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z"
+                                fill="currentColor"></path>
+                            <path d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z" fill="currentColor"></path>
+                        </svg>
+                        <template if:false={isMobileOrTablet}>View Listings</template>
+                    </button>
                 </div>
-                <template if:true={isPortalData}>
-                    <div class="field-mapping-container">
-                        <template for:each={portalRecordList} for:item="record" for:index="index">
-                            <div key={record.val.Id} class="portalMapping_data-row">
-                                <div class="name_icon_css">
-                                    <img src={record.val.MVEX__Endpoint__c} alt={record.val.MVEX__Generator__c}
-                                        class="small-logo" draggable="false">
-                                    <p class="font_style_css">
-                                        {record.val.Name}
-                                    </p>
-                                </div>
-                                <div class="status_btn_cls">
-                                    <div class="tableStatusCol">
-                                        <div class="slds-truncate">
-                                            <div class="container">
-                                                <div class="content">
-                                                    <label class="switch">
-                                                        <input type="checkbox" checked={record.val.MVEX__Is_Active__c}
-                                                            onchange={handleStatusChange}
-                                                            data-portal-id={record.val.Id}
-                                                            data-portal-name={record.val.Name} />
-                                                        <small></small>
-                                                    </label>
+
+                <template if:true={isRecordAvailable}>
+                    <div class="main_content_cls">
+                        <div class="table-content">
+                            <table class="slds-table slds-table_fixed-layout">
+                                <thead>
+                                    <tr class="table_tr_cls">
+                                        <th scope="col" class="column1">
+                                            <div class="min_width_css header-text">Listing Fields</div>
+                                        </th>
+                                        <th scope="col" class="column1">
+                                            <div class="min_width_css header-text">Portals Fields</div>
+                                        </th>
+                                        <th scope="col" class="column1">
+                                            <div class="min_width_css header-text">Example</div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={finalList} for:item="val" for:index="index">
+                                        <tr key={val.id}>
+                                            <td data-label="Listing Fields">
+                                                <div class="slds-col position_css">
+                                                    <div if:true={val.isRequired} class="red_css">*</div>
+                                                    <lightning-combobox
+                                                        label=""
+                                                        options={val.listingFields}
+                                                        data-index={index}
+                                                        data-datatype={val.dataType}
+                                                        variant="label-hidden"
+                                                        value={val.listingFieldAPIName}
+                                                        onchange={handleComboboxChange}>
+                                                    </lightning-combobox>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="action-btn">
-                                        <button class="preview-icon-css" data-portalname={record.val.Name}
-                                            data-portaliconurl={record.val.MVEX__Endpoint__c}
-                                            data-portalstatus={record.val.MVEX__Is_Active__c}
-                                            data-portalgen={record.val.MVEX__Generator__c} data-portalid={record.val.Id}
-                                            onclick={handleClick}>
-                                            <svg width="14" height="14" fill="#000000"
-                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                                                enable-background="new 0 0 52 52" xml:space="preserve">
-                                                <path
-                                                    d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
-                                                </path>
-                                                <path
-                                                    d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
-                                                </path>
-                                            </svg>
-                                        </button>
-                                        <button class="edit-icon-css" onclick={handleEditPortal}
-                                            data-portal-id={record.val.Id}
-                                            data-portaliconurl={record.val.MVEX__Endpoint__c}
-                                            data-portalgen={record.val.MVEX__Generator__c}>
-                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                            </svg>
-                                        </button>
-                                        <button class="delete-icon-css" onclick={handleDelete}
-                                            data-portal-id={record.val.Id} data-portal-name={record.val.Name}>
-                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
+                                            </td>
+                                            <td data-label="Portals Fields">
+                                                <div class="slds-col view_input slds-input_faux font_styles1 portal_label_truncate_css">
+                                                    {val.portalLabel}
+                                                    <template if:true={val.description}>
+                                                        <lightning-helptext content={val.description}></lightning-helptext>
+                                                    </template>
+                                                </div>
+                                            </td>
+                                            <td data-label="Example">
+                                                <div class="slds-col font_styles2">
+                                                    {val.example}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </template>
-                <template if:false={isPortalData}>
-                    <div class="exp-no-data-container">
-                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                        <div class="exp-no-data-message">No Portals are available to show.</div>
+
+                <template if:false={isRecordAvailable}>
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-state__icon">
+                                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                            </div>
+                            <div class="empty-state__message">No records has been added yet.</div>
+                        </div>
                     </div>
                 </template>
             </div>
         </div>
-    </div>
+    </template>
 
     <template if:true={showModal}>
-        <c-new-pop-up onhidepopup={handleHidePopup} get-portal-name={clickedPortalName}
-            get-portal-icon-url={clickedPortalIconURL} onrefreshpageonhide={handleHideAndRefreshPage}></c-new-pop-up>
+        <!-- New Portal Popup -->
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_small section_css">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close close-icon-css" onclick={handleHidePopup}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="#1F2937" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">New Portal</h1>
+                </div>
+                <div class="slds-modal__content modalbody">
+                    <div class="content_body">
+                        <template for:each={newPopupFields} for:item="field" for:index="index">
+                            <template if:true={field.isFirst}>
+                                <div class="input-container" key={field.id}>
+                                    <div class="slds-form-element flex_css">
+                                        <label class="label_css">{field.fieldName}</label>
+                                        <div class="slds-form-element__control width_css">
+                                            {field.value}
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:false={field.isFirst}>
+                                <template if:true={field.isCheckbox}>
+                                    <div class="input-container" key={field.id}>
+                                        <div class="slds-form-element flex_css">
+                                            <label class="label_css">
+                                                <abbr if:true={field.isRequired} class="slds-required"
+                                                    title="required">*</abbr>{field.fieldName}
+                                                <lightning-helptext content={field.helpText}></lightning-helptext>
+                                            </label>
+                                            <div class="slds-form-element__control width_css">
+                                                <lightning-input type="checkbox" variant="label-hidden"
+                                                    data-field={field.fieldName} checked={field.value}
+                                                    onchange={handleNewPopupCheckboxChange}></lightning-input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template if:false={field.isCheckbox}>
+                                    <template if:false={field.isPicklist}>
+                                        <div class="input-container" key={field.id}>
+                                            <div class="slds-form-element flex_css">
+                                                <label class="label_css">
+                                                    <abbr if:true={field.isRequired} class="slds-required"
+                                                        title="required">*</abbr>{field.fieldName}
+                                                    <lightning-helptext content={field.helpText}></lightning-helptext>
+                                                </label>
+                                                <div class="slds-form-element__control width_css">
+                                                    <input type={field.datatype} class="slds-input"
+                                                        placeholder={field.placeHolder} data-field={field.fieldName}
+                                                        onkeyup={getNewPopupFieldValue} value={field.value}>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template if:true={field.isPicklist}>
+                                        <div class="input-container" key={field.id}>
+                                            <div class="slds-form-element flex_css">
+                                                <label class="label_css">
+                                                    <abbr if:true={field.isRequired} class="slds-required"
+                                                        title="required">*</abbr>{field.fieldName}
+                                                    <lightning-helptext content={field.helpText}></lightning-helptext>
+                                                </label>
+                                                <div class="slds-form-element__control width_css">
+                                                    <lightning-combobox data-index={index} value={field.value}
+                                                        placeholder={field.placeHolder} options={field.picklistOptions}
+                                                        variant="label-hidden" onchange={handleNewPopupChange}></lightning-combobox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+                    <div class="footerbtns">
+                        <button class="white-btn-css cancel_btn_css" aria-label="Cancel and close" onclick={handleHidePopup}>
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <button class="blue-btn-css save_btn_css" onclick={saveNewPortalRecord}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                            </svg>
+                            Create Portal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+
+    <template if:true={propertyEditModal}>
+        <!-- Edit Portal Popup -->
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close close-icon-css" onclick={handleHidePopup}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                        fill="#1F2937" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Edit Portal</h1>
+                </div>
+                <div class="slds-modal__content modalbody">
+                    <div class="content_body">
+                        <template for:each={editPopupFields} for:item="field" for:index="index">
+                            <template if:true={field.isFirst}>
+                                <div class="input-container" key={field.id}>
+                                    <div class="slds-form-element flex_css">
+                                        <label class="label_css">{field.fieldName}</label>
+                                        <div class="slds-form-element__control width_css">
+                                            {field.value}
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:false={field.isFirst}>
+                                <template if:true={field.isCheckbox}>
+                                    <div class="input-container" key={field.id}>
+                                        <div class="slds-form-element flex_css">
+                                            <label class="label_css">
+                                                <abbr if:true={field.isRequired} class="slds-required"
+                                                    title="required">*</abbr>{field.fieldName}
+                                                <lightning-helptext content={field.helpText}></lightning-helptext>
+                                            </label>
+                                            <div class="slds-form-element__control width_css">
+                                                <lightning-input type="checkbox" variant="label-hidden"
+                                                    data-field={field.fieldName} checked={field.value}
+                                                    onchange={handleSettingPopupCheckboxChange}></lightning-input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template if:false={field.isCheckbox}>
+                                    <template if:false={field.isPicklist}>
+                                        <div class="input-container" key={field.id}>
+                                            <div class="slds-form-element flex_css">
+                                                <label class="label_css">
+                                                    <abbr if:true={field.isRequired} class="slds-required" title="required">*</abbr>{field.fieldName}
+                                                    <lightning-helptext content={field.helpText}></lightning-helptext>
+                                                </label>
+                                                <div class="slds-form-element__control width_css">
+                                                    <input type={field.datatype} class="slds-input" placeholder={field.placeHolder} data-field={field.fieldName}
+                                                        onkeyup={getSettingPopupFieldValue} value={field.value}>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template if:true={field.isPicklist}>
+                                        <div class="input-container" key={field.id}>
+                                            <div class="slds-form-element flex_css">
+                                                <label class="label_css">
+                                                    <abbr if:true={field.isRequired} class="slds-required" title="required">*</abbr>{field.fieldName}
+                                                    <lightning-helptext content={field.helpText}></lightning-helptext>
+                                                </label>
+                                                <div class="slds-form-element__control width_css">
+                                                    <lightning-combobox
+                                                        data-index={index}
+                                                        value={field.value}
+                                                        placeholder="Select field"
+                                                        options={field.picklistOptions} variant="label-hidden"
+                                                        onchange={handleSettingPopupChange} ></lightning-combobox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+                    <div class="footerbtns">
+                        <button class="white-btn-css cancel_btn_css" aria-label="Cancel and close" onclick={handleHidePopup}>
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <button class="blue-btn-css save_btn_css" onclick={updateExistingPortalRecord}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                            </svg>
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+
+    <template if:true={showListingPopup}>
+        <!-- List of Published Listings Popup -->
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close close-icon-css" onclick={handleCloseListingViewPopup}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="#1F2937" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Listings Published On {selectedPortalName} Portal</h1>
+                </div>
+                <div class="slds-modal__content border_css">
+                    <div class="content_body">
+                        <div class="main_content_cls">
+                            <template if:true={isDataAvailable}>
+                                <div class="table-content">
+                                    <table class="slds-table slds-table_fixed-layout">
+                                        <thead>
+                                            <tr class="table_tr_cls">
+                                                <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header listing-name-col"
+                                                    data-id="name" onclick={sortClick} aria-sort="none">
+                                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                        <span class="slds-truncate" title="Listing Name">Listing Name</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="name" class="listing-manager-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                </th>
+                                                <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header listing-ref-col"
+                                                    data-id="listing_reference" onclick={sortClick} aria-sort="none">
+                                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                        <span class="slds-truncate" title="Listing Reference">Listing Reference</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="listing_reference" class="listing-manager-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                </th>
+                                                <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header listing-type-col"
+                                                    data-id="listing_type" onclick={sortClick} aria-sort="none">
+                                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                                                        <span class="slds-truncate" title="Listing Type">Listing Type</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="listing_type" class="listing-manager-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={listingsDatas} for:item="listingsData">
+                                                <tr key={listingsData.listing_reference}>
+                                                    <td data-label="Listing Name" class="listing-name-col">
+                                                        <div>
+                                                            <p class="clickable_css" onclick={redirectToListing} data-id={listingsData.id}>{listingsData.name}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td data-label="Listing Reference" class="listing-ref-col">
+                                                        <div>{listingsData.listing_reference}</div>
+                                                    </td>
+                                                    <td data-label="Listing Type" class="listing-type-col">
+                                                        <div>{listingsData.listing_type}</div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={isDataAvailable}>
+                                <div class="empty-state">
+                                    <div class="empty-state__content">
+                                        <div class="empty-state__icon">
+                                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                        </div>
+                                        <div class="empty-state__message">No Listing has been published on {selectedPortalName} portal yet.</div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="footerbtns">
+                        <button class="white-btn-css cancel_btn_css" onclick={handleCloseListingViewPopup}>
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
     </template>
 
     <template if:true={isSpinner}>
@@ -136,15 +563,70 @@
     </template>
 
     <template if:true={isErrorPopup}>
+        <!-- Error Popup -->
         <div class="my_popup_container">
-            <c-error-popup-for-portals jsonbody={errorBody} portalname="Zoopla"
-                onhidepopup={handleHidePopup}></c-error-popup-for-portals>
-        </div>
-    </template>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+                class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close closs_icon_css" onclick={handleHidePopup}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="#1F2937" />
+                        </svg>
+                    </div>    
 
-    <template if:true={propertyEditModal}>
-        <c-setting-pop-up onhidepopup={handleHidePopup} get-portal-name={portalGen} get-portal-icon-url={portalIconUrl}
-            get-portal-id={selectedPortalId} onrefreshpageonhide={handleHideAndRefreshPage}></c-setting-pop-up>
+                    <div class="slds-modal__header blue-header">
+                        <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">List of Errors</h1>
+                    </div>
+                    <div class="slds-modal__content border_css">
+                        <div class="body_container">
+                            <div class="header_container_css">
+                                <svg width="30" height="22" viewBox="0 0 40 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21.8182 20.2105H18.1818V11.7895H21.8182V20.2105ZM21.8182 26.9474H18.1818V23.5789H21.8182V26.9474ZM0 32H40L20 0L0 32Z" fill="#EF665B"/>
+                                </svg>
+                                <p>Failed to {errorPopupType} the listing on the {portalname} portal.</p>    
+                            </div>
+                            <div class="main_content_cls">
+                                <div class="table-content">
+                                    <table aria-multiselectable="true" class="slds-table">
+                                        <thead>
+                                            <tr class="table_tr_cls">
+                                                <th class="header-cell message-col">{errorFirstHeader}</th>
+                                                <th class="header-cell path-col">{errorSecondHeader}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={parsedErrors} for:item="error">
+                                                <tr key={error.id}>
+                                                    <td class="message-col slds-truncate">
+                                                        <template if:true={error.message}>{error.message}</template>
+                                                        <template if:false={error.message}>-</template>
+                                                    </td>
+                                                    <td class="path-col slds-truncate">
+                                                        <template if:true={error.path}>{error.path}</template>
+                                                        <template if:false={error.path}>-</template>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footerbtns">
+                            <button class="blue-btn-css save_btn_css" onclick={handleHidePopup}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                                </svg>
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </div>
     </template>
 
     <c-message-popup onconfirmation={handleConfirmation}>

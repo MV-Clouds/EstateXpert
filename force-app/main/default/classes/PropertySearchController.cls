@@ -14,9 +14,9 @@ public with sharing class PropertySearchController {
      **/
     public class WrapperClass {
         @AuraEnabled
-        public List<Listing__c> listings;
+        public List<MVEX__Listing__c> listings;
         @AuraEnabled
-        public List<Inquiry__c> inquiries;
+        public List<MVEX__Inquiry__c> inquiries;
         @AuraEnabled
         public Map<Id, String> medias;
         @AuraEnabled
@@ -98,21 +98,21 @@ public with sharing class PropertySearchController {
                 }
             }
 
-            List<Listing__c> listings = new List<Listing__c>();
-            List<Inquiry__c> inquiries = new List<Inquiry__c>();
+            List<MVEX__Listing__c> listings = new List<MVEX__Listing__c>();
+            List<MVEX__Inquiry__c> inquiries = new List<MVEX__Inquiry__c>();
 
             // ---------- COMMON: Fetch current record once ----------
-            Listing__c currentListing;
-            Inquiry__c currentInquiry;
+            MVEX__Listing__c currentListing;
+            MVEX__Inquiry__c currentInquiry;
 
             if (objectName == 'MVEX__Listing__c') {
-                List<Listing__c> temp = Database.query(
+                List<MVEX__Listing__c> temp = Database.query(
                     'SELECT ' + listingFieldsStr + ' FROM MVEX__Listing__c WHERE Id = :recId',AccessLevel.USER_MODE);
                 if (!temp.isEmpty()) currentListing = temp[0];
             }
 
             if (objectName == 'MVEX__Inquiry__c') {
-                List<Inquiry__c> temp = Database.query(
+                List<MVEX__Inquiry__c> temp = Database.query(
                     'SELECT ' + inquiryFieldsStr + ' FROM MVEX__Inquiry__c WHERE Id = :recId',AccessLevel.USER_MODE);
                 if (!temp.isEmpty()) currentInquiry = temp[0];
             }
@@ -204,7 +204,7 @@ public with sharing class PropertySearchController {
             }
 
             // ---------- property ids ----------
-            for (Listing__c listing : listings) {
+            for (MVEX__Listing__c listing : listings) {
                 if (listing.MVEX__Property__c != null) {
                     propertyIds.add(listing.MVEX__Property__c);
                 }
@@ -220,13 +220,13 @@ public with sharing class PropertySearchController {
             if (!propertyIds.isEmpty()) {
                 Map<Id, String> mediaMap = new Map<Id, String>();
 
-                for (Property_File__c media : [
-                    SELECT Property__c, BaseUrl__c
-                    FROM Property_File__c
-                    WHERE Property__c IN :propertyIds
+                for (MVEX__Property_File__c media : [
+                    SELECT MVEX__Property__c, MVEX__BaseUrl__c
+                    FROM MVEX__Property_File__c
+                    WHERE MVEX__Property__c IN :propertyIds
                     WITH USER_MODE
                 ]) {
-                    mediaMap.put(media.Property__c, media.BaseUrl__c);
+                    mediaMap.put(media.MVEX__Property__c, media.MVEX__BaseUrl__c);
                 }
 
                 wc.medias = mediaMap;
@@ -248,7 +248,7 @@ public with sharing class PropertySearchController {
      * @last modified on  : 01-04-2026
      * @last modified by  : Kajal Tiwari
      **/
-    private static Map<String, Map<String, String>> resolveInquiryReferenceNames(List<Inquiry__c> inquiries) {
+    private static Map<String, Map<String, String>> resolveInquiryReferenceNames(List<MVEX__Inquiry__c> inquiries) {
         Map<String, Map<String, String>> refMappings = new Map<String, Map<String, String>>();
         
         if (inquiries == null || inquiries.isEmpty()) {
@@ -256,17 +256,17 @@ public with sharing class PropertySearchController {
         }
         
         try {
-            // Get field descriptions for Inquiry__c (handling namespace dynamically)
+            // Get field descriptions for MVEX__Inquiry__c (handling namespace dynamically)
             Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
             Schema.SObjectType inquiryType = globalDescribe.get('MVEX__Inquiry__c');
             if (inquiryType == null) {
-                inquiryType = globalDescribe.get('Inquiry__c');
+                inquiryType = globalDescribe.get('MVEX__Inquiry__c');
             }
             Map<String, Schema.SObjectField> fieldMap = inquiryType != null ? inquiryType.getDescribe().fields.getMap() : new Map<String, Schema.SObjectField>();
             Map<String, Set<Id>> refIdsByField = new Map<String, Set<Id>>();
             
             // Collect all reference field IDs
-            for (Inquiry__c inq : inquiries) {
+            for (MVEX__Inquiry__c inq : inquiries) {
                 for (String fieldName : fieldMap.keySet()) {
                     Schema.DescribeFieldResult fieldDesc = fieldMap.get(fieldName).getDescribe();
                     
@@ -370,178 +370,6 @@ public with sharing class PropertySearchController {
         }
     }
     
-    @AuraEnabled
-    public static void sendEmail(String emailDataJson) {
-        
-        try {
-            Map<String, Map<String, String>> contactEmailInfoMap = new Map<String, Map<String, String>>();
-            Map<String, Object> emailData = (Map<String, Object>) JSON.deserializeUntyped(emailDataJson);
-            
-            String sendMethod = (String) emailData.get('sendMethod');
-            String templateId = (String) emailData.get('templateId');
-            String listingId = (String) emailData.get('listingId');
-            
-            List<Object> inquiryListRaw = (List<Object>) emailData.get('inquiry');
-            List<Map<String, Object>> inquiries = new List<Map<String, Object>>();
-            
-            List<ContentVersion> listingContentVersion = [SELECT Title, VersionData, ContentDocumentId FROM ContentVersion WHERE FirstPublishLocationId = :listingId WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 1];
-            
-            for (Object inquiryRaw : inquiryListRaw) {
-                inquiries.add((Map<String, Object>) inquiryRaw);
-            }
-            
-            List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
-            String templateBody = '';
-            
-            List<Template__c> temp = [SELECT Id, Template_Name__c,Subject__c,
-            (SELECT Id, Template_Value_Simple__c, Value_Type__c FROM Template_Data__r WHERE Value_Type__c = 'Body Value' ORDER BY Order_No_Simple__c ASC),
-            (SELECT Id, Page_Margin__c, Page_Orientation__c, Page_Size__c, Unit_of_Page_Configs__c, Show_Header__c, Show_Footer__c, Header_margin_top__c, Footer_margin_bottom__c FROM Template_Pages__r ORDER BY Page_Number__c ASC)
-            FROM Template__c WHERE Id = :templateId WITH USER_MODE LIMIT 1 ];
-            
-            if (temp.size() > 0) {
-                for (Template_Data__c fieldData : temp[0].Template_Data__r) {
-                    String value = fieldData.Template_Value_Simple__c != null ? fieldData.Template_Value_Simple__c : '';
-                    if (fieldData.Value_Type__c == 'Body Value') {
-                        templateBody += value;
-                    }
-                }
-            }
-            
-            // Extract the Contact__c IDs from the inquiries
-            List<Id> contactIds = new List<Id>();
-            for (Map<String, Object> inquiry : inquiries) {
-                if (inquiry.containsKey('mvex__contact__c') && inquiry.get('mvex__contact__c') != null) {
-                    contactIds.add((Id) inquiry.get('mvex__contact__c'));
-                }
-            }
-
-            // Query contact information based on Contact__c field
-            List<Contact> contacts = [SELECT Id, Email, FirstName, LastName FROM Contact WHERE Id IN :contactIds WITH USER_MODE];
-
-            List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
-            
-            for (Contact contact : contacts) {
-                if (contact.Email != null && contact.Email != '') {
-                    Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-                    
-                    Map<String, Map<String, String>> mappingKeys = DataMappingControllerV2.getMappingsKeyValues(new List<String>{templateId}, contact.Id, true);
-                    Map<String, String> mappingKeyVsMappingValues = mappingKeys.get('objectNGeneral');
-                    Map<String, String> salesforceImages = mappingKeys.get('salesforceImages');
-                    
-                    for (String key : mappingKeyVsMappingValues.keySet()) {
-                        String escapedKey = Pattern.quote(key); // Escapes special characters in the key
-                        templateBody = templateBody.replaceAll(escapedKey, mappingKeyVsMappingValues.get(key));
-                    }
-                    
-                    for (String src : salesforceImages.keySet()) {
-                        String escapedSrc = Pattern.quote(src); // Escapes special characters in the src
-                        templateBody = templateBody.replaceAll(escapedSrc, salesforceImages.get(src));
-                    }
-                    
-                    if (sendMethod == 'single') {
-                        if (!listingContentVersion.isEmpty()) {
-                            Messaging.EmailFileAttachment emailAttachment = new Messaging.EmailFileAttachment();
-                            
-                            emailAttachment.setFileName(listingContentVersion[0].Title);
-                            emailAttachment.setBody(listingContentVersion[0].VersionData);
-                            emailAttachment.setContentType('application/pdf');
-                            
-                            email.setFileAttachments(new Messaging.EmailFileAttachment[] { emailAttachment });
-                        }
-                        
-                        email.setToAddresses(new List<String>{contact.Email});
-                        email.setSubject(temp[0].Subject__c);
-                        email.setHtmlBody(templateBody);
-                        
-                        String replyToEmail = Label.EmailMessageEmailService;
-                        
-                        if(replyToEmail != null){
-                            email.setReplyTo(replyToEmail);
-                        }
-                        
-                        emails.add(email);
-                        
-                        contactEmailInfoMap.put(contact.Id, new Map<String, String>{
-                            'subject' => temp[0].Subject__c,
-                            'body' => templateBody,
-                            'email' => contact.Email,
-                            'cc' => '',
-                            'bcc' => ''
-                        });
-                        
-                    } else if (sendMethod == 'gmail') {
-                        GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
-                        singleGmail.toAddresses = new List<String>{contact.Email};
-                        singleGmail.subject = temp[0].Subject__c;
-                        singleGmail.body = templateBody;
-                        
-                        if (singleGmail.contactEmailInfoMap == null) {
-                            singleGmail.contactEmailInfoMap = new Map<String, Map<String, String>>();
-                        }
-                        
-                        singleGmail.contactEmailInfoMap.put(contact.Id, new Map<String, String>{
-                            'subject' =>  temp[0].Subject__c,
-                            'body' => templateBody,
-                            'email' => contact.Email,
-                            'cc' => '',
-                            'bcc' => ''
-                        });
-                        
-                        gmails.add(singleGmail);
-                    }
-                }
-            }
-            
-            // Send emails through Salesforce
-            if (!emails.isEmpty()) {
-                List<Messaging.SendEmailResult> mrs = Messaging.sendEmail(emails);
-                
-                Boolean allEmailsSentSuccessfully = true;
-                
-                for (Messaging.SendEmailResult mr : mrs) {
-                    if (!mr.isSuccess()) {
-                        allEmailsSentSuccessfully = false;
-                    }
-                }
-                
-                if (allEmailsSentSuccessfully) {
-                    deleteContentVersion(listingContentVersion);
-                }
-                
-                CreateActivityRecordsFromMail.createCaseEmailMessage(contactEmailInfoMap);
-            }
-            // Send emails through Gmail
-            else if (!gmails.isEmpty()) {
-                GmailIntegrationControllerV1.requestNewAccessToken(gmails,null,null,false);
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'sendEmail', 'Error while sending email.');
-        }
-        
-    }
-    
-    public static void deleteContentVersion(List<ContentVersion> contentVersions) {
-        try {
-            if (contentVersions.isEmpty()) {
-                return;
-            }
-            
-            List<Id> contentDocumentIds = new List<Id>();
-            for (ContentVersion contentVersion : contentVersions) {
-                contentDocumentIds.add(contentVersion.ContentDocumentId);
-            }
-            
-            List<ContentDocument> contentDocuments = [SELECT Id FROM ContentDocument WHERE Id IN :contentDocumentIds WITH USER_MODE];
-            
-            if (!contentDocuments.isEmpty()) {
-                delete as user contentDocuments;
-            }
-            
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'deleteContentVersion', 'Error while deleting content version.');
-        }
-    }
-    
     public class FieldWrapper {
         @AuraEnabled public String label;
         @AuraEnabled public String value;
@@ -623,20 +451,20 @@ public with sharing class PropertySearchController {
     public static List<Map<String, String>> getContactsForInquiries(List<String> inquiryIds) {
         try {
             // Query inquiries with their related contacts
-            Map<Id, Inquiry__c> inquiries = new Map<Id, Inquiry__c>([SELECT Id, Name, Contact__c FROM Inquiry__c WHERE Id IN :inquiryIds AND Contact__c != NULL WITH USER_MODE]);
+            Map<Id, MVEX__Inquiry__c> inquiries = new Map<Id, MVEX__Inquiry__c>([SELECT Id, Name, MVEX__Contact__c FROM MVEX__Inquiry__c WHERE Id IN :inquiryIds AND MVEX__Contact__c != NULL WITH USER_MODE]);
 
-            // Query contacts for the related Contact__c IDs
+            // Query contacts for the related MVEX__Contact__c IDs
             Set<Id> contactIds = new Set<Id>();
-            for (Inquiry__c inquiry : inquiries.values()) {
-                contactIds.add(inquiry.Contact__c);
+            for (MVEX__Inquiry__c inquiry : inquiries.values()) {
+                contactIds.add(inquiry.MVEX__Contact__c);
             }
 
             Map<Id, Contact> contacts = new Map<Id, Contact>([SELECT Id, Name, Phone FROM Contact WHERE Id IN :contactIds WITH USER_MODE]);
 
             // Build the result list with inquiry and contact details
             List<Map<String, String>> result = new List<Map<String, String>>();
-            for (Inquiry__c inquiry : inquiries.values()) {
-                Contact contact = contacts.get(inquiry.Contact__c);
+            for (MVEX__Inquiry__c inquiry : inquiries.values()) {
+                Contact contact = contacts.get(inquiry.MVEX__Contact__c);
                 if (contact != null) {
                     result.add(new Map<String, String>{
                         'InquiryId' => inquiry.Id,

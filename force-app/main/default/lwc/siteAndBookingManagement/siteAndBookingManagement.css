@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .main-card {
@@ -398,18 +397,6 @@
     flex-direction: column;
 }
 
-.whatsapp-preview {
-    height: fit-content;
-    background-color: rgb(234, 255, 202);
-    width: 20rem;
-    margin: auto;
-    padding: 0.5rem;
-    box-shadow: 1px 0px 10px 2px grey;
-    border-radius: 8px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
 .email-preview-container {
     padding: 0px;
     border: none;
@@ -427,11 +414,6 @@
     width: 11rem;
 }
 
-c-template-preview {
-    max-height: none !important;
-    --max-height-of-the-preview-div: none !important;
-}
-
 /* ================================
 == RESPONSIVE
 ================================ */
@@ -444,4 +426,8 @@ c-template-preview {
 .header-actions .blue-btn-css {
     height: 34px;
     min-height: 34px;
+}
+
+.exp-no-data-container{
+    margin-top: 3rem;
 }

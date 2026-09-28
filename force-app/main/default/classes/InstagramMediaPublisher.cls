@@ -5,6 +5,7 @@ public class InstagramMediaPublisher implements Schedulable {
     public String creationId { get; set; }
     public List<String> awsObjectKeys { get; set; }
     public List<String> awsObjectKeysToPreserve { get; set; }
+    public static final String INSTAGRAM_ENDPOINT = System.label.InstagramEndPoint;
 
     public InstagramMediaPublisher(String userId, String accessToken, String creationId, List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
         this.userId = userId;
@@ -22,7 +23,7 @@ public class InstagramMediaPublisher implements Schedulable {
     public static void publishMedia(String userId, String creationId, String accessToken, List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
         Http http = new Http();
         HttpRequest publishReq = new HttpRequest();
-        publishReq.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media_publish');
+        publishReq.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media_publish');
         publishReq.setMethod('POST');
         publishReq.setHeader('Content-Type', 'application/json');
 
@@ -37,11 +38,11 @@ public class InstagramMediaPublisher implements Schedulable {
 
             if (publishResponse.getStatusCode() == 200) {
 
-                AWS_Config__c awsData = AWS_Config__c.getOrgDefaults();
-                String awsAccessKey = awsData.AWS_Access_Key__c;
-                String awsSecretKey = awsData.AWS_Secret_Access_Key__c;
-                String awsRegion = awsData.S3_Region_Name__c;
-                String awsBucketName = awsData.S3_Bucket_Name__c;
+                MVEX__AWS_Config__c awsData = MVEX__AWS_Config__c.getOrgDefaults();
+                String awsAccessKey = awsData.MVEX__AWS_Access_Key__c;
+                String awsSecretKey = awsData.MVEX__AWS_Secret_Access_Key__c;
+                String awsRegion = awsData.MVEX__S3_Region_Name__c;
+                String awsBucketName = awsData.MVEX__S3_Bucket_Name__c;
 
                 String endpoint = 'https://' + awsBucketName + '.s3.amazonaws.com/';
 

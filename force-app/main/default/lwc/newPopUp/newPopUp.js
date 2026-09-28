@@ -79,10 +79,10 @@ export default class NewPopUp extends LightningElement {
                     { id: 4, fieldName: 'Certificate Name', fieldAPIName: 'certificate', datatype: 'text', value: '', isRequired: true, placeHolder: 'zoopla_certificate', helpText: 'Name of the certificate uploaded in Salesforce.', isFirst: false, isPicklist: false },
                     { id: 5, fieldName: 'Branch Reference', fieldAPIName: 'branch_reference', datatype: 'text', value: '', isRequired: true, placeHolder: '"1234";"kd-789d"', helpText: 'Your unique identifier for the branch.', isFirst: false, isPicklist: false },
                     { id: 6, fieldName: 'Branch Name', fieldAPIName: 'branch_name', datatype: 'text', value: '', isRequired: true, placeHolder: '"Estate Agent Ltd - Shepherd Bush"', helpText: 'The name of the branch. This is usually the name of the company and may also include some location information in order to differentiate it from the other branches of the company.', isFirst: false, isPicklist: false },
-                    { id: 7, fieldName: 'Street Name', fieldAPIName: 'street_name', datatype: 'text', value: '', isRequired: true, placeHolder: '"Barker Road";"Chestnut Street"', helpText: 'The name of the road on which the branch is principally adjacent.', isFirst: false, isPicklist: false },
-                    { id: 8, fieldName: 'Town or City', fieldAPIName: 'town_or_city', datatype: 'text', value: '', isRequired: true, placeHolder: '"Birmingham";"San Francisco"', helpText: 'The nearest large urban area to the branch.', isFirst: false, isPicklist: false },
-                    { id: 9, fieldName: 'Postal Code', fieldAPIName: 'postal_code', datatype: 'text', value: '', isRequired: true, placeHolder: '"B19 4JY";"94112"', helpText: 'The postal area code issued by the primary postal service in the country. For example, for the UK, this would be Royal Mails postcode; for the US, the United States Postal Services ZIP code.', isFirst: false, isPicklist: false },
-                    { id: 10, fieldName: 'Country Code', fieldAPIName: 'country_code', datatype: 'text', value: '', isRequired: true, placeHolder: '"GB";"US"', helpText: 'The ISO 3166-2 (preferred) or ISO 3166-1 alpha-2 country code.', isFirst: false, isPicklist: false },
+                    { id: 7, fieldName: 'Street Name', fieldAPIName: 'street_name', datatype: 'text', value: '', isRequired: false, placeHolder: '"Barker Road";"Chestnut Street"', helpText: 'The name of the road on which the branch is principally adjacent.', isFirst: false, isPicklist: false },
+                    { id: 8, fieldName: 'Town or City', fieldAPIName: 'town_or_city', datatype: 'text', value: '', isRequired: false, placeHolder: '"Birmingham";"San Francisco"', helpText: 'The nearest large urban area to the branch.', isFirst: false, isPicklist: false },
+                    { id: 9, fieldName: 'Postal Code', fieldAPIName: 'postal_code', datatype: 'text', value: '', isRequired: false, placeHolder: '"B19 4JY";"94112"', helpText: 'The postal area code issued by the primary postal service in the country. For example, for the UK, this would be Royal Mails postcode; for the US, the United States Postal Services ZIP code.', isFirst: false, isPicklist: false },
+                    { id: 10, fieldName: 'Country Code', fieldAPIName: 'country_code', datatype: 'text', value: '', isRequired: false, placeHolder: '"GB";"US"', helpText: 'The ISO 3166-2 (preferred) or ISO 3166-1 alpha-2 country code.', isFirst: false, isPicklist: false },
                     { id: 11, fieldName: 'Locality', fieldAPIName: 'locality', datatype: 'text', value: '', isRequired: false, placeHolder: '"Sutton Coldfield";"North Beach"', helpText: 'The familiar name of the area as it is referred to by local residents. This is usually a traditional, historic name and may refer to an aspect of the area which has ceased to exist.', isFirst: false, isPicklist: false },
                     { id: 12, fieldName: 'County', fieldAPIName: 'county', datatype: 'text', value: '', isRequired: false, placeHolder: '"West Midlands";"California"', helpText: 'The largest territorial area division within the country which the property resides in. (Synonymous with e.g.: province; principality.)', isFirst: false, isPicklist: false },
                     { id: 13, fieldName: 'Latitude', fieldAPIName: 'latitude', datatype: 'number', value: '', isRequired: false, placeHolder: '-90.0000000;54.123456;90.000000', helpText: 'The latitude, measured in degrees, of the branch.', isFirst: false, isPicklist: false },
@@ -95,7 +95,8 @@ export default class NewPopUp extends LightningElement {
                     { id: 20, fieldName: 'Email', fieldAPIName: 'email', datatype: 'email', value: '', isRequired: false, placeHolder: '"test@rk.com"', helpText: 'Email address.', isFirst: false, isPicklist: false },
                     { id: 21, fieldName: 'Website', fieldAPIName: 'website', datatype: 'text', value: '', isRequired: false, placeHolder: '"http://www.estateagent.co.uk"', helpText: 'The URI-encoded URL for the branchs website, or that of its parent company if it doesnt have one of its own.', isFirst: false, isPicklist: false },
                     { id: 22, fieldName: 'Test Portal', fieldAPIName: 'is_test_portal', datatype: 'text', value: '', isRequired: true, placeHolder: 'true/false', helpText: 'If set to true feeds will be exported to the Zoopla sandbox.', isFirst: false, isPicklist: true, picklistOptions: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }] },
-                    // { id: 23, fieldName: 'Feed Selector Field', fieldAPIName: 'differentiator_values', datatype: 'picklist', value: '', isRequired: true, placeHolder: 'Select a field', helpText: 'Define a field that separates different portal feeds.', isFirst: false, picklistOptions: this.pickListOptionsFields , isPicklist: true}
+                    { id: 23, fieldName: 'Feed Selector Field', fieldAPIName: 'differentiator_values', datatype: 'picklist', value: '', isRequired: false, placeHolder: 'Select a field', helpText: 'Define a field that separates different portal feeds.', isFirst: false, picklistOptions: this.pickListOptionsFields , isPicklist: true},
+                    { id: 24, fieldName: 'Sync Branch Details with Zoopla', fieldAPIName: 'sync_branch_with_zoopla', datatype: 'checkbox', value: false, isRequired: false, placeHolder: '', helpText: 'When enabled, branch details will be sent directly to Zoopla. Keep this disabled to only save the configuration in Salesforce.', isFirst: false, isPicklist: false, isCheckbox: true }
                 ];
             } else if (this.getPortalName === 'Rightmove' || this.getPortalName === 'Rightmove Overseas') {
                 this.fields = [
@@ -105,7 +106,7 @@ export default class NewPopUp extends LightningElement {
                     { id: 6, fieldName: 'Branch ID', fieldAPIName: 'branch.branch_id', datatype: 'number', value: '', isRequired: true, placeHolder: '67890', helpText: 'Unique Rightmove reference for this branch.', isFirst: false, isPicklist: false },
                     { id: 7, fieldName: 'Use Sandbox', fieldAPIName: 'is_test_portal', datatype: 'text', value: '', isRequired: true, placeHolder: 'true/false', helpText: 'If set to true feeds will be exported to the Rightmove sandbox.', isFirst: false, isPicklist: true, picklistOptions: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }] },
                 ];
-            } else if (this.getPortalName === 'Propertyfinder' && !this.isXMLForPF) {
+            } else if (this.getPortalName === 'Propertyfinder') {
                 this.fields = [
                     ...commonFields,
                     { id: 4, fieldName: 'API Key', fieldAPIName: 'apiKey', datatype: 'text', value: '', isRequired: true, placeHolder: '<API_KEY>', helpText: 'Enter the API key obtained from the PF Expert application.', isFirst: false, isPicklist: false },
@@ -199,12 +200,11 @@ export default class NewPopUp extends LightningElement {
             }
 
             let portalWrapper = {};
-            if (this.getPortalName === 'Propertyfinder' && this.isXMLForPF) {
+            if (this.getPortalName === 'Propertyfinder') {
                 portalWrapper = {
                     version: '1.2',
                     portalname: this.getPortalName,
                     getPortalIconUrl: this.getPortalIconUrl,
-                    isXMLForPF: this.isXMLForPF,
                     ...fieldValues
                 };
             } else {
@@ -299,6 +299,29 @@ export default class NewPopUp extends LightningElement {
             this.validateFields();
         } catch (error) {
             errorDebugger('NewPopUp', 'handleChange', error, 'warn', 'Error in handleChange');
+        }
+    }
+
+    /**
+    * Method Name: handleCheckboxChange
+    * @description: Used to handle checkbox value changes.
+    * Created Date: 21/09/2026
+    * Created By: Karan Singh
+    */
+    handleCheckboxChange(event) {
+        try {
+            const fieldName = event.target.dataset.field;
+            const checked = event.target.checked;
+
+            this.fields = this.fields.map(field => {
+                if (field.fieldName === fieldName) {
+                    return { ...field, value: checked };
+                }
+                return field;
+            });
+            this.validateFields();
+        } catch (error) {
+            errorDebugger('NewPopUp', 'handleCheckboxChange', error, 'warn', 'Error in handleCheckboxChange');
         }
     }
 }

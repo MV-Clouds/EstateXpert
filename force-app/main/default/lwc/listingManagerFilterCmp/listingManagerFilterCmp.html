@@ -4,13 +4,13 @@
         <div class="filter-text">Filters</div>
         <div class="header-buttons">
             <template if:false={isFilterLimitReached}>
-                <div class="add-btn-cover" onclick={openModal} title="Add More Filter">
+                <div class="add-btn-cover" onclick={openModal} title="Add Filters: Select and add more filter fields to refine the listing list">
                     <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
                     </svg>
                 </div>
             </template>
-            <div class="reset-text" onclick={handleReset} title="Reset All">
+            <div class="reset-text" onclick={handleReset} title="Reset All: Clear all applied filters and restore the default view">
                 <svg width="16" height="16" fill="#ffffff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
                     <path
                         d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
@@ -18,14 +18,14 @@
                 </svg>
             </div>
             <template if:true={filterFields.length}>
-                <div class={customLogicToggleClass} onclick={handleCustomLogicToggle} title="Custom Logic">
+                <div class={customLogicToggleClass} onclick={handleCustomLogicToggle} title="Custom Logic: Apply custom condition logic (e.g. 1 AND (2 OR 3)) between filter fields">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="white"/>
                     </svg>
                 </div>
             </template>
             <template if:true={isFilterChanged}>
-                <div class="save-btn-cover" onclick={saveFilterPermanent} title="Save Filter">
+                <div class="save-btn-cover" onclick={saveFilterPermanent} title="Save Filter: Save currently configured filters as your default view">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M13.5 0H1.5C0.671573 0 0 0.671573 0 1.5V14.5C0 15.3284 0.671573 16 1.5 16H14.5C15.3284 16 16 15.3284 16 14.5V2.5L13.5 0ZM8 14C6.34315 14 5 12.6569 5 11C5 9.34315 6.34315 8 8 8C9.65685 8 11 9.34315 11 11C11 12.6569 9.65685 14 8 14ZM11 3H2V1H11V3Z"

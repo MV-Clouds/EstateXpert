@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .main-card {
@@ -1069,11 +1068,6 @@ span {
     align-items: center;
     justify-content: center;
     width: 100%;
-}
-
-.preview-box c-template-preview {
-    width: 100%;
-    max-width: 330px;
 }
 
 .preview-placeholder {

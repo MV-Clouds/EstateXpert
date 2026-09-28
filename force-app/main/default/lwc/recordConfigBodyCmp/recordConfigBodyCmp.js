@@ -141,7 +141,9 @@ export default class RecordConfigBodyCmp extends LightningElement {
                     .filter(option => {
                         if (!option.label || !option.value) return false;  // skip malformed entries
                         if (option.value === 'OwnerId') return false;
-                        if (this.featureName === 'Suggested_Listing_Fields' && option.value.toLowerCase() === 'name') return false;
+                        const val = option.value.toLowerCase();
+                        if ((this.featureName === 'Suggested_Listing_Fields' || this.featureName === 'Suggested_Inquiry_Fields') && val === 'name') return false;
+                        if (this.featureName === 'Suggested_Inquiry_Fields' && (val === 'mvex__contact__c' || val === 'contact__c')) return false;
                         return true;
                     })
                     .map(option => ({
@@ -160,6 +162,10 @@ export default class RecordConfigBodyCmp extends LightningElement {
                         let fieldsData = JSON.parse(result.metadataRecords[0]);
                         if (this.featureName === 'Suggested_Listing_Fields') {
                             fieldsData = fieldsData.filter(item => (item.fieldName || item.value || '').toLowerCase() !== 'name');
+                        }
+                        if (this.featureName === 'Suggested_Inquiry_Fields') {
+                            const excluded = ['name', 'mvex__contact__c', 'contact__c'];
+                            fieldsData = fieldsData.filter(item => !excluded.includes((item.fieldName || item.value || '').toLowerCase()));
                         }
                         this.checklistItems = fieldsData.map((item, index) => ({
                             id: index + 1,

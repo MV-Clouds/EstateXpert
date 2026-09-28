@@ -195,18 +195,52 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
     }
 
     /**
-     
+     * Method Name: validateFields
+     * @description: Validates all visible required input fields
+     * @return {Boolean} true if all fields are valid, false otherwise
+     */
+    validateFields() {
+        let isValid = true;
+        const inputFields = this.template.querySelectorAll('lightning-input-field');
+
+        inputFields.forEach(field => {
+            if (!field.classList.contains('slds-hide')) {
+                const fieldValid = field.reportValidity ? field.reportValidity() : true;
+                if (!fieldValid) {
+                    isValid = false;
+                }
+
+                // Extra safety check for configured required fields
+                const fieldConfig = this.offerFields.find(f => f.fieldName === field.fieldName);
+                if (fieldConfig && fieldConfig.required && !fieldConfig.hidden) {
+                    const val = field.value;
+                    const isEmpty = val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0);
+                    if (isEmpty) {
+                        isValid = false;
+                    }
+                }
+            }
+        });
+
+        return isValid;
+    }
 
     /**
      * Method Name: handleSaveClick
-     * @description: Handles save button click and submits the form
+     * @description: Handles save button click, validates required fields, and submits the form
      * Created Date: 10/02/2026
      * Created By: Karan Singh
      */
     handleSaveClick() {
+        if (!this.validateFields()) {
+            this.showToast('Error', 'Please complete all required fields.', 'error');
+            return;
+        }
+
         const form = this.template.querySelector('lightning-record-edit-form');
 
         if (form) {
+            this.isLoading = true;
             // Collect all field values from the form
             const fields = {};
             const inputFields = this.template.querySelectorAll('lightning-input-field');
@@ -281,6 +315,7 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
      * Created By: Karan Singh
      */
     handleError(event) {
+        this.isLoading = false;
         let errorMessage = 'Unknown error';
         if (event.detail && event.detail.detail) {
             errorMessage = event.detail.detail;

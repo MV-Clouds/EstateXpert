@@ -31,16 +31,25 @@ public with sharing class ListingManagerController {
     public static WrapperClass getListingData(){
         try {
             String listingFields = 'Id,MVEX__City__c,MVEX__Status__c,MVEX__Bathrooms__c,MVEX__Listing__c.MVEX__Property__c,MVEX__Country__c,MVEX__State__c,MVEX__Street__c,Name,MVEX__Sq_Ft__c,MVEX__Listing_Address__CountryCode__s,MVEX__Listing_Address__StateCode__s,MVEX__Listing_Address__City__s,MVEX__Listing_Address__PostalCode__s,MVEX__Listing_Address__Street__s,MVEX__Property_Type__c, MVEX__Property_Category__c';
-            List<Map<String, String>> configuredFields = getConfiguredFields();
 
-            if (configuredFields == null) {
-                configuredFields = new List<Map<String, String>>();
+            List<MVEX__Configuration_Settings__c> configs = [SELECT MVEX__Fields_Data__c, MVEX__Page_Size__c FROM MVEX__Configuration_Settings__c 
+                                                                WHERE MVEX__Feature_Name__c = 'Listing_Manager_Fields' WITH USER_MODE LIMIT 1];
+
+            List<Map<String, String>> configuredFields = new List<Map<String, String>>();
+            Integer pageSize = 30;
+
+            if (!configs.isEmpty()) {
+                MVEX__Configuration_Settings__c config = configs[0];
+                if (String.isNotBlank(config.MVEX__Fields_Data__c)) {
+                    configuredFields = (List<Map<String, String>>)JSON.deserialize(config.MVEX__Fields_Data__c, List<Map<String, String>>.class);
+                }
+                if (config.MVEX__Page_Size__c != null) {
+                    pageSize = Integer.valueOf(config.MVEX__Page_Size__c);
+                }
             }
 
-            // Collect state/country address sub-fields so we can build code→label maps.
-            // Detection is by API name suffix — no special fieldType sentinel needed.
             Set<String> stateCountryApiNames = new Set<String>();
-            // We also need the original-case API name for SObject.put() later.
+
             Map<String, String> lowerToOriginalCase = new Map<String, String>();
 
             if (!configuredFields.isEmpty()) {
@@ -55,11 +64,7 @@ public with sharing class ListingManagerController {
                     String fieldApiname = field.get('fieldApiname').trim();
                     String lowerApi    = fieldApiname.toLowerCase();
 
-                    // Require __ before state/country so we only match address compound
-                    // sub-fields (e.g. MVEX__Listing_Address__StateCode__s) and not
-                    // plain custom fields that happen to end in State__c.
-                    if (lowerApi.endsWith('__statecode__s') || lowerApi.endsWith('__state__s')
-                        || lowerApi.endsWith('__countrycode__s') || lowerApi.endsWith('__country__s')) {
+                    if (lowerApi.endsWith('__statecode__s') || lowerApi.endsWith('__state__s') || lowerApi.endsWith('__countrycode__s') || lowerApi.endsWith('__country__s')) {
                         stateCountryApiNames.add(lowerApi);
                         lowerToOriginalCase.put(lowerApi, fieldApiname);
                     }
@@ -75,12 +80,9 @@ public with sharing class ListingManagerController {
                 }
             }
 
-            Integer pageSize = getPageSizeFromConfig();
-
             String query = 'SELECT ' + listingFields + ' FROM MVEX__Listing__c';
             List<MVEX__Listing__c> listing = Database.query(query, AccessLevel.USER_MODE);
 
-            // ── Build code→label maps for each detected state/country field ────────────
             Map<String, Map<String, String>> codeToLabelByField = new Map<String, Map<String, String>>();
             if (!stateCountryApiNames.isEmpty()) {
                 Schema.DescribeSObjectResult objDescribe = MVEX__Listing__c.sObjectType.getDescribe();
@@ -136,67 +138,5 @@ public with sharing class ListingManagerController {
             ErrorHandler.insertErrorData(e, 'ListingManagerController', 'getListingData', 'Error while getting listing data.');
             return null;
         }
-    }
-
-    /**
-     * Method Name : getConfiguredFields
-     * @description : Retrieves the configured fields (API names and labels) from custom metadata.
-     * @return List<Map<String, String>>.
-     */
-    private static List<Map<String, String>> getConfiguredFields() {
-
-        try {
-            // Query Custom Object instead of Metadata
-            List<MVEX__Configuration_Settings__c> configs = [
-                SELECT MVEX__Fields_Data__c 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Feature_Name__c = 'Listing_Manager_Fields' 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
-            
-            List<Map<String, String>> fields = new List<Map<String, String>>();
-            
-            if (!configs.isEmpty()) {
-                MVEX__Configuration_Settings__c config = configs[0];
-                String fieldsDataJson = config.MVEX__Fields_Data__c;
-                
-                if (String.isNotBlank(fieldsDataJson)) {
-                    // Deserialize JSON to List<Map<String, String>>
-                    fields = (List<Map<String, String>>)JSON.deserialize(fieldsDataJson, List<Map<String, String>>.class);
-                }
-            }
-            
-            return fields;
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ListingManagerController', 'getConfiguredFields', 'Error while getting configured fields.');
-            return null;
-        }
-
-    }
-
-    // Helper method to get pageSize from metadata
-    private static Integer getPageSizeFromConfig() {
-
-        try {
-            // Query Custom Object instead of Metadata
-            List<MVEX__Configuration_Settings__c> configs = [
-                SELECT MVEX__Page_Size__c 
-                FROM MVEX__Configuration_Settings__c 
-                WHERE MVEX__Feature_Name__c = 'Listing_Manager_Fields' 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
-
-            if (!configs.isEmpty()) {
-                MVEX__Configuration_Settings__c config = configs[0];
-                return config.MVEX__Page_Size__c != null ? Integer.valueOf(config.MVEX__Page_Size__c) : 30; // Default to 30 if not set
-            }
-            
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'ListingManagerController', 'getPageSizeFromConfig', 'Error while getting page size from config.');
-        }
-        
-        return 30; // Default to 30 if no metadata found
     }
 }

@@ -1,135 +1,171 @@
-import { LightningElement, track, wire } from "lwc";
+import { LightningElement, wire } from "lwc";
 import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
-import { NavigationMixin } from "lightning/navigation";
+import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import FORM_FACTOR from "@salesforce/client/formFactor";
-import getMetadataRecords from "@salesforce/apex/ControlCenterController.getMetadataRecords";
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
-    @track featureAvailability = {};
-    @track isLoading = true;
-    @track currentView = 'controlCenter'; // 'controlCenter' or 'childComponent'
-    @track selectedComponent = null;
-    @track selectedComponentTitle = '';
-    @track selectedComponentDescription = '';
-    @track parentComponentTitle = ''; // For nested navigation breadcrumb
+    currentView = 'controlCenter';
+    selectedComponent = null;
+    selectedComponentTitle = '';
+    selectedComponentDescription = '';
+    parentComponentTitle = ''; // For nested navigation breadcrumb
     
     // Portal mapping state
-    @track portalId = null;
-    @track portalGen = null;
-    @track portalName = null;
-    @track portalIconUrl = null;
-    @track portalStatus = null;
-    @track isXMLForPF = false;
+    portalId = null;
+    portalGen = null;
+    portalName = null;
+    portalIconUrl = null;
+    portalStatus = null;
+    isXMLForPF = false;
     
     // Lead capture state
-    @track integrationType = null; // 'Google' or 'Meta'
+    integrationType = null; // 'Google' or 'Meta'
 
-    connectedCallback() {
-        // Load Mulish font
-        loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log("Css loaded successfully");
-            })
-            .catch((error) => {
-                console.log("Error loading style:", error);
-            });
-    }
-
-    @wire(getMetadataRecords)
-    metadataRecords({ error, data }) {
-        if (data) {
-            this.featureAvailability = data.reduce((acc, record) => {
-                acc[record.DeveloperName] = record.MVEX__isAvailable__c;
-                return acc;
-            }, {});
-            setTimeout(() => {
-                this.isLoading = false;
-            }, 1000);
-        } else if (error) {
-            console.error("Error fetching metadata records:", error);
-            this.isLoading = false;
+    /**
+     * Method Name: getStateParameters
+     * @description: Retrieves and processes the current page reference parameters
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
+    @wire(CurrentPageReference)
+    getStateParameters(currentPageReference) {
+        if (currentPageReference && currentPageReference.state) {
+            const target = currentPageReference.state.c__openComponent;
+            if (target === 'storageIntegration') {
+                this.generalIntegrationMethod();
+            }
         }
     }
 
-    get isWhatsappSectionAvailable() {
-        return !this.featureAvailability?.Whatsapp_Flow_Builder &&
-            !this.featureAvailability?.Whatsapp_Template_Builder &&
-            !this.featureAvailability?.Whatsapp_Embedded_Signup
-            ? false
-            : true;
+    /**
+     * Method Name: connectedCallback
+     * @description: Lifecycle hook that fires when the component is inserted into the DOM
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
+    connectedCallback() {
+        loadStyle(this, MulishFontCss);
     }
 
-    get isIntegrationSectionAvailable() {
-        return !this.featureAvailability?.General_Integrations &&
-            !this.featureAvailability?.Portal_Integration &&
-            !this.featureAvailability?.Lead_Capture
-            ? false
-            : true;
-    }
-
-    get isGeneralSectionAvailable() {
-        return !this.featureAvailability?.Map_Listing_And_Property &&
-            !this.featureAvailability?.Map_Listing_And_Inquiry &&
-            !this.featureAvailability?.Configure_Settings &&
-            !this.featureAvailability?.Lead_Assignment_Rule &&
-            !this.featureAvailability?.Object_Config &&
-            !this.featureAvailability?.Template_Builder
-            ? false
-            : true;
-    }
-
+    /**
+     * Method Name: isControlCenterView
+     * @description: Getter to check if the current view is the main control center
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isControlCenterView() {
         return this.currentView === 'controlCenter';
     }
 
+    /**
+     * Method Name: isChildComponentView
+     * @description: Getter to check if the current view is a child component
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isChildComponentView() {
         return this.currentView === 'childComponent';
     }
 
+    /**
+     * Method Name: layoutClass
+     * @description: Getter to dynamically set layout CSS classes based on the active view
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get layoutClass() {
         return this.isChildComponentView 
             ? 'control-center-layout with-breadcrumb' 
             : 'control-center-layout';
     }
 
+    /**
+     * Method Name: showRightSidebar
+     * @description: Getter to check if the right sidebar should be displayed based on form factor
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get showRightSidebar() {
         return FORM_FACTOR === 'Large';
     }
 
-    // Component type getters for in-place rendering
+    /**
+     * Method Name: isMapFieldsComponent
+     * @description: Checks if MapFields component is selected
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isMapFieldsComponent() {
         return this.selectedComponent === 'mapFields';
     }
 
+    /**
+     * Method Name: isLeadAssignmentRuleComponent
+     * @description: Checks if LeadAssignmentRule component is selected
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isLeadAssignmentRuleComponent() {
         return this.selectedComponent === 'leadAssignmentRule';
     }
 
+    /**
+     * Method Name: isStorageIntegrationComponent
+     * @description: Checks if StorageIntegration component is selected
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isStorageIntegrationComponent() {
         return this.selectedComponent === 'storageIntegration';
     }
 
+    /**
+     * Method Name: isLeadCaptureCmpComponent
+     * @description: Checks if LeadCaptureCmp component is selected
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isLeadCaptureCmpComponent() {
         return this.selectedComponent === 'leadCaptureCmp';
     }
 
-    get isObjectConfigCompComponent() {
-        return this.selectedComponent === 'objectConfigComp';
-    }
-
+    /**
+     * Method Name: isPortalMappingComponent
+     * @description: Checks if PortalMapping component is selected
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isPortalMappingComponent() {
         return this.selectedComponent === 'portalMapping';
     }
 
+    /**
+     * Method Name: isPortalMappingLandingPageComponent
+     * @description: Checks if PortalMappingLandingPage component is selected
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isPortalMappingLandingPageComponent() {
         return this.selectedComponent === 'portalMappingLandingPage';
     }
 
+    /**
+     * Method Name: isGoogleLeadFieldMappingComponent
+     * @description: Checks if GoogleLeadFieldMapping component is selected
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get isGoogleLeadFieldMappingComponent() {
         return this.selectedComponent === 'googleLeadFieldMapping';
     }
 
+    /**
+     * Method Name: hasParentComponent
+     * @description: Checks if there is a parent component set for breadcrumbs
+     * Date: 23/09/2026
+     * Created By: Vyom Soni
+     */
     get hasParentComponent() {
         return this.parentComponentTitle !== '';
     }
@@ -192,20 +228,25 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     goToControlCenter() {
-        // Always go back to control center, clear all state
-        this.currentView = 'controlCenter';
-        this.selectedComponent = null;
-        this.selectedComponentTitle = '';
-        this.selectedComponentDescription = '';
-        this.parentComponentTitle = '';
-        // Clear portal state
-        this.portalId = null;
-        this.portalGen = null;
-        this.portalName = null;
-        this.portalIconUrl = null;
-        this.portalStatus = null;
-        // Clear lead capture state
-        this.integrationType = null;
+        try {
+            this.currentView = 'controlCenter';
+            this.selectedComponent = null;
+            this.selectedComponentTitle = '';
+            this.selectedComponentDescription = '';
+            this.parentComponentTitle = '';
+            this.portalId = null;
+            this.portalGen = null;
+            this.portalName = null;
+            this.portalIconUrl = null;
+            this.portalStatus = null;
+            this.integrationType = null;
+        
+            if (window?.history?.replaceState && window?.location?.pathname) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } catch (e) {
+            console.log('Error in goToControlCenter:', e);
+        }
     }
 
     /**
@@ -234,20 +275,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             this.parentComponentTitle = '';
             // Clear lead capture state
             this.integrationType = null;
-        }
-    }
-
-    /**
-     * Method Name: goBackToControlCenter (kept for backward compatibility)
-     * @description: Smart navigation - goes to parent if exists, otherwise control center
-     * Date: 17/02/2026
-     * Created By: Karan Singh
-     */
-    goBackToControlCenter() {
-        if (this.parentComponentTitle) {
-            this.goToParentComponent();
-        } else {
-            this.goToControlCenter();
         }
     }
 
@@ -288,7 +315,9 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     generalIntegrationMethod(event) {
-        event.preventDefault();
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
         this.openComponent(
             'storageIntegration', 
             'Integration Hub',
@@ -296,6 +325,12 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         );
     }
 
+    /**
+     * Method Name: leadCaptureMethod
+     * @description: Used to open leadCaptureCmp component.
+     * Date: 09/09/2024
+     * Created By: Karan Singh
+     */
     leadCaptureMethod() {
         this.openComponent(
             'leadCaptureCmp', 
@@ -331,27 +366,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: templateBuilderMethod
-     * @description: Used to open templateHomePage component.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    templateBuilderMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:templateHomePage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    /**
      * Method Name: portalIntegrationMethod
      * @description: Used to open portalMapping component in-place.
      * Date: 09/09/2024
@@ -375,89 +389,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     handlePortalNavigation(event) {
         const { portalId, portalGen, portalName, portalIconUrl, portalStatus, isXMLForPF } = event.detail;
-        
-        // Store portal parameters
         this.portalId = portalId;
         this.portalGen = portalGen;
         this.portalName = portalName;
         this.portalIconUrl = portalIconUrl;
         this.portalStatus = portalStatus;
         this.isXMLForPF = isXMLForPF;
-        
-        // Set parent component for breadcrumb
         this.parentComponentTitle = 'Portal Integration';
-        
-        // Navigate to landing page
         this.selectedComponent = 'portalMappingLandingPage';
         this.selectedComponentTitle = portalName;
         this.currentView = 'childComponent';
-    }
-
-    /**
-     * Method Name: whatsappEmbeddedSignuprMethod
-     * @description: Used to open WhatsApp Embedded Signup.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    whatsappEmbeddedSignuprMethod(event) {
-        event.preventDefault();
-        // For VF page, we still need to navigate
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: '/apex/MVEX__facebookSDK'
-            }
-        });
-    }
-
-    /**
-     * Method Name: whatsappTemplateBuilderMethod
-     * @description: Used to open WhatsApp template builder.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    whatsappTemplateBuilderMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:wbAllTemplatePage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    /**
-     * Method Name: whatsappFlowBuilderMethod
-     * @description: Used to open WhatsApp flow builder.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    whatsappFlowBuilderMethod(event) {
-        event.preventDefault();
-        let componentDef = {
-            componentDef: "MVEX:wbAllFlowsPage"
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: "/one/one.app#" + encodedComponentDef
-            }
-        });
-    }
-
-    objectConfigurationMethod(event) {
-        event.preventDefault();
-        this.openComponent(
-            'objectConfigComp', 
-            'Object Configuration',
-            'The "Object Config" allows you to configure which objects and fields should be available when creating groups of members or sending email and WhatsApp messages from broadcast or campaign features, ensuring precise control over your marketing data structure.'
-        );
     }
 }

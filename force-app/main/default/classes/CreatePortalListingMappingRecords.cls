@@ -16,9 +16,9 @@ public with sharing class CreatePortalListingMappingRecords {
     */
     public static String createPortalRecords(String portalName) {
         try {
-            Portaldata__mdt portalMetaData = [SELECT MasterLabel, Portal_Record__c, Portal_Value__c FROM Portaldata__mdt WHERE Portal_Value__c = :portalName WITH USER_MODE LIMIT 1];
+            MVEX__Portaldata__mdt portalMetaData = [SELECT MasterLabel, MVEX__Portal_Record__c, MVEX__Portal_Value__c FROM MVEX__Portaldata__mdt WHERE MVEX__Portal_Value__c = :portalName WITH USER_MODE LIMIT 1];
 
-            Object jsonObject = JSON.deserializeUntyped(portalMetaData.Portal_Record__c);
+            Object jsonObject = JSON.deserializeUntyped(portalMetaData.MVEX__Portal_Record__c);
             if (jsonObject instanceof List<Object>) {
                 List<Object> jsonList = (List<Object>) jsonObject;
                 List<Map<String, Object>> jsonData = new List<Map<String, Object>>();
@@ -31,40 +31,40 @@ public with sharing class CreatePortalListingMappingRecords {
                     }
                 }
 
-                List<Portal_Listing_Mapping__c> newRecords = new List<Portal_Listing_Mapping__c>();
+                List<MVEX__Portal_Listing_Mapping__c> newRecords = new List<MVEX__Portal_Listing_Mapping__c>();
 
                 Map<String, String> stringMap = new Map<String, String>();
                 
                 for (Map<String, Object> recordData : jsonData) {
-                    if (recordData.containsKey('Listing_Field_API_Name__c') && recordData.get('Listing_Field_API_Name__c') != null && recordData.containsKey('Name')) {
-                        stringMap.put((String) recordData.get('Listing_Field_API_Name__c'), (String) recordData.get('Name'));
+                    if (recordData.containsKey('MVEX__Listing_Field_API_Name__c') && recordData.get('MVEX__Listing_Field_API_Name__c') != null && recordData.containsKey('Name')) {
+                        stringMap.put((String) recordData.get('MVEX__Listing_Field_API_Name__c'), (String) recordData.get('Name'));
                     }
 
-                    Portal_Listing_Mapping__c newRecord = new Portal_Listing_Mapping__c();
+                    MVEX__Portal_Listing_Mapping__c newRecord = new MVEX__Portal_Listing_Mapping__c();
                     
-                    if (recordData.containsKey('Allowed_Field_Datatype__c')) {
-                        newRecord.Allowed_Field_Datatype__c = (String) recordData.get('Allowed_Field_Datatype__c');
+                    if (recordData.containsKey('MVEX__Allowed_Field_Datatype__c')) {
+                        newRecord.MVEX__Allowed_Field_Datatype__c = (String) recordData.get('Allowed_Field_Datatype__c');
                     }
-                    if (recordData.containsKey('Data_Type__c')) {
-                        newRecord.Data_Type__c = (String) recordData.get('Data_Type__c');
+                    if (recordData.containsKey('MVEX__Data_Type__c')) {
+                        newRecord.MVEX__Data_Type__c = (String) recordData.get('Data_Type__c');
                     }
                     if (recordData.containsKey('Listing_Field_API_Name__c')) {
-                        newRecord.Listing_Field_API_Name__c = (String) recordData.get('Listing_Field_API_Name__c');
+                        newRecord.MVEX__Listing_Field_API_Name__c = (String) recordData.get('Listing_Field_API_Name__c');
                     }
                     if (recordData.containsKey('Portal_Field_Description__c')) {
-                        newRecord.Portal_Field_Description__c = (String) recordData.get('Portal_Field_Description__c');
+                        newRecord.MVEX__Portal_Field_Description__c = (String) recordData.get('Portal_Field_Description__c');
                     }
                     if (recordData.containsKey('Portal_Field_Example__c')) {
-                        newRecord.Portal_Field_Example__c = (String) recordData.get('Portal_Field_Example__c');
+                        newRecord.MVEX__Portal_Field_Example__c = (String) recordData.get('Portal_Field_Example__c');
                     }
                     if (recordData.containsKey('Portal_Name__c')) {
-                        newRecord.Portal_Name__c = (String) recordData.get('Portal_Name__c');
+                        newRecord.MVEX__Portal_Name__c = (String) recordData.get('Portal_Name__c');
                     }
                     if (recordData.containsKey('Required__c')) {
-                        newRecord.Required__c = (Boolean) recordData.get('Required__c');
+                        newRecord.MVEX__Required__c = (Boolean) recordData.get('Required__c');
                     }
                     if (recordData.containsKey('Value_Mapping__c')) {
-                        newRecord.Value_Mapping__c = (String) recordData.get('Value_Mapping__c');
+                        newRecord.MVEX__Value_Mapping__c = (String) recordData.get('Value_Mapping__c');
                     }
                     if (recordData.containsKey('Name')) {
                         newRecord.Name = (String) recordData.get('Name');
@@ -100,67 +100,67 @@ public with sharing class CreatePortalListingMappingRecords {
         try {
             if (portalName == 'Propertyfinder') {
 
-                BFFPF__c propertyFinderSettings = BFFPF__c.getOrgDefaults();
+                MVEX__BFFPF__c propertyFinderSettings = MVEX__BFFPF__c.getOrgDefaults();
                 if (propertyFinderSettings == null) {
-                    propertyFinderSettings = new BFFPF__c();
+                    propertyFinderSettings = new MVEX__BFFPF__c();
                     propertyFinderSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
-                propertyFinderSettings.Fields_Name__c = 'Id;MVEX__Property__c;LastModifiedDate;MVEX__Listing_Type__c;MVEX__Rent_Frequency__c';
+                propertyFinderSettings.MVEX__Fields_Name__c = 'Id;MVEX__Property__c;LastModifiedDate;MVEX__Listing_Type__c;MVEX__Rent_Frequency__c';
                     
                 upsert as user propertyFinderSettings;
 
             } else if (portalName == 'Zoopla') {
 
-                BFFZ__c zooplaSettings = BFFZ__c.getOrgDefaults();
+                MVEX__BFFZ__c zooplaSettings = MVEX__BFFZ__c.getOrgDefaults();
                 if (zooplaSettings == null) {
-                    zooplaSettings = new BFFZ__c();
+                    zooplaSettings = new MVEX__BFFZ__c();
                     zooplaSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
-                zooplaSettings.Fields_Name__c = 'Id;MVEX__Property__c';
+                zooplaSettings.MVEX__Fields_Name__c = 'Id;MVEX__Property__c';
                 
                 upsert as user zooplaSettings;
 
             } else if (portalName == 'Bayut') {
 
-                BFFB__c bayutSettings = BFFB__c.getOrgDefaults();
+                MVEX__BFFB__c bayutSettings = MVEX__BFFB__c.getOrgDefaults();
                 if (bayutSettings == null) {
-                    bayutSettings = new BFFB__c();
+                    bayutSettings = new MVEX__BFFB__c();
                     bayutSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
-                bayutSettings.Fields_Name__c = 'Id;MVEX__Property__c;LastModifiedDate';
+                bayutSettings.MVEX__Fields_Name__c = 'Id;MVEX__Property__c;LastModifiedDate';
 
                 upsert as user  bayutSettings;
                     
             } else if (portalName == 'Rightmove') {
 
-                BFFR__c rightmoveSettings = BFFR__c.getOrgDefaults();
+                MVEX__BFFR__c rightmoveSettings = MVEX__BFFR__c.getOrgDefaults();
                 if (rightmoveSettings == null) {
-                    rightmoveSettings = new BFFR__c();
+                    rightmoveSettings = new MVEX__BFFR__c();
                     rightmoveSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
-                rightmoveSettings.Fields_Name__c = 'Id;MVEX__Property__c;MVEX__Listing_Type__c';
+                rightmoveSettings.MVEX__Fields_Name__c = 'Id;MVEX__Property__c;MVEX__Listing_Type__c';
 
                 upsert as user rightmoveSettings;
 
             } else if (portalName == 'Rightmove Overseas') {
 
-                BFFRO__c rightmoveOverseasSettings = BFFRO__c.getOrgDefaults();
+                MVEX__BFFRO__c rightmoveOverseasSettings = MVEX__BFFRO__c.getOrgDefaults();
                 if (rightmoveOverseasSettings == null) {
-                    rightmoveOverseasSettings = new BFFRO__c();
+                    rightmoveOverseasSettings = new MVEX__BFFRO__c();
                     rightmoveOverseasSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
-                rightmoveOverseasSettings.Fields_Name__c = 'Id;MVEX__Property__c';
+                rightmoveOverseasSettings.MVEX__Fields_Name__c = 'Id;MVEX__Property__c';
 
                 upsert as user rightmoveOverseasSettings;
 
             } else if (portalName == 'Dubizzle') {
                 
-                BFFB__c bayutSettings = BFFB__c.getOrgDefaults();
+                MVEX__BFFB__c bayutSettings = MVEX__BFFB__c.getOrgDefaults();
                 if (bayutSettings == null) {
-                    bayutSettings = new BFFB__c();
+                    bayutSettings = new MVEX__BFFB__c();
                     bayutSettings.SetupOwnerId = UserInfo.getOrganizationId();
                 }
-                bayutSettings.Fields_Name__c = 'Id;MVEX__Property__c;LastModifiedDate';
+                bayutSettings.MVEX__Fields_Name__c = 'Id;MVEX__Property__c;LastModifiedDate';
 
                 upsert as user bayutSettings;
             }

@@ -18,17 +18,17 @@ public with sharing class RightmoveOverseaIntegration {
             String escapedListingId = String.escapeSingleQuotes(listingId);
             String escapedPortalId = String.escapeSingleQuotes(portalId);
 
-            List<Portal__c> portalRightmove = [SELECT Id, Field_Mapping__c, Portal_Configuration__c, Is_Active__c FROM Portal__c WHERE Id =: escapedPortalId AND Is_Active__c = true WITH USER_MODE LIMIT 1];
+            List<MVEX__Portal__c> portalRightmove = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id =: escapedPortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
 
             if (portalRightmove.isEmpty()) {
                 updatePortalListingRecord(listingId, portalId, 'Portal configuration is missing.', 'Exception');
                 return;
             }
 
-            Portal__c rightmovePortal = portalRightmove[0];
+            MVEX__Portal__c rightmovePortal = portalRightmove[0];
 
-            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(rightmovePortal.Field_Mapping__c);
-            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(rightmovePortal.Portal_Configuration__c);
+            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(rightmovePortal.MVEX__Field_Mapping__c);
+            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(rightmovePortal.MVEX__Portal_Configuration__c);
             Map<String, Object> finalMapping = new Map<String, Object>();
 
             finalMapping.put('branch.branch_id', configMap.get('branch.branch_id'));
@@ -53,7 +53,7 @@ public with sharing class RightmoveOverseaIntegration {
                 SObject listingRecord = records[0];
                 String propertyId = (String) listingRecord.get('MVEX__Property__c');
 
-                List<Property_File__c> media = [SELECT Id, BaseUrl__c, ExternalLink__c, Tags__c, LastModifiedDate FROM Property_File__c WHERE Property__c = :propertyId AND IsOnPortalFeed__c = true WITH USER_MODE Order BY Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC];
+                List<MVEX__Property_File__c> media = [SELECT Id, MVEX__BaseUrl__c, MVEX__ExternalLink__c, MVEX__Tags__c, LastModifiedDate FROM MVEX__Property_File__c WHERE MVEX__Property__c = :propertyId AND MVEX__IsOnPortalFeed__c = true WITH USER_MODE Order BY MVEX__Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC];
 
                 for (String key : jsonMap.keySet()) {
                     String label = (String) jsonMap.get(key);
@@ -72,12 +72,12 @@ public with sharing class RightmoveOverseaIntegration {
     public static void updatePortalListingRecord(String listingId, String portalId, String apiResponse, String status) {
         try {
             if (status == 'Success') {
-                PortalListing__c newPortalListing = new PortalListing__c();
-                newPortalListing.Listing__c = listingId;
-                newPortalListing.Portal__c = portalId;
-                newPortalListing.SystemIsActive__c = true;
-                newPortalListing.Listed_Date__c = System.today();
-                newPortalListing.API_Response__c = apiResponse;
+                MVEX__PortalListing__c newPortalListing = new MVEX__PortalListing__c();
+                newPortalListing.MVEX__Listing__c = listingId;
+                newPortalListing.MVEX__Portal__c = portalId;
+                newPortalListing.MVEX__SystemIsActive__c = true;
+                newPortalListing.MVEX__Listed_Date__c = System.today();
+                newPortalListing.MVEX__API_Response__c = apiResponse;
                 insert as user newPortalListing;  
             }
             PlatformEventController.publishEvent(status, apiResponse, 'Rightmove Overseas', listingId);

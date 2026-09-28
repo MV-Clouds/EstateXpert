@@ -2,32 +2,24 @@ import { LightningElement, track, wire, api } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { encodeDefaultFieldValues } from 'lightning/pageReferenceUtils';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
-import getContactsForInquiries from '@salesforce/apex/PropertySearchController.getContactsForInquiries';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
-import sendEmail from '@salesforce/apex/PropertySearchController.sendEmail';
-import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuickTemplates';
-import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController.getMessagingServiceOptions';
-import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
+import { loadStyle } from 'lightning/platformResourceLoader';
 import getObjectName from '@salesforce/apex/PropertySearchController.getObjectName';
-import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
-import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
-import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
-import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
-import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmpController.processBroadcastMessageWithObject';
 import { errorDebugger } from 'c/globalProperties';
 import getObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
 import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
-import emptyState from '@salesforce/resourceUrl/emptyState';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
 import FORM_FACTOR from '@salesforce/client/formFactor';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
 export default class displayInquiry extends NavigationMixin(LightningElement) {
     @api recordId;
+    refreshChannelName = '/event/MVEX__RefreshEvent__e';
+    refreshSubscription = {};
     @track objectApiName = '';
     @track totalRecords = 0;
     @track inquiries = [];
@@ -36,7 +28,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track isLoading = true;
     @track pageSize = 9;
     @track pagedFilteredInquiryData = [];
-    @track sendMailInquiryDataList = [];
     @track inquirydata = [];
     @track totalinquiry = [];
     @track isInquiryAvailable = true;
@@ -47,29 +38,13 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track checkAll = false;
     @track sortField = 'name';
     @track sortOrder = 'asc';
-    @track popupSortField = 'Name';
-    @track popupSortOrder = 'asc';
     _renderedCallbackRunOnce = false;
 
     refNameCache = {};
     referenceNameMappings = {};
 
     @track isShowModal = false;
-
-    @track isMassEmailModalOpen = false;
-    @track sendMethod = '';
-    @track selectedTemplate = '';
-    @track selectedListingTemplate = '';
-    @track templateBody = '';
-    @track isTemplateBody = false;
-    @track isFirstScreen = true;
-    @track footerButtonLabel = 'Next';
     @track selectedMappingId;
-
-    @track messageOptions = [];
-
-    @track quickTemplates = [];
-    @track listingTemplateOptions = [];
 
     @track selectedConditionType = 'Related List';
     @track mappings = [];
@@ -102,16 +77,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     ];
     @track visiblePages = 5;
     @track divElement;
-    @track showTemplate = false;
-    @track isMainModal = true;
-    @track selectedRecord = false;
-    @track templateHeader = '';
-    @track templateFooter = '';
-    @track isShowSchedule = false;
-    @track isShowNextSchedule = false;
-    @track selectedDate = '';
-
-    @track vfGeneratePageSRC;
 
     @track inquiryColumns = [];
     @track defaultColumns = [
@@ -142,33 +107,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         return this.allConditionOptions;
     }
 
-    @track broadcastContactList = [];
-    @track popUpFirstPage = true;
-    @track popUpSecondPage = false;
-    @track popUpLastPage = false;
-    @track popUpConfirmPage = false;
-    @track popupHeader = 'Create Broadcast Group';
-    @track broadcastGroupName = '';
-    @track tempBroadcastGroupName = '';
-    @track messageText = '';
-    @track selectedDateTime = '';
-    @track broadcastGroupId = null;
-    @track templateOptions = [];
-    @track templateMap = new Map();
-    @track selectedObject = 'Contact'; // Default to Contact for messaging
-    @track listViewId = '';
-    @track spinnerShow = false;
     @track isConfigOpen = false;
-    @track hasBusinessAccountConfigured = false;
     @track listingFieldOptions = [];
     @track isConstant = false;
     @track selectedRecordName = '';
-    @track NoDataImageUrl = emptyState;
-    @track hideFilterButton = false;
-    @track filteredGroupMembers = [];
-    @track pagedFilteredInquiryData = [];
     @track modalFilteredInquiryData = [];
-    @track sendMailInquiryDataList = [];
     filterModalSnapshot = null;
     @track screenWidth = 0;
 
@@ -208,10 +151,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
         // For other condition types (related, linked, none), button is always enabled
         return false;
-    }
-
-    get modalContainerClass() {
-        return this.popUpSecondPage ? 'slds-modal__container send-template-modal-container' : 'slds-modal__container';
     }
 
     /**
@@ -255,15 +194,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         return this.pagedFilteredInquiryData.length;
     }
 
-    /**
-    * Method Name : totalSelectedItems
-    * @description : set the total selected items count.
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
-    get totalSelectedItems() {
-        return this.sendMailInquiryDataList.length;
-    }
 
     /**
     * Method Name : mappingClass
@@ -484,19 +414,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         return this.mappings.length > 0;
     }
 
-    /**
-    * Method Name : isSendEmailButtonDisabled
-    * @description : check if inquirylist is empty or not
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
-    get isSendEmailButtonDisabled() {
-        return this.sendMailInquiryDataList.length === 0;
-    }
-
-    get isForSingle() {
-        return this.sendMethod === 'single';
-    }
 
     /**
     * Method Name : objectName
@@ -540,43 +457,79 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     async connectedCallback() {
         try {
             await this.getObjectApiName();
-            await this.checkBusinessAccountConfig();
             loadStyle(this, MulishFontCss);
             this.getInquiryFields();
             this.fetchInquiryConfiguration();
 
-            // Wait for both required data loads before fetching filter configuration
-            await Promise.all([
-                this.getListingFields(),
-                this.loadQuickTemplates(),
-                this.loadMessageOptions(),
-                this.loadListViewId()
-            ]);
-
-            this.loadAllTemplates();
-            this.fetchFilterConfiguration();
+            // Wait for listing fields data load before fetching filter configuration
+            await this.getListingFields();
 
             this.updateScreenWidth();
             window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
             window?.globalThis?.addEventListener('click', this.handleClickOutside);
-            this.vfPageMessageHandler();
-            this.checkHideFilterButton();
+            this.handleSubscribeRefresh();
+            // this.checkHideFilterButton();
         } catch (error) {
             errorDebugger('displayInquiry', 'connectedCallback', error, 'warn', 'Error during initialization');
         }
     }
 
-    checkHideFilterButton() {
-        getMetadataRecords()
-            .then(result => {
-                const feature = result.find(item => item.DeveloperName === 'Map_Listing_And_Inquiry');
-                if (feature && feature.MVEX__isAvailable__c) {
-                    this.hideFilterButton = true;
-                }
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'checkHideFilterButton', error, 'warn', 'Error fetching metadata');
-            });
+    /**
+     * Method Name: getContactInfo
+     * @description: Resolves contact ID, contact Name, and hasContact for an inquiry record
+     */
+    getContactInfo(inquiry) {
+        if (!inquiry) {
+            return { contactId: null, contactName: '', contactname: '', hasContact: false };
+        }
+
+        // Find contact ID (mvex__contact__c or contact__c)
+        const contactIdKey = Object.keys(inquiry).find(
+            k => k.toLowerCase() === 'mvex__contact__c' || k.toLowerCase() === 'contact__c'
+        );
+        const contactId = contactIdKey ? inquiry[contactIdKey] : null;
+
+        let contactName = '';
+
+        // 1. Try relationship traversal: mvex__contact__r or contact__r
+        const parentObjKey = Object.keys(inquiry).find(
+            k => k.toLowerCase() === 'mvex__contact__r' || k.toLowerCase() === 'contact__r'
+        );
+        const parentObj = parentObjKey ? inquiry[parentObjKey] : null;
+        if (parentObj && typeof parentObj === 'object') {
+            const nameKey = Object.keys(parentObj).find(k => k.toLowerCase() === 'name');
+            const resolved = nameKey ? parentObj[nameKey] : null;
+            if (resolved !== null && resolved !== undefined && String(resolved).trim() !== '') {
+                contactName = String(resolved);
+            }
+        }
+
+        // 2. Fall back to refNameCache
+        if (!contactName && contactId && this.refNameCache && this.refNameCache[contactId]) {
+            contactName = this.refNameCache[contactId];
+        }
+
+        // 3. Fall back to referenceNameMappings
+        if (!contactName && contactId && this.referenceNameMappings && typeof this.referenceNameMappings === 'object') {
+            const mappingKey = Object.keys(this.referenceNameMappings).find(
+                k => k.toLowerCase() === 'mvex__contact__c' || k.toLowerCase() === 'contact__c'
+            );
+            if (mappingKey && this.referenceNameMappings[mappingKey]) {
+                contactName = this.referenceNameMappings[mappingKey][contactId] || '';
+            }
+        }
+
+        const hasContact = Boolean(contactId);
+        if (hasContact && !contactName) {
+            contactName = String(contactId);
+        }
+
+        return {
+            contactId: contactId,
+            contactName: contactName,
+            contactname: contactName.toLowerCase(),
+            hasContact: hasContact
+        };
     }
 
     processInquiryData(inquiries) {
@@ -584,6 +537,12 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
         return (inquiries || []).map(inquiry => {
             const row = { ...inquiry };
+            const contactInfo = this.getContactInfo(inquiry);
+            row.contactId = contactInfo.contactId;
+            row.contactName = contactInfo.contactName;
+            row.contactname = contactInfo.contactname;
+            row.hasContact = contactInfo.hasContact;
+
             row.displayFields = cols.map(col => {
                 // Ensure fieldName is lowercase to match inquiry data keys
                 const key = (col.fieldName || '').toLowerCase();
@@ -738,10 +697,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handleRefresh() {
         this.isLoading = true;
         this.checkAll = false;
-        this.sendMailInquiryDataList = [];
         this.searchTerm = '';
         this.fetchListings();
-        this.checkHideFilterButton();
+        // this.checkHideFilterButton();
     }
 
     /**
@@ -763,6 +721,17 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     });
                 }
             });
+
+            // Update contact info for totalinquiry if already populated
+            if (this.totalinquiry && this.totalinquiry.length > 0) {
+                this.totalinquiry.forEach(inquiry => {
+                    const contactInfo = this.getContactInfo(inquiry);
+                    inquiry.contactId = contactInfo.contactId;
+                    inquiry.contactName = contactInfo.contactName;
+                    inquiry.contactname = contactInfo.contactname;
+                    inquiry.hasContact = contactInfo.hasContact;
+                });
+            }
         } catch (error) {
             errorDebugger('displayInquiry', 'populateRefNameCacheFromMappings', error, 'warn', 'Error populating reference name cache');
         }
@@ -825,44 +794,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    /**
-    * Method Name : checkBusinessAccountConfig
-    * @description : method to check if business account ID is configured in custom metadata
-    * Date: 03/02/2026
-    * Created By: Karan Singh
-    */
-    async checkBusinessAccountConfig() {
-        try {
-            const result = await hasBusinessAccountId();
-            this.hasBusinessAccountConfigured = result;
-        } catch (error) {
-            errorDebugger('displayInquiry', 'checkBusinessAccountConfig', error, 'warn', 'Error checking business account configuration');
-            this.hasBusinessAccountConfigured = false;
-        }
-    }
-
-    vfPageMessageHandler() {
-        if (typeof window !== 'undefined') {
-            window.addEventListener('message', this.simpleTempFileGenResponse);
-        }
-    }
-
-    simpleTempFileGenResponse = (message) => {
-        try {
-            if (message.data.messageFrom == 'docGenerate') {
-                let listingTemplateStatus = message.data.status;
-                let listingTemplateError = message.data.error;
-                if (listingTemplateStatus) {
-                    this.handleSave();
-                } else {
-                    this.showToast('Failed to generate PDF', listingTemplateError, 'error');
-                    this.isLoading = false;
-                }
-            }
-        } catch (error) {
-            errorDebugger('displayInquiry', 'simpleTempFileGenResponse', error, 'warn', 'Error processing message');
-        }
-    }
 
     renderedCallback() {
         // Initialize sorting icons only once
@@ -873,63 +804,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     }
 
-    loadAllTemplates() {
-        getTemplatesByObject()
-            .then(result => {
-                this.templateMap = new Map(Object.entries(result));
-                this.updateTemplateOptions();
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'loadAllTemplates', error, 'warn', 'Failed to load templates');
-                this.showToast('Error', 'Failed to load templates', 'error');
-            });
-    }
-
-    loadListViewId() {
-        return getListViewId()
-            .then(data => {
-                this.listViewId = data;
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'loadListViewId', error, 'warn', 'Failed to load list view id');
-                this.showToast('Error', 'Failed to load list view id', 'error');
-            });
-    }
-
-    /**
-    * Method Name : loadQuickTemplates
-    * @description : method to load contacts
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    loadQuickTemplates() {
-        return getQuickTemplates()
-            .then(result => {
-                this.quickTemplates = [
-                    { label: 'None', value: '', body: '' },
-                    ...result.marketingTemplates
-                        .filter(option => option.objectApiName === 'Contact')
-                        .map(option => {
-                            return {
-                                label: option.templateName,
-                                value: option.templateId,
-                                body: option.body
-                            };
-                        })
-                ];
-
-                this.listingTemplateOptions = [
-                    { label: 'None', value: '', body: '' },
-                    ...result.listingTemplates.map(option => {
-                        return { label: option.templateName, value: option.templateId };
-                    })
-                ];
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'loadQuickTemplates', error, 'warn', 'Failed to load quick templates');
-                this.showToast('Error', 'Failed to load quick templates', 'error');
-            });
-    }
 
     /**
     * Method Name : fetchFilterConfiguration
@@ -964,24 +838,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             });
     }
 
-    /**
-    * Method Name : loadMessageOptions
-    * @description : method to get all message service options from apex
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
-    loadMessageOptions() {
-        return getMessagingServiceOptions()
-            .then(data => {
-                this.messageOptions = data.map(option => {
-                    return { label: option.label, value: option.value };
-                });
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'loadMessageOptions', error, 'warn', 'Failed to fetch message options');
-                this.showToast('Error', 'Failed to fetch message options', 'error');
-            });
-    }
 
     /**
     * Method Name : getInquiryFields
@@ -1048,134 +904,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         event.stopPropagation();
     }
 
-    /**
-    * Method Name : handleSendMethodChange
-    * @description : method to handle sender mode change
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
-    handleSendMethodChange(event) {
-        this.sendMethod = event.detail.value;
-    }
-
-    /**
-    * Method Name : handletemplateChange
-    * @description : method to handle template change
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handletemplateChange(event) {
-        try {
-            this.selectedTemplate = event.detail.value;
-            const selectedOption = this.quickTemplates.find(option => option.value === this.selectedTemplate);
-            if (selectedOption.label === 'None') {
-                this.isTemplateBody = false;
-            } else {
-                this.isTemplateBody = true;
-                this.templateBody = selectedOption ? selectedOption.body : '';
-            }
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handletemplateChange', error, 'warn', 'Error selecting template');
-            this.showToast('Error', 'An error occurred while selecting template', 'error');
-        }
-    }
-
-    /**
-    * Method Name : handleListingTemplateChange
-    * @description : method to handle listing template change
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleListingTemplateChange(event) {
-        this.selectedListingTemplate = event.detail.value;
-    }
-
-    /**
-    * Method Name : handleFooterButtonClick
-    * @description : method to check validation and call save method
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleFooterButtonClick() {
-        try {
-            if (this.isFirstScreen) {
-                if (!this.sendMethod || !this.selectedTemplate) {
-                    this.showToast('Error', 'Please Ensure all required fields are filled', 'error');
-                    return;
-                }
-                this.isFirstScreen = false;
-                this.footerButtonLabel = 'Save';
-            } else {
-                this.isLoading = true;
-                if (this.selectedListingTemplate != '' && this.selectedListingTemplate != undefined && this.sendMethod == 'single') {
-                    let paraData = {
-                        'templateId': this.selectedListingTemplate,
-                        'recordId': this.recordId,
-                        'selectedExtension': '.pdf',
-                        'selectedChannels': 'Files',
-                        'fileName': 'ListingPDF'
-                    }
-                    let paraDataStringify = JSON.stringify(paraData);
-                    let newSRC = '/apex/MVEX__DocGeneratePage?paraData=' + encodeURIComponent(paraDataStringify);
-                    this.vfGeneratePageSRC = newSRC;
-                } else {
-                    this.handleSave();
-                }
-            }
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handleFooterButtonClick', error, 'warn', 'Error processing footer button click');
-            this.showToast('Error', 'An error occurred while processing', 'error');
-        }
-    }
-
-    /**
-    * Method Name : handleSave
-    * @description : method to send email and save data based on all condition
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleSave() {
-        try {
-            const emailData = {
-                sendMethod: this.sendMethod,
-                templateId: this.selectedTemplate,
-                listingId: this.recordId,
-                inquiry: this.sendMailInquiryDataList
-            };
-
-            sendEmail({ emailDataJson: JSON.stringify(emailData) })
-                .then(() => {
-                    this.showToast('Success', 'Emails sent successfully!', 'success');
-                    this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
-                        return { ...inquiry, isSelected: false };
-                    });
-                    this.checkAll = false;
-                    this.sendMailInquiryDataList = [];
-                    this.selectedListingTemplate = '';
-                    this.closeModal();
-                    this.isLoading = false;
-                })
-                .catch(error => {
-                    errorDebugger('displayInquiry', 'handleSave', error, 'warn', 'Failed to send emails');
-                    this.showToast('Error', 'Failed to send emails', 'error');
-                    this.isLoading = false;
-                });
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handleSave', error, 'warn', 'Error sending emails');
-            this.showToast('Error', 'An error occurred while sending emails', 'error');
-            this.isLoading = false;
-        }
-    }
-
-    /**
-    * Method Name : handleBack
-    * @description : method to back in the first screen for selecting template
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
-    handleBack() {
-        this.isFirstScreen = true;
-    }
 
     /**
     * Method Name : handleDeleteMapping
@@ -1428,7 +1156,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.hideModalBox(false);
             this.searchTerm = '';
             this.checkAll = false;
-            this.sendMailInquiryDataList = [];
             this.isLoading = false;
 
         } catch (error) {
@@ -1464,21 +1191,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    /**
-    * Method Name : setTempValue
-    * @description : method to display value of template body
-    * * Date: 20/08/2024
-    * Created By:Rachit Shah
-    */
-    setTempValue(value) {
-        return `<div class=" note-editor2 note-frame2">
-                    <div class="note-editing-area2">
-                        <div aria-multiline="true" role="textbox" class="note-editable2">
-                            ${value}
-                        </div>
-                    </div>
-                </div>`
-    }
 
     /**
   * Method Name: fetchListings
@@ -1608,6 +1320,11 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             Object.keys(item).forEach(key => {
                 newItem[key.toLowerCase()] = item[key];
             });
+            const contactInfo = this.getContactInfo(newItem);
+            newItem.contactId = contactInfo.contactId;
+            newItem.contactName = contactInfo.contactName;
+            newItem.contactname = contactInfo.contactname;
+            newItem.hasContact = contactInfo.hasContact;
             return newItem;
         });
     }
@@ -1639,8 +1356,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     applyFilters() {
         try {
             this.pagedFilteredInquiryData = this.modalFilteredInquiryData.filter(inquiry => {
-                const searchInquiry = inquiry.name.toLowerCase().includes(this.searchTerm);
-                return searchInquiry;
+                const searchInquiry = inquiry.name ? inquiry.name.toLowerCase().includes(this.searchTerm) : false;
+                const searchContact = inquiry.contactName ? inquiry.contactName.toLowerCase().includes(this.searchTerm) : false;
+                return searchInquiry || searchContact;
             });
 
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
@@ -1981,7 +1699,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                         this.searchTerm = '';
                         this.checkAll = false;
-                        this.sendMailInquiryDataList = [];
 
                         if (this.pagedFilteredInquiryData.length === 0) {
                             this.showToast('Info', 'No linked inquiries found for this listing', 'info');
@@ -2021,7 +1738,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                         this.searchTerm = '';
                         this.checkAll = false;
-                        this.sendMailInquiryDataList = [];
 
                         if (this.pagedFilteredInquiryData.length === 0) {
                             this.showToast('Info', 'No related inquiries found for this listing', 'info');
@@ -2059,7 +1775,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                         this.searchTerm = '';
                         this.checkAll = false;
-                        this.sendMailInquiryDataList = [];
 
                         this.hideModalBox(false);
                         this.isLoading = false;
@@ -2081,7 +1796,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.logicalExpression = '';
                     this.searchTerm = '';
                     this.checkAll = false;
-                    this.sendMailInquiryDataList = [];
                     this.hideModalBox(false);
                     this.isLoading = false;
                     return;
@@ -2097,31 +1811,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         }
     }
 
-    /**
-    * Method Name : openModal
-    * @description : method to open modal
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    openModal() {
-        this.isMassEmailModalOpen = true;
-        this.isFirstScreen = true;
-        this.footerButtonLabel = 'Next';
-    }
-
-    /**
-    * Method Name : closeModal
-    * @description : method to close modal
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    closeModal() {
-        this.isMassEmailModalOpen = false;
-        this.templateBody = '';
-        this.sendMethod = '';
-        this.selectedTemplate = '';
-        this.selectedListingTemplate = '';
-    }
 
     /**
     * Method Name : handleUseConstantChange
@@ -2375,13 +2064,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
             return { ...inquiry, isSelected: this.checkAll };
         });
-
-        // If "Select All" is checked, add all inquiries to sendMailInquiryDataList
-        if (this.checkAll) {
-            this.sendMailInquiryDataList = [...this.pagedFilteredInquiryData];
-        } else {
-            this.sendMailInquiryDataList = [];
-        }
     }
 
     // Method to handle individual checkbox change
@@ -2396,14 +2078,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             }
             return inquiry;
         });
-
-        // Add or remove inquiry from sendMailInquiryDataList based on checkbox state
-        if (isChecked) {
-            const selectedInquiry = this.pagedFilteredInquiryData.find(inq => inq.id === inquiryId);
-            this.sendMailInquiryDataList.push(selectedInquiry);
-        } else {
-            this.sendMailInquiryDataList = this.sendMailInquiryDataList.filter(inq => inq.id !== inquiryId);
-        }
 
         // Check if all checkboxes are selected, if yes, check "Select All" checkbox
         this.checkAll = this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
@@ -2474,519 +2148,15 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     disconnectedCallback() {
         try {
             window?.globalThis?.removeEventListener('resize', this.updateScreenWidth);
-            window?.globalThis?.removeEventListener('message', this.simpleTempFileGenResponse);
             window?.globalThis?.removeEventListener('click', this.handleClickOutside);
-            const richTextElement = this.template.querySelector('.richText');
-            if (richTextElement) {
-                $(richTextElement).summernote('destroy');
-            }
+            this.handleUnsubscribeRefresh();
         } catch (error) {
-            errorDebugger('displayInquiry', 'disconnectedCallback', error, 'warn', 'Error destroying Summernote editor');
+            errorDebugger('displayInquiry', 'disconnectedCallback', error, 'warn', 'Error in disconnectedCallback');
         }
     }
 
-    handleNameClick(event) {
-        this.selectedRecordId = event.target.dataset.recordId;
-    }
 
-    handleSearchPopup(event) {
-        const searchValue = event.target.value.trim().toLowerCase();
 
-        // Filter the broadcast groups based on the search value
-        this.filteredGroups = this.broadcastGroups.filter(group =>
-            group.Name.toLowerCase().includes(searchValue)
-        );
-
-        // Ensure the IsChecked property is updated for filtered groups
-        this.filteredGroups = this.filteredGroups.map(group => ({
-            ...group,
-            IsChecked: this.selectedGroupIds.some(selected => selected.Id === group.Id)
-        }));
-    }
-
-    // Handle group selection
-    handleGroupSelection(event) {
-        try {
-            const groupId = event.target.dataset.id;
-            const selectedGroup = this.broadcastGroups.find(group => group.Id === groupId);
-
-            if (event.target.checked) {
-                // Add group ID to selected list if checked
-                if (!this.selectedGroupIds.some(group => group.Id === groupId)) {
-                    this.selectedGroupIds = [
-                        ...this.selectedGroupIds,
-                        { Id: groupId, ObjName: selectedGroup.MVEX__Object_Name__c, Name: selectedGroup.Name }
-                    ];
-                }
-            } else {
-                // Remove group ID if unchecked
-                this.selectedGroupIds = this.selectedGroupIds.filter(group => group.Id !== groupId);
-            }
-
-            this.selectedObjectName = this.selectedGroupIds[0]?.ObjName || '';
-
-            // Update filteredGroups to reflect selection
-            this.filteredGroups = this.filteredGroups.map(group => ({
-                ...group,
-                IsChecked: this.selectedGroupIds.some(selected => selected.Id === group.Id)
-            }));
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handleGroupSelection', error, 'warn', 'Error handling group selection');
-            this.showToast('Error', 'Error handling group selection', 'error');
-        }
-    }
-
-    updateTemplateOptions() {
-        if (!this.selectedObject || this.templateMap.size === 0) {
-            this.templateOptions = [];
-            return;
-        }
-
-        let combinedTemplates = [];
-
-        // Add object-specific templates
-        if (this.templateMap.has(this.selectedObject)) {
-            combinedTemplates = [...this.templateMap.get(this.selectedObject)];
-        }
-
-        // Add Generic templates
-        if (this.templateMap.has('Generic')) {
-            combinedTemplates = [...combinedTemplates, ...this.templateMap.get('Generic')];
-        }
-
-        // Convert to combobox options format
-        this.templateOptions = combinedTemplates.map(template => ({
-            label: template.MVEX__Template_Name__c,
-            value: template.Id
-        }));
-    }
-
-    // Handle send message button click
-    get previewRecordId() {
-        if (this.broadcastContactList && this.broadcastContactList.length > 0) {
-            return this.broadcastContactList[0].ContactId;
-        }
-        return null;
-    }
-
-    handleInputChange(event) {
-        const { name, value } = event.target;
-        switch (name) {
-            case 'name':
-                this.broadcastGroupName = value;
-                break;
-            case 'message':
-                this.messageText = value;
-                break;
-            case 'template':
-                this.selectedTemplate = value;
-                this.handleRefreshClick(); // Trigger preview refresh
-                break;
-            case 'dateTime':
-                this.selectedDateTime = value;
-                break;
-            default:
-                console.warn(`Unhandled input change for name: ${name}`);
-                break;
-        }
-    }
-
-    // Handle send message button click - Modified to skip first screen
-    handleSendMessage() {
-        try {
-            if (this.sendMailInquiryDataList.length === 0) {
-                this.showToast('Error', 'Please select at least one inquiry', 'error');
-                return;
-            }
-
-            this.isLoading = true;
-            const inquiryIds = this.sendMailInquiryDataList.map(inquiry => inquiry.id);
-
-            getContactsForInquiries({ inquiryIds })
-                .then(records => {
-                    if (records.length === 0) {
-                        this.showToast('Error', 'No contacts found for the selected inquiries', 'error');
-                        this.isLoading = false;
-                        return;
-                    }
-
-                    this.broadcastContactList = records.map(record => ({
-                        Id: record.ContactId, // Using ContactId as unique Id
-                        InquiryId: record.InquiryId,
-                        InquiryName: record.InquiryName,
-                        ContactId: record.ContactId,
-                        Name: record.ContactName,
-                        Phone: record.Phone,
-                        GroupName: record.InquiryName // For display in 3rd column
-                    }));
-                    this.filteredGroupMembers = [...this.broadcastContactList];
-
-                    // Apply default popup sort (Name ASC) when popup opens
-                    if (this.filteredGroupMembers && this.filteredGroupMembers.length > 0) {
-                        this.popupSortField = 'Name';
-                        this.popupSortOrder = 'asc';
-                        this.sortPopupData();
-                        this.updatePopupSortIcons();
-                    }
-
-                    this.showTemplate = true;
-                    this.popUpFirstPage = false;
-                    this.popUpSecondPage = true;
-                    this.popUpConfirmPage = false;
-                    this.popUpLastPage = false;
-                    this.popupHeader = 'Send Message';
-                    this.broadcastGroupName = '';
-                    this.messageText = '';
-                    this.selectedTemplate = this.templateOptions.length > 0 ? this.templateOptions[0].value : '';
-                    this.selectedDateTime = '';
-                    this.broadcastGroupId = null;
-                    this.updateTemplateOptions();
-                })
-                .catch(error => {
-                    errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Failed to fetch records');
-                    this.showToast('Error', 'Failed to fetch records', 'error');
-                })
-                .finally(() => {
-                    this.isLoading = false;
-                });
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handleSendMessage', error, 'warn', 'Error opening send message modal');
-            this.showToast('Error', 'Error opening send message modal', 'error');
-            this.isLoading = false;
-        }
-    }
-
-    handleSearchMembers(event) {
-        const searchTerm = event.target.value.toLowerCase();
-        if (!searchTerm) {
-            this.filteredGroupMembers = [...this.broadcastContactList];
-            return;
-        }
-        this.filteredGroupMembers = this.broadcastContactList.filter(member =>
-            (member.Name && member.Name.toLowerCase().includes(searchTerm)) ||
-            (member.Phone && member.Phone.includes(searchTerm)) ||
-            (member.GroupName && member.GroupName.toLowerCase().includes(searchTerm))
-        );
-    }
-
-    handleRemoveMember(event) {
-        try {
-            const button = event.target.closest('button[data-id]');
-            if (!button) {
-                console.warn('Delete button with data-id not found');
-                return;
-            }
-
-            const memberId = button.dataset.id;
-
-            // Validate memberId exists
-            if (!memberId) {
-                console.warn('No memberId found in button data-id');
-                return;
-            }
-
-            const memberToRemove = this.broadcastContactList.find(m => m.Id === memberId);
-
-            if (!memberToRemove) {
-                console.warn('Member not found in broadcastContactList');
-                return;
-            }
-
-            const inquiryId = memberToRemove.InquiryId;
-
-            // 1. Update Inquiry Selection state in main table
-            this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
-                if (inquiry.id === inquiryId) {
-                    return { ...inquiry, isSelected: false };
-                }
-                return inquiry;
-            });
-
-            // 2. Remove from global selected list
-            this.sendMailInquiryDataList = this.sendMailInquiryDataList.filter(inq => inq.id !== inquiryId);
-
-            // 3. Remove from broadcast modal list
-            this.broadcastContactList = this.broadcastContactList.filter(m => m.Id !== memberId);
-            this.filteredGroupMembers = this.filteredGroupMembers.filter(m => m.Id !== memberId);
-
-            // 4. Update check-all state
-            this.checkAll = this.pagedFilteredInquiryData.length > 0 &&
-                this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
-
-            // 5. If no members left, close the modal
-            if (this.broadcastContactList.length === 0) {
-                this.handleCloseTemplate();
-                this.showToast('Info', 'All selected inquiries have been removed.', 'info');
-            }
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handleRemoveMember', error, 'warn', 'Error removing member');
-            this.showToast('Error', 'Error removing member', 'error');
-        }
-    }
-
-    clearSelectedInquiryWithCheckboxFalse() {
-        this.selectedInquiry = null;
-        this.selectedInquiryList = [];
-        this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
-            return { ...inquiry, isSelected: false };
-        });
-        this.sendMailInquiryDataList = [];
-        this.broadcastContactList = [];
-        this.filteredGroupMembers = [];
-        this.broadcastGroupId = null;
-
-        this.checkAll = false;
-    }
-
-    // Add this getter for the preview component
-    get previewRecordId() {
-        if (this.broadcastContactList && this.broadcastContactList.length > 0) {
-            return this.broadcastContactList[0].ContactId;
-        }
-        return null;
-    }
-
-    async createBroadcastGroupBackground() {
-        const now = new Date();
-        const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
-        const autoGroupName = 'Suggested Inquiry - ' + timestamp;
-        const autoDesc = 'Broadcast initiated from Inquiry Manager at ' + timestamp;
-
-        const phoneNumbers = this.broadcastContactList
-            .map(record => record.Phone)
-            .filter(phone => phone);
-
-        const messageData = {
-            objectApiName: this.selectedObject,
-            listViewName: this.listViewId,
-            phoneNumbers: phoneNumbers,
-            description: autoDesc,
-            name: autoGroupName,
-            isUpdate: false,
-            broadcastGroupId: null,
-            phoneField: 'Phone'
-        };
-
-        try {
-            const result = await processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) });
-            this.broadcastGroupId = result;
-            return true;
-        } catch (error) {
-            this.showToast('Error', 'Background group creation failed: ' + (error.body?.message || error.message), 'error');
-            return false;
-        }
-    }
-
-    // Handle closing the template modal
-    handleCloseTemplate() {
-        this.showTemplate = false;
-        this.popUpFirstPage = true;
-        this.popUpSecondPage = false;
-        this.popUpConfirmPage = false;
-        this.popUpLastPage = false;
-        this.popupHeader = 'Create Broadcast Group';
-        this.broadcastGroupName = '';
-        this.messageText = '';
-        this.selectedTemplate = '';
-        this.selectedDateTime = '';
-        this.broadcastGroupId = null;
-        this.broadcastContactList = [];
-    }
-
-    // Handle next button on first page (create broadcast group)
-    handleNextOnPopup() {
-        if (this.messageText.trim() === '' || this.broadcastGroupName.trim() === '') {
-            this.showToast('Error', 'Please fill in all required fields', 'error');
-            return;
-        }
-
-        if (this.tempBroadcastGroupName == this.broadcastGroupName) {
-            this.popUpFirstPage = false;
-            this.popUpSecondPage = true;
-            this.popupHeader = 'Choose Template';
-            return;
-        }
-
-        const phoneNumbers = this.broadcastContactList
-            .map(record => record.Phone)
-            .filter(phone => phone);
-
-        if (phoneNumbers.length === 0) {
-            this.showToast('Error', 'No valid phone numbers found for the selected contacts', 'error');
-            return;
-        }
-
-        const messageData = {
-            objectApiName: this.selectedObject,
-            listViewName: this.listViewId,
-            phoneNumbers: phoneNumbers,
-            description: this.messageText,
-            name: this.broadcastGroupName,
-            isUpdate: false,
-            broadcastGroupId: null,
-            phoneField: 'Phone'
-        };
-
-        this.spinnerShow = true;
-
-        processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) })
-            .then(result => {
-                this.broadcastGroupId = result;
-                this.showToast('Success', 'Broadcast group created successfully', 'success');
-                this.popUpFirstPage = false;
-                this.popUpSecondPage = true;
-                this.popupHeader = 'Choose Template';
-                this.tempBroadcastGroupName = this.broadcastGroupName;
-                this.updateTemplateOptions();
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'handleNextOnPopup', error, 'warn', 'Failed to create broadcast group');
-                this.showToast('Error', 'Failed to create broadcast group', 'error');
-            })
-            .finally(() => {
-                this.spinnerShow = false;
-            });
-    }
-
-    // Handle previous button on second page
-    handlePreviousOnPopup() {
-        this.popUpFirstPage = true;
-        this.popUpSecondPage = false;
-        this.popupHeader = 'Create Broadcast Group';
-        this.selectedTemplate = '';
-        this.popUpConfirmPage = false;
-    }
-
-    handleConfirmPopup() {
-        this.popUpConfirmPage = true;
-    }
-
-    // Handle send button on second page
-    async handleSendOnPopup() {
-        if (!this.selectedTemplate) {
-            this.showToast('Error', 'Please select a template', 'error');
-            return;
-        }
-
-        this.spinnerShow = true;
-
-        // Auto-create the group in background before sending
-        const groupCreated = await this.createBroadcastGroupBackground();
-        if (!groupCreated) {
-            this.spinnerShow = false;
-            return;
-        }
-
-        createChatRecods({
-            templateId: this.selectedTemplate,
-            groupIds: [this.broadcastGroupId],
-            isScheduled: false,
-            timeOfMessage: ''
-        })
-            .then(result => {
-                if (result) {
-                    this.showToast('Success', 'Broadcast sent successfully', 'success');
-                    this.handleCloseTemplate();
-                    this.clearSelectedInquiryWithCheckboxFalse();
-                    this.navigateToBroadcastComponent(result);
-                } else {
-                    this.showToast('Error', `Broadcast failed: ${result}`, 'error');
-                }
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'handleSendOnPopup', error, 'warn', 'Broadcast failed');
-                this.showToast('Error', 'Broadcast failed', 'error');
-            })
-            .finally(() => {
-                this.spinnerShow = false;
-            });
-    }
-
-    navigateToBroadcastComponent(broadcastId) {
-        let componentDef = {
-            componentDef: "MVEX:broadcastReportComp",
-            attributes: {
-                recordId: broadcastId
-            }
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/one/one.app#' + encodedComponentDef
-            }
-        });
-    }
-
-    // Handle schedule button on second page
-    handleSchedulePopup() {
-        if (!this.selectedTemplate) {
-            this.showToast('Error', 'Please select a template', 'error');
-            return;
-        }
-
-        this.popUpSecondPage = true;
-        this.popUpLastPage = true;
-        this.popupHeader = 'Select Date and Time';
-    }
-
-    // Handle previous button on last page
-    handlePreviousLastPage() {
-        this.popUpSecondPage = true;
-        this.popUpLastPage = false;
-        this.popUpConfirmPage = false;
-        this.popupHeader = 'Choose Template';
-    }
-
-    // Handle schedule and send button on last page
-    async handleSchedule() {
-        if (!this.selectedDateTime) {
-            this.showToast('Error', 'Please select date and time', 'error');
-            return;
-        }
-
-        const selectedTime = new Date(this.selectedDateTime);
-        const now = new Date();
-
-        if (selectedTime < now) {
-            this.showToast('Error', 'Selected date and time cannot be in the past', 'error');
-            return;
-        }
-
-        this.spinnerShow = true;
-
-        // Auto-create the group in background before scheduling
-        const groupCreated = await this.createBroadcastGroupBackground();
-        if (!groupCreated) {
-            this.spinnerShow = false;
-            return;
-        }
-
-        createChatRecods({
-            templateId: this.selectedTemplate,
-            groupIds: [this.broadcastGroupId],
-            isScheduled: true,
-            timeOfMessage: this.selectedDateTime
-        })
-            .then(result => {
-                if (result) {
-                    this.showToast('Success', 'Broadcast scheduled successfully', 'success');
-                    this.handleCloseTemplate();
-                    this.clearSelectedInquiryWithCheckboxFalse();
-                } else {
-                    this.showToast('Error', `Scheduling failed: ${result}`, 'error');
-                }
-            })
-            .catch(error => {
-                errorDebugger('displayInquiry', 'handleSchedule', error, 'warn', 'Scheduling failed');
-                this.showToast('Error', 'Scheduling failed', 'error');
-            })
-            .finally(() => {
-                this.spinnerShow = false;
-            });
-    }
 
     /**
     * Method Name : fetchInquiryConfiguration
@@ -3000,8 +2170,9 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 if (result && result.metadataRecords && result.metadataRecords.length > 0) {
                     try {
                         const fieldsData = JSON.parse(result.metadataRecords[0]);
+                        const excludedFields = ['name', 'mvex__contact__c', 'contact__c'];
                         this.inquiryColumns = fieldsData
-                            .filter(field => (field.fieldName || field.value || '').toLowerCase() !== 'name')
+                            .filter(field => !excludedFields.includes((field.fieldName || field.value || '').toLowerCase()))
                             .map(field => ({
                                 label: field.label || field.fieldLabel,
                                 fieldName: (field.fieldName || field.value || '').toLowerCase(),
@@ -3068,27 +2239,21 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         this.fetchInquiryConfiguration();
     }
 
-    handleRefreshClick() {
-        const childComponent = this.template.querySelector('c-template-preview');
-        if (childComponent && this.selectedTemplate) {
-            childComponent.refreshComponent(this.selectedTemplate);
-        }
-    }
 
     /**
-    * Method Name : get tableColumns
-    * @description : getter for table columns
-    */
+     * Method Name : get tableColumns
+     * @description : getter for table columns
+     */
     get tableColumns() {
         return this.inquiryColumns.length > 0 ? this.inquiryColumns : this.defaultColumns;
     }
 
     /**
-    * Method Name : sortClick
-    * @description : this methods apply the sorting on the all fields
-    * Created Date: 03/06/2024
-    * Created By: Karan Singh
-    */
+     * Method Name : sortClick
+     * @description : this methods apply the sorting on the all fields
+     * Created Date: 03/06/2024
+     * Created By: Karan Singh
+     */
     sortClick(event) {
         try {
             const rawField = event.currentTarget.dataset.id || '';
@@ -3104,23 +2269,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.updateSortIcons();
         } catch (error) {
             errorDebugger('displayInquiry', 'sortClick', error, 'warn', 'Error in sortClick');
-        }
-    }
-
-    // Sorting for popup contact table
-    sortPopupClick(event) {
-        try {
-            const fieldName = event.currentTarget.dataset.id;
-            if (this.popupSortField === fieldName) {
-                this.popupSortOrder = this.popupSortOrder === 'asc' ? 'desc' : 'asc';
-            } else {
-                this.popupSortField = fieldName;
-                this.popupSortOrder = 'asc';
-            }
-            this.sortPopupData();
-            this.updatePopupSortIcons();
-        } catch (error) {
-            errorDebugger('displayInquiry', 'sortPopupClick', error, 'warn', 'Error in sortPopupClick');
         }
     }
 
@@ -3249,65 +2397,147 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
-     * Sort popup contact table data (Name/Phone columns)
-     */
-    sortPopupData() {
-        try {
-            if (!this.filteredGroupMembers || this.filteredGroupMembers.length === 0) {
-                return;
+    * Method Name : handleSubscribeRefresh
+    * @description : Subscribes to MVEX__RefreshEvent__e platform event to detect inquiry changes
+    */
+    handleSubscribeRefresh() {
+        const messageCallback = (response) => {
+            console.log('RefreshEvent received in displayInquiry:', response);
+            const payload = response?.data?.payload;
+            const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
+
+            if (featureName && (featureName.toLowerCase() === 'inquiry' || featureName.toLowerCase() === 'display_inquiry' || featureName.toLowerCase() === 'mvex__inquiry__c')) {
+                this.handleRefreshEventReceived();
             }
-            this.filteredGroupMembers.sort((a, b) => {
-                let aValue = a[this.popupSortField];
-                let bValue = b[this.popupSortField];
-                if (aValue === undefined || aValue === null) aValue = '';
-                if (bValue === undefined || bValue === null) bValue = '';
-                if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-                if (typeof bValue === 'string') bValue = bValue.toLowerCase();
-                if (!isNaN(aValue) && !isNaN(bValue)) {
-                    aValue = Number(aValue);
-                    bValue = Number(bValue);
+        };
+
+        subscribe(this.refreshChannelName, -1, messageCallback)
+            .then(response => {
+                this.refreshSubscription = response;
+            })
+            .catch(error => {
+                console.warn('Subscription error for ' + this.refreshChannelName + ':', error);
+                if (this.refreshChannelName.includes('MVEX__')) {
+                    this.refreshChannelName = '/event/RefreshEvent__e';
+                    subscribe(this.refreshChannelName, -1, messageCallback)
+                        .then(resp => {
+                            this.refreshSubscription = resp;
+                        })
+                        .catch(err => errorDebugger('displayInquiry', 'handleSubscribeRefresh', err, 'warn', 'Fallback subscription error'));
+                } else {
+                    errorDebugger('displayInquiry', 'handleSubscribeRefresh', error, 'warn', 'Subscription error');
                 }
-                let compare = 0;
-                if (aValue > bValue) compare = 1;
-                else if (aValue < bValue) compare = -1;
-                return this.popupSortOrder === 'asc' ? compare : -compare;
             });
-        } catch (error) {
-            errorDebugger('displayInquiry', 'sortPopupData', error, 'warn', 'Error sorting popup data');
+
+        onError(error => {
+            errorDebugger('displayInquiry', 'empApi', error, 'warn', 'empApi error');
+        });
+    }
+
+    /**
+    * Method Name : handleUnsubscribeRefresh
+    * @description : Unsubscribes from refresh platform event channel
+    */
+    handleUnsubscribeRefresh() {
+        if (this.refreshSubscription && this.refreshSubscription.id) {
+            unsubscribe(this.refreshSubscription, response => {
+                console.log('Unsubscribed from refresh event channel in displayInquiry:', response);
+            });
         }
     }
 
     /**
-     * Update sort icons in popup contact table
-     */
-    updatePopupSortIcons() {
+    * Method Name : handleRefreshEventReceived
+    * @description : Handles incoming refresh event and triggers data refresh with current filters and sorting
+    */
+    handleRefreshEventReceived() {
+        this.refreshInquiries();
+    }
+
+    /**
+    * Method Name : refreshInquiries
+    * @description : Refreshes the inquiry data from server while preserving applied filters, search term, and sorting
+    */
+    refreshInquiries() {
         try {
-            // Force update after small delay to ensure DOM rendered
-            setTimeout(() => {
-                // Scope to popup table only
-                const popupHeaders = this.template.querySelectorAll('.contact-table .sorting_header');
-                popupHeaders.forEach(header => {
-                    header.classList.remove('active-sort');
-                });
-                const activeHeader = this.template.querySelector(`.contact-table .sorting_header[data-id="${this.popupSortField}"]`);
-                if (activeHeader) {
-                    activeHeader.classList.add('active-sort');
-                    const icon = activeHeader.querySelector('.listing-manager-icon');
-                    if (icon) {
-                        icon.classList.remove('rotate-asc', 'rotate-desc');
-                        if (this.popupSortOrder === 'asc') {
-                            icon.classList.add('rotate-asc');
-                        } else {
-                            icon.classList.add('rotate-desc');
-                        }
-                        icon.style.opacity = '1';
-                        icon.style.visibility = 'visible';
-                        icon.style.display = 'block';
+            const currentSearch = this.searchTerm;
+            const savedPage = this.currentPage;
+
+            let filterType = 'default';
+            if (this.conditiontype === 'linked') {
+                filterType = 'linked';
+            } else if (this.conditiontype === 'related') {
+                filterType = 'related';
+            }
+
+            getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
+                .then(result => {
+                    if (result.referenceNameMappings) {
+                        this.referenceNameMappings = result.referenceNameMappings;
+                        this.populateRefNameCacheFromMappings();
                     }
-                }
-            }, 100);
+
+                    let listing = {};
+                    if (result.inquiries && result.inquiries.length > 0) {
+                        this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
+                    } else {
+                        this.totalinquiry = [];
+                    }
+
+                    if (result.listings && result.listings.length > 0) {
+                        listing = result.listings[0];
+                    }
+
+                    const convertoLowerCase = (obj) => {
+                        return Object.keys(obj).reduce((acc, key) => {
+                            acc[key.toLowerCase()] = obj[key];
+                            return acc;
+                        }, {});
+                    };
+                    this.listingRecord = convertoLowerCase(listing);
+
+                    if (filterType === 'linked') {
+                        this.pagedFilteredInquiryData = [...this.totalinquiry];
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    } else if (filterType === 'related') {
+                        this.pagedFilteredInquiryData = this.totalinquiry.filter(inquiry =>
+                            inquiry.mvex__listing__c === this.recordId
+                        );
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    } else if (this.conditiontype === 'none') {
+                        this.pagedFilteredInquiryData = [...this.totalinquiry];
+                        this.modalFilteredInquiryData = [...this.pagedFilteredInquiryData];
+                    } else {
+                        // Apply existing modal filter conditions (all, any, custom)
+                        this.applyFiltersData(this.listingRecord);
+                    }
+
+                    // Re-apply search term if user had entered one
+                    if (currentSearch && currentSearch.trim() !== '') {
+                        this.searchTerm = currentSearch;
+                        this.applyFilters();
+                    }
+
+                    // Re-apply sorting if sortField is set
+                    if (this.sortField) {
+                        this.sortData();
+                        this.updateSortIcons();
+                    }
+
+                    this.totalRecords = this.pagedFilteredInquiryData.length;
+                    this.isInquiryAvailable = this.totalRecords > 0;
+
+                    // Preserve page number if still valid
+                    const maxPage = this.totalPages || 1;
+                    this.currentPage = savedPage <= maxPage ? savedPage : maxPage;
+
+                    this.showToast('Success', 'Inquiry data refreshed successfully', 'success');
+                })
+                .catch(error => {
+                    errorDebugger('displayInquiry', 'refreshInquiries', error, 'warn', 'Error refreshing inquiries');
+                });
         } catch (error) {
-            errorDebugger('displayInquiry', 'updatePopupSortIcons', error, 'warn', 'Error updating popup sort icons');
+            errorDebugger('displayInquiry', 'refreshInquiries', error, 'warn', 'Error in refreshInquiries');
         }
     }
 }

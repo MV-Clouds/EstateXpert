@@ -353,3 +353,28 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
 }
+
+.existing-image-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    background: #F0F7FF;
+    border: 1px solid #D0E5FA;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+}
+
+.notice-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notice-text {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #1E40AF;
+}

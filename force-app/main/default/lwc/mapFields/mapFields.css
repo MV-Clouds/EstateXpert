@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .wrapper {
@@ -534,7 +533,7 @@
 
 .navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: right;
     align-items: center;
     flex-direction: row;
     gap: 1rem;

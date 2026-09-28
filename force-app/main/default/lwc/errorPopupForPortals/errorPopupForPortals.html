@@ -33,7 +33,7 @@
                                 </thead>
                                 <tbody>
                                     <template for:each={errors} for:item="error">
-                                        <tr key={error.path}>
+                                        <tr key={error.id}>
                                             <td class="message-col slds-truncate">
                                                 <template if:true={error.message}>
                                                     {error.message}

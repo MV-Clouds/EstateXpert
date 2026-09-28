@@ -1,43 +1,43 @@
 /**
 * Class Name : PropertyFileTriggerHandler
 * Created By : Karan Singh
-* @description : This class is used to handle trigger events for Property_File__c object.
+* @description : This class is used to handle trigger events for MVEX__Property_File__c object.
 */
 
 public with sharing class PropertyFileTriggerHandler {
     
     /**
      * Method Name : handleAfterDelete
-     * @description : Handles the after delete event for Property_File__c records.
-     * @param deletedPropertyFiles List of deleted Property_File__c records.
+     * @description : Handles the after delete event for MVEX__Property_File__c records.
+     * @param deletedPropertyFiles List of deleted MVEX__Property_File__c records.
      */
-    public static void handleAfterDelete(List<Property__c> deletedPropertyFiles) {
+    public static void handleAfterDelete(List<MVEX__Property__c> deletedPropertyFiles) {
 
         try {
-            List<AWS_Config__c> awsSettingsList = [SELECT Id, AWS_Access_Key__c, AWS_Secret_Access_Key__c, S3_Bucket_Name__c, S3_Region_Name__c FROM AWS_Config__c WHERE SetupOwnerId = :UserInfo.getOrganizationId() WITH USER_MODE LIMIT 1];
+            List<MVEX__AWS_Config__c> awsSettingsList = [SELECT Id, MVEX__AWS_Access_Key__c, MVEX__AWS_Secret_Access_Key__c, MVEX__S3_Bucket_Name__c, MVEX__S3_Region_Name__c FROM MVEX__AWS_Config__c WHERE SetupOwnerId = :UserInfo.getOrganizationId() WITH USER_MODE LIMIT 1];
 
             if (awsSettingsList.isEmpty()) {
                 return;
             }
 
-            AWS_Config__c settings = awsSettingsList[0];
-            String awsBucket = settings.S3_Bucket_Name__c;
-            String awsKey = settings.AWS_Access_Key__c;
-            String awsSecret = settings.AWS_Secret_Access_Key__c;
-            String awsRegion = settings.S3_Region_Name__c;
+            MVEX__AWS_Config__c settings = awsSettingsList[0];
+            String awsBucket = settings.MVEX__S3_Bucket_Name__c;
+            String awsKey = settings.MVEX__AWS_Access_Key__c;
+            String awsSecret = settings.MVEX__AWS_Secret_Access_Key__c;
+            String awsRegion = settings.MVEX__S3_Region_Name__c;
 
             Set<Id> propertyIds = new Set<Id>();
              
-            for(Property__c property : deletedPropertyFiles) {
+            for(MVEX__Property__c property : deletedPropertyFiles) {
                 propertyIds.add(property.Id);
             }
     
-            List<Property_File__c> propertyFilesToDelete = [SELECT Id, Filename__c FROM Property_File__c WHERE Property__c IN :propertyIds WITH USER_MODE LIMIT 1000];
+            List<MVEX__Property_File__c> propertyFilesToDelete = [SELECT Id, MVEX__Filename__c FROM MVEX__Property_File__c WHERE MVEX__Property__c IN :propertyIds WITH USER_MODE LIMIT 1000];
     
             List<String> fileNames = new List<String>();
             
-            for(Property_File__c propertyFile : propertyFilesToDelete){
-                fileNames.add(propertyFile.Filename__c); 
+            for(MVEX__Property_File__c propertyFile : propertyFilesToDelete){
+                fileNames.add(propertyFile.MVEX__Filename__c); 
             }
             
             if(fileNames.isEmpty() == false){

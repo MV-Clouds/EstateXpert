@@ -1,30 +1,39 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import designcss from '@salesforce/resourceUrl/listingManagerCss';
 import getListingData from '@salesforce/apex/ListingManagerController.getListingData';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
 import { NavigationMixin } from 'lightning/navigation';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
-import LISTING_OBJECT from '@salesforce/schema/Listing__c';
+import LISTING_OBJECT from '@salesforce/schema/MVEX__Listing__c';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { errorDebugger } from 'c/globalProperties';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
 import FORM_FACTOR from '@salesforce/client/formFactor';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class ListingManager extends NavigationMixin(LightningElement) {
     @api objectName = 'MVEX__Listing__c';
     @api recordId;
     @api fieldSet = 'ListingManagerFieldSet';
+    channelName = '/event/MVEX__RefreshEvent__e';
+    refreshSubscription = null;
+    realtimeRefreshTimer = null;
+    isSilentSync = false;
     @track spinnerShow = true;
     @track showList = true;
     @track showMap = false;
+    @track mapMarkers = [];
     @track listingData = [];
     @track unchangedListingData = [];
     @track fields = [];
     @track processedListingData = [];
     @track unchangedProcessListings = [];
     @track shownProcessedListingData = [];
+    @track pendingFilterEvent = null; // Store filter event if received before data loads
+    @track lastFilterEvent = null; // Store last applied filter event to persist across data reloads
+    @track appliedFilters = [];
+    @track showAllFilters = false;
     @track propertyMediaUrls = [];
     @track sortField = 'Name';
     @track sortOrder = 'asc';
@@ -39,7 +48,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     @track currentPage = 1;
     @track visiblePages = 5;
     @track fieldsModal = false;
-    @track isAccessible = false;
     @track listingLoading = false;
     isConfigOpen = false;
     hasInitializedFilter = false;
@@ -248,6 +256,73 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
         return this.shownProcessedListingData.length === 0;
     }
 
+    get isFilterApplied() {
+        if (Array.isArray(this.appliedFilters) && this.appliedFilters.length > 0) {
+            return true;
+        }
+        if (this.unchangedProcessListings && this.processedListingData &&
+            this.unchangedProcessListings.length > 0 &&
+            this.processedListingData.length < this.unchangedProcessListings.length) {
+            return true;
+        }
+        return false;
+    }
+
+    get hasAppliedFilters() {
+        return (Array.isArray(this.appliedFilters) && this.appliedFilters.length > 0) ||
+            (this.unchangedListingData && this.unchangedListingData.length > 0 && this.listingData && this.listingData.length === 0);
+    }
+
+    get displayedAppliedFilters() {
+        if (!this.appliedFilters || !Array.isArray(this.appliedFilters)) {
+            return [];
+        }
+        if (this.showAllFilters || this.appliedFilters.length <= 3) {
+            return this.appliedFilters;
+        }
+        return this.appliedFilters.slice(0, 3);
+    }
+
+    get hasMoreFilters() {
+        return Array.isArray(this.appliedFilters) && this.appliedFilters.length > 3 && !this.showAllFilters;
+    }
+
+    get remainingFilterCount() {
+        if (!Array.isArray(this.appliedFilters) || this.appliedFilters.length <= 3) {
+            return 0;
+        }
+        return this.appliedFilters.length - 3;
+    }
+
+    get canCollapseFilters() {
+        return this.showAllFilters && Array.isArray(this.appliedFilters) && this.appliedFilters.length > 3;
+    }
+
+    toggleShowAllFilters(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.showAllFilters = !this.showAllFilters;
+    }
+
+    openFilterPanel() {
+        try {
+            if (this.wrapOn) {
+                this.wrapFilter();
+            } else {
+                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                if (filterDiv) {
+                    filterDiv.classList.add('highlight-filter-panel');
+                    setTimeout(() => {
+                        filterDiv.classList.remove('highlight-filter-panel');
+                    }, 1200);
+                }
+            }
+        } catch (error) {
+            console.error('Error in openFilterPanel:', error);
+        }
+    }
+
     /**
     * Method Name : sortDescription
     * @description : set the header sort description.
@@ -335,8 +410,8 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             if (!import.meta.env.SSR) {
                 window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
             }
-            loadStyle(this, designcss);
-            this.getAccessible();
+            this.getListingDataMethod();
+            this.registerPlatformEventListener();
 
         } catch (error) {
             errorDebugger('ListingManager', 'connectedCallback', error, 'warn', 'Error in connectedCallback');
@@ -379,26 +454,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
         }
     }
 
-    getAccessible() {
-        getMetadataRecords()
-            .then(data => {
-                const listingManagerFeature = data.find(
-                    item => item.DeveloperName === 'Listing_Manager'
-                );
-                this.isAccessible = listingManagerFeature ? Boolean(listingManagerFeature.MVEX__isAvailable__c) : false;
-                if (this.isAccessible) {
-                    this.getListingDataMethod();
-                } else {
-                    this.spinnerShow = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching accessible fields', error);
-                this.isAccessible = false;
-                this.spinnerShow = false;
-            });
-    }
-
     /**
     * Method Name : disconnectedCallback
     * @description : remove the resize event.
@@ -409,6 +464,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
         if (!import.meta.env.SSR) {
             window?.globalThis?.removeEventListener('resize', this.updateScreenWidth);
         }
+        this.unregisterPlatformEventListener();
     }
 
     /**
@@ -427,15 +483,16 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     * * Date: 3/06/2024
     * Created By:Vyom Soni
     */
-    getListingDataMethod() {
-        this.spinnerShow = true;
-        getListingData()
+    getListingDataMethod(isSilent = false) {
+        if (!isSilent) {
+            this.spinnerShow = true;
+        }
+        return getListingData()
             .then(result => {
-                this.listingData = result.listings;
-                this.propertyMediaUrls = result.medias; this.listingData = result.listings;
-                this.propertyMediaUrls = result.medias;
-                this.pageSize = result.pageSize;
-                this.fields = result.selectedFields.map(field => ({
+                this.listingData = result.listings || [];
+                this.propertyMediaUrls = result.medias || {};
+                this.pageSize = result.pageSize || 30;
+                this.fields = (result.selectedFields || []).map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
                     fieldType: field.fieldType,
@@ -444,12 +501,14 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     relationshipName: field.relationshipName
                 }));
 
+                const selectedIds = new Set((this.selectedProperties || []).map(p => p.Id));
+
                 this.listingData.forEach((listing) => {
                     const prop_id = listing.MVEX__Property__c;
                     listing.media_url = this.propertyMediaUrls[prop_id] ? this.propertyMediaUrls[prop_id] : '/resource/MVEX__blankImage';
-                    listing.isChecked = false;
-                    listing.isActive = listing.MVEX__Status__c === 'Active' ? true : false;
-                })
+                    listing.isChecked = isSilent && selectedIds.has(listing.Id);
+                    listing.isActive = listing.MVEX__Status__c === 'Active';
+                });
 
                 this.unchangedListingData = this.listingData;
                 this.processListings();
@@ -458,7 +517,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 errorDebugger('ListingManager', 'getListingDataMethod', error, 'warn', 'Error in getListingDataMethod');
             })
             .finally(() => {
-                this.spinnerShow = false;
+                if (!isSilent) {
+                    this.spinnerShow = false;
+                }
             });
     }
 
@@ -485,7 +546,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                         let relatedObject = listing[fieldParts[0]];
                         rawValue = relatedObject ? relatedObject[fieldParts[1]] : '-';
 
-                        if (relatedObject && fieldParts[1] === 'Name') {
+                        if (relatedObject && fieldParts[1] === 'Name' && fieldParts[0] !== 'RecordType') {
                             isRedirectable = true;
                             lookupId = relatedObject.Id;
                             objectApiName = field.referenceObjectName;
@@ -494,10 +555,21 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                         rawValue = listing[field.fieldName];
                     }
 
+                    // RecordTypeId is a lookup but has no standard record page
+                    if (field.fieldName === 'RecordTypeId' || field.fieldName === 'RecordType.Name') {
+                        isRedirectable = false;
+                    }
+
                     let fieldValueraw;
 
-                    // Handle empty/null/undefined
-                    if (rawValue === null || rawValue === undefined || rawValue === '') {
+                    const isAddressType = (field.fieldType && field.fieldType.toUpperCase() === 'ADDRESS') ||
+                        (typeof rawValue === 'object' && rawValue !== null && ('street' in rawValue || 'city' in rawValue || 'state' in rawValue || 'postalCode' in rawValue || 'country' in rawValue)) ||
+                        (field.fieldName && field.fieldName.toLowerCase().endsWith('address__c'));
+
+                    if (isAddressType) {
+                        fieldValueraw = this.formatAddress(rawValue, listing, field.fieldName);
+                    }
+                    else if (rawValue === null || rawValue === undefined || rawValue === '') {
                         fieldValueraw = '-';
                     }
                     else if (field.fieldType === 'CURRENCY') {
@@ -510,6 +582,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     else if (field.format) {
                         fieldValueraw = this.applyFieldFormat(rawValue, field.format);
                     }
+                    else if (typeof rawValue === 'object' && rawValue !== null) {
+                        fieldValueraw = this.formatAddress(rawValue, listing, field.fieldName);
+                    }
                     else {
                         fieldValueraw = rawValue;
                     }
@@ -517,7 +592,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     return {
                         fieldName: field.fieldName,
                         value: fieldValueraw,
-                        rawValue: (rawValue === null || rawValue === undefined || rawValue === '') ? null : rawValue,
+                        rawValue: (fieldValueraw === '-' || rawValue === null || rawValue === undefined || rawValue === '')
+                            ? null
+                            : (typeof rawValue === 'object' ? fieldValueraw : rawValue),
                         isRedirectable: isRedirectable,
                         lookupId: lookupId,
                         objectApiName: objectApiName
@@ -525,6 +602,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 });
 
                 return {
+                    ...listing,
                     Id: listing.Id,
                     Name: listing.Name,
                     media_url: listing.media_url,
@@ -539,8 +617,18 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 };
             });
             this.unchangedProcessListings = this.processedListingData;
-            this.sortData();
-            this.updateShownData();
+
+            // Apply existing filter if one was already active, or pending filter if received before load
+            if (this.lastFilterEvent) {
+                this.handleFilteredListings(this.lastFilterEvent);
+            } else if (this.pendingFilterEvent) {
+                const filterEvent = this.pendingFilterEvent;
+                this.pendingFilterEvent = null;
+                this.handleFilteredListings(filterEvent);
+            } else {
+                this.sortData();
+                this.updateShownData();
+            }
             this.spinnerShow = false;
         } catch (error) {
             errorDebugger('ListingManager', 'processListings', error, 'warn', 'Error in processListings');
@@ -595,6 +683,74 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     }
 
     /**
+    * Method Name : formatAddress
+    * @description : Formats an Address object or compound address fields into a readable string
+    * @param {Object|String} addressValue - The raw address value or object
+    * @param {Object} listingRecord - The full listing record for fallback subfields
+    * @param {String} fieldName - The API name of the address field
+    * @return {String} Formatted address string or '-'
+    */
+    formatAddress(addressValue, listingRecord, fieldName) {
+        try {
+            let street = '';
+            let city = '';
+            let state = '';
+            let postalCode = '';
+            let country = '';
+
+            if (addressValue && typeof addressValue === 'object') {
+                street = addressValue.street || addressValue.Street || '';
+                city = addressValue.city || addressValue.City || '';
+                state = addressValue.state || addressValue.stateCode || addressValue.State || addressValue.StateCode || '';
+                postalCode = addressValue.postalCode || addressValue.PostalCode || '';
+                country = addressValue.country || addressValue.countryCode || addressValue.Country || addressValue.CountryCode || '';
+
+                // Handle Geolocation if it's not a standard address
+                if (!street && !city && !state && !country && ('latitude' in addressValue || 'longitude' in addressValue)) {
+                    const lat = addressValue.latitude != null ? addressValue.latitude : '';
+                    const lng = addressValue.longitude != null ? addressValue.longitude : '';
+                    return (lat || lng) ? `${lat}, ${lng}` : '-';
+                }
+            } else if (typeof addressValue === 'string' && addressValue.trim()) {
+                return addressValue.trim();
+            }
+
+            // Fallback to record-level sub-fields if any are missing
+            if (listingRecord) {
+                const cleanPrefix = fieldName ? fieldName.replace(/__c$/i, '') : 'MVEX__Listing_Address';
+                if (!street) {
+                    street = listingRecord[`${cleanPrefix}__Street__s`] || listingRecord.MVEX__Listing_Address__Street__s || listingRecord.Street__c || listingRecord.MVEX__Street__c || '';
+                }
+                if (!city) {
+                    city = listingRecord[`${cleanPrefix}__City__s`] || listingRecord.MVEX__Listing_Address__City__s || listingRecord.City__c || listingRecord.MVEX__City__c || '';
+                }
+                if (!state) {
+                    state = listingRecord[`${cleanPrefix}__StateCode__s`] || listingRecord[`${cleanPrefix}__State__s`] || listingRecord.MVEX__Listing_Address__StateCode__s || listingRecord.State__c || listingRecord.MVEX__State__c || '';
+                }
+                if (!postalCode) {
+                    postalCode = listingRecord[`${cleanPrefix}__PostalCode__s`] || listingRecord.MVEX__Listing_Address__PostalCode__s || '';
+                }
+                if (!country) {
+                    country = listingRecord[`${cleanPrefix}__CountryCode__s`] || listingRecord[`${cleanPrefix}__Country__s`] || listingRecord.MVEX__Listing_Address__CountryCode__s || listingRecord.Country__c || listingRecord.MVEX__Country__c || '';
+                }
+            }
+
+            if (street && typeof street === 'string') {
+                street = street.replace(/\r?\n+/g, ', ');
+            }
+
+            const addressParts = [street, city, state, postalCode, country]
+                .map(part => (typeof part === 'string' ? part.trim() : part))
+                .filter(part => part != null && part !== '');
+
+            return addressParts.length > 0 ? addressParts.join(', ') : '-';
+        } catch (error) {
+            console.error('Error formatting address:', error);
+            return '-';
+        }
+    }
+
+    /**
     * Method Name : handleFilteredListings
     * @description : set the data comming from the filter cmp
     * Date: 14/06/2024
@@ -602,14 +758,37 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     handleFilteredListings(event) {
         try {
-            this.sortField = 'Name';
-            this.sortOrder = 'asc';
+            this.showAllFilters = false;
+            if (event.detail && Array.isArray(event.detail.appliedFilters)) {
+                this.appliedFilters = event.detail.appliedFilters;
+            }
 
-            const resetCheckedFlag = item => ({ ...item, isChecked: false });
+            // Save last filter event to reapply whenever table data reloads
+            this.lastFilterEvent = event;
+
+            // If listing data hasn't loaded yet, store the filter event for later
+            if (!this.unchangedProcessListings || this.unchangedProcessListings.length === 0) {
+                this.pendingFilterEvent = event;
+                return;
+            }
+
+            const savedPage = this.isSilentSync ? this.currentPage : 1;
+            const selectedIds = new Set((this.selectedProperties || []).map(p => p.Id));
+
+            if (!this.isSilentSync) {
+                this.sortField = 'Name';
+                this.sortOrder = 'asc';
+            }
+
+            const resetCheckedFlag = item => ({
+                ...item,
+                isChecked: this.isSilentSync && selectedIds.has(item.Id)
+            });
             this.processedListingData = this.processedListingData.map(resetCheckedFlag);
             this.unchangedProcessListings = this.unchangedProcessListings.map(resetCheckedFlag);
 
-            const filteredListingIds = new Set(event.detail.filterlistings.map(filtered => filtered.Id));
+            const filteredListings = Array.isArray(event?.detail?.filterlistings) ? event.detail.filterlistings : [];
+            const filteredListingIds = new Set(filteredListings.map(filtered => filtered.Id).filter(Boolean));
             this.processedListingData = this.unchangedProcessListings.filter(processListing =>
                 filteredListingIds.has(processListing.Id)
             );
@@ -617,7 +796,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 filteredListingIds.has(processListing.Id)
             );
 
-            this.currentPage = 1;
+            const maxPage = Math.ceil(this.processedListingData.length / this.pageSize) || 1;
+            this.currentPage = this.isSilentSync ? Math.min(savedPage, maxPage) : 1;
+
             this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
@@ -635,8 +816,15 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     handleReset(event) {
         try {
             if (event.detail.filterlistings == true) {
-                this.sortField = 'Name';
-                this.sortOrder = 'asc';
+                this.showAllFilters = false;
+                if (event.detail && Array.isArray(event.detail.appliedFilters)) {
+                    this.appliedFilters = event.detail.appliedFilters;
+                    this.lastFilterEvent = event;
+                } else {
+                    this.appliedFilters = [];
+                    this.lastFilterEvent = null;
+                }
+                this.pendingFilterEvent = null;
                 this.sortField = 'Name';
                 this.sortOrder = 'asc';
 
@@ -675,7 +863,106 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     * Date: 19/02/2026
     */
     handleLoading(event) {
+        if (this.isSilentSync) {
+            return;
+        }
         this.listingLoading = event.detail;
+    }
+
+    /**
+     * Method Name : registerPlatformEventListener
+     * @description : Subscribe to MVEX__RefreshEvent__e for real-time synchronization
+     */
+    registerPlatformEventListener() {
+        const messageCallback = (event) => {
+            const payload = event?.data?.payload;
+            const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
+            if (featureName === 'Listing_Manager' || featureName === 'ListingManager') {
+                this.handleRealtimeRefresh();
+            }
+        };
+
+        subscribe(this.channelName, -1, messageCallback)
+            .then(response => {
+                this.refreshSubscription = response;
+            })
+            .catch(error => {
+                errorDebugger('ListingManager', 'registerPlatformEventListener', error, 'warn', 'Error subscribing to refresh event');
+            });
+
+        onError(error => {
+            errorDebugger('ListingManager', 'empApi onError', error, 'warn', 'EMP API error');
+        });
+    }
+
+    /**
+     * Method Name : unregisterPlatformEventListener
+     * @description : Unsubscribe from platform event channel
+     */
+    unregisterPlatformEventListener() {
+        if (this.refreshSubscription) {
+            unsubscribe(this.refreshSubscription, () => {
+                this.refreshSubscription = null;
+            });
+        }
+    }
+
+    /**
+     * Method Name : handleRealtimeRefresh
+     * @description : Smoothly synchronize listing changes in real-time without interrupting user
+     */
+    handleRealtimeRefresh() {
+        try {
+            clearTimeout(this.realtimeRefreshTimer);
+            this.realtimeRefreshTimer = setTimeout(async () => {
+                this.isSilentSync = true;
+                const savedPage = this.currentPage;
+                const selectedIds = new Set((this.selectedProperties || []).map(p => p.Id));
+
+                // 1. Fetch latest listings from Apex silently
+                await this.getListingDataMethod(true);
+
+                // 2. If filters are active, re-apply them against latest DB state silently
+                const filterCmp = this.template.querySelector('c-listing-manager-filter-cmp');
+                const hasFilters = this.hasAppliedFilters || (filterCmp && typeof filterCmp.hasActiveFilters === 'function' && filterCmp.hasActiveFilters());
+                if (filterCmp && typeof filterCmp.reapplyFilters === 'function' && hasFilters) {
+                    filterCmp.reapplyFilters(true);
+                } else {
+                    // Restore checked status if no filter reapplication was triggered
+                    if (selectedIds.size > 0 && Array.isArray(this.processedListingData)) {
+                        this.processedListingData.forEach(item => {
+                            if (selectedIds.has(item.Id)) {
+                                item.isChecked = true;
+                            }
+                        });
+                        this.updateSelectedProperties();
+                    }
+
+                    if (Array.isArray(this.processedListingData)) {
+                        const maxPage = Math.ceil(this.processedListingData.length / this.pageSize) || 1;
+                        this.currentPage = Math.min(savedPage, maxPage);
+                        this.updateShownData();
+                    }
+                }
+
+                setTimeout(() => {
+                    this.isSilentSync = false;
+                }, 300);
+
+                // Display info toast notification about the real-time update
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Listings Updated',
+                        message: 'The listings data has been synchronized with the latest changes.',
+                        variant: 'info',
+                        mode: 'dismissable'
+                    })
+                );
+            }, 300);
+        } catch (error) {
+            errorDebugger('ListingManager', 'handleRealtimeRefresh', error, 'warn', 'Error in handleRealtimeRefresh');
+            this.isSilentSync = false;
+        }
     }
 
     /**
@@ -693,6 +980,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 this.showList = true;
             } else if (target == "2") {
                 this.showMap = true;
+                this.updateMapMarkers();
             }
             this.template.querySelectorAll(".tab-div").forEach(tabEl => {
                 tabEl.classList.remove("active-tab-div");
@@ -722,6 +1010,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
         try {
             const recordId = event.target.dataset.id;
             const objectApiName = event.target.dataset.object || 'MVEX__Listing__c';
+            if (!recordId || objectApiName === 'RecordType') {
+                return;
+            }
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
@@ -729,7 +1020,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     objectApiName: objectApiName,
                     actionName: 'view'
                 }
-            })
+            });
         } catch (error) {
             errorDebugger('ListingManager', 'redirectToRecord', error, 'warn', 'Error in redirectToRecord');
         }
@@ -746,8 +1037,60 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             const startIndex = (this.currentPage - 1) * this.pageSize;
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
             this.shownProcessedListingData = this.processedListingData.slice(startIndex, endIndex);
+            this.updateMapMarkers();
         } catch (error) {
             errorDebugger('ListingManager', 'updateShownData', error, 'warn', 'Error in updateShownData');
+        }
+    }
+
+    /**
+     * Method Name : updateMapMarkers
+     * @description : Updates mapMarkers array from current page's shownProcessedListingData for map view
+     */
+    updateMapMarkers() {
+        try {
+            if (!this.shownProcessedListingData || this.shownProcessedListingData.length === 0) {
+                this.mapMarkers = [];
+                return;
+            }
+            this.mapMarkers = this.shownProcessedListingData.map(record => {
+                const addr = (record.MVEX__Listing_Address__c && typeof record.MVEX__Listing_Address__c === 'object') ? record.MVEX__Listing_Address__c : null;
+                const street = addr?.street || record.MVEX__Listing_Address__Street__s || record.MVEX__Street__c || record.Street__c || '';
+                const city = addr?.city || record.MVEX__Listing_Address__City__s || record.MVEX__City__c || record.City__c || '';
+                const state = addr?.state || addr?.stateCode || record.MVEX__Listing_Address__StateCode__s || record.MVEX__State__c || '';
+                const country = addr?.country || addr?.countryCode || record.MVEX__Listing_Address__CountryCode__s || record.MVEX__Country__c || '';
+                const postalCode = addr?.postalCode || record.MVEX__Listing_Address__PostalCode__s || '';
+                const rooms = record.MVEX__Number_of_Bedrooms__c || record.MVEX__Bedrooms__c || '';
+                const listingType = record.MVEX__Listing_Type__c || '';
+                const propertyType = record.MVEX__Property_Type__c || '';
+                const propertyCategory = record.MVEX__Property_Category__c || '';
+
+                return {
+                    location: {
+                        id: record.Id,
+                        rooms: rooms,
+                        City: city,
+                        Country: country,
+                        PostalCode: postalCode,
+                        State: state,
+                        Street: street
+                    },
+                    title: record.Name,
+                    description: `
+                        <b>Listing Type:-</b> ${listingType ? listingType : ''}
+                        <br><b>Property Type:-</b> ${propertyType ? propertyType : ''}
+                        <br><b>Property Category:-</b> ${propertyCategory ? propertyCategory : ''}
+                        <br><b>Address:-</b><br>
+                        ${street ? street + ',' : ''} 
+                        ${city ? city + ',' : ''}
+                        ${state ? state + ',' : ''}
+                        ${country ? country : ''}
+                    `
+                };
+            });
+        } catch (error) {
+            errorDebugger('ListingManager', 'updateMapMarkers', error, 'warn', 'Error in updateMapMarkers');
+            this.mapMarkers = [];
         }
     }
 
@@ -1139,5 +1482,9 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     handleCloseModal() {
         this.isConfigOpen = false;
         this.getListingDataMethod();
+        const filterCmp = this.template.querySelector('c-listing-manager-filter-cmp');
+        if (filterCmp && typeof filterCmp.reapplyFilters === 'function') {
+            filterCmp.reapplyFilters();
+        }
     }
 }

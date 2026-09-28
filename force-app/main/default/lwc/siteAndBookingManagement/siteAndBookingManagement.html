@@ -123,7 +123,7 @@
                                     <div class="action-btn">
                                         <template if:false={isMobileOrTablet}>
                                             <button class="edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
-                                                title="Send Email/WhatsApp">
+                                                title="Send Email">
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path
@@ -155,9 +155,9 @@
             </div>
         </template>
         <template if:false={isContactDataAvailable}>
-            <div class="no-prop">
-                <img src={NoDataImageUrl} class="no-data-img" alt="No Data Found">
-                <p>No related contacts found for this property listing.</p>
+            <div class="exp-no-data-container">
+                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                <div class="exp-no-data-message">No related contacts found for this property listing.</div>
             </div>
         </template>
     </div>
@@ -238,22 +238,6 @@
                                 </lightning-combobox>
                             </template>
 
-                            <template if:true={showCommunicationInputs}>
-                                <lightning-combobox name="communicationMethod" label="Communication Method"
-                                    options={communicationMethodOptions} value={selectedCommunicationMethod}
-                                    onchange={handleCommunicationMethodChange} required
-                                    message-when-value-missing="Communication method is required"
-                                    class="slds-m-bottom_medium">
-                                </lightning-combobox>
-
-                                <template if:true={isWhatsAppSelected}>
-                                    <lightning-combobox name="template" label="Select Template"
-                                        options={templateOptions} onchange={handleTemplateChange}
-                                        value={selectedTemplate} required
-                                        message-when-value-missing="Template is required" class="slds-m-bottom_medium">
-                                    </lightning-combobox>
-                                </template>
-                            </template>
                         </div>
 
                         <div class="slds-col slds-size_6-of-8 slds-p-around_medium slds-border_left modal-preview-area">
@@ -268,37 +252,18 @@
                             <template if:true={showCommunicationInputs}>
                                 <h3 class="slds-text-heading_medium slds-m-bottom_small">Live Preview</h3>
                                 <div class="slds-box slds-theme_default preview-container">
-
-                                    <template if:true={isWhatsAppSelected}>
-                                        <template if:true={selectedTemplate}>
-                                            <div class="whatsapp-preview">
-                                                <c-template-preview template-id={selectedTemplate}
-                                                    record-id={currentShowingId} object-api-name="MVEX__Showing__c">
-                                                </c-template-preview>
+                                    <div class="email-preview-container">
+                                        <template if:true={previewEmailHtml}>
+                                            <div class="email-preview slds-p-around_medium" lwc:dom="manual">
                                             </div>
                                         </template>
-                                        <template if:false={selectedTemplate}>
+                                        <template if:false={previewEmailHtml}>
                                             <div
                                                 class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
-                                                Select a WhatsApp template to preview
+                                                Email preview loading...
                                             </div>
                                         </template>
-                                    </template>
-
-                                    <template if:false={isWhatsAppSelected}>
-                                        <div class="email-preview-container">
-                                            <template if:true={previewEmailHtml}>
-                                                <div class="email-preview slds-p-around_medium" lwc:dom="manual">
-                                                </div>
-                                            </template>
-                                            <template if:false={previewEmailHtml}>
-                                                <div
-                                                    class="slds-text-align_center slds-text-color_weak slds-p-vertical_medium slds-text-heading_medium action-message-center">
-                                                    Email preview loading...
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
+                                    </div>
                                 </div>
                             </template>
 

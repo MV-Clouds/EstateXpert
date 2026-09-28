@@ -116,6 +116,11 @@
                 <default>false</default>
                 <label>external/video</label>
             </value>
+            <value>
+                <fullName>video/quicktime</fullName>
+                <default>false</default>
+                <label>video/quicktime</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

@@ -1,22 +1,10 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import designcss from '@salesforce/resourceUrl/listingManagerCss';
-import getMetadataRecords from '@salesforce/apex/ControlCenterController.getMetadataRecords';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
+import designcss from '@salesforce/resourceUrl/MulishFontCss';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
-import getListViewId from '@salesforce/apex/MarketingListCmpController.getListViewId';
 import { NavigationMixin } from 'lightning/navigation';
-import sendEmail from '@salesforce/apex/MarketingListCmpController.sendEmail';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import summerNote_Editor from '@salesforce/resourceUrl/summerNoteEditor';
-import getQuickTemplates from '@salesforce/apex/EmailCampaignController.getQuickTemplates';
-import processBroadcastMessageWithObject from '@salesforce/apex/MarketingListCmpController.processBroadcastMessageWithObject';
-// import objectAndTempData from '@salesforce/apex/CreateTemplateController.objectAndTempData';
-// import sendTemplateMessage from '@salesforce/apex/BroadcastMessageController.sendTemplateMessage';
-// import scheduleTemplateMessage from '@salesforce/apex/BroadcastMessageController.scheduleTemplateMessage';
-import getMessagingServiceOptions from '@salesforce/apex/EmailCampaignController.getMessagingServiceOptions';
-import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
-import createChatRecods from '@salesforce/apex/BroadcastMessageController.createChatRecods';
-import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
 import FORM_FACTOR from '@salesforce/client/formFactor';
@@ -24,17 +12,29 @@ import FORM_FACTOR from '@salesforce/client/formFactor';
 export default class MarketingListCmp extends NavigationMixin(LightningElement) {
     @api objectName = 'Contact';
     @api recordId;
+    refreshSubscription = {};
+    refreshChannelName = '/event/MVEX__RefreshEvent__e';
+    realtimeRefreshTimer = null;
+    isSilentSync = false;
+    isManualRefreshing = false;
     @track data;
-    @track addModal = false;
     @track spinnerShow = true;
     @track showList = true;
     @track contactData = [];
     @track fields = [];
     @track processedContactData = [];
     @track unchangedProcessContact = [];
-    @track filteredSelectedContacts = [];
     @track pendingFilterEvent = null; // Store filter event if received before data loads
-    allSelectedContacts = [];
+    @track lastFilterEvent = null; // Store last applied filter event to persist across data reloads
+    @track appliedFilters = [
+        {
+            id: 'MVEX__Contact_Type__c',
+            label: 'Contact Type',
+            value: 'Buyer',
+            displayText: 'Contact Type: Buyer'
+        }
+    ];
+    @track showAllFilters = false;
     @track sortField = 'Name';
     @track sortOrder = 'asc';
     @track totalSelected = 0;
@@ -43,7 +43,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track pageNumber = 1;
     @track pageSize = 30;
     @track shownProcessedContactData = [];
-    @track isModalOpen = false;
     @track selectedContactList = [];
     @track isContactSelected = true;
     isConfigOpen = false;
@@ -56,36 +55,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track fieldsModal = false;
     isSortApplied = false;
 
-    // rachit changes
-    @track sendMethod = '';
-    @track selectedTemplate = '';
-    @track isTemplateBody = false;
-    @track isFirstScreen = true;
-    @track footerButtonLabel = 'Next';
-
-    @track messageOptions = [];
-
-    @track getQuickTemplates = [];
-    @track showTemplate = false;
-    @track isMainModal = true;
-
-    @track messageText = '';
-    @track broadcastGroupName = '';
-    @track tempBroadcastGroupName = '';
-    @track listViewId = '';
-
-    @track popUpLastPage = false;
-    @track popUpConfirmPage = false;
-    @track popupHeader = 'Create Broadcast Group';
-    @track templateOptions = [];
-    @track selectedDateTime = '';
-    @track selectedObject = 'Contact';
-    @track broadcastGroupId = null;
-    @track templateMap = new Map();
-    @track isAccessible = false;
-    @track hasBusinessAccountConfigured = false;
-    selectedTemplate = '';
-    allSelectedContact = [];
     @track listingLoading = false;
 
     /**
@@ -278,6 +247,42 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return this.shownProcessedContactData.length === 0;
     }
 
+    get hasAppliedFilters() {
+        return Array.isArray(this.appliedFilters) && this.appliedFilters.length > 0;
+    }
+
+    get displayedAppliedFilters() {
+        if (!this.appliedFilters || !Array.isArray(this.appliedFilters)) {
+            return [];
+        }
+        if (this.showAllFilters || this.appliedFilters.length <= 3) {
+            return this.appliedFilters;
+        }
+        return this.appliedFilters.slice(0, 3);
+    }
+
+    get hasMoreFilters() {
+        return Array.isArray(this.appliedFilters) && this.appliedFilters.length > 3 && !this.showAllFilters;
+    }
+
+    get remainingFilterCount() {
+        if (!Array.isArray(this.appliedFilters) || this.appliedFilters.length <= 3) {
+            return 0;
+        }
+        return this.appliedFilters.length - 3;
+    }
+
+    get canCollapseFilters() {
+        return this.showAllFilters && Array.isArray(this.appliedFilters) && this.appliedFilters.length > 3;
+    }
+
+    toggleShowAllFilters(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.showAllFilters = !this.showAllFilters;
+    }
+
     get listingSpinnerLoading() {
         return !this.spinnerShow && this.listingLoading;
     }
@@ -324,24 +329,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
 
     /**
-     * Method Name : checkAllBroadcast
-     * @description : Getter to check if all contacts in the broadcast group table are selected
-     * Date: 13/06/2025
-     * Created By: [Your Name]
-     */
-    get checkAllBroadcast() {
-        return this.selectedContactList.every(item => item.isChecked);
-    }
-
-    // Getter to provide a record ID for the preview component
-    get previewRecordId() {
-        if (this.selectedContactList && this.selectedContactList.length > 0) {
-            return this.selectedContactList[0].Id;
-        }
-        return null;
-    }
-
-    /**
      * Method Name : connectedCallback
      * @description : retrieve fields name from the field-set and retrieve Contact records.
      * Date: 22/06/2024
@@ -357,73 +344,157 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             .catch(error => {
                 console.error('Error loading styles', error);
             });
-        this.checkBusinessAccountConfig();
-        this.getAccessible();
+        this.handleSubscribeRefresh();
+        this.getContactDataMethod();
     }
 
     handleLoading(event) {
+        if (this.isSilentSync) {
+            return;
+        }
         this.listingLoading = event.detail;
     }
 
     /**
-    * Method Name : checkBusinessAccountConfig
-    * @description : method to check if business account ID is configured in custom metadata
-    * Date: 03/02/2026
-    * Created By: Karan Singh
+    * Method Name: handleSubscribeRefresh
+    * @description: Subscribes to MVEX__RefreshEvent__e platform event to detect contact changes
     */
-    async checkBusinessAccountConfig() {
-        try {
-            const result = await hasBusinessAccountId();
-            this.hasBusinessAccountConfigured = result;
-        } catch (error) {
-            console.error('Error checking business account configuration:', error);
-            this.hasBusinessAccountConfigured = false;
+    handleSubscribeRefresh() {
+        const messageCallback = (response) => {
+            console.log('RefreshEvent received in marketingListCmp:', response);
+            const payload = response?.data?.payload;
+            const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
+            
+            // Verify feature name before doing any operation
+            if (featureName && (featureName.toLowerCase() === 'marketing_list' || featureName.toLowerCase() === 'marketing_list_fields')) {
+                this.handleRealtimeRefresh();
+            }
+        };
+
+        subscribe(this.refreshChannelName, -1, messageCallback)
+            .then(response => {
+                this.refreshSubscription = response;
+            })
+            .catch(error => {
+                console.warn('Subscription error for ' + this.refreshChannelName + ':', error);
+                if (this.refreshChannelName.includes('MVEX__')) {
+                    this.refreshChannelName = '/event/RefreshEvent__e';
+                    subscribe(this.refreshChannelName, -1, messageCallback)
+                        .then(resp => {
+                            this.refreshSubscription = resp;
+                        })
+                        .catch(err => console.error('Fallback subscription error:', err));
+                }
+            });
+
+        onError(error => {
+            console.warn('empApi error:', error);
+        });
+    }
+
+    /**
+    * Method Name: handleUnsubscribeRefresh
+    * @description: Unsubscribes from refresh platform event channel
+    */
+    handleUnsubscribeRefresh() {
+        if (this.refreshSubscription && this.refreshSubscription.id) {
+            unsubscribe(this.refreshSubscription, response => {
+                console.log('Unsubscribed from refresh event channel:', response);
+            });
         }
     }
 
-    getAccessible() {
-        getMetadataRecords()
-            .then(data => {
-                const marketingListFeature = data.find(
-                    item => item.DeveloperName === 'Marketing_List'
-                );
-                this.isAccessible = marketingListFeature ? Boolean(marketingListFeature.MVEX__isAvailable__c) : false;
+    /**
+     * Method Name : handleRealtimeRefresh
+     * @description : Smoothly synchronize contact changes in real-time without interrupting user
+     */
+    handleRealtimeRefresh() {
+        try {
+            clearTimeout(this.realtimeRefreshTimer);
+            this.realtimeRefreshTimer = setTimeout(async () => {
+                this.isSilentSync = true;
+                const savedPage = this.currentPage;
+                const selectedIds = new Set((this.selectedContactList || []).map(p => p.Id));
 
-                if (this.isAccessible) {
-                    this.getContactDataMethod();
-                    this.loadQuickTemplates();
-                    this.loadMessageOptions();
-                    this.loadListViewId();
-                    this.loadAllTemplates();
+                // 1. Fetch latest contacts from Apex silently
+                await this.getContactDataMethod(true);
+
+                // 2. If filters are active, re-apply them against latest DB state silently
+                const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
+                const hasFilters = this.hasAppliedFilters || (filterCmp && typeof filterCmp.hasActiveFilters === 'function' && filterCmp.hasActiveFilters());
+                if (filterCmp && typeof filterCmp.reapplyFilters === 'function' && hasFilters) {
+                    filterCmp.reapplyFilters(true);
                 } else {
+                    // Restore checked status if no filter reapplication was triggered
+                    if (selectedIds.size > 0 && Array.isArray(this.processedContactData)) {
+                        this.processedContactData.forEach(item => {
+                            if (selectedIds.has(item.Id)) {
+                                item.isChecked = true;
+                            }
+                        });
+                        this.updateSelectedProperties();
+                    }
+
+                    if (Array.isArray(this.processedContactData)) {
+                        const maxPage = Math.ceil(this.processedContactData.length / this.pageSize) || 1;
+                        this.currentPage = Math.min(savedPage, maxPage);
+                        this.updateShownData();
+                    }
+                }
+
+                setTimeout(() => {
+                    this.isSilentSync = false;
+                }, 300);
+
+                // Display info toast notification about the real-time update
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Contacts Updated',
+                        message: 'The contacts data has been synchronized with the latest changes.',
+                        variant: 'info',
+                        mode: 'dismissable'
+                    })
+                );
+            }, 300);
+        } catch (error) {
+            console.error('Error in handleRealtimeRefresh in marketingListCmp:', error);
+            this.isSilentSync = false;
+        }
+    }
+
+    /**
+    * Method Name: handleRefreshMarketingList
+    * @description: Manually refreshes the contact data while preserving currently applied filters
+    */
+    handleRefreshMarketingList() {
+        this.isManualRefreshing = true;
+        this.spinnerShow = true;
+        this.getContactDataMethod()
+            .then(() => {
+                const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
+                if (filterCmp && typeof filterCmp.reapplyFilters === 'function') {
+                    filterCmp.reapplyFilters();
+                } else {
+                    this.isManualRefreshing = false;
                     this.spinnerShow = false;
+                    this.showToast('Success', 'Marketing list refreshed successfully.', 'success');
                 }
             })
             .catch(error => {
-                console.error('Error fetching accessible fields', error);
-                this.isAccessible = false;
+                this.isManualRefreshing = false;
                 this.spinnerShow = false;
+                this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
             });
     }
 
     /**
     * Method Name : renderedCallback
-    * @description : to display content of templte body.
+    * @description : to update sort icons when data is loaded.
     * Date: 29/07/2024
     * Created By:Rachit shah
     */
     renderedCallback() {
         try {
-            if (!this.isFirstScreen) {
-                Promise.all([
-                    loadStyle(this, summerNote_Editor + '/summernote-lite-pdf.css'),
-                ]).then(() => {
-                    const richText = this.template.querySelector('.richText');
-                    richText && (richText.innerHTML = this.setTempValue(this.templateBody));
-                }).catch(error => {
-                    console.log('Error ==> ', error);
-                });
-            }
             if (!this.isSortApplied && this.processedContactData?.length > 0) {
                 this.updateSortIcons();
                 this.isSortApplied = true;
@@ -441,45 +512,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     disconnectedCallback() {
         window?.globalThis?.removeEventListener('resize', this.handleResize);
-    }
-
-    loadAllTemplates() {
-        getTemplatesByObject()
-            .then(result => {
-                this.templateMap = new Map(Object.entries(result));
-                this.updateTemplateOptions();
-            })
-            .catch(error => {
-                this.showToast('Error', 'Failed to load templates', 'error');
-                console.error('Error loadAllTemplates->', error);
-            });
-    }
-
-    /**
-    * Method Name : loadMessageOptions
-    * @description : fetch the message options.
-    * Date: 29/07/2024
-    * Created By:Vyom Soni
-    */
-    loadMessageOptions() {
-        getMessagingServiceOptions()
-            .then(data => {
-                this.messageOptions = data.map(option => {
-                    return { label: option.label, value: option.value };
-                });
-            })
-            .catch(error => {
-                this.showToast('Error', 'Failed to fetch message options', 'error');
-                console.error(error);
-            })
-    }
-
-    loadListViewId() {
-        getListViewId().then(data => {
-            this.listViewId = data;
-        }).catch(error => {
-            this.showToast('Error', 'Failed to load list view id: ' + error.stack, 'error');
-        })
+        clearTimeout(this.realtimeRefreshTimer);
+        this.handleUnsubscribeRefresh();
     }
 
     /**
@@ -488,9 +522,11 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
      * Date: 22/06/2024
      * Created By:Vyom Soni
      */
-    getContactDataMethod() {
-        this.spinnerShow = true;
-        getContactData()
+    getContactDataMethod(isSilent = false) {
+        if (!isSilent) {
+            this.spinnerShow = true;
+        }
+        return getContactData()
             .then(result => {
                 this.contactData = result.contacts;
                 this.pageSize = result.pageSize;
@@ -504,49 +540,30 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     relationshipName: field.relationshipName
                 }));
 
+                const selectedIds = new Set((this.selectedContactList || []).map(c => c.Id));
+
                 this.contactData.forEach((con) => {
-                    con.isChecked = false;
-                })
+                    con.isChecked = isSilent && selectedIds.has(con.Id);
+                });
                 this.processContacts();
+                return result;
             })
             .catch(error => {
-                this.spinnerShow = false;
-                this.showToast('Error', error.body.message || 'An unknown error occurred', 'error');
+                this.isManualRefreshing = false;
+                if (!isSilent) {
+                    this.spinnerShow = false;
+                    this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
+                }
                 console.log('error in getContactData -> ' + JSON.stringify(error, null, 2));
+                throw error;
+            })
+            .finally(() => {
+                if (!isSilent && !this.isManualRefreshing) {
+                    this.spinnerShow = false;
+                }
             });
     }
 
-    /**
-    * Method Name : handleSave
-    * @description : method to do save changes
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleSave() {
-        try {
-            this.spinnerShow = true;
-            const emailData = {
-                sendMethod: this.sendMethod,
-                templateId: this.selectedTemplate,
-                contacts: this.selectedContactList
-            };
-
-            sendEmail({ emailDataJson: JSON.stringify(emailData) })
-                .then(() => {
-                    this.showToast('Success', 'Emails sent successfully!', 'success');
-                    this.closeModal();
-                })
-                .catch(error => {
-                    this.showToast('Error', 'Failed to send emails. ' + error.body.message, 'error');
-                })
-                .finally(() => {
-                    this.spinnerShow = false;
-                });
-        } catch (error) {
-            console.log('Error handleSave->' + error);
-            this.spinnerShow = false;
-        }
-    }
 
     convertKeysToLowercase(obj) {
         if (obj && typeof obj === 'object') {
@@ -635,15 +652,21 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 };
             });
             this.unchangedProcessContact = this.processedContactData;
-            this.sortData();
-            this.updateShownData();
-            this.spinnerShow = false;
 
-            // Apply pending filter if it was received before data loaded
-            if (this.pendingFilterEvent) {
+            // Apply existing filter if one was already active, or pending filter if received before load
+            if (!this.isManualRefreshing && this.lastFilterEvent) {
+                this.handleFilteredContacts(this.lastFilterEvent);
+            } else if (this.pendingFilterEvent) {
                 const filterEvent = this.pendingFilterEvent;
                 this.pendingFilterEvent = null; // Clear the pending event
                 this.handleFilteredContacts(filterEvent);
+            } else {
+                this.sortData();
+                this.updateShownData();
+            }
+
+            if (!this.isManualRefreshing && !this.isSilentSync) {
+                this.spinnerShow = false;
             }
         } catch (error) {
             console.log('Error processContacts->' + error);
@@ -782,37 +805,60 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     handleFilteredContacts(event) {
         try {
+            this.showAllFilters = false;
+            if (event.detail && Array.isArray(event.detail.appliedFilters)) {
+                this.appliedFilters = event.detail.appliedFilters;
+            }
+
+            // Save last filter event to reapply whenever table data reloads
+            this.lastFilterEvent = event;
+
             // If contact data hasn't loaded yet, store the filter event for later
             if (!this.unchangedProcessContact || this.unchangedProcessContact.length === 0) {
                 this.pendingFilterEvent = event;
                 return;
             }
 
-            this.sortField = 'Name';
-            this.sortOrder = 'asc';
+            const savedPage = this.isSilentSync ? this.currentPage : 1;
+            const selectedIds = new Set((this.selectedContactList || []).map(p => p.Id));
 
-            // Reset all icons to remove rotation classes
-            const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-            allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+            if (!this.isManualRefreshing && !this.isSilentSync) {
+                this.sortField = 'Name';
+                this.sortOrder = 'asc';
 
-            // Deselect all items in processedListingData and unchangedProcessListings
-            const resetCheckedFlag = item => ({ ...item, isChecked: false });
+                // Reset all icons to remove rotation classes
+                const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
+                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+                this.isSortApplied = false;
+            }
+
+            // Reset or preserve checked flag based on isSilentSync
+            const resetCheckedFlag = item => ({
+                ...item,
+                isChecked: this.isSilentSync && selectedIds.has(item.Id)
+            });
             this.processedContactData = this.processedContactData.map(resetCheckedFlag);
-            this.isSortApplied = false;
-
             this.unchangedProcessContact = this.unchangedProcessContact.map(resetCheckedFlag);
 
-            // Apply filtered listings
-            const filteredListingIds = new Set(event.detail.filtercontacts.map(filtered => filtered.Id));
+            // Apply filtered contacts safely
+            const filteredContacts = Array.isArray(event?.detail?.filtercontacts) ? event.detail.filtercontacts : [];
+            const filteredListingIds = new Set(filteredContacts.map(filtered => filtered.Id).filter(Boolean));
             this.processedContactData = this.unchangedProcessContact.filter(processListing =>
                 filteredListingIds.has(processListing.Id)
             );
 
-            // Reset current page and update view
-            this.currentPage = 1;
+            // Reset or maintain current page and update view
+            const maxPage = Math.ceil(this.processedContactData.length / this.pageSize) || 1;
+            this.currentPage = this.isSilentSync ? Math.min(savedPage, maxPage) : 1;
             this.sortData();
             this.updateShownData();
             this.updateSelectedProperties();
+
+            if (this.isManualRefreshing) {
+                this.isManualRefreshing = false;
+                this.spinnerShow = false;
+                this.showToast('Success', 'Marketing list refreshed successfully.', 'success');
+            }
         } catch (e) {
             console.error('handleFilteredContacts' + e);
         }
@@ -821,6 +867,21 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     handleReset(event) {
         try {
             if (event.detail.filtercontacts == true) {
+                this.showAllFilters = false;
+                if (event.detail && Array.isArray(event.detail.appliedFilters)) {
+                    this.appliedFilters = event.detail.appliedFilters;
+                    this.lastFilterEvent = event;
+                } else {
+                    this.appliedFilters = [
+                        {
+                            id: 'MVEX__Contact_Type__c',
+                            label: 'Contact Type',
+                            value: 'Buyer',
+                            displayText: 'Contact Type: Buyer'
+                        }
+                    ];
+                    this.lastFilterEvent = null;
+                }
                 this.sortField = 'Name';
                 this.sortOrder = 'asc';
 
@@ -912,7 +973,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     checkBoxValueChange(event) {
         try {
             const checkboxId = Number(event.target.dataset.id);
-            this.shownProcessedContactData[checkboxId].isChecked = event.target.checked;
+            const isChecked = event.target.checked;
+            this.shownProcessedContactData[checkboxId].isChecked = isChecked;
             this.processedContactData.forEach(item1 => {
                 this.shownProcessedContactData.forEach(item2 => {
                     if (item1.Id == item2.Id) {
@@ -1029,82 +1091,8 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     updateSelectedProperties() {
         this.selectedContactList = this.processedContactData.filter(con => con.isChecked);
-        this.allSelectedContacts = [...this.selectedContactList];
-        this.filteredSelectedContacts = [...this.selectedContactList];
         this.totalSelected = this.selectedContactList.length;
         this.isContactSelected = this.selectedContactList.length <= 0;
-    }
-
-    @track selectedContactSortField = 'Name';
-    @track selectedContactSortOrder = 'asc';
-
-    /**
-    * Method Name : sortSelectedContact
-    * @description : this methods apply the sorting on the selected contacts fields
-    */
-    sortSelectedContact(event) {
-        try {
-            const fieldName = event.currentTarget.dataset.id;
-            if (this.selectedContactSortField === fieldName) {
-                this.selectedContactSortOrder = this.selectedContactSortOrder === 'asc' ? 'desc' : 'asc';
-            } else {
-                this.selectedContactSortField = fieldName;
-                this.selectedContactSortOrder = 'asc';
-            }
-            this.sortSelectedContactsData();
-            this.updateSelectedSortIcons();
-        } catch (error) {
-            console.log('Error sortSelectedContact->' + error);
-        }
-    }
-
-    sortSelectedContactsData() {
-        try {
-            this.filteredSelectedContacts = [...this.filteredSelectedContacts].sort((a, b) => {
-                let aValue = a[this.selectedContactSortField] || '';
-                let bValue = b[this.selectedContactSortField] || '';
-
-                if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-                if (typeof bValue === 'string') bValue = bValue.toLowerCase();
-
-                let compare = 0;
-                if (aValue > bValue) compare = 1;
-                else if (aValue < bValue) compare = -1;
-
-                return this.selectedContactSortOrder === 'asc' ? compare : -compare;
-            });
-        } catch (error) {
-            console.log('Error sortSelectedContactsData->' + error);
-        }
-    }
-
-    updateSelectedSortIcons() {
-        try {
-            // Remove icon rotation
-            const allIcons = this.template.querySelectorAll('.popup-table .slds-icon-utility-arrowdown svg');
-            allIcons.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
-            });
-
-            // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.popup-table .sorting_header');
-            allHeaders.forEach(header => {
-                header.classList.remove('active-sort');
-            });
-
-            // Set active header
-            const currentHeader = this.template.querySelector('.popup-table [data-id="' + this.selectedContactSortField + '"]');
-            if (currentHeader) {
-                currentHeader.classList.add('active-sort');
-
-                const icon = currentHeader.querySelector('svg');
-                if (icon) {
-                    icon.classList.add(this.selectedContactSortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
-                }
-            }
-        } catch (error) {
-            console.log('Error in updateSelectedSortIcons --> ' + error);
-        }
     }
 
     /**
@@ -1192,25 +1180,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     }
 
-    /**
-    * Method Name : handleAdd
-    * @description : this method open the modal
-    * Date: 20/07/2024
-    * Created By:Vyom Soni
-    */
-    handleAdd() {
-        this.isModalOpen = true;
-    }
-
-    /**
-    * Method Name : handleModalClose
-    * @description : this method close the modal
-    * Date: 20/07/2024
-    * Created By:Vyom Soni
-    */
-    handleModalClose() {
-        this.isModalOpen = false;
-    }
 
     /**
     * Method Name : updateSortIcons
@@ -1281,91 +1250,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
-    /**
-    * Method Name : handleSendMethodChange
-    * @description : method to handle sender mode
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleSendMethodChange(event) {
-        this.sendMethod = event.detail.value;
-    }
-
-    /**
-    * Method Name : loadQuickTemplates
-    * @description : method to load contacts
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    loadQuickTemplates() {
-        getQuickTemplates()
-            .then(result => {
-                this.getQuickTemplates = [
-                    { label: 'None', value: '', body: '' },
-                    ...result.marketingTemplates.map(option => {
-                        return { label: option.templateName, value: option.templateId, body: option.body };
-                    })
-                ];
-            })
-            .catch(error => {
-                console.error('Error loading Gmail template options stack', error.stack);
-            });
-    }
-
-    /**
-    * Method Name : handleGmailTemplateChange
-    * @description : method to handle template change
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleGmailTemplateChange(event) {
-        try {
-            this.selectedTemplate = event.detail.value;
-            const selectedOption = this.getQuickTemplates.find(option => option.value === this.selectedTemplate);
-            if (selectedOption.label == 'None') {
-                this.isTemplateBody = false;
-            }
-            else {
-                this.isTemplateBody = true;
-                this.templateBody = selectedOption ? selectedOption.body : '';
-            }
-        } catch (error) {
-            console.log('Error handleGmailTemplateChange->' + error);
-        }
-    }
-
-    /**
-    * Method Name : handleFooterButtonClick
-    * @description : method to check validation and call save method
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleFooterButtonClick() {
-        try {
-            if (this.isFirstScreen) {
-                if (!this.sendMethod || !this.selectedTemplate) {
-                    this.showToast('Error', 'Please Ensure all required fields are filled', 'error');
-                    return;
-                }
-                this.isFirstScreen = false;
-                this.footerButtonLabel = 'Save';
-            } else {
-                this.handleSave();
-            }
-        } catch (error) {
-            console.log('Error handleFooterButtonClick->' + error);
-        }
-    }
-
-    /**
-    * Method Name : handleBack
-    * @description : method to go in previous sreen
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    handleBack() {
-        this.isFirstScreen = true;
-    }
 
     /**
     * Method Name : showToast
@@ -1384,21 +1268,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
-    /**
-    * Method Name : setTempValue
-    * @description : method to set value for the body
-    * Date: 29/07/2024
-    * Created By:Rachit Shah
-    */
-    setTempValue(value) {
-        return `<div class=" note-editor2 note-frame2">
-                    <div class="note-editing-area2">
-                        <div aria-multiline="true" role="textbox" class="note-editable2">
-                            ${value}
-                        </div>
-                    </div>
-                </div>`
-    }
 
     /**
    * Method Name : wrapFilter
@@ -1464,6 +1333,24 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
+    openFilterPanel() {
+        try {
+            if (this.wrapOn) {
+                this.wrapFilter();
+            } else {
+                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                if (filterDiv) {
+                    filterDiv.classList.add('highlight-filter-panel');
+                    setTimeout(() => {
+                        filterDiv.classList.remove('highlight-filter-panel');
+                    }, 1200);
+                }
+            }
+        } catch (error) {
+            console.error('Error in openFilterPanel:', error);
+        }
+    }
+
     backToControlCenter(event) {
         try {
             event.preventDefault();
@@ -1483,476 +1370,15 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     }
     handleCloseModal() {
         this.isConfigOpen = false;
-        this.getContactDataMethod();
-    }
-
-    /**
-     * Method Name : broadcastCheckboxChange
-     * @description : Handle individual checkbox changes in the broadcast group table
-     * Date: 13/06/2025
-     * Created By: [Your Name]
-     */
-    // broadcastCheckboxChange(event) {
-    //     try {
-    //         const checkboxId = Number(event.target.dataset.id);
-    //         this.selectedContactList[checkboxId].isChecked = event.target.checked;
-    //         this.updateSelectedProperties();
-    //     } catch (error) {
-    //         console.log('Error broadcastCheckboxChange->' + error);
-    //     }
-    // }
-
-    // handleSave(){
-    //     try{
-
-    //         if(this.messageText.trim() === '' || this.broadcastGroupName.trim() === ''){            
-    //             this.showToast('Error', 'Please fill in all required fields', 'error');
-    //             return;
-    //         }
-
-    //         console.log('selectedContactList', JSON.stringify(this.selectedContactList));
-
-    //         const phoneNumbers = Array.from(this.selectedContactList)
-    //         .map(recordId => {
-    //             return recordId ? recordId.Phone : null;
-    //         })
-    //         .filter(Phone => Phone !== null && Phone !== '');
-
-
-    //         const isUpdate = false;
-
-    //         const phoneField = 'Phone';
-    //         // const listViewName = '00BdM00000XfLjwUAF';
-
-    //         const messageData = {
-    //             objectApiName: this.selectedObject,
-    //             listViewName: this.listViewId,
-    //             phoneNumbers: phoneNumbers,
-    //             description: this.messageText,
-    //             name: this.broadcastGroupName,
-    //             isUpdate: isUpdate,
-    //             broadcastGroupId: null,
-    //             phoneField: phoneField
-    //         };
-
-    //         this.spinnerShow = true;
-
-    //         console.log('messageData', JSON.stringify(messageData));
-
-    //         // Call the Apex method
-    //         processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) })
-    //         .then(() => {
-    //             this.showToast('Success', 'Broadcast group created successfully', 'success');
-    //             this.updateShownData();
-    //         })
-    //         .catch(error => {
-    //             this.showToast('Error', error.body?.message || 'Failed to process broadcast', 'error');
-    //         })
-    //         .finally(() => {
-    //             this.spinnerShow = false;
-    //         });;
-    //     }catch(error){
-    //         console.log('Error handleSave-->' + error.stack);
-    //     }
-    // }
-
-    //  handlePageChange(event) {
-    //     try{
-    //         const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
-    //         if (selectedPage !== this.currentPage) {
-    //             this.currentPage = selectedPage;
-    //             this.updateShownData();
-    //         }
-    //     }catch(error){
-    //         this.showToast('Error', 'Error navigating pages', 'error');
-    //     }
-    // } 
-
-    updateTemplateOptions() {
-        if (!this.selectedObject || this.templateMap.size === 0) {
-            this.templateOptions = [];
-            return;
-        }
-
-        let combinedTemplates = [];
-
-        // Add object-specific templates
-        if (this.templateMap.has(this.selectedObject)) {
-            combinedTemplates = [...this.templateMap.get(this.selectedObject)];
-        }
-
-        // Add Generic templates
-        if (this.templateMap.has('Generic')) {
-            combinedTemplates = [...combinedTemplates, ...this.templateMap.get('Generic')];
-        }
-
-        // Convert to combobox options format
-        this.templateOptions = combinedTemplates.map(template => ({
-            label: template.MVEX__Template_Name__c,
-            value: template.Id
-        }));
-        this.selectedTemplate = this.templateOptions[0].value;
-    }
-
-    handleInputChange(event) {
-        const { name, value } = event.target;
-        switch (name) {
-            case 'name':
-                this.broadcastGroupName = value;
-                break;
-            case 'message':
-                this.messageText = value;
-                break;
-            case 'template':
-                this.selectedTemplate = value;
-                this.handleRefreshClick();
-                break;
-            case 'scheduleDateTime':
-                this.selectedDateTime = value;
-                break;
-            default:
-                console.warn(`Unexpected input name: ${name}`);
-        }
-    }
-
-    // Handle send message button click
-    handleSendMessage() {
-        this.showTemplate = true;
-        this.popUpLastPage = false;
-        this.popUpConfirmPage = false;
-        this.popupHeader = 'Choose Template';
-        this.broadcastGroupName = '';
-        this.messageText = '';
-        this.selectedTemplate = '';
-        this.selectedDateTime = '';
-        this.updateTemplateOptions();
-    }
-
-    // Handle closing the template modal
-    handleCloseTemplate() {
-        this.showTemplate = false;
-        this.popUpLastPage = false;
-        this.popUpConfirmPage = false;
-        this.popupHeader = 'Create Broadcast Group';
-        this.broadcastGroupName = '';
-        this.messageText = '';
-        this.selectedTemplate = '';
-        this.selectedDateTime = '';
-        this.broadcastGroupId = null;
-        this.filteredSelectedContacts = [...this.allSelectedContacts];
-
-    }
-
-    // New helper to auto-create group in background
-    async createBroadcastGroupBackground() {
-        const now = new Date();
-        const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
-        const autoGroupName = 'Marketing List - ' + timestamp;
-        const autoDesc = 'Broadcast initiated from Marketing List at ' + timestamp;
-
-        const phoneNumbers = this.selectedContactList
-            .map(contact => contact.Phone)
-            .filter(phone => phone);
-
-        const messageData = {
-            objectApiName: this.selectedObject,
-            listViewName: this.listViewId,
-            phoneNumbers: phoneNumbers,
-            description: autoDesc,
-            name: autoGroupName,
-            isUpdate: false,
-            broadcastGroupId: null,
-            phoneField: 'Phone',
-            communicationType: 'WhatsApp'
-        };
-
-        try {
-            const result = await processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) });
-            this.broadcastGroupId = result;
-            return true;
-        } catch (error) {
-            this.showToast('Error', 'Background group creation failed: ' + (error.body?.message || error.message), 'error');
-            return false;
-        }
-    }
-
-    // Handle next button on first page (create broadcast group)
-    handleNextOnPopup() {
-        if (this.messageText.trim() === '' || this.broadcastGroupName.trim() === '') {
-            this.showToast('Error', 'Please fill in all required fields', 'error');
-            return;
-        }
-
-        if (this.tempBroadcastGroupName == this.broadcastGroupName) {
-            this.popupHeader = 'Choose Template';
-            return;
-        }
-
-        const phoneNumbers = this.selectedContactList
-            .map(contact => contact.Phone)
-            .filter(phone => phone);
-
-        const messageData = {
-            objectApiName: this.selectedObject,
-            listViewName: this.listViewId,
-            phoneNumbers: phoneNumbers,
-            description: this.messageText,
-            name: this.broadcastGroupName,
-            isUpdate: false,
-            broadcastGroupId: null,
-            phoneField: 'Phone'
-        };
-
-        this.spinnerShow = true;
-
-        processBroadcastMessageWithObject({ requestJson: JSON.stringify(messageData) })
-            .then(result => {
-                this.broadcastGroupId = result; // Assuming Apex returns the created Broadcast Group ID
-                this.showToast('Success', 'Broadcast group created successfully', 'success');
-                this.popupHeader = 'Choose Template';
-                this.tempBroadcastGroupName = this.broadcastGroupName;
-                this.updateTemplateOptions();
-            })
-            .catch(error => {
-                this.showToast('Error', error.body?.message || 'Failed to create broadcast group', 'error');
-                console.error('Error handleNextOnPopup->', error);
-            })
-            .finally(() => {
-                this.spinnerShow = false;
-            });
-    }
-
-    // Handle previous button on second page
-    handlePreviousOnPopup() {
-        this.popupHeader = 'Create Broadcast Group';
-        this.selectedTemplate = '';
-        this.popUpConfirmPage = false;
-    }
-
-    handleConfirmPopup() {
-        this.popUpConfirmPage = true;
-    }
-    // Handle send button on second page
-    async handleSendOnPopup() {
-        if (!this.selectedTemplate) {
-            this.showToast('Error', 'Please select a template', 'error');
-            return;
-        }
-
-        this.spinnerShow = true;
-
-        // Auto-create the group in background before sending
-        const groupCreated = await this.createBroadcastGroupBackground();
-        if (!groupCreated) {
-            this.spinnerShow = false;
-            return;
-        }
-
-        createChatRecods({
-            templateId: this.selectedTemplate,
-            groupIds: [this.broadcastGroupId],
-            isScheduled: false,
-            timeOfMessage: ''
-        })
-            .then(result => {
-                if (result) {
-                    this.showToast('Success', 'Broadcast sent successfully', 'success');
-                    this.handleCloseTemplate();
-                    this.clearSelectedContacts();
-                    this.navigateToBroadcastComponent(result);
-                } else {
-                    this.showToast('Error', `Broadcast failed: ${result}`, 'error');
+        this.getContactDataMethod()
+            .then(() => {
+                const filterCmp = this.template.querySelector('c-marketing-list-filter-cmp');
+                if (filterCmp && typeof filterCmp.reapplyFilters === 'function') {
+                    filterCmp.reapplyFilters();
                 }
             })
             .catch(error => {
-                this.showToast('Error', `Broadcast failed: ${error.body?.message || error.message}`, 'error');
-                console.error('Error handleSendOnPopup->', error);
-            })
-            .finally(() => {
-                this.spinnerShow = false;
+                console.error('Error reloading after close modal:', error);
             });
     }
-
-    navigateToBroadcastComponent(broadcastId) {
-        let componentDef = {
-            componentDef: "MVEX:broadcastReportComp",
-            attributes: {
-                recordId: broadcastId
-            }
-        };
-
-        let encodedComponentDef = btoa(JSON.stringify(componentDef));
-
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/one/one.app#' + encodedComponentDef
-            }
-        });
-    }
-
-
-
-    // Handle schedule button on second page
-    handleSchedulePopup() {
-        if (!this.selectedTemplate) {
-            this.showToast('Error', 'Please select a template', 'error');
-            return;
-        }
-
-        this.popUpLastPage = true;
-    }
-
-    // Handle previous button on last page
-    handlePreviousLastPage() {
-        this.popUpLastPage = false;
-        this.popUpConfirmPage = false;
-        this.popupHeader = 'Choose Template';
-    }
-
-    handleRefreshClick() {
-        const childComponent = this.template.querySelector('c-template-preview');
-        if (childComponent && this.selectedTemplate) {
-            childComponent.refreshComponent(this.selectedTemplate);
-        }
-    }
-
-    handleSearch(event) {
-        const searchKey = event.detail.value?.toLowerCase() || '';
-
-        if (!searchKey) {
-            // If search is empty, show all selected contacts
-            this.filteredSelectedContacts = [...this.allSelectedContacts];
-        } else {
-            // Filter from the master list of all selected contacts
-            this.filteredSelectedContacts = this.allSelectedContacts.filter(contact =>
-                (contact.Name && contact.Name.toLowerCase().includes(searchKey)) ||
-                (contact.Phone && contact.Phone.toLowerCase().includes(searchKey))
-            );
-        }
-    }
-
-    handleRemoveContact(event) {
-        const contactId = event.currentTarget.dataset.id;
-
-        // Remove from master list
-        this.allSelectedContacts = this.allSelectedContacts.filter(
-            contact => contact.Id !== contactId
-        );
-
-        // Update display list (apply current search filter if any)
-        const searchInput = this.template.querySelector('lightning-input[data-id="search-input"]');
-        const currentSearchKey = searchInput?.value?.toLowerCase() || '';
-
-        if (currentSearchKey) {
-            this.filteredSelectedContacts = this.allSelectedContacts.filter(contact =>
-                (contact.Name && contact.Name.toLowerCase().includes(currentSearchKey)) ||
-                (contact.Phone && contact.Phone.toLowerCase().includes(currentSearchKey))
-            );
-        } else {
-            this.filteredSelectedContacts = [...this.allSelectedContacts];
-        }
-
-        this.selectedContactList = [...this.allSelectedContacts];
-
-        // Update the isChecked property in processedContactData
-        this.processedContactData = this.processedContactData.map(contact => {
-            if (contact.Id === contactId) {
-                return { ...contact, isChecked: false };
-            }
-            return contact;
-        });
-
-        // Update the isChecked property in unchangedProcessContact
-        this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
-            if (contact.Id === contactId) {
-                return { ...contact, isChecked: false };
-            }
-            return contact;
-        });
-
-        // Update the shown data (current page)
-        this.updateShownData();
-
-        // Update total selected count
-        this.totalSelected = this.selectedContactList.length;
-        this.isContactSelected = this.selectedContactList.length <= 0;
-    }
-
-    /**
-     * Method Name : clearSelectedContacts
-     * @description : Clear all selected contacts and update checkboxes
-     */
-    clearSelectedContacts() {
-        // Clear all lists
-        this.selectedContactList = [];
-        this.allSelectedContacts = [];
-        this.filteredSelectedContacts = [];
-
-        // Set isChecked to false for all contacts in processedContactData
-        this.processedContactData = this.processedContactData.map(contact => {
-            return { ...contact, isChecked: false };
-        });
-
-        // Set isChecked to false for all contacts in unchangedProcessContact
-        this.unchangedProcessContact = this.unchangedProcessContact.map(contact => {
-            return { ...contact, isChecked: false };
-        });
-
-        // Update the shown data (current page)
-        this.updateShownData();
-
-        // Update total selected count
-        this.totalSelected = 0;
-        this.isContactSelected = true;
-    }
-
-    // Handle schedule and send button on last page
-    async handleSchedule() {
-        if (!this.selectedDateTime) {
-            this.showToast('Error', 'Please select date and time', 'error');
-            return;
-        }
-
-        const selectedTime = new Date(this.selectedDateTime);
-        const now = new Date();
-
-        if (selectedTime < now) {
-            this.showToast('Error', 'Selected date and time cannot be in the past', 'error');
-            return;
-        }
-
-        this.spinnerShow = true;
-
-        // Auto-create the group in background before scheduling
-        const groupCreated = await this.createBroadcastGroupBackground();
-        if (!groupCreated) {
-            this.spinnerShow = false;
-            return;
-        }
-
-        createChatRecods({
-            templateId: this.selectedTemplate,
-            groupIds: [this.broadcastGroupId],
-            isScheduled: true,
-            timeOfMessage: this.selectedDateTime
-        })
-            .then(result => {
-                if (result) {
-                    this.showToast('Success', 'Broadcast scheduled successfully', 'success');
-                    this.handleCloseTemplate();
-                    this.clearSelectedContacts();
-                } else {
-                    this.showToast('Error', `Scheduling failed: ${result}`, 'error');
-                }
-            })
-            .catch(error => {
-                this.showToast('Error', `Scheduling failed: ${error.body?.message || error.message}`, 'error');
-                console.error('Error handleSchedule->', error);
-            })
-            .finally(() => {
-                this.spinnerShow = false;
-            });
-    }
-
 }

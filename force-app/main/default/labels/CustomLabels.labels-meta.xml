@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
     <labels>
-        <fullName>CLAR_Users</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>CLAR Users</shortDescription>
-        <value>{
-  &quot;isProfile&quot;: true,
-  &quot;isRole&quot;: false,
-  &quot;Profiles&quot;: [
-    &quot;System Administrator&quot;
-  ],
-  &quot;Roles&quot;: [
-    &quot;Sales Manager&quot;,
-    &quot;Support Lead&quot;,
-    &quot;Marketing Head&quot;
-  ]
-}</value>
-    </labels>
-    <labels>
         <fullName>EmailMessageEmailService</fullName>
         <language>en_US</language>
         <protected>true</protected>
@@ -54,20 +36,6 @@
         <value>https://www.googleapis.com/</value>
     </labels>
     <labels>
-        <fullName>Google_Drive_Endpoint</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Google Drive Endpoint</shortDescription>
-        <value>https://oauth2.googleapis.com/token</value>
-    </labels>
-    <labels>
-        <fullName>Google_Drive_Scope</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Google Drive Scope</shortDescription>
-        <value>https://www.googleapis.com/auth/drive.file</value>
-    </labels>
-    <labels>
         <fullName>Google_Endpoint</fullName>
         <language>en_US</language>
         <protected>true</protected>
@@ -82,39 +50,11 @@
         <value>https://graph.instagram.com/v21.0/</value>
     </labels>
     <labels>
-        <fullName>Lead_Welcome_Email_Template</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Lead Welcome Email Template</shortDescription>
-        <value>Welcome_Lead_Email_Template</value>
-    </labels>
-    <labels>
-        <fullName>Outlook_Batch_Url</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Outlook Batch Url</shortDescription>
-        <value>https://graph.microsoft.com/v1.0/$batch</value>
-    </labels>
-    <labels>
-        <fullName>Outlook_Endpoint</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Outlook Endpoint</shortDescription>
-        <value>https://login.microsoftonline.com/common/oauth2/v2.0/</value>
-    </labels>
-    <labels>
         <fullName>PropertyFinder_Endpoint_Production</fullName>
         <language>en_US</language>
         <protected>true</protected>
         <shortDescription>PropertyFinder_Endpoint_Production</shortDescription>
         <value>https://atlas.propertyfinder.com/v1/</value>
-    </labels>
-    <labels>
-        <fullName>ReminderBeforeDays</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>ReminderBeforeDays</shortDescription>
-        <value>1</value>
     </labels>
     <labels>
         <fullName>Rightmove_Endpoint_Production</fullName>
@@ -129,20 +69,6 @@
         <protected>true</protected>
         <shortDescription>Rightmove Endpoint Sandbox</shortDescription>
         <value>https://adfapi.adftest.rightmove.com/v1/property/</value>
-    </labels>
-    <labels>
-        <fullName>Whatsapp_Endpoint</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Whatsapp Endpoint &amp; Version</shortDescription>
-        <value>https://graph.facebook.com/;v24.0</value>
-    </labels>
-    <labels>
-        <fullName>Whatsapp_Webhook_Gmail_API</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Whatsapp Webhook Gmail API</shortDescription>
-        <value>https://gmail.googleapis.com/gmail/v1/users/me/messages/send</value>
     </labels>
     <labels>
         <fullName>Zoopla_Doc_Endpoint</fullName>
@@ -178,5 +104,33 @@
         <protected>true</protected>
         <shortDescription>thumbnail</shortDescription>
         <value>https://estatexpertlistingimages.s3.us-east-1.amazonaws.com/videothumbnail.jpeg</value>
+    </labels>
+    <labels>
+        <fullName>AWS_S3_ENDPONT</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>AWS_S3_ENDPONT</shortDescription>
+        <value>https://s3.amazonaws.com/</value>
+    </labels>
+    <labels>
+        <fullName>Gmail_Send_Scope</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Gmail_Send_Scope</shortDescription>
+        <value>https://www.googleapis.com/auth/gmail.send</value>
+    </labels>
+    <labels>
+        <fullName>Google_Oauth_URL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Google_Oauth_URL</shortDescription>
+        <value>https://accounts.google.com/o/oauth2/auth?</value>
+    </labels>
+    <labels>
+        <fullName>Insta_Oauth_URL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Insta_Oauth_URL</shortDescription>
+        <value>https://www.instagram.com/oauth/authorize?</value>
     </labels>
 </CustomLabels>

@@ -28,7 +28,6 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     @track propertyEditModal = false;
     @track portalIconUrl;
     @track portalGen;
-    @track isXMLForPF = false;
 
     /**
     * Method Name: connectedCallback
@@ -61,7 +60,6 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
             getPortalRecords()
                 .then(result => {
                     this.portals = result.portalDetailsRecords;
-                    this.isXMLForPF = result.isXMLForPF;
                     if (result.portalRecords.length > 0) {
                         this.portalRecordList = result.portalRecords.map((val, index) => ({
                             number: index + 1,
@@ -212,7 +210,6 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
                     portalName: portalName,
                     portalIconUrl: portalIconURL,
                     portalStatus: portalStatus,
-                    isXMLForPF: this.isXMLForPF
                 },
                 bubbles: true,
                 composed: true

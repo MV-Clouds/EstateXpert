@@ -15,40 +15,56 @@
             </div>
             <div class="slds-modal__content modalbody" id="modal-content-id-1">
                 <div class="content_body">
-                    <!-- Existing file selector and dropzone -->
-                    <div class="image_content">
-                        <p class="con1">Image Upload</p>
-                        <p class="con2">Add your image below. Please note that only one image can be uploaded at a time.
-                        </p>
-                    </div>
-                    <div class="slds-file-selector slds-file-selector_images" ondrop={handleDrop}
-                        ondragover={allowDrop}>
-                        <div class="slds-file-selector__dropzone flex_css">
-                            <div>
-                                <svg width="48" height="36" viewBox="0 0 36 24" fill="none">
+                    <template if:false={hasExistingImage}>
+                        <!-- Existing file selector and dropzone -->
+                        <div class="image_content">
+                            <p class="con1">Image Upload</p>
+                            <p class="con2">Add your image below. Please note that only one image can be uploaded at a time.
+                            </p>
+                        </div>
+                        <div class="slds-file-selector slds-file-selector_images" ondrop={handleDrop}
+                            ondragover={allowDrop}>
+                            <div class="slds-file-selector__dropzone flex_css">
+                                <div>
+                                    <svg width="48" height="36" viewBox="0 0 36 24" fill="none">
+                                        <path
+                                            d="M29.025 9.06C28.005 3.885 23.46 0 18 0C13.665 0 9.9 2.46 8.025 6.06C3.51 6.54 0 10.365 0 15C0 19.965 4.035 24 9 24H28.5C32.64 24 36 20.64 36 16.5C36 12.54 32.925 9.33 29.025 9.06ZM28.5 21H9C5.685 21 3 18.315 3 15C3 11.925 5.295 9.36 8.34 9.045L9.945 8.88L10.695 7.455C12.12 4.71 14.91 3 18 3C21.93 3 25.32 5.79 26.085 9.645L26.535 11.895L28.83 12.06C31.17 12.21 33 14.175 33 16.5C33 18.975 30.975 21 28.5 21ZM12 13.5H15.825V18H20.175V13.5H24L18 7.5L12 13.5Z"
+                                            fill="#0176D3" />
+                                    </svg>
+                                </div>
+                                <div class="formbold-drop-file images_upcss">
+                                    <p>Drag Your File Here or</p>
+                                    <input type="file" class="slds-file-selector__input slds-assistive-text"
+                                        onchange={handleSelectedFiles} accept="image/png" id="file-upload-input-107"
+                                        aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
+                                    <label class="slds-file-selector__body" for="file-upload-input-107"
+                                        id="file-selector-secondary-label106">
+                                        <span class="formbold-browse">Click to Browse</span>
+                                    </label>
+                                </div>
+                                <div class="images_details">
+                                    <p>Please ensure the image is in .png format only and does not exceed 4.5 MB.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <template if:true={hasExistingImage}>
+                        <div class="image_content">
+                            <p class="con1">Uploaded Watermark Image</p>
+                        </div>
+                        <div class="existing-image-notice">
+                            <div class="notice-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path
-                                        d="M29.025 9.06C28.005 3.885 23.46 0 18 0C13.665 0 9.9 2.46 8.025 6.06C3.51 6.54 0 10.365 0 15C0 19.965 4.035 24 9 24H28.5C32.64 24 36 20.64 36 16.5C36 12.54 32.925 9.33 29.025 9.06ZM28.5 21H9C5.685 21 3 18.315 3 15C3 11.925 5.295 9.36 8.34 9.045L9.945 8.88L10.695 7.455C12.12 4.71 14.91 3 18 3C21.93 3 25.32 5.79 26.085 9.645L26.535 11.895L28.83 12.06C31.17 12.21 33 14.175 33 16.5C33 18.975 30.975 21 28.5 21ZM12 13.5H15.825V18H20.175V13.5H24L18 7.5L12 13.5Z"
+                                        d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM11 15H9V9H11V15ZM11 7H9V5H11V7Z"
                                         fill="#0176D3" />
                                 </svg>
                             </div>
-                            <div class="formbold-drop-file images_upcss">
-                                <p>Drag Your File Here or</p>
-                                <input type="file" class="slds-file-selector__input slds-assistive-text"
-                                    onchange={handleSelectedFiles} accept="image/png" id="file-upload-input-107"
-                                    aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
-                                <label class="slds-file-selector__body" for="file-upload-input-107"
-                                    id="file-selector-secondary-label106">
-                                    <span class="formbold-browse">Click to Browse</span>
-                                </label>
-                            </div>
-                            <div class="images_details">
-                                <p>Please ensure images do not exceed 4.5 MB.</p>
+                            <div class="notice-text">
+                                A watermark image is already uploaded. To upload a new image, please delete the existing one first.
                             </div>
                         </div>
-                    </div>
-                    <div class="image_content_btm">
-                        <p class="con2">Please upload images in .png format only.</p>
-                    </div>
+                    </template>
                     <!-- Modified image list with flip card -->
                     <template if:true={isImageData}>
                         <div lwc:if={fromData} class="image-list">
@@ -100,8 +116,8 @@
                             </template>
                         </div>
                         <div lwc:elseif={fromUploader} class="image-list">
-                            <div class="container flip-container" data-id={index}>
-                                <div class={uploaderFlipClass}>
+                            <div class="container flip-container" data-id="client-image">
+                                <div class="flip-card">
                                     <!-- Front of the card (Image Preview) -->
                                     <div class="flip-card-front">
                                         <div class="img_css">
@@ -113,31 +129,12 @@
                                         </div>
                                         <div class="removeImage">
                                             <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
-                                                data-name="uploaderdata" onclick={flipCard}>
+                                                onclick={handleRemoveClientImage} title="Remove image">
                                                 <path
                                                     d="M7.625 8.29166L8.15964 15.2088C8.23242 16.1498 9.01758 16.875 9.96139 16.875H14.0386C14.9824 16.875 15.7676 16.1498 15.8404 15.2088L16.375 8.29166M10.125 8.08333V7.45833C10.125 6.53786 10.8712 5.79166 11.7917 5.79166H12.2083C13.1288 5.79166 13.875 6.53786 13.875 7.45833V8.08333M6.16669 8.29166H17.8334"
                                                     stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
                                                     stroke-linejoin="round" />
                                             </svg>
-                                        </div>
-                                    </div>
-                                    <!-- Back of the card (Confirmation) -->
-                                    <div class="flip-card-back">
-                                        <div class="confirmation">
-                                            <p>Delete this image?</p>
-                                            <div class="confirmation-actions">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                    data-name="uploaderdata" onclick={confirmDelete}>
-                                                    <path d="M9 16.2L4.8 12L3.4 13.4L9 19L21 7L19.6 5.6L9 16.2Z"
-                                                        fill="currentColor" />
-                                                </svg>
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                    data-name="uploaderdata" onclick={cancelDelete}>
-                                                    <path
-                                                        d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
-                                                        fill="currentColor" />
-                                                </svg>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -154,12 +151,14 @@
                         </svg>
                         Close
                     </button>
-                    <button class="blue-btn-css" onclick={handleSave}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
-                        </svg>
-                        Upload
-                    </button>
+                    <template if:true={showUploadButton}>
+                        <button class="blue-btn-css" onclick={handleSave} disabled={isUploadDisabled}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                            </svg>
+                            Upload
+                        </button>
+                    </template>
                 </div>
             </div>
         </div>

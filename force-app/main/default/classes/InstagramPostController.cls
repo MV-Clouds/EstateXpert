@@ -6,177 +6,21 @@ public with sharing class InstagramPostController {
         public String id { get; set; }
     }
 
-    @AuraEnabled
-    public static Map<String, Object> createInstagramContainer(List<String> mediaUrls, String caption) {
-        try {
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
-
-            String userId = instaCredential.User_Id__c;
-            String accessToken = instaCredential.Long_Access_Token__c;
-
-            Http http = new Http();
-            Map<String, Object> result = new Map<String, Object>();
-            result.put('success', false);
-
-            System.debug('Creating Instagram container with mediaURLS: ' + mediaUrls);
-
-            if (mediaUrls.size() == 1) {
-                String mediaUrl = mediaUrls[0];
-                String mediaType = getMediaTypeFromUrl(mediaUrl);
-
-                HttpRequest req = new HttpRequest();
-                req.setTimeout(120000);
-                req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
-                req.setMethod('POST');
-                req.setHeader('Content-Type', 'application/json');
-
-                Map<String, Object> requestBody = new Map<String, Object>{
-                    (mediaType == 'REELS' ? 'video_url' : 'image_url') => mediaUrl,
-                    'access_token' => accessToken,
-                    'caption' => caption
-                };
-
-                if(mediaType == 'REELS'){
-                    requestBody.put('media_type', mediaType);
-                }
-                req.setBody(JSON.serialize(requestBody));
-
-                HttpResponse response = http.send(req);
-
-                if (response.getStatusCode() == 200) {
-                    MediaResponse mediaResponse = (MediaResponse) JSON.deserialize(response.getBody(), MediaResponse.class);
-                    String mediaContainerId = mediaResponse.id;
-
-                    List<String> mediaContainerIds = new List<String>{mediaContainerId};
-
-                    System.debug('Media container created with ID: ' + mediaContainerId);
-                    System.debug('Media containers created with ID: ' + mediaContainerIds);
-                    
-                    result.put('success', true);
-                    result.put('isCarousel', false);
-                    result.put('containerIds', mediaContainerIds);
-                    result.put('containerId', mediaContainerId);
-                    result.put('message', 'Media container created successfully.');
-                    
-                    return result;
-                } else {
-                    result.put('message', 'Failed to create media container: ' + response.getBody());
-                    return result;
-                }
-            } else {
-                List<String> mediaContainerIds = new List<String>();
-
-                for (String mediaUrl : mediaUrls) {
-                    String mediaType = getMediaTypeFromUrl(mediaUrl);
-
-                    HttpRequest req = new HttpRequest();
-                    req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
-                    req.setMethod('POST');
-                    req.setHeader('Content-Type', 'application/json');
-
-                    Map<String, Object> requestBody = new Map<String, Object>{
-                        (mediaType == 'REELS' ? 'video_url' : 'image_url') => mediaUrl,
-                        'is_carousel_item' => true,
-                        'access_token' => accessToken
-                    };
-
-                    if(mediaType == 'REELS'){
-                        requestBody.put('media_type', mediaType);
-                    }
-
-                    req.setBody(JSON.serialize(requestBody));
-
-                    HttpResponse response = http.send(req);
-
-                    if (response.getStatusCode() == 200) {
-                        MediaResponse mediaResponse = (MediaResponse) JSON.deserialize(response.getBody(), MediaResponse.class);
-                        mediaContainerIds.add(mediaResponse.id);
-                    } else {
-                        result.put('message', 'Failed to create media container: ' + response.getBody());
-                        return result;
-                    }
-                }
-                
-                result.put('success', true);
-                result.put('isCarousel', true);
-                result.put('containerIds', mediaContainerIds);
-                result.put('containerId', '');
-                result.put('message', 'Media containers created successfully.');
-                
-                return result;
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'createInstagramContainer', 'Error while creating Instagram container.');
-            Map<String, Object> result = new Map<String, Object>();
-            result.put('success', false);
-            result.put('message', 'Exception: ' + e.getMessage());
-            return result;
-        }
-    }
-    
-    @AuraEnabled
-    public static String publishToInstagram(String containerId, List<String> containerIds, Boolean isCarousel, String caption, List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
-        try {
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
-
-            String userId = instaCredential.User_Id__c;
-            String accessToken = instaCredential.Long_Access_Token__c;
-            
-            Map<String, Object> params = new Map<String, Object>();
-            params.put('userId', userId);
-            params.put('accessToken', accessToken);
-            params.put('caption', caption);
-            params.put('awsObjectKeys', awsObjectKeys);
-            params.put('awsObjectKeysToPreserve', awsObjectKeysToPreserve);
-            
-            System.debug('containerId: ' + containerId);
-            System.debug('isCarousel: ' + isCarousel);
-            System.debug('containerIds: ' + containerIds);
-            
-            if (isCarousel) {
-                if (containerIds == null) {
-                    containerIds = new List<String>();
-                }
-                params.put('mediaContainerIds', containerIds);
-                params.put('creationId', '');
-                params.put('isCarousel', true);
-                
-                InstagramPostScheduler job = new InstagramPostScheduler(params);
-                String cronExpression = System.now().addMinutes(1).format('s m H d M \'?\'  yyyy');
-                System.schedule('Instagram Media Publish' + containerIds[0], cronExpression, job);
-            } else {
-                params.put('mediaContainerIds', new List<String>());
-                params.put('creationId', containerId);
-                params.put('isCarousel', false);
-                
-                InstagramPostScheduler job = new InstagramPostScheduler(params);
-                String cronExpression = System.now().addMinutes(1).format('s m H d M \'?\'  yyyy');
-                System.schedule('Instagram Media Publish ' + containerId, cronExpression, job);
-            }
-            
-            return 'Publishing scheduled successfully.';
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'publishToInstagram', 'Error while publishing to Instagram.');
-            return 'Exception: ' + e.getMessage();
-        }
-    }
-
     private static String getMediaTypeFromUrl(String mediaUrl) {
-        if (mediaUrl.toLowerCase().endsWith('.mp4')) {
-            return 'REELS';
-        } else {
+        if (String.isBlank(mediaUrl)) {
             return 'IMAGE';
         }
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static AWS_Config__c getS3ConfigSettings() {
-        try {
-            return AWS_Config__c.getOrgDefaults();
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'getS3ConfigSettings', 'Error while getting S3 config settings.');
-            return null;
+        
+        String lowerUrl = mediaUrl.toLowerCase();
+        if (lowerUrl.contains('?')) {
+            lowerUrl = lowerUrl.substringBefore('?');
         }
+        
+        if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov')) {
+            return 'REELS';
+        }
+        
+        return 'IMAGE';
     }
 
     public static Map<String, String> generateAWSHeaders(String payload, String contentMD5, String awsAccessKey, String awsSecretKey, String awsRegion, String awsBucketName) {
@@ -248,22 +92,18 @@ public with sharing class InstagramPostController {
         try {
             Map<String, String> mediaUrlMap = new Map<String, String>();
     
-            Listing__c listingRecord = [
-                SELECT Property__c 
-                FROM Listing__c 
-                WHERE Id = :listingId WITH USER_MODE
-                LIMIT 1
-            ];
+            MVEX__Listing__c listingRecord = [SELECT MVEX__Property__c FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
         
-            if (listingRecord != null && listingRecord.Property__c != null) {
-                List<Property_File__c> propertyFiles = [
-                    SELECT Name, BaseUrl__c,Size__c,ExternalLink__c
-                    FROM Property_File__c 
-                    WHERE Property__c = :listingRecord.Property__c AND IsDeleted = false AND Size__c != null  WITH USER_MODE
-                ];
+            if (listingRecord != null && listingRecord.MVEX__Property__c != null) {
+                List<MVEX__Property_File__c> propertyFiles = [SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c FROM MVEX__Property_File__c 
+                                                                WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE];
         
-                for (Property_File__c file : propertyFiles) {
-                    mediaUrlMap.put(file.Name, file.BaseUrl__c);
+                for (MVEX__Property_File__c file : propertyFiles) {
+                    if (String.isNotBlank(file.MVEX__ExternalLink__c)) {
+                        mediaUrlMap.put(file.Name, file.MVEX__ExternalLink__c);
+                    } else {
+                        mediaUrlMap.put(file.Name, file.MVEX__BaseUrl__c);
+                    }
                 }
             }
         
@@ -279,8 +119,8 @@ public with sharing class InstagramPostController {
     @AuraEnabled(cacheable=true)
     public static Boolean checkInstagramIntegration() {
         try {
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
-            if (instaCredential != null && instaCredential.User_Id__c != null && instaCredential.Long_Access_Token__c != null) {
+            MVEX__IG_Configuration__c instaCredential = MVEX__IG_Configuration__c.getOrgDefaults();
+            if (instaCredential != null && instaCredential.MVEX__User_Id__c != null && instaCredential.MVEX__Long_Access_Token__c != null) {
                 return true;
             } else {
                 return false;
@@ -301,10 +141,10 @@ public with sharing class InstagramPostController {
         InstagramPostResponse apexResponse = new InstagramPostResponse();
         try {
 
-            IG_Configuration__c instaCredential = IG_Configuration__c.getOrgDefaults();
+            MVEX__IG_Configuration__c instaCredential = MVEX__IG_Configuration__c.getOrgDefaults();
 
-            String userId = instaCredential.User_Id__c;
-            String accessToken = instaCredential.Long_Access_Token__c;
+            String userId = instaCredential.MVEX__User_Id__c;
+            String accessToken = instaCredential.MVEX__Long_Access_Token__c;
 
             Http http = new Http();
 
@@ -313,7 +153,7 @@ public with sharing class InstagramPostController {
                 String mediaType = getMediaTypeFromUrl(mediaUrl);
 
                 HttpRequest req = new HttpRequest();
-                req.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+                req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
                 req.setMethod('POST');
                 req.setHeader('Content-Type', 'application/json');
 
@@ -350,7 +190,6 @@ public with sharing class InstagramPostController {
                     System.schedule('Instagram Media Publish ' + mediaContainerId, cronExpression, job);
 
                     apexResponse.status = 'SUCCESS';
-                    // apexResponse.message = 'Media container created. Publishing scheduled.';
                     apexResponse.message = 'Instagram post is successfully created.';
                     return apexResponse;
                 } else {
@@ -368,7 +207,7 @@ public with sharing class InstagramPostController {
 
                     HttpRequest req = new HttpRequest();
                     req.setTimeout(120000);
-                    req.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+                    req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
                     req.setMethod('POST');
                     req.setHeader('Content-Type', 'application/json');
 
@@ -427,9 +266,7 @@ public with sharing class InstagramPostController {
     }
 
     public static void sendEmailNotification(String errorMessage) {
-
         try {
-            
             String emailId = UserInfo.getUserEmail();
             String userName = UserInfo.getName();
             String errorEmailId = System.Label.ErrorNotificationEmail;
@@ -442,37 +279,15 @@ public with sharing class InstagramPostController {
             emailBody = emailBody.replace('{!errorDetails}', errorMessage);
             emailBody = emailBody.replace('{!User}', userName);
     
-            GmailConfig__c settings = GmailConfig__c.getOrgDefaults();
-    
-            String refreshToken = settings.Refresh_Token__c;
-    
-            if(refreshToken != null && emailId != null){
-                List<GmailIntegrationControllerV1.EmailWrapper> gmails = new List<GmailIntegrationControllerV1.EmailWrapper>();
-    
-                GmailIntegrationControllerV1.EmailWrapper singleGmail = new GmailIntegrationControllerV1.EmailWrapper();
-                singleGmail.toAddresses = new List<String>{emailId , errorEmailId};
-                singleGmail.subject = emailTemplate.Subject;
-                singleGmail.body = emailBody;
-    
-                gmails.add(singleGmail);
-    
-                GmailIntegrationControllerV1.requestNewAccessToken(gmails,null,null,false);
-    
-            }
-            else if(emailId != null){
-                    
+            if(emailId != null){
                 Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                 mail.setToAddresses(new String[] { emailId, errorEmailId});
                 mail.setSubject(emailTemplate.Subject);
                 mail.setHtmlBody(emailBody);
-        
                 Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
-                System.debug('Email sent to user: ' + emailId);
             }
                 
         } catch (Exception e) {
-            System.debug('Error: ' + e.getMessage());
-            System.debug('Error: ' + e.getLineNumber());
             ErrorHandler.insertErrordata(e, 'InstagramPostController', 'sendEmailNotification', 'Error while sending email notification.');
         }
 

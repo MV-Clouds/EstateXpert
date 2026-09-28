@@ -413,7 +413,7 @@ public with sharing class PortalMappingController {
             }
 
             if (wrapper.portalname == 'Zoopla' && wrapper.sync_branch_with_zoopla) {
-                // ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
+                ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
             }
 
             return 'success';
@@ -454,7 +454,7 @@ public with sharing class PortalMappingController {
             }
 
             if (wrapper.portalname == 'Zoopla' && wrapper.sync_branch_with_zoopla) {
-                // ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
+                ZooplaIntegrationController.zooplaCreateAndUpdateBranch(portalWrapper, portalId);
             }
 
             return 'success';

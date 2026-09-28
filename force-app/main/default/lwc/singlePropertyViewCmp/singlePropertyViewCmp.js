@@ -4,6 +4,7 @@ import getShowingData from '@salesforce/apex/SinglePropertyViewCmpController.get
 import updateShowingStatus from '@salesforce/apex/SinglePropertyViewCmpController.updateShowingStatus';
 import updateShowingDate from '@salesforce/apex/SinglePropertyViewCmpController.updateShowingDate';
 import plvimg from '@salesforce/resourceUrl/plvimgs';
+import emptyState from '@salesforce/resourceUrl/emptyState';
 
 export default class SinglePropertyView extends LightningElement {
     imagesOnDescription = [];
@@ -26,7 +27,9 @@ export default class SinglePropertyView extends LightningElement {
     @track mapCenter = {};
     hasValidLocation = false;
     showError = false;
+    errorTitle = 'Listing Unavailable';
     errorMessage = '';
+    emptyStateUrl = emptyState;
     formattedAddress = '';
     formattedPrice = '';
     isRentListing = false;
@@ -60,6 +63,14 @@ export default class SinglePropertyView extends LightningElement {
     plvimg4 = plvimg + '/plvimgs/CarParking.png';
 
     // State-based getters
+    get showEmptyState() {
+        return this.showError || this.isListingInactive;
+    }
+
+    get toastClass() {
+        return `toast toast-${this.toastType}`;
+    }
+
     get isProposed() {
         return this.showingStatus === 'Proposed' || this.showingStatus === 'Waiting For Confirmation' || !this.showingStatus;
     }
@@ -147,7 +158,8 @@ export default class SinglePropertyView extends LightningElement {
         this.objectId = urlParams.get('objectId');
         if (!this.listingrecordid) {
             this.showError = true;
-            this.errorMessage = 'No property ID provided in the URL.';
+            this.errorTitle = 'Listing Not Found';
+            this.errorMessage = 'No property ID was provided in the link. Please verify the URL or contact your agent.';
             return;
         }
 
@@ -287,13 +299,16 @@ export default class SinglePropertyView extends LightningElement {
             .then(result => {
                 if (!result.listingData || result.listingData.length === 0) {
                     this.showError = true;
-                    this.errorMessage = 'This Listing could not be found. It may have been removed or the link has expired.';
+                    this.errorTitle = 'Listing Unavailable';
+                    this.errorMessage = 'This property listing is currently unavailable or no longer active. It may have been sold, rented, or removed from the market.';
                     this.spinnerdatatable = false;
                     return;
                 }
                 
                 if (result.listingData[0].MVEX__Status__c !== 'Active') {
                     this.isListingInactive = true;
+                    this.errorTitle = 'Listing Unavailable';
+                    this.errorMessage = 'This property listing is no longer active. It may have been sold, rented, or temporarily taken off the market.';
                     this.spinnerdatatable = false;
                     return;
                 }
@@ -342,6 +357,7 @@ export default class SinglePropertyView extends LightningElement {
             .catch(error => {
                 this.spinnerdatatable = false;
                 this.showError = true;
+                this.errorTitle = 'Listing Unavailable';
                 this.errorMessage = 'We encountered a temporary issue while loading this property. Please refresh the page or contact your agent.';
                 console.error('Error loading listing data:', error);
             });
